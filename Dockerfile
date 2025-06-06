@@ -1,19 +1,38 @@
-FROM condaforge/mambaforge:4.9.2-5 AS conda
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
 # Ignore interactive prompts
 ARG DEBIAN_FRONTEND=noninteractive
 
-# update packages and install make
-RUN apt-get update && apt-get install make
+# Basic tools
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    git \
+    ca-certificates \
+    build-essential \
+    cmake \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# install open-ssh
-RUN apt-get install -y openssh-client
+# install the right miniforge version based on architecture
+RUN ARCH="$(uname -m)" && \
+    if [ "$ARCH" = "x86_64" ]; then \
+    URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+    URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh"; \
+    else \
+    echo "Unsupported architecture: $ARCH"; exit 1; \
+    fi && \
+    wget "$URL" -O installer.sh && \
+    bash installer.sh -b -p /opt/conda && \
+    rm installer.sh
 
-# install cmake and build-essentials
-RUN apt-get -y install cmake build-essential
+
+
+ENV PATH="/opt/conda/bin:$PATH"
 
 # Add environment lock file
-ADD conda-lock.yml /tmp/conda-lock.yml
+COPY conda-lock.yml /tmp/conda-lock.yml
 
 # install conda-lock
 RUN mamba install conda-lock=2.5.7
@@ -28,6 +47,5 @@ RUN conda-lock install --name myenv /tmp/conda-lock.yml
 RUN echo "source activate myenv" > ~/.bashrc
 ENV PATH=/opt/conda/envs/myenv/bin:$PATH
 
-ADD . /
-RUN pip install --upgrade pip
-RUN pip install .
+COPY . /
+RUN pip install --upgrade pip && pip install .
