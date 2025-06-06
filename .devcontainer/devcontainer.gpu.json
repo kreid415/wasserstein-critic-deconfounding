@@ -1,6 +1,0 @@
-{
-    "extends": "./devcontainer.json",
-    "runArgs": [
-        "--gpus=all"
-    ]
-}
