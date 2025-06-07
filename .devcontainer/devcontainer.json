@@ -8,10 +8,17 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile"
 	},
-	// Uncomment if you want to use GPU
-	// "runArgs": [
-	// 	"--gpus=all"
-	// ],
+	"runArgs": [
+		"--gpus",
+		"all",
+		"--env",
+		"NVIDIA_VISIBLE_DEVICES=all",
+		"--env",
+		"NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+		"--runtime",
+		"nvidia",
+		"--privileged"
+	],
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
