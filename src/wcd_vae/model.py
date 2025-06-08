@@ -18,6 +18,9 @@ class VAEConfig:
     use_batchnorm: bool = False
     dropout: float = 0.0
     lr: float = 1e-3
+    batchsize: int = 64
+    num_epochs: int = 10
+    weight_decay: float = 0.0
 
 
 # -- Utility --------------------------------------------------------------
@@ -107,7 +110,7 @@ class VAE(pl.LightningModule):
         x, _ = batch
         x = x.view(x.size(0), -1)
         x_hat, mu, logvar = self.forward(x)
-        recon_loss = F.binary_cross_entropy(x_hat, x, reduction="sum")
+        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         loss = recon_loss + kl_div
         self.log_dict(
