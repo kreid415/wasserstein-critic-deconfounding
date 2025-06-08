@@ -10,6 +10,14 @@ dependencies:
   - pre-commit
   - conda-lock
   - ipykernel
+  - scanpy
+  - anndata
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - umap-learn
+  - lightning
   - pip:
       - pip
       - setuptools
@@ -20,4 +28,3 @@ platforms:
   - linux-64
   - osx-64
   - osx-arm64
-  - win-64

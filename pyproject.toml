@@ -28,6 +28,7 @@ src = ["src"]
 # Ruff will automatically exclude all files listed in .gitignore as well as common temporary Python
 # tool directories.
 # To exclude additional folders, use extend-exclude.
+exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = [

@@ -19,3 +19,4 @@ build/
 .vs
 *.prof
 .devcontainer/devcontainer.json
+notebooks/data/*
