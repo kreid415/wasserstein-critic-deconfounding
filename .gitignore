@@ -19,5 +19,5 @@ build/
 .vs
 *.prof
 .devcontainer/devcontainer.json
-notebooks/data/*
+**/data/**
 **/lightning_logs/**
