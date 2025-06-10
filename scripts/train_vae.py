@@ -8,10 +8,8 @@ import pytorch_lightning as pl
 import scanpy as sc
 import anndata as ad
 
-from pytorch_lightning.callbacks import ModelCheckpoint
-
 from wcd_vae.data import get_dataloader_from_adata
-from wcd_vae.model import VAE, VAEConfig
+from wcd_vae.model import VAE, VAEConfig, Discriminator
 from wcd_vae.metrics import compute_metrics
 
 
@@ -20,20 +18,18 @@ def main():
     pl.seed_everything(42)
 
     # Load the data
-    anndata_path = "./data/vu_2022_ay_wh.h5ad"
-    anndata_obj = ad.read_h5ad(anndata_path)
+    anndata_path = "data/vu_2022_ay_wh.h5ad"
+    anndata = ad.read_h5ad(anndata_path)
+    anndata.layers["normalized"] = anndata.X
 
-    # Save raw counts (if not saved yet)
-    if "counts" not in anndata_obj.layers:
-        anndata_obj.layers["counts"] = anndata_obj.X.copy()
-
-    # Find HVGs
-    sc.pp.highly_variable_genes(anndata_obj, n_top_genes=3000, batch_key="sample")
-    # Subset to HVGs, keep normalized + log data
-    anndata_obj = anndata_obj[:, anndata_obj.var["highly_variable"]].copy()
+    # Find/subset HVGs & swap to raw counts
+    sc.pp.highly_variable_genes(anndata, n_top_genes=3000, batch_key="sample")
+    sc.pl.highly_variable_genes(anndata)
+    anndata = anndata[:, anndata.var["highly_variable"]]
+    anndata.X = anndata.layers["counts"]
 
     # Data sanity checks
-    X = anndata_obj.X
+    X = anndata.X
     if not isinstance(X, np.ndarray):
         X = X.A if hasattr(X, "A") else X.toarray()
     X = X.astype(np.float64)
@@ -42,8 +38,8 @@ def main():
     print("Max value in anndata.X:", np.max(X))
     print("Min value in anndata.X:", np.min(X))
 
-    if "counts" in anndata_obj.layers:
-        counts = anndata_obj.layers["counts"]
+    if "counts" in anndata.layers:
+        counts = anndata.layers["counts"]
         if not isinstance(counts, np.ndarray):
             counts = counts.A if hasattr(counts, "A") else counts.toarray()
         counts = counts.astype(np.float64)
@@ -52,40 +48,41 @@ def main():
         print("Max value in anndata.layers['counts']:", np.max(counts))
         print("Min value in anndata.layers['counts']:", np.min(counts))
 
-    # Print age distribution
-    print(anndata_obj.obs["age"].value_counts(normalize=True))
-    print(anndata_obj.obs["age"].value_counts(normalize=False))
+    print(anndata.obs["age"].value_counts(normalize=True))
+    print(anndata.obs["age"].value_counts(normalize=False))
 
-    # VAE config
+    # VAE config (copied from notebook)
     config = VAEConfig(
-        input_dim=anndata_obj.shape[1],
-        latent_dim=32,
-        encoder_hidden_dims=[128, 64],
-        decoder_hidden_dims=[64, 128],
+        input_dim=anndata.shape[1],
+        latent_dim=128,
+        encoder_hidden_dims=[512, 256],
+        decoder_hidden_dims=[256, 512],
         dropout=0.2,
-        batchsize=64,
-        num_epochs=100,
-        lr=1e-6,
+        batchsize=128,
+        num_epochs=10000,
+        lr=1e-4,
         weight_decay=1e-5,
-        kl_anneal_start=10,
-        kl_anneal_end=50,
-        kl_anneal_max=1.0,
+        kl_anneal_start=0,
+        kl_anneal_end=100,
+        kl_anneal_max=1,
     )
-    vae = VAE(config)
+    vae = VAE(config, linear_decoder=True)
 
     # Data loaders
     train_loader, test_loader, domain_encoder, cell_encoder = get_dataloader_from_adata(
-        anndata_obj, by="age", batch_size=config.batchsize, num_workers=0
+        anndata, by="age", batch_size=config.batchsize, num_workers=0
     )
 
-    # ModelCheckpoint callback
-    checkpoint_callback = ModelCheckpoint(
+    # this scripts filename
+    script_name = os.path.basename(__file__).split(".")[0]
+
+    # add checkpint callback
+    checkpoint_callback = pl.callbacks.ModelCheckpoint(
         monitor="val_loss",
         mode="min",
         save_top_k=1,
-        save_last=True,
-        filename="best-vae-{epoch:02d}-{val_loss:.4f}",
-        verbose=True,
+        filename="{script_name}-{epoch:02d}-{val_loss:.2f}",
+        dirpath="checkpoints/",
     )
 
     # Trainer
@@ -94,15 +91,12 @@ def main():
         accelerator="auto",
         devices="auto",
         log_every_n_steps=10,
-        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(vae, train_dataloaders=train_loader, val_dataloaders=test_loader)
 
     # Plot the loss
-    log_dir = sorted(
-        glob.glob("notebooks/lightning_logs/version_*"), key=lambda x: int(x.split("_")[-1])
-    )
+    log_dir = sorted(glob.glob("lightning_logs/version_*"), key=lambda x: int(x.split("_")[-1]))
     if log_dir:
         log_dir = log_dir[-1]
     else:
@@ -120,8 +114,8 @@ def main():
     plt.plot(metrics["step"], metrics["kl_div_step"] * metrics["kl_weight_step"], label="KL Div")
     plt.xlabel("Step")
     plt.ylabel("Loss")
-    plt.ylim([0, 2])
     plt.title("Training and Validation Loss")
+    plt.ylim([0, 1000])
     plt.legend()
     plt.tight_layout()
     plt.savefig("training_loss.png")
@@ -130,11 +124,12 @@ def main():
     # Compute embeddings and metrics
     from tqdm import tqdm
 
-    vae.eval()
-    vae = vae.to("cuda" if torch.cuda.is_available() else "cpu")
     embeddings = []
     batches = []
     cell_type = []
+
+    vae.eval()
+    vae = vae.to("cuda" if torch.cuda.is_available() else "cpu")
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="Evaluating VAE"):
             x, batch_label, cell_label = batch
@@ -147,11 +142,11 @@ def main():
             embeddings.append(embed.cpu())
             batches.append(batch_label.cpu())
             cell_type.append(cell_label.cpu())
+
     embeddings = torch.cat(embeddings, dim=0)
     batches = torch.cat(batches, dim=0)
     cell_type = torch.cat(cell_type, dim=0)
 
-    # Compute and print metrics
     metrics_dict = compute_metrics(
         embeddings=embeddings,
         batch_labels=batches,

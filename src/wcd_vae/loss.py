@@ -70,7 +70,6 @@ def distance_gmm(
 
 
 def unbalanced_ot(
-    tran,
     mu1,
     var1,
     mu2,
@@ -89,8 +88,6 @@ def unbalanced_ot(
 
     Parameters
     ----------
-    tran
-        transport matrix between the two batches sampling from the global OT matrix.
     mu1
         mean vector of batch 1 from the encoder
     var1
@@ -144,9 +141,8 @@ def unbalanced_ot(
     p_s = p_s.to(device)
     p_t = p_t.to(device)
 
-    if tran is None:
-        tran = torch.ones(ns, nt) / (ns * nt)
-        tran = tran.to(device)
+    tran = torch.ones(ns, nt) / (ns * nt)
+    tran = tran.to(device)
 
     dual = (torch.ones(ns, 1) / ns).to(device)
     f = reg_m / (reg_m + reg)
