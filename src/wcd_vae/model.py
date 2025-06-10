@@ -6,6 +6,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F  # noqa: N812
 
+from wcd_vae.loss import wasserstein_loss
 from wcd_vae.metrics import compute_metrics
 
 
@@ -82,6 +83,44 @@ class Decoder(nn.Module):
         self.net = nn.Sequential(*layers)
 
     def forward(self, z):
+        return self.net(z)
+
+
+# -- Discriminator Module -------------------------------------------------
+class Discriminator(nn.Module):
+    """
+    Discriminator network for adversarial regularization of VAE latent space.
+    Predicts confounding variable(s) from latent representation.
+    """
+
+    def __init__(self, latent_dim, hidden_dims=[64, 32], dropout=0.1, critic=False):
+        """
+        Args:
+            latent_dim (int): Dimension of VAE latent space (input to discriminator)
+            confounder_dim (int): Number of confounder classes (output dimension)
+            hidden_dims (list): List of hidden layer sizes
+            dropout (float): Dropout rate
+        """
+        super().__init__()
+        dims = [latent_dim] + hidden_dims
+        layers = []
+        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
+            layers.append(nn.Linear(in_dim, out_dim))
+            layers.append(nn.ReLU())
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(dims[-1], 1))
+        if not critic:
+            layers.append(nn.Sigmoid())  # Output logits for binary classification
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, z):
+        """
+        Args:
+            z (Tensor): Latent representation (batch_size, latent_dim)
+        Returns:
+            logits (Tensor): Predicted confounder logits (batch_size, confounder_dim)
+        """
         return self.net(z)
 
 
@@ -226,3 +265,119 @@ class VAE(pl.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.config.lr)
+
+
+# -- Discriminator VAE Module ---------------------------------------------
+class VAEDiscriminatorAdv(pl.LightningModule):
+    """
+    PyTorch Lightning module for VAE with adversarial regularization using either a discriminator or a critic.
+    """
+
+    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
+        super().__init__()
+        self.vae = vae
+        self.critic = critic
+        self.lr_vae = lr_vae
+        self.lr_critic = lr_critic
+        self.lambda_gp = lambda_gp
+        self.critic_steps = critic_steps
+
+    def forward(self, x):
+        return self.vae(x)
+
+    def gradient_penalty(self, real_z, fake_z):
+        batch_size = real_z.size(0)
+        device = real_z.device
+        alpha = torch.rand(batch_size, 1, device=device)
+        alpha = alpha.expand_as(real_z)
+        interpolates = alpha * real_z + (1 - alpha) * fake_z
+        interpolates.requires_grad_(True)
+        critic_interpolates = self.critic(interpolates)
+        gradients = torch.autograd.grad(
+            outputs=critic_interpolates,
+            inputs=interpolates,
+            grad_outputs=torch.ones_like(critic_interpolates),
+            create_graph=True,
+            retain_graph=True,
+            only_inputs=True,
+        )[0]
+        gradients = gradients.view(batch_size, -1)
+        grad_norm = gradients.norm(2, dim=1)
+        gp = self.lambda_gp * ((grad_norm - 1) ** 2).mean()
+        return gp
+
+    def training_step(self, batch, batch_idx, optimizer_idx):
+        x, batch_label, _ = batch
+
+        x = x.view(x.size(0), -1)
+        mu, logvar = self.vae.encoder(x)
+        z = self.vae.reparameterize(mu, logvar).detach()
+
+        mask_0 = batch_label == 0
+        mask_1 = batch_label == 1
+
+        z_real = z[mask_0]
+        z_fake = z[mask_1]
+
+        real_score = self.critic(z_real)
+        fake_score = self.critic(z_fake)
+        # Wasserstein loss: real=1, fake=-1
+        y_real = torch.ones_like(real_score)
+        y_fake = -torch.ones_like(fake_score)
+        w_loss_real = wasserstein_loss(real_score, y_real)
+        w_loss_fake = wasserstein_loss(fake_score, y_fake)
+
+        wasserstein = w_loss_real + w_loss_fake
+
+        # Critic update (optimizer_idx == 0)
+        if optimizer_idx == 0:
+            gp = self.gradient_penalty(z_real, z_fake)
+            critic_loss = wasserstein + gp
+            self.log("critic_loss", critic_loss, prog_bar=True, on_step=True, on_epoch=True)
+            return critic_loss
+
+        # Generator (VAE) update (optimizer_idx == 1)
+        if optimizer_idx == 1:
+            wasserstein *= -1  # we maximize the wasserstein loss which is the same as minimizing the negative wasserstein distance
+            x_hat = self.vae.decode(z)
+            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+            vae_loss = recon_loss + kl_weight * kl_div
+
+            # Fool the critic
+            total_loss = vae_loss + wasserstein  # we aim to minimize the wasserstein distance
+            self.log("vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+            self.log("adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
+            self.log("total_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+            return total_loss
+
+    def configure_optimizers(self):
+        opt_critic = torch.optim.Adam(
+            self.critic.parameters(), lr=self.lr_critic, betas=(0.5, 0.9)
+        )
+        opt_vae = torch.optim.Adam(self.vae.parameters(), lr=self.lr_vae)
+        return [opt_critic, opt_vae], []
+
+    def optimizer_step(
+        self,
+        epoch,
+        batch_idx,
+        optimizer,
+        optimizer_idx,
+        optimizer_closure,
+        on_tpu,
+        using_native_amp,
+        using_lbfgs,
+    ):
+        # Update critic 5x more than generator
+        if optimizer_idx == 0:
+            if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
+                optimizer.step(closure=optimizer_closure)
+            else:
+                optimizer_closure()
+        if optimizer_idx == 1:
+            if (batch_idx % (self.critic_steps + 1)) == self.critic_steps:
+                optimizer.step(closure=optimizer_closure)
+            else:
+                optimizer_closure()

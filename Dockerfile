@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     openssh-client \
+    tmux \
     && rm -rf /var/lib/apt/lists/*
 
 # install the right miniforge version based on architecture

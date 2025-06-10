@@ -167,3 +167,8 @@ def unbalanced_ot(
     d_fgw = (cost_pp * tran.detach().data).sum()
 
     return d_fgw, tran.detach()
+
+
+# Wasserstein loss for the critic
+def wasserstein_loss(y_pred, y_true):
+    return torch.mean(y_true * y_pred)
