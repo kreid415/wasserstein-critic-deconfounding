@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List
 
 import pytorch_lightning as pl
@@ -142,7 +142,6 @@ class BaseVAE(pl.LightningModule):
 
     def __init__(self, config: VAEConfig):
         super().__init__()
-        self.save_hyperparameters(config)
         self.config = config
 
     def encode(self, x):
@@ -182,7 +181,7 @@ class BaseVAE(pl.LightningModule):
 # -- VAE Lightning Module -------------------------------------------------
 class VAE(BaseVAE):
     def __init__(self, config: VAEConfig, linear_decoder=False):
-        super().__init__()
+        super().__init__(config)
         self.save_hyperparameters()
         self.config = config
         self.encoder = Encoder(config)
@@ -270,7 +269,7 @@ class VAE_OT(BaseVAE):
     """
 
     def __init__(self, config: VAEConfig, ot_lambda=1.0, linear_decoder=False):
-        super().__init__()
+        super().__init__(config)
         self.save_hyperparameters()
         self.config = config
         self.ot_lambda = ot_lambda
@@ -424,10 +423,15 @@ class VAEAdvBase(pl.LightningModule):
 
 
 # -- Wasserstein VAE Module ---------------------------------------------
-class VAEWassersteinAdv(VAEAdvBase):
+class VAEWasserstein(VAEAdvBase):
     """
     PyTorch Lightning module for VAE with adversarial regularization using wasserstein critic.
+    Implements manual optimization for compatibility with multiple optimizers.
     """
+
+    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
+        super().__init__(vae, critic, lr_vae, lr_critic, lambda_gp, critic_steps)
+        self.automatic_optimization = False
 
     def gradient_penalty(self, real_z, fake_z):
         batch_size = real_z.size(0)
@@ -450,133 +454,114 @@ class VAEWassersteinAdv(VAEAdvBase):
         gp = self.lambda_gp * ((grad_norm - 1) ** 2).mean()
         return gp
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx):
         x, batch_label, _ = batch
-
         x = x.view(x.size(0), -1)
         mu, logvar = self.vae.encoder(x)
+        z = self.vae.reparameterize(mu, logvar)
 
-        # Critic update (optimizer_idx == 0)
-        if optimizer_idx == 0:
-            z = self.vae.reparameterize(mu, logvar).detach()
+        labels = batch_label.argmax(dim=1)
+        mask_0 = labels == 0
+        mask_1 = labels == 1
 
-            labels = batch_label.argmax(dim=1)
-            mask_0 = labels == 0
-            mask_1 = labels == 1
+        z_real = z[mask_0]
+        z_fake = z[mask_1]
 
-            z_real = z[mask_0]
-            z_fake = z[mask_1]
+        opt_critic, opt_vae = self.optimizers()
 
-            real_score = self.critic(z_real)
-            fake_score = self.critic(z_fake)
-            # Wasserstein loss: real=1, fake=-1
+        # Alternate updates: update critic more often than vae
+        if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
+            # --- Critic update ---
+            opt_critic.zero_grad()
+            z_real_detach = z_real.detach()
+            z_fake_detach = z_fake.detach()
+            real_score = self.critic(z_real_detach)
+            fake_score = self.critic(z_fake_detach)
             y_real = torch.ones_like(real_score)
             y_fake = -torch.ones_like(fake_score)
             w_loss_real = wasserstein_loss(real_score, y_real)
             w_loss_fake = wasserstein_loss(fake_score, y_fake)
+            wasserstein = -1 * (w_loss_real + w_loss_fake)
 
-            wasserstein = w_loss_real + w_loss_fake
-            gp = self.gradient_penalty(z_real, z_fake)
+            # Ensure z_real and z_fake have the same batch size for gradient penalty
+            min_n = min(z_real.size(0), z_fake.size(0))
+            if min_n == 0:
+                # One group is empty, skip GP computation
+                gp = torch.tensor(0.0, device=z_real.device)
+            else:
+                # Randomly sample min_n from each group
+                idx_real = torch.randperm(z_real.size(0), device=z_real.device)[:min_n]
+                idx_fake = torch.randperm(z_fake.size(0), device=z_fake.device)[:min_n]
+                z_real_gp = z_real[idx_real]
+                z_fake_gp = z_fake[idx_fake]
+                gp = self.gradient_penalty(z_real_gp, z_fake_gp)
             critic_loss = wasserstein + gp
+            self.manual_backward(critic_loss)
+            opt_critic.step()
             self.log("train_critic_loss", critic_loss, prog_bar=True, on_step=True, on_epoch=True)
-            return critic_loss
-
-        # Generator (VAE) update (optimizer_idx == 1)
-        if optimizer_idx == 1:
-            z = self.vae.reparameterize(mu, logvar)
-
-            labels = batch_label.argmax(dim=1)
-            mask_0 = labels == 0
-            mask_1 = labels == 1
-
-            z_real = z[mask_0]
-            z_fake = z[mask_1]
-
+        else:
+            # --- VAE (generator) update ---
+            opt_vae.zero_grad()
             real_score = self.critic(z_real)
             fake_score = self.critic(z_fake)
-            # Wasserstein loss: real=1, fake=-1
             y_real = torch.ones_like(real_score)
             y_fake = -torch.ones_like(fake_score)
             w_loss_real = wasserstein_loss(real_score, y_real)
             w_loss_fake = wasserstein_loss(fake_score, y_fake)
-
             wasserstein = w_loss_real + w_loss_fake
             x_hat = self.vae.decode(z)
             recon_loss = F.mse_loss(x_hat, x, reduction="mean")
             kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
             kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
             vae_loss = recon_loss + kl_weight * kl_div
-
-            # Fool the critic
-            total_loss = vae_loss + wasserstein  # we aim to minimize the wasserstein distance
+            total_loss = vae_loss + wasserstein  # minimize wasserstein distance
+            self.manual_backward(total_loss)
+            opt_vae.step()
             self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
             self.log("train_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
             self.log("train_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
             return total_loss
 
-    def validation_step(self, batch, batch_idx, optimizer_idx):
+    def validation_step(self, batch, batch_idx):
         x, batch_label, _ = batch
 
         x = x.view(x.size(0), -1)
         mu, logvar = self.vae.encoder(x)
 
-        # Critic update (optimizer_idx == 0)
-        if optimizer_idx == 0:
-            z = self.vae.reparameterize(mu, logvar).detach()
+        z = self.vae.reparameterize(mu, logvar).detach()
 
-            labels = batch_label.argmax(dim=1)
-            mask_0 = labels == 0
-            mask_1 = labels == 1
+        labels = batch_label.argmax(dim=1)
+        mask_0 = labels == 0
+        mask_1 = labels == 1
 
-            z_real = z[mask_0]
-            z_fake = z[mask_1]
+        z_real = z[mask_0]
+        z_fake = z[mask_1]
 
-            real_score = self.critic(z_real)
-            fake_score = self.critic(z_fake)
-            # Wasserstein loss: real=1, fake=-1
-            y_real = torch.ones_like(real_score)
-            y_fake = -torch.ones_like(fake_score)
-            w_loss_real = wasserstein_loss(real_score, y_real)
-            w_loss_fake = wasserstein_loss(fake_score, y_fake)
+        real_score = self.critic(z_real)
+        fake_score = self.critic(z_fake)
+        # Wasserstein loss: real=1, fake=-1
+        y_real = torch.ones_like(real_score)
+        y_fake = -torch.ones_like(fake_score)
+        w_loss_real = wasserstein_loss(real_score, y_real)
+        w_loss_fake = wasserstein_loss(fake_score, y_fake)
 
-            wasserstein = w_loss_real + w_loss_fake
-            gp = self.gradient_penalty(z_real, z_fake)
-            critic_loss = wasserstein + gp
-            self.log("val_critic_loss", critic_loss, prog_bar=True, on_step=True, on_epoch=True)
-            return critic_loss
+        wasserstein = w_loss_real + w_loss_fake
 
-        # Generator (VAE) update (optimizer_idx == 1)
-        if optimizer_idx == 1:
-            z = self.vae.reparameterize(mu, logvar)
+        self.log("val_critic_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
 
-            labels = batch_label.argmax(dim=1)
-            mask_0 = labels == 0
-            mask_1 = labels == 1
+        wasserstein *= -1
+        x_hat = self.vae.decode(z)
+        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+        kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+        vae_loss = recon_loss + kl_weight * kl_div
 
-            z_real = z[mask_0]
-            z_fake = z[mask_1]
-
-            real_score = self.critic(z_real)
-            fake_score = self.critic(z_fake)
-            # Wasserstein loss: real=1, fake=-1
-            y_real = torch.ones_like(real_score)
-            y_fake = -torch.ones_like(fake_score)
-            w_loss_real = wasserstein_loss(real_score, y_real)
-            w_loss_fake = wasserstein_loss(fake_score, y_fake)
-
-            wasserstein = w_loss_real + w_loss_fake
-            x_hat = self.vae.decode(z)
-            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
-            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
-            vae_loss = recon_loss + kl_weight * kl_div
-
-            # Fool the critic
-            total_loss = vae_loss + wasserstein  # we aim to minimize the wasserstein distance
-            self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("val_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("val_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
-            return total_loss
+        # Fool the critic
+        total_loss = vae_loss + wasserstein  # we aim to minimize the wasserstein distance
+        self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("val_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("val_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+        return total_loss
 
 
 # -- VAE with Adversarial Confounder Module ----------------------------------------
@@ -586,43 +571,48 @@ class VAEDiscriminator(VAEAdvBase):
     to remove confounder information from the latent space.
     """
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
+        super().__init__(vae, critic, lr_vae, lr_critic, lambda_gp, critic_steps)
+        self.automatic_optimization = False
+
+    def training_step(self, batch, batch_idx):
         x, batch_label, _ = batch
         x = x.view(x.size(0), -1)
         mu, logvar = self.vae.encoder(x)
         z = self.vae.reparameterize(mu, logvar)
-
-        # Convert one-hot to class indices for confounder prediction
         confounder_labels = batch_label.argmax(dim=1).long()
 
-        # Discriminator update (optimizer_idx == 0)
-        if optimizer_idx == 0:
+        opt_disc, opt_vae = self.optimizers()
+
+        # Alternate updates: update disc more often than vae
+        if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
+            # --- Discriminator update ---
+            opt_disc.zero_grad()
             z_detached = z.detach()
             pred = self.critic(z_detached).squeeze()
-            # For binary confounder, use BCEWithLogitsLoss
             loss_disc = F.binary_cross_entropy(pred, confounder_labels.float())
+            self.manual_backward(loss_disc)
+            opt_disc.step()
             self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
-            return loss_disc
-
-        # VAE (generator) update (optimizer_idx == 1)
-        if optimizer_idx == 1:
+        else:
+            # --- VAE (generator) update ---
+            opt_vae.zero_grad()
             x_hat = self.vae.decode(z)
             recon_loss = F.mse_loss(x_hat, x, reduction="mean")
             kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
             kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
             vae_loss = recon_loss + kl_weight * kl_div
-
-            # Adversarial loss: fool the discriminator (flip labels)
             pred = self.critic(z).squeeze()
             adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels.float())
             total_loss = vae_loss + self.adv_weight * adv_loss
-
+            self.manual_backward(total_loss)
+            opt_vae.step()
             self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
             self.log("train_adv_loss", adv_loss, prog_bar=True, on_step=True, on_epoch=True)
             self.log("train_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
             return total_loss
 
-    def validation_step(self, batch, batch_idx, optimizer_idx):
+    def validation_step(self, batch, batch_idx):
         x, batch_label, _ = batch
         x = x.view(x.size(0), -1)
         mu, logvar = self.vae.encoder(x)
@@ -631,29 +621,24 @@ class VAEDiscriminator(VAEAdvBase):
         # Convert one-hot to class indices for confounder prediction
         confounder_labels = batch_label.argmax(dim=1).long()
 
-        # Discriminator update (optimizer_idx == 0)
-        if optimizer_idx == 0:
-            z_detached = z.detach()
-            pred = self.critic(z_detached).squeeze()
-            # For binary confounder, use BCEWithLogitsLoss
-            loss_disc = F.binary_cross_entropy(pred, confounder_labels.float())
-            self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
-            return loss_disc
+        pred = self.critic(z).squeeze()
+        # For binary confounder, use BCEWithLogitsLoss
+        loss_disc = F.binary_cross_entropy(pred, confounder_labels.float())
+        self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
 
-        # VAE (generator) update (optimizer_idx == 1)
-        if optimizer_idx == 1:
-            x_hat = self.vae.decode(z)
-            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
-            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
-            vae_loss = recon_loss + kl_weight * kl_div
+        x_hat = self.vae.decode(z)
+        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+        kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+        vae_loss = recon_loss + kl_weight * kl_div
 
-            # Adversarial loss: fool the discriminator (flip labels)
-            pred = self.critic(z).squeeze()
-            adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels.float())
-            total_loss = vae_loss + self.adv_weight * adv_loss
+        # Adversarial loss: fool the discriminator (flip labels)
+        pred = self.critic(z).squeeze()
+        adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels.float())
+        total_loss = vae_loss + self.adv_weight * adv_loss
 
-            self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("val_adv_loss", adv_loss, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("val_total_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
-            return total_loss
+        self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("val_adv_loss", adv_loss, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("val_total_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+
+        return total_loss

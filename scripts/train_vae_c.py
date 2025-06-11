@@ -9,7 +9,7 @@ import scanpy as sc
 import anndata as ad
 
 from wcd_vae.data import get_dataloader_from_adata
-from wcd_vae.model import VAE, VAEDiscriminatorAdv, VAEConfig, Discriminator
+from wcd_vae.model import VAE, VAEWasserstein, VAEConfig, Discriminator
 from wcd_vae.metrics import compute_metrics
 
 
@@ -70,7 +70,7 @@ def main():
 
     critic = Discriminator(config.latent_dim, critic=True)
 
-    vae_discriminator = VAEDiscriminatorAdv(vae, critic)
+    vae_discriminator = VAEWasserstein(vae, critic)
 
     # Data loaders
     train_loader, test_loader, domain_encoder, cell_encoder = get_dataloader_from_adata(
@@ -95,7 +95,7 @@ def main():
         accelerator="auto",
         devices="auto",
         log_every_n_steps=10,
-        checkpoint_callback=checkpoint_callback,
+        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(vae_discriminator, train_dataloaders=train_loader, val_dataloaders=test_loader)
@@ -123,7 +123,7 @@ def main():
     plt.ylim([0, 1000])
     plt.legend()
     plt.tight_layout()
-    plt.savefig("training_loss.png")
+    plt.savefig(f"{script_name}" + "training_loss.png")
     plt.close()
 
     # Compute embeddings and metrics
@@ -179,7 +179,7 @@ def main():
     plt.title("UMAP colored by Batch")
     plt.legend(title="Batch", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.tight_layout()
-    plt.savefig("umap_by_batch.png")
+    plt.savefig(f"{script_name}" + "umap_by_batch.png")
     plt.close()
 
     plt.figure(figsize=(8, 6))
@@ -189,7 +189,7 @@ def main():
     plt.title("UMAP colored by Cell Type")
     plt.legend(title="Cell Type", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.tight_layout()
-    plt.savefig("umap_by_celltype.png")
+    plt.savefig(f"{script_name}" + "umap_by_celltype.png")
     plt.close()
 
 

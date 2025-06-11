@@ -21,3 +21,4 @@ build/
 .devcontainer/devcontainer.json
 **/data/**
 **/lightning_logs/**
+*.ckpt

@@ -119,7 +119,7 @@ def main():
     plt.ylim([0, 1000])
     plt.legend()
     plt.tight_layout()
-    plt.savefig("training_loss.png")
+    plt.savefig(f"{script_name}" + "training_loss.png")
     plt.close()
 
     # Compute embeddings and metrics
@@ -175,7 +175,7 @@ def main():
     plt.title("UMAP colored by Batch")
     plt.legend(title="Batch", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.tight_layout()
-    plt.savefig("umap_by_batch.png")
+    plt.savefig(f"{script_name}" + "umap_by_batch.png")
     plt.close()
 
     plt.figure(figsize=(8, 6))
@@ -185,7 +185,7 @@ def main():
     plt.title("UMAP colored by Cell Type")
     plt.legend(title="Cell Type", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.tight_layout()
-    plt.savefig("umap_by_celltype.png")
+    plt.savefig(f"{script_name}" + "umap_by_celltype.png")
     plt.close()
 
 
