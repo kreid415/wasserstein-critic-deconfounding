@@ -18,6 +18,7 @@ dependencies:
   - seaborn
   - umap-learn
   - lightning
+  - pyro4
   - pip:
       - pip
       - setuptools

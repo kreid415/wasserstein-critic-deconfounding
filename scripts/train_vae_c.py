@@ -59,7 +59,7 @@ def main():
         decoder_hidden_dims=[256, 512],
         dropout=0.2,
         batchsize=128,
-        num_epochs=10000,
+        num_epochs=100_000,
         lr=1e-4,
         weight_decay=1e-5,
         kl_anneal_start=0,

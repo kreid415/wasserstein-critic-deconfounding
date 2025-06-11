@@ -168,3 +168,54 @@ def unbalanced_ot(
 # Wasserstein loss for the critic
 def wasserstein_loss(y_pred, y_true):
     return torch.mean(y_true * y_pred)
+
+
+def mmd_gaussian(mu1, var1, mu2, var2, bandwidth=1.0, device="cpu"):
+    """
+    Compute MMD between two sets of Gaussians with diagonal covariance
+    under an RBF kernel with given bandwidth.
+
+    Args:
+        mu1, logvar1: tensors (batch_size, latent_dim)
+        mu2, logvar2: tensors (batch_size, latent_dim)
+        bandwidth: float
+
+    Returns:
+        scalar MMD loss
+    """
+
+    def kernel_expectation(mu_a, var_a, mu_b, var_b):
+        # Computes E_{x ~ N(mu_a, var_a), y ~ N(mu_b, var_b)}[k(x,y)]
+        var_sum = var_a + var_b + bandwidth  # Broadcasting sum + bandwidth
+        diff = mu_a - mu_b
+        exp_term = torch.exp(-0.5 * (diff**2) / var_sum)
+        norm_term = torch.prod(bandwidth / var_sum, dim=1).sqrt()
+        return norm_term * exp_term.prod(dim=1)
+
+    # Pairwise expectations within each batch
+    batch_size1 = mu1.size(0)
+    batch_size2 = mu2.size(0)
+
+    # Compute all pairwise expectations for batch1
+    xx = 0.0
+    for i in range(batch_size1):
+        for j in range(batch_size1):
+            xx += kernel_expectation(mu1[i], var1[i], mu1[j], var1[j])
+    xx /= batch_size1 * batch_size1
+
+    # Compute all pairwise expectations for batch2
+    yy = 0.0
+    for i in range(batch_size2):
+        for j in range(batch_size2):
+            yy += kernel_expectation(mu2[i], var2[i], mu2[j], var2[j])
+    yy /= batch_size2 * batch_size2
+
+    # Cross expectation
+    xy = 0.0
+    for i in range(batch_size1):
+        for j in range(batch_size2):
+            xy += kernel_expectation(mu1[i], var1[i], mu2[j], var2[j])
+    xy /= batch_size1 * batch_size2
+
+    mmd = xx + yy - 2 * xy
+    return mmd

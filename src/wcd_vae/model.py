@@ -1,13 +1,13 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import List
 
+from pyro.distributions.zero_inflated import ZeroInflatedNegativeBinomial
 import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F  # noqa: N812
 
-from wcd_vae.loss import wasserstein_loss, unbalanced_ot
-from wcd_vae.metrics import compute_metrics
+from wcd_vae.loss import wasserstein_loss
 
 
 # -- Config Dataclass -----------------------------------------------------
@@ -18,7 +18,7 @@ class VAEConfig:
     encoder_hidden_dims: List[int] = (400,)
     decoder_hidden_dims: List[int] = (400,)
     activation: str = "relu"
-    use_batchnorm: bool = False
+    use_batchnorm: bool = True
     dropout: float = 0.0
     lr: float = 1e-3
     batchsize: int = 64
@@ -27,6 +27,9 @@ class VAEConfig:
     kl_anneal_start: int = 0  # epoch to start annealing
     kl_anneal_end: int = 10  # epoch to reach full KL weight
     kl_anneal_max: float = 1.0  # maximum KL weight
+    decon_weight: float = 1.0
+    recon_weight: float = 1.0
+    zinb_loss: bool = False  # Use Zero-Inflated Negative Binomial loss
 
 
 # -- Utility --------------------------------------------------------------
@@ -65,72 +68,38 @@ class Encoder(nn.Module):
 
 # -- Decoder Module -------------------------------------------------------
 class Decoder(nn.Module):
-    def __init__(self, config: VAEConfig):
+    def __init__(
+        self,
+        config: VAEConfig,
+    ):
         super().__init__()
-        dims = [config.latent_dim] + list(config.decoder_hidden_dims)
-        layers = []
-
-        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
-            layers.append(nn.Linear(in_dim, out_dim))
-            if config.use_batchnorm:
-                layers.append(nn.BatchNorm1d(out_dim))
-            layers.append(get_activation(config.activation))
-            if config.dropout > 0:
-                layers.append(nn.Dropout(config.dropout))
-
-        layers.append(nn.Linear(dims[-1], config.input_dim))
-        layers.append(nn.Sigmoid())  # for binary input images
-        self.net = nn.Sequential(*layers)
+        self.config = config
+        self.fc1 = nn.Linear(config.latent_dim, 64)
+        self.bn = nn.BatchNorm1d(64) if config.use_batchnorm else nn.Identity()
+        self.fc_mu = nn.Linear(64 + config.latent_dim, config.input_dim)
+        self.fc_pi = nn.Linear(64 + config.latent_dim, config.input_dim)
 
     def forward(self, z):
-        return self.net(z)
+        h = F.relu(self.fc1(z))
+        h = self.bn(h)
+        h_ = torch.cat([h, z], dim=-1)
+
+        mu = F.softplus(self.fc_mu(h_)) + 1e-5  # Ensure positivity
+        pi_logit = self.fc_pi(h_)
+
+        return mu, pi_logit
 
 
 class LinearDecoder(nn.Module):
     def __init__(self, config: VAEConfig):
         super().__init__()
-        self.linear = nn.Linear(config.latent_dim, config.input_dim)
+        self.fc_mu = nn.Linear(config.latent_dim, config.input_dim)
+        self.fc_pi = nn.Linear(config.latent_dim, config.input_dim)
 
     def forward(self, z):
-        return self.linear(z)
-
-
-# -- Discriminator Module -------------------------------------------------
-class Discriminator(nn.Module):
-    """
-    Discriminator network for adversarial regularization of VAE latent space.
-    Predicts confounding variable(s) from latent representation.
-    """
-
-    def __init__(self, latent_dim, hidden_dims=[64, 32], dropout=0.1, critic=False):
-        """
-        Args:
-            latent_dim (int): Dimension of VAE latent space (input to discriminator)
-            confounder_dim (int): Number of confounder classes (output dimension)
-            hidden_dims (list): List of hidden layer sizes
-            dropout (float): Dropout rate
-        """
-        super().__init__()
-        dims = [latent_dim] + hidden_dims
-        layers = []
-        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
-            layers.append(nn.Linear(in_dim, out_dim))
-            layers.append(nn.ReLU())
-            if dropout > 0:
-                layers.append(nn.Dropout(dropout))
-        layers.append(nn.Linear(dims[-1], 1))
-        if not critic:
-            layers.append(nn.Sigmoid())  # Output logits for binary classification
-        self.net = nn.Sequential(*layers)
-
-    def forward(self, z):
-        """
-        Args:
-            z (Tensor): Latent representation (batch_size, latent_dim)
-        Returns:
-            logits (Tensor): Predicted confounder logits (batch_size, confounder_dim)
-        """
-        return self.net(z)
+        mu = F.softplus(self.fc_mu(z)) + 1e-5  # Ensure positivity
+        pi_logit = self.fc_pi(z)
+        return mu, pi_logit
 
 
 # -- Base Class for VAE ---------------------------------------------------
@@ -140,9 +109,34 @@ class BaseVAE(pl.LightningModule):
     Provides common functionality for encoding, decoding, and training steps.
     """
 
-    def __init__(self, config: VAEConfig):
+    def __init__(self, config: VAEConfig, linear_decoder):
         super().__init__()
         self.config = config
+        self.save_hyperparameters()
+        self.encoder = Encoder(config)
+        self.zinb_loss = config.zinb_loss
+        if linear_decoder:
+            self.decoder = LinearDecoder(config)
+        else:
+            self.decoder = Decoder(config)
+
+        self.log_theta = torch.nn.Parameter(torch.randn(config.input_dim))
+
+    def zinb_loss(self, x, mu, pi_logits):
+        """
+        x: input data
+        mu: output of decoder
+        dropout_logits: dropout logits of zinb distribution
+        """
+        theta = self.log_theta.exp()
+
+        nb_logits = (mu + 1e-5).log() - (theta + 1e-5).log()
+
+        distribution = ZeroInflatedNegativeBinomial(
+            total_count=theta, logits=nb_logits, gate_logits=pi_logits, validate_args=False
+        )
+
+        return -distribution.log_prob(x).sum(-1).mean()
 
     def encode(self, x):
         mu, logvar = self.encoder(x)
@@ -159,7 +153,8 @@ class BaseVAE(pl.LightningModule):
     def forward(self, x):
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
-        return self.decode(z), z, mu, logvar
+        mu_zimb, pi_logit = self.decode(z)
+        return mu_zimb, pi_logit, z, mu, logvar
 
     def kl_weight(self):
         # Linear annealing from kl_anneal_start to kl_anneal_end
@@ -180,37 +175,25 @@ class BaseVAE(pl.LightningModule):
 
 # -- VAE Lightning Module -------------------------------------------------
 class VAE(BaseVAE):
-    def __init__(self, config: VAEConfig, linear_decoder=False):
-        super().__init__(config)
-        self.save_hyperparameters()
-        self.config = config
-        self.encoder = Encoder(config)
-        if linear_decoder:
-            self.decoder = LinearDecoder(config)
-        else:
-            self.decoder = Decoder(config)
-
-        self.val_embeddings = []
-        self.val_batches = []
-        self.val_cell_types = []
-
-        self.automatic_optimization = True
+    def __init__(self, config: VAEConfig, linear_decoder):
+        super().__init__(config, linear_decoder)
 
     def training_step(self, batch, batch_idx):
         x, _, _ = batch
         x = x.view(x.size(0), -1)
-        x_hat, _, mu, logvar = self.forward(x)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
-        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-        kl_weight = self.kl_weight()
-        loss = recon_loss + kl_weight * kl_div
-
-        # Debug: check for NaN/Inf loss
-        if torch.isnan(loss) or torch.isinf(loss):
-            print(
-                f"NaN or Inf loss at batch {batch_idx}: recon_loss={recon_loss.item()}, kl_div={kl_div.item()}, kl_weight={kl_weight}"
+        mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
+        if self.zinb_loss:
+            # Use Zero-Inflated Negative Binomial loss
+            recon_loss = (
+                self.zinb_loss(x, mu_zimb, pi_logit) * self.config.recon_weight / x.size(0)
             )
-            raise ValueError("Loss is NaN or Inf")
+        else:
+            # Use standard reconstruction loss (e.g., MSE)
+            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean") * self.config.recon_weight
+        kl_weight = self.kl_weight()
+        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0) * kl_weight
+        kl_div = torch.clamp(kl_div, 0.2)
+        loss = recon_loss + kl_div
 
         self.log(
             "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, batch_size=x.size(0)
@@ -220,11 +203,14 @@ class VAE(BaseVAE):
             recon_loss,
             on_step=True,
             on_epoch=True,
-            prog_bar=False,
-            batch_size=x.size(0),
+            prog_bar=True,
         )
         self.log(
-            "kl_div", kl_div, on_step=True, on_epoch=True, prog_bar=False, batch_size=x.size(0)
+            "kl_div",
+            kl_div,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
         )
         self.log(
             "kl_weight",
@@ -232,7 +218,6 @@ class VAE(BaseVAE):
             on_step=True,
             on_epoch=True,
             prog_bar=False,
-            batch_size=x.size(0),
         )
         return loss
 
@@ -241,10 +226,18 @@ class VAE(BaseVAE):
         x = x.view(x.size(0), -1)
         x = x.to(self.device)
 
-        x_hat, _, mu, logvar = self.forward(x)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
-        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-
+        mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
+        if self.zinb_loss:
+            # Use Zero-Inflated Negative Binomial loss
+            recon_loss = (
+                self.zinb_loss(x, mu_zimb, pi_logit) * self.config.recon_weight / x.size(0)
+            )
+        else:
+            # Use standard reconstruction loss (e.g., MSE)
+            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean") * self.config.recon_weight
+        kl_weight = self.kl_weight()
+        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0) * kl_weight
+        kl_div = torch.clamp(kl_div, 0.2)
         loss = recon_loss + kl_div
 
         self.log_dict(
@@ -268,22 +261,19 @@ class VAE_OT(BaseVAE):
     This encourages the latent representations of different groups (e.g., batches) to be similar.
     """
 
-    def __init__(self, config: VAEConfig, ot_lambda=1.0, linear_decoder=False):
-        super().__init__(config)
-        self.save_hyperparameters()
-        self.config = config
-        self.ot_lambda = ot_lambda
-        self.encoder = Encoder(config)
-        if linear_decoder:
-            self.decoder = LinearDecoder(config)
-        else:
-            self.decoder = Decoder(config)
+    def __init__(self, config: VAEConfig, linear_decoder, domain_loss, ot_lambda=1.0):
+        super().__init__(config, linear_decoder)
+        self.domain_loss = domain_loss
 
     def training_step(self, batch, batch_idx):
         x, batch_label, _ = batch
         x = x.view(x.size(0), -1)
-        x_hat, z, mu, logvar = self.forward(x)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        mu_zimb, mu_theta, mu_pi, _, mu, logvar = self.forward(x)
+        recon_loss = (
+            self.zinb_loss(x, mu_zimb, mu_theta, mu_pi, eps=1e-8)
+            * self.config.recon_weight
+            / x.size(0)
+        )
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
         kl_weight = self.kl_weight()
         vae_loss = recon_loss + kl_weight * kl_div
@@ -298,7 +288,7 @@ class VAE_OT(BaseVAE):
 
         ot_loss = 0.0
         if mu0.shape[0] > 0 and mu1.shape[0] > 0:
-            ot_loss, _ = unbalanced_ot(mu0, logvar0.exp(), mu1, logvar1.exp(), device=x.device)
+            ot_loss, _ = self.domain_loss(mu0, logvar0.exp(), mu1, logvar1.exp(), device=x.device)
 
         total_loss = vae_loss + self.ot_lambda * ot_loss
 
@@ -341,7 +331,12 @@ class VAE_OT(BaseVAE):
         x = x.to(self.device)
 
         x_hat, z, mu, logvar = self.forward(x)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        mu_zimb, mu_theta, mu_pi, _, mu, logvar = self.forward(x)
+        recon_loss = (
+            self.zinb_loss(x, mu_zimb, mu_theta, mu_pi, eps=1e-8)
+            * self.config.recon_weight
+            / x.size(0)
+        )
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
 
         # Unbalanced OT regularization
@@ -353,7 +348,7 @@ class VAE_OT(BaseVAE):
 
         ot_loss = 0.0
         if mu0.shape[0] > 0 and mu1.shape[0] > 0:
-            ot_loss, _ = unbalanced_ot(mu0, logvar0.exp(), mu1, logvar1.exp(), device=x.device)
+            ot_loss, _ = self.domain_loss(mu0, logvar0.exp(), mu1, logvar1.exp(), device=x.device)
 
         loss = recon_loss + kl_div + self.ot_lambda * ot_loss
 
@@ -372,6 +367,44 @@ class VAE_OT(BaseVAE):
         return loss
 
 
+# -- Discriminator Module -------------------------------------------------
+class Discriminator(nn.Module):
+    """
+    Discriminator network for adversarial regularization of VAE latent space.
+    Predicts confounding variable(s) from latent representation.
+    """
+
+    def __init__(self, latent_dim, hidden_dims=[64, 32], dropout=0.1, critic=False):
+        """
+        Args:
+            latent_dim (int): Dimension of VAE latent space (input to discriminator)
+            confounder_dim (int): Number of confounder classes (output dimension)
+            hidden_dims (list): List of hidden layer sizes
+            dropout (float): Dropout rate
+        """
+        super().__init__()
+        dims = [latent_dim] + hidden_dims
+        layers = []
+        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
+            layers.append(nn.Linear(in_dim, out_dim))
+            layers.append(nn.ReLU())
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(dims[-1], 1))
+        if not critic:
+            layers.append(nn.Sigmoid())  # Output logits for binary classification
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, z):
+        """
+        Args:
+            z (Tensor): Latent representation (batch_size, latent_dim)
+        Returns:
+            logits (Tensor): Predicted confounder logits (batch_size, confounder_dim)
+        """
+        return self.net(z)
+
+
 # -- Base adversarial class for VAE with critic/discriminator ------
 class VAEAdvBase(pl.LightningModule):
     """
@@ -379,12 +412,24 @@ class VAEAdvBase(pl.LightningModule):
     Provides common functionality for training steps and optimizer configuration.
     """
 
-    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
+    def __init__(
+        self,
+        config,
+        vae,
+        critic,
+        lr_vae=1e-3,
+        lr_critic=1e-4,
+        lambda_critic=1.0,
+        lambda_gp=10.0,
+        critic_steps=5,
+    ):
         super().__init__()
+        self.config = config
         self.vae = vae
         self.critic = critic
         self.lr_vae = lr_vae
         self.lr_critic = lr_critic
+        self.lambda_critic = lambda_critic
         self.lambda_gp = lambda_gp
         self.critic_steps = critic_steps
 
@@ -429,7 +474,7 @@ class VAEWasserstein(VAEAdvBase):
     Implements manual optimization for compatibility with multiple optimizers.
     """
 
-    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
+    def __init__(self, vae, critic, lr_vae=1e-4, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
         super().__init__(vae, critic, lr_vae, lr_critic, lambda_gp, critic_steps)
         self.automatic_optimization = False
 
@@ -508,9 +553,9 @@ class VAEWasserstein(VAEAdvBase):
             y_fake = -torch.ones_like(fake_score)
             w_loss_real = wasserstein_loss(real_score, y_real)
             w_loss_fake = wasserstein_loss(fake_score, y_fake)
-            wasserstein = w_loss_real + w_loss_fake
+            wasserstein = (w_loss_real + w_loss_fake) * self.lambda_critic
             x_hat = self.vae.decode(z)
-            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+            recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
             kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
             kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
             vae_loss = recon_loss + kl_weight * kl_div
@@ -545,13 +590,13 @@ class VAEWasserstein(VAEAdvBase):
         w_loss_real = wasserstein_loss(real_score, y_real)
         w_loss_fake = wasserstein_loss(fake_score, y_fake)
 
-        wasserstein = w_loss_real + w_loss_fake
+        wasserstein = (w_loss_real + w_loss_fake) * self.lambda_critic
 
         self.log("val_critic_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
 
         wasserstein *= -1
         x_hat = self.vae.decode(z)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
         kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
         vae_loss = recon_loss + kl_weight * kl_div
@@ -571,8 +616,17 @@ class VAEDiscriminator(VAEAdvBase):
     to remove confounder information from the latent space.
     """
 
-    def __init__(self, vae, critic, lr_vae=1e-3, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
-        super().__init__(vae, critic, lr_vae, lr_critic, lambda_gp, critic_steps)
+    def __init__(
+        self,
+        vae,
+        critic,
+        lr_vae=1e-3,
+        lr_critic=1e-4,
+        lambda_critic=1.0,
+        lambda_gp=10.0,
+        critic_steps=1,
+    ):
+        super().__init__(vae, critic, lr_vae, lr_critic, lambda_critic, lambda_gp, critic_steps)
         self.automatic_optimization = False
 
     def training_step(self, batch, batch_idx):
@@ -590,7 +644,9 @@ class VAEDiscriminator(VAEAdvBase):
             opt_disc.zero_grad()
             z_detached = z.detach()
             pred = self.critic(z_detached).squeeze()
-            loss_disc = F.binary_cross_entropy(pred, confounder_labels.float())
+            loss_disc = (
+                F.binary_cross_entropy(pred, confounder_labels.float()) * self.lambda_critic
+            )
             self.manual_backward(loss_disc)
             opt_disc.step()
             self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
@@ -598,13 +654,15 @@ class VAEDiscriminator(VAEAdvBase):
             # --- VAE (generator) update ---
             opt_vae.zero_grad()
             x_hat = self.vae.decode(z)
-            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+            recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
             kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
             kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
             vae_loss = recon_loss + kl_weight * kl_div
             pred = self.critic(z).squeeze()
-            adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels.float())
-            total_loss = vae_loss + self.adv_weight * adv_loss
+            adv_loss = (
+                F.binary_cross_entropy(pred, confounder_labels.float()) * self.lambda_critic * -1
+            )
+            total_loss = vae_loss + adv_loss
             self.manual_backward(total_loss)
             opt_vae.step()
             self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
@@ -623,22 +681,24 @@ class VAEDiscriminator(VAEAdvBase):
 
         pred = self.critic(z).squeeze()
         # For binary confounder, use BCEWithLogitsLoss
-        loss_disc = F.binary_cross_entropy(pred, confounder_labels.float())
+        loss_disc = F.binary_cross_entropy(pred, confounder_labels.float()) * self.lambda_critic
         self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
 
         x_hat = self.vae.decode(z)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+        recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
         kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
         vae_loss = recon_loss + kl_weight * kl_div
 
         # Adversarial loss: fool the discriminator (flip labels)
         pred = self.critic(z).squeeze()
-        adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels.float())
-        total_loss = vae_loss + self.adv_weight * adv_loss
+        adv_loss = (
+            F.binary_cross_entropy(pred, confounder_labels.float()) * self.lambda_critic * -1
+        )
+        total_loss = vae_loss + adv_loss
 
         self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
         self.log("val_adv_loss", adv_loss, prog_bar=True, on_step=True, on_epoch=True)
-        self.log("val_total_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+        self.log("val_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
 
         return total_loss
