@@ -29,7 +29,8 @@ class VAEConfig:
     kl_anneal_max: float = 1.0  # maximum KL weight
     decon_weight: float = 1.0
     recon_weight: float = 1.0
-    zinb_loss: bool = False  # Use Zero-Inflated Negative Binomial loss
+    zinb: bool = False  # Use Zero-Inflated Negative Binomial loss
+    variational: bool = True  # Use variational inference
 
 
 # -- Utility --------------------------------------------------------------
@@ -114,7 +115,7 @@ class BaseVAE(pl.LightningModule):
         self.config = config
         self.save_hyperparameters()
         self.encoder = Encoder(config)
-        self.zinb_loss = config.zinb_loss
+        self.zinb = config.zinb
         if linear_decoder:
             self.decoder = LinearDecoder(config)
         else:
@@ -136,7 +137,13 @@ class BaseVAE(pl.LightningModule):
             total_count=theta, logits=nb_logits, gate_logits=pi_logits, validate_args=False
         )
 
-        return -distribution.log_prob(x).sum(-1).mean()
+        loss = -distribution.log_prob(x).sum(-1).mean()
+
+        x_hat = distribution.mean
+
+        rmse = torch.sqrt(F.mse_loss(x_hat, x, reduction="mean"))
+
+        return loss, rmse
 
     def encode(self, x):
         mu, logvar = self.encoder(x)
@@ -152,14 +159,14 @@ class BaseVAE(pl.LightningModule):
 
     def forward(self, x):
         mu, logvar = self.encode(x)
-        z = self.reparameterize(mu, logvar)
+        z = self.reparameterize(mu, logvar) if self.config.variational else mu
         mu_zimb, pi_logit = self.decode(z)
         return mu_zimb, pi_logit, z, mu, logvar
 
     def kl_weight(self):
         # Linear annealing from kl_anneal_start to kl_anneal_end
         current_epoch = self.current_epoch if hasattr(self, "current_epoch") else 0
-        if current_epoch < self.config.kl_anneal_start:
+        if current_epoch < self.config.kl_anneal_start or not self.config.variational:
             return 0.0
         elif current_epoch >= self.config.kl_anneal_end:
             return self.config.kl_anneal_max
@@ -182,17 +189,16 @@ class VAE(BaseVAE):
         x, _, _ = batch
         x = x.view(x.size(0), -1)
         mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
-        if self.zinb_loss:
+        if self.zinb:
             # Use Zero-Inflated Negative Binomial loss
-            recon_loss = (
-                self.zinb_loss(x, mu_zimb, pi_logit) * self.config.recon_weight / x.size(0)
-            )
+            recon_loss, rmse = self.zinb_loss(x, mu_zimb, pi_logit)
         else:
             # Use standard reconstruction loss (e.g., MSE)
-            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean") * self.config.recon_weight
+            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean")
+
+        recon_loss *= self.config.recon_weight / x.size(0)
         kl_weight = self.kl_weight()
         kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0) * kl_weight
-        kl_div = torch.clamp(kl_div, 0.2)
         loss = recon_loss + kl_div
 
         self.log(
@@ -219,6 +225,15 @@ class VAE(BaseVAE):
             on_epoch=True,
             prog_bar=False,
         )
+        if self.zinb:
+            self.log(
+                "rmse",
+                rmse,
+                on_step=True,
+                on_epoch=True,
+                prog_bar=True,
+            )
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -227,17 +242,20 @@ class VAE(BaseVAE):
         x = x.to(self.device)
 
         mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
-        if self.zinb_loss:
+        if self.zinb:
             # Use Zero-Inflated Negative Binomial loss
-            recon_loss = (
-                self.zinb_loss(x, mu_zimb, pi_logit) * self.config.recon_weight / x.size(0)
-            )
+            recon_loss, rmse = self.zinb_loss(x, mu_zimb, pi_logit)
         else:
             # Use standard reconstruction loss (e.g., MSE)
-            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean") * self.config.recon_weight
-        kl_weight = self.kl_weight()
-        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0) * kl_weight
-        kl_div = torch.clamp(kl_div, 0.2)
+            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean")
+
+        recon_loss *= self.config.recon_weight / x.size(0)
+        kl_div = (
+            -0.5
+            * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+            / x.size(0)
+            * self.config.kl_anneal_max
+        )
         loss = recon_loss + kl_div
 
         self.log_dict(
@@ -250,6 +268,15 @@ class VAE(BaseVAE):
             on_step=True,
             on_epoch=True,
         )
+
+        if self.zinb:
+            self.log(
+                "val_rmse",
+                rmse,
+                on_step=True,
+                on_epoch=True,
+                prog_bar=True,
+            )
 
         return loss
 

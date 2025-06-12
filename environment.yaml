@@ -23,6 +23,7 @@ dependencies:
       - pip
       - setuptools
       - wheel
+      - scib
 prefix: /opt/conda/envs/myenv
 platforms:
   - linux-aarch64

@@ -6,14 +6,15 @@ import torch.utils.data as utils
 
 def get_dataloader_from_adata(
     adata_concat,
-    by="dataset_name",
-    cell_label="broad_type",
+    by: str,
+    cell_label: str,
     test_size=0.2,
     batch_size: int = 128,
     num_workers: int = 8,
 ):
     # transform expression data into tensor
-    data_tensor = torch.tensor(adata_concat.X.toarray(), dtype=torch.float32)
+    data = adata_concat.X.toarray() if hasattr(adata_concat.X, "toarray") else adata_concat.X
+    data_tensor = torch.tensor(data, dtype=torch.float32)
 
     # make domain labels
     domain_encoder = OneHotEncoder(sparse_output=False)
@@ -21,9 +22,13 @@ def get_dataloader_from_adata(
     domain_labels_tensor = torch.tensor(domain_labels, dtype=torch.float32)
 
     cell_encoder = OneHotEncoder(sparse_output=False)
-    cell_labels = cell_encoder.fit_transform(
-        adata_concat.obs[cell_label].to_numpy().reshape(-1, 1)
+
+    obs = (
+        adata_concat.obs[cell_label].to_numpy()
+        if hasattr(adata_concat.obs[cell_label], "to_numpy")
+        else adata_concat.obs[cell_label]
     )
+    cell_labels = cell_encoder.fit_transform(obs.reshape(-1, 1))
     cell_labels_tensor = torch.tensor(cell_labels, dtype=torch.float32)
 
     dataset = utils.TensorDataset(

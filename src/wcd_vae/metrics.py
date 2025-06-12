@@ -9,7 +9,7 @@ from torchmetrics import Metric
 
 
 class BatchEntropy(Metric):
-    def __init__(self, k: int = 50):
+    def __init__(self, k: int = 30):
         super().__init__()
         self.k = k
         self.add_state("total_entropy", default=torch.tensor(0.0), dist_reduce_fx="sum")
@@ -36,7 +36,7 @@ class BatchEntropy(Metric):
 
 
 class LISI(Metric):
-    def __init__(self, k: int = 90):
+    def __init__(self, k: int = 30):
         super().__init__()
         self.k = k
         self.add_state("total_lisi", default=torch.tensor(0.0), dist_reduce_fx="sum")
