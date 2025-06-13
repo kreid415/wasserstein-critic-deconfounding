@@ -13,24 +13,25 @@ from wcd_vae.loss import wasserstein_loss
 # -- Config Dataclass -----------------------------------------------------
 @dataclass
 class VAEConfig:
-    input_dim: int = 784
-    latent_dim: int = 20
-    encoder_hidden_dims: List[int] = (400,)
-    decoder_hidden_dims: List[int] = (400,)
+    input_dim: int
+    latent_dim: int
+    encoder_hidden_dims: List[int]
+    decoder_hidden_dims: List[int]
+    lr: float
+    batchsize: int
+    num_epochs: int
+    weight_decay: float
+    kl_anneal_end: int
+    kl_anneal_max: float
+    zinb: bool
+    variational: bool
+    linear_decoder: bool
     activation: str = "relu"
     use_batchnorm: bool = True
     dropout: float = 0.0
-    lr: float = 1e-3
-    batchsize: int = 64
-    num_epochs: int = 10
-    weight_decay: float = 0.0
-    kl_anneal_start: int = 0  # epoch to start annealing
-    kl_anneal_end: int = 10  # epoch to reach full KL weight
-    kl_anneal_max: float = 1.0  # maximum KL weight
     decon_weight: float = 1.0
     recon_weight: float = 1.0
-    zinb: bool = False  # Use Zero-Inflated Negative Binomial loss
-    variational: bool = True  # Use variational inference
+    kl_anneal_start: int = 0
 
 
 # -- Utility --------------------------------------------------------------
@@ -60,7 +61,8 @@ class Encoder(nn.Module):
         self.logvar = nn.Linear(dims[-1], config.latent_dim)
 
     def forward(self, x):
-        h = self.net(x)
+        log_x = torch.log(x + 1)
+        h = self.net(log_x)
         mu = self.mu(h)
         logvar = self.logvar(h)
         logvar = torch.clamp(logvar, min=-4, max=4)  # Clamp for stability
@@ -69,26 +71,27 @@ class Encoder(nn.Module):
 
 # -- Decoder Module -------------------------------------------------------
 class Decoder(nn.Module):
-    def __init__(
-        self,
-        config: VAEConfig,
-    ):
+    def __init__(self, config: VAEConfig):
         super().__init__()
-        self.config = config
-        self.fc1 = nn.Linear(config.latent_dim, 64)
-        self.bn = nn.BatchNorm1d(64) if config.use_batchnorm else nn.Identity()
-        self.fc_mu = nn.Linear(64 + config.latent_dim, config.input_dim)
-        self.fc_pi = nn.Linear(64 + config.latent_dim, config.input_dim)
+        dims = [config.latent_dim] + list(config.decoder_hidden_dims)
+        layers = []
+        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
+            layers.append(nn.Linear(in_dim, out_dim))
+            if config.use_batchnorm:
+                layers.append(nn.BatchNorm1d(out_dim))
+            layers.append(get_activation(config.activation))
+            if config.dropout > 0:
+                layers.append(nn.Dropout(config.dropout))
+        self.net = nn.Sequential(*layers)
+        # Output layers
+        self.fc_mu = nn.Linear(dims[-1], config.input_dim)
+        self.fc_pi = nn.Linear(dims[-1], config.input_dim)
 
     def forward(self, z):
-        h = F.relu(self.fc1(z))
-        h = self.bn(h)
-        h_ = torch.cat([h, z], dim=-1)
-
-        mu = F.softplus(self.fc_mu(h_)) + 1e-5  # Ensure positivity
-        pi_logit = self.fc_pi(h_)
-
-        return mu, pi_logit
+        h = self.net(z)
+        log_mu = self.fc_mu(h)
+        pi_logit = self.fc_pi(h)
+        return log_mu, pi_logit
 
 
 class LinearDecoder(nn.Module):
@@ -98,9 +101,9 @@ class LinearDecoder(nn.Module):
         self.fc_pi = nn.Linear(config.latent_dim, config.input_dim)
 
     def forward(self, z):
-        mu = F.softplus(self.fc_mu(z)) + 1e-5  # Ensure positivity
+        log_mu = self.fc_mu(z)
         pi_logit = self.fc_pi(z)
-        return mu, pi_logit
+        return log_mu, pi_logit
 
 
 # -- Base Class for VAE ---------------------------------------------------
@@ -110,20 +113,20 @@ class BaseVAE(pl.LightningModule):
     Provides common functionality for encoding, decoding, and training steps.
     """
 
-    def __init__(self, config: VAEConfig, linear_decoder):
+    def __init__(self, config: VAEConfig):
         super().__init__()
         self.config = config
         self.save_hyperparameters()
         self.encoder = Encoder(config)
         self.zinb = config.zinb
-        if linear_decoder:
+        if config.linear_decoder:
             self.decoder = LinearDecoder(config)
         else:
             self.decoder = Decoder(config)
 
         self.log_theta = torch.nn.Parameter(torch.randn(config.input_dim))
 
-    def zinb_loss(self, x, mu, pi_logits):
+    def zinb_loss(self, x, log_mu, pi_logits):
         """
         x: input data
         mu: output of decoder
@@ -131,7 +134,7 @@ class BaseVAE(pl.LightningModule):
         """
         theta = self.log_theta.exp()
 
-        nb_logits = (mu + 1e-5).log() - (theta + 1e-5).log()
+        nb_logits = log_mu - self.log_theta
 
         distribution = ZeroInflatedNegativeBinomial(
             total_count=theta, logits=nb_logits, gate_logits=pi_logits, validate_args=False
@@ -182,8 +185,8 @@ class BaseVAE(pl.LightningModule):
 
 # -- VAE Lightning Module -------------------------------------------------
 class VAE(BaseVAE):
-    def __init__(self, config: VAEConfig, linear_decoder):
-        super().__init__(config, linear_decoder)
+    def __init__(self, config: VAEConfig):
+        super().__init__(config)
 
     def training_step(self, batch, batch_idx):
         x, _, _ = batch
@@ -288,8 +291,8 @@ class VAE_OT(BaseVAE):
     This encourages the latent representations of different groups (e.g., batches) to be similar.
     """
 
-    def __init__(self, config: VAEConfig, linear_decoder, domain_loss, ot_lambda=1.0):
-        super().__init__(config, linear_decoder)
+    def __init__(self, config: VAEConfig, domain_loss, ot_lambda=1.0):
+        super().__init__(config)
         self.domain_loss = domain_loss
 
     def training_step(self, batch, batch_idx):
@@ -436,7 +439,7 @@ class Discriminator(nn.Module):
 class VAEAdvBase(pl.LightningModule):
     """
     Base class for VAE with adversarial regularization using a critic or discriminator.
-    Provides common functionality for training steps and optimizer configuration.
+    Implements 3-stage training: VAE-only, discriminator-only, then alternating.
     """
 
     def __init__(
@@ -449,6 +452,10 @@ class VAEAdvBase(pl.LightningModule):
         lambda_critic=1.0,
         lambda_gp=10.0,
         critic_steps=5,
+        vae_stage_epochs=10,
+        disc_stage_epochs=10,
+        total_epochs=100,
+        adv_weight=1.0,
     ):
         super().__init__()
         self.config = config
@@ -459,9 +466,20 @@ class VAEAdvBase(pl.LightningModule):
         self.lambda_critic = lambda_critic
         self.lambda_gp = lambda_gp
         self.critic_steps = critic_steps
+        self.vae_stage_epochs = vae_stage_epochs
+        self.disc_stage_epochs = disc_stage_epochs
+        self.total_epochs = total_epochs
+        self.adv_weight = adv_weight
+        self.automatic_optimization = False
 
-    def forward(self, x):
-        return self.vae(x)
+    def current_stage(self):
+        epoch = self.current_epoch
+        if epoch < self.vae_stage_epochs:
+            return "vae"
+        elif epoch < self.vae_stage_epochs + self.disc_stage_epochs:
+            return "disc"
+        else:
+            return "alternate"
 
     def configure_optimizers(self):
         opt_critic = torch.optim.Adam(
@@ -470,45 +488,86 @@ class VAEAdvBase(pl.LightningModule):
         opt_vae = torch.optim.Adam(self.vae.parameters(), lr=self.lr_vae)
         return [opt_critic, opt_vae], []
 
-    def optimizer_step(
-        self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx,
-        optimizer_closure,
-        on_tpu,
-        using_native_amp,
-        using_lbfgs,
-    ):
-        # Update critic 5x more than generator
-        if optimizer_idx == 0:
+    # The actual training_step must be implemented in subclasses
+    # using self.current_stage() to control the logic
+
+
+# Example: Discriminator-based adversarial VAE
+class VAEDiscriminator(VAEAdvBase):
+    def training_step(self, batch, batch_idx):
+        x, batch_label, _ = batch
+        x = x.view(x.size(0), -1)
+        mu, logvar = self.vae.encoder(x)
+        z = self.vae.reparameterize(mu, logvar)
+        confounder_labels = batch_label.argmax(dim=1).float()
+
+        opt_disc, opt_vae = self.optimizers()
+        stage = self.current_stage()
+
+        if stage == "vae":
+            # Only train VAE
+            opt_vae.zero_grad()
+            x_hat = self.vae.decode(z)
+            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+            vae_loss = recon_loss + kl_weight * kl_div
+            self.manual_backward(vae_loss)
+            opt_vae.step()
+            self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+            return vae_loss
+
+        elif stage == "disc":
+            # Only train discriminator
+            opt_disc.zero_grad()
+            z_detached = z.detach()
+            pred = self.critic(z_detached).squeeze()
+            loss_disc = F.binary_cross_entropy(pred, confounder_labels)
+            self.manual_backward(loss_disc)
+            opt_disc.step()
+            self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
+            return loss_disc
+
+        else:  # "alternate"
             if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
-                optimizer.step(closure=optimizer_closure)
+                opt_disc.zero_grad()
+                z_detached = z.detach()
+                pred = self.critic(z_detached).squeeze()
+                loss_disc = F.binary_cross_entropy(pred, confounder_labels)
+                self.manual_backward(loss_disc)
+                opt_disc.step()
+                self.log("disc_loss", loss_disc, prog_bar=True, on_step=True, on_epoch=True)
+                return loss_disc
             else:
-                optimizer_closure()
-        if optimizer_idx == 1:
-            if (batch_idx % (self.critic_steps + 1)) == self.critic_steps:
-                optimizer.step(closure=optimizer_closure)
-            else:
-                optimizer_closure()
+                opt_vae.zero_grad()
+                x_hat = self.vae.decode(z)
+                recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+                kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+                kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+                vae_loss = recon_loss + kl_weight * kl_div
+                pred = self.critic(z).squeeze()
+                adv_loss = F.binary_cross_entropy(pred, 1.0 - confounder_labels)
+                total_loss = vae_loss + self.adv_weight * adv_loss
+                self.manual_backward(total_loss)
+                opt_vae.step()
+                self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+                self.log("train_adv_loss", adv_loss, prog_bar=True, on_step=True, on_epoch=True)
+                self.log("train_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+                return total_loss
 
 
-# -- Wasserstein VAE Module ---------------------------------------------
+# Example: Wasserstein-based adversarial VAE
 class VAEWasserstein(VAEAdvBase):
-    """
-    PyTorch Lightning module for VAE with adversarial regularization using wasserstein critic.
-    Implements manual optimization for compatibility with multiple optimizers.
-    """
-
-    def __init__(self, vae, critic, lr_vae=1e-4, lr_critic=1e-4, lambda_gp=10.0, critic_steps=5):
-        super().__init__(vae, critic, lr_vae, lr_critic, lambda_gp, critic_steps)
-        self.automatic_optimization = False
-
     def gradient_penalty(self, real_z, fake_z):
-        batch_size = real_z.size(0)
-        device = real_z.device
-        alpha = torch.rand(batch_size, 1, device=device)
+        batch_size = min(real_z.size(0), fake_z.size(0))
+        if batch_size == 0:
+            return torch.tensor(0.0, device=real_z.device)
+        # Subsample to match sizes
+        idx_real = torch.randperm(real_z.size(0), device=real_z.device)[:batch_size]
+        idx_fake = torch.randperm(fake_z.size(0), device=fake_z.device)[:batch_size]
+        real_z = real_z[idx_real]
+        fake_z = fake_z[idx_fake]
+        alpha = torch.rand(batch_size, 1, device=real_z.device)
         alpha = alpha.expand_as(real_z)
         interpolates = alpha * real_z + (1 - alpha) * fake_z
         interpolates.requires_grad_(True)
@@ -531,19 +590,28 @@ class VAEWasserstein(VAEAdvBase):
         x = x.view(x.size(0), -1)
         mu, logvar = self.vae.encoder(x)
         z = self.vae.reparameterize(mu, logvar)
-
         labels = batch_label.argmax(dim=1)
         mask_0 = labels == 0
         mask_1 = labels == 1
-
         z_real = z[mask_0]
         z_fake = z[mask_1]
 
         opt_critic, opt_vae = self.optimizers()
+        stage = self.current_stage()
 
-        # Alternate updates: update critic more often than vae
-        if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
-            # --- Critic update ---
+        if stage == "vae":
+            opt_vae.zero_grad()
+            x_hat = self.vae.decode(z)
+            recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+            vae_loss = recon_loss + kl_weight * kl_div
+            self.manual_backward(vae_loss)
+            opt_vae.step()
+            self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+            return vae_loss
+
+        elif stage == "disc":
             opt_critic.zero_grad()
             z_real_detach = z_real.detach()
             z_fake_detach = z_fake.detach()
@@ -553,87 +621,55 @@ class VAEWasserstein(VAEAdvBase):
             y_fake = -torch.ones_like(fake_score)
             w_loss_real = wasserstein_loss(real_score, y_real)
             w_loss_fake = wasserstein_loss(fake_score, y_fake)
-            wasserstein = -1 * (w_loss_real + w_loss_fake)
-
-            # Ensure z_real and z_fake have the same batch size for gradient penalty
-            min_n = min(z_real.size(0), z_fake.size(0))
-            if min_n == 0:
-                # One group is empty, skip GP computation
-                gp = torch.tensor(0.0, device=z_real.device)
-            else:
-                # Randomly sample min_n from each group
-                idx_real = torch.randperm(z_real.size(0), device=z_real.device)[:min_n]
-                idx_fake = torch.randperm(z_fake.size(0), device=z_fake.device)[:min_n]
-                z_real_gp = z_real[idx_real]
-                z_fake_gp = z_fake[idx_fake]
-                gp = self.gradient_penalty(z_real_gp, z_fake_gp)
+            wasserstein = w_loss_real + w_loss_fake
+            gp = self.gradient_penalty(z_real_detach, z_fake_detach)
             critic_loss = wasserstein + gp
             self.manual_backward(critic_loss)
             opt_critic.step()
             self.log("train_critic_loss", critic_loss, prog_bar=True, on_step=True, on_epoch=True)
-        else:
-            # --- VAE (generator) update ---
-            opt_vae.zero_grad()
-            real_score = self.critic(z_real)
-            fake_score = self.critic(z_fake)
-            y_real = torch.ones_like(real_score)
-            y_fake = -torch.ones_like(fake_score)
-            w_loss_real = wasserstein_loss(real_score, y_real)
-            w_loss_fake = wasserstein_loss(fake_score, y_fake)
-            wasserstein = (w_loss_real + w_loss_fake) * self.lambda_critic
-            x_hat = self.vae.decode(z)
-            recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
-            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-            kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
-            vae_loss = recon_loss + kl_weight * kl_div
-            total_loss = vae_loss + wasserstein  # minimize wasserstein distance
-            self.manual_backward(total_loss)
-            opt_vae.step()
-            self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("train_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
-            self.log("train_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
-            return total_loss
+            return critic_loss
 
-    def validation_step(self, batch, batch_idx):
-        x, batch_label, _ = batch
-
-        x = x.view(x.size(0), -1)
-        mu, logvar = self.vae.encoder(x)
-
-        z = self.vae.reparameterize(mu, logvar).detach()
-
-        labels = batch_label.argmax(dim=1)
-        mask_0 = labels == 0
-        mask_1 = labels == 1
-
-        z_real = z[mask_0]
-        z_fake = z[mask_1]
-
-        real_score = self.critic(z_real)
-        fake_score = self.critic(z_fake)
-        # Wasserstein loss: real=1, fake=-1
-        y_real = torch.ones_like(real_score)
-        y_fake = -torch.ones_like(fake_score)
-        w_loss_real = wasserstein_loss(real_score, y_real)
-        w_loss_fake = wasserstein_loss(fake_score, y_fake)
-
-        wasserstein = (w_loss_real + w_loss_fake) * self.lambda_critic
-
-        self.log("val_critic_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
-
-        wasserstein *= -1
-        x_hat = self.vae.decode(z)
-        recon_loss = F.mse_loss(x_hat, x, reduction="mean") * self.config.recon_weight
-        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
-        kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
-        vae_loss = recon_loss + kl_weight * kl_div
-
-        # Fool the critic
-        total_loss = vae_loss + wasserstein  # we aim to minimize the wasserstein distance
-        self.log("val_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
-        self.log("val_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
-        self.log("val_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
-        return total_loss
+        else:  # alternate
+            if (batch_idx % (self.critic_steps + 1)) < self.critic_steps:
+                opt_critic.zero_grad()
+                z_real_detach = z_real.detach()
+                z_fake_detach = z_fake.detach()
+                real_score = self.critic(z_real_detach)
+                fake_score = self.critic(z_fake_detach)
+                y_real = torch.ones_like(real_score)
+                y_fake = -torch.ones_like(fake_score)
+                w_loss_real = wasserstein_loss(real_score, y_real)
+                w_loss_fake = wasserstein_loss(fake_score, y_fake)
+                wasserstein = w_loss_real + w_loss_fake
+                gp = self.gradient_penalty(z_real_detach, z_fake_detach)
+                critic_loss = wasserstein + gp
+                self.manual_backward(critic_loss)
+                opt_critic.step()
+                self.log(
+                    "train_critic_loss", critic_loss, prog_bar=True, on_step=True, on_epoch=True
+                )
+                return critic_loss
+            else:
+                opt_vae.zero_grad()
+                real_score = self.critic(z_real)
+                fake_score = self.critic(z_fake)
+                y_real = torch.ones_like(real_score)
+                y_fake = -torch.ones_like(fake_score)
+                w_loss_real = wasserstein_loss(real_score, y_real)
+                w_loss_fake = wasserstein_loss(fake_score, y_fake)
+                wasserstein = w_loss_real + w_loss_fake
+                x_hat = self.vae.decode(z)
+                recon_loss = F.mse_loss(x_hat, x, reduction="mean")
+                kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+                kl_weight = self.vae.kl_weight() if hasattr(self.vae, "kl_weight") else 1.0
+                vae_loss = recon_loss + kl_weight * kl_div
+                total_loss = vae_loss + wasserstein
+                self.manual_backward(total_loss)
+                opt_vae.step()
+                self.log("train_vae_loss", vae_loss, prog_bar=True, on_step=True, on_epoch=True)
+                self.log("train_adv_loss", wasserstein, prog_bar=True, on_step=True, on_epoch=True)
+                self.log("train_loss", total_loss, prog_bar=True, on_step=True, on_epoch=True)
+                return total_loss
 
 
 # -- VAE with Adversarial Confounder Module ----------------------------------------
