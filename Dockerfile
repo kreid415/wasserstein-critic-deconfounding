@@ -59,5 +59,8 @@ RUN pip install --upgrade pip && \
 # install scladders
 RUN pip install scladder
 
+# install scDML
+RUN pip install git+https://github.com/eleozzr/scDML.git
+
 COPY . /
 RUN pip install .

@@ -20,11 +20,16 @@ dependencies:
   - lightning
   - pyro4
   - pytest
+  - ipywidgets
   - pip:
       - pip
       - setuptools
       - wheel
       - scib
+      - harmonypy
+      - scanorama
+      - bbknn
+      - imap
 prefix: /opt/conda/envs/myenv
 platforms:
   - linux-aarch64
