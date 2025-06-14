@@ -47,7 +47,7 @@ def main():
         decoder_hidden_dims=[128, 128],
         dropout=0.2,
         batchsize=128,
-        num_epochs=10_000,
+        num_epochs=100_000,
         lr=1e-3,
         weight_decay=1e-5,
         kl_anneal_start=0,
@@ -58,6 +58,10 @@ def main():
         recon_weight=1,
         variational=True,
         linear_decoder=False,
+        num_batches=2,
+        learn_lib=False,
+        num_pseudo_inputs=32,
+        vamprior=True,
     )
     vae = VAE(config)
 
@@ -75,10 +79,10 @@ def main():
 
     # add checkpint callback
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
-        monitor="val_loss",
+        monitor="val_recon_loss",
         mode="min",
         save_top_k=1,
-        filename=f"{script_name}" + "-{epoch:02d}-{val_loss:.2f}",
+        filename=f"{script_name}" + "-{epoch:02d}-v-{val_recon_loss:.2f}",
         dirpath="checkpoints/",
     )
 

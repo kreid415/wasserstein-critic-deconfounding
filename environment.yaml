@@ -19,6 +19,7 @@ dependencies:
   - umap-learn
   - lightning
   - pyro4
+  - pytest
   - pip:
       - pip
       - setuptools

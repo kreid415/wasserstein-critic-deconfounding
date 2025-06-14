@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
+import numpy as np
 from pyro.distributions.zero_inflated import ZeroInflatedNegativeBinomial
 import pytorch_lightning as pl
 import torch
@@ -26,6 +27,10 @@ class VAEConfig:
     zinb: bool
     variational: bool
     linear_decoder: bool
+    num_batches: int
+    learn_lib: bool
+    num_pseudo_inputs: int
+    vamprior: bool
     activation: str = "relu"
     use_batchnorm: bool = True
     dropout: float = 0.0
@@ -47,7 +52,8 @@ def get_activation(name):
 class Encoder(nn.Module):
     def __init__(self, config: VAEConfig):
         super().__init__()
-        dims = [config.input_dim] + list(config.encoder_hidden_dims)
+        self.input_dim = config.input_dim
+        dims = [self.input_dim] + list(config.encoder_hidden_dims)
         layers = []
         for in_dim, out_dim in zip(dims[:-1], dims[1:]):
             layers.append(nn.Linear(in_dim, out_dim))
@@ -60,20 +66,34 @@ class Encoder(nn.Module):
         self.mu = nn.Linear(dims[-1], config.latent_dim)
         self.logvar = nn.Linear(dims[-1], config.latent_dim)
 
-    def forward(self, x):
-        log_x = torch.log(x + 1)
-        h = self.net(log_x)
+        # Log-library size head
+        self.l_mu = nn.Linear(dims[-1], 1)
+        self.l_logvar = nn.Linear(dims[-1], 1)
+
+        nn.init.constant_(self.l_mu.bias, np.log(1e4))
+
+    def forward(self, x, log_transform=False):
+        if log_transform:
+            x = torch.log1p(x)
+        h = self.net(x)
         mu = self.mu(h)
         logvar = self.logvar(h)
-        logvar = torch.clamp(logvar, min=-4, max=4)  # Clamp for stability
-        return mu, logvar
+        logvar = torch.clamp(logvar, min=-4, max=4)
+
+        l_mu = self.l_mu(h)
+        l_logvar = self.l_logvar(h)
+        l_logvar = torch.clamp(l_logvar, min=-4, max=4)
+
+        return mu, logvar, l_mu, l_logvar
 
 
 # -- Decoder Module -------------------------------------------------------
 class Decoder(nn.Module):
     def __init__(self, config: VAEConfig):
         super().__init__()
-        dims = [config.latent_dim] + list(config.decoder_hidden_dims)
+        self.num_batches = config.num_batches
+        input_dim = config.latent_dim + self.num_batches
+        dims = [input_dim] + list(config.decoder_hidden_dims)
         layers = []
         for in_dim, out_dim in zip(dims[:-1], dims[1:]):
             layers.append(nn.Linear(in_dim, out_dim))
@@ -87,7 +107,8 @@ class Decoder(nn.Module):
         self.fc_mu = nn.Linear(dims[-1], config.input_dim)
         self.fc_pi = nn.Linear(dims[-1], config.input_dim)
 
-    def forward(self, z):
+    def forward(self, z, batch_id):
+        z = torch.cat([z, batch_id], dim=-1)  # Concatenate batch_id
         h = self.net(z)
         log_mu = self.fc_mu(h)
         pi_logit = self.fc_pi(h)
@@ -126,30 +147,63 @@ class BaseVAE(pl.LightningModule):
 
         self.log_theta = torch.nn.Parameter(torch.randn(config.input_dim))
 
+        # vamprior
+        self.num_pseudo_inputs = config.num_pseudo_inputs
+
+        self.pseudo_inputs = nn.Parameter(
+            torch.randn(self.num_pseudo_inputs, self.encoder.input_dim)
+        )
+
+    def sample_prior(self):
+        mu, logvar = self.encoder(self.pseudo_inputs)
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def compute_vampprior_kl(self, z, mu, logvar):
+        batch_size, latent_dim = z.shape
+        K = self.pseudo_inputs.shape[0]
+
+        log_q_zx = -0.5 * torch.sum(
+            logvar + (z - mu).pow(2) / torch.exp(logvar) + torch.log(torch.tensor(2 * torch.pi)),
+            dim=1,
+        )
+
+        with torch.no_grad():
+            mu_k, logvar_k, _, _ = self.encoder(self.pseudo_inputs)
+
+        z_exp = z.unsqueeze(1)
+        mu_k_exp = mu_k.unsqueeze(0)
+        logvar_k_exp = logvar_k.unsqueeze(0)
+
+        log_probs = -0.5 * torch.sum(
+            logvar_k_exp
+            + (z_exp - mu_k_exp).pow(2) / torch.exp(logvar_k_exp)
+            + torch.log(torch.tensor(2 * torch.pi)),
+            dim=2,
+        )
+
+        log_p_z = torch.logsumexp(log_probs, dim=1) - torch.log(
+            torch.tensor(K, dtype=torch.float32)
+        )
+
+        kl_vamp = torch.mean(log_q_zx - log_p_z)
+
+        return kl_vamp
+
     def zinb_loss(self, x, log_mu, pi_logits):
-        """
-        x: input data
-        mu: output of decoder
-        dropout_logits: dropout logits of zinb distribution
-        """
         theta = self.log_theta.exp()
-
         nb_logits = log_mu - self.log_theta
-
         distribution = ZeroInflatedNegativeBinomial(
             total_count=theta, logits=nb_logits, gate_logits=pi_logits, validate_args=False
         )
-
         loss = -distribution.log_prob(x).sum(-1).mean()
-
         x_hat = distribution.mean
-
         rmse = torch.sqrt(F.mse_loss(x_hat, x, reduction="mean"))
-
         return loss, rmse
 
     def encode(self, x):
-        mu, logvar = self.encoder(x)
+        mu, logvar, l_mu, l_logvar = self.encoder(x)
         return mu, logvar
 
     def reparameterize(self, mu, logvar):
@@ -157,14 +211,23 @@ class BaseVAE(pl.LightningModule):
         eps = torch.randn_like(std)
         return mu + eps * std
 
-    def decode(self, z):
-        return self.decoder(z)
+    def decode(self, z, batch_id):
+        return self.decoder(
+            z,
+            batch_id,
+        )
 
-    def forward(self, x):
-        mu, logvar = self.encode(x)
+    def forward(self, x, batch_id):
+        mu, logvar, l_mu, l_logvar = self.encoder(x, log_transform=True)
         z = self.reparameterize(mu, logvar) if self.config.variational else mu
-        mu_zimb, pi_logit = self.decode(z)
-        return mu_zimb, pi_logit, z, mu, logvar
+        log_size = self.reparameterize(l_mu, l_logvar)  # log-library size sample
+        log_mu, pi_logit = self.decode(z, batch_id)
+
+        # Add library size scaling
+        if self.config.learn_lib:
+            log_mu = log_mu + log_size.expand_as(log_mu)
+
+        return log_mu, pi_logit, z, mu, logvar, l_mu, l_logvar
 
     def kl_weight(self):
         # Linear annealing from kl_anneal_start to kl_anneal_end
@@ -189,88 +252,72 @@ class VAE(BaseVAE):
         super().__init__(config)
 
     def training_step(self, batch, batch_idx):
-        x, _, _ = batch
+        x, batch_id, _ = batch
         x = x.view(x.size(0), -1)
-        mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
+        log_mu, pi_logit, z, mu, logvar, l_mu, l_logvar = self.forward(x, batch_id)
+
         if self.zinb:
-            # Use Zero-Inflated Negative Binomial loss
-            recon_loss, rmse = self.zinb_loss(x, mu_zimb, pi_logit)
+            recon_loss, rmse = self.zinb_loss(x, log_mu, pi_logit)
         else:
-            # Use standard reconstruction loss (e.g., MSE)
-            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean")
+            recon_loss = F.mse_loss(log_mu, x, reduction="mean")
 
         recon_loss *= self.config.recon_weight / x.size(0)
-        kl_weight = self.kl_weight()
-        kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0) * kl_weight
-        loss = recon_loss + kl_div
 
-        self.log(
-            "train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, batch_size=x.size(0)
-        )
-        self.log(
-            "recon_loss",
-            recon_loss,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "kl_div",
-            kl_div,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "kl_weight",
-            kl_weight,
-            on_step=True,
-            on_epoch=True,
-            prog_bar=False,
-        )
-        if self.zinb:
-            self.log(
-                "rmse",
-                rmse,
-                on_step=True,
-                on_epoch=True,
-                prog_bar=True,
-            )
-
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        x, _, _ = batch
-        x = x.view(x.size(0), -1)
-        x = x.to(self.device)
-
-        mu_zimb, pi_logit, _, mu, logvar = self.forward(x)
-        if self.zinb:
-            # Use Zero-Inflated Negative Binomial loss
-            recon_loss, rmse = self.zinb_loss(x, mu_zimb, pi_logit)
+        if self.config.vamprior:
+            kl_z = self.compute_vampprior_kl(z, mu, logvar)
         else:
-            # Use standard reconstruction loss (e.g., MSE)
-            recon_loss = F.mse_loss(mu_zimb, x, reduction="mean")
+            kl_z = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+        kl_l = -0.5 * torch.sum(1 + l_logvar - l_mu.pow(2) - l_logvar.exp()) / x.size(0)
 
-        recon_loss *= self.config.recon_weight / x.size(0)
-        kl_div = (
-            -0.5
-            * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-            / x.size(0)
-            * self.config.kl_anneal_max
-        )
+        kl_div = kl_z + kl_l if self.config.learn_lib else kl_z
+
+        kl_div *= self.kl_weight()
         loss = recon_loss + kl_div
 
         self.log_dict(
             {
-                "val_loss": loss,
-                "val_recon_loss": recon_loss,
-                "val_kl_div": kl_div,
+                "train_loss": loss,
+                # "recon_loss": recon_loss,
+                # "kl_z": kl_z,
+                # "kl_l": kl_l,
             },
-            prog_bar=True,
             on_step=True,
             on_epoch=True,
+            prog_bar=True,
         )
+
+        if self.zinb:
+            self.log("rmse", rmse, on_step=True, on_epoch=True, prog_bar=False)
+
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, batch_id, _ = batch
+        x = x.view(x.size(0), -1)
+        x = x.to(self.device)
+
+        log_mu, pi_logit, z, mu, logvar, l_mu, l_logvar = self.forward(x, batch_id)
+
+        if self.zinb:
+            recon_loss, rmse = self.zinb_loss(x, log_mu, pi_logit)
+        else:
+            recon_loss = F.mse_loss(log_mu, x, reduction="mean")
+
+        recon_loss *= self.config.recon_weight / x.size(0)
+
+        if self.config.vamprior:
+            kl_z = self.compute_vampprior_kl(z, mu, logvar)
+        else:
+            kl_z = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
+        kl_l = -0.5 * torch.sum(1 + l_logvar - l_mu.pow(2) - l_logvar.exp()) / x.size(0)
+        kl_div = kl_z + kl_l if self.config.learn_lib else kl_z
+        kl_div *= self.kl_weight()
+
+        loss = recon_loss + kl_div
+
+        self.log("val_recon_loss", recon_loss, on_step=True, on_epoch=True, prog_bar=True)
+
+        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
 
         if self.zinb:
             self.log(
@@ -278,7 +325,7 @@ class VAE(BaseVAE):
                 rmse,
                 on_step=True,
                 on_epoch=True,
-                prog_bar=True,
+                prog_bar=False,
             )
 
         return loss

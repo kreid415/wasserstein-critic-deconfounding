@@ -3,6 +3,7 @@
 # adopted from : https://github.com/caokai1073/uniPort/blob/43296b12f0e3927315ed5769c5a78f9f73c5c7f1/uniport/model/loss.py#L74
 """
 
+import ot
 import torch
 from torch.distributions import Normal, kl_divergence
 
