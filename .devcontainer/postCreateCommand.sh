@@ -4,12 +4,6 @@ git checkout kr_dev
 pip install -e .
 cd ..
 
-git clone https://github.com/kreid415/scCRAFT.git
-cd scCRAFT
-git checkout kr_dev
-pip install -e .
-cd ..
-
 git clone
 
 pre-commit install
