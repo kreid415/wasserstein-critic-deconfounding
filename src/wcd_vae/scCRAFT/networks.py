@@ -1,33 +1,14 @@
+from typing import Union
+
+import jax.numpy as jnp
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import scanpy as sc
-import numpy as np
-import umap
-import torch.autograd as autograd
-import scipy.sparse
-import random
-from sklearn.decomposition import PCA
-import anndata
-import pandas as pd
-from typing import List
-import time
-from itertools import combinations
-from torch.distributions import Normal, kl_divergence as kl
-from torch.utils.data import DataLoader, TensorDataset, Dataset
 from torch.autograd import grad
+from torch.distributions import Normal
+from torch.distributions import kl_divergence as kl
+import torch.nn as nn
+import torch.nn.functional as F  # noqa: N812
 
 torch.backends.cudnn.benchmark = True
-
-from typing import Optional, Union
-import collections
-from typing import Iterable, List
-
-from torch.distributions import Normal
-from torch.nn import ModuleList
-import jax.numpy as jnp
-
 
 # Net + Loss function
 
@@ -77,7 +58,7 @@ def reparameterize_gaussian(mu, var):
 
 class Encoder(nn.Module):
     def __init__(self, p_dim, latent_dim=128):
-        super(Encoder, self).__init__()
+        super().__init__()
         # Define the architecture
         self.fc1 = nn.Linear(p_dim, 1024)
         self.fc2 = nn.Linear(1024, 512)
@@ -108,7 +89,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, p_dim, v_dim, latent_dim=256):
-        super(Decoder, self).__init__()
+        super().__init__()
         self.relu = nn.ReLU()
 
         # Main decoder pathway
@@ -155,7 +136,7 @@ class Decoder(nn.Module):
 
 class VAE(nn.Module):
     def __init__(self, p_dim, v_dim, latent_dim=256):
-        super(VAE, self).__init__()
+        super().__init__()
         self.encoder = Encoder(p_dim, latent_dim)
         self.decoder = Decoder(p_dim, v_dim, latent_dim)
 
@@ -179,7 +160,7 @@ class VAE(nn.Module):
 
 class CrossEntropy(nn.Module):
     def __init__(self, reduction="mean"):
-        super(CrossEntropy, self).__init__()
+        super().__init__()
         self.reduction = reduction
 
     def forward(self, output, target):
@@ -194,17 +175,17 @@ class CrossEntropy(nn.Module):
 
 class WassersteinLoss(nn.Module):
     def __init__(self, reduction="mean"):
-        super(WassersteinLoss, self).__init__()
+        super().__init__()
         self.reduction = reduction
 
     def forward(self, output, batch_ids):
-        real_samples = output[batch_ids == 1]
-        fake_samples = output[batch_ids == 0]
+        source = output[batch_ids != 0]
+        target = output[batch_ids == 0]
 
         # Compute the Wasserstein loss
-        D_loss = -1 * real_samples + fake_samples
+        loss = -1 * target + source
 
-        return D_loss
+        return loss
 
 
 def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
@@ -243,9 +224,9 @@ def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
     return penalty
 
 
-class discriminator(nn.Module):
+class Discriminator(nn.Module):
     def __init__(self, n_input, domain_number, critic=False):
-        super(discriminator, self).__init__()
+        super().__init__()
         n_hidden = 128
         self.critic = critic
         # Define layers
@@ -274,17 +255,18 @@ class discriminator(nn.Module):
             # If batch_ids is None, return the output directly
             return output
 
-        D_loss = self.loss(output, batch_ids)
+        discriminator_loss = self.loss(output, batch_ids)
 
-        real_samples = x[batch_ids == 1]
-        fake_samples = x[batch_ids == 0]
+        source_samples = x[batch_ids != 1]
+        target_samples = x[batch_ids == 0]
+
+        gp_loss = 0.0
 
         if self.loss.reduction == "mean":
-            D_loss = D_loss.mean()
+            discriminator_loss = discriminator_loss.mean()
         elif self.loss.reduction == "sum":
-            D_loss = D_loss.sum()
+            discriminator_loss = discriminator_loss.sum()
         if self.critic:
-            gp_loss = gradient_penalty(self, real_samples, fake_samples, device=x.device)
-            D_loss += gp_loss
+            gp_loss = gradient_penalty(self, target_samples, source_samples, device=x.device)
 
-        return D_loss
+        return discriminator_loss, gp_loss

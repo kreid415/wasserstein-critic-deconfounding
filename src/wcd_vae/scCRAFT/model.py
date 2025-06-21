@@ -1,21 +1,21 @@
+import sys
+import time
+
+import numpy as np
+from sklearn.decomposition import PCA
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 import torch.optim as optim
-import scanpy as sc
-import numpy as np
-import umap
-import torch.autograd as autograd
-import scipy.sparse
-import random
-from sklearn.decomposition import PCA
-import anndata
-import pandas as pd
-from typing import List
-import time
-from scCRAFT.networks import *
-from scCRAFT.utils import *
-import sys
+
+from wcd_vae.scCRAFT.networks import VAE, Discriminator
+from wcd_vae.scCRAFT.utils import (
+    create_triplets,
+    generate_adata_to_dataloader,
+    generate_balanced_dataloader,
+    set_seed,
+    weights_init_normal,
+)
 
 # Dynamic import of tqdm based on the environment
 if "ipykernel" in sys.modules:
@@ -27,14 +27,14 @@ else:
 # Main training class
 class SCIntegrationModel(nn.Module):
     def __init__(self, adata, batch_key, z_dim, critic):
-        super(SCIntegrationModel, self).__init__()
+        super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
 
         # Correctly initialize VAE with p_dim, v_dim, and latent_dim
         self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
-        self.D_Z = discriminator(self.z_dim, self.v_dim, critic=critic)
+        self.D_Z = Discriminator(self.z_dim, self.v_dim, critic=critic)
         self.mse_loss = torch.nn.MSELoss()
 
         # self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -48,14 +48,11 @@ class SCIntegrationModel(nn.Module):
         self.VAE.apply(weights_init_normal)
         self.D_Z.apply(weights_init_normal)
 
-    def train_model(self, adata, batch_key, epochs, d_coef, kl_coef, warmup_epoch):
+    def train_model(self, adata, batch_key, epochs, d_coef, kl_coef, warmup_epoch, disc_iter):
         # Optimizer for VAE (Encoder + Decoder)
         optimizer_G = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
         # Optimizer for Discriminator
         optimizer_D_Z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
-
-        FloatTensor = torch.cuda.FloatTensor if self.cuda else torch.FloatTensor
-        LongTensor = torch.cuda.LongTensor if self.cuda else torch.LongTensor
 
         progress_bar = tqdm(total=epochs, desc="Overall Progress", leave=True)
         for epoch in range(epochs):
@@ -88,25 +85,32 @@ class SCIntegrationModel(nn.Module):
                 ).mean()
                 loss_VAE = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
-                if v_true is None:
-                    raise ValueError(
-                        "v_true is None. Ensure that the batch contains valid labels."
-                    )
-
-                for disc_iter in range(10):
+                for _ in range(disc_iter):
                     optimizer_D_Z.zero_grad()
-                    loss_D_Z = self.D_Z(z, v_true)
+                    if self.D_Z.critic:
+                        loss_D_Z, gp = self.D_Z(z, v_true)
+                    else:
+                        loss_D_Z, gp = self.D_Z(z, v_true), 0.0
+
+                    loss_D_Z += gp
+
                     loss_D_Z.backward(retain_graph=True)
                     optimizer_D_Z.step()
 
                 optimizer_G.zero_grad()
-                loss_DA = self.D_Z(z, v_true, generator=False)
+                if self.D_Z.critic:
+                    loss_DA, gp = self.D_Z(z, v_true)
+                else:
+                    loss_DA, gp = self.D_Z(z, v_true), 0.0
 
                 triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
+
                 if epoch < warmup_epoch:
-                    all_loss = -0 * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos
+                    all_loss = -0 * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos + gp
                 else:
-                    all_loss = -d_coef * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos
+                    all_loss = (
+                        -d_coef * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos + gp
+                    )
 
                 all_loss.backward()
                 optimizer_G.step()
@@ -123,6 +127,7 @@ class SCIntegrationModel(nn.Module):
 
 def train_integration_model(
     adata,
+    disc_iter,
     batch_key="batch",
     z_dim=256,
     epochs=150,
@@ -154,6 +159,7 @@ def train_integration_model(
         d_coef=d_coef,
         kl_coef=kl_coef,
         warmup_epoch=warmup_epoch,
+        disc_iter=disc_iter,
     )
     end_time = time.time()
     training_time = end_time - start_time
