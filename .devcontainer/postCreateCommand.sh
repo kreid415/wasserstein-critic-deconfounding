@@ -4,8 +4,6 @@ git checkout kr_dev
 pip install -e .
 cd ..
 
-git clone
-
 pre-commit install
 
 pip install -e .

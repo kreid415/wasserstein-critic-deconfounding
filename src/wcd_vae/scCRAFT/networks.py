@@ -183,7 +183,48 @@ class WassersteinLoss(nn.Module):
         target = output[batch_ids == 0]
 
         # Compute the Wasserstein loss
-        loss = -1 * target + source
+        loss = -1 * target.mean() + source.mean()
+
+        return loss
+
+
+class MultiClassWassersteinLoss(nn.Module):
+    def __init__(self, reduction="mean"):
+        super().__init__()
+        self.reduction = reduction
+
+    def forward(self, output, batch_ids):
+        """
+        Args:
+            output: Tensor of shape [B, K] - critic scores for each class.
+            batch_ids: Tensor of shape [B] - true domain IDs (0 to K-1).
+        Returns:
+            Wasserstein loss encouraging domain confusion.
+        """
+        num_domains = output.shape[1]  # number of classes/domains
+        loss = 0.0
+        total = 0
+
+        for k in range(num_domains):
+            mask_k = batch_ids == k
+            if mask_k.sum() == 0:
+                continue
+
+            # Scores for domain k samples from the k-th output head
+            d_kk = output[mask_k, k]  # true class head for samples from domain k
+
+            # Scores for domain k samples from all other heads
+            d_kj = output[mask_k]  # [n_k, K]
+            mask_other = torch.ones(num_domains, dtype=torch.bool, device=output.device)
+            mask_other[k] = False
+            d_kj_others = d_kj[:, mask_other]  # [n_k, K-1]
+
+            # Wasserstein-style loss: true score - mean of other scores
+            diff = d_kk.mean() - d_kj_others.mean()
+            loss += diff
+            total += 1
+
+        loss = loss / total
 
         return loss
 
@@ -193,6 +234,15 @@ def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
     batch_size = real_samples.size(0)
     epsilon = torch.rand(batch_size, 1, device=device)
     epsilon = epsilon.expand_as(real_samples)
+
+    # if there is a mismatch in shape, subsample the larger tensor
+    if fake_samples.shape != real_samples.shape:
+        if fake_samples.shape[0] > real_samples.shape[0]:
+            perm = torch.randperm(fake_samples.shape[0], device=device)
+            fake_samples = fake_samples[perm[: real_samples.shape[0]]]
+        elif real_samples.shape[0] > fake_samples.shape[0]:
+            perm = torch.randperm(real_samples.shape[0], device=device)
+            real_samples = real_samples[perm[: fake_samples.shape[0]]]
 
     # Interpolate between real and fake samples
     interpolated = epsilon * real_samples + (1 - epsilon) * fake_samples
@@ -224,6 +274,62 @@ def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
     return penalty
 
 
+def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0):
+    """
+    Computes the multi-class gradient penalty for a multi-output critic.
+
+    Args:
+        critic: A callable that maps latent vectors z to shape [B, K] (K = num domains).
+        z: Latent vectors, shape [B, latent_dim].
+        batch_ids: Tensor of shape [B] with domain labels (0 to K-1).
+        lambda_gp: Weight of gradient penalty.
+
+    Returns:
+        Scalar gradient penalty loss.
+    """
+    b, latent_dim = z.shape
+    critic_out = critic(z, batch_ids=None).shape[1]
+    gp_total = 0.0
+    device = z.device
+    total_classes = 0
+
+    for k in range(critic_out):
+        # Get samples from domain k
+        mask_k = batch_ids == k
+        if mask_k.sum() == 0:
+            continue
+
+        z_k = z[mask_k]
+        z_ref = z[torch.randperm(z.size(0))[: z_k.size(0)]]
+
+        # Interpolate
+        epsilon = torch.rand(z_k.size(0), 1, device=device)
+        epsilon = epsilon.expand_as(z_k)
+        z_hat = epsilon * z_k + (1 - epsilon) * z_ref
+        z_hat.requires_grad_(True)
+
+        # Forward pass through critic
+        out = critic(z_hat, batch_ids=None)  # [B_k, K]
+        out_k = out[:, k].sum()  # Only the k-th head
+
+        # Compute gradients
+        grad = torch.autograd.grad(
+            outputs=out_k, inputs=z_hat, create_graph=True, retain_graph=True, only_inputs=True
+        )[0]
+
+        # Compute L2 norm of gradients
+        grad_norm = grad.view(grad.size(0), -1).norm(2, dim=1)
+        gp = ((grad_norm - 1) ** 2).mean()
+
+        gp_total += gp
+        total_classes += 1
+
+    if total_classes == 0:
+        return torch.tensor(0.0, device=z.device)
+
+    return lambda_gp * gp_total / total_classes
+
+
 class Discriminator(nn.Module):
     def __init__(self, n_input, domain_number, critic=False):
         super().__init__()
@@ -232,15 +338,11 @@ class Discriminator(nn.Module):
         # Define layers
         self.fc1 = nn.Linear(n_input, n_hidden)
         self.fc2 = nn.Linear(n_hidden, n_hidden)
-        if self.critic:
-            # If using critic, use a single output layer
-            self.fc3 = nn.Linear(n_hidden, 1)
-        else:
-            self.fc3 = nn.Linear(n_hidden, domain_number)
+        self.fc3 = nn.Linear(n_hidden, domain_number)
 
         if self.critic:
             # If using critic, use Wasserstein loss
-            self.loss = WassersteinLoss()
+            self.loss = MultiClassWassersteinLoss()
         else:
             # If not using critic, use cross-entropy loss
             self.loss = CrossEntropy()
@@ -257,9 +359,6 @@ class Discriminator(nn.Module):
 
         discriminator_loss = self.loss(output, batch_ids)
 
-        source_samples = x[batch_ids != 1]
-        target_samples = x[batch_ids == 0]
-
         gp_loss = 0.0
 
         if self.loss.reduction == "mean":
@@ -267,6 +366,6 @@ class Discriminator(nn.Module):
         elif self.loss.reduction == "sum":
             discriminator_loss = discriminator_loss.sum()
         if self.critic:
-            gp_loss = gradient_penalty(self, target_samples, source_samples, device=x.device)
+            gp_loss = multi_class_gradient_penalty(self, x, batch_ids)
 
         return discriminator_loss, gp_loss

@@ -62,5 +62,20 @@ RUN pip install scladder
 # install scDML
 RUN pip install git+https://github.com/eleozzr/scDML.git
 
+# install scib
+RUN pip install scib
+
+# install harmonypy
+RUN pip install harmonypy
+
+# install scanorama
+RUN pip install scanorama
+
+# install bbknn
+RUN pip install bbknn
+
+# install imap
+RUN pip install imap
+
 COPY . /
 RUN pip install .

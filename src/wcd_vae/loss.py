@@ -3,7 +3,6 @@
 # adopted from : https://github.com/caokai1073/uniPort/blob/43296b12f0e3927315ed5769c5a78f9f73c5c7f1/uniport/model/loss.py#L74
 """
 
-import ot
 import torch
 from torch.distributions import Normal, kl_divergence
 
@@ -148,13 +147,13 @@ def unbalanced_ot(
     dual = (torch.ones(ns, 1) / ns).to(device)
     f = reg_m / (reg_m + reg)
 
-    for m in range(10):
+    for _m in range(10):
         cost = cost_pp * couple if couple is not None else cost_pp
 
         kernel = torch.exp(-cost / (reg * torch.max(torch.abs(cost)))) * tran
         b = p_t / (torch.t(kernel) @ dual)
         # dual = p_s / (kernel @ b)
-        for i in range(10):
+        for _i in range(10):
             dual = (p_s / (kernel @ b)) ** f
             b = (p_t / (torch.t(kernel) @ dual)) ** f
         tran = (dual @ torch.t(b)) * kernel

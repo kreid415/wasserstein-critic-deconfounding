@@ -26,7 +26,7 @@ else:
 
 # Main training class
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic):
+    def __init__(self, adata, batch_key, z_dim, critic, seed=None):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
@@ -44,27 +44,38 @@ class SCIntegrationModel(nn.Module):
         self.D_Z.to(self.device)
 
         # Initialize weights
-        set_seed(22)
+        if seed is not None:
+            set_seed(seed)
         self.VAE.apply(weights_init_normal)
         self.D_Z.apply(weights_init_normal)
 
-    def train_model(self, adata, batch_key, epochs, d_coef, kl_coef, warmup_epoch, disc_iter):
+    def train_model(
+        self,
+        adata,
+        batch_key,
+        epochs,
+        d_coef,
+        kl_coef,
+        triplet_coef,
+        cos_coef,
+        warmup_epoch,
+        disc_iter,
+    ):
         # Optimizer for VAE (Encoder + Decoder)
-        optimizer_G = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
+        optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
         # Optimizer for Discriminator
-        optimizer_D_Z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
+        optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
 
         progress_bar = tqdm(total=epochs, desc="Overall Progress", leave=True)
         for epoch in range(epochs):
-            set_seed(epoch)
             data_loader = generate_balanced_dataloader(adata, batch_size=512, batch_key=batch_key)
             self.VAE.train()
             self.D_Z.train()
             all_losses = 0
-            D_loss = 0
-            T_loss = 0
-            V_loss = 0
-            for i, (x, v, labels_low, labels_high) in enumerate(data_loader):
+            d_loss = 0
+            t_loss = 0
+            v_loss = 0
+            for _, (x, v, labels_low, labels_high) in enumerate(data_loader):
                 x = x.to(self.device)
                 v = v.to(self.device)
                 labels_low = labels_low.to(self.device)
@@ -83,44 +94,54 @@ class SCIntegrationModel(nn.Module):
                 loss_cos = (
                     1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)
                 ).mean()
-                loss_VAE = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
+                loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
                 for _ in range(disc_iter):
-                    optimizer_D_Z.zero_grad()
+                    optimizer_d_z.zero_grad()
                     if self.D_Z.critic:
-                        loss_D_Z, gp = self.D_Z(z, v_true)
+                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
                     else:
-                        loss_D_Z, gp = self.D_Z(z, v_true), 0.0
+                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
 
-                    loss_D_Z += gp
+                    loss_d_z += gp
 
-                    loss_D_Z.backward(retain_graph=True)
-                    optimizer_D_Z.step()
+                    loss_d_z.backward(retain_graph=True)
+                    optimizer_d_z.step()
 
-                optimizer_G.zero_grad()
+                optimizer_g.zero_grad()
                 if self.D_Z.critic:
-                    loss_DA, gp = self.D_Z(z, v_true)
+                    loss_da, gp = self.D_Z(z, v_true)
                 else:
-                    loss_DA, gp = self.D_Z(z, v_true), 0.0
+                    loss_da, gp = self.D_Z(z, v_true)
 
                 triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
 
                 if epoch < warmup_epoch:
-                    all_loss = -0 * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos + gp
+                    all_loss = (
+                        -0 * loss_da
+                        + 1 * loss_vae
+                        + gp
+                        + triplet_coef * triplet_loss
+                        + cos_coef * loss_cos
+                    )
                 else:
                     all_loss = (
-                        -d_coef * loss_DA + 1 * loss_VAE + 1 * triplet_loss + 20 * loss_cos + gp
+                        -d_coef * loss_da
+                        + 1 * loss_vae
+                        + gp
+                        + triplet_coef * triplet_loss
+                        + cos_coef * loss_cos
                     )
 
                 all_loss.backward()
-                optimizer_G.step()
+                optimizer_g.step()
                 all_losses += all_loss
-                D_loss += loss_DA
-                T_loss += triplet_loss
-                V_loss += loss_VAE
+                d_loss += loss_da
+                t_loss += triplet_loss
+                v_loss += loss_vae
             progress_bar.update(1)  # Increment the progress bar by one for each batch processed
             progress_bar.set_postfix(
-                epoch=f"{epoch + 1}/{epochs}", all_loss=all_losses.item(), disc_loss=D_loss.item()
+                epoch=f"{epoch + 1}/{epochs}", all_loss=all_losses.item(), disc_loss=d_loss.item()
             )
         progress_bar.close()
 
@@ -133,6 +154,8 @@ def train_integration_model(
     epochs=150,
     d_coef=0.2,
     kl_coef=0.005,
+    triplet_coef=1,
+    cos_coef=20,
     warmup_epoch=50,
     critic=False,
 ):
@@ -158,6 +181,8 @@ def train_integration_model(
         epochs=epochs,
         d_coef=d_coef,
         kl_coef=kl_coef,
+        triplet_coef=triplet_coef,
+        cos_coef=cos_coef,
         warmup_epoch=warmup_epoch,
         disc_iter=disc_iter,
     )
@@ -169,20 +194,19 @@ def train_integration_model(
     return model.VAE
 
 
-def obtain_embeddings(adata, VAE, dim=50, pca=True, seed=None):
+def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
     if seed is not None:
         set_seed(seed)
 
-    VAE.eval()
+    vae.eval()
     data_loader = generate_adata_to_dataloader(adata)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     all_z = []
     all_indices = []
 
-    for i, (x, indices) in enumerate(data_loader):
+    for _, (x, indices) in enumerate(data_loader):
         x = x.to(device)
-        batch_size = x.size(0)
-        _, _, z = VAE.encoder(x)
+        _, _, z = vae.encoder(x)
         all_z.append(z)
         all_indices.extend(indices.tolist())
 
@@ -197,8 +221,8 @@ def obtain_embeddings(adata, VAE, dim=50, pca=True, seed=None):
     if pca:
         pca_model = PCA(n_components=dim)
         # Fit and transform the data
-        X_scCRAFT_pca = pca_model.fit_transform(adata.obsm["X_scCRAFT"])
+        x_sccraft_pca = pca_model.fit_transform(adata.obsm["X_scCRAFT"])
         # Store the PCA-reduced data back into adata.obsm
-        adata.obsm["X_scCRAFT"] = X_scCRAFT_pca
+        adata.obsm["X_scCRAFT"] = x_sccraft_pca
 
     return adata
