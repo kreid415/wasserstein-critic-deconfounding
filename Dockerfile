@@ -29,7 +29,14 @@ RUN ARCH="$(uname -m)" && \
     bash installer.sh -b -p /opt/conda && \
     rm installer.sh
 
-
+# install R
+RUN apt-get update && apt-get install -y \
+    r-base \
+    r-base-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/opt/conda/bin:$PATH"
 
@@ -76,6 +83,9 @@ RUN pip install bbknn
 
 # install imap
 RUN pip install imap
+
+# install rpy2
+RUN pip install rpy2
 
 COPY . /
 RUN pip install .

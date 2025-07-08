@@ -57,8 +57,10 @@ def reparameterize_gaussian(mu, var):
 
 
 class Encoder(nn.Module):
-    def __init__(self, p_dim, latent_dim=128):
+    def __init__(self, p_dim, latent_dim, scale):
         super().__init__()
+        self.scale = scale
+        self.f_avg = []
         # Define the architecture
         self.fc1 = nn.Linear(p_dim, 1024)
         self.fc2 = nn.Linear(1024, 512)
@@ -69,7 +71,7 @@ class Encoder(nn.Module):
         self.bn1 = nn.BatchNorm1d(1024)
         self.bn2 = nn.BatchNorm1d(512)
 
-    def forward(self, x):
+    def forward(self, x, warmup):
         # Forward pass through the network
         x = self.fc1(x)
         x = self.relu(self.bn1(x))
@@ -82,7 +84,21 @@ class Encoder(nn.Module):
         q_v = torch.exp(self.fc_var(x)) + 1e-4
         # library = self.fc_library(x)  # Predicted log library size
 
-        z = reparameterize_gaussian(q_m, q_v)
+        if self.scale:
+            if warmup:
+                mean_scaler = (
+                    torch.tensor(self.scale, dtype=q_m.dtype, device=q_m.device)
+                    / q_m.std(dim=0, keepdim=True).detach()
+                )
+                self.f_avg.append(mean_scaler)
+                q_m_scaled = q_m * mean_scaler
+            else:
+                mean_scaler = torch.mean(torch.stack(self.f_avg), dim=0).to(q_m.device)
+                q_m_scaled = q_m * mean_scaler
+        else:
+            q_m_scaled = q_m
+
+        z = reparameterize_gaussian(q_m_scaled, q_v)
 
         return q_m, q_v, z
 
@@ -135,14 +151,14 @@ class Decoder(nn.Module):
 
 
 class VAE(nn.Module):
-    def __init__(self, p_dim, v_dim, latent_dim=256):
+    def __init__(self, p_dim, v_dim, latent_dim, scale):
         super().__init__()
-        self.encoder = Encoder(p_dim, latent_dim)
+        self.encoder = Encoder(p_dim, latent_dim, scale)
         self.decoder = Decoder(p_dim, v_dim, latent_dim)
 
-    def forward(self, x, ec):
+    def forward(self, x, ec, warmup):
         # Encoding
-        q_m, q_v, z = self.encoder(x)
+        q_m, q_v, z = self.encoder(x, warmup)
 
         # Decoding
         px_scale, px_r = self.decoder(z, ec)

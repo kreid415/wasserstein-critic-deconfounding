@@ -7,3 +7,5 @@ cd ..
 pre-commit install
 
 pip install -e .
+
+pip install ipywidgets --upgrade

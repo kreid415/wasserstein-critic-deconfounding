@@ -26,15 +26,15 @@ else:
 
 # Main training class
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic, seed=None):
+    def __init__(self, adata, batch_key, z_dim, critic, seed, scale):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
 
         # Correctly initialize VAE with p_dim, v_dim, and latent_dim
-        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
-        self.D_Z = Discriminator(self.z_dim, self.v_dim, critic=critic)
+        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim, scale=scale)
+        self.D_Z = Discriminator(n_input=self.z_dim, domain_number=self.v_dim, critic=critic)
         self.mse_loss = torch.nn.MSELoss()
 
         # self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -75,6 +75,7 @@ class SCIntegrationModel(nn.Module):
             d_loss = 0
             t_loss = 0
             v_loss = 0
+            warmup = epoch < warmup_epoch
             for _, (x, v, labels_low, labels_high) in enumerate(data_loader):
                 x = x.to(self.device)
                 v = v.to(self.device)
@@ -88,7 +89,7 @@ class SCIntegrationModel(nn.Module):
 
                 v_one_hot.scatter_(1, v, 1).to(v.device)
 
-                reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot)
+                reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot, warmup)
                 reconst_loss = torch.clamp(reconst_loss, max=1e5)
 
                 loss_cos = (
@@ -116,7 +117,7 @@ class SCIntegrationModel(nn.Module):
 
                 triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
 
-                if epoch < warmup_epoch:
+                if warmup:
                     all_loss = (
                         -0 * loss_da
                         + 1 * loss_vae
@@ -158,6 +159,7 @@ def train_integration_model(
     cos_coef=20,
     warmup_epoch=50,
     critic=False,
+    scale=None,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -172,7 +174,9 @@ def train_integration_model(
                 epochs = calculated_epochs
     else:
         epochs = epochs
-    model = SCIntegrationModel(adata, batch_key, z_dim, critic)
+    model = SCIntegrationModel(
+        adata=adata, batch_key=batch_key, z_dim=z_dim, critic=critic, seed=42, scale=scale
+    )
     print(epochs)
     start_time = time.time()
     model.train_model(
@@ -206,7 +210,7 @@ def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
 
     for _, (x, indices) in enumerate(data_loader):
         x = x.to(device)
-        _, _, z = vae.encoder(x)
+        _, _, z = vae.encoder(x, warmup=False)
         all_z.append(z)
         all_indices.extend(indices.tolist())
 
