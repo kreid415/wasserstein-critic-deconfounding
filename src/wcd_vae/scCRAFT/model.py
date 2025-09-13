@@ -1,0 +1,232 @@
+import sys
+import time
+
+import numpy as np
+from sklearn.decomposition import PCA
+import torch
+import torch.nn as nn
+import torch.nn.functional as F  # noqa: N812
+import torch.optim as optim
+
+from wcd_vae.scCRAFT.networks import VAE, Discriminator
+from wcd_vae.scCRAFT.utils import (
+    create_triplets,
+    generate_adata_to_dataloader,
+    generate_balanced_dataloader,
+    set_seed,
+    weights_init_normal,
+)
+
+# Dynamic import of tqdm based on the environment
+if "ipykernel" in sys.modules:
+    from tqdm.notebook import tqdm
+else:
+    from tqdm import tqdm
+
+
+# Main training class
+class SCIntegrationModel(nn.Module):
+    def __init__(self, adata, batch_key, z_dim, critic, seed, scale):
+        super().__init__()
+        self.p_dim = adata.shape[1]
+        self.z_dim = z_dim
+        self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
+
+        # Correctly initialize VAE with p_dim, v_dim, and latent_dim
+        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim, scale=scale)
+        self.D_Z = Discriminator(n_input=self.z_dim, domain_number=self.v_dim, critic=critic)
+        self.mse_loss = torch.nn.MSELoss()
+
+        # self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = "cpu"
+        # Move models to CUDA if available
+        self.VAE.to(self.device)
+        self.D_Z.to(self.device)
+
+        # Initialize weights
+        if seed is not None:
+            set_seed(seed)
+        self.VAE.apply(weights_init_normal)
+        self.D_Z.apply(weights_init_normal)
+
+    def train_model(
+        self,
+        adata,
+        batch_key,
+        epochs,
+        d_coef,
+        kl_coef,
+        triplet_coef,
+        cos_coef,
+        warmup_epoch,
+        disc_iter,
+    ):
+        # Optimizer for VAE (Encoder + Decoder)
+        optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
+        # Optimizer for Discriminator
+        optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
+
+        progress_bar = tqdm(total=epochs, desc="Overall Progress", leave=True)
+        for epoch in range(epochs):
+            data_loader = generate_balanced_dataloader(adata, batch_size=512, batch_key=batch_key)
+            self.VAE.train()
+            self.D_Z.train()
+            all_losses = 0
+            d_loss = 0
+            t_loss = 0
+            v_loss = 0
+            warmup = epoch < warmup_epoch
+            for _, (x, v, labels_low, labels_high) in enumerate(data_loader):
+                x = x.to(self.device)
+                v = v.to(self.device)
+                labels_low = labels_low.to(self.device)
+                labels_high = labels_high.to(self.device)
+                batch_size = x.size(0)
+                v_true = v
+                v_one_hot = torch.zeros(batch_size, self.v_dim).to(x.device)
+                # Use scatter_ to put 1s in the indices indicated by v
+                v = v.unsqueeze(1)  # Ensure v is of shape [batch_size, 1] if it's not already
+
+                v_one_hot.scatter_(1, v, 1).to(v.device)
+
+                reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot, warmup)
+                reconst_loss = torch.clamp(reconst_loss, max=1e5)
+
+                loss_cos = (
+                    1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)
+                ).mean()
+                loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
+
+                for _ in range(disc_iter):
+                    optimizer_d_z.zero_grad()
+                    if self.D_Z.critic:
+                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
+                    else:
+                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
+
+                    loss_d_z += gp
+
+                    loss_d_z.backward(retain_graph=True)
+                    optimizer_d_z.step()
+
+                optimizer_g.zero_grad()
+                if self.D_Z.critic:
+                    loss_da, gp = self.D_Z(z, v_true)
+                else:
+                    loss_da, gp = self.D_Z(z, v_true)
+
+                triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
+
+                if warmup:
+                    all_loss = (
+                        -0 * loss_da
+                        + 1 * loss_vae
+                        + gp
+                        + triplet_coef * triplet_loss
+                        + cos_coef * loss_cos
+                    )
+                else:
+                    all_loss = (
+                        -d_coef * loss_da
+                        + 1 * loss_vae
+                        + gp
+                        + triplet_coef * triplet_loss
+                        + cos_coef * loss_cos
+                    )
+
+                all_loss.backward()
+                optimizer_g.step()
+                all_losses += all_loss
+                d_loss += loss_da
+                t_loss += triplet_loss
+                v_loss += loss_vae
+            progress_bar.update(1)  # Increment the progress bar by one for each batch processed
+            progress_bar.set_postfix(
+                epoch=f"{epoch + 1}/{epochs}", all_loss=all_losses.item(), disc_loss=d_loss.item()
+            )
+        progress_bar.close()
+
+
+def train_integration_model(
+    adata,
+    disc_iter,
+    batch_key="batch",
+    z_dim=256,
+    epochs=150,
+    d_coef=0.2,
+    kl_coef=0.005,
+    triplet_coef=1,
+    cos_coef=20,
+    warmup_epoch=50,
+    critic=False,
+    scale=None,
+):
+    number_of_cells = adata.n_obs
+    number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
+
+    # Default number of epochs
+    if epochs == 150:
+        # Check if the number of cells goes above 100000
+        if number_of_cells > 100000:
+            calculated_epochs = int(1.5 * number_of_cells / (number_of_batches * 512))
+            # If the calculated value is larger than the default, use it instead
+            if calculated_epochs > epochs:
+                epochs = calculated_epochs
+    else:
+        epochs = epochs
+    model = SCIntegrationModel(
+        adata=adata, batch_key=batch_key, z_dim=z_dim, critic=critic, seed=42, scale=scale
+    )
+    print(epochs)
+    start_time = time.time()
+    model.train_model(
+        adata,
+        batch_key=batch_key,
+        epochs=epochs,
+        d_coef=d_coef,
+        kl_coef=kl_coef,
+        triplet_coef=triplet_coef,
+        cos_coef=cos_coef,
+        warmup_epoch=warmup_epoch,
+        disc_iter=disc_iter,
+    )
+    end_time = time.time()
+    training_time = end_time - start_time
+    print(f"Training completed in {training_time:.2f} seconds")
+
+    model.VAE.eval()
+    return model.VAE
+
+
+def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
+    if seed is not None:
+        set_seed(seed)
+
+    vae.eval()
+    data_loader = generate_adata_to_dataloader(adata)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    all_z = []
+    all_indices = []
+
+    for _, (x, indices) in enumerate(data_loader):
+        x = x.to(device)
+        _, _, z = vae.encoder(x, warmup=False)
+        all_z.append(z)
+        all_indices.extend(indices.tolist())
+
+    all_z_combined = torch.cat(all_z, dim=0)
+    all_indices_tensor = torch.tensor(all_indices)
+    all_z_reordered = all_z_combined[all_indices_tensor.argsort()]
+    all_z_np = all_z_reordered.cpu().detach().numpy()
+
+    # Create anndata object with reordered embeddings
+    adata.obsm["X_scCRAFT"] = all_z_np
+
+    if pca:
+        pca_model = PCA(n_components=dim)
+        # Fit and transform the data
+        x_sccraft_pca = pca_model.fit_transform(adata.obsm["X_scCRAFT"])
+        # Store the PCA-reduced data back into adata.obsm
+        adata.obsm["X_scCRAFT"] = x_sccraft_pca
+
+    return adata

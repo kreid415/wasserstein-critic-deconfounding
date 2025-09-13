@@ -1,12 +1,17 @@
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-  rev: v0.6.3
-  hooks:
-    # Run the linter.
-    - id: ruff
-      types_or: [ python, pyi ]
-      args: [ --fix ]
-    # Run the formatter.
-    - id: ruff-format
-      types_or: [ python, pyi ]
+  # Ruff: Linter and formatter for Python.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13 # Latest as of June 2025
+    hooks:
+      - id: ruff
+        types_or: [python, pyi]
+        args: [--fix] # Auto-fix issues
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # Strip output from Jupyter notebooks before commit
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+        files: \.ipynb$

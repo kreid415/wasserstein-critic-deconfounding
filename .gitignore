@@ -18,3 +18,7 @@ build/
 .spyproject
 .vs
 *.prof
+.devcontainer/devcontainer.json
+**/data/**
+**/lightning_logs/**
+*.ckpt

@@ -10,14 +10,29 @@ dependencies:
   - pre-commit
   - conda-lock
   - ipykernel
+  - scanpy
+  - anndata
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - umap-learn
+  - lightning
+  - pyro4
+  - pytest
+  - ipywidgets
   - pip:
       - pip
       - setuptools
       - wheel
+      - scib
+      - harmonypy
+      - scanorama
+      - bbknn
+      - imap
 prefix: /opt/conda/envs/myenv
 platforms:
   - linux-aarch64
   - linux-64
   - osx-64
   - osx-arm64
-  - win-64
