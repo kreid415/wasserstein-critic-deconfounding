@@ -55,7 +55,7 @@ def generate_balanced_dataloader(adata, batch_size, batch_key="batch"):
     if isinstance(x_sampled, np.ndarray):
         x_tensor = torch.tensor(x_sampled, dtype=torch.float32)
     else:  # if it's a sparse matrix
-        x_tensor = torch.tensor(x_tensor.toarray(), dtype=torch.float32)
+        x_tensor = torch.tensor(x_sampled.toarray(), dtype=torch.float32)
 
     # Convert batch labels to tensor
     v_tensor = torch.tensor(batch_labels_list, dtype=torch.int64)

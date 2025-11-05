@@ -1,22 +1,7 @@
 import scanpy as sc
-import numpy as np
-import scCRAFT
-from scCRAFT.model import train_integration_model, obtain_embeddings
+from scCRAFT.model import obtain_embeddings, train_integration_model
 from scCRAFT.utils import multi_resolution_cluster
-import scvi
-import scib
-import harmonypy as hm
-import pandas as pd
-import scanorama
-import time
-import bbknn
-import scDML
-from scDML import scDMLModel
-from scDML.utils import print_dataset_information
-import imap
-from scib.utils import *
 import torch
-import scib
 
 
 def main():
@@ -48,10 +33,10 @@ def main():
     adata = adata[:, adata.var["highly_variable"]]
 
     multi_resolution_cluster(adata, resolution1=1, method="Leiden")
-    VAE = train_integration_model(
+    vae = train_integration_model(
         adata, batch_key="tech", z_dim=256, d_coef=0.2, epochs=1000, critic=True
     )
-    obtain_embeddings(adata, VAE.to("cuda:0"))
+    obtain_embeddings(adata, vae.to("cuda:0"))
     sc.pp.neighbors(adata, use_rep="X_scCRAFT")
     sc.tl.umap(adata, min_dist=0.5)
     sc.pl.umap(adata, color=["tech", "celltype"], frameon=False, ncols=1)

@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import anndata as ad
 import pytorch_lightning as pl
@@ -34,7 +34,6 @@ def main():
     anndata = anndata[anndata.obs["celltype"].isin(valid_celltypes)].copy()
 
     # Find/subset HVGs & swap to raw counts
-    import scanpy as sc
 
     sc.pp.highly_variable_genes(anndata, n_top_genes=3000, batch_key="tech")
     anndata = anndata[:, anndata.var["highly_variable"]].copy()
@@ -75,7 +74,7 @@ def main():
     )
 
     # this scripts filename
-    script_name = os.path.basename(__file__).split(".")[0]
+    script_name = Path(__file__).name.split(".")[0]
 
     # add checkpint callback
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
