@@ -9,7 +9,6 @@ import torch
 
 from wcd_vae.metrics import clisi_graph, ilisi_graph
 from wcd_vae.scCRAFT.model import obtain_embeddings, train_integration_model
-from wcd_vae.scCRAFT.utils import set_seed
 
 
 def nested_cv_hyperparameter_tuning(
@@ -22,7 +21,6 @@ def nested_cv_hyperparameter_tuning(
     z_dim=256,
     epochs=100,
     disc_iter=10,
-    random_state=42,
     reference_batch=None,
     output_dir=None,
     output_prefix=None,
@@ -59,13 +57,11 @@ def nested_cv_hyperparameter_tuning(
         Results with outer fold statistics
     """
 
-    set_seed(random_state)
-
     # Prepare data indices for stratified splitting by cell type
     cell_indices = np.arange(adata.n_obs)
 
     # Create stratified outer folds
-    outer_kf = KFold(n_splits=n_outer_folds, shuffle=True, random_state=random_state)
+    outer_kf = KFold(n_splits=n_outer_folds, shuffle=True)
 
     # Store results for each outer fold
     outer_fold_results = {
@@ -84,7 +80,7 @@ def nested_cv_hyperparameter_tuning(
             iters = disc_iter if use_critic else 1
 
             # Inner cross-validation for hyperparameter selection
-            inner_kf = KFold(n_splits=n_inner_folds, shuffle=True, random_state=random_state)
+            inner_kf = KFold(n_splits=n_inner_folds, shuffle=True)
             inner_scores = defaultdict(list)
 
             for d_coef in d_coef_range:
