@@ -29,34 +29,7 @@ def nested_cv_hyperparameter_tuning(
 ):
     """
     Perform nested cross-validation for hyperparameter tuning of d_coef with and without critic.
-
-    Parameters:
-    -----------
-    adata : AnnData
-        Annotated data object
-    batch_key : str
-        Key for batch information
-    celltype_key : str
-        Key for cell type information
-    d_coef_range : list
-        Range of d_coef values to test
-    n_outer_folds : int
-        Number of outer CV folds
-    n_inner_folds : int
-        Number of inner CV folds for hyperparameter selection
-    z_dim : int
-        Latent dimension
-    epochs : int
-        Training epochs
-    disc_iter : int
-        Discriminator iterations
-    random_state : int
-        Random seed
-
-    Returns:
-    --------
-    results_df : DataFrame
-        Results with outer fold statistics
+    ... (rest of docstring) ...
     """
 
     set_seed(random_state)
@@ -112,17 +85,38 @@ def nested_cv_hyperparameter_tuning(
                         reference_batch=reference_batch,
                     )
 
-                    # Get embeddings for validation set
+                    # --- START: MODIFIED INNER LOOP EVALUATION ---
+                    # Get embeddings for BOTH inner train and validation sets
                     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-                    obtain_embeddings(adata_inner_val, model.to(device))
+                    model_on_device = model.to(device)
 
-                    # Compute validation scores
+                    obtain_embeddings(adata_inner_train, model_on_device)
+                    obtain_embeddings(adata_inner_val, model_on_device)
+
+                    # Combine them
+                    adata_inner_combined = adata_inner_train.concatenate(adata_inner_val)
+
+                    # Define the indices for the validation set
+                    inner_val_indices = np.arange(
+                        adata_inner_train.n_obs, adata_inner_combined.n_obs
+                    )
+
+                    # Compute validation scores on the combined graph, subsetting
                     ilisi_val = ilisi_graph(
-                        adata_inner_val, batch_key=batch_key, type="embed", use_rep="X_scCRAFT"
+                        adata_inner_combined,
+                        batch_key=batch_key,
+                        type="embed",
+                        use_rep="X_scCRAFT",
+                        subset_indices=inner_val_indices,
                     )
                     clisi_val = clisi_graph(
-                        adata_inner_val, label_key=celltype_key, type="embed", use_rep="X_scCRAFT"
+                        adata_inner_combined,
+                        label_key=celltype_key,
+                        type="embed",
+                        use_rep="X_scCRAFT",
+                        subset_indices=inner_val_indices,
                     )
+                    # --- END: MODIFIED INNER LOOP EVALUATION ---
 
                     inner_ilisi_scores.append(ilisi_val)
                     inner_clisi_scores.append(clisi_val)
@@ -131,7 +125,7 @@ def nested_cv_hyperparameter_tuning(
                 avg_ilisi = np.mean(inner_ilisi_scores)
                 avg_clisi = np.mean(inner_clisi_scores)
 
-                # Composite score (higher iLISI is better, lower cLISI is better)
+                # Composite score (higher iLisi is better, lower cLISI is better)
                 composite_score = avg_ilisi - avg_clisi
 
                 inner_scores[d_coef] = {
@@ -154,17 +148,37 @@ def nested_cv_hyperparameter_tuning(
                 disc_iter=disc_iter,
             )
 
+            # --- START: MODIFIED OUTER LOOP EVALUATION (from before) ---
             # Evaluate on test set
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
-            obtain_embeddings(adata_test, final_model.to(device))
+            model_on_device = final_model.to(device)
 
-            # Compute test scores
+            # Get embeddings for BOTH train and test sets
+            obtain_embeddings(adata_train, model_on_device)
+            obtain_embeddings(adata_test, model_on_device)
+
+            # Combine them
+            adata_combined = adata_train.concatenate(adata_test)
+
+            # Define the indices for the test set
+            test_indices = np.arange(adata_train.n_obs, adata_combined.n_obs)
+
+            # Compute test scores on the combined graph, subsetting to test cells
             test_ilisi = ilisi_graph(
-                adata_test, batch_key=batch_key, type="embed", use_rep="X_scCRAFT"
+                adata_combined,
+                batch_key=batch_key,
+                type="embed",
+                use_rep="X_scCRAFT",
+                subset_indices=test_indices,
             )
             test_clisi = clisi_graph(
-                adata_test, label_key=celltype_key, type="embed", use_rep="X_scCRAFT"
+                adata_combined,
+                label_key=celltype_key,
+                type="embed",
+                use_rep="X_scCRAFT",
+                subset_indices=test_indices,
             )
+            # --- END: MODIFIED OUTER LOOP EVALUATION ---
 
             print(f"  Test scores: iLISI={test_ilisi:.4f}, cLISI={test_clisi:.4f}")
 

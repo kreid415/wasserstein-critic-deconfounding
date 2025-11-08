@@ -261,7 +261,9 @@ def find_sigma(distances, target_perplexity, tol=1e-5, max_iter=50):
     return sigma
 
 
-def ilisi_graph(adata, batch_key, type="embed", use_rep="X_pca", perplexity=30):
+def ilisi_graph(
+    adata, batch_key, type="embed", use_rep="X_pca", perplexity=30, subset_indices=None
+):
     """
     Compute integration Local Inverse Simpson Index (iLISI) for an AnnData object.
 
@@ -277,6 +279,8 @@ def ilisi_graph(adata, batch_key, type="embed", use_rep="X_pca", perplexity=30):
         Key in adata.obsm for the embedding to use
     perplexity : int, default=30
         Perplexity parameter for neighborhood definition
+    subset_indices : array-like, optional
+        Indices of cells to include in the computation
 
     Returns:
     --------
@@ -304,11 +308,19 @@ def ilisi_graph(adata, batch_key, type="embed", use_rep="X_pca", perplexity=30):
     # Normalize by number of batches (perfect mixing = 1.0, no mixing = 1/n_batches)
     normalized_scores = (lisi_scores - 1) / (n_batches - 1)
 
+    # --- START NEW CODE ---
+    # If indices are provided, only return the mean for those cells
+    if subset_indices is not None:
+        return np.mean(normalized_scores[subset_indices])
+    # --- END NEW CODE ---
+
     # Return mean normalized iLISI score
     return np.mean(normalized_scores)
 
 
-def clisi_graph(adata, label_key, type="embed", use_rep="X_pca", perplexity=30):
+def clisi_graph(
+    adata, label_key, type="embed", use_rep="X_pca", perplexity=30, subset_indices=None
+):
     """
     Compute cell-type Local Inverse Simpson Index (cLISI) for an AnnData object.
 
@@ -350,6 +362,11 @@ def clisi_graph(adata, label_key, type="embed", use_rep="X_pca", perplexity=30):
 
     # Normalize by number of cell types (perfect mixing = 1.0, no mixing = 1/n_celltypes)
     normalized_scores = (lisi_scores - 1) / (n_celltypes - 1)
+
+    # --- START NEW CODE ---
+    if subset_indices is not None:
+        return np.mean(normalized_scores[subset_indices])
+    # --- END NEW CODE ---
 
     # Return mean normalized cLISI score
     return np.mean(normalized_scores)
