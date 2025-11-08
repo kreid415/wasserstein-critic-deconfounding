@@ -61,6 +61,7 @@ def main():
         n_inner_folds=10,
         output_dir=output_dir,
         output_prefix=f"{data_set}_binary",
+        random_state=42,
     )
 
     create_paper_assets(
