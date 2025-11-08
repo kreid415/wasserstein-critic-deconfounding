@@ -1,7 +1,11 @@
+import numpy as np
+import scanpy as sc
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 import torch
 import torch.utils.data as utils
+
+from wcd_vae.scCRAFT.utils import multi_resolution_cluster
 
 
 def get_dataloader_from_adata(
@@ -47,3 +51,46 @@ def get_dataloader_from_adata(
     )
 
     return train_loader, test_loader, domain_encoder, cell_encoder
+
+
+def prep_data(
+    anndata_path,
+    batch_key,
+    celltype_key,
+    batch_count=2,
+    min_genes=300,
+    min_cells=5,
+    norm_val=1e4,
+    n_top_genes=2000,
+    balance=True,
+):
+    adata = sc.read_h5ad(anndata_path)
+
+    adata = adata[
+        adata.obs[batch_key].isin(adata.obs[batch_key].value_counts().index[:batch_count])
+    ].copy()
+
+    if balance:
+        batch1_name = adata.obs[batch_key].value_counts().index[0]
+        batch2_name = adata.obs[batch_key].value_counts().index[1]
+
+        common_celltypes = np.intersect1d(
+            adata[adata.obs[batch_key] == batch1_name].obs[celltype_key].unique(),
+            adata[adata.obs[batch_key] == batch2_name].obs[celltype_key].unique(),
+        )
+
+        # Filter the adata object to keep only the common cell types
+        adata = adata[adata.obs[celltype_key].isin(common_celltypes)].copy()
+
+    adata.raw = adata
+    adata.layers["counts"] = adata.X.copy()
+    sc.pp.filter_cells(adata, min_genes=min_genes)
+    sc.pp.filter_genes(adata, min_cells=min_cells)
+    sc.pp.normalize_per_cell(adata, counts_per_cell_after=norm_val)
+    sc.pp.log1p(adata)
+    sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, batch_key=batch_key)
+    adata = adata[:, adata.var["highly_variable"]]
+
+    multi_resolution_cluster(adata, resolution1=1, method="Leiden")
+
+    return adata

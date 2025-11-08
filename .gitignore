@@ -22,3 +22,4 @@ build/
 **/data/**
 **/lightning_logs/**
 *.ckpt
+**/results/

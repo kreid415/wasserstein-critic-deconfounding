@@ -1,6 +1,5 @@
 from typing import Union
 
-import jax.numpy as jnp
 import torch
 from torch.autograd import grad
 from torch.distributions import Normal
@@ -14,9 +13,9 @@ torch.backends.cudnn.benchmark = True
 
 
 def log_nb_positive(
-    x: Union[torch.Tensor, jnp.ndarray],
-    mu: Union[torch.Tensor, jnp.ndarray],
-    theta: Union[torch.Tensor, jnp.ndarray],
+    x: Union[torch.Tensor],
+    mu: Union[torch.Tensor],
+    theta: Union[torch.Tensor],
     eps: float = 1e-8,
     log_fn: callable = torch.log,
     lgamma_fn: callable = torch.lgamma,
@@ -57,10 +56,8 @@ def reparameterize_gaussian(mu, var):
 
 
 class Encoder(nn.Module):
-    def __init__(self, p_dim, latent_dim, scale):
+    def __init__(self, p_dim, latent_dim):
         super().__init__()
-        self.scale = scale
-        self.f_avg = []
         # Define the architecture
         self.fc1 = nn.Linear(p_dim, 1024)
         self.fc2 = nn.Linear(1024, 512)
@@ -84,21 +81,7 @@ class Encoder(nn.Module):
         q_v = torch.exp(self.fc_var(x)) + 1e-4
         # library = self.fc_library(x)  # Predicted log library size
 
-        if self.scale:
-            if warmup:
-                mean_scaler = (
-                    torch.tensor(self.scale, dtype=q_m.dtype, device=q_m.device)
-                    / q_m.std(dim=0, keepdim=True).detach()
-                )
-                self.f_avg.append(mean_scaler)
-                q_m_scaled = q_m * mean_scaler
-            else:
-                mean_scaler = torch.mean(torch.stack(self.f_avg), dim=0).to(q_m.device)
-                q_m_scaled = q_m * mean_scaler
-        else:
-            q_m_scaled = q_m
-
-        z = reparameterize_gaussian(q_m_scaled, q_v)
+        z = reparameterize_gaussian(q_m, q_v)
 
         return q_m, q_v, z
 
@@ -151,9 +134,9 @@ class Decoder(nn.Module):
 
 
 class VAE(nn.Module):
-    def __init__(self, p_dim, v_dim, latent_dim, scale):
+    def __init__(self, p_dim, v_dim, latent_dim):
         super().__init__()
-        self.encoder = Encoder(p_dim, latent_dim, scale)
+        self.encoder = Encoder(p_dim, latent_dim)
         self.decoder = Decoder(p_dim, v_dim, latent_dim)
 
     def forward(self, x, ec, warmup):
@@ -243,6 +226,91 @@ class MultiClassWassersteinLoss(nn.Module):
         loss = loss / total
 
         return loss
+
+
+class ReferenceWassersteinLoss(nn.Module):
+    """
+    Calculates a Wasserstein-style loss between a designated reference class
+    and all other classes present in a batch.
+    """
+
+    def __init__(self, reference_class: int, reduction: str = "mean"):
+        """
+        Args:
+            reference_class (int): The index of the class to be used as the reference.
+            reduction (str): Specifies the reduction to apply to the output: 'none', 'mean', 'sum'.
+        """
+        super().__init__()
+        self.reference_class = reference_class
+        self.reduction = reduction
+
+    def forward(self, output: torch.Tensor, batch_ids: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            output: Tensor of shape [B, K] - critic scores for each of K classes.
+            batch_ids: Tensor of shape [B] - true class IDs (0 to K-1).
+        Returns:
+            The calculated Wasserstein loss.
+        """
+        num_domains = output.shape[1]
+
+        # --- 1. Isolate the reference class samples ---
+        mask_ref = batch_ids == self.reference_class
+
+        # If no reference samples are in this batch, we cannot compute the loss.
+        if mask_ref.sum() == 0:
+            return torch.tensor(0.0, device=output.device, requires_grad=True)
+
+        # Get the critic scores for all reference samples across all K heads.
+        output_ref = output[mask_ref]
+
+        # --- 2. Loop over non-reference classes and calculate loss ---
+        total_loss = 0.0
+        pairs_calculated = 0
+
+        for k in range(num_domains):
+            # Skip the reference class itself.
+            if k == self.reference_class:
+                continue
+
+            mask_k = batch_ids == k
+
+            # If there are no samples for this class in the batch, skip.
+            if mask_k.sum() == 0:
+                continue
+
+            # --- 3. Calculate the loss term for the (k, ref) pair ---
+
+            # For critic head 'k', get the scores it assigns to its "true" samples (from class k).
+            # This is E[critic_k(x)] for x ~ P_k
+            scores_k_on_head_k = output[mask_k, k]
+
+            # For the same critic head 'k', get the scores it assigns to the "other" samples
+            # (from the reference class).
+            # This is E[critic_k(x)] for x ~ P_ref
+            scores_ref_on_head_k = output_ref[:, k]
+
+            # The loss for this pair encourages the critic to output a higher score
+            # for its "true" class than for the reference class.
+            # We want to maximize: E[critic_k(P_k)] - E[critic_k(P_ref)]
+            diff = scores_k_on_head_k.mean() - scores_ref_on_head_k.mean()
+
+            total_loss += diff
+            pairs_calculated += 1
+
+        # If no non-reference classes were found in the batch, loss is 0.
+        if pairs_calculated == 0:
+            return torch.tensor(0.0, device=output.device, requires_grad=True)
+
+        # --- 4. Apply reduction ---
+        if self.reduction == "mean":
+            return total_loss / pairs_calculated
+        elif self.reduction == "sum":
+            return total_loss
+        else:  # 'none'
+            # Note: 'none' isn't well-defined here since we sum over pairs.
+            # Returning the mean is a sensible default.
+            return total_loss / pairs_calculated
 
 
 def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
@@ -347,7 +415,7 @@ def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, n_input, domain_number, critic=False):
+    def __init__(self, n_input, domain_number, critic=False, reference_batch=None):
         super().__init__()
         n_hidden = 128
         self.critic = critic
@@ -358,7 +426,10 @@ class Discriminator(nn.Module):
 
         if self.critic:
             # If using critic, use Wasserstein loss
-            self.loss = MultiClassWassersteinLoss()
+            if reference_batch is not None:
+                self.loss = ReferenceWassersteinLoss(reference_class=reference_batch)
+            else:
+                self.loss = MultiClassWassersteinLoss()
         else:
             # If not using critic, use cross-entropy loss
             self.loss = CrossEntropy()

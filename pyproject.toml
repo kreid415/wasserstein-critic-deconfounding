@@ -3,7 +3,7 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "WCD-VAE"
+name = "wcd_vae"
 description = "Wasserstein Critic Deconfounding Variational Autoencoder"
 authors = [{ name = "Kendall Reid", email = "kreid415@protonmail.com" }]
 readme = "README.rst"

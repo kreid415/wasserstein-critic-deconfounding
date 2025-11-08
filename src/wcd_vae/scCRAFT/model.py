@@ -19,26 +19,31 @@ from wcd_vae.scCRAFT.utils import (
 
 # Dynamic import of tqdm based on the environment
 if "ipykernel" in sys.modules:
-    from tqdm.notebook import tqdm
+    pass
 else:
-    from tqdm import tqdm
+    pass
 
 
 # Main training class
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic, seed, scale):
+    def __init__(self, adata, batch_key, z_dim, critic, seed, reference_batch):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
 
         # Correctly initialize VAE with p_dim, v_dim, and latent_dim
-        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim, scale=scale)
-        self.D_Z = Discriminator(n_input=self.z_dim, domain_number=self.v_dim, critic=critic)
+        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
+        self.D_Z = Discriminator(
+            n_input=self.z_dim,
+            domain_number=self.v_dim,
+            critic=critic,
+            reference_batch=reference_batch,
+        )
         self.mse_loss = torch.nn.MSELoss()
 
-        # self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.device = "cpu"
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"Using device: {self.device}")
         # Move models to CUDA if available
         self.VAE.to(self.device)
         self.D_Z.to(self.device)
@@ -66,7 +71,6 @@ class SCIntegrationModel(nn.Module):
         # Optimizer for Discriminator
         optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
 
-        progress_bar = tqdm(total=epochs, desc="Overall Progress", leave=True)
         for epoch in range(epochs):
             data_loader = generate_balanced_dataloader(adata, batch_size=512, batch_key=batch_key)
             self.VAE.train()
@@ -140,17 +144,13 @@ class SCIntegrationModel(nn.Module):
                 d_loss += loss_da
                 t_loss += triplet_loss
                 v_loss += loss_vae
-            progress_bar.update(1)  # Increment the progress bar by one for each batch processed
-            progress_bar.set_postfix(
-                epoch=f"{epoch + 1}/{epochs}", all_loss=all_losses.item(), disc_loss=d_loss.item()
-            )
-        progress_bar.close()
 
 
 def train_integration_model(
     adata,
     disc_iter,
     batch_key="batch",
+    reference_batch=None,
     z_dim=256,
     epochs=150,
     d_coef=0.2,
@@ -175,7 +175,12 @@ def train_integration_model(
     else:
         epochs = epochs
     model = SCIntegrationModel(
-        adata=adata, batch_key=batch_key, z_dim=z_dim, critic=critic, seed=42, scale=scale
+        adata=adata,
+        batch_key=batch_key,
+        z_dim=z_dim,
+        critic=critic,
+        seed=42,
+        reference_batch=reference_batch,
     )
     print(epochs)
     start_time = time.time()
