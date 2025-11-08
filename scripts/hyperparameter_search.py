@@ -38,8 +38,7 @@ def main():
         celltype_key = "cell_type"
         data_path = "/workspaces/data/Lung_atlas_public.h5ad"
 
-    # pancrease
-    pancrease_adata = prep_data(
+    adata = prep_data(
         data_path,
         batch_key=batch_key,
         celltype_key=celltype_key,
@@ -52,7 +51,7 @@ def main():
     )
 
     results_df, outer_fold_results = nested_cv_hyperparameter_tuning(
-        pancrease_adata,
+        adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
         reference_batch=0,

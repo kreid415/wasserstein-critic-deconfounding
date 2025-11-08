@@ -137,6 +137,9 @@ def nested_cv_hyperparameter_tuning(
             # Select best hyperparameter based on composite score
             best_d_coef = max(inner_scores.keys(), key=lambda k: inner_scores[k]["composite"])
 
+            # Determine the correct number of iterations
+            iters_final = disc_iter if use_critic else 1
+
             # Train final model on full training set with best hyperparameter
             final_model = train_integration_model(
                 adata_train,
@@ -145,7 +148,7 @@ def nested_cv_hyperparameter_tuning(
                 d_coef=best_d_coef,
                 epochs=epochs,
                 critic=use_critic,
-                disc_iter=disc_iter,
+                disc_iter=iters_final,  # <--- Use the corrected iteration number
             )
 
             # --- START: MODIFIED OUTER LOOP EVALUATION (from before) ---
