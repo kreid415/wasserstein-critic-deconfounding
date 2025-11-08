@@ -23,7 +23,7 @@ def main():
     data_set = args.dataset.lower()
     output_dir = args.output_dir
 
-    if data_set == "pancrease":
+    if data_set == "pancreas":
         batch_key = "tech"
         celltype_key = "celltype"
         data_path = "/workspaces/data/human_pancreas_norm_complexBatch.h5ad"
@@ -55,9 +55,9 @@ def main():
         batch_key=batch_key,
         celltype_key=celltype_key,
         reference_batch=0,
-        epochs=100,
-        n_outer_folds=100,
-        n_inner_folds=10,
+        epochs=500,
+        n_outer_folds=5,
+        n_inner_folds=5,
         output_dir=output_dir,
         output_prefix=f"{data_set}_binary",
         random_state=42,
