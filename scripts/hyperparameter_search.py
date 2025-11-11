@@ -23,23 +23,22 @@ def main():
     data_set = args.dataset.lower()
     output_dir = args.output_dir
 
-    if data_set == "pancrease":
+    if data_set == "pancreas":
         batch_key = "tech"
         celltype_key = "celltype"
         data_path = "/workspaces/data/human_pancreas_norm_complexBatch.h5ad"
 
     elif data_set == "immune":
-        batch_key = "batch"
+        batch_key = "chemistry"
         celltype_key = "final_annotation"
         data_path = "/workspaces/data/Immune_ALL_human.h5ad"
 
     elif data_set == "lung":
-        batch_key = "batch"
+        batch_key = "protocol"
         celltype_key = "cell_type"
         data_path = "/workspaces/data/Lung_atlas_public.h5ad"
 
-    # pancrease
-    pancrease_adata = prep_data(
+    adata = prep_data(
         data_path,
         batch_key=batch_key,
         celltype_key=celltype_key,
@@ -52,13 +51,13 @@ def main():
     )
 
     results_df, outer_fold_results = nested_cv_hyperparameter_tuning(
-        pancrease_adata,
+        adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
         reference_batch=0,
-        epochs=100,
-        n_outer_folds=100,
-        n_inner_folds=10,
+        epochs=500,
+        n_outer_folds=5,
+        n_inner_folds=3,
         output_dir=output_dir,
         output_prefix=f"{data_set}_binary",
         random_state=42,

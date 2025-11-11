@@ -4,7 +4,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 import torch
 
 from wcd_vae.metrics import clisi_graph, ilisi_graph
@@ -34,11 +34,20 @@ def nested_cv_hyperparameter_tuning(
 
     set_seed(random_state)
 
+    # --- START: ADDED COUNTERS ---
+    total_coefficients = len(d_coef_range)
+    total_critic_types = 2  # Hardcoded [True, False]
+    total_steps = n_outer_folds * total_critic_types * total_coefficients * n_inner_folds
+    current_step = 0
+    print(f"Starting nested CV. Total hyperparameter search steps (inner loops): {total_steps}")
+    # --- END: ADDED COUNTERS ---
+
     # Prepare data indices for stratified splitting by cell type
     cell_indices = np.arange(adata.n_obs)
+    cell_labels = adata.obs[celltype_key]
 
     # Create stratified outer folds
-    outer_kf = KFold(n_splits=n_outer_folds, shuffle=True, random_state=random_state)
+    outer_kf = StratifiedKFold(n_splits=n_outer_folds, shuffle=True, random_state=random_state)
 
     # Store results for each outer fold
     outer_fold_results = {
@@ -46,7 +55,11 @@ def nested_cv_hyperparameter_tuning(
         "no_critic": {"ilisi": [], "clisi": [], "best_d_coef": []},
     }
 
-    for _, (train_idx, test_idx) in enumerate(outer_kf.split(cell_indices)):
+    # *** MODIFIED: Renamed '_' to 'outer_fold_idx' for clarity ***
+    for outer_fold_idx, (train_idx, test_idx) in enumerate(
+        outer_kf.split(cell_indices, cell_labels)
+    ):
+        print(f"\n--- Starting Outer Fold {outer_fold_idx + 1}/{n_outer_folds} ---")
         # Split data for outer fold
         adata_train = adata[train_idx].copy()
         adata_test = adata[test_idx].copy()
@@ -55,17 +68,36 @@ def nested_cv_hyperparameter_tuning(
         for use_critic in [True, False]:
             critic_label = "critic" if use_critic else "no_critic"
             iters = disc_iter if use_critic else 1
+            print(f"  --- Running Inner CV for: {critic_label} ---")
 
             # Inner cross-validation for hyperparameter selection
-            inner_kf = KFold(n_splits=n_inner_folds, shuffle=True, random_state=random_state)
+            inner_kf = StratifiedKFold(
+                n_splits=n_inner_folds, shuffle=True, random_state=random_state
+            )
             inner_scores = defaultdict(list)
+
+            train_labels = cell_labels[train_idx]
 
             for d_coef in d_coef_range:
                 # Inner fold validation scores
                 inner_ilisi_scores = []
                 inner_clisi_scores = []
 
-                for _, (inner_train_idx, inner_val_idx) in enumerate(inner_kf.split(train_idx)):
+                # *** MODIFIED: Renamed '_' to 'inner_fold_idx' for clarity ***
+                for inner_fold_idx, (inner_train_idx, inner_val_idx) in enumerate(
+                    inner_kf.split(train_idx, train_labels)
+                ):
+                    # --- START: ADDED PRINT STATEMENT ---
+                    current_step += 1
+                    print(
+                        f"    [Outer Fold: {outer_fold_idx + 1}/{n_outer_folds} | "
+                        f"Critic: {critic_label} | "
+                        f"d_coef: {d_coef} | "
+                        f"Inner Fold: {inner_fold_idx + 1}/{n_inner_folds}]"
+                    )
+                    print(f"    --- Starting HP Search Step {current_step} / {total_steps} ---")
+                    # --- END: ADDED PRINT STATEMENT ---
+
                     # Get actual indices
                     actual_train_idx = train_idx[inner_train_idx]
                     actual_val_idx = train_idx[inner_val_idx]
@@ -84,6 +116,8 @@ def nested_cv_hyperparameter_tuning(
                         disc_iter=iters,
                         reference_batch=reference_batch,
                     )
+
+                    # ... (rest of your code) ...
 
                     # --- START: MODIFIED INNER LOOP EVALUATION ---
                     # Get embeddings for BOTH inner train and validation sets
@@ -136,8 +170,13 @@ def nested_cv_hyperparameter_tuning(
 
             # Select best hyperparameter based on composite score
             best_d_coef = max(inner_scores.keys(), key=lambda k: inner_scores[k]["composite"])
+            print(f"    Best d_coef for {critic_label}: {best_d_coef}")
+
+            # Determine the correct number of iterations
+            iters_final = disc_iter if use_critic else 1
 
             # Train final model on full training set with best hyperparameter
+            print(f"  --- Training final {critic_label} model on full outer fold data ---")
             final_model = train_integration_model(
                 adata_train,
                 batch_key=batch_key,
@@ -145,7 +184,7 @@ def nested_cv_hyperparameter_tuning(
                 d_coef=best_d_coef,
                 epochs=epochs,
                 critic=use_critic,
-                disc_iter=disc_iter,
+                disc_iter=iters_final,  # <--- Use the corrected iteration number
             )
 
             # --- START: MODIFIED OUTER LOOP EVALUATION (from before) ---
@@ -180,7 +219,9 @@ def nested_cv_hyperparameter_tuning(
             )
             # --- END: MODIFIED OUTER LOOP EVALUATION ---
 
-            print(f"  Test scores: iLISI={test_ilisi:.4f}, cLISI={test_clisi:.4f}")
+            print(
+                f"  Test scores ({critic_label}): iLISI={test_ilisi:.4f}, cLISI={test_clisi:.4f}"
+            )
 
             # Store results
             outer_fold_results[critic_label]["ilisi"].append(test_ilisi)
