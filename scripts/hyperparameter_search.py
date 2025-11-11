@@ -29,12 +29,12 @@ def main():
         data_path = "/workspaces/data/human_pancreas_norm_complexBatch.h5ad"
 
     elif data_set == "immune":
-        batch_key = "batch"
+        batch_key = "chemistry"
         celltype_key = "final_annotation"
         data_path = "/workspaces/data/Immune_ALL_human.h5ad"
 
     elif data_set == "lung":
-        batch_key = "batch"
+        batch_key = "protocol"
         celltype_key = "cell_type"
         data_path = "/workspaces/data/Lung_atlas_public.h5ad"
 
