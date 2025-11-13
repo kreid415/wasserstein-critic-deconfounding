@@ -308,11 +308,9 @@ def ilisi_graph(
     # Normalize by number of batches (perfect mixing = 1.0, no mixing = 1/n_batches)
     normalized_scores = (lisi_scores - 1) / (n_batches - 1)
 
-    # --- START NEW CODE ---
     # If indices are provided, only return the mean for those cells
     if subset_indices is not None:
         return np.mean(normalized_scores[subset_indices])
-    # --- END NEW CODE ---
 
     # Return mean normalized iLISI score
     return np.mean(normalized_scores)
@@ -363,10 +361,8 @@ def clisi_graph(
     # Normalize by number of cell types (perfect mixing = 1.0, no mixing = 1/n_celltypes)
     normalized_scores = (lisi_scores - 1) / (n_celltypes - 1)
 
-    # --- START NEW CODE ---
     if subset_indices is not None:
         return np.mean(normalized_scores[subset_indices])
-    # --- END NEW CODE ---
 
     # Return mean normalized cLISI score
     return np.mean(normalized_scores)

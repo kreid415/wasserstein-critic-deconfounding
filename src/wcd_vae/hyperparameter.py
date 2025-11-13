@@ -34,13 +34,11 @@ def nested_cv_hyperparameter_tuning(
 
     set_seed(random_state)
 
-    # --- START: ADDED COUNTERS ---
     total_coefficients = len(d_coef_range)
-    total_critic_types = 2  # Hardcoded [True, False]
+    total_critic_types = 2  # True or False
     total_steps = n_outer_folds * total_critic_types * total_coefficients * n_inner_folds
     current_step = 0
     print(f"Starting nested CV. Total hyperparameter search steps (inner loops): {total_steps}")
-    # --- END: ADDED COUNTERS ---
 
     # Prepare data indices for stratified splitting by cell type
     cell_indices = np.arange(adata.n_obs)
@@ -55,7 +53,6 @@ def nested_cv_hyperparameter_tuning(
         "no_critic": {"ilisi": [], "clisi": [], "best_d_coef": []},
     }
 
-    # *** MODIFIED: Renamed '_' to 'outer_fold_idx' for clarity ***
     for outer_fold_idx, (train_idx, test_idx) in enumerate(
         outer_kf.split(cell_indices, cell_labels)
     ):
@@ -83,11 +80,9 @@ def nested_cv_hyperparameter_tuning(
                 inner_ilisi_scores = []
                 inner_clisi_scores = []
 
-                # *** MODIFIED: Renamed '_' to 'inner_fold_idx' for clarity ***
                 for inner_fold_idx, (inner_train_idx, inner_val_idx) in enumerate(
                     inner_kf.split(train_idx, train_labels)
                 ):
-                    # --- START: ADDED PRINT STATEMENT ---
                     current_step += 1
                     print(
                         f"    [Outer Fold: {outer_fold_idx + 1}/{n_outer_folds} | "
@@ -96,7 +91,6 @@ def nested_cv_hyperparameter_tuning(
                         f"Inner Fold: {inner_fold_idx + 1}/{n_inner_folds}]"
                     )
                     print(f"    --- Starting HP Search Step {current_step} / {total_steps} ---")
-                    # --- END: ADDED PRINT STATEMENT ---
 
                     # Get actual indices
                     actual_train_idx = train_idx[inner_train_idx]
@@ -117,9 +111,6 @@ def nested_cv_hyperparameter_tuning(
                         reference_batch=reference_batch,
                     )
 
-                    # ... (rest of your code) ...
-
-                    # --- START: MODIFIED INNER LOOP EVALUATION ---
                     # Get embeddings for BOTH inner train and validation sets
                     device = "cuda:0" if torch.cuda.is_available() else "cpu"
                     model_on_device = model.to(device)
@@ -150,7 +141,6 @@ def nested_cv_hyperparameter_tuning(
                         use_rep="X_scCRAFT",
                         subset_indices=inner_val_indices,
                     )
-                    # --- END: MODIFIED INNER LOOP EVALUATION ---
 
                     inner_ilisi_scores.append(ilisi_val)
                     inner_clisi_scores.append(clisi_val)
@@ -184,10 +174,9 @@ def nested_cv_hyperparameter_tuning(
                 d_coef=best_d_coef,
                 epochs=epochs,
                 critic=use_critic,
-                disc_iter=iters_final,  # <--- Use the corrected iteration number
+                disc_iter=iters_final,
             )
 
-            # --- START: MODIFIED OUTER LOOP EVALUATION (from before) ---
             # Evaluate on test set
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
             model_on_device = final_model.to(device)
@@ -217,7 +206,6 @@ def nested_cv_hyperparameter_tuning(
                 use_rep="X_scCRAFT",
                 subset_indices=test_indices,
             )
-            # --- END: MODIFIED OUTER LOOP EVALUATION ---
 
             print(
                 f"  Test scores ({critic_label}): iLISI={test_ilisi:.4f}, cLISI={test_clisi:.4f}"

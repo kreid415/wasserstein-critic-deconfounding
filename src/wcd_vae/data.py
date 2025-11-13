@@ -62,7 +62,7 @@ def prep_data(
     min_cells=5,
     norm_val=1e4,
     n_top_genes=2000,
-    balance=True,
+    balance=False,
 ):
     adata = sc.read_h5ad(anndata_path)
 
