@@ -56,7 +56,7 @@ def main():
         celltype_key=celltype_key,
         reference_batch=0,
         epochs=500,
-        n_outer_folds=5,
+        n_outer_folds=50,
         n_inner_folds=3,
         output_dir=output_dir,
         output_prefix=f"{data_set}_binary",
