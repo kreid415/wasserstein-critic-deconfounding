@@ -23,7 +23,7 @@ def generate_balanced_dataloader(adata, batch_size, batch_key="batch"):
             "Indices are not unique. Please ensure the indices are unique before proceeding."
         )
     # Map unique batch keys to integers
-    unique_batches = adata.obs[batch_key].unique()
+    unique_batches = adata.obs[batch_key].sort_values().unique()
     batch_to_int = {batch: i for i, batch in enumerate(unique_batches)}
     unsupervised_labels1 = adata.obs["leiden1"].cat.codes.values
     unsupervised_labels2 = adata.obs["leiden2"].cat.codes.values

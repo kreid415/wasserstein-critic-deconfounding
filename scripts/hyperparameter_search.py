@@ -15,6 +15,12 @@ def main():
     parser.add_argument(
         "--output_dir", type=str, required=True, help="Output directory for results"
     )
+    parser.add_argument("--batch_count", type=int, default=2, help="Number of batches to consider")
+    parser.add_argument("--epochs", type=int, default=500, help="Number of training epochs")
+    parser.add_argument("--reference_batch", type=int, default=0, help="Reference batch index")
+    parser.add_argument(
+        "--balance", action="store_true", help="Whether to balance batches during training"
+    )
 
     args = parser.parse_args()
 
@@ -22,6 +28,10 @@ def main():
 
     data_set = args.dataset.lower()
     output_dir = args.output_dir
+    batch_count = args.batch_count
+    epochs = args.epochs
+    reference_batch = args.reference_batch
+    balance = args.balance
 
     if data_set == "pancreas":
         batch_key = "tech"
@@ -42,29 +52,29 @@ def main():
         data_path,
         batch_key=batch_key,
         celltype_key=celltype_key,
-        batch_count=2,
+        batch_count=batch_count,
         min_genes=300,
         min_cells=5,
         norm_val=1e4,
         n_top_genes=2000,
-        balance=False,
+        balance=balance,
     )
 
     results_df, outer_fold_results = nested_cv_hyperparameter_tuning(
         adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
-        reference_batch=0,
-        epochs=500,
-        n_outer_folds=50,
-        n_inner_folds=3,
+        reference_batch=reference_batch,
+        epochs=epochs,
+        n_outer_folds=2,
+        n_inner_folds=2,
         output_dir=output_dir,
-        output_prefix=f"{data_set}_binary",
+        output_prefix=f"{data_set}",
         random_state=42,
     )
 
     create_paper_assets(
-        results_df, outer_fold_results, output_dir=output_dir, output_prefix=f"{data_set}_binary"
+        results_df, outer_fold_results, output_dir=output_dir, output_prefix=f"{data_set}"
     )
 
 
