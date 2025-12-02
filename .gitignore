@@ -24,3 +24,5 @@ build/
 *.ckpt
 **/results/
 *.tex
+*.csv
+*.pkl
