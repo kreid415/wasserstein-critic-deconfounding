@@ -44,7 +44,7 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_sc
     scib.me.cluster_optimal_resolution(
         adata, label_key=celltype_key, cluster_key="louvain_opt", use_rep=embed_key
     )
-    ari = scib.me.ari(adata, group_key=celltype_key, cluster_key="louvain_opt")
+    ari = scib.me.ari(adata, celltype_key, "louvain_opt")
 
     return asw_batch, asw_celltype, ari
 
