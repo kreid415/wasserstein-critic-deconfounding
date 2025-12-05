@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     openssh-client \
     tmux \
     zip \
+    parallel \
     && rm -rf /var/lib/apt/lists/*
 
 # install the right miniforge version based on architecture
