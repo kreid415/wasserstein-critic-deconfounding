@@ -2,7 +2,7 @@ import argparse
 import warnings
 
 from wcd_vae.data import prep_data
-from wcd_vae.hyperparameter import nested_cv_hyperparameter_tuning
+from wcd_vae.hyperparameter import run_comprehensive_nested_cv
 from wcd_vae.plot import create_paper_assets
 from wcd_vae.scCRAFT.utils import set_seed
 
@@ -60,7 +60,7 @@ def main():
         balance=balance,
     )
 
-    results_df, outer_fold_results = nested_cv_hyperparameter_tuning(
+    results_df, outer_fold_results, sensitivity_results = run_comprehensive_nested_cv(
         adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
