@@ -16,7 +16,9 @@ def weights_init_normal(m):
         torch.nn.init.constant_(m.bias.data, 0.0)
 
 
-def generate_balanced_dataloader(adata, batch_size, batch_key="batch"):
+def generate_balanced_dataloader(
+    adata, batch_size, batch_key="batch", num_workers=4, pin_memory=True
+):
     if not adata.obs_names.is_unique:
         print("Error: Indices are not unique!")
         raise AssertionError(
@@ -64,7 +66,13 @@ def generate_balanced_dataloader(adata, batch_size, batch_key="batch"):
 
     # Create a TensorDataset and DataLoader
     combined_dataset = TensorDataset(x_tensor, v_tensor, label_tensor1, label_tensor2)
-    dataloader = DataLoader(combined_dataset, batch_size=batch_size * 2, shuffle=True)
+    dataloader = DataLoader(
+        combined_dataset,
+        batch_size=batch_size * 2,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
 
     return dataloader
 

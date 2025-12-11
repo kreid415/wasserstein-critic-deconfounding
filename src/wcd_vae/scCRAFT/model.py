@@ -65,6 +65,7 @@ class SCIntegrationModel(nn.Module):
         cos_coef,
         warmup_epoch,
         disc_iter,
+        num_workers,
     ):
         # Optimizer for VAE (Encoder + Decoder)
         optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
@@ -72,7 +73,13 @@ class SCIntegrationModel(nn.Module):
         optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
 
         for epoch in range(epochs):
-            data_loader = generate_balanced_dataloader(adata, batch_size=512, batch_key=batch_key)
+            data_loader = generate_balanced_dataloader(
+                adata,
+                batch_size=512,
+                batch_key=batch_key,
+                num_workers=num_workers,  # Enable multi-process data loading
+                pin_memory=True,  # Faster transfer to GPU
+            )
             self.VAE.train()
             self.D_Z.train()
             all_losses = 0
@@ -160,6 +167,7 @@ def train_integration_model(
     warmup_epoch=50,
     critic=False,
     scale=None,
+    num_workers=1,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -194,6 +202,7 @@ def train_integration_model(
         cos_coef=cos_coef,
         warmup_epoch=warmup_epoch,
         disc_iter=disc_iter,
+        num_workers=num_workers,
     )
     end_time = time.time()
     training_time = end_time - start_time
