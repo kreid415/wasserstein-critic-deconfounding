@@ -17,6 +17,7 @@ def main():
     )
     parser.add_argument("--batch_count", type=int, default=2, help="Number of batches to consider")
     parser.add_argument("--epochs", type=int, default=500, help="Number of training epochs")
+    parser.add_argument("--inner_epochs", type=int, default=100, help="Number of inner CV epochs")
     parser.add_argument("--reference_batch", type=int, default=0, help="Reference batch index")
     parser.add_argument(
         "--balance", action="store_true", help="Whether to balance batches during training"
@@ -30,6 +31,7 @@ def main():
     output_dir = args.output_dir
     batch_count = args.batch_count
     epochs = args.epochs
+    inner_epochs = args.inner_epochs
     reference_batch = args.reference_batch
     balance = args.balance
 
@@ -66,6 +68,7 @@ def main():
         celltype_key=celltype_key,
         reference_batch=reference_batch,
         epochs=epochs,
+        inner_epochs=inner_epochs,
         n_outer_folds=2,
         n_inner_folds=2,
         output_dir=output_dir,

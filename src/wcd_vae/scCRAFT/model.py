@@ -2,6 +2,7 @@ import sys
 import time
 
 import numpy as np
+import scipy
 from sklearn.decomposition import PCA
 import torch
 import torch.nn as nn
@@ -12,7 +13,6 @@ from wcd_vae.scCRAFT.networks import VAE, Discriminator
 from wcd_vae.scCRAFT.utils import (
     create_triplets,
     generate_adata_to_dataloader,
-    generate_balanced_dataloader,
     set_seed,
     weights_init_normal,
 )
@@ -28,11 +28,11 @@ else:
 class SCIntegrationModel(nn.Module):
     def __init__(self, adata, batch_key, z_dim, critic, seed, reference_batch):
         super().__init__()
+        # ... (Keep existing __init__ logic) ...
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
 
-        # Correctly initialize VAE with p_dim, v_dim, and latent_dim
         self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
         self.D_Z = Discriminator(
             n_input=self.z_dim,
@@ -40,19 +40,143 @@ class SCIntegrationModel(nn.Module):
             critic=critic,
             reference_batch=reference_batch,
         )
-        self.mse_loss = torch.nn.MSELoss()
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Using device: {self.device}")
-        # Move models to CUDA if available
         self.VAE.to(self.device)
         self.D_Z.to(self.device)
 
-        # Initialize weights
         if seed is not None:
             set_seed(seed)
         self.VAE.apply(weights_init_normal)
         self.D_Z.apply(weights_init_normal)
+
+    def _prepare_tensors(self, adata, batch_key):
+        """
+        One-time setup: Moves data to GPU and builds index maps for sampling.
+        """
+        # 1. Convert Feature Matrix
+        if scipy.sparse.issparse(adata.X):
+            X_tensor = torch.tensor(adata.X.toarray(), dtype=torch.float32)
+        else:
+            X_tensor = torch.tensor(adata.X, dtype=torch.float32)
+
+        # 2. Prepare Labels and Batch Indices
+        unique_batches = adata.obs[batch_key].sort_values().unique()
+        batch_map = {b: i for i, b in enumerate(unique_batches)}
+        batch_indices = np.array([batch_map[b] for b in adata.obs[batch_key]])
+
+        # Create tensors (initially on CPU)
+        batch_tensor = torch.tensor(batch_indices, dtype=torch.int64)
+        label1_tensor = torch.tensor(adata.obs["leiden1"].cat.codes.values, dtype=torch.int64)
+        label2_tensor = torch.tensor(adata.obs["leiden2"].cat.codes.values, dtype=torch.int64)
+
+        # --- FIX: Explicitly assign the GPU tensors back to the variables ---
+        X_tensor = X_tensor.to(self.device)
+        batch_tensor = batch_tensor.to(self.device)
+        label1_tensor = label1_tensor.to(self.device)
+        label2_tensor = label2_tensor.to(self.device)
+
+        data_dict = {
+            "X": X_tensor,
+            "batch_labels": batch_tensor,
+            "l1": label1_tensor,
+            "l2": label2_tensor,
+        }
+
+        # Pre-calculate indices for each batch for fast sampling
+        # batch_tensor is now on GPU, so 'idxs' will also be on GPU
+        batch_indices_map = {}
+        for i in range(len(unique_batches)):
+            idxs = (batch_tensor == i).nonzero(as_tuple=True)[0]
+            batch_indices_map[i] = idxs
+
+        return data_dict, batch_indices_map
+
+    def _sample_epoch_indices(self, batch_indices_map, sample_per_batch=512):
+        """
+        Generates balanced, shuffled indices for one epoch.
+        """
+        epoch_indices = []
+        epoch_batch_labels = []
+
+        for b_id, available_indices in batch_indices_map.items():
+            n_avail = len(available_indices)
+
+            # Sample indices (with replacement if necessary)
+            if n_avail >= sample_per_batch:
+                rand_perm = torch.randperm(n_avail, device=self.device)[:sample_per_batch]
+                chosen = available_indices[rand_perm]
+            else:
+                rand_idx = torch.randint(n_avail, (sample_per_batch,), device=self.device)
+                chosen = available_indices[rand_idx]
+
+            epoch_indices.append(chosen)
+            # Create corresponding batch labels
+            epoch_batch_labels.append(
+                torch.full((sample_per_batch,), b_id, device=self.device, dtype=torch.int64)
+            )
+
+        # Concatenate and shuffle
+        train_idxs = torch.cat(epoch_indices)
+        train_v = torch.cat(epoch_batch_labels)
+
+        shuffle_order = torch.randperm(len(train_idxs), device=self.device)
+        return train_idxs[shuffle_order], train_v[shuffle_order]
+
+    def _train_batch(self, batch_data, optimizers, params, warmup):
+        """
+        Performs the forward and backward pass for a single mini-batch.
+        """
+        x, v, labels_low, labels_high = batch_data
+        opt_g, opt_d = optimizers
+        d_coef, kl_coef, triplet_coef, cos_coef, disc_iter = params
+
+        batch_size = x.size(0)
+        v_true = v
+        v_one_hot = torch.zeros(batch_size, self.v_dim, device=self.device)
+        v_one_hot.scatter_(1, v.unsqueeze(1), 1)
+
+        # 1. VAE Forward Pass
+        reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot, warmup)
+        reconst_loss = torch.clamp(reconst_loss, max=1e5)
+
+        loss_cos = (1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)).mean()
+        loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
+
+        # 2. Discriminator Steps
+        for _ in range(disc_iter):
+            opt_d.zero_grad()
+            loss_d_z, gp = self.D_Z(z.detach(), v_true)  # D_Z handles 'critic' flag internally
+            loss_d_z += gp
+            loss_d_z.backward(retain_graph=True)
+            opt_d.step()
+
+        # 3. Generator/VAE Update
+        opt_g.zero_grad()
+        loss_da, gp = self.D_Z(z, v_true)
+        triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
+
+        if warmup:
+            all_loss = (
+                -0 * loss_da
+                + 1 * loss_vae
+                + gp
+                + triplet_coef * triplet_loss
+                + cos_coef * loss_cos
+            )
+        else:
+            all_loss = (
+                -d_coef * loss_da
+                + 1 * loss_vae
+                + gp
+                + triplet_coef * triplet_loss
+                + cos_coef * loss_cos
+            )
+
+        all_loss.backward()
+        opt_g.step()
+
+        return all_loss, loss_da, triplet_loss, loss_vae
 
     def train_model(
         self,
@@ -67,90 +191,42 @@ class SCIntegrationModel(nn.Module):
         disc_iter,
         num_workers,
     ):
-        # Optimizer for VAE (Encoder + Decoder)
+        # 1. Prepare Data (One-time GPU transfer)
+        data_dict, batch_indices_map = self._prepare_tensors(adata, batch_key)
+
         optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
-        # Optimizer for Discriminator
         optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
+        optimizers = (optimizer_g, optimizer_d_z)
+
+        batch_size_loader = 1024
+
+        print(f"Starting training on {self.device}...")
 
         for epoch in range(epochs):
-            data_loader = generate_balanced_dataloader(
-                adata,
-                batch_size=512,
-                batch_key=batch_key,
-                num_workers=num_workers,  # Enable multi-process data loading
-                pin_memory=True,  # Faster transfer to GPU
-            )
             self.VAE.train()
             self.D_Z.train()
-            all_losses = 0
-            d_loss = 0
-            t_loss = 0
-            v_loss = 0
+
+            # 2. Sample Indices for this Epoch
+            train_idxs, train_v = self._sample_epoch_indices(batch_indices_map)
+            total_samples = len(train_idxs)
+
             warmup = epoch < warmup_epoch
-            for _, (x, v, labels_low, labels_high) in enumerate(data_loader):
-                x = x.to(self.device)
-                v = v.to(self.device)
-                labels_low = labels_low.to(self.device)
-                labels_high = labels_high.to(self.device)
-                batch_size = x.size(0)
-                v_true = v
-                v_one_hot = torch.zeros(batch_size, self.v_dim).to(x.device)
-                # Use scatter_ to put 1s in the indices indicated by v
-                v = v.unsqueeze(1)  # Ensure v is of shape [batch_size, 1] if it's not already
+            params = (d_coef, kl_coef, triplet_coef, cos_coef, disc_iter)
 
-                v_one_hot.scatter_(1, v, 1).to(v.device)
+            # 3. Iterate Mini-batches
+            for i in range(0, total_samples, batch_size_loader):
+                end = min(i + batch_size_loader, total_samples)
+                mb_idxs = train_idxs[i:end]
 
-                reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot, warmup)
-                reconst_loss = torch.clamp(reconst_loss, max=1e5)
+                # Slice directly from GPU tensors
+                batch_data = (
+                    data_dict["X"][mb_idxs],
+                    train_v[i:end],
+                    data_dict["l1"][mb_idxs],
+                    data_dict["l2"][mb_idxs],
+                )
 
-                loss_cos = (
-                    1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)
-                ).mean()
-                loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
-
-                for _ in range(disc_iter):
-                    optimizer_d_z.zero_grad()
-                    if self.D_Z.critic:
-                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
-                    else:
-                        loss_d_z, gp = self.D_Z(z.detach(), v_true)
-
-                    loss_d_z += gp
-
-                    loss_d_z.backward(retain_graph=True)
-                    optimizer_d_z.step()
-
-                optimizer_g.zero_grad()
-                if self.D_Z.critic:
-                    loss_da, gp = self.D_Z(z, v_true)
-                else:
-                    loss_da, gp = self.D_Z(z, v_true)
-
-                triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
-
-                if warmup:
-                    all_loss = (
-                        -0 * loss_da
-                        + 1 * loss_vae
-                        + gp
-                        + triplet_coef * triplet_loss
-                        + cos_coef * loss_cos
-                    )
-                else:
-                    all_loss = (
-                        -d_coef * loss_da
-                        + 1 * loss_vae
-                        + gp
-                        + triplet_coef * triplet_loss
-                        + cos_coef * loss_cos
-                    )
-
-                all_loss.backward()
-                optimizer_g.step()
-                all_losses += all_loss
-                d_loss += loss_da
-                t_loss += triplet_loss
-                v_loss += loss_vae
+                self._train_batch(batch_data, optimizers, params, warmup)
 
 
 def train_integration_model(
@@ -168,20 +244,18 @@ def train_integration_model(
     critic=False,
     scale=None,
     num_workers=1,
+    flex_epochs=False,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
 
     # Default number of epochs
-    if epochs == 150:
-        # Check if the number of cells goes above 100000
-        if number_of_cells > 100000:
-            calculated_epochs = int(1.5 * number_of_cells / (number_of_batches * 512))
-            # If the calculated value is larger than the default, use it instead
-            if calculated_epochs > epochs:
-                epochs = calculated_epochs
-    else:
-        epochs = epochs
+    if flex_epochs and number_of_cells > 100000:
+        calculated_epochs = int(1.5 * number_of_cells / (number_of_batches * 512))
+        # If the calculated value is larger than the default, use it instead
+        if calculated_epochs > epochs:
+            epochs = calculated_epochs
+
     model = SCIntegrationModel(
         adata=adata,
         batch_key=batch_key,

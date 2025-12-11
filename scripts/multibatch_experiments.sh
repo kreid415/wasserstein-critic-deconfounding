@@ -8,57 +8,61 @@ mkdir -p ./scripts/multibatch_experiments/balanced/immune
 # Create a central logs directory
 mkdir -p ./scripts/multibatch_experiments/logs
 
-echo "Generating commands and starting parallel execution..."
+echo "Starting sequential execution..."
 echo "Logs will be saved to: ./scripts/multibatch_experiments/logs/"
 
-# 2. Generate commands + log names, piped to Parallel
-# We use 'echo -e' so that it recognizes '\t' as a tab separator.
-(
-    # --- PANCREAS SEQUENCE (Batch counts 2 to 8) ---
-    for i in {2..8}; do
-        # Unbalanced
-        cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch 0"
-        logname="panc_batch${i}_unbalanced"
-        echo -e "${cmd}\t${logname}"
-        
-        # Balanced
-        cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch 0 --balance"
-        logname="panc_batch${i}_balanced"
-        echo -e "${cmd}\t${logname}"
-    done
+# Function to execute command and log output to a file
+run_task() {
+    local cmd="$1"
+    local logname="$2"
+    local logfile="./scripts/multibatch_experiments/logs/${logname}.log"
+    
+    echo "----------------------------------------------------------------"
+    echo "Starting task: $logname"
+    echo "Command: $cmd"
+    echo "Logging to: $logfile"
+    
+    # Execute the command, redirecting both stdout (1) and stderr (2) to the logfile
+    $cmd > "$logfile" 2>&1
+    
+    echo "Finished task: $logname"
+}
 
-    # --- IMMUNE SEQUENCE (Batch counts 2 to 4) ---
-    for i in {2..4}; do
-        # Unbalanced
-        cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/unbalanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch 0"
-        logname="immune_batch${i}_unbalanced"
-        echo -e "${cmd}\t${logname}"
-        
-        # Balanced
-        cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/balanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch 0 --balance"
-        logname="immune_batch${i}_balanced"
-        echo -e "${cmd}\t${logname}"
-    done
-
-    # --- THE OUTLIER (Panc 9 dir name, Batch Count 2, Ref Batch 9) ---
+# --- PANCREAS SEQUENCE (Batch counts 2 to 8) ---
+for i in {2..8}; do
     # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_9 --batch_count 2 --epochs 500 --reference_batch 9"
-    # Give it a distinct log name highlighting the reference batch difference
-    logname="panc_outlier_ref9_unbalanced"
-    echo -e "${cmd}\t${logname}"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch 0"
+    logname="panc_batch${i}_unbalanced"
+    run_task "$cmd" "$logname"
     
     # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_9 --batch_count 2 --epochs 500 --reference_batch 9 --balance"
-    logname="panc_outlier_ref9_balanced"
-    echo -e "${cmd}\t${logname}"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch 0 --balance"
+    logname="panc_batch${i}_balanced"
+    run_task "$cmd" "$logname"
+done
 
-) | parallel --colsep '\t' -j 6 --verbose \
-    --joblog ./scripts/multibatch_experiments/logs/master_joblog.txt \
-    --results ./scripts/multibatch_experiments/logs/{2} \
-    {1}
+# --- IMMUNE SEQUENCE (Batch counts 2 to 4) ---
+for i in {2..4}; do
+    # Unbalanced
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/unbalanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch 0"
+    logname="immune_batch${i}_unbalanced"
+    run_task "$cmd" "$logname"
+    
+    # Balanced
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/balanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch 0 --balance"
+    logname="immune_batch${i}_balanced"
+    run_task "$cmd" "$logname"
+done
 
-# Explaining the parallel command at the end:
-# --colsep '\t': Split the input line by tabs. {1} is command, {2} is logname.
-# --joblog ...: Creates a single summary file of all jobs (exit codes, runtimes).
-# --results .../{2}: Creates a directory named after the logname column, containing stdout and stderr files.
-# {1}: The actual command to execute.
+# --- THE OUTLIER (Panc 9 dir name, Batch Count 2, Ref Batch 9) ---
+# Unbalanced
+cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_9 --batch_count 2 --epochs 500 --reference_batch 9"
+logname="panc_outlier_ref9_unbalanced"
+run_task "$cmd" "$logname"
+
+# Balanced
+cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_9 --batch_count 2 --epochs 500 --reference_batch 9 --balance"
+logname="panc_outlier_ref9_balanced"
+run_task "$cmd" "$logname"
+
+echo "All tasks completed."
