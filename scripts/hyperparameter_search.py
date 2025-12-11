@@ -71,7 +71,7 @@ def main():
         output_dir=output_dir,
         output_prefix=f"{data_set}",
         random_state=42,
-        num_workers=4,
+        num_workers=1,
     )
 
     create_paper_assets(
