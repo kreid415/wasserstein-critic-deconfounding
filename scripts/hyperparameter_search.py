@@ -50,7 +50,7 @@ def main():
         celltype_key = "cell_type"
         data_path = "/workspaces/data/Lung_atlas_public.h5ad"
 
-    adata = prep_data(
+    adata, largest_batch_name = prep_data(
         data_path,
         batch_key=batch_key,
         celltype_key=celltype_key,
@@ -67,14 +67,14 @@ def main():
         batch_key=batch_key,
         celltype_key=celltype_key,
         reference_batch=reference_batch,
+        reference_batch_name_str=largest_batch_name,
         epochs=epochs,
         inner_epochs=inner_epochs,
-        n_outer_folds=2,
-        n_inner_folds=2,
+        n_outer_folds=5,
+        n_inner_folds=3,
         output_dir=output_dir,
         output_prefix=f"{data_set}",
         random_state=42,
-        num_workers=1,
     )
 
     create_paper_assets(

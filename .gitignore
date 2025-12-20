@@ -27,3 +27,5 @@ build/
 *.csv
 *.pkl
 **/logs/
+*.nbc
+*.nbi

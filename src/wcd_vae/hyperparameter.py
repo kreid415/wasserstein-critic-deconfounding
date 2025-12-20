@@ -56,10 +56,10 @@ def run_comprehensive_nested_cv(
     inner_epochs=100,
     disc_iter=10,
     reference_batch=None,
+    reference_batch_name_str=None,
     output_dir=None,
     output_prefix=None,
     random_state=42,
-    num_workers=1,
 ):
     """
     Performs optimized nested cross-validation.
@@ -136,7 +136,7 @@ def run_comprehensive_nested_cv(
                         critic=use_critic,
                         disc_iter=iters,
                         reference_batch=reference_batch,
-                        num_workers=num_workers,
+                        reference_batch_name_str=reference_batch_name_str,
                     )
 
                     # 3. Evaluate on Inner Validation Set (FAST METRICS ONLY)

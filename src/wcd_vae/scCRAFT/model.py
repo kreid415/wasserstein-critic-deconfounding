@@ -50,9 +50,10 @@ class SCIntegrationModel(nn.Module):
         self.VAE.apply(weights_init_normal)
         self.D_Z.apply(weights_init_normal)
 
-    def _prepare_tensors(self, adata, batch_key):
+    def _prepare_tensors(self, adata, batch_key, reference_batch_name_str=None):
         """
         One-time setup: Moves data to GPU and builds index maps for sampling.
+        Determines definitive reference batch index based on provided name string.
         """
         # 1. Convert Feature Matrix
         if scipy.sparse.issparse(adata.X):
@@ -61,8 +62,23 @@ class SCIntegrationModel(nn.Module):
             X_tensor = torch.tensor(adata.X, dtype=torch.float32)
 
         # 2. Prepare Labels and Batch Indices
+        # THIS IS THE DEFINITIVE MAPPING SOURCE
         unique_batches = adata.obs[batch_key].sort_values().unique()
         batch_map = {b: i for i, b in enumerate(unique_batches)}
+
+        # --- NEW SECTION: RESOLVE REFERENCE INDEX ---
+        reference_batch_idx = 0  # Default safe fallback
+        if reference_batch_name_str is not None:
+            if reference_batch_name_str in batch_map:
+                # Found it! Get its correct integer index according to this specific map.
+                reference_batch_idx = batch_map[reference_batch_name_str]
+            else:
+                # This happens if prep_data determined a largest batch, but subsequent
+                # filtering in this step somehow removed it (unlikely but possible safety check).
+                raise ValueError(
+                    f"Reference batch name '{reference_batch_name_str}' not found in the current batch mapping."
+                )
+
         batch_indices = np.array([batch_map[b] for b in adata.obs[batch_key]])
 
         # Create tensors (initially on CPU)
@@ -71,6 +87,7 @@ class SCIntegrationModel(nn.Module):
         label2_tensor = torch.tensor(adata.obs["leiden2"].cat.codes.values, dtype=torch.int64)
 
         # --- FIX: Explicitly assign the GPU tensors back to the variables ---
+        # Move to device (e.g., GPU)
         X_tensor = X_tensor.to(self.device)
         batch_tensor = batch_tensor.to(self.device)
         label1_tensor = label1_tensor.to(self.device)
@@ -90,7 +107,8 @@ class SCIntegrationModel(nn.Module):
             idxs = (batch_tensor == i).nonzero(as_tuple=True)[0]
             batch_indices_map[i] = idxs
 
-        return data_dict, batch_indices_map
+        # Return the index along with the data
+        return data_dict, batch_indices_map, reference_batch_idx
 
     def _sample_epoch_indices(self, batch_indices_map, sample_per_batch=512):
         """
@@ -123,7 +141,7 @@ class SCIntegrationModel(nn.Module):
         shuffle_order = torch.randperm(len(train_idxs), device=self.device)
         return train_idxs[shuffle_order], train_v[shuffle_order]
 
-    def _train_batch(self, batch_data, optimizers, params, warmup):
+    def _train_batch(self, batch_data, optimizers, params, warmup, reference_batch_idx=None):
         """
         Performs the forward and backward pass for a single mini-batch.
         """
@@ -146,7 +164,9 @@ class SCIntegrationModel(nn.Module):
         # 2. Discriminator Steps
         for _ in range(disc_iter):
             opt_d.zero_grad()
-            loss_d_z, gp = self.D_Z(z.detach(), v_true)  # D_Z handles 'critic' flag internally
+            loss_d_z, gp = self.D_Z(
+                z.detach(), v_true, reference_batch=reference_batch_idx
+            )  # D_Z handles 'critic' flag internally
             loss_d_z += gp
             loss_d_z.backward(retain_graph=True)
             opt_d.step()
@@ -189,10 +209,12 @@ class SCIntegrationModel(nn.Module):
         cos_coef,
         warmup_epoch,
         disc_iter,
-        num_workers,
+        reference_batch_name_str=None,
     ):
         # 1. Prepare Data (One-time GPU transfer)
-        data_dict, batch_indices_map = self._prepare_tensors(adata, batch_key)
+        data_dict, batch_indices_map, reference_batch_idx = self._prepare_tensors(
+            adata, batch_key, reference_batch_name_str
+        )
 
         optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
         optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
@@ -226,7 +248,7 @@ class SCIntegrationModel(nn.Module):
                     data_dict["l2"][mb_idxs],
                 )
 
-                self._train_batch(batch_data, optimizers, params, warmup)
+                self._train_batch(batch_data, optimizers, params, warmup, reference_batch_name_str)
 
 
 def train_integration_model(
@@ -234,6 +256,7 @@ def train_integration_model(
     disc_iter,
     batch_key="batch",
     reference_batch=None,
+    reference_batch_name_str=None,
     z_dim=256,
     epochs=150,
     d_coef=0.2,
@@ -243,7 +266,6 @@ def train_integration_model(
     warmup_epoch=50,
     critic=False,
     scale=None,
-    num_workers=1,
     flex_epochs=False,
 ):
     number_of_cells = adata.n_obs
@@ -276,7 +298,7 @@ def train_integration_model(
         cos_coef=cos_coef,
         warmup_epoch=warmup_epoch,
         disc_iter=disc_iter,
-        num_workers=num_workers,
+        reference_batch_name_str=reference_batch_name_str,
     )
     end_time = time.time()
     training_time = end_time - start_time

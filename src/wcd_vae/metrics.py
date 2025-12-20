@@ -1,5 +1,6 @@
 from typing import Optional
 
+from numba import njit  # <--- Added Numba import
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import normalized_mutual_info_score, silhouette_score
@@ -157,9 +158,88 @@ def compute_metrics(
     }
 
 
+# --- OPTIMIZED NUMBA LOGIC STARTS HERE ---
+
+
+@njit(fastmath=True, cache=True)
+def compute_simpson_numba(indices, distances, batch_codes, n_batches, perplexity=30):
+    """
+    Numba-accelerated LISI computation.
+    Replaces the slow Python loop and binary search.
+    """
+    n_cells = indices.shape[0]
+    n_neighbors = indices.shape[1]
+    lisi_scores = np.zeros(n_cells)
+
+    # Pre-compute target entropy
+    target_entropy = np.log2(perplexity)
+
+    for i in range(n_cells):
+        # Get distances for this cell (excluding self at index 0)
+        # Input distances should be squared distances for Gaussian kernel
+        dists = distances[i, 1:]
+        batches = batch_codes[indices[i, 1:]]
+
+        # Binary search for beta = 1 / (2 * sigma^2)
+        beta_min = -np.inf
+        beta_max = np.inf
+        beta = 1.0
+
+        # Binary search for 50 iterations (standard t-SNE optimization)
+        for _ in range(50):
+            # Compute Gaussian kernel
+            p = np.exp(-dists * beta)
+            sum_p = np.sum(p)
+
+            if sum_p == 0:
+                sum_p = 1e-10
+
+            # Entropy calculation
+            h = np.log2(sum_p) + beta * np.sum(dists * p) / sum_p / np.log(2)
+
+            diff = h - target_entropy
+
+            if np.abs(diff) < 1e-5:
+                break
+
+            if diff > 0:
+                beta_min = beta
+                if beta_max == np.inf:
+                    beta *= 2.0
+                else:
+                    beta = (beta + beta_max) / 2.0
+            else:
+                beta_max = beta
+                if beta_min == -np.inf:
+                    beta /= 2.0
+                else:
+                    beta = (beta + beta_min) / 2.0
+
+        # Final weights
+        weights = np.exp(-dists * beta)
+        weights_sum = np.sum(weights)
+        if weights_sum > 0:
+            weights /= weights_sum
+
+        # Batch probabilities
+        batch_probs = np.zeros(n_batches)
+        for j in range(len(weights)):
+            b = batches[j]
+            batch_probs[b] += weights[j]
+
+        # Inverse Simpson Index
+        simpson = np.sum(batch_probs**2)
+        if simpson > 0:
+            lisi_scores[i] = 1.0 / simpson
+        else:
+            lisi_scores[i] = n_neighbors  # Fallback if numerical instability
+
+    return lisi_scores
+
+
 def compute_lisi(x, metadata, label_colname, perplexity=30):
     """
-    Compute Local Inverse Simpson Index (LISI) for batch mixing evaluation.
+    Compute Local Inverse Simpson Index (LISI) using optimized Numba backend.
 
     Parameters:
     -----------
@@ -170,7 +250,7 @@ def compute_lisi(x, metadata, label_colname, perplexity=30):
     label_colname : str
         Column name in metadata containing the batch labels
     perplexity : int, default=30
-        Perplexity parameter for Gaussian kernel (similar to t-SNE)
+        Perplexity parameter for Gaussian kernel
 
     Returns:
     --------
@@ -179,86 +259,29 @@ def compute_lisi(x, metadata, label_colname, perplexity=30):
     """
     n_cells = x.shape[0]
 
-    # Get batch labels
-    batch_labels = metadata[label_colname].values
-    unique_batches = np.unique(batch_labels)
-    n_batches = len(unique_batches)
+    # 1. Prepare Batches (Integer encoding)
+    if label_colname not in metadata:
+        raise ValueError(f"Column {label_colname} not found in metadata")
 
-    # Create mapping from batch to index
-    batch_to_idx = {batch: idx for idx, batch in enumerate(unique_batches)}
-    batch_indices = np.array([batch_to_idx[batch] for batch in batch_labels])
+    # Convert to category codes for Numba
+    batch_codes = metadata[label_colname].astype("category").cat.codes.values
+    n_batches = len(np.unique(batch_codes))
 
-    # Find k-nearest neighbors (k should be larger than perplexity)
-    k = min(90, n_cells - 1)  # Use 90 neighbors or n_cells-1 if smaller
+    # 2. Nearest Neighbors
+    # k must be > perplexity. 3*perplexity is a standard heuristic.
+    k = min(int(perplexity * 3), n_cells - 1)
+
     print(f"Computing {k} nearest neighbors for {n_cells} cells...")
-    nbrs = NearestNeighbors(n_neighbors=k, algorithm="auto").fit(x)
+    nbrs = NearestNeighbors(n_neighbors=k + 1, algorithm="auto").fit(x)
     distances, indices = nbrs.kneighbors(x)
 
-    lisi_scores = np.zeros(n_cells)
-
-    # Add progress bar for LISI computation
-    print(f"Computing LISI scores for {label_colname}...")
-    for i in range(n_cells):
-        # Get neighbors and distances for current cell
-        neighbor_indices = indices[i, 1:]  # Exclude self (index 0)
-        neighbor_distances = distances[i, 1:]
-
-        # Compute Gaussian kernel weights with adaptive bandwidth
-        # Find bandwidth that gives desired perplexity
-        sigma = find_sigma(neighbor_distances, perplexity)
-        weights = np.exp(-(neighbor_distances**2) / (2 * sigma**2))
-        weights = weights / np.sum(weights)  # Normalize
-
-        # Get batch labels of neighbors
-        neighbor_batches = batch_indices[neighbor_indices]
-
-        # Compute probability of each batch in neighborhood
-        batch_probs = np.zeros(n_batches)
-        for j, batch_idx in enumerate(neighbor_batches):
-            batch_probs[batch_idx] += weights[j]
-
-        # Avoid division by zero
-        batch_probs = batch_probs + 1e-12
-
-        # Compute Simpson diversity (inverse Simpson index)
-        simpson_index = np.sum(batch_probs**2)
-        lisi_scores[i] = 1.0 / simpson_index
+    # 3. Compute LISI (Numba accelerated)
+    print(f"Computing LISI scores for {label_colname} (Optimized)...")
+    # Pass squared distances because Gaussian kernel is exp(-d^2 / 2sigma^2)
+    # NearestNeighbors returns Euclidean distance (d), so we pass d^2
+    lisi_scores = compute_simpson_numba(indices, distances**2, batch_codes, n_batches, perplexity)
 
     return lisi_scores
-
-
-def find_sigma(distances, target_perplexity, tol=1e-5, max_iter=50):
-    """
-    Find the Gaussian kernel bandwidth (sigma) that achieves target perplexity.
-    Uses binary search similar to t-SNE implementation.
-    """
-
-    def perplexity_fn(sigma):
-        if sigma <= 0:
-            return 0
-        weights = np.exp(-(distances**2) / (2 * sigma**2))
-        weights = weights / np.sum(weights)
-        # Avoid log(0)
-        weights = np.maximum(weights, 1e-12)
-        h = -np.sum(weights * np.log2(weights))
-        return 2**h
-
-    # Binary search for sigma
-    sigma_min, sigma_max = 1e-20, 1000.0
-
-    for _ in range(max_iter):
-        sigma = (sigma_min + sigma_max) / 2.0
-        perp = perplexity_fn(sigma)
-
-        if abs(perp - target_perplexity) < tol:
-            break
-
-        if perp > target_perplexity:
-            sigma_max = sigma
-        else:
-            sigma_min = sigma
-
-    return sigma
 
 
 def ilisi_graph(
@@ -306,7 +329,11 @@ def ilisi_graph(
     lisi_scores = compute_lisi(x, adata.obs, batch_key, perplexity)
 
     # Normalize by number of batches (perfect mixing = 1.0, no mixing = 1/n_batches)
-    normalized_scores = (lisi_scores - 1) / (n_batches - 1)
+    # Avoid division by zero if n_batches == 1
+    if n_batches > 1:
+        normalized_scores = (lisi_scores - 1) / (n_batches - 1)
+    else:
+        normalized_scores = lisi_scores - 1  # Should be 0
 
     # If indices are provided, only return the mean for those cells
     if subset_indices is not None:
@@ -359,7 +386,10 @@ def clisi_graph(
     lisi_scores = compute_lisi(x, adata.obs, label_key, perplexity)
 
     # Normalize by number of cell types (perfect mixing = 1.0, no mixing = 1/n_celltypes)
-    normalized_scores = (lisi_scores - 1) / (n_celltypes - 1)
+    if n_celltypes > 1:
+        normalized_scores = (lisi_scores - 1) / (n_celltypes - 1)
+    else:
+        normalized_scores = lisi_scores - 1
 
     if subset_indices is not None:
         return np.mean(normalized_scores[subset_indices])

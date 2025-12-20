@@ -14,7 +14,6 @@ def get_dataloader_from_adata(
     cell_label: str,
     test_size=0.2,
     batch_size: int = 128,
-    num_workers: int = 8,
 ):
     # transform expression data into tensor
     data = adata_concat.X.toarray() if hasattr(adata_concat.X, "toarray") else adata_concat.X
@@ -43,14 +42,18 @@ def get_dataloader_from_adata(
     train_loader, test_loader = (
         utils.DataLoader(
             dataset=train_set,
-            num_workers=num_workers,
             batch_size=batch_size,
             shuffle=True,
         ),
-        utils.DataLoader(test_set, num_workers=num_workers, batch_size=batch_size, shuffle=False),
+        utils.DataLoader(test_set, batch_size=batch_size, shuffle=False),
     )
 
     return train_loader, test_loader, domain_encoder, cell_encoder
+
+
+import scanpy as sc
+import numpy as np
+# Ensure multi_resolution_cluster is imported
 
 
 def prep_data(
@@ -66,22 +69,35 @@ def prep_data(
 ):
     adata = sc.read_h5ad(anndata_path)
 
-    adata = adata[
-        adata.obs[batch_key].isin(adata.obs[batch_key].value_counts().index[:batch_count])
-    ].copy()
+    # 1. Initial selection: Keep top 'batch_count' largest batches
+    top_batches = adata.obs[batch_key].value_counts().index[:batch_count]
+    adata = adata[adata.obs[batch_key].isin(top_batches)].copy()
 
+    # 2. Balancing (using the robust intersection method discussed previously)
     if balance:
-        batch1_name = adata.obs[batch_key].value_counts().index[0]
-        batch2_name = adata.obs[batch_key].value_counts().index[1]
+        remaining_batches = adata.obs[batch_key].unique()
+        if len(remaining_batches) > 0:
+            # Start with first batch's types
+            first_batch_name = remaining_batches[0]
+            common_celltypes_set = set(
+                adata[adata.obs[batch_key] == first_batch_name].obs[celltype_key].unique()
+            )
+            # Intersect with all others
+            for batch_name in remaining_batches[1:]:
+                current_batch_celltypes = set(
+                    adata[adata.obs[batch_key] == batch_name].obs[celltype_key].unique()
+                )
+                common_celltypes_set.intersection_update(current_batch_celltypes)
 
-        common_celltypes = np.intersect1d(
-            adata[adata.obs[batch_key] == batch1_name].obs[celltype_key].unique(),
-            adata[adata.obs[batch_key] == batch2_name].obs[celltype_key].unique(),
-        )
+            if not common_celltypes_set:
+                raise ValueError("Balancing failed: No common cell types found.")
 
-        # Filter the adata object to keep only the common cell types
-        adata = adata[adata.obs[celltype_key].isin(common_celltypes)].copy()
+            # Filter adata to keep only common types
+            adata = adata[adata.obs[celltype_key].isin(list(common_celltypes_set))].copy()
+        else:
+            raise ValueError("No batches remained before balancing.")
 
+    # 3. Standard preprocessing (HVGs, scaling, etc.)
     adata.raw = adata
     adata.layers["counts"] = adata.X.copy()
     sc.pp.filter_cells(adata, min_genes=min_genes)
@@ -93,4 +109,11 @@ def prep_data(
 
     multi_resolution_cluster(adata, resolution1=1, method="Leiden")
 
-    return adata
+    # --- FINAL STEP: Determine Largest Batch Name from FINAL data ---
+    # This is safe because balancing is finished.
+    largest_batch_name = adata.obs[batch_key].value_counts().idxmax()
+    print(f"Final preprocessed data has {adata.n_obs} cells.")
+    print(f"The largest batch in the final dataset is: '{largest_batch_name}'")
+
+    # Return the data AND the NAME string
+    return adata, largest_batch_name

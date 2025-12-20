@@ -42,7 +42,7 @@ for i in {0..9}; do
     # Balanced
     cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/balanced/panc/panc_$i --batch_count 100 --epochs 500 --reference_batch $i --balance"
     logname="panc_ref${i}_balanced"
-    run_task "$cmd" "$logname"
+    # run_task "$cmd" "$logname"
 done
 
 # --- IMMUNE EXPERIMENTS (0 to 5) ---
@@ -56,21 +56,21 @@ for i in {0..5}; do
     # Balanced
     cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/balanced/immune/immune_$i --batch_count 100 --epochs 500 --reference_batch $i --balance"
     logname="immune_ref${i}_balanced"
-    run_task "$cmd" "$logname"
+    # run_task "$cmd" "$logname"
 done
 
-# --- LUNG EXPERIMENTS (0 to 1) ---
-echo "Starting Lung Queue..."
-for i in {0..1}; do
-    # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset lung --output_dir $BaseDir/unbalanced/lung/lung_$i --batch_count 100 --epochs 500 --reference_batch $i"
-    logname="lung_ref${i}_unbalanced"
-    run_task "$cmd" "$logname"
+# # --- LUNG EXPERIMENTS (0 to 1) ---
+# echo "Starting Lung Queue..."
+# for i in {0..1}; do
+#     # Unbalanced
+#     cmd="python scripts/hyperparameter_search.py --dataset lung --output_dir $BaseDir/unbalanced/lung/lung_$i --batch_count 100 --epochs 500 --reference_batch $i"
+#     logname="lung_ref${i}_unbalanced"
+#     run_task "$cmd" "$logname"
     
-    # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset lung --output_dir $BaseDir/balanced/lung/lung_$i --batch_count 100 --epochs 500 --reference_batch $i --balance"
-    logname="lung_ref${i}_balanced"
-    run_task "$cmd" "$logname"
-done
+#     # Balanced
+#     cmd="python scripts/hyperparameter_search.py --dataset lung --output_dir $BaseDir/balanced/lung/lung_$i --batch_count 100 --epochs 500 --reference_batch $i --balance"
+#     logname="lung_ref${i}_balanced"
+#     run_task "$cmd" "$logname"
+# done
 
 echo "All reference experiments completed."

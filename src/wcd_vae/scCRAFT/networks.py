@@ -244,7 +244,9 @@ class ReferenceWassersteinLoss(nn.Module):
         self.reference_class = reference_class
         self.reduction = reduction
 
-    def forward(self, output: torch.Tensor, batch_ids: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, output: torch.Tensor, batch_ids: torch.Tensor, reference_batch=None
+    ) -> torch.Tensor:
         """
         Args:
             output: Tensor of shape [B, K] - critic scores for each of K classes.
@@ -255,7 +257,11 @@ class ReferenceWassersteinLoss(nn.Module):
         num_domains = output.shape[1]
 
         # --- 1. Isolate the reference class samples ---
-        mask_ref = batch_ids == self.reference_class
+        mask_ref = (
+            batch_ids == self.reference_class
+            if reference_batch is None
+            else batch_ids == reference_batch
+        )
 
         # If no reference samples are in this batch, we cannot compute the loss.
         if mask_ref.sum() == 0:
@@ -415,7 +421,14 @@ def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, n_input, domain_number, critic=False, reference_batch=None):
+    def __init__(
+        self,
+        n_input,
+        domain_number,
+        critic=False,
+        reference_batch=None,
+        reference_batch_name_str=None,
+    ):
         super().__init__()
         n_hidden = 128
         self.critic = critic
@@ -434,7 +447,7 @@ class Discriminator(nn.Module):
             # If not using critic, use cross-entropy loss
             self.loss = CrossEntropy()
 
-    def forward(self, x, batch_ids, generator=False):
+    def forward(self, x, batch_ids, generator=False, reference_batch=None):
         # Forward pass through layers
         h = F.relu(self.fc1(x))
         h = F.relu(self.fc2(h))
@@ -444,7 +457,10 @@ class Discriminator(nn.Module):
             # If batch_ids is None, return the output directly
             return output
 
-        discriminator_loss = self.loss(output, batch_ids)
+        if self.loss is ReferenceWassersteinLoss and reference_batch is not None:
+            discriminator_loss = self.loss(output, batch_ids, reference_batch)
+        else:
+            discriminator_loss = self.loss(output, batch_ids)
 
         gp_loss = 0.0
 
