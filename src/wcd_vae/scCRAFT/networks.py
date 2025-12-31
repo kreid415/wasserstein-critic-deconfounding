@@ -256,12 +256,19 @@ class ReferenceWassersteinLoss(nn.Module):
         """
         num_domains = output.shape[1]
 
+        # --- 1. Resolve and Validate the Reference Index ---
+        # Determine which index is currently being used
+        active_ref_idx = self.reference_class if reference_batch is None else reference_batch
+
+        # Check if the index is valid for the current model output
+        if not (0 <= active_ref_idx < num_domains):
+            raise ValueError(
+                f"Invalid reference batch index: {active_ref_idx}. "
+                f"Must be between 0 and {num_domains - 1} (inclusive)."
+            )
+
         # --- 1. Isolate the reference class samples ---
-        mask_ref = (
-            batch_ids == self.reference_class
-            if reference_batch is None
-            else batch_ids == reference_batch
-        )
+        mask_ref = batch_ids == active_ref_idx
 
         # If no reference samples are in this batch, we cannot compute the loss.
         if mask_ref.sum() == 0:
@@ -457,7 +464,7 @@ class Discriminator(nn.Module):
             # If batch_ids is None, return the output directly
             return output
 
-        if self.loss is ReferenceWassersteinLoss and reference_batch is not None:
+        if isinstance(self.loss, ReferenceWassersteinLoss) and reference_batch is not None:
             discriminator_loss = self.loss(output, batch_ids, reference_batch)
         else:
             discriminator_loss = self.loss(output, batch_ids)

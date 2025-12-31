@@ -62,12 +62,14 @@ def main():
         balance=balance,
     )
 
+    reference_batch_name = largest_batch_name if reference_batch == -1 else None
+
     results_df, outer_fold_results, sensitivity_results = run_comprehensive_nested_cv(
         adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
         reference_batch=reference_batch,
-        reference_batch_name_str=largest_batch_name,
+        reference_batch_name_str=reference_batch_name,
         epochs=epochs,
         inner_epochs=inner_epochs,
         n_outer_folds=5,

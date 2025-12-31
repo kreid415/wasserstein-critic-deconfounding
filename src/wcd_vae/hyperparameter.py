@@ -216,6 +216,7 @@ def run_comprehensive_nested_cv(
                 critic=use_critic,
                 disc_iter=iters,
                 reference_batch=reference_batch,
+                reference_batch_name_str=reference_batch_name_str,
             )
 
             # Evaluate on HELD-OUT TEST SET (FULL METRICS SUITE)

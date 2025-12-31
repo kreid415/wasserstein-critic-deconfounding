@@ -67,7 +67,7 @@ class SCIntegrationModel(nn.Module):
         batch_map = {b: i for i, b in enumerate(unique_batches)}
 
         # --- NEW SECTION: RESOLVE REFERENCE INDEX ---
-        reference_batch_idx = 0  # Default safe fallback
+        reference_batch_idx = None  # Default safe fallback
         if reference_batch_name_str is not None:
             if reference_batch_name_str in batch_map:
                 # Found it! Get its correct integer index according to this specific map.
@@ -173,7 +173,7 @@ class SCIntegrationModel(nn.Module):
 
         # 3. Generator/VAE Update
         opt_g.zero_grad()
-        loss_da, gp = self.D_Z(z, v_true)
+        loss_da, gp = self.D_Z(z, v_true, reference_batch=reference_batch_idx)
         triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
 
         if warmup:
@@ -248,7 +248,7 @@ class SCIntegrationModel(nn.Module):
                     data_dict["l2"][mb_idxs],
                 )
 
-                self._train_batch(batch_data, optimizers, params, warmup, reference_batch_name_str)
+                self._train_batch(batch_data, optimizers, params, warmup, reference_batch_idx)
 
 
 def train_integration_model(
