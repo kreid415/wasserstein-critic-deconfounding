@@ -317,13 +317,13 @@ class ReferenceWassersteinLoss(nn.Module):
 
         # --- 4. Apply reduction ---
         if self.reduction == "mean":
-            return total_loss / pairs_calculated
+            return -1.0 * total_loss / pairs_calculated
         elif self.reduction == "sum":
-            return total_loss
+            return -1.0 * total_loss
         else:  # 'none'
             # Note: 'none' isn't well-defined here since we sum over pairs.
             # Returning the mean is a sensible default.
-            return total_loss / pairs_calculated
+            return -1.0 * total_loss / pairs_calculated
 
 
 def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
@@ -371,18 +371,9 @@ def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
     return penalty
 
 
-def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0):
+def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0, reference_batch=None):
     """
-    Computes the multi-class gradient penalty for a multi-output critic.
-
-    Args:
-        critic: A callable that maps latent vectors z to shape [B, K] (K = num domains).
-        z: Latent vectors, shape [B, latent_dim].
-        batch_ids: Tensor of shape [B] with domain labels (0 to K-1).
-        lambda_gp: Weight of gradient penalty.
-
-    Returns:
-        Scalar gradient penalty loss.
+    Computes GP interpolating between specific Batch K and the Reference Batch.
     """
     b, latent_dim = z.shape
     critic_out = critic(z, batch_ids=None).shape[1]
@@ -390,32 +381,56 @@ def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0):
     device = z.device
     total_classes = 0
 
+    # 1. Identify Reference Samples
+    if reference_batch is None:
+        # Fallback to random sampling if no reference provided (Original behavior)
+        # Or raise error if strict compliance is needed
+        ref_samples = z
+    else:
+        mask_ref = batch_ids == reference_batch
+        ref_samples = z[mask_ref]
+
+        # If no reference samples in this mini-batch, we can't compute valid GP
+        if ref_samples.size(0) == 0:
+            return torch.tensor(0.0, device=device)
+
     for k in range(critic_out):
+        # Skip if k is the reference batch (no need to separate ref from ref)
+        if reference_batch is not None and k == reference_batch:
+            continue
+
         # Get samples from domain k
         mask_k = batch_ids == k
         if mask_k.sum() == 0:
             continue
 
         z_k = z[mask_k]
-        z_ref = z[torch.randperm(z.size(0))[: z_k.size(0)]]
 
-        # Interpolate
+        # 2. Sample Correct "Real" Data (From Reference Batch Only)
+        # Randomly select samples from the available reference samples to match z_k size
+        rand_ref_indices = torch.randint(0, ref_samples.size(0), (z_k.size(0),), device=device)
+        z_ref_subset = ref_samples[rand_ref_indices]
+
+        # 3. Interpolate
         epsilon = torch.rand(z_k.size(0), 1, device=device)
         epsilon = epsilon.expand_as(z_k)
-        z_hat = epsilon * z_k + (1 - epsilon) * z_ref
+
+        # Interpolate between Batch K (z_k) and Reference (z_ref_subset)
+        z_hat = epsilon * z_k + (1 - epsilon) * z_ref_subset
         z_hat.requires_grad_(True)
 
         # Forward pass through critic
-        out = critic(z_hat, batch_ids=None)  # [B_k, K]
-        out_k = out[:, k].sum()  # Only the k-th head
+        out = critic(z_hat, batch_ids=None)
+
+        # We only care about the gradient of the k-th head output
+        out_k = out[:, k].sum()
 
         # Compute gradients
-        grad = torch.autograd.grad(
+        grad_k = torch.autograd.grad(
             outputs=out_k, inputs=z_hat, create_graph=True, retain_graph=True, only_inputs=True
         )[0]
 
-        # Compute L2 norm of gradients
-        grad_norm = grad.view(grad.size(0), -1).norm(2, dim=1)
+        grad_norm = grad_k.view(grad_k.size(0), -1).norm(2, dim=1)
         gp = ((grad_norm - 1) ** 2).mean()
 
         gp_total += gp
@@ -476,6 +491,8 @@ class Discriminator(nn.Module):
         elif self.loss.reduction == "sum":
             discriminator_loss = discriminator_loss.sum()
         if self.critic:
-            gp_loss = multi_class_gradient_penalty(self, x, batch_ids)
+            gp_loss = multi_class_gradient_penalty(
+                self, x, batch_ids, reference_batch=reference_batch
+            )
 
         return discriminator_loss, gp_loss
