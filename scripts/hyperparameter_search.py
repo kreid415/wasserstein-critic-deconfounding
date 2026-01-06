@@ -22,6 +22,11 @@ def main():
     parser.add_argument(
         "--balance", action="store_true", help="Whether to balance batches during training"
     )
+    parser.add_argument(
+        "--skip_discr",
+        action="store_true",
+        help="Whether to skip discriminator training",
+    )
 
     args = parser.parse_args()
 
@@ -34,6 +39,7 @@ def main():
     inner_epochs = args.inner_epochs
     reference_batch = args.reference_batch
     balance = args.balance
+    skip_discr = args.skip_discr
 
     if data_set == "pancreas":
         batch_key = "tech"
@@ -77,6 +83,7 @@ def main():
         output_dir=output_dir,
         output_prefix=f"{data_set}",
         random_state=42,
+        skip_discr=skip_discr,
     )
 
     create_paper_assets(

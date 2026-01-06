@@ -60,6 +60,7 @@ def run_comprehensive_nested_cv(
     output_dir=None,
     output_prefix=None,
     random_state=42,
+    skip_discr=False,
 ):
     """
     Performs optimized nested cross-validation.
@@ -70,7 +71,9 @@ def run_comprehensive_nested_cv(
 
     set_seed(random_state)
 
-    total_steps = n_outer_folds * 2 * len(d_coef_range) * n_inner_folds
+    num_adversarias = 2 if not skip_discr else 1
+
+    total_steps = n_outer_folds * num_adversarias * len(d_coef_range) * n_inner_folds
     current_step = 0
     print(f"Starting OPTIMIZED nested CV. Total inner steps: {total_steps}")
 
@@ -95,7 +98,7 @@ def run_comprehensive_nested_cv(
         adata_train = adata[train_idx].copy()
         adata_test = adata[test_idx].copy()
 
-        for use_critic in [True, False]:
+        for use_critic in [True, False] if not skip_discr else [False]:
             critic_label = "critic" if use_critic else "no_critic"
             iters = disc_iter if use_critic else 1
             print(f"  --- Processing method: {critic_label} ---")
