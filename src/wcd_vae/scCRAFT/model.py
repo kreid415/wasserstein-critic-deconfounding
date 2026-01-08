@@ -202,8 +202,9 @@ class SCIntegrationModel(nn.Module):
                 z.detach(), v_true, reference_batch=reference_batch_idx
             )  # D_Z handles 'critic' flag internally
             loss_d_z += gp
-            loss_d_z.backward(retain_graph=True)
-            opt_d.step()
+            if not warmup:
+                loss_d_z.backward(retain_graph=True)
+                opt_d.step()
 
         # 3. Generator/VAE Update
         opt_g.zero_grad()
