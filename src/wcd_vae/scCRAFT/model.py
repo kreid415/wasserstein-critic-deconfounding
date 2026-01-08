@@ -210,17 +210,12 @@ class SCIntegrationModel(nn.Module):
 
         if warmup:
             all_loss = (
-                -0 * loss_da
-                + 1 * loss_vae
-                + gp
-                + triplet_coef * triplet_loss
-                + cos_coef * loss_cos
+                -0 * loss_da + 1 * loss_vae + triplet_coef * triplet_loss + cos_coef * loss_cos
             )
         else:
             all_loss = (
                 -d_coef * loss_da
                 + 1 * loss_vae
-                + gp
                 + triplet_coef * triplet_loss
                 + cos_coef * loss_cos
             )
