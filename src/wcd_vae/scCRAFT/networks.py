@@ -109,12 +109,11 @@ class Decoder(nn.Module):
             nn.Linear(1024, p_dim),
         )
 
-        # Parameters for ZINB distribution
-        self.px_scale_decoder = nn.Linear(p_dim, p_dim)  # mean (rate) of ZINB
+        # Parameters for NB distribution
+        self.px_scale_decoder = nn.Linear(p_dim, p_dim)  # mean (rate) of NB
         self.px_r_decoder = nn.Linear(p_dim, p_dim)  # dispersion
 
     def forward(self, z, ec):
-        # Main decoding
         z_ec = torch.cat((z, ec), dim=-1)
         decoded = self.decoder(z_ec)
         decoded_ec = self.decoder_ec(ec)

@@ -66,7 +66,7 @@ class SCIntegrationModel(nn.Module):
             )  # or adata.raw
         else:
             # Fallback or error
-            raise ValueError("Raw counts required for ZINB loss")
+            raise ValueError("Raw counts required for NB loss")
 
         # 2. Prepare Labels and Batch Indices
         unique_batches = adata.obs[batch_key].sort_values().unique()
@@ -115,17 +115,17 @@ class SCIntegrationModel(nn.Module):
         # Return the index along with the data
         return data_dict, batch_indices_map, reference_batch_idx
 
-    def _sample_epoch_indices(self, batch_indices_map, sample_per_batch=512):
+    def _sample_epoch_indices(self, batch_indices_map, sample_per_batch=512, batch_size=1024):
         """
-        Generates balanced, shuffled indices for one epoch.
+        Generates stratified indices for one epoch.
+        Ensures that EVERY mini-batch contains samples from all batches (including the reference),
+        which is critical for the stability of the Wasserstein Critic's gradient penalty.
         """
-        epoch_indices = []
-        epoch_batch_labels = []
-
+        # 1. Collect balanced samples for each batch first
+        batch_samples = {}
         for b_id, available_indices in batch_indices_map.items():
             n_avail = len(available_indices)
 
-            # Sample indices (with replacement if necessary)
             if n_avail >= sample_per_batch:
                 rand_perm = torch.randperm(n_avail, device=self.device)[:sample_per_batch]
                 chosen = available_indices[rand_perm]
@@ -133,18 +133,46 @@ class SCIntegrationModel(nn.Module):
                 rand_idx = torch.randint(n_avail, (sample_per_batch,), device=self.device)
                 chosen = available_indices[rand_idx]
 
-            epoch_indices.append(chosen)
-            # Create corresponding batch labels
-            epoch_batch_labels.append(
-                torch.full((sample_per_batch,), b_id, device=self.device, dtype=torch.int64)
-            )
+            batch_samples[b_id] = chosen
 
-        # Concatenate and shuffle
-        train_idxs = torch.cat(epoch_indices)
-        train_v = torch.cat(epoch_batch_labels)
+        # 2. Determine how many mini-batches (steps) we need to split these into
+        n_classes = len(batch_indices_map)
+        total_samples = n_classes * sample_per_batch
+        num_steps = (total_samples + batch_size - 1) // batch_size
 
-        shuffle_order = torch.randperm(len(train_idxs), device=self.device)
-        return train_idxs[shuffle_order], train_v[shuffle_order]
+        final_indices = []
+        final_labels = []
+
+        # 3. Construct the epoch mini-batch by mini-batch
+        for step in range(num_steps):
+            step_indices = []
+            step_labels = []
+
+            for b_id in batch_indices_map.keys():
+                # Calculate proportional slice for this step
+                start = (step * sample_per_batch) // num_steps
+                end = ((step + 1) * sample_per_batch) // num_steps
+
+                # Get the slice of indices for this batch
+                idxs = batch_samples[b_id][start:end]
+
+                step_indices.append(idxs)
+                step_labels.append(
+                    torch.full((len(idxs),), b_id, device=self.device, dtype=torch.int64)
+                )
+
+            # Combine all batch representatives for this step
+            mb_idxs = torch.cat(step_indices)
+            mb_lbls = torch.cat(step_labels)
+
+            # Shuffle ONLY within this mini-batch
+            # This preserves the stratification while randomizing processing order
+            perm = torch.randperm(len(mb_idxs), device=self.device)
+            final_indices.append(mb_idxs[perm])
+            final_labels.append(mb_lbls[perm])
+
+        # Concatenate the stratified mini-batches
+        return torch.cat(final_indices), torch.cat(final_labels)
 
     def _train_batch(self, batch_data, optimizers, params, warmup, reference_batch_idx=None):
         """
@@ -234,7 +262,9 @@ class SCIntegrationModel(nn.Module):
             self.D_Z.train()
 
             # 2. Sample Indices for this Epoch
-            train_idxs, train_v = self._sample_epoch_indices(batch_indices_map)
+            train_idxs, train_v = self._sample_epoch_indices(
+                batch_indices_map, batch_size=batch_size_loader
+            )
             total_samples = len(train_idxs)
 
             warmup = epoch < warmup_epoch
