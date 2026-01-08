@@ -115,6 +115,13 @@ class SCIntegrationModel(nn.Module):
         Ensures that EVERY mini-batch contains samples from all batches (including the reference),
         which is critical for the stability of the Wasserstein Critic's gradient penalty.
         """
+        n_classes = len(batch_indices_map)
+
+        if sample_per_batch is None:
+            total_cells = sum(len(idxs) for idxs in batch_indices_map.values())
+            # Distribute N samples evenly across K batches
+            # We use max(1, ...) to handle edge cases with extremely small datasets/large K
+            sample_per_batch = max(1, total_cells // n_classes)
         # 1. Collect balanced samples for each batch first
         batch_samples = {}
         for b_id, available_indices in batch_indices_map.items():
@@ -130,7 +137,6 @@ class SCIntegrationModel(nn.Module):
             batch_samples[b_id] = chosen
 
         # 2. Determine how many mini-batches (steps) we need to split these into
-        n_classes = len(batch_indices_map)
         total_samples = n_classes * sample_per_batch
         num_steps = (total_samples + batch_size - 1) // batch_size
 
@@ -256,7 +262,7 @@ class SCIntegrationModel(nn.Module):
 
             # 2. Sample Indices for this Epoch
             train_idxs, train_v = self._sample_epoch_indices(
-                batch_indices_map, batch_size=batch_size_loader
+                batch_indices_map, sample_per_batch=None, batch_size=batch_size_loader
             )
             total_samples = len(train_idxs)
 
