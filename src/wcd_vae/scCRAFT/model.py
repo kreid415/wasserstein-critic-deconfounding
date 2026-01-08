@@ -17,12 +17,6 @@ from wcd_vae.scCRAFT.utils import (
     weights_init_normal,
 )
 
-# Dynamic import of tqdm based on the environment
-if "ipykernel" in sys.modules:
-    pass
-else:
-    pass
-
 
 # Main training class
 class SCIntegrationModel(nn.Module):
@@ -189,7 +183,6 @@ class SCIntegrationModel(nn.Module):
 
         # 1. VAE Forward Pass
         reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
-        reconst_loss = torch.clamp(reconst_loss, max=1e5)
 
         loss_cos = (1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)).mean()
         loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
