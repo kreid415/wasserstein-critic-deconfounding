@@ -190,7 +190,9 @@ class SCIntegrationModel(nn.Module):
         # 1. VAE Forward Pass
         reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
 
-        loss_cos = (1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)).mean()
+        loss_cos = (
+            1 - torch.sum(F.normalize(torch.log1p(x_tilde), p=2) * F.normalize(x, p=2), 1)
+        ).mean()
         loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
         # 2. Discriminator Steps
