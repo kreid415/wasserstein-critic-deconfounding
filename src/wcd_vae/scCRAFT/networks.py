@@ -170,62 +170,6 @@ class CrossEntropy(nn.Module):
         return loss
 
 
-class WassersteinLoss(nn.Module):
-    def __init__(self, reduction="mean"):
-        super().__init__()
-        self.reduction = reduction
-
-    def forward(self, output, batch_ids):
-        source = output[batch_ids != 0]
-        target = output[batch_ids == 0]
-
-        # Compute the Wasserstein loss
-        loss = -1 * target.mean() + source.mean()
-
-        return loss
-
-
-class MultiClassWassersteinLoss(nn.Module):
-    def __init__(self, reduction="mean"):
-        super().__init__()
-        self.reduction = reduction
-
-    def forward(self, output, batch_ids):
-        """
-        Args:
-            output: Tensor of shape [B, K] - critic scores for each class.
-            batch_ids: Tensor of shape [B] - true domain IDs (0 to K-1).
-        Returns:
-            Wasserstein loss encouraging domain confusion.
-        """
-        num_domains = output.shape[1]  # number of classes/domains
-        loss = 0.0
-        total = 0
-
-        for k in range(num_domains):
-            mask_k = batch_ids == k
-            if mask_k.sum() == 0:
-                continue
-
-            # Scores for domain k samples from the k-th output head
-            d_kk = output[mask_k, k]  # true class head for samples from domain k
-
-            # Scores for domain k samples from all other heads
-            d_kj = output[mask_k]  # [n_k, K]
-            mask_other = torch.ones(num_domains, dtype=torch.bool, device=output.device)
-            mask_other[k] = False
-            d_kj_others = d_kj[:, mask_other]  # [n_k, K-1]
-
-            # Wasserstein-style loss: true score - mean of other scores
-            diff = d_kk.mean() - d_kj_others.mean()
-            loss += diff
-            total += 1
-
-        loss = loss / total
-
-        return loss
-
-
 class ReferenceWassersteinLoss(nn.Module):
     """
     Calculates a Wasserstein-style loss between a designated reference class
@@ -440,7 +384,7 @@ class Discriminator(nn.Module):
             if reference_batch is not None:
                 self.loss = ReferenceWassersteinLoss(reference_class=reference_batch)
             else:
-                self.loss = MultiClassWassersteinLoss()
+                raise ValueError("Reference batch must be provided for Wasserstein loss.")
         else:
             # If not using critic, use cross-entropy loss
             self.loss = CrossEntropy()

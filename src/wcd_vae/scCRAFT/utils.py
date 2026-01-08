@@ -16,68 +16,6 @@ def weights_init_normal(m):
         torch.nn.init.constant_(m.bias.data, 0.0)
 
 
-def generate_balanced_dataloader(adata, batch_size, batch_key="batch", pin_memory=True):
-    if not adata.obs_names.is_unique:
-        print("Error: Indices are not unique!")
-        raise AssertionError(
-            "Indices are not unique. Please ensure the indices are unique before proceeding."
-        )
-    # Map unique batch keys to integers
-    unique_batches = adata.obs[batch_key].sort_values().unique()
-    batch_to_int = {batch: i for i, batch in enumerate(unique_batches)}
-    unsupervised_labels1 = adata.obs["leiden1"].cat.codes.values
-    unsupervised_labels2 = adata.obs["leiden2"].cat.codes.values
-    # Separate the dataset by batches and sample indices
-    batch_indices = []
-    batch_labels_list = []
-    for batch in unique_batches:
-        # Find the indices for the current batch
-        batch_indices_in_adata = adata.obs[adata.obs[batch_key] == batch].index
-
-        # Sample indices from the current batch
-        if len(batch_indices_in_adata) >= batch_size:
-            sampled_indices = np.random.choice(batch_indices_in_adata, batch_size, replace=False)
-        else:
-            # If not enough cells, sample with replacement
-            sampled_indices = np.random.choice(batch_indices_in_adata, batch_size, replace=True)
-
-        # Get the integer positions of the sampled indices
-        sampled_indices_pos = [adata.obs_names.get_loc(idx) for idx in sampled_indices]
-        batch_indices.extend(sampled_indices_pos)
-
-        # Map the batch keys to integers and add to the label list
-        batch_labels_list.extend([batch_to_int[batch]] * batch_size)
-
-    # Extract the feature data
-    x_sampled = adata.X[batch_indices, :]
-
-    # Convert features to tensor
-    if isinstance(x_sampled, np.ndarray):
-        x_tensor = torch.tensor(x_sampled, dtype=torch.float32)
-    else:  # if it's a sparse matrix
-        x_tensor = torch.tensor(x_sampled.toarray(), dtype=torch.float32)
-
-    # Convert batch labels to tensor
-    v_tensor = torch.tensor(batch_labels_list, dtype=torch.int64)
-    label_tensor1 = torch.tensor(unsupervised_labels1[batch_indices], dtype=torch.int64)
-    label_tensor2 = torch.tensor(unsupervised_labels2[batch_indices], dtype=torch.int64)
-
-    # Create a TensorDataset and DataLoader
-    combined_dataset = TensorDataset(x_tensor, v_tensor, label_tensor1, label_tensor2)
-    dataloader = DataLoader(
-        combined_dataset,
-        batch_size=batch_size * 2,
-        shuffle=True,
-        pin_memory=pin_memory,
-    )
-
-    return dataloader
-
-
-# Example usage (assuming `adata` is your AnnData object):
-# data_loader = generate_balanced_dataloader(adata, batch_size=256, batch_key='batch')
-
-
 def count_labels_per_batch(labels, batch_ids):
     unique_batches = batch_ids.unique()
     label_counts_per_batch = {

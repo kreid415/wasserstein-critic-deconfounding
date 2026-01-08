@@ -70,7 +70,7 @@ def main():
 
     reference_batch_name = largest_batch_name if reference_batch == -1 else None
 
-    results_df, outer_fold_results, sensitivity_results = run_comprehensive_nested_cv(
+    run_comprehensive_nested_cv(
         adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
@@ -84,10 +84,6 @@ def main():
         output_prefix=f"{data_set}",
         random_state=42,
         skip_discr=skip_discr,
-    )
-
-    create_paper_assets(
-        results_df, outer_fold_results, output_dir=output_dir, output_prefix=f"{data_set}"
     )
 
 
