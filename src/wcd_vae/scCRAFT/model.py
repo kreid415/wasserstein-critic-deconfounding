@@ -60,6 +60,14 @@ class SCIntegrationModel(nn.Module):
         else:
             X_tensor = torch.tensor(adata.X, dtype=torch.float32)
 
+        if "counts" in adata.layers:
+            X_raw_tensor = torch.tensor(
+                adata.layers["counts"].toarray(), dtype=torch.float32
+            )  # or adata.raw
+        else:
+            # Fallback or error
+            raise ValueError("Raw counts required for ZINB loss")
+
         # 2. Prepare Labels and Batch Indices
         unique_batches = adata.obs[batch_key].sort_values().unique()
         batch_map = {b: i for i, b in enumerate(unique_batches)}
@@ -87,9 +95,11 @@ class SCIntegrationModel(nn.Module):
         batch_tensor = batch_tensor.to(self.device)
         label1_tensor = label1_tensor.to(self.device)
         label2_tensor = label2_tensor.to(self.device)
+        X_raw_tensor = X_raw_tensor.to(self.device)
 
         data_dict = {
             "X": X_tensor,
+            "X_raw": X_raw_tensor,
             "batch_labels": batch_tensor,
             "l1": label1_tensor,
             "l2": label2_tensor,
@@ -140,7 +150,7 @@ class SCIntegrationModel(nn.Module):
         """
         Performs the forward and backward pass for a single mini-batch.
         """
-        x, v, labels_low, labels_high = batch_data
+        x, x_raw, v, labels_low, labels_high = batch_data
         opt_g, opt_d = optimizers
         d_coef, kl_coef, triplet_coef, cos_coef, disc_iter = params
 
@@ -150,7 +160,7 @@ class SCIntegrationModel(nn.Module):
         v_one_hot.scatter_(1, v.unsqueeze(1), 1)
 
         # 1. VAE Forward Pass
-        reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, v_one_hot, warmup)
+        reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
         reconst_loss = torch.clamp(reconst_loss, max=1e5)
 
         loss_cos = (1 - torch.sum(F.normalize(x_tilde, p=2) * F.normalize(x, p=2), 1)).mean()
@@ -211,8 +221,8 @@ class SCIntegrationModel(nn.Module):
             adata, batch_key, reference_batch_name_str
         )
 
-        optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, weight_decay=0.0)
-        optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, weight_decay=0.0)
+        optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, betas=(0.5, 0.9))
+        optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, betas=(0.5, 0.9))
         optimizers = (optimizer_g, optimizer_d_z)
 
         batch_size_loader = 1024

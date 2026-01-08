@@ -139,7 +139,7 @@ class VAE(nn.Module):
         self.encoder = Encoder(p_dim, latent_dim)
         self.decoder = Decoder(p_dim, v_dim, latent_dim)
 
-    def forward(self, x, ec, warmup):
+    def forward(self, x, x_raw, ec, warmup):
         # Encoding
         q_m, q_v, z = self.encoder(x, warmup)
 
@@ -147,8 +147,7 @@ class VAE(nn.Module):
         px_scale, px_r = self.decoder(z, ec)
 
         # Reconstruction Loss
-        # reconst_loss = F.mse_loss(px_scale, x)
-        reconst_loss = -log_nb_positive(x, px_scale, px_r)
+        reconst_loss = -log_nb_positive(x_raw, px_scale, px_r)
         # KL Divergence
         mean = torch.zeros_like(q_m)
         scale = torch.ones_like(q_v)
