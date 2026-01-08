@@ -247,7 +247,7 @@ def run_comprehensive_nested_cv(
                 subset_indices=test_indices,
             )
 
-            # 2. Calculate expensive scib metrics ONLY here
+            # 2. Calculate expensive scib metrics here
             test_asw_batch, test_asw_celltype, test_ari = calculate_additional_metrics(
                 adata_test_only, batch_key, celltype_key, embed_key="X_scCRAFT"
             )

@@ -51,11 +51,6 @@ def get_dataloader_from_adata(
     return train_loader, test_loader, domain_encoder, cell_encoder
 
 
-import scanpy as sc
-import numpy as np
-# Ensure multi_resolution_cluster is imported
-
-
 def prep_data(
     anndata_path,
     batch_key,
@@ -110,10 +105,8 @@ def prep_data(
     multi_resolution_cluster(adata, resolution1=1, method="Leiden")
 
     # --- FINAL STEP: Determine Largest Batch Name from FINAL data ---
-    # This is safe because balancing is finished.
     largest_batch_name = adata.obs[batch_key].value_counts().idxmax()
     print(f"Final preprocessed data has {adata.n_obs} cells.")
     print(f"The largest batch in the final dataset is: '{largest_batch_name}'")
 
-    # Return the data AND the NAME string
     return adata, largest_batch_name

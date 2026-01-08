@@ -24,3 +24,9 @@ curl 'https://figshare.com/ndownloader/articles/12420968/versions/8' \
   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36' \
   -o data_download.zip
   ```
+
+Install the package with pip install .
+
+To execute the experiments run binary_experiments.sh, reference_experiments.sh, and multibatch_experiments.sh in the scripts directory.
+
+Afterwards, all figures and tables can be generated from results.ipynb in the notebooks directory.

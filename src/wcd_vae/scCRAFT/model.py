@@ -28,7 +28,6 @@ else:
 class SCIntegrationModel(nn.Module):
     def __init__(self, adata, batch_key, z_dim, critic, seed, reference_batch):
         super().__init__()
-        # ... (Keep existing __init__ logic) ...
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
@@ -62,15 +61,12 @@ class SCIntegrationModel(nn.Module):
             X_tensor = torch.tensor(adata.X, dtype=torch.float32)
 
         # 2. Prepare Labels and Batch Indices
-        # THIS IS THE DEFINITIVE MAPPING SOURCE
         unique_batches = adata.obs[batch_key].sort_values().unique()
         batch_map = {b: i for i, b in enumerate(unique_batches)}
 
-        # --- NEW SECTION: RESOLVE REFERENCE INDEX ---
         reference_batch_idx = None  # Default safe fallback
         if reference_batch_name_str is not None:
             if reference_batch_name_str in batch_map:
-                # Found it! Get its correct integer index according to this specific map.
                 reference_batch_idx = batch_map[reference_batch_name_str]
             else:
                 # This happens if prep_data determined a largest batch, but subsequent
@@ -86,7 +82,6 @@ class SCIntegrationModel(nn.Module):
         label1_tensor = torch.tensor(adata.obs["leiden1"].cat.codes.values, dtype=torch.int64)
         label2_tensor = torch.tensor(adata.obs["leiden2"].cat.codes.values, dtype=torch.int64)
 
-        # --- FIX: Explicitly assign the GPU tensors back to the variables ---
         # Move to device (e.g., GPU)
         X_tensor = X_tensor.to(self.device)
         batch_tensor = batch_tensor.to(self.device)
@@ -283,7 +278,6 @@ def train_integration_model(
         batch_key=batch_key,
         z_dim=z_dim,
         critic=critic,
-        seed=42,
         reference_batch=reference_batch,
     )
     print(epochs)

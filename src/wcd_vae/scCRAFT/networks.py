@@ -234,11 +234,11 @@ class ReferenceWassersteinLoss(nn.Module):
     and all other classes present in a batch.
     """
 
-    def __init__(self, reference_class: int, reduction: str = "mean"):
+    def __init__(self, reference_class: int = -1, reduction: str = "mean"):
         """
         Args:
-            reference_class (int): The index of the class to be used as the reference.
-            reduction (str): Specifies the reduction to apply to the output: 'none', 'mean', 'sum'.
+            reference_class (int): Default reference class. Set to -1 if reference
+                                   is determined dynamically per batch.
         """
         super().__init__()
         self.reference_class = reference_class
@@ -247,82 +247,60 @@ class ReferenceWassersteinLoss(nn.Module):
     def forward(
         self, output: torch.Tensor, batch_ids: torch.Tensor, reference_batch=None
     ) -> torch.Tensor:
-        """
-        Args:
-            output: Tensor of shape [B, K] - critic scores for each of K classes.
-            batch_ids: Tensor of shape [B] - true class IDs (0 to K-1).
-        Returns:
-            The calculated Wasserstein loss.
-        """
         num_domains = output.shape[1]
 
-        # --- 1. Resolve and Validate the Reference Index ---
-        # Determine which index is currently being used
-        active_ref_idx = self.reference_class if reference_batch is None else reference_batch
+        # 1. Determine Active Reference
+        # If a dynamic batch is passed, use it. Otherwise use the static init.
+        active_ref_idx = reference_batch if reference_batch is not None else self.reference_class
 
-        # Check if the index is valid for the current model output
+        # Safety Check: Ensure we have a valid reference index (0 to K-1)
         if not (0 <= active_ref_idx < num_domains):
+            # This catches the case where init is -1 but no dynamic batch was passed
             raise ValueError(
-                f"Invalid reference batch index: {active_ref_idx}. "
-                f"Must be between 0 and {num_domains - 1} (inclusive)."
+                f"Invalid reference index: {active_ref_idx}. "
+                "Ensure reference_batch is passed if reference_class is -1."
             )
 
-        # --- 1. Isolate the reference class samples ---
+        # 2. Isolate Reference Samples
         mask_ref = batch_ids == active_ref_idx
-
-        # If no reference samples are in this batch, we cannot compute the loss.
         if mask_ref.sum() == 0:
             return torch.tensor(0.0, device=output.device, requires_grad=True)
 
-        # Get the critic scores for all reference samples across all K heads.
         output_ref = output[mask_ref]
-
-        # --- 2. Loop over non-reference classes and calculate loss ---
         total_loss = 0.0
         pairs_calculated = 0
 
         for k in range(num_domains):
-            # Skip the reference class itself.
-            if k == self.reference_class:
+            if k == active_ref_idx:
                 continue
 
             mask_k = batch_ids == k
-
-            # If there are no samples for this class in the batch, skip.
             if mask_k.sum() == 0:
                 continue
 
-            # --- 3. Calculate the loss term for the (k, ref) pair ---
-
-            # For critic head 'k', get the scores it assigns to its "true" samples (from class k).
-            # This is E[critic_k(x)] for x ~ P_k
+            # Critic head k on samples from domain k
             scores_k_on_head_k = output[mask_k, k]
 
-            # For the same critic head 'k', get the scores it assigns to the "other" samples
-            # (from the reference class).
-            # This is E[critic_k(x)] for x ~ P_ref
+            # Critic head k on samples from reference domain
             scores_ref_on_head_k = output_ref[:, k]
 
-            # The loss for this pair encourages the critic to output a higher score
-            # for its "true" class than for the reference class.
-            # We want to maximize: E[critic_k(P_k)] - E[critic_k(P_ref)]
+            # Maximize distance: E[Critic(Source)] - E[Critic(Ref)]
+            # We return negative because optimizers minimize.
             diff = scores_k_on_head_k.mean() - scores_ref_on_head_k.mean()
 
             total_loss += diff
             pairs_calculated += 1
 
-        # If no non-reference classes were found in the batch, loss is 0.
         if pairs_calculated == 0:
             return torch.tensor(0.0, device=output.device, requires_grad=True)
 
-        # --- 4. Apply reduction ---
+        # 3. Reduction
+        # Now dividing by the correct number of pairs (K-1)
         if self.reduction == "mean":
             return -1.0 * total_loss / pairs_calculated
         elif self.reduction == "sum":
             return -1.0 * total_loss
-        else:  # 'none'
-            # Note: 'none' isn't well-defined here since we sum over pairs.
-            # Returning the mean is a sensible default.
+        else:
             return -1.0 * total_loss / pairs_calculated
 
 
