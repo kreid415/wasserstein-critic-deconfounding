@@ -131,7 +131,7 @@ def run_comprehensive_nested_cv(
                     adata_inner_val = adata[actual_val_idx].copy()
 
                     # 2. Train Inner Model
-                    model = train_integration_model(
+                    model, _ = train_integration_model(
                         adata_inner_train,
                         batch_key=batch_key,
                         z_dim=z_dim,
@@ -212,7 +212,7 @@ def run_comprehensive_nested_cv(
             print(f"  >>> Best d_coef selected for {critic_label}: {best_d_coef}")
 
             print(f"  --- Training FINAL {critic_label} model on full Outer Fold train data ---")
-            final_model = train_integration_model(
+            final_model, training_history = train_integration_model(
                 adata_train,
                 batch_key=batch_key,
                 z_dim=z_dim,
@@ -223,6 +223,17 @@ def run_comprehensive_nested_cv(
                 reference_batch=reference_batch,
                 reference_batch_name_str=reference_batch_name_str,
             )
+
+            if output_dir:
+                # Create a specific filename for this fold/method
+                hist_filename = (
+                    f"{output_prefix}_fold{outer_fold_idx + 1}_{critic_label}_history.csv"
+                )
+                full_hist_path = Path(output_dir) / hist_filename
+
+                # Convert to DataFrame and save
+                pd.DataFrame(training_history).to_csv(full_hist_path, index_label="epoch")
+                print(f"  >>> Saved training history to: {full_hist_path}")
 
             # Evaluate on HELD-OUT TEST SET (FULL METRICS SUITE)
             model_on_device = final_model.to(device)

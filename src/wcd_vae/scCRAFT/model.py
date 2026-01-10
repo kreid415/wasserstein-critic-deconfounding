@@ -55,9 +55,10 @@ class SCIntegrationModel(nn.Module):
             X_tensor = torch.tensor(adata.X, dtype=torch.float32)
 
         if "counts" in adata.layers:
-            X_raw_tensor = torch.tensor(
-                adata.layers["counts"].toarray(), dtype=torch.float32
-            )  # or adata.raw
+            if scipy.sparse.issparse(adata.layers["counts"]):
+                X_raw_tensor = torch.tensor(adata.layers["counts"].toarray(), dtype=torch.float32)
+            else:
+                X_raw_tensor = torch.tensor(adata.layers["counts"], dtype=torch.float32)
         else:
             # Fallback or error
             raise ValueError("Raw counts required for NB loss")
@@ -226,7 +227,20 @@ class SCIntegrationModel(nn.Module):
         all_loss.backward()
         opt_g.step()
 
-        return all_loss, loss_da, triplet_loss, loss_vae
+        non_zero_mask = x_raw > 0
+        if non_zero_mask.sum() > 0:
+            reconst_loss_non_zero = reconst_loss[non_zero_mask].mean()
+        else:
+            reconst_loss_non_zero = torch.tensor(0.0, device=self.device)
+
+        return (
+            all_loss,
+            loss_da,
+            triplet_loss,
+            loss_vae,
+            reconst_loss.mean(),
+            reconst_loss_non_zero,
+        )
 
     def train_model(
         self,
@@ -241,6 +255,15 @@ class SCIntegrationModel(nn.Module):
         disc_iter,
         reference_batch_name_str=None,
     ):
+        training_history = {
+            "all_loss": [],
+            "loss_da": [],
+            "triplet_loss": [],
+            "loss_vae": [],
+            "reconst_loss": [],
+            "reconst_loss_non_zero": [],
+        }
+
         # 1. Prepare Data (One-time GPU transfer)
         data_dict, batch_indices_map, reference_batch_idx = self._prepare_tensors(
             adata, batch_key, reference_batch_name_str
@@ -257,6 +280,14 @@ class SCIntegrationModel(nn.Module):
         for epoch in range(epochs):
             self.VAE.train()
             self.D_Z.train()
+
+            # Track epoch accumulation
+            epoch_vae = 0
+            epoch_critic = 0
+            epoch_gen_adv = 0
+            epoch_total = 0
+            epoch_reconst_non_zero = 0
+            batch_count = 0
 
             # 2. Sample Indices for this Epoch
             train_idxs, train_v = self._sample_epoch_indices(
@@ -281,7 +312,27 @@ class SCIntegrationModel(nn.Module):
                     data_dict["l2"][mb_idxs],
                 )
 
-                self._train_batch(batch_data, optimizers, params, warmup, reference_batch_idx)
+                all_loss, loss_da, triplet_loss, loss_vae, reconst_loss, reconst_loss_non_zero = (
+                    self._train_batch(batch_data, optimizers, params, warmup, reference_batch_idx)
+                )
+
+                # Accumulate (handle tensors vs floats)
+                epoch_total += all_loss.item()
+                epoch_gen_adv += loss_da.item()
+                epoch_vae += loss_vae.item()
+                epoch_critic += reconst_loss.item()
+                epoch_reconst_non_zero += reconst_loss_non_zero.item()
+                batch_count += 1
+
+            # Average losses for the epoch
+            training_history["all_loss"].append(epoch_total / batch_count)
+            training_history["loss_da"].append(epoch_gen_adv / batch_count)
+            training_history["triplet_loss"].append(epoch_gen_adv / batch_count)
+            training_history["loss_vae"].append(epoch_vae / batch_count)
+            training_history["reconst_loss"].append(epoch_critic / batch_count)
+            training_history["reconst_loss_non_zero"].append(epoch_reconst_non_zero / batch_count)
+
+        return training_history
 
 
 def train_integration_model(
@@ -320,7 +371,7 @@ def train_integration_model(
     )
     print(epochs)
     start_time = time.time()
-    model.train_model(
+    training_history = model.train_model(
         adata,
         batch_key=batch_key,
         epochs=epochs,
@@ -335,9 +386,8 @@ def train_integration_model(
     end_time = time.time()
     training_time = end_time - start_time
     print(f"Training completed in {training_time:.2f} seconds")
-
     model.VAE.eval()
-    return model.VAE
+    return model.VAE, training_history
 
 
 def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
