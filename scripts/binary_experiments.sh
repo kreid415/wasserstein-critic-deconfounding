@@ -31,12 +31,12 @@ for dataset in immune pancreas lung; do
     echo "Processing dataset: $dataset..."
 
     # --- Unbalanced ---
-    cmd="python scripts/hyperparameter_search.py --dataset $dataset --batch_count 2 --epochs 500 --output_dir ./scripts/binary_experiments/unbalanced"
+    cmd="python scripts/hyperparameter_search.py --dataset $dataset --batch_count 2 --output_dir ./scripts/binary_experiments/unbalanced"
     logname="${dataset}_unbalanced"
     run_task "$cmd" "$logname"
 
     # --- Balanced ---
-    cmd="python scripts/hyperparameter_search.py --dataset $dataset --batch_count 2 --epochs 500 --output_dir ./scripts/binary_experiments/balanced --balance"
+    cmd="python scripts/hyperparameter_search.py --dataset $dataset --batch_count 2 --output_dir ./scripts/binary_experiments/balanced --balance"
     logname="${dataset}_balanced"
     run_task "$cmd" "$logname"
 done

@@ -20,7 +20,7 @@ from wcd_vae.scCRAFT.utils import (
 
 # Main training class
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic, seed, reference_batch):
+    def __init__(self, adata, batch_key, z_dim, critic, reference_batch, seed=None):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
@@ -275,6 +275,7 @@ class SCIntegrationModel(nn.Module):
                 # Slice directly from GPU tensors
                 batch_data = (
                     data_dict["X"][mb_idxs],
+                    data_dict["X_raw"][mb_idxs],
                     train_v[i:end],
                     data_dict["l1"][mb_idxs],
                     data_dict["l2"][mb_idxs],
@@ -295,7 +296,7 @@ def train_integration_model(
     kl_coef=0.005,
     triplet_coef=1,
     cos_coef=20,
-    warmup_epoch=50,
+    warmup_epoch=5,
     critic=False,
     scale=None,
     flex_epochs=False,

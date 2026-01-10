@@ -3,7 +3,6 @@ import warnings
 
 from wcd_vae.data import prep_data
 from wcd_vae.hyperparameter import run_comprehensive_nested_cv
-from wcd_vae.plot import create_paper_assets
 from wcd_vae.scCRAFT.utils import set_seed
 
 warnings.filterwarnings("ignore")
@@ -16,8 +15,9 @@ def main():
         "--output_dir", type=str, required=True, help="Output directory for results"
     )
     parser.add_argument("--batch_count", type=int, default=2, help="Number of batches to consider")
-    parser.add_argument("--epochs", type=int, default=500, help="Number of training epochs")
-    parser.add_argument("--inner_epochs", type=int, default=100, help="Number of inner CV epochs")
+    parser.add_argument("--epochs", type=int, default=80, help="Number of training epochs")
+    parser.add_argument("--inner_epochs", type=int, default=40, help="Number of inner CV epochs")
+    parser.add_argument("--warmup_epoch", type=int, default=10, help="Number of warmup epochs")
     parser.add_argument("--reference_batch", type=int, default=0, help="Reference batch index")
     parser.add_argument(
         "--balance", action="store_true", help="Whether to balance batches during training"
@@ -37,6 +37,7 @@ def main():
     batch_count = args.batch_count
     epochs = args.epochs
     inner_epochs = args.inner_epochs
+    warmup_epoch = args.warmup_epoch
     reference_batch = args.reference_batch
     balance = args.balance
     skip_discr = args.skip_discr
@@ -78,6 +79,7 @@ def main():
         reference_batch_name_str=reference_batch_name,
         epochs=epochs,
         inner_epochs=inner_epochs,
+        warmup_epoch=warmup_epoch,
         n_outer_folds=5,
         n_inner_folds=3,
         output_dir=output_dir,

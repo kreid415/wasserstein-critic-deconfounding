@@ -78,7 +78,7 @@ class Encoder(nn.Module):
 
         # Separate paths for mean, variance, and library size
         q_m = self.fc_mean(x)
-        q_v = torch.exp(self.fc_var(x)) + 1e-4
+        q_v = torch.exp(torch.clamp(self.fc_var(x), max=15)) + 1e-4
         # library = self.fc_library(x)  # Predicted log library size
 
         z = reparameterize_gaussian(q_m, q_v)
@@ -123,8 +123,8 @@ class Decoder(nn.Module):
 
         # NB parameters with safe exponential
 
-        px_scale = torch.exp(self.px_scale_decoder(combined))
-        px_r = torch.exp(self.px_r_decoder(combined))
+        px_scale = torch.exp(torch.clamp(self.px_scale_decoder(combined), max=15))
+        px_r = torch.exp(torch.clamp(self.px_r_decoder(combined), max=15))
 
         # Scale the mean (px_scale) with the predicted library size
         px_rate = px_scale
