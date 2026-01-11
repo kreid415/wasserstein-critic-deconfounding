@@ -31,12 +31,12 @@ run_task() {
 # --- PANCREAS SEQUENCE (Batch counts 2 to 9) ---
 for i in {2..9}; do
     # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch -1"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/unbalanced/panc/panc_$i --batch_count $i --reference_batch -1"
     logname="panc_batch${i}_unbalanced"
     run_task "$cmd" "$logname"
     
     # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_$i --batch_count $i --epochs 500 --reference_batch -1 --balance"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir ./scripts/multibatch_experiments/balanced/panc/panc_$i --batch_count $i --reference_batch -1 --balance"
     logname="panc_batch${i}_balanced"
     run_task "$cmd" "$logname"
 done
@@ -44,12 +44,12 @@ done
 # --- IMMUNE SEQUENCE (Batch counts 2 to 5) ---
 for i in {2..5}; do
     # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/unbalanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch -1"
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/unbalanced/immune/immune_$i --batch_count $i --reference_batch -1"
     logname="immune_batch${i}_unbalanced"
     run_task "$cmd" "$logname"
     
     # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/balanced/immune/immune_$i --batch_count $i --epochs 500 --reference_batch -1 --balance"
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/balanced/immune/immune_$i --batch_count $i --reference_batch -1 --balance"
     logname="immune_batch${i}_balanced"
     run_task "$cmd" "$logname"
 done

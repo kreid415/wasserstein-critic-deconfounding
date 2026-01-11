@@ -34,12 +34,12 @@ run_task() {
 echo "Starting Pancreas Queue..."
 for i in {0..9}; do
     # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/unbalanced/panc/panc_$i --batch_count 100 --epochs 500 --reference_batch $i --skip_discr"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/unbalanced/panc/panc_$i --batch_count 100 --reference_batch $i --skip_discr"
     logname="panc_ref${i}_unbalanced"
     run_task "$cmd" "$logname"
     
     # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/balanced/panc/panc_$i --batch_count 100 --epochs 500 --reference_batch $i --balance --skip_discr"
+    cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/balanced/panc/panc_$i --batch_count 100 --reference_batch $i --balance --skip_discr"
     logname="panc_ref${i}_balanced"
     # run_task "$cmd" "$logname"
 done
@@ -48,12 +48,12 @@ done
 echo "Starting Immune Queue..."
 for i in {0..5}; do
     # Unbalanced
-    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/unbalanced/immune/immune_$i --batch_count 100 --epochs 500 --reference_batch $i --skip_discr"
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/unbalanced/immune/immune_$i --batch_count 100 --reference_batch $i --skip_discr"
     logname="immune_ref${i}_unbalanced"
     run_task "$cmd" "$logname"
     
     # Balanced
-    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/balanced/immune/immune_$i --batch_count 100 --epochs 500 --reference_batch $i --balance --skip_discr"
+    cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/balanced/immune/immune_$i --batch_count 100 --reference_batch $i --balance --skip_discr"
     logname="immune_ref${i}_balanced"
     # run_task "$cmd" "$logname"
 done
