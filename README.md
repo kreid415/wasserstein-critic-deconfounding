@@ -1,5 +1,3 @@
-Much of the code for this notebook is sourced from the original underlying base model scCraft. This ensures reproducibilty of the original results in comparison to the new approach. The github link is available here: https://github.com/ch2343/scCRAFT/tree/main, and a link to the publication is available here: https://www.nature.com/articles/s42003-025-07988-y. 
-
 Data is available here: "https://figshare.com/articles/dataset/Benchmarking_atlas-level_data_integration_in_single-cell_genomics_-\_integration_task_datasets_Immune_and_pancreas_/12420968"
 
 We use the pancreas_norm_complexBatch, Immune_ALL_human, and Lung_atlas_public datasets.
