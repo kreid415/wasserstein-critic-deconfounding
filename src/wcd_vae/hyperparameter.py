@@ -48,6 +48,7 @@ def run_comprehensive_nested_cv(
     adata,
     batch_key,
     celltype_key,
+    output_dir,
     d_coef_range=(0.01, 0.05, 0.1, 0.2, 0.5),
     n_outer_folds=5,
     n_inner_folds=3,
@@ -58,7 +59,6 @@ def run_comprehensive_nested_cv(
     disc_iter=10,
     reference_batch=None,
     reference_batch_name_str=None,
-    output_dir=None,
     output_prefix=None,
     random_state=42,
     skip_discr=False,
@@ -230,7 +230,7 @@ def run_comprehensive_nested_cv(
                     f"{output_prefix}_fold{outer_fold_idx + 1}_{critic_label}_history.csv"
                 )
                 full_hist_path = Path(output_dir) / hist_filename
-
+                full_hist_path.parent.mkdir(parents=True, exist_ok=True)
                 # Convert to DataFrame and save
                 pd.DataFrame(training_history).to_csv(full_hist_path, index_label="epoch")
                 print(f"  >>> Saved training history to: {full_hist_path}")
@@ -296,10 +296,13 @@ def run_comprehensive_nested_cv(
 
     # --- FORMAT FINAL OUTPUTS ---
 
+    # Define methods list based on the flag
+    methods_to_save = ["no_critic"] if skip_discr else ["critic", "no_critic"]
+
     # 1. Final Results DF (Includes all metrics for best models)
     final_results_data = []
     for fold in range(n_outer_folds):
-        for m in ["critic", "no_critic"]:
+        for m in methods_to_save:  # <--- Use the dynamic list here
             record = {
                 "fold": fold + 1,
                 "method": m,
@@ -315,7 +318,10 @@ def run_comprehensive_nested_cv(
     # --- SAVING ---
     if output_dir:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
-        prefix = f"{output_dir}/{output_prefix}_" if output_prefix else f"{output_dir}/"
+        prefix = (
+            Path(f"{output_dir}/{output_prefix}_") if output_prefix else Path(f"{output_dir}/")
+        )
+        prefix.mkdir(parents=True, exist_ok=True)
 
         final_results_df.to_csv(f"{prefix}final_best_results.csv", index=False)
         with open(f"{prefix}final_results_dict.pkl", "wb") as f:

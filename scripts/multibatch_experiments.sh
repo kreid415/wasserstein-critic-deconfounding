@@ -41,8 +41,8 @@ for i in {2..9}; do
     run_task "$cmd" "$logname"
 done
 
-# --- IMMUNE SEQUENCE (Batch counts 2 to 5) ---
-for i in {2..5}; do
+# --- IMMUNE SEQUENCE (Batch counts 2 to 4) ---
+for i in {2..4}; do
     # Unbalanced
     cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir ./scripts/multibatch_experiments/unbalanced/immune/immune_$i --batch_count $i --reference_batch -1"
     logname="immune_batch${i}_unbalanced"

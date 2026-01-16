@@ -41,12 +41,12 @@ for i in {0..9}; do
     # Balanced
     cmd="python scripts/hyperparameter_search.py --dataset pancreas --output_dir $BaseDir/balanced/panc/panc_$i --batch_count 100 --reference_batch $i --balance --skip_discr"
     logname="panc_ref${i}_balanced"
-    # run_task "$cmd" "$logname"
+    run_task "$cmd" "$logname"
 done
 
-# --- IMMUNE EXPERIMENTS (0 to 5) ---
+# --- IMMUNE EXPERIMENTS (0 to 4) ---
 echo "Starting Immune Queue..."
-for i in {0..5}; do
+for i in {0..4}; do
     # Unbalanced
     cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/unbalanced/immune/immune_$i --batch_count 100 --reference_batch $i --skip_discr"
     logname="immune_ref${i}_unbalanced"
@@ -55,7 +55,7 @@ for i in {0..5}; do
     # Balanced
     cmd="python scripts/hyperparameter_search.py --dataset immune --output_dir $BaseDir/balanced/immune/immune_$i --batch_count 100 --reference_batch $i --balance --skip_discr"
     logname="immune_ref${i}_balanced"
-    # run_task "$cmd" "$logname"
+    run_task "$cmd" "$logname"
 done
 
 echo "All reference experiments completed."
