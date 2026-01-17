@@ -297,7 +297,7 @@ def run_comprehensive_nested_cv(
     # --- FORMAT FINAL OUTPUTS ---
 
     # Define methods list based on the flag
-    methods_to_save = ["no_critic"] if skip_discr else ["critic", "no_critic"]
+    methods_to_save = ["critic"] if skip_discr else ["critic", "no_critic"]
 
     # 1. Final Results DF (Includes all metrics for best models)
     final_results_data = []
