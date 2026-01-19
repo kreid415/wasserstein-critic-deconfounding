@@ -1,4 +1,4 @@
-Data is available here: "https://figshare.com/articles/dataset/Benchmarking_atlas-level_data_integration_in_single-cell_genomics_-\_integration_task_datasets_Immune_and_pancreas_/12420968"
+Data is available here: "[https://figshare.com/articles/dataset/Benchmarking_atlas-level_data_integration_in_single-cell_genomics_-\_integration_task_datasets_Immune_and_pancreas_/12420968](https://figshare.com/articles/dataset/Benchmarking_atlas-level_data_integration_in_single-cell_genomics_-_integration_task_datasets_Immune_and_pancreas_/12420968/1)"
 
 We use the pancreas_norm_complexBatch, Immune_ALL_human, and Lung_atlas_public datasets.
 
