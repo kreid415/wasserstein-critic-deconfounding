@@ -99,7 +99,7 @@ def run_comprehensive_nested_cv(
         adata_train = adata[train_idx].copy()
         adata_test = adata[test_idx].copy()
 
-        for use_critic in [True, False] if not skip_discr else [False]:
+        for use_critic in [True, False] if not skip_discr else [True]:
             critic_label = "critic" if use_critic else "no_critic"
             iters = disc_iter if use_critic else 1
             print(f"  --- Processing method: {critic_label} ---")
