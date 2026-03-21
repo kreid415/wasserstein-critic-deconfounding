@@ -62,7 +62,7 @@ RUN pip install pre-commit ruff nbstripout
 
 # install PyTorch with CUDA (only for Linux GPU image)
 RUN pip install --upgrade pip && \
-    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 
 # install scladders
 RUN pip install scladder

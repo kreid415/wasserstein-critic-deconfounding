@@ -22,6 +22,7 @@ def main():
     parser.add_argument(
         "--balance", action="store_true", help="Whether to balance batches during training"
     )
+    parser.add_argument("--batch_size", type=int, default=1024, help="Batch size for training")
     parser.add_argument(
         "--skip_discr",
         action="store_true",
@@ -41,6 +42,7 @@ def main():
     reference_batch = args.reference_batch
     balance = args.balance
     skip_discr = args.skip_discr
+    batch_size = args.batch_size
 
     if data_set == "pancreas":
         batch_key = "tech"
@@ -86,6 +88,8 @@ def main():
         output_prefix=f"{data_set}",
         random_state=42,
         skip_discr=skip_discr,
+        clisi_weight=10,
+        batch_size=batch_size,
     )
 
 

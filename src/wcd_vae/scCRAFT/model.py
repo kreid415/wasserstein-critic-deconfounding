@@ -253,6 +253,7 @@ class SCIntegrationModel(nn.Module):
         cos_coef,
         warmup_epoch,
         disc_iter,
+        batch_size=1024,
         reference_batch_name_str=None,
     ):
         training_history = {
@@ -273,7 +274,7 @@ class SCIntegrationModel(nn.Module):
         optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, betas=(0.5, 0.9))
         optimizers = (optimizer_g, optimizer_d_z)
 
-        batch_size_loader = 1024
+        batch_size_loader = batch_size
 
         print(f"Starting training on {self.device}...")
 
@@ -285,6 +286,7 @@ class SCIntegrationModel(nn.Module):
             epoch_vae = 0
             epoch_critic = 0
             epoch_gen_adv = 0
+            epoch_triplet = 0
             epoch_total = 0
             epoch_reconst_non_zero = 0
             batch_count = 0
@@ -322,12 +324,13 @@ class SCIntegrationModel(nn.Module):
                 epoch_vae += loss_vae.item()
                 epoch_critic += reconst_loss.item()
                 epoch_reconst_non_zero += reconst_loss_non_zero.item()
+                epoch_triplet += triplet_loss.item()
                 batch_count += 1
 
             # Average losses for the epoch
             training_history["all_loss"].append(epoch_total / batch_count)
             training_history["loss_da"].append(epoch_gen_adv / batch_count)
-            training_history["triplet_loss"].append(epoch_gen_adv / batch_count)
+            training_history["triplet_loss"].append(epoch_triplet / batch_count)
             training_history["loss_vae"].append(epoch_vae / batch_count)
             training_history["reconst_loss"].append(epoch_critic / batch_count)
             training_history["reconst_loss_non_zero"].append(epoch_reconst_non_zero / batch_count)
@@ -351,6 +354,7 @@ def train_integration_model(
     critic=False,
     scale=None,
     flex_epochs=False,
+    batch_size=1024,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -382,6 +386,7 @@ def train_integration_model(
         warmup_epoch=warmup_epoch,
         disc_iter=disc_iter,
         reference_batch_name_str=reference_batch_name_str,
+        batch_size=batch_size,
     )
     end_time = time.time()
     training_time = end_time - start_time

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import scib
+from scipy.stats import spearmanr
 from sklearn.model_selection import StratifiedKFold
 import torch
 
@@ -16,9 +17,69 @@ from wcd_vae.scCRAFT.model import obtain_embeddings, train_integration_model
 from wcd_vae.scCRAFT.utils import set_seed
 
 
+def compute_mean_paga_spearman(
+    adata, tech_key="tech", celltype_key="celltype", embed_key="X_scCRAFT", baseline_rep="X_pca"
+):
+    """
+    Computes the mean Spearman correlation of PAGA connectivities
+    across all technologies. Optimized for training loops.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # Keep the training logs clean
+
+        # 1. Global Integrated PAGA
+        adata_global = adata.copy()
+        sc.pp.neighbors(adata_global, use_rep=embed_key)
+        sc.tl.paga(adata_global, groups=celltype_key)
+
+        global_matrix = adata_global.uns["paga"]["connectivities"].toarray()
+        global_celltypes = adata_global.obs[celltype_key].cat.categories
+        df_global = pd.DataFrame(global_matrix, index=global_celltypes, columns=global_celltypes)
+
+        spearman_scores = []
+
+        # 2. Loop through each technology
+        for tech in adata.obs[tech_key].unique():
+            adata_tech = adata[adata.obs[tech_key] == tech].copy()
+            tech_cats = adata_tech.obs[celltype_key].unique()
+
+            if len(tech_cats) < 3:
+                continue  # Need at least 3 cell types for a meaningful correlation
+
+            sc.pp.neighbors(adata_tech, use_rep=baseline_rep)
+            sc.tl.paga(adata_tech, groups=celltype_key)
+
+            tech_matrix = adata_tech.uns["paga"]["connectivities"].toarray()
+            tech_cats = adata_tech.obs[celltype_key].cat.categories
+            df_tech = pd.DataFrame(tech_matrix, index=tech_cats, columns=tech_cats)
+
+            # 3. Align and Extract
+            common_ct = list(set(global_celltypes) & set(tech_cats))
+            common_ct.sort()
+
+            if len(common_ct) < 3:
+                continue
+
+            aligned_global = df_global.loc[common_ct, common_ct].to_numpy()
+            aligned_tech = df_tech.loc[common_ct, common_ct].to_numpy()
+
+            upper_tri_idx = np.triu_indices_from(aligned_tech, k=1)
+            global_edges = aligned_global[upper_tri_idx]
+            tech_edges = aligned_tech[upper_tri_idx]
+
+            # 4. Correlate
+            if np.var(tech_edges) > 0 and np.var(global_edges) > 0:
+                corr, _ = spearmanr(tech_edges, global_edges)
+                if not np.isnan(corr):
+                    spearman_scores.append(corr)
+
+        # Return the average preservation score
+        return np.mean(spearman_scores) if spearman_scores else 0.0
+
+
 def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_scCRAFT"):
     """
-    Helper function to calculate ASW_batch, ASW_celltype, and ARI.
+    Helper function to calculate ASW_batch, ASW_celltype, ARI, and Graph Connectivity.
     Optimized to use existing embeddings and silence noisy output.
     """
     with warnings.catch_warnings():
@@ -28,7 +89,24 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_sc
         )
         asw_celltype = scib.me.silhouette(adata, group_key=celltype_key, embed=embed_key)
 
+    # Required for both optimal_resolution, PAGA, and Graph Connectivity
     sc.pp.neighbors(adata, use_rep=embed_key)
+
+    # --- ADDED FOR PAGA & TOPOLOGY ---
+    # Compute PAGA (stores connectivity matrix in adata.uns['paga']['connectivities'])
+    sc.tl.paga(adata, groups=celltype_key)
+
+    # Compute Graph Connectivity (Quantitative topological metric between 0 and 1)
+    graph_conn = scib.me.graph_connectivity(adata, label_key=celltype_key)
+    # ---------------------------------
+
+    paga_spearman = compute_mean_paga_spearman(
+        adata,
+        tech_key=batch_key,
+        celltype_key=celltype_key,
+        embed_key=embed_key,
+        baseline_rep="X_pca",
+    )
 
     old_stdout = sys.stdout
     sys.stdout = open(os.devnull, "w")
@@ -41,7 +119,9 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_sc
         sys.stdout = old_stdout
 
     ari = scib.me.ari(adata, celltype_key, "louvain_opt")
-    return asw_batch, asw_celltype, ari
+
+    # Return graph_conn as well
+    return asw_batch, asw_celltype, ari, graph_conn, paga_spearman
 
 
 def run_comprehensive_nested_cv(
@@ -57,11 +137,13 @@ def run_comprehensive_nested_cv(
     inner_epochs=100,
     warmup_epoch=10,
     disc_iter=10,
+    batch_size=1024,
     reference_batch=None,
     reference_batch_name_str=None,
     output_prefix=None,
     random_state=42,
     skip_discr=False,
+    clisi_weight=1.0,
 ):
     """
     Performs optimized nested cross-validation.
@@ -84,7 +166,16 @@ def run_comprehensive_nested_cv(
     outer_kf = StratifiedKFold(n_splits=n_outer_folds, shuffle=True, random_state=random_state)
 
     # Output structure for final, best-model results (includes ALL metrics)
-    metrics_list_final = ["ilisi", "clisi", "asw_batch", "asw_celltype", "ari", "best_d_coef"]
+    metrics_list_final = [
+        "ilisi",
+        "clisi",
+        "asw_batch",
+        "asw_celltype",
+        "ari",
+        "graph_conn",
+        "paga_spearman",
+        "best_d_coef",
+    ]
     outer_fold_results_dict = {
         "critic": {m: [] for m in metrics_list_final},
         "no_critic": {m: [] for m in metrics_list_final},
@@ -140,6 +231,7 @@ def run_comprehensive_nested_cv(
                         warmup_epoch=warmup_epoch,
                         critic=use_critic,
                         disc_iter=iters,
+                        batch_size=batch_size,
                         reference_batch=reference_batch,
                         reference_batch_name_str=reference_batch_name_str,
                     )
@@ -182,14 +274,15 @@ def run_comprehensive_nested_cv(
                             "d_coef": d_coef,
                             "ilisi": ilisi_val,
                             "clisi": clisi_val,
-                            "composite_score": ilisi_val - clisi_val,
+                            "batch_size": batch_size,
+                            "composite_score": ilisi_val - (clisi_val * clisi_weight),
                         }
                     )
 
                 # --- End of Inner Folds for this d_coef ---
                 avg_ilisi = np.mean(temp_inner_ilisi)
                 avg_clisi = np.mean(temp_inner_clisi)
-                avg_composite = avg_ilisi - avg_clisi
+                avg_composite = avg_ilisi - (avg_clisi * clisi_weight)
 
                 inner_selection_scores[d_coef] = avg_composite
 
@@ -222,6 +315,7 @@ def run_comprehensive_nested_cv(
                 disc_iter=iters,
                 reference_batch=reference_batch,
                 reference_batch_name_str=reference_batch_name_str,
+                batch_size=batch_size,
             )
 
             if output_dir:
@@ -261,12 +355,14 @@ def run_comprehensive_nested_cv(
             )
 
             # 2. Calculate expensive scib metrics here
-            test_asw_batch, test_asw_celltype, test_ari = calculate_additional_metrics(
-                adata_test_only, batch_key, celltype_key, embed_key="X_scCRAFT"
+            test_asw_batch, test_asw_celltype, test_ari, test_graph_conn, test_paga_correlation = (
+                calculate_additional_metrics(
+                    adata_test_only, batch_key, celltype_key, embed_key="X_scCRAFT"
+                )
             )
 
             print(
-                f"  >>> Final Test Scores ({critic_label}): iLISI={test_ilisi:.3f}, cLISI={test_clisi:.3f}, ARI={test_ari:.3f}"
+                f"  >>> Final Test Scores ({critic_label}): iLISI={test_ilisi:.3f}, cLISI={test_clisi:.3f}, ARI={test_ari:.3f}, Graph Connectivity={test_graph_conn:.3f}, PAGA Spearman={test_paga_correlation:.3f}"
             )
 
             # Save all metrics to the final results dictionary
@@ -275,7 +371,9 @@ def run_comprehensive_nested_cv(
             outer_fold_results_dict[critic_label]["asw_batch"].append(test_asw_batch)
             outer_fold_results_dict[critic_label]["asw_celltype"].append(test_asw_celltype)
             outer_fold_results_dict[critic_label]["ari"].append(test_ari)
+            outer_fold_results_dict[critic_label]["graph_conn"].append(test_graph_conn)
             outer_fold_results_dict[critic_label]["best_d_coef"].append(best_d_coef)
+            outer_fold_results_dict[critic_label]["paga_spearman"].append(test_paga_correlation)
 
             # Log final test result to sensitivity DF (will contain NaNs for ASW/ARI in inner loop rows)
             sensitivity_records.append(
@@ -290,7 +388,10 @@ def run_comprehensive_nested_cv(
                     "asw_batch": test_asw_batch,
                     "asw_celltype": test_asw_celltype,
                     "ari": test_ari,
-                    "composite_score": test_ilisi - test_clisi,
+                    "graph_conn": test_graph_conn,
+                    "paga_spearman": test_paga_correlation,
+                    "composite_score": ilisi_val - (clisi_val * clisi_weight),
+                    "batch_size": batch_size,
                 }
             )
 

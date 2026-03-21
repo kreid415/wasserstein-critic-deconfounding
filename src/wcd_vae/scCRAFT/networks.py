@@ -123,8 +123,8 @@ class Decoder(nn.Module):
 
         # NB parameters with safe exponential
 
-        px_scale = torch.exp(torch.clamp(self.px_scale_decoder(combined), max=15))
-        px_r = torch.exp(torch.clamp(self.px_r_decoder(combined), max=15))
+        px_scale = torch.exp(torch.clamp(self.px_scale_decoder(combined), max=15, min=-15))
+        px_r = torch.exp(torch.clamp(self.px_r_decoder(combined), max=15, min=-15))
 
         # Scale the mean (px_scale) with the predicted library size
         px_rate = px_scale
