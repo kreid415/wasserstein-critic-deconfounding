@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- BASE DIRECTORY SETUP ---
-BaseDir="./scripts/reference_experiments"
+BaseDir="./scripts/batch_size_experiments"
 LogDir="$BaseDir/logs"
 
 # 1. Create all necessary directories beforehand
@@ -11,7 +11,7 @@ mkdir -p "$BaseDir/unbalanced/lung" "$BaseDir/balanced/lung"
 
 mkdir -p "$LogDir"
 
-echo "--- Starting Sequential Reference Experiments ---"
+echo "--- Starting Sequential Batch Size Experiments ---"
 echo "Strategy: Strictly sequential (PANCREAS -> IMMUNE -> LUNG)."
 echo "Output logs saved to: $LogDir"
 
@@ -74,4 +74,4 @@ for batch_size in 128 256 512 1024; do
     run_task "$cmd" "$logname"
 done
 
-echo "All reference experiments completed."
+echo "All batch size experiments completed."
