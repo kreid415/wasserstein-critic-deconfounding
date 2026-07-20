@@ -38,6 +38,10 @@ class SCIntegrationModel(nn.Module):
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
+        # store head type + reference index so train_model can enable the E4 modes
+        # (rotating/joint) even when the reference is given as an int, not a name.
+        self.critic = critic
+        self.reference_batch = reference_batch
 
         # WHY: E2 swaps only the z-producing backbone while holding the adversarial head
         #      fixed; HOW: backbone=None keeps the upstream scCRAFT VAE (reference),
@@ -291,6 +295,14 @@ class SCIntegrationModel(nn.Module):
         data_dict, batch_indices_map, reference_batch_idx = self._prepare_tensors(
             adata, batch_key, reference_batch_name_str
         )
+        # WHY (E4 fix): experiments pass the reference as an INT index at construction
+        #   (self.reference_batch), not as a name string, so _prepare_tensors returns
+        #   reference_batch_idx=None and the epoch-level rotating/joint logic below never
+        #   fired (all modes silently collapsed to the critic's constructor reference).
+        #   Fall back to the model's stored int index so a reference IS active whenever
+        #   this is the critic head, enabling the fixed/rotating/joint comparison.
+        if reference_batch_idx is None and self.critic and getattr(self, "reference_batch", None) is not None:
+            reference_batch_idx = int(self.reference_batch)
 
         # WHY (E4): isolate whether critic pathologies come from the REFERENCE DESIGN
         #           rather than the Wasserstein objective. HOW: three reference modes.
