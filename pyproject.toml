@@ -49,6 +49,9 @@ select = [
 extend-ignore = ["RUF005", "RUF012", "ISC001"]
 
 [tool.ruff.lint.per-file-ignores]
+# Experiment scripts: E501 long metric/config lines; PTH os.path usage kept consistent
+# with the rest of the project's script layer.
+"scripts/*.py" = ["E501", "PTH103", "PTH111", "PTH118", "PTH120", "PTH123"]
 # Numerical modules relocated from upstream scCRAFT during the authored-vs-upstream
 # refactor. N806: ML tensor naming (X_tensor, X_raw_tensor) is a deliberate convention;
 # E501/PTH123: long numerical expressions and open() calls preserved verbatim from the
