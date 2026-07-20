@@ -159,7 +159,23 @@ joint comparison. Language softened throughout per E0.
 ### R2.4 — Benchmark weak for the strength of the claims: add baselines+datasets OR frame as narrow ablation
 
 **Response.** We do **both**. More datasets (8 total incl. cross-species and 2 ATAC),
-external baselines **[E3 — PENDING]**, and explicit ablation framing [E0].
+explicit ablation framing [E0], and external baselines (E3) on the identical metric
+suite. **E3 — five external methods on three datasets (mean over seeds):**
+
+| Dataset | method | iLISI | cLISI | ASW-batch | ARI |
+|---|---|---|---|---|---|
+| immune | unintegrated / harmony / scVI / scANVI / scanorama | 0.024 / 0.216 / 0.254 / 0.201 / 0.203 | 0.011 / 0.012 / 0.015 / 0.003 / 0.012 | 0.74 / 0.88 / 0.88 / 0.85 / 0.79 | 0.42 / 0.78 / 0.73 / 0.96 / 0.44 |
+| pancreas | unintegrated / harmony / scVI / scANVI / scanorama | 0.026 / 0.228 / 0.210 / 0.239 / 0.126 | 0.003 / 0.004 / 0.006 / 0.002 / 0.005 | 0.86 / 0.88 / 0.92 / 0.92 / 0.79 | 0.44 / 0.95 / 0.95 / 0.96 / 0.33 |
+| cross-species immune | unintegrated / harmony / scVI / scANVI / scanorama | 0.000 / 0.000 / 0.017 / 0.008 / 0.000 | 0.024 / 0.024 / 0.027 / 0.006 / 0.024 | 0.58 / 0.59 / 0.83 / 0.79 / 0.58 | 0.33 / 0.36 / 0.32 / 0.54 / 0.33 |
+
+Two findings position our work against the field: (i) label-aware **scANVI** dominates on
+cell-type conservation (ARI ~0.96) where batches overlap, setting the practical ceiling
+our unsupervised adversarial heads are compared against; (ii) on the **near-perfectly
+disjoint cross-species task, every external method fails to mix** (iLISI ≤ 0.017; Harmony
+and Scanorama return essentially unintegrated), which concretely demonstrates the
+disjoint-support regime that motivates the Wasserstein objective. Full table in
+`E3_external_baselines.csv`; our critic/discriminator at the operating point are overlaid
+on the mixing↔conservation plane in Figure E3.
 
 ### R2.5 — Weakness may come from the reference-based design, not Wasserstein itself
 
