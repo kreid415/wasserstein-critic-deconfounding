@@ -25,17 +25,42 @@ def emb_unintegrated(adata, batch_key, celltype_key):
 
 
 def emb_harmony(adata, batch_key, celltype_key):
+    # WHY: call harmonypy directly + assign with an explicit shape check, rather than
+    #      sc.external.pp.harmony_integrate whose obsm write is version-fragile
+    #      (observed a (n_pcs,)-shaped write instead of (n_cells, n_pcs)).
+    import harmonypy
+
     if "X_pca" not in adata.obsm:
         sc.tl.pca(adata, n_comps=50)
-    sc.external.pp.harmony_integrate(adata, key=batch_key, basis="X_pca", adjusted_basis="X_emb")
+    pca = np.asarray(adata.obsm["X_pca"][:, :50])
+    ho = harmonypy.run_harmony(pca, adata.obs, [batch_key])
+    z = np.asarray(ho.Z_corr).T  # harmonypy returns (n_pcs, n_cells)
+    assert z.shape[0] == adata.n_obs, f"harmony emb shape {z.shape} != n_obs {adata.n_obs}"
+    adata.obsm["X_emb"] = z
 
 
 def emb_scanorama(adata, batch_key, celltype_key):
-    import scanorama  # noqa: F401
+    # WHY: run scanorama per-batch then reassemble in original cell order; the scanpy
+    #      wrapper had the same fragile-obsm-write issue as harmony.
+    import scanorama
 
     if "X_pca" not in adata.obsm:
         sc.tl.pca(adata, n_comps=50)
-    sc.external.pp.scanorama_integrate(adata, key=batch_key, basis="X_pca", adjusted_basis="X_emb")
+    order = np.argsort(adata.obs[batch_key].astype(str).values, kind="stable")
+    inv = np.argsort(order)
+    ad_sorted = adata[order].copy()
+    batches = ad_sorted.obs[batch_key].astype(str).values
+    splits, mats = [], []
+    for b in pd.unique(batches):
+        m = batches == b
+        splits.append(np.where(m)[0])
+        mats.append(np.asarray(ad_sorted.obsm["X_pca"][m, :50]))
+    integrated = scanorama.assemble(mats)  # list of corrected per-batch matrices
+    z_sorted = np.zeros((ad_sorted.n_obs, integrated[0].shape[1]), dtype=np.float32)
+    for idx, mat in zip(splits, integrated):
+        z_sorted[idx] = np.asarray(mat)
+    adata.obsm["X_emb"] = z_sorted[inv]  # back to original order
+    assert adata.obsm["X_emb"].shape[0] == adata.n_obs
 
 
 def _fit_scvi(adata, batch_key, n_latent=30):
