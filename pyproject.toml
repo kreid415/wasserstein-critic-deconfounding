@@ -55,6 +55,9 @@ extend-ignore = ["RUF005", "RUF012", "ISC001"]
 # working baseline to avoid behavior-altering edits to validated training/eval code.
 "src/wcd_vae/wcd/training.py" = ["N806", "E501"]
 "src/wcd_vae/wcd/evaluation.py" = ["E501", "SIM108"]
+# experiment.py: shared harness. E501 long metric-call lines; PTH/SIM115 the same
+# devnull-stdout idiom used to silence scib's optimal-resolution clustering.
+"src/wcd_vae/wcd/experiment.py" = ["E501", "PTH111", "PTH118", "PTH123", "SIM115"]
 # SIM115: sys.stdout is deliberately redirected to os.devnull and restored in a
 # finally block to silence scib's chatty cluster_optimal_resolution; a context
 # manager would not fit the stdout-swap idiom.
