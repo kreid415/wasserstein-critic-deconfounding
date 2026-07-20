@@ -276,6 +276,7 @@ class SCIntegrationModel(nn.Module):
         disc_iter,
         batch_size=1024,
         reference_batch_name_str=None,
+        reference_mode="fixed",
     ):
         training_history = {
             "all_loss": [],
@@ -290,6 +291,16 @@ class SCIntegrationModel(nn.Module):
         data_dict, batch_indices_map, reference_batch_idx = self._prepare_tensors(
             adata, batch_key, reference_batch_name_str
         )
+
+        # WHY (E4): isolate whether critic pathologies come from the REFERENCE DESIGN
+        #           rather than the Wasserstein objective. HOW: three reference modes.
+        #   "fixed"    - one reference batch for all of training (original behaviour).
+        #   "rotating" - the reference batch cycles across batches each epoch, so no
+        #                single batch is privileged as the alignment anchor.
+        #   "joint"    - no privileged reference; each epoch draws a reference uniformly
+        #                at random, approximating all-pairs alignment on average.
+        n_batches_total = len(batch_indices_map)
+        base_ref = reference_batch_idx if reference_batch_idx is not None else 0
 
         optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, betas=(0.5, 0.9))
         optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, betas=(0.5, 0.9))
@@ -321,6 +332,16 @@ class SCIntegrationModel(nn.Module):
             warmup = epoch < warmup_epoch
             params = (d_coef, kl_coef, triplet_coef, cos_coef, disc_iter)
 
+            # E4: resolve the reference batch index used for THIS epoch.
+            if reference_batch_idx is None:
+                epoch_ref_idx = None  # discriminator head: no reference concept
+            elif reference_mode == "rotating":
+                epoch_ref_idx = (base_ref + epoch) % n_batches_total
+            elif reference_mode == "joint":
+                epoch_ref_idx = int(np.random.randint(n_batches_total))
+            else:  # "fixed"
+                epoch_ref_idx = reference_batch_idx
+
             # 3. Iterate Mini-batches
             for i in range(0, total_samples, batch_size_loader):
                 end = min(i + batch_size_loader, total_samples)
@@ -336,7 +357,7 @@ class SCIntegrationModel(nn.Module):
                 )
 
                 all_loss, loss_da, triplet_loss, loss_vae, reconst_loss, reconst_loss_non_zero = (
-                    self._train_batch(batch_data, optimizers, params, warmup, reference_batch_idx)
+                    self._train_batch(batch_data, optimizers, params, warmup, epoch_ref_idx)
                 )
 
                 # Accumulate (handle tensors vs floats)
@@ -377,6 +398,7 @@ def train_integration_model(
     flex_epochs=False,
     batch_size=1024,
     backbone=None,
+    reference_mode="fixed",
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -410,6 +432,7 @@ def train_integration_model(
         disc_iter=disc_iter,
         reference_batch_name_str=reference_batch_name_str,
         batch_size=batch_size,
+        reference_mode=reference_mode,
     )
     end_time = time.time()
     training_time = end_time - start_time

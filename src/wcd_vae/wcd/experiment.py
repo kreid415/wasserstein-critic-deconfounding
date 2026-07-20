@@ -89,6 +89,7 @@ def train_one(
     warmup_epoch=5,
     batch_size=1024,
     backbone=None,
+    reference_mode="fixed",
 ):
     """Train ONE configuration and return the fitted VAE + history.
 
@@ -109,6 +110,7 @@ def train_one(
         "batch_size": batch_size,
         "reference_batch": reference_batch,
         "reference_batch_name_str": reference_batch_name_str,
+        "reference_mode": reference_mode,
     }
     if backbone is not None:
         kwargs["backbone"] = backbone
@@ -204,6 +206,7 @@ def evaluate_config(
     reference_batch=None,
     reference_batch_name_str=None,
     backbone=None,
+    reference_mode="fixed",
     z_dim=256,
     epochs=150,
     warmup_epoch=5,
@@ -218,7 +221,8 @@ def evaluate_config(
     vae, hist = train_one(
         ad, batch_key, critic=critic, d_coef=d_coef, seed=seed,
         reference_batch=reference_batch, reference_batch_name_str=reference_batch_name_str,
-        backbone=backbone, z_dim=z_dim, epochs=epochs, warmup_epoch=warmup_epoch, batch_size=batch_size,
+        backbone=backbone, reference_mode=reference_mode, z_dim=z_dim, epochs=epochs,
+        warmup_epoch=warmup_epoch, batch_size=batch_size,
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
@@ -229,6 +233,7 @@ def evaluate_config(
         "d_coef": d_coef,
         "seed": seed,
         "reference_batch": reference_batch,
+        "reference_mode": reference_mode,
         "final_loss": float(hist["all_loss"][-1]),
         "final_loss_da": float(hist["loss_da"][-1]),
         **metrics,
