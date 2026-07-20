@@ -57,6 +57,7 @@ extend-ignore = ["RUF005", "RUF012", "ISC001"]
 # E501/PTH123: long numerical expressions and open() calls preserved verbatim from the
 # working baseline to avoid behavior-altering edits to validated training/eval code.
 "src/wcd_vae/wcd/training.py" = ["N806", "E501"]
+"src/wcd_vae/wcd/backbones.py" = ["N806", "E501"]
 "src/wcd_vae/wcd/evaluation.py" = ["E501", "SIM108"]
 # experiment.py: shared harness. E501 long metric-call lines; PTH/SIM115 the same
 # devnull-stdout idiom used to silence scib's optimal-resolution clustering.

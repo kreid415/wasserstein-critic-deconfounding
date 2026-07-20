@@ -33,13 +33,21 @@ from wcd_vae.wcd.adversarial import Discriminator
 
 
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic, reference_batch, seed=None):
+    def __init__(self, adata, batch_key, z_dim, critic, reference_batch, seed=None, backbone=None):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
         self.v_dim = np.unique(adata.obs[batch_key]).shape[0]
 
-        self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
+        # WHY: E2 swaps only the z-producing backbone while holding the adversarial head
+        #      fixed; HOW: backbone=None keeps the upstream scCRAFT VAE (reference),
+        #      otherwise build the named alternative sharing the same forward contract.
+        if backbone is None or backbone == "scCRAFT":
+            self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
+        else:
+            from wcd_vae.wcd.backbones import build_backbone
+
+            self.VAE = build_backbone(backbone, self.p_dim, self.v_dim, self.z_dim)
         self.D_Z = Discriminator(
             n_input=self.z_dim,
             domain_number=self.v_dim,
@@ -368,6 +376,7 @@ def train_integration_model(
     scale=None,
     flex_epochs=False,
     batch_size=1024,
+    backbone=None,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -385,6 +394,7 @@ def train_integration_model(
         z_dim=z_dim,
         critic=critic,
         reference_batch=reference_batch,
+        backbone=backbone,
     )
     print(epochs)
     start_time = time.time()
