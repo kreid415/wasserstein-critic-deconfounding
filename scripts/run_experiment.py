@@ -67,6 +67,9 @@ def main():
         registry = json.load(fh)
     entry = registry[args.dataset]
 
+    # create output dir upfront so the incremental per-config CSV writes below succeed.
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+
     adata, batch_key, celltype_key, largest = load_task(
         args.dataset, batch_count=args.batch_count, balance=args.balance,
         data_root=args.data_root, registry=registry,

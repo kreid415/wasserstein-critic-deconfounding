@@ -88,6 +88,8 @@ def main():
     with open(args.registry) as fh:
         registry = json.load(fh)
 
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+
     adata, batch_key, celltype_key, _largest = load_task(
         args.dataset, batch_count=args.batch_count, balance=args.balance,
         data_root=args.data_root, registry=registry,

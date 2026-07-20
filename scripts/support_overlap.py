@@ -51,8 +51,8 @@ def linear_mmd2(xa, xb):
 def batch_classifier_accuracy(x, batch_codes, seed=0, max_cells=20000):
     # WHY: global separability; HOW: 3-fold CV balanced accuracy of an RF batch predictor.
     #      Chance = 1/n_batches; >> chance => batches separable => low support overlap.
-    #      Subsample to max_cells (stratified) so large atlases stay tractable; the
-    #      accuracy estimate is unbiased for the separability question.
+    #      Subsample to max_cells (uniform random, proportional to batch sizes in
+    #      expectation) so large atlases stay tractable without changing the estimand.
     rng = np.random.default_rng(seed)
     if len(batch_codes) > max_cells:
         idx = rng.choice(len(batch_codes), size=max_cells, replace=False)
