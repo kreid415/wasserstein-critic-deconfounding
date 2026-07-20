@@ -131,7 +131,7 @@ within a fixed backbone. **(2) Added adversarial-variant breadth [E2]:** we hold
 adversarial heads fixed and swap the VAE backbone across four architectures
 (scCRAFT, scVI negative-binomial, Gaussian, ZINB), 3 seeds each, at the operating point.
 **The trade-off reproduces on all four backbones on both datasets:** the critic minus
-discriminator difference is stable in sign and magnitude — cLISI worsens (+0.012 to
+discriminator difference is stable in sign and magnitude — cLISI worsens (+0.013 to
 +0.017 on immune, +0.012 on pancreas, essentially backbone-invariant) and ARI drops
 (−0.12 to −0.19 immune; −0.24 to −0.29 pancreas) for every backbone. Because the
 qualitative behavior does not depend on the reconstruction likelihood, we state the claim
