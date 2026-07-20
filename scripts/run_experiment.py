@@ -61,6 +61,10 @@ def main():
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--zdim", type=int, default=256)
     ap.add_argument("--data-root", default=None)
+    ap.add_argument("--head", choices=["discriminator", "critic", "both"], default="both",
+                    help="run only one adversarial head (lets E1 split into two shorter jobs)")
+    ap.add_argument("--resume", action="store_true",
+                    help="skip configs already present in --out (by method,backbone,d_coef,seed)")
     args = ap.parse_args()
 
     with open(args.registry) as fh:
@@ -78,9 +82,27 @@ def main():
     print(f"[{args.dataset}] n_obs={adata.n_obs} batch_key={batch_key} largest={largest} "
           f"n_batches={adata.obs[batch_key].nunique()}")
 
+    # resume: load already-computed configs so a re-run skips them.
+    done = set()
     rows = []
+    if args.resume and os.path.exists(args.out):
+        prev = pd.read_csv(args.out)
+        rows = prev.to_dict("records")
+        for r in rows:
+            done.add((r["method"], r.get("backbone", "scCRAFT"), float(r["d_coef"]), int(r["seed"])))
+        print(f"[resume] loaded {len(done)} completed configs from {args.out}")
+
     for i, cfg in enumerate(configs_for(args.experiment, entry)):
+        # head filter: lets E1 be split into two shorter jobs (one per adversarial head).
+        if args.head != "both":
+            want_critic = args.head == "critic"
+            if bool(cfg.get("critic")) != want_critic:
+                continue
         cfg = dict(cfg, epochs=args.epochs, z_dim=args.zdim)
+        method = "critic" if cfg.get("critic") else "discriminator"
+        key = (method, cfg.get("backbone", "scCRAFT"), float(cfg["d_coef"]), int(cfg["seed"]))
+        if key in done:
+            continue
         try:
             row = evaluate_config(adata, batch_key, celltype_key, **cfg)
             row.update({"experiment": args.experiment, "dataset": args.dataset,

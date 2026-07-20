@@ -226,9 +226,11 @@ trajectory preservation is already reported (PAGA-Spearman). *[Fill.]*
 ## Reproducibility note
 
 - **Code provenance.** Authored contributions are now separated from the upstream
-  scCRAFT backbone (He et al. 2025) into a dedicated `wcd/` package; a symbol-level
-  AST diff against the upstream repository documents every new, modified, and unchanged
-  function (`code_provenance.csv`). This directly supports the generalization claims by
+  scCRAFT backbone into a dedicated `wcd/` package; a symbol-level AST diff against the
+  upstream repository (github.com/ch2343/scCRAFT) documents every new, modified, and
+  unchanged function (`code_provenance.csv`). Upstream reference: He C, Filippidis P,
+  Kleinstein SH, Guan L. *Partially characterized topology guides reliable anchor-free
+  scRNA-integration.* Commun Biol 8(1):561 (2025). This directly supports the generalization claims by
   making the intervention (adversarial head swap) auditable.
 - **Metric correctness.** During the revision we found and fixed a numerical bug: the
   LISI kernel was compiled with `@njit(fastmath=True)`, which invalidates the
