@@ -34,7 +34,10 @@ def emb_harmony(adata, batch_key, celltype_key):
         sc.tl.pca(adata, n_comps=50)
     pca = np.asarray(adata.obsm["X_pca"][:, :50])
     ho = harmonypy.run_harmony(pca, adata.obs, [batch_key])
-    z = np.asarray(ho.Z_corr).T  # harmonypy returns (n_pcs, n_cells)
+    z = np.asarray(ho.Z_corr)
+    # orient to (n_cells, n_pcs) regardless of harmonypy's return convention.
+    if z.shape[0] != adata.n_obs and z.shape[1] == adata.n_obs:
+        z = z.T
     assert z.shape[0] == adata.n_obs, f"harmony emb shape {z.shape} != n_obs {adata.n_obs}"
     adata.obsm["X_emb"] = z
 
