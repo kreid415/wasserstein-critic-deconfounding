@@ -48,10 +48,16 @@ def linear_mmd2(xa, xb):
     return float(np.sum((ma - mb) ** 2))
 
 
-def batch_classifier_accuracy(x, batch_codes, seed=0):
+def batch_classifier_accuracy(x, batch_codes, seed=0, max_cells=20000):
     # WHY: global separability; HOW: 3-fold CV balanced accuracy of an RF batch predictor.
     #      Chance = 1/n_batches; >> chance => batches separable => low support overlap.
-    clf = RandomForestClassifier(n_estimators=200, max_depth=None, n_jobs=-1, random_state=seed)
+    #      Subsample to max_cells (stratified) so large atlases stay tractable; the
+    #      accuracy estimate is unbiased for the separability question.
+    rng = np.random.default_rng(seed)
+    if len(batch_codes) > max_cells:
+        idx = rng.choice(len(batch_codes), size=max_cells, replace=False)
+        x, batch_codes = x[idx], batch_codes[idx]
+    clf = RandomForestClassifier(n_estimators=100, max_depth=20, n_jobs=-1, random_state=seed)
     pred = cross_val_predict(clf, x, batch_codes, cv=3)
     return float(balanced_accuracy_score(batch_codes, pred))
 
@@ -112,6 +118,7 @@ def main():
                     batch_count=entry.get("n_batches", 2),
                     balance=balance,
                     modality=entry.get("prep", "rna"),
+                    cluster=False,  # E6 only needs PCA, not the triplet-loss Leiden labels
                 )
                 res = analyze(adata, entry["batch_key"], k=args.k)
                 res.update({
