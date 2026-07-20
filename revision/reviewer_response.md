@@ -129,9 +129,15 @@ purity. See Theme C / R2.6 for the quantitative results.
 [E0]:** the paper is reframed as a *controlled ablation*; the existence claim is stated
 within a fixed backbone. **(2) Added adversarial-variant breadth [E2]:** we hold the
 adversarial heads fixed and swap the VAE backbone across four architectures
-(scCRAFT/scVI-NB/Gaussian/ZINB), testing whether the trade-off is backbone-specific.
-*[Fill E2: reproduces across N/4 backbones ⇒ "generalizes across the backbones tested"
-or report the boundary.]*
+(scCRAFT, scVI negative-binomial, Gaussian, ZINB), 3 seeds each, at the operating point.
+**The trade-off reproduces on all four backbones on both datasets:** the critic minus
+discriminator difference is stable in sign and magnitude — cLISI worsens (+0.012 to
++0.017 on immune, +0.012 on pancreas, essentially backbone-invariant) and ARI drops
+(−0.12 to −0.19 immune; −0.24 to −0.29 pancreas) for every backbone. Because the
+qualitative behavior does not depend on the reconstruction likelihood, we state the claim
+as *"the trade-off generalizes across the VAE backbones tested"* rather than a
+scCRAFT-specific artifact. See Figure E2 (`fig_E2_backbones.png`) and
+`E2_backbone_generalization.csv`.
 
 ### R2.2 — Over-correction may be a λ_adv tuning issue; provide a Pareto front
 
