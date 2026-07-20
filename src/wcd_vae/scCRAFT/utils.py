@@ -5,7 +5,6 @@ import numpy as np
 import scanpy as sc
 import scipy.sparse
 import torch
-from torch.utils.data import DataLoader, TensorDataset
 
 
 def weights_init_normal(m):

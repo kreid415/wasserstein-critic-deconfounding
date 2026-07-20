@@ -48,6 +48,18 @@ select = [
 # TODO: Remove ISC001 ignore when formatter updated: https://github.com/astral-sh/ruff/issues/8272
 extend-ignore = ["RUF005", "RUF012", "ISC001"]
 
+[tool.ruff.lint.per-file-ignores]
+# Numerical modules relocated from upstream scCRAFT during the authored-vs-upstream
+# refactor. N806: ML tensor naming (X_tensor, X_raw_tensor) is a deliberate convention;
+# E501/PTH123: long numerical expressions and open() calls preserved verbatim from the
+# working baseline to avoid behavior-altering edits to validated training/eval code.
+"src/wcd_vae/wcd/training.py" = ["N806", "E501"]
+"src/wcd_vae/wcd/evaluation.py" = ["E501", "SIM108"]
+# SIM115: sys.stdout is deliberately redirected to os.devnull and restored in a
+# finally block to silence scib's chatty cluster_optimal_resolution; a context
+# manager would not fit the stdout-swap idiom.
+"src/wcd_vae/wcd/hyperparameter.py" = ["E501", "PTH123", "SIM115"]
+
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 split-on-trailing-comma = false

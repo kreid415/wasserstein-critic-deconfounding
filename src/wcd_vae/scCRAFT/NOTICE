@@ -1,0 +1,17 @@
+This directory contains code derived from scCRAFT:
+
+  He, C., Filippidis, P., Kleinstein, S.H., Guan, L. (2025).
+  "Partially characterized topology guides reliable anchor-free scRNA-integration."
+  Commun. Biol. 8(1):561.
+  Source: https://github.com/ch2343/scCRAFT
+
+The VAE backbone (Encoder/Decoder/VAE), the negative-binomial likelihood
+(log_nb_positive), the Gaussian reparameterization, the triplet loss and
+multi-resolution clustering (utils.py), and CrossEntropy are upstream scCRAFT,
+with local modifications by K. Reid (warmup flag, raw-counts NB path, batch-effect
+decoder pathway). Retained under scCRAFT's original license.
+
+Everything under the sibling wcd/ package (reference Wasserstein critic, adversarial
+head dispatch, alternative VAE backbones, adversarial training engine, LISI/evaluation
+metrics, data preprocessing, and the nested-CV / Pareto experiment harness) is the
+authored contribution of this work and is NOT part of upstream scCRAFT.

@@ -1,4 +1,17 @@
-import sys
+"""Adversarial-deconfounding training engine — AUTHORED CONTRIBUTION (K. Reid).
+
+# WHY: Train the VAE backbone against an adversarial head so the latent space is
+#      mixed across batches while cell-type structure (triplet + cosine terms) is kept.
+# HOW: Alternating optimisation — a stratified sampler guarantees the reference batch
+#      appears in every mini-batch (required for a stable critic gradient penalty),
+#      the head takes ``disc_iter`` steps, then the generator/VAE takes one step with
+#      the adversarial term weighted by ``d_coef`` (= lambda_adv).
+Modified from scCRAFT's SCIntegrationModel (upstream had a single dataloader and a
+discriminator-only loop); the reference-batch handling, stratified epoch sampler,
+per-batch adversarial step, and critic support are authored. The backbone is injected,
+so this engine trains any ``wcd.backbones`` architecture unchanged.
+"""
+
 import time
 
 import numpy as np
@@ -9,16 +22,16 @@ import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 import torch.optim as optim
 
-from wcd_vae.scCRAFT.networks import VAE, Discriminator
+from wcd_vae.scCRAFT.networks import VAE
 from wcd_vae.scCRAFT.utils import (
     create_triplets,
     generate_adata_to_dataloader,
     set_seed,
     weights_init_normal,
 )
+from wcd_vae.wcd.adversarial import Discriminator
 
 
-# Main training class
 class SCIntegrationModel(nn.Module):
     def __init__(self, adata, batch_key, z_dim, critic, reference_batch, seed=None):
         super().__init__()
@@ -149,7 +162,7 @@ class SCIntegrationModel(nn.Module):
             step_indices = []
             step_labels = []
 
-            for b_id in batch_indices_map.keys():
+            for b_id in batch_indices_map:
                 # Calculate proportional slice for this step
                 start = (step * sample_per_batch) // num_steps
                 end = ((step + 1) * sample_per_batch) // num_steps

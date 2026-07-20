@@ -3,7 +3,12 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
-@njit(fastmath=True, cache=True)
+# NOTE (K. Reid, revision): fastmath removed. Under fastmath=True the compiler assumes
+# no inf/nan, which breaks the `beta == np.inf` guards in the perplexity binary search
+# below; on recent numba builds this silently collapses every LISI score to the
+# n_neighbors fallback (a constant), corrupting iLISI/cLISI. fastmath=False restores
+# the correct adaptive-bandwidth computation with negligible speed cost.
+@njit(cache=True)
 def compute_simpson_numba(indices, distances, batch_codes, n_batches, perplexity=30):
     """
     Numba-accelerated LISI computation.

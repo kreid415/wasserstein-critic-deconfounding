@@ -12,9 +12,9 @@ from scipy.stats import spearmanr
 from sklearn.model_selection import StratifiedKFold
 import torch
 
-from wcd_vae.metrics import clisi_graph, ilisi_graph
-from wcd_vae.scCRAFT.model import obtain_embeddings, train_integration_model
 from wcd_vae.scCRAFT.utils import set_seed
+from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph
+from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 
 def compute_mean_paga_spearman(
