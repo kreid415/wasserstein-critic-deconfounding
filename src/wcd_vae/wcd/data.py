@@ -13,7 +13,21 @@ def prep_data(
     norm_val=1e4,
     n_top_genes=2000,
     balance=False,
+    modality="rna",
 ):
+    """Preprocess an integration task for the adversarial VAE.
+
+    modality:
+      "rna"  - standard scRNA-seq path: cell/gene QC filters, per-cell normalisation,
+               log1p, and batch-aware HVG selection to ``n_top_genes``.
+      "atac" - scATAC gene-activity path. HVG selection and the aggressive gene/cell
+               QC filters are SKIPPED: gene-activity matrices already summarise
+               accessibility over a modest, curated gene set (a few thousand features),
+               so HVG subsetting would discard informative signal and the standard
+               min_genes threshold (tuned for RNA depth) would drop most ATAC cells.
+               Raw counts, per-cell normalisation, and log1p are retained so the NB
+               decoder and cosine term operate on the same footing as RNA.
+    """
     adata = sc.read_h5ad(anndata_path)
 
     # 1. Initial selection: Keep top 'batch_count' largest batches
@@ -44,15 +58,22 @@ def prep_data(
         else:
             raise ValueError("No batches remained before balancing.")
 
-    # 3. Standard preprocessing (HVGs, scaling, etc.)
+    # 3. Preprocessing (modality-dependent)
     adata.raw = adata
     adata.layers["counts"] = adata.X.copy()
-    sc.pp.filter_cells(adata, min_genes=min_genes)
-    sc.pp.filter_genes(adata, min_cells=min_cells)
-    sc.pp.normalize_per_cell(adata, counts_per_cell_after=norm_val)
-    sc.pp.log1p(adata)
-    sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, batch_key=batch_key)
-    adata = adata[:, adata.var["highly_variable"]]
+    if modality == "atac":
+        # WHY: gene-activity ATAC has few, curated features and lower per-cell depth;
+        #      RNA-tuned QC + HVG selection would discard signal and most cells.
+        # HOW: keep counts, normalise + log1p only; no gene/cell filtering, no HVG subset.
+        sc.pp.normalize_per_cell(adata, counts_per_cell_after=norm_val)
+        sc.pp.log1p(adata)
+    else:
+        sc.pp.filter_cells(adata, min_genes=min_genes)
+        sc.pp.filter_genes(adata, min_cells=min_cells)
+        sc.pp.normalize_per_cell(adata, counts_per_cell_after=norm_val)
+        sc.pp.log1p(adata)
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, batch_key=batch_key)
+        adata = adata[:, adata.var["highly_variable"]]
 
     multi_resolution_cluster(adata, resolution1=1, method="Leiden")
 

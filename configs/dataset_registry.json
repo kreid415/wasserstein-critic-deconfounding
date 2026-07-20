@@ -1,0 +1,90 @@
+{
+  "pancreas": {
+    "file": "human_pancreas_norm_complexBatch.h5ad",
+    "batch_key": "tech",
+    "celltype_key": "celltype",
+    "n_obs": 16382,
+    "n_batches": 9,
+    "modality": "rna",
+    "prep": "rna",
+    "role": "easy baseline (known: distinct cell-type variation, well-separated)",
+    "path": "$HOME/data_gsteino1/wcd_data/human_pancreas_norm_complexBatch.h5ad"
+  },
+  "immune": {
+    "file": "Immune_ALL_human.h5ad",
+    "batch_key": "chemistry",
+    "celltype_key": "final_annotation",
+    "n_obs": 33506,
+    "n_batches": 4,
+    "modality": "rna",
+    "prep": "rna",
+    "role": "harder real task; chemistry batch effect (original headline)",
+    "path": "$HOME/data_gsteino1/wcd_data/Immune_ALL_human.h5ad"
+  },
+  "lung": {
+    "file": "Lung_atlas_public.h5ad",
+    "batch_key": "protocol",
+    "celltype_key": "cell_type",
+    "n_obs": 32472,
+    "n_batches": 2,
+    "modality": "rna",
+    "prep": "rna",
+    "role": "cross-protocol (drop-seq vs 10x)",
+    "path": "$HOME/data_gsteino1/wcd_data/Lung_atlas_public.h5ad"
+  },
+  "immune_hum_mou": {
+    "file": "Immune_ALL_hum_mou.h5ad",
+    "batch_key": "species",
+    "celltype_key": "final_annotation",
+    "n_obs": 97861,
+    "n_batches": 2,
+    "modality": "rna",
+    "prep": "rna",
+    "role": "CROSS-SPECIES = clean disjoint-support test (R1.major.2). batch_key=species (Human/Mouse); alt batch_key='batch'(23) or 'chemistry'(5) available for multibatch scaling",
+    "path": "$HOME/data_gsteino1/wcd_data/Immune_ALL_hum_mou.h5ad"
+  },
+  "sim1": {
+    "file": "sim1_1_norm.h5ad",
+    "batch_key": "Batch",
+    "celltype_key": "Group",
+    "n_obs": 12097,
+    "n_batches": 6,
+    "modality": "rna_sim",
+    "prep": "rna",
+    "role": "GROUND-TRUTH batch+bio (Splatter). 6 batches, 7 groups. For R2.6 direct over-correction proof",
+    "path": "$HOME/data_gsteino1/wcd_data/sim1_1_norm.h5ad"
+  },
+  "sim2": {
+    "file": "sim2_norm.h5ad",
+    "batch_key": "Batch",
+    "celltype_key": "Group",
+    "n_obs": 19318,
+    "n_batches": 4,
+    "modality": "rna_sim",
+    "prep": "rna",
+    "role": "GROUND-TRUTH, nested (4 batches x 4 sub-batches, 4 groups). Hierarchical batch structure",
+    "path": "$HOME/data_gsteino1/wcd_data/sim2_norm.h5ad"
+  },
+  "atac_large": {
+    "file": "large_atac_gene_activity.h5ad",
+    "batch_key": "batchname",
+    "celltype_key": "final_cell_label",
+    "n_obs": 84813,
+    "n_batches": 3,
+    "modality": "atac",
+    "prep": "atac",
+    "role": "MODALITY generalization (R3.minor.1). Mouse brain scATAC gene-activity. alt batch_key='batchname_all'(11) for multibatch",
+    "path": "$HOME/data_gsteino1/wcd_data/large_atac_gene_activity.h5ad"
+  },
+  "atac_small": {
+    "file": "small_atac_gene_activity.h5ad",
+    "batch_key": "batchname",
+    "celltype_key": "final_cell_label",
+    "n_obs": 11270,
+    "n_batches": 3,
+    "modality": "atac",
+    "prep": "atac",
+    "role": "smaller ATAC replicate",
+    "path": "$HOME/data_gsteino1/wcd_data/small_atac_gene_activity.h5ad"
+  }
+}
