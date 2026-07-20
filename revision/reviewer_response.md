@@ -101,7 +101,10 @@ design, and we drop the "independent alignment is intrinsically harder" language
 
 ### R1.minor.2 — Downstream biology (annotation, marker preservation) would be easy to add
 
-**Response — ADDRESSED (E5).** Added, see Theme C / R2.6 below.
+**Response — ADDRESSED (E5).** We add automatic cell-type annotation via cross-batch
+label transfer (kNN classifier trained on the largest batch, tested on the others;
+per-type and macro F1) and marker/structure preservation via per-cell-type neighborhood
+purity. See Theme C / R2.6 for the quantitative results.
 
 ### R1.minor.3 — Notation errors in three equations
 
@@ -145,9 +148,13 @@ if the fronts coincide, we retract the "intrinsically worse" framing.]*
 
 ### R2.3 — Feels like an ablation; mechanistic language (topology, reference bottleneck) outruns evidence
 
-**Response.** Accepted. Mechanistic claims are now **hypotheses tied to specific tests**:
-E4 (reference design) and E6 (local/global + which cell types collapse via E5). Language
-softened throughout per E0.
+**Response.** Accepted. Mechanistic claims are now **hypotheses tied to specific tests**.
+The reviewer's specific ask — "which cell types collapse" — is answered directly by E5:
+the critic collapses rare/distinct populations (plasmacytoid dendritic cells,
+megakaryocyte progenitors, erythrocytes on immune; alpha/mast/schwann on pancreas),
+not cell types uniformly. "Which references fail" is answered by E4's per-batch coverage
+analysis, and "how reference coverage explains the results" by E4's fixed-vs-rotating-vs-
+joint comparison. Language softened throughout per E0.
 
 ### R2.4 — Benchmark weak for the strength of the claims: add baselines+datasets OR frame as narrow ablation
 
@@ -171,11 +178,26 @@ exactly as the reviewer suggests.]*
 > *"…include more direct analyses, such as marker preservation, cell-type confusion,
 > rare-cell retention, or per-cell-type neighborhood purity."*
 
-**Response — ADDRESSED (E5).** We add every readout the reviewer names. **[PENDING]**
-For both heads at the operating point we report per-cell-type neighborhood purity,
-rare-cell retention (smallest-quartile types), the cell-type confusion matrix (which
-pairs merge), and cross-batch label-transfer F1. Simulations (ground-truth Group labels)
-give a clean test. *[Fill: which specific cell types lose purity/merge under the critic.]*
+**Response — ADDRESSED (E5).** We add every readout the reviewer names, computed
+identically for both heads at the operating point (λ_adv = 0.2) so the head difference
+isolates over-correction. **The critic degrades every biological readout on every
+dataset:**
+
+| Dataset | per-type purity (disc→crit) | rare-cell retention | label-transfer F1 |
+|---|---|---|---|
+| sim1 (ground truth) | 0.972 → 0.919 (−0.053) | 0.520 → 0.409 (−0.111) | 0.846 → 0.739 (−0.107) |
+| immune | 0.820 → 0.720 (−0.100) | 0.668 → 0.522 (−0.146) | 0.645 → 0.332 (−0.313) |
+| pancreas | 0.948 → 0.845 (−0.103) | 0.313 → 0.212 (−0.101) | 0.646 → 0.466 (−0.181) |
+
+The loss is largest for **rare and transcriptionally distinct types** — the over-correction
+signature. Which types collapse (per-cell-type purity, disc→crit): on **immune**,
+plasmacytoid dendritic cells (0.98→0.31), erythrocytes (0.91→0.50), megakaryocyte
+progenitors (0.58→0.34); on **pancreas**, alpha (0.99→0.82), macrophage, mast, schwann;
+on **sim1**, ground-truth Group 6 (1.00→0.74). Label-transfer F1 nearly halves on immune
+(0.645→0.332). This is direct evidence that the critic's stronger local mixing carries a
+real biological cost, not merely a metric artifact — exactly the analysis R2.6 requested.
+See Figure E5 (`fig_E5_biology.png`), `E5_summary_all.csv`, `E5_purity_*.csv`, and the
+per-dataset confusion matrices.
 
 ---
 
@@ -218,8 +240,11 @@ datasets). The data prep uses a modality-aware branch (ATAC skips RNA-specific Q
 
 ### R3.minor.2 — Downstream analyses (DE, trajectory, label transfer)
 
-**Response — PARTIALLY ADDRESSED (E5).** Label transfer is included in E5; PAGA-based
-trajectory preservation is already reported (PAGA-Spearman). *[Fill.]*
+**Response — ADDRESSED (E5).** Cross-batch label transfer is now a headline readout
+(E5): macro-F1 drops under the critic on all three datasets (immune 0.645→0.332,
+pancreas 0.646→0.466, sim1 0.846→0.739), showing the practical downstream consequence
+of over-correction. PAGA-based trajectory/topology preservation is already reported
+(PAGA-Spearman in the metric suite).
 
 ---
 
@@ -228,9 +253,11 @@ trajectory preservation is already reported (PAGA-Spearman). *[Fill.]*
 - **Code provenance.** Authored contributions are now separated from the upstream
   scCRAFT backbone into a dedicated `wcd/` package; a symbol-level AST diff against the
   upstream repository (github.com/ch2343/scCRAFT) documents every new, modified, and
-  unchanged function (`code_provenance.csv`). Upstream reference: He C, Filippidis P,
-  Kleinstein SH, Guan L. *Partially characterized topology guides reliable anchor-free
-  scRNA-integration.* Commun Biol 8(1):561 (2025). This directly supports the generalization claims by
+  unchanged function (`code_provenance.csv`). Upstream reference: *Partially
+  characterized topology guides reliable anchor-free scRNA-integration*, Communications
+  Biology (2025), DOI 10.1038/s42003-025-07988-y — code at github.com/ch2343/scCRAFT.
+  [Verify the full author list and volume/issue against the published article before
+  submission.] This directly supports the generalization claims by
   making the intervention (adversarial head swap) auditable.
 - **Metric correctness.** During the revision we found and fixed a numerical bug: the
   LISI kernel was compiled with `@njit(fastmath=True)`, which invalidates the
