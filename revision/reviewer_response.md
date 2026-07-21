@@ -121,9 +121,13 @@ on ARI and cLISI, corroborated by iLISI at scale) rather than on iLISI alone. Se
 (`fig_E8_multibatch.png`), `E8_multibatch_summary.csv`. **(2) The reviewer is right that
 "independent (V−1) alignments" is not self-evidently harder** — so we test it directly in
 **E4** by comparing the fixed-reference critic against a *joint* variant that draws the
-reference at random each epoch (approximating an all-pairs objective). *[Fill: whether
-joint alignment recovers the lost performance; if so, the bottleneck is the reference
-design, and we drop the "independent alignment is intrinsically harder" language.]*
+reference at random each epoch (approximating an all-pairs objective). Joint alignment
+**partially** recovers performance on immune (ARI 0.520 vs fixed 0.43–0.47) but does not
+close the gap to the discriminator (0.613), and on cross-species it is indistinguishable
+from fixed. We therefore drop the strong "independent alignment is intrinsically harder"
+language and instead state that the single-reference design contributes a measurable but
+minority share of the gap, with the Wasserstein-critic objective accounting for the rest
+(full analysis under R2.5 / E4).
 
 ### R1.minor.2 — Downstream biology (annotation, marker preservation) would be easy to add
 
@@ -286,24 +290,45 @@ per-dataset confusion matrices.
 
 ### R3.1 — Justify generality; relate to scVI and SOTA; is the trade-off fundamental or architecture-specific?
 
-**Response.** **[E3 + E2].** E3 places our adversarial heads alongside Harmony, scVI,
+**Response.** **(E3 + E2).** E3 places our adversarial heads alongside Harmony, scVI,
 scANVI, and Scanorama on the identical metric suite; E2 tests architecture-specificity
-across four backbones. The disjoint-support analysis (E6) states the condition under
-which the Wasserstein objective is motivated. *[Fill: our critic vs scVI/scANVI on the
-mixing↔conservation plane.]*
+across four backbones (see R2.1 — the trade-off reproduces on all four). On the
+mixing↔conservation plane (immune, operating point λ=0.2): our **discriminator** mixes
+*more* than any external method (iLISI 0.415 vs scVI 0.254 / scANVI 0.201 / Harmony 0.216)
+while holding competitive global geometry (ASW-batch 0.890), but the label-aware
+**scANVI** wins cell-type conservation (ARI 0.959 vs our 0.613) precisely because it
+consumes cell-type labels our unsupervised heads do not. Our **critic** is dominated —
+similar mixing to the discriminator (iLISI 0.402) but markedly worse conservation (ARI
+0.429, cLISI 0.034). So the honest positioning is: the adversarial heads are the most
+*aggressive mixers* in the panel, useful when maximal batch integration is the goal, but
+they do not beat supervised methods on conservation, and the critic is not preferable to
+the discriminator. The disjoint-support analysis (E6) states the condition under which the
+Wasserstein objective is motivated at all. See `E3_external_baselines.csv`,
+`E1_immune_pareto.csv`.
 
 ### R3.2 — Robustness to architecture/hyperparameters (depth, latent dim, loss weights)
 
-**Response.** **[E2 capacity sweep — PENDING].** Beyond backbone identity we sweep
-latent dimensionality (z_dim ∈ {10, 30, 50, 256}) and network depth (±1 layer) to test
-whether the trade-off is intrinsic or a capacity artifact. *[Fill.]*
+**Response (E2 capacity sweep).** Beyond backbone identity we vary latent
+dimensionality (z_dim ∈ {32, 128, 256}) on immune, both heads, holding everything else
+fixed, to test whether the trade-off is intrinsic or a capacity artifact. *[Numbers to be
+inserted from the running z_dim={32,128} jobs; the z_dim=256 point is the main E2 result.
+Expectation stated as hypothesis until filled: if ΔcLISI>0 and ΔARI<0 persist at every
+z_dim, the trade-off is not a capacity artifact.]*
 
 ### R3.3 — Provide practical guidance / mitigation
 
-**Response.** **[E0 + E1].** We add a "when to use which" paragraph derived from the
-Pareto fronts (E1) and support-overlap (E6): prefer the critic when batches have little
-support overlap and local mixing is the priority; prefer the discriminator (or a
-low-λ_adv critic) when global/rare-cell conservation matters.
+**Response (E0 + E1).** We add a "when to use which" paragraph derived from the Pareto
+fronts (E1), the multibatch scaling (E8), and the biological readouts (E5). Our evidence
+does **not** support recommending the critic: across datasets, batch counts, and backbones
+the discriminator either dominates the critic outright or matches it, and the critic's
+only apparent edge (fast early mixing at low λ_adv) neither exceeds the discriminator's
+peak mixing nor survives to higher batch counts. Concrete guidance: **use the discriminator
+head as the default**; treat the reference Wasserstein critic as the object of study rather
+than a recommended tool; and in all cases keep λ_adv moderate (≈0.1–0.35 on our datasets),
+since mixing saturates and cell-type conservation degrades beyond that. Where maximal batch
+mixing is the sole objective and cell-type structure is expendable, the adversarial VAE
+heads mix more aggressively than Harmony/scVI/scANVI (R3.1) — but the discriminator, not
+the critic, is the better of the two.
 
 ### R3.4 — Benchmark scale (atlas-scale, hundreds of thousands to millions)
 
@@ -315,9 +340,13 @@ were de-scoped for this revision by mutual agreement.)*
 
 ### R3.minor.1 — Generalization beyond scRNA-seq (snRNA-seq, other modalities)
 
-**Response — ADDRESSED.** We add scATAC-seq (gene-activity) as a second modality (two
-datasets). The data prep uses a modality-aware branch (ATAC skips RNA-specific QC/HVG).
-*[Fill: whether the trade-off holds on ATAC.]*
+**Response — ADDRESSED.** We add scATAC-seq (gene-activity) as a second modality (small
+~11k and large ~85k cell datasets). The data prep uses a modality-aware branch (ATAC skips
+RNA-specific QC/HVG, keeps counts+normalize+log1p). We further confirmed via E6 that both
+ATAC datasets exhibit the disjoint-support condition (separability 0.68/0.91, kNN
+cross-batch fraction 0.12/0.17). A critic-vs-discriminator comparison on both ATAC datasets
+is running. *[Fill the ΔcLISI/ΔARI once the ATAC E2 jobs land; state whether the trade-off
+transfers to the ATAC modality.]*
 
 ### R3.minor.2 — Downstream analyses (DE, trajectory, label transfer)
 
