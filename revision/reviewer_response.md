@@ -89,10 +89,19 @@ regime the Wasserstein critic is designed for. See Figure (support overlap).
 > distributions independently does not necessarily imply degradation… jointly optimizing
 > all batch alignments may itself constitute the more challenging optimization problem."*
 
-**Response.** Two parts. **(1) Full metric suite [E8 — PENDING]:** we re-run the
+**Response.** Two parts. **(1) Full metric suite (E8):** we re-ran the
 batch-count scaling (pancreas 2→9, immune 2→4) reporting the complete local+global suite,
-not iLISI alone. *[Fill: whether the degradation reproduces across metrics or is
-iLISI-specific; qualify the claim accordingly.]* **(2) The reviewer is right that
+not iLISI alone. **The degradation is not an iLISI artifact — it is clearest on the
+*global* metric.** Across all batch counts the critic loses cell-type conservation
+relative to the discriminator (ΔARI = −0.13 to −0.39; ΔcLISI = +0.008 to +0.019, both
+consistent in sign at every batch count). Crucially, the critic's *apparent iLISI
+advantage is scale-dependent and inverts*: at 2 batches the critic mixes more (ΔiLISI
++0.11 pancreas, +0.16 immune), but from ≈6 batches onward the discriminator mixes as well
+or better (ΔiLISI −0.04 to −0.07 on pancreas bc6–9), so at many batches the critic is
+worse on *both* axes. The discriminator holds ARI ≈ 0.93 from bc2 through bc9; the critic
+falls to ARI ≈ 0.64. We therefore re-state the multibatch claim on the full suite (anchored
+on ARI and cLISI, corroborated by iLISI at scale) rather than on iLISI alone. See Figure E8
+(`fig_E8_multibatch.png`), `E8_multibatch_summary.csv`. **(2) The reviewer is right that
 "independent (V−1) alignments" is not self-evidently harder** — so we test it directly in
 **E4** by comparing the fixed-reference critic against a *joint* variant that draws the
 reference at random each epoch (approximating an all-pairs objective). *[Fill: whether
