@@ -319,10 +319,17 @@ z_dim, the trade-off is not a capacity artifact.]*
 
 **Response (E0 + E1).** We add a "when to use which" paragraph derived from the Pareto
 fronts (E1), the multibatch scaling (E8), and the biological readouts (E5). Our evidence
-does **not** support recommending the critic: across datasets, batch counts, and backbones
-the discriminator either dominates the critic outright or matches it, and the critic's
-only apparent edge (fast early mixing at low λ_adv) neither exceeds the discriminator's
-peak mixing nor survives to higher batch counts. Concrete guidance: **use the discriminator
+does **not** support recommending the critic at the operating point. There is a caveat we
+state plainly: at **very low λ_adv (≈0.01–0.05)** the critic does dominate the
+discriminator on the immune Pareto front — beating it on *both* mixing and conservation
+(e.g. λ=0.02: critic iLISI 0.247/ARI 0.557 vs discriminator 0.123/0.469) — because at that
+weight the discriminator has barely begun to mix. But this advantage does not persist: by
+the recommended operating range (λ_adv ≈ 0.1–0.35) the discriminator matches or dominates
+the critic on every axis, reaches a higher peak mixing (iLISI 0.445 vs the critic's ~0.40
+plateau), and the critic's cell-type conservation then collapses (ARI → ~0.42). Across
+batch counts (E8) and backbones (E2) the critic is likewise dominated at the operating
+point. So the low-λ regime is a genuine but narrow exception, not a reason to prefer the
+critic in practice. Concrete guidance: **use the discriminator
 head as the default**; treat the reference Wasserstein critic as the object of study rather
 than a recommended tool; and in all cases keep λ_adv moderate (≈0.1–0.35 on our datasets),
 since mixing saturates and cell-type conservation degrades beyond that. Where maximal batch
