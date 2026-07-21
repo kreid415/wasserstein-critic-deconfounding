@@ -323,10 +323,12 @@ does **not** support recommending the critic at the operating point. There is a 
 state plainly: at **very low λ_adv (≈0.01–0.05)** the critic does dominate the
 discriminator on the immune Pareto front — beating it on *both* mixing and conservation
 (e.g. λ=0.02: critic iLISI 0.247/ARI 0.557 vs discriminator 0.123/0.469) — because at that
-weight the discriminator has barely begun to mix. But this advantage does not persist: by
-the recommended operating range (λ_adv ≈ 0.1–0.35) the discriminator matches or dominates
-the critic on every axis, reaches a higher peak mixing (iLISI 0.445 vs the critic's ~0.40
-plateau), and the critic's cell-type conservation then collapses (ARI → ~0.42). Across
+weight the discriminator has barely begun to mix. But this advantage does not persist: as λ_adv
+increases the discriminator overtakes the critic — at λ=0.1 it already wins conservation
+(ARI 0.579 vs 0.446) though the critic still edges it on mixing (iLISI 0.386 vs 0.362), and
+by λ ≥ 0.2 the discriminator dominates on both axes (λ=0.2: iLISI 0.415/ARI 0.613 vs
+0.402/0.429), reaching a higher peak mixing (iLISI 0.445 at λ=0.35 vs the critic's ~0.40
+plateau) while the critic's cell-type conservation collapses (ARI → ~0.42). Across
 batch counts (E8) and backbones (E2) the critic is likewise dominated at the operating
 point. So the low-λ regime is a genuine but narrow exception, not a reason to prefer the
 critic in practice. Concrete guidance: **use the discriminator
