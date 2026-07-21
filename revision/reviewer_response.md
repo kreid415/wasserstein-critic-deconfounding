@@ -231,11 +231,28 @@ on the mixing↔conservation plane in Figure E3.
 > batches to align to a single reference batch."*
 
 **Response — DIRECTLY TESTED (E4).** We separate the *objective* from the *reference
-design* by comparing: fixed single reference, rotating reference (cycled per epoch), and
-joint (random reference per epoch ≈ all-pairs), plus a per-batch reference-coverage
-analysis. **[PENDING]** *[Fill: if rotating/joint removes the sensitivity, we explicitly
-attribute the failure to the reference formulation, not Wasserstein critics in general —
-exactly as the reviewer suggests.]*
+design* by comparing, at a fixed operating point, the critic under three reference
+schemes — fixed single reference, rotating reference (cycled per epoch), and joint (random
+reference each epoch, ≈ all-pairs alignment) — against the reference-free discriminator.
+**The result does *not* support the reference-design explanation: no critic reference
+scheme reaches the discriminator, on either dataset.**
+
+- **Immune.** Joint alignment is the best critic variant and does move in the predicted
+  direction (ARI 0.520 vs fixed-reference 0.43–0.47), but it still falls well short of the
+  discriminator (ARI 0.613; ASW-batch 0.847 vs 0.890). Rotating is no better than fixed.
+  So relaxing the single-reference constraint helps a little but leaves most of the gap.
+- **Cross-species immune (disjoint regime).** All critic schemes behave identically
+  (fixed/rotating/joint ARI ≈ 0.23, iLISI ≈ 0.67) and all *over-mix* relative to the
+  discriminator (iLISI 0.56) at no conservation benefit — the pathology is present
+  regardless of reference design.
+
+We therefore attribute the residual failure to the **Wasserstein-critic objective itself,
+not merely the single-reference formulation** — while acknowledging the reviewer's point
+that reference design contributes a measurable share (the joint gain on immune). The
+per-batch reference-coverage spread (across fixed_ref0…3 on immune, ARI 0.43–0.47) is
+small relative to the critic↔discriminator gap, reinforcing the same conclusion. We revise
+the text to state this explicitly rather than implying the reference design is the sole
+cause. See Figure E4 (`fig_E4_refdesign.png`), `E4_refdesign_combined.csv`.
 
 ### R2.6 — Biological over-correction not directly validated
 
