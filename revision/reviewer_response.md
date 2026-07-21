@@ -48,12 +48,29 @@ upstream scCRAFT backbone (see Reproducibility note at the end).
 > integration and cell-type compactness."*
 
 **Response.** We agree this is central, and we now treat it as a primary result rather
-than an aside. **[E6 local-vs-global decomposition — PENDING]** We decompose every
-metric into its local (neighborhood: iLISI, cLISI, kBET, graph connectivity) and global
-(geometry: ASW-batch, ASW-celltype, PCR, isolated-label ASW) components and show the
-critic and discriminator sit at systematically different points on the local↔global
-axis. *[Fill: the critic maximizes local mixing (iLISI ↑) while the discriminator better
-preserves global batch geometry (ASW-batch ↑); quantify the crossover.]*
+than an aside (E6). We split the suite into **local** (kNN-neighborhood: iLISI, cLISI,
+kBET, graph connectivity) and **global** (whole-embedding geometry: ASW-batch,
+ASW-celltype, PCR, isolated-label ASW) components. Two findings:
+
+**(1) The local and global mixing metrics are genuinely decoupled — the reviewer's
+observation is a real property of the embedding, not noise.** Sweeping λ_adv on immune,
+the *local* mixing metric iLISI swings roughly 8-fold (0.05 → 0.45 → 0.13) while the
+*global* mixing metric ASW-batch stays essentially flat (0.857–0.890); across the sweep
+their correlation is only r = 0.38. A method can transform local neighborhood composition
+while barely moving the global batch geometry, which is exactly why reporting a single
+scale is insufficient.
+
+**(2) At the operating point, however, the "critic wins locally / discriminator wins
+globally" split does *not* hold — the discriminator wins on both.** On pancreas the
+discriminator beats the critic on local mixing (iLISI 0.450 vs 0.381; graph-conn 0.952 vs
+0.930) *and* global mixing (ASW-batch 0.927 vs 0.907) *and* global conservation (ARI 0.931
+vs 0.644); the only axis where the critic "moves more" is local bio *degradation* (cLISI
+0.017 vs 0.005 — worse). The same ordering holds on immune. So the local/global mismatch
+is real as a *metric property* (finding 1), but it does not translate into a critic
+advantage at the operating point (finding 2). We rewrite the discussion around this
+distinction and drop any claim that the critic is preferable on local mixing. See Figure
+E6 (`fig_E6_local_global.png`), `E6_local_global_decomposition.csv`,
+`E6_ilisi_aswbatch_decoupling.csv`.
 
 ### R1.major.2 — Is the disjoint-support setting actually present in Immune/Lung/Pancreas?
 
