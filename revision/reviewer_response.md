@@ -115,8 +115,8 @@ consistent in sign at every batch count). Crucially, the critic's *apparent iLIS
 advantage is scale-dependent and inverts*: at 2 batches the critic mixes more (ΔiLISI
 +0.11 pancreas, +0.16 immune), but from ≈6 batches onward the discriminator mixes as well
 or better (ΔiLISI −0.04 to −0.07 on pancreas bc6–9), so at many batches the critic is
-worse on *both* axes. The discriminator holds ARI ≈ 0.93 from bc2 through bc9; the critic
-falls to ARI ≈ 0.64. We therefore re-state the multibatch claim on the full suite (anchored
+worse on *both* axes. The discriminator holds ARI in the 0.84–0.94 band across bc2–bc9
+(≈0.93 at the extremes, dipping to ≈0.84 at bc3–4); the critic falls as low as ARI ≈ 0.64. We therefore re-state the multibatch claim on the full suite (anchored
 on ARI and cLISI, corroborated by iLISI at scale) rather than on iLISI alone. See Figure E8
 (`fig_E8_multibatch.png`), `E8_multibatch_summary.csv`. **(2) The reviewer is right that
 "independent (V−1) alignments" is not self-evidently harder** — so we test it directly in
