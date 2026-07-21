@@ -34,6 +34,8 @@ def main():
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--data-root", default=None)
     ap.add_argument("--d-coef", type=float, default=0.2)
+    ap.add_argument("--resume", action="store_true",
+                    help="skip (ref_design, seed) rows already present in --out")
     args = ap.parse_args()
 
     with open(args.registry) as fh:
@@ -50,8 +52,21 @@ def main():
 
     rows = []
 
+    # WHY: cross-species (98k cells) can exceed the wall; --resume lets a follow-up job
+    #      skip (tag, seed) rows already present so we only compute the remainder.
+    done_keys = set()
+    if getattr(args, "resume", False) and os.path.exists(args.out):
+        prev = pd.read_csv(args.out)
+        rows.extend(prev.to_dict("records"))
+        if "ref_design" in prev.columns and "seed" in prev.columns:
+            done_keys = {(str(t), int(s)) for t, s in zip(prev["ref_design"], prev["seed"])}
+        print(f"[resume] loaded {len(rows)} existing rows; {len(done_keys)} (tag,seed) done", flush=True)
+
     def run(tag, **cfg):
         for seed in SEEDS:
+            if (str(tag), int(seed)) in done_keys:
+                print(f"  {tag:16s} seed={seed} | SKIP (resume)", flush=True)
+                continue
             try:
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
                                       seed=seed, epochs=args.epochs, **cfg)
