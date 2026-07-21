@@ -173,10 +173,26 @@ scCRAFT-specific artifact. See Figure E2 (`fig_E2_backbones.png`) and
 
 **Response — CORE NEW RESULT (E1).** We sweep λ_adv ∈ {0, 0.01, 0.02, 0.05, 0.1, 0.2,
 0.35, 0.5, 0.75, 1.0} for both heads (3 seeds) and plot the integration↔conservation
-Pareto front. **[PENDING]** *[Fill: whether the critic front dominates, is dominated by,
-or crosses the discriminator front. If the critic's front is uniformly shifted toward
-mixing-over-conservation at matched λ_adv, the trade-off is not merely a tuning choice;
-if the fronts coincide, we retract the "intrinsically worse" framing.]*
+Pareto front. **The discriminator Pareto-dominates the critic on immune** — at matched
+mixing it preserves cell-type structure better, and its front reaches a higher maximum
+mixing. Concretely (mean over 3 seeds):
+
+- The **critic mixes aggressively at low λ_adv but its front bends the wrong way**: iLISI
+  reaches ≈0.40 by λ=0.1, but from λ≥0.1 its ARI collapses to ≈0.42–0.43 and cLISI rises
+  to ≈0.03 — i.e. increasing λ_adv buys almost no additional mixing while steadily
+  destroying cell-type structure.
+- The **discriminator front is strictly better-positioned**: it climbs to a *higher* peak
+  mixing (iLISI 0.445 at λ=0.35) while holding ARI at 0.56–0.61 and cLISI at ≈0.017 — its
+  entire operating range sits up-and-to-the-right of the critic's in the
+  mixing↔conservation plane.
+
+So the over-correction is **not** merely a tuning artifact removable by lowering λ_adv:
+there is no λ_adv at which the critic matches the discriminator's conservation at equal
+mixing — the critic's front is shifted toward mixing-over-conservation at every matched
+weight. We keep the trade-off claim but state it as a **Pareto-dominance result on the
+tested datasets**, not an "intrinsically worse" universal. See Figure E1
+(`fig_E1_pareto_immune.png`), `E1_immune_pareto.csv`. (Cross-species immune sweep is
+running and will be added as a second Pareto panel.)
 
 ### R2.3 — Feels like an ablation; mechanistic language (topology, reference bottleneck) outruns evidence
 
