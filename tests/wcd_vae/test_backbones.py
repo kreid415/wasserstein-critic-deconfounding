@@ -6,8 +6,11 @@ import pytest
 import scanpy as sc
 
 from wcd_vae.scCRAFT.utils import multi_resolution_cluster
-from wcd_vae.wcd.backbones import BACKBONES
+from wcd_vae.wcd.backbones import BACKBONE_CONFIGS, BACKBONES
 from wcd_vae.wcd.training import train_integration_model
+
+# The rebuilt-E2 native backbones (likelihood x conditioning) plus legacy aliases.
+ALL_BACKBONES = list(BACKBONE_CONFIGS) + list(BACKBONES)
 
 
 def _toy():
@@ -29,7 +32,7 @@ def _toy():
     return a
 
 
-@pytest.mark.parametrize("backbone", list(BACKBONES))
+@pytest.mark.parametrize("backbone", ALL_BACKBONES)
 @pytest.mark.parametrize("critic", [False, True])
 def test_backbone_trains_finite(backbone, critic):
     # WHY: each (backbone, head) must produce finite losses; HOW: short train on toy data

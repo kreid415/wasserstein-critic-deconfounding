@@ -53,6 +53,8 @@ def _kl_standard_normal(q_m, q_v):
     return kl(Normal(q_m, torch.sqrt(q_v)), Normal(torch.zeros_like(q_m), torch.ones_like(q_v))).sum(dim=1)
 
 
+
+# --- legacy scVI_NB (pre-pivot, retained for artifact replay) ---
 class ScviNBVAE(nn.Module):
     """scVI-style NB VAE: NB decoder conditioned on batch, no scCRAFT batch-effect
     residual pathway. Represents the mainstream NB-VAE design (R3.1)."""
@@ -77,81 +79,186 @@ class ScviNBVAE(nn.Module):
         return reconst_loss, kl_div, z, px_scale
 
 
-class GaussianVAE(nn.Module):
-    """Vanilla Gaussian VAE: MSE reconstruction on log-normalised X. The simplest
-    possible decoder likelihood — a strong architecture-generality control."""
+# =============================================================================
+# De-scCRAFT multi-VAE study (rebuilt E2): each backbone is a NATIVE VAE trained
+# with only its own reconstruction likelihood + KL. The scCRAFT auxiliary losses
+# (cosine, triplet) are NOT applied here -- they are backbone-owned and every VAE
+# below declares an empty aux set, so the ONLY globally-fixed component across
+# backbones is the adversarial head. This isolates the head as the variable and
+# makes each backbone a model people actually use.
+#
+# Two crossed axes:
+#   likelihood     : Gaussian | Poisson | NB | ZINB  (+ LDVAE = NB, linear decoder)
+#   conditioning   : whether the decoder receives the batch one-hot (decoder-side
+#                    batch correction) or not (adversary is the only mixing route).
+# Every backbone exposes:
+#   .conditioned                     -> bool
+#   .aux_losses  (class attribute)   -> tuple of aux-loss names it natively uses ()
+#   .encoder(x, warmup)              -> (q_m, q_v, z)
+#   forward(x, x_raw, ec, warmup)    -> (reconst_loss[N,G], kl[N], z[N,dz], x_tilde[N,G])
+# =============================================================================
 
-    def __init__(self, p_dim, v_dim, latent_dim):
+
+def _dec_input(z, ec, conditioned):
+    """Concatenate the batch one-hot only when the decoder is batch-conditioned."""
+    return torch.cat((z, ec), dim=-1) if conditioned else z
+
+
+class _NativeVAE(nn.Module):
+    """Base for the native (non-scCRAFT) backbones. Native training objective is
+    reconstruction + KL only; no cosine/triplet."""
+
+    aux_losses = ()  # names of scCRAFT-style auxiliary losses this backbone uses
+
+    def __init__(self, p_dim, v_dim, latent_dim, conditioned=True):
         super().__init__()
+        self.conditioned = conditioned
+        self.p_dim, self.v_dim, self.latent_dim = p_dim, v_dim, latent_dim
         self.encoder = _Encoder(p_dim, latent_dim)
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_dim + v_dim, 512), nn.ReLU(),
+        self._dec_in = latent_dim + (v_dim if conditioned else 0)
+
+    def _trunk(self, in_dim):
+        return nn.Sequential(
+            nn.Linear(in_dim, 512), nn.ReLU(),
             nn.Linear(512, 1024), nn.ReLU(),
-            nn.Linear(1024, p_dim),
+        )
+
+
+class GaussianVAE(_NativeVAE):
+    """Gaussian VAE: MSE reconstruction on log-normalised X. Simplest control."""
+
+    def __init__(self, p_dim, v_dim, latent_dim, conditioned=False):
+        super().__init__(p_dim, v_dim, latent_dim, conditioned)
+        self.decoder = nn.Sequential(
+            self._trunk(self._dec_in), nn.Linear(1024, p_dim),
         )
 
     def forward(self, x, x_raw, ec, warmup):
         q_m, q_v, z = self.encoder(x, warmup)
-        x_hat = self.decoder(torch.cat((z, ec), dim=-1))  # reconstructs log-norm X
-        # per-cell,per-gene squared error; keep [N,G] shape to match the engine's mean().
+        x_hat = self.decoder(_dec_input(z, ec, self.conditioned))
         reconst_loss = (x_hat - x) ** 2
         kl_div = _kl_standard_normal(q_m, q_v)
-        # x_tilde on gene scale for the cosine term: expm1 of the (nonneg) reconstruction.
         x_tilde = torch.clamp(torch.expm1(F.relu(x_hat)), max=1e6)
         return reconst_loss, kl_div, z, x_tilde
 
 
-class ZinbVAE(nn.Module):
-    """Zero-inflated NB VAE: NB decoder plus a per-gene dropout-logit head. Captures
-    excess zeros common in droplet scRNA-seq / ATAC gene-activity."""
+class PoissonVAE(_NativeVAE):
+    """Poisson VAE: simplest count likelihood (single rate parameter per gene)."""
 
-    def __init__(self, p_dim, v_dim, latent_dim):
-        super().__init__()
-        self.encoder = _Encoder(p_dim, latent_dim)
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_dim + v_dim, 512), nn.ReLU(),
-            nn.Linear(512, 1024), nn.ReLU(),
-        )
-        self.px_scale = nn.Linear(1024, p_dim)
-        self.px_r = nn.Linear(1024, p_dim)
-        self.px_dropout = nn.Linear(1024, p_dim)  # zero-inflation logits
+    def __init__(self, p_dim, v_dim, latent_dim, conditioned=True):
+        super().__init__(p_dim, v_dim, latent_dim, conditioned)
+        self.decoder = self._trunk(self._dec_in)
+        self.px_rate = nn.Linear(1024, p_dim)
 
     def forward(self, x, x_raw, ec, warmup):
         q_m, q_v, z = self.encoder(x, warmup)
-        h = self.decoder(torch.cat((z, ec), dim=-1))
+        h = self.decoder(_dec_input(z, ec, self.conditioned))
+        rate = torch.exp(torch.clamp(self.px_rate(h), max=15, min=-15))
+        # Poisson negative log-likelihood (drop the constant log x! term):
+        reconst_loss = rate - x_raw * torch.log(rate + 1e-8)
+        kl_div = _kl_standard_normal(q_m, q_v)
+        return reconst_loss, kl_div, z, rate
+
+
+class NBVAE(_NativeVAE):
+    """Negative binomial VAE (the scVI-style count model). Deep decoder."""
+
+    linear = False
+
+    def __init__(self, p_dim, v_dim, latent_dim, conditioned=True):
+        super().__init__(p_dim, v_dim, latent_dim, conditioned)
+        if self.linear:
+            # LDVAE: a single linear decoder from the (optionally conditioned) latent.
+            self.decoder = None
+            self.px_scale = nn.Linear(self._dec_in, p_dim)
+            self.px_r = nn.Linear(self._dec_in, p_dim)
+        else:
+            self.decoder = self._trunk(self._dec_in)
+            self.px_scale = nn.Linear(1024, p_dim)
+            self.px_r = nn.Linear(1024, p_dim)
+
+    def _decode(self, z, ec):
+        d = _dec_input(z, ec, self.conditioned)
+        h = d if self.linear else self.decoder(d)
         px_scale = torch.exp(torch.clamp(self.px_scale(h), max=15, min=-15))
         px_r = torch.exp(torch.clamp(self.px_r(h), max=15, min=-15))
-        pi_logit = self.px_dropout(h)  # logit of the zero-inflation probability
+        return px_scale, px_r
+
+    def forward(self, x, x_raw, ec, warmup):
+        q_m, q_v, z = self.encoder(x, warmup)
+        px_scale, px_r = self._decode(z, ec)
+        reconst_loss = -log_nb_positive(x_raw, px_scale, px_r)
+        kl_div = _kl_standard_normal(q_m, q_v)
+        return reconst_loss, kl_div, z, px_scale
+
+
+class LDVAE(NBVAE):
+    """Linearly-decoded NB VAE (scVI's LDVAE): NB likelihood, linear decoder."""
+
+    linear = True
+
+
+class ZinbVAE(_NativeVAE):
+    """Zero-inflated NB VAE: NB decoder + per-gene dropout-logit head."""
+
+    def __init__(self, p_dim, v_dim, latent_dim, conditioned=True):
+        super().__init__(p_dim, v_dim, latent_dim, conditioned)
+        self.decoder = self._trunk(self._dec_in)
+        self.px_scale = nn.Linear(1024, p_dim)
+        self.px_r = nn.Linear(1024, p_dim)
+        self.px_dropout = nn.Linear(1024, p_dim)
+
+    def forward(self, x, x_raw, ec, warmup):
+        q_m, q_v, z = self.encoder(x, warmup)
+        h = self.decoder(_dec_input(z, ec, self.conditioned))
+        px_scale = torch.exp(torch.clamp(self.px_scale(h), max=15, min=-15))
+        px_r = torch.exp(torch.clamp(self.px_r(h), max=15, min=-15))
+        pi_logit = self.px_dropout(h)
         reconst_loss = -self._log_zinb(x_raw, px_scale, px_r, pi_logit)
         kl_div = _kl_standard_normal(q_m, q_v)
         return reconst_loss, kl_div, z, px_scale
 
     @staticmethod
     def _log_zinb(x, mu, theta, pi_logit, eps=1e-8):
-        # WHY: ZINB log-likelihood; HOW: mixture of a point mass at 0 (weight sigmoid(pi))
-        #      and an NB, computed in a numerically stable log-space via softplus.
         softplus = nn.functional.softplus
-        nb_ll = log_nb_positive(x, mu, theta, eps=eps)  # NB log-prob [N,G]
-        # log P(x=0) under NB = theta*(log theta - log(theta+mu))
+        nb_ll = log_nb_positive(x, mu, theta, eps=eps)
         log_nb_zero = theta * (torch.log(theta + eps) - torch.log(theta + mu + eps))
-        # case x==0: log( sigmoid(pi) + (1-sigmoid(pi)) * NB(0) )
-        #          = softplus(-pi + log_nb_zero) - softplus(-pi)   (log-sum-exp form)
         case_zero = softplus(-pi_logit + log_nb_zero) - softplus(-pi_logit)
-        # case x>0 : log(1-sigmoid(pi)) + NB(x) = -softplus(pi) + nb_ll
         case_nonzero = -softplus(pi_logit) + nb_ll
         return torch.where(x < eps, case_zero, case_nonzero)
 
 
+# -----------------------------------------------------------------------------
+# Registry: config name -> (class, kwargs). Conditioned/unconditioned variants
+# are explicit configs so the harness can sweep them by name. The old scCRAFT and
+# scVI_NB names are retained for backward-compatible replay of pre-pivot artifacts.
+# -----------------------------------------------------------------------------
+BACKBONE_CONFIGS = {
+    # likelihood x conditioning grid (the rebuilt E2)
+    "Gaussian":     (GaussianVAE, {"conditioned": False}),
+    "Poisson":      (PoissonVAE,  {"conditioned": False}),
+    "NB":           (NBVAE,       {"conditioned": True}),
+    "NB_uncond":    (NBVAE,       {"conditioned": False}),
+    "ZINB":         (ZinbVAE,     {"conditioned": True}),
+    "ZINB_uncond":  (ZinbVAE,     {"conditioned": False}),
+    "LDVAE":        (LDVAE,       {"conditioned": True}),
+    "LDVAE_uncond": (LDVAE,       {"conditioned": False}),
+}
+
+# Backward-compatible aliases (pre-pivot; scCRAFT recipe applied aux losses globally).
 BACKBONES = {
     "scCRAFT": scCRAFTVAE,
     "scVI_NB": ScviNBVAE,
-    "Gaussian": GaussianVAE,
-    "ZINB": ZinbVAE,
 }
 
 
 def build_backbone(name, p_dim, v_dim, latent_dim):
-    """Factory: return an initialised backbone by registry name."""
-    if name not in BACKBONES:
-        raise KeyError(f"Unknown backbone '{name}'. Known: {sorted(BACKBONES)}")
-    return BACKBONES[name](p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim)
+    """Factory: return an initialised backbone by config or legacy name."""
+    if name in BACKBONE_CONFIGS:
+        cls, kw = BACKBONE_CONFIGS[name]
+        return cls(p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim, **kw)
+    if name in BACKBONES:  # legacy path (scCRAFT / scVI_NB)
+        return BACKBONES[name](p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim)
+    raise KeyError(
+        f"Unknown backbone '{name}'. Known: {sorted(BACKBONE_CONFIGS) + sorted(BACKBONES)}"
+    )

@@ -229,9 +229,19 @@ class SCIntegrationModel(nn.Module):
         # 1. VAE Forward Pass
         reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
 
-        loss_cos = (
-            1 - torch.sum(F.normalize(torch.log1p(x_tilde), p=2) * F.normalize(x, p=2), 1)
-        ).mean()
+        # WHY (de-scCRAFT rebuild): the cosine + triplet auxiliary losses are scCRAFT's
+        #      training recipe, not universal. Each backbone declares which it natively
+        #      uses via `aux_losses`; native VAEs (Gaussian/Poisson/NB/ZINB/LDVAE) declare
+        #      () so ONLY reconstruction + KL applies, leaving the adversarial head as the
+        #      sole globally-fixed component. Legacy scCRAFT has no attribute -> full recipe.
+        aux = getattr(self.VAE, "aux_losses", ("cosine", "triplet"))
+        if "cosine" in aux:
+            loss_cos = (
+                1 - torch.sum(F.normalize(torch.log1p(x_tilde), p=2) * F.normalize(x, p=2), 1)
+            ).mean()
+        else:
+            loss_cos = torch.zeros((), device=self.device)
+        self._use_triplet = "triplet" in aux
         loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
         # 2. Discriminator Steps
@@ -248,7 +258,10 @@ class SCIntegrationModel(nn.Module):
         # 3. Generator/VAE Update
         opt_g.zero_grad()
         loss_da, gp = self.D_Z(z, v_true, reference_batch=reference_batch_idx)
-        triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
+        if getattr(self, "_use_triplet", True):
+            triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
+        else:
+            triplet_loss = torch.zeros((), device=self.device)
 
         if warmup:
             all_loss = (
