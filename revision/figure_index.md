@@ -8,7 +8,7 @@ version at time of writing.
 
 | Figure | What it shows | Data |
 |---|---|---|
-| `fig_headline_summary.png` | 4-panel synthesis: (A) λ_adv Pareto front, (B) backbone-invariant ΔARI, (C) biological over-correction, (D) multibatch scaling — the discriminator is preferable on every axis | E1/E2/E5/E8 |
+| `fig_headline_summary.png` | 4-panel synthesis: (A) λ_adv Pareto front, (B) backbone-invariant ΔARI, (C) biological over-correction, (D) multibatch scaling — the discriminator is preferable on cell-type conservation (ARI) throughout and dominates outright at the operating point; the critic's only edge is more aggressive batch mixing at low λ_adv / low batch counts, which does not persist and comes at a conservation cost | E1/E2/E5/E8 |
 
 ## Per-experiment figures
 
