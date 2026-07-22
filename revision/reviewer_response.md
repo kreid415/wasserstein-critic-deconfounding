@@ -367,7 +367,7 @@ RNA-specific QC/HVG, keeps counts+normalize+log1p). We further confirmed via E6 
 ATAC datasets exhibit the disjoint-support condition (separability 0.68/0.91, kNN
 cross-batch fraction 0.12/0.17). **The trade-off transfers to the ATAC modality.** On both
 ATAC datasets (scCRAFT backbone, 3 seeds) the critic shows its characteristic local
-cell-type degradation — cLISI rises (worse) relative to the discriminator by +0.027 on
+cell-type degradation — cLISI rises (worse) relative to the discriminator by +0.026 on
 atac-small and +0.027 on atac-large — while ARI is equal-or-worse (atac-small ΔARI 0.000 at
 +0.227 iLISI over-mixing; atac-large ΔARI −0.031 at matched mixing). ATAC ARI is low overall
 for both heads (~0.13–0.19) because the gene-activity integration task is intrinsically
