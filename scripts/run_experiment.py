@@ -18,7 +18,15 @@ from wcd_vae.wcd.experiment import evaluate_config, load_task
 
 # lambda_adv grid for the Pareto front (R2.2 / R3.3). 0 == no adversarial term.
 LAMBDA_GRID = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0]
-BACKBONES = ["scCRAFT", "scVI_NB", "Gaussian", "ZINB"]
+# Rebuilt E2 (de-scCRAFT): native VAEs spanning likelihood x decoder batch-conditioning.
+# NB/ZINB/LDVAE are run both conditioned and unconditioned so decoder-side integration is a
+# measured axis; Gaussian/Poisson are simple unconditioned controls. scCRAFT is dropped.
+BACKBONES = [
+    "Gaussian", "Poisson",
+    "NB", "NB_uncond",
+    "ZINB", "ZINB_uncond",
+    "LDVAE", "LDVAE_uncond",
+]
 SEEDS = [0, 1, 2]
 
 
