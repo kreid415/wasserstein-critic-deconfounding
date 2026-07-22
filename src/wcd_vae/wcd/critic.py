@@ -21,44 +21,76 @@ class ReferenceWassersteinLoss(nn.Module):
     and all other classes present in a batch.
     """
 
-    def __init__(self, reference_class: int = -1, reduction: str = "mean"):
+    def __init__(
+        self, reference_class: int = -1, reduction: str = "mean", formulation: str = "reference"
+    ):
         """
         Args:
             reference_class (int): Default reference class. Set to -1 if reference
                                    is determined dynamically per batch.
+            formulation (str): Which target distribution each critic head aligns to.
+                "reference"  - a single designated reference batch (original design).
+                "pooled"     - the global pool of all cells (no privileged batch); the
+                               V-way joint counterpart to the discriminator.
+                "barycenter" - a learnable set of anchor points approximating the
+                               Wasserstein (Fréchet) barycenter of all batches.
         """
         super().__init__()
         self.reference_class = reference_class
         self.reduction = reduction
+        if formulation not in ("reference", "pooled", "barycenter"):
+            raise ValueError(f"Unknown formulation: {formulation}")
+        self.formulation = formulation
 
     def forward(
-        self, output: torch.Tensor, batch_ids: torch.Tensor, reference_batch=None
+        self,
+        output: torch.Tensor,
+        batch_ids: torch.Tensor,
+        reference_batch=None,
+        target_output: torch.Tensor = None,
     ) -> torch.Tensor:
+        """Wasserstein-1 dual objective; the alignment TARGET depends on ``formulation``.
+
+        For every critic head ``k`` we maximise ``E[C_k(P_k)] - E[C_k(T)]`` where the
+        target distribution ``T`` is:
+          * ``reference``  - samples from the designated reference batch (excludes head=ref);
+          * ``pooled``     - all cells in the mini-batch (the global pool);
+          * ``barycenter`` - the learnable anchor points, whose critic scores are supplied
+                             in ``target_output`` (shape [M, num_domains]).
+        The negative is returned because optimisers minimise.
+        """
         num_domains = output.shape[1]
 
-        # 1. Determine Active Reference
-        # If a dynamic batch is passed, use it. Otherwise use the static init.
-        active_ref_idx = reference_batch if reference_batch is not None else self.reference_class
-
-        # Safety Check: Ensure we have a valid reference index (0 to K-1)
-        if not (0 <= active_ref_idx < num_domains):
-            # This catches the case where init is -1 but no dynamic batch was passed
-            raise ValueError(
-                f"Invalid reference index: {active_ref_idx}. "
-                "Ensure reference_batch is passed if reference_class is -1."
+        # 1. Resolve the target scores (shape [*, num_domains]) and the head to skip.
+        skip_idx = -1  # no head skipped unless a reference is used
+        if self.formulation == "reference":
+            active_ref_idx = (
+                reference_batch if reference_batch is not None else self.reference_class
             )
+            if not (0 <= active_ref_idx < num_domains):
+                raise ValueError(
+                    f"Invalid reference index: {active_ref_idx}. "
+                    "Ensure reference_batch is passed if reference_class is -1."
+                )
+            mask_ref = batch_ids == active_ref_idx
+            if mask_ref.sum() == 0:
+                return torch.tensor(0.0, device=output.device, requires_grad=True)
+            target_scores = output[mask_ref]  # [N_ref, V]
+            skip_idx = active_ref_idx
+        elif self.formulation == "pooled":
+            target_scores = output  # the whole mini-batch is the pooled target
+        else:  # barycenter
+            if target_output is None:
+                raise ValueError(
+                    "formulation='barycenter' requires target_output (anchor scores)."
+                )
+            target_scores = target_output  # [M, V]
 
-        # 2. Isolate Reference Samples
-        mask_ref = batch_ids == active_ref_idx
-        if mask_ref.sum() == 0:
-            return torch.tensor(0.0, device=output.device, requires_grad=True)
-
-        output_ref = output[mask_ref]
         total_loss = 0.0
         pairs_calculated = 0
 
         for k in range(num_domains):
-            if k == active_ref_idx:
+            if k == skip_idx:
                 continue
 
             mask_k = batch_ids == k
@@ -68,12 +100,12 @@ class ReferenceWassersteinLoss(nn.Module):
             # Critic head k on samples from domain k
             scores_k_on_head_k = output[mask_k, k]
 
-            # Critic head k on samples from reference domain
-            scores_ref_on_head_k = output_ref[:, k]
+            # Critic head k on the target distribution
+            scores_target_on_head_k = target_scores[:, k]
 
-            # Maximize distance: E[Critic(Source)] - E[Critic(Ref)]
+            # Maximize distance: E[Critic(Source)] - E[Critic(Target)]
             # We return negative because optimizers minimize.
-            diff = scores_k_on_head_k.mean() - scores_ref_on_head_k.mean()
+            diff = scores_k_on_head_k.mean() - scores_target_on_head_k.mean()
 
             total_loss += diff
             pairs_calculated += 1
@@ -136,9 +168,22 @@ def gradient_penalty(discriminator, real_samples, fake_samples, device="cpu"):
     return penalty
 
 
-def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0, reference_batch=None):
+def multi_class_gradient_penalty(
+    critic,
+    z,
+    batch_ids,
+    lambda_gp=10.0,
+    reference_batch=None,
+    formulation="reference",
+    target_samples=None,
+):
     """
-    Computes GP interpolating between specific Batch K and the Reference Batch.
+    Computes GP interpolating between each batch K and the alignment TARGET.
+
+    The target latent samples depend on ``formulation``:
+      * ``reference``  - the designated reference batch's samples (head=ref skipped);
+      * ``pooled``     - the whole mini-batch z (the global pool);
+      * ``barycenter`` - the learnable anchor points passed in ``target_samples``.
     """
     _b, _latent_dim = z.shape
     critic_out = critic(z, batch_ids=None).shape[1]
@@ -146,22 +191,26 @@ def multi_class_gradient_penalty(critic, z, batch_ids, lambda_gp=10.0, reference
     device = z.device
     total_classes = 0
 
-    # 1. Identify Reference Samples
-    if reference_batch is None:
-        # Fallback to random sampling if no reference provided (Original behavior)
-        # Or raise error if strict compliance is needed
+    # 1. Identify the target samples to interpolate toward, and the head to skip.
+    skip_idx = -1
+    if formulation == "barycenter":
+        if target_samples is None:
+            raise ValueError("formulation='barycenter' requires target_samples (anchors).")
+        ref_samples = target_samples
+    elif formulation == "pooled" or reference_batch is None:
+        # pooled: interpolate every batch toward the global pool
         ref_samples = z
     else:
         mask_ref = batch_ids == reference_batch
         ref_samples = z[mask_ref]
-
+        skip_idx = reference_batch
         # If no reference samples in this mini-batch, we can't compute valid GP
         if ref_samples.size(0) == 0:
             return torch.tensor(0.0, device=device)
 
     for k in range(critic_out):
         # Skip if k is the reference batch (no need to separate ref from ref)
-        if reference_batch is not None and k == reference_batch:
+        if k == skip_idx:
             continue
 
         # Get samples from domain k

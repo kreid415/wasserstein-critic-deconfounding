@@ -9,6 +9,7 @@ Modified from scCRAFT's `discriminator` (renamed `Discriminator`); the critic br
 reference plumbing, and gradient-penalty call are authored additions.
 """
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 
@@ -24,21 +25,35 @@ class Discriminator(nn.Module):
         critic=False,
         reference_batch=None,
         reference_batch_name_str=None,
+        formulation="reference",
+        n_anchors=64,
     ):
         super().__init__()
         n_hidden = 128
         self.critic = critic
+        self.formulation = formulation
         # Define layers
         self.fc1 = nn.Linear(n_input, n_hidden)
         self.fc2 = nn.Linear(n_hidden, n_hidden)
         self.fc3 = nn.Linear(n_hidden, domain_number)
 
+        # WHY (formulation study): the barycenter critic aligns every batch to a LEARNABLE
+        #      virtual center rather than an existing batch, testing whether the critic's
+        #      pathologies stem from the fixed-reference design or the Wasserstein objective.
+        # HOW: M anchor points in latent space, updated by the generator optimiser toward
+        #      the Frechet mean of the batch distributions.
+        self.anchors = None
+        if self.critic and formulation == "barycenter":
+            self.anchors = nn.Parameter(torch.randn(n_anchors, n_input) * 0.01)
+
         if self.critic:
-            # If using critic, use Wasserstein loss
-            if reference_batch is not None:
-                self.loss = ReferenceWassersteinLoss(reference_class=reference_batch)
-            else:
-                raise ValueError("Reference batch must be provided for Wasserstein loss.")
+            # If using critic, use Wasserstein loss with the chosen alignment target.
+            if formulation == "reference" and reference_batch is None:
+                raise ValueError("Reference batch must be provided for reference formulation.")
+            self.loss = ReferenceWassersteinLoss(
+                reference_class=reference_batch if reference_batch is not None else -1,
+                formulation=formulation,
+            )
         else:
             # If not using critic, use cross-entropy loss
             self.loss = CrossEntropy()
@@ -53,8 +68,16 @@ class Discriminator(nn.Module):
             # If batch_ids is None, return the output directly
             return output
 
-        if isinstance(self.loss, ReferenceWassersteinLoss) and reference_batch is not None:
-            discriminator_loss = self.loss(output, batch_ids, reference_batch)
+        if isinstance(self.loss, ReferenceWassersteinLoss):
+            # Compute anchor scores once for the barycenter formulation.
+            target_output = None
+            if self.formulation == "barycenter":
+                a = F.relu(self.fc1(self.anchors))
+                a = F.relu(self.fc2(a))
+                target_output = self.fc3(a)
+            discriminator_loss = self.loss(
+                output, batch_ids, reference_batch, target_output=target_output
+            )
         else:
             discriminator_loss = self.loss(output, batch_ids)
 
@@ -66,7 +89,12 @@ class Discriminator(nn.Module):
             discriminator_loss = discriminator_loss.sum()
         if self.critic:
             gp_loss = multi_class_gradient_penalty(
-                self, x, batch_ids, reference_batch=reference_batch
+                self,
+                x,
+                batch_ids,
+                reference_batch=reference_batch,
+                formulation=self.formulation,
+                target_samples=self.anchors if self.formulation == "barycenter" else None,
             )
 
         return discriminator_loss, gp_loss

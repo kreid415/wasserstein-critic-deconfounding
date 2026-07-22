@@ -33,7 +33,17 @@ from wcd_vae.wcd.adversarial import Discriminator
 
 
 class SCIntegrationModel(nn.Module):
-    def __init__(self, adata, batch_key, z_dim, critic, reference_batch, seed=None, backbone=None):
+    def __init__(
+        self,
+        adata,
+        batch_key,
+        z_dim,
+        critic,
+        reference_batch,
+        seed=None,
+        backbone=None,
+        formulation="reference",
+    ):
         super().__init__()
         self.p_dim = adata.shape[1]
         self.z_dim = z_dim
@@ -42,6 +52,8 @@ class SCIntegrationModel(nn.Module):
         # (rotating/joint) even when the reference is given as an int, not a name.
         self.critic = critic
         self.reference_batch = reference_batch
+        # formulation selects the critic alignment target: reference | pooled | barycenter.
+        self.formulation = formulation
 
         # WHY: E2 swaps only the z-producing backbone while holding the adversarial head
         #      fixed; HOW: backbone=None keeps the upstream scCRAFT VAE (reference),
@@ -57,6 +69,7 @@ class SCIntegrationModel(nn.Module):
             domain_number=self.v_dim,
             critic=critic,
             reference_batch=reference_batch,
+            formulation=formulation,
         )
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -314,8 +327,19 @@ class SCIntegrationModel(nn.Module):
         n_batches_total = len(batch_indices_map)
         base_ref = reference_batch_idx if reference_batch_idx is not None else 0
 
-        optimizer_d_z = optim.Adam(self.D_Z.parameters(), lr=0.001, betas=(0.5, 0.9))
-        optimizer_g = optim.Adam(self.VAE.parameters(), lr=0.001, betas=(0.5, 0.9))
+        # WHY (barycenter formulation): the learnable anchors approximate the Frechet mean,
+        #      so they must be MINIMISED with the generator (pulling the virtual centre toward
+        #      the batches) and EXCLUDED from the critic step (which maximises distance and
+        #      would otherwise push the anchors away adversarially).
+        if self.D_Z.anchors is not None:
+            anchor_ids = {id(self.D_Z.anchors)}
+            critic_params = [p for p in self.D_Z.parameters() if id(p) not in anchor_ids]
+            gen_params = list(self.VAE.parameters()) + [self.D_Z.anchors]
+        else:
+            critic_params = list(self.D_Z.parameters())
+            gen_params = list(self.VAE.parameters())
+        optimizer_d_z = optim.Adam(critic_params, lr=0.001, betas=(0.5, 0.9))
+        optimizer_g = optim.Adam(gen_params, lr=0.001, betas=(0.5, 0.9))
         optimizers = (optimizer_g, optimizer_d_z)
 
         batch_size_loader = batch_size
@@ -411,6 +435,7 @@ def train_integration_model(
     batch_size=1024,
     backbone=None,
     reference_mode="fixed",
+    formulation="reference",
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -429,6 +454,7 @@ def train_integration_model(
         critic=critic,
         reference_batch=reference_batch,
         backbone=backbone,
+        formulation=formulation,
     )
     print(epochs)
     start_time = time.time()

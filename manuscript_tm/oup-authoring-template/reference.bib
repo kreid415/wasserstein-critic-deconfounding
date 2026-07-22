@@ -1,0 +1,1196 @@
+@article{10.1093/bioinformatics/btaa796,
+    author = {Dincer, Ayse B and Janizek, Joseph D and Lee, Su-In},
+    title = {Adversarial deconfounding autoencoder for learning robust gene expression embeddings},
+    journal = {Bioinformatics},
+    volume = {36},
+    year = {2020},
+    abstract = {Increasing number of gene expression profiles has enabled the use of complex models, such as deep unsupervised neural networks, to extract a latent space from these profiles. However, expression profiles, especially when collected in large numbers, inherently contain variations introduced by technical artifacts (e.g. batch effects) and uninteresting biological variables (e.g. age) in addition to the true signals of interest. These sources of variations, called confounders, produce embeddings that fail to transfer to different domains, i.e. an embedding learned from one dataset with a specific confounder distribution does not generalize to different distributions. To remedy this problem, we attempt to disentangle confounders from true signals to generate biologically informative embeddings.In this article, we introduce the Adversarial Deconfounding AutoEncoder (AD-AE) approach to deconfounding gene expression latent spaces. The AD-AE model consists of two neural networks: (i) an autoencoder to generate an embedding that can reconstruct original measurements, and (ii) an adversary trained to predict the confounder from that embedding. We jointly train the networks to generate embeddings that can encode as much information as possible without encoding any confounding signal. By applying AD-AE to two distinct gene expression datasets, we show that our model can (i) generate embeddings that do not encode confounder information, (ii) conserve the biological signals present in the original space and (iii) generalize successfully across different confounder domains. We demonstrate that AD-AE outperforms standard autoencoder and other deconfounding approaches.Our code and data are available at https://gitlab.cs.washington.edu/abdincer/ad-ae.Supplementary data are available at Bioinformatics online.},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/36/Supplement\_2/i573/50693499/btaa796.pdf},
+}
+
+@ARTICLE{Gondane2023-tx,
+  title     = "Revealing the history and mystery of {RNA-seq}",
+  author    = "Gondane, Aishwarya and Itkonen, Harri M",
+  abstract  = "Advances in RNA-sequencing technologies have led to the
+               development of intriguing experimental setups, a massive
+               accumulation of data, and high demand for tools to analyze it.
+               To answer this demand, computational scientists have developed a
+               myriad of data analysis pipelines, but it is less often
+               considered what the most appropriate one is. The RNA-sequencing
+               data analysis pipeline can be divided into three major parts:
+               data pre-processing, followed by the main and downstream
+               analyses. Here, we present an overview of the tools used in both
+               the bulk RNA-seq and at the single-cell level, with a particular
+               focus on alternative splicing and active RNA synthesis analysis.
+               A crucial part of data pre-processing is quality control, which
+               defines the necessity of the next steps; adapter removal,
+               trimming, and filtering. After pre-processing, the data are
+               finally analyzed using a variety of tools: differential gene
+               expression, alternative splicing, and assessment of active
+               synthesis, the latter requiring dedicated sample preparation. In
+               brief, we describe the commonly used tools in the sample
+               preparation and analysis of RNA-seq data.",
+  journal   = "Curr. Issues Mol. Biol.",
+  volume    =  45,
+  number    =  3,
+  year      =  2023,
+  keywords  = "RNA-seq; alternative splicing; bioinformatics; nascent mRNA
+               analysis; scRNA-seq; transcriptomic data analysis",
+  copyright = "https://creativecommons.org/licenses/by/4.0/",
+  language  = "en"
+}
+
+@ARTICLE{Tran2020-op,
+  title    = "A benchmark of batch-effect correction methods for single-cell
+              {RNA} sequencing data",
+  author   = "Tran, Hoa Thi Nhu and Ang, Kok Siong and Chevrier, Marion and
+              Zhang, Xiaomeng and Lee, Nicole Yee Shin and Goh, Michelle and
+              Chen, Jinmiao",
+  abstract = "Large-scale single-cell transcriptomic datasets generated using
+              different technologies contain batch-specific systematic
+              variations that present a challenge to batch-effect removal and
+              data integration. With continued growth expected in scRNA-seq
+              data, achieving effective batch integration with available
+              computational resources is crucial. Here, we perform an in-depth
+              benchmark study on available batch correction methods to
+              determine the most suitable method for batch-effect removal.",
+  journal  = "Genome Biology",
+  volume   =  21,
+  number   =  1,
+  year     =  2020
+}
+
+@article{10.1145/3422622,
+author = {Goodfellow, Ian and Pouget-Abadie, Jean and Mirza, Mehdi and Xu, Bing and Warde-Farley, David and Ozair, Sherjil and Courville, Aaron and Bengio, Yoshua},
+title = {Generative adversarial networks},
+year = {2020},
+issue_date = {November 2020},
+volume = {63},
+number = {11},
+abstract = {Generative adversarial networks are a kind of artificial intelligence algorithm designed to solve the generative modeling problem. The goal of a generative model is to study a collection of training examples and learn the probability distribution that generated them. Generative Adversarial Networks (GANs) are then able to generate more examples from the estimated probability distribution. Generative models based on deep learning are common, but GANs are among the most successful generative models (especially in terms of their ability to generate realistic high-resolution images). GANs have been successfully applied to a wide variety of tasks (mostly in research settings) but continue to present unique challenges and research opportunities because they are based on game theory while most other approaches to generative modeling are based on optimization.},
+journal = {Commun. ACM},
+numpages = {6}
+}
+
+@inproceedings{10.5555/3305381.3305404,
+author = {Arjovsky, Martin and Chintala, Soumith and Bottou, L\'{e}on},
+title = {Wasserstein generative adversarial networks},
+year = {2017},
+abstract = {We introduce a new algorithm named WGAN, an alternative to traditional GAN training. In this new model, we show that we can improve the stability of learning, get rid of problems like mode collapse, and provide meaningful learning curves useful for debugging and hyperparameter searches. Furthermore, we show that the corresponding optimization problem is sound, and provide extensive theoretical work highlighting the deep connections to different distances between distributions.},
+booktitle = {Proceedings of the 34th International Conference on Machine Learning - Volume 70},
+numpages = {10},
+location = {Sydney, NSW, Australia},
+series = {ICML'17}
+}
+
+@inproceedings{Kingma2014,
+  abstract = {How can we perform efficient inference and learning in directed probabilistic models, in the presence of continuous latent variables with intractable posterior distributions, and large datasets? We introduce a stochastic variational inference and learning algorithm that scales to large datasets and, under some mild differentiability conditions, even works in the intractable case. Our contributions is two-fold. First, we show that a reparameterization of the variational lower bound yields a lower bound estimator that can be straightforwardly optimized using standard stochastic gradient methods. Second, we show that for i.i.d. datasets with continuous latent variables per datapoint, posterior inference can be made especially efficient by fitting an approximate inference model (also called a recognition model) to the intractable posterior using the proposed lower bound estimator. Theoretical advantages are reflected in experimental results.},
+  added-at = {2020-10-15T14:36:56.000+0200},
+  author = {Kingma, Diederik P. and Welling, Max},
+  biburl = {https://www.bibsonomy.org/bibtex/242e5be6faa01cba2587f4907ac99dce8/annakrause},
+  booktitle = {2nd International Conference on Learning Representations, {ICLR} 2014, Banff, AB, Canada, April 14-16, 2014, Conference Track Proceedings},
+  eprint = {http://arxiv.org/abs/1312.6114v10},
+  eprintclass = {stat.ML},
+  eprinttype = {arXiv},
+  file = {:http\://arxiv.org/pdf/1312.6114v10:PDF;:KingmaWelling_Auto-EncodingVariationalBayes.pdf:PDF},
+  interhash = {a626a9d77a123c52405a08da983203cb},
+  intrahash = {42e5be6faa01cba2587f4907ac99dce8},
+  keywords = {cs.LG stat.ML vae},
+  timestamp = {2021-02-01T17:13:18.000+0100},
+  title = {{Auto-Encoding Variational Bayes}},
+  year = 2014
+}
+
+@ARTICLE{Chazarra-Gil2021-mr,
+  title     = "Flexible comparison of batch correction methods for single-cell
+               {RNA-seq} using {BatchBench}",
+  author    = "Chazarra-Gil, Ruben and van Dongen, Stijn and Kiselev, Vladimir
+               Yu and Hemberg, Martin",
+  abstract  = "As the cost of single-cell RNA-seq experiments has decreased, an
+               increasing number of datasets are now available. Combining newly
+               generated and publicly accessible datasets is challenging due to
+               non-biological signals, commonly known as batch effects.
+               Although there are several computational methods available that
+               can remove batch effects, evaluating which method performs best
+               is not straightforward. Here, we present BatchBench
+               (https://github.com/cellgeni/batchbench), a modular and flexible
+               pipeline for comparing batch correction methods for single-cell
+               RNA-seq data. We apply BatchBench to eight methods, highlighting
+               their methodological differences and assess their performance
+               and computational requirements through a compendium of
+               well-studied datasets. This systematic comparison guides users
+               in the choice of batch correction tool, and the pipeline makes
+               it easy to evaluate other datasets.",
+  journal   = "Nucleic Acids Res.",
+  volume    =  49,
+  number    =  7,
+  year      =  2021,
+  copyright = "http://creativecommons.org/licenses/by/4.0/",
+  language  = "en"
+}
+
+@ARTICLE{Korsunsky2019-kj,
+  title    = "Fast, sensitive and accurate integration of single-cell data with
+              Harmony",
+  author   = "Korsunsky, Ilya and Millard, Nghia and Fan, Jean and Slowikowski,
+              Kamil and Zhang, Fan and Wei, Kevin and Baglaenko, Yuriy and
+              Brenner, Michael and Loh, Po-Ru and Raychaudhuri, Soumya",
+  abstract = "The emerging diversity of single-cell RNA-seq datasets allows for
+              the full transcriptional characterization of cell types across a
+              wide variety of biological and clinical conditions. However, it
+              is challenging to analyze them together, particularly when
+              datasets are assayed with different technologies, because
+              biological and technical differences are interspersed. We present
+              Harmony (https://github.com/immunogenomics/harmony), an algorithm
+              that projects cells into a shared embedding in which cells group
+              by cell type rather than dataset-specific conditions. Harmony
+              simultaneously accounts for multiple experimental and biological
+              factors. In six analyses, we demonstrate the superior performance
+              of Harmony to previously published algorithms while requiring
+              fewer computational resources. Harmony enables the integration of
+              ~106 cells on a personal computer. We apply Harmony to peripheral
+              blood mononuclear cells from datasets with large experimental
+              differences, five studies of pancreatic islet cells, mouse
+              embryogenesis datasets and the integration of scRNA-seq with
+              spatial transcriptomics data.",
+  journal  = "Nature Methods",
+  volume   =  16,
+  number   =  12,
+  year     =  2019
+}
+
+@ARTICLE{Rousseeuw1987-mw,
+  title    = "Silhouettes: A graphical aid to the interpretation and validation
+              of cluster analysis",
+  author   = "Rousseeuw, Peter J",
+  abstract = "A new graphical display is proposed for partitioning techniques.
+              Each cluster is represented by a so-called silhouette, which is
+              based on the comparison of its tightness and separation. This
+              silhouette shows which objects lie well within their cluster, and
+              which ones are merely somewhere in between clusters. The entire
+              clustering is displayed by combining the silhouettes into a
+              single plot, allowing an appreciation of the relative quality of
+              the clusters and an overview of the data configuration. The
+              average silhouette width provides an evaluation of clustering
+              validity, and might be used to select an `appropriate' number of
+              clusters.",
+  journal  = "Journal of Computational and Applied Mathematics",
+  volume   =  20,
+  year     =  1987,
+  keywords = "Graphical display; cluster analysis; clustering validity;
+              classification"
+}
+
+@ARTICLE{Gyorffy2010-gp,
+  title     = "An online survival analysis tool to rapidly assess the effect of
+               22,277 genes on breast cancer prognosis using microarray data of
+               1,809 patients",
+  author    = "Gy{\"o}rffy, Balazs and Lanczky, Andras and Eklund, Aron C and
+               Denkert, Carsten and Budczies, Jan and Li, Qiyuan and Szallasi,
+               Zoltan",
+  abstract  = "Validating prognostic or predictive candidate genes in
+               appropriately powered breast cancer cohorts are of utmost
+               interest. Our aim was to develop an online tool to draw survival
+               plots, which can be used to assess the relevance of the
+               expression levels of various genes on the clinical outcome both
+               in untreated and treated breast cancer patients. A background
+               database was established using gene expression data and survival
+               information of 1,809 patients downloaded from GEO (Affymetrix
+               HGU133A and HGU133+2 microarrays). The median relapse free
+               survival is 6.43 years, 968/1,231 patients are estrogen-receptor
+               (ER) positive, and 190/1,369 are lymph-node positive. After
+               quality control and normalization only probes present on both
+               Affymetrix platforms were retained (n = 22,277). In order to
+               analyze the prognostic value of a particular gene, the cohorts
+               are divided into two groups according to the median (or
+               upper/lower quartile) expression of the gene. The two groups can
+               be compared in terms of relapse free survival, overall survival,
+               and distant metastasis free survival. A survival curve is
+               displayed, and the hazard ratio with 95\% confidence intervals
+               and logrank P value are calculated and displayed. Additionally,
+               three subgroups of patients can be assessed: systematically
+               untreated patients, endocrine-treated ER positive patients, and
+               patients with a distribution of clinical characteristics
+               representative of those seen in general clinical practice in the
+               US. Web address: www.kmplot.com . We used this integrative data
+               analysis tool to confirm the prognostic power of the
+               proliferation-related genes TOP2A and TOP2B, MKI67, CCND2,
+               CCND3, CCNDE2, as well as CDKN1A, and TK2. We also validated the
+               capability of microarrays to determine estrogen receptor status
+               in 1,231 patients. The tool is highly valuable for the
+               preliminary assessment of biomarkers, especially for research
+               groups with limited bioinformatic resources.",
+  journal   = "Breast Cancer Res. Treat.",
+  volume    =  123,
+  number    =  3,
+  year      =  2010,
+  language  = "en"
+}
+
+@ARTICLE{Cancer_Genome_Atlas_Research_Network2015-rk,
+  title    = "Comprehensive, integrative genomic analysis of diffuse
+              lower-grade gliomas",
+  author   = "{Cancer Genome Atlas Research Network} and Brat, Daniel J and
+              Verhaak, Roel G W and Aldape, Kenneth D and Yung, W K Alfred and
+              Salama, Sofie R and Cooper, Lee A D and Rheinbay, Esther and
+              Miller, C Ryan and Vitucci, Mark and Morozova, Olena and
+              Robertson, A Gordon and Noushmehr, Houtan and Laird, Peter W and
+              Cherniack, Andrew D and Akbani, Rehan and Huse, Jason T and
+              Ciriello, Giovanni and Poisson, Laila M and Barnholtz-Sloan, Jill
+              S and Berger, Mitchel S and Brennan, Cameron and Colen, Rivka R
+              and Colman, Howard and Flanders, Adam E and Giannini, Caterina
+              and Grifford, Mia and Iavarone, Antonio and Jain, Rajan and
+              Joseph, Isaac and Kim, Jaegil and Kasaian, Katayoon and
+              Mikkelsen, Tom and Murray, Bradley A and O'Neill, Brian Patrick
+              and Pachter, Lior and Parsons, Donald W and Sougnez, Carrie and
+              Sulman, Erik P and Vandenberg, Scott R and Van Meir, Erwin G and
+              von Deimling, Andreas and Zhang, Hailei and Crain, Daniel and
+              Lau, Kevin and Mallery, David and Morris, Scott and Paulauskis,
+              Joseph and Penny, Robert and Shelton, Troy and Sherman, Mark and
+              Yena, Peggy and Black, Aaron and Bowen, Jay and Dicostanzo, Katie
+              and Gastier-Foster, Julie and Leraas, Kristen M and Lichtenberg,
+              Tara M and Pierson, Christopher R and Ramirez, Nilsa C and
+              Taylor, Cynthia and Weaver, Stephanie and Wise, Lisa and Zmuda,
+              Erik and Davidsen, Tanja and Demchok, John A and Eley, Greg and
+              Ferguson, Martin L and Hutter, Carolyn M and Mills Shaw, Kenna R
+              and Ozenberger, Bradley A and Sheth, Margi and Sofia, Heidi J and
+              Tarnuzzer, Roy and Wang, Zhining and Yang, Liming and Zenklusen,
+              Jean Claude and Ayala, Brenda and Baboud, Julien and Chudamani,
+              Sudha and Jensen, Mark A and Liu, Jia and Pihl, Todd and Raman,
+              Rohini and Wan, Yunhu and Wu, Ye and Ally, Adrian and Auman, J
+              Todd and Balasundaram, Miruna and Balu, Saianand and Baylin,
+              Stephen B and Beroukhim, Rameen and Bootwalla, Moiz S and Bowlby,
+              Reanne and Bristow, Christopher A and Brooks, Denise and
+              Butterfield, Yaron and Carlsen, Rebecca and Carter, Scott and
+              Chin, Lynda and Chu, Andy and Chuah, Eric and Cibulskis, Kristian
+              and Clarke, Amanda and Coetzee, Simon G and Dhalla, Noreen and
+              Fennell, Tim and Fisher, Sheila and Gabriel, Stacey and Getz, Gad
+              and Gibbs, Richard and Guin, Ranabir and Hadjipanayis, Angela and
+              Hayes, D Neil and Hinoue, Toshinori and Hoadley, Katherine and
+              Holt, Robert A and Hoyle, Alan P and Jefferys, Stuart R and
+              Jones, Steven and Jones, Corbin D and Kucherlapati, Raju and Lai,
+              Phillip H and Lander, Eric and Lee, Semin and Lichtenstein, Lee
+              and Ma, Yussanne and Maglinte, Dennis T and Mahadeshwar, Harshad
+              S and Marra, Marco A and Mayo, Michael and Meng, Shaowu and
+              Meyerson, Matthew L and Mieczkowski, Piotr A and Moore, Richard A
+              and Mose, Lisle E and Mungall, Andrew J and Pantazi, Angeliki and
+              Parfenov, Michael and Park, Peter J and Parker, Joel S and Perou,
+              Charles M and Protopopov, Alexei and Ren, Xiaojia and Roach,
+              Jeffrey and Sabedot, Tha{\'\i}s S and Schein, Jacqueline and
+              Schumacher, Steven E and Seidman, Jonathan G and Seth, Sahil and
+              Shen, Hui and Simons, Janae V and Sipahimalani, Payal and
+              Soloway, Matthew G and Song, Xingzhi and Sun, Huandong and Tabak,
+              Barbara and Tam, Angela and Tan, Donghui and Tang, Jiabin and
+              Thiessen, Nina and Triche, Jr, Timothy and Van Den Berg, David J
+              and Veluvolu, Umadevi and Waring, Scot and Weisenberger, Daniel J
+              and Wilkerson, Matthew D and Wong, Tina and Wu, Junyuan and Xi,
+              Liu and Xu, Andrew W and Yang, Lixing and Zack, Travis I and
+              Zhang, Jianhua and Aksoy, B Arman and Arachchi, Harindra and
+              Benz, Chris and Bernard, Brady and Carlin, Daniel and Cho, Juok
+              and DiCara, Daniel and Frazer, Scott and Fuller, Gregory N and
+              Gao, Jianjiong and Gehlenborg, Nils and Haussler, David and
+              Heiman, David I and Iype, Lisa and Jacobsen, Anders and Ju,
+              Zhenlin and Katzman, Sol and Kim, Hoon and Knijnenburg, Theo and
+              Kreisberg, Richard Bailey and Lawrence, Michael S and Lee,
+              William and Leinonen, Kalle and Lin, Pei and Ling, Shiyun and
+              Liu, Wenbin and Liu, Yingchun and Liu, Yuexin and Lu, Yiling and
+              Mills, Gordon and Ng, Sam and Noble, Michael S and Paull, Evan
+              and Rao, Arvind and Reynolds, Sheila and Saksena, Gordon and
+              Sanborn, Zack and Sander, Chris and Schultz, Nikolaus and
+              Senbabaoglu, Yasin and Shen, Ronglai and Shmulevich, Ilya and
+              Sinha, Rileen and Stuart, Josh and Sumer, S Onur and Sun, Yichao
+              and Tasman, Natalie and Taylor, Barry S and Voet, Doug and
+              Weinhold, Nils and Weinstein, John N and Yang, Da and Yoshihara,
+              Kosuke and Zheng, Siyuan and Zhang, Wei and Zou, Lihua and Abel,
+              Ty and Sadeghi, Sara and Cohen, Mark L and Eschbacher, Jenny and
+              Hattab, Eyas M and Raghunathan, Aditya and Schniederjan, Matthew
+              J and Aziz, Dina and Barnett, Gene and Barrett, Wendi and Bigner,
+              Darell D and Boice, Lori and Brewer, Cathy and Calatozzolo,
+              Chiara and Campos, Benito and Carlotti, Jr, Carlos Gilberto and
+              Chan, Timothy A and Cuppini, Lucia and Curley, Erin and Cuzzubbo,
+              Stefania and Devine, Karen and DiMeco, Francesco and Duell,
+              Rebecca and Elder, J Bradley and Fehrenbach, Ashley and
+              Finocchiaro, Gaetano and Friedman, William and Fulop, Jordonna
+              and Gardner, Johanna and Hermes, Beth and Herold-Mende, Christel
+              and Jungk, Christine and Kendler, Ady and Lehman, Norman L and
+              Lipp, Eric and Liu, Ouida and Mandt, Randy and McGraw, Mary and
+              Mclendon, Roger and McPherson, Christopher and Neder, Luciano and
+              Nguyen, Phuong and Noss, Ardene and Nunziata, Raffaele and
+              Ostrom, Quinn T and Palmer, Cheryl and Perin, Alessandro and
+              Pollo, Bianca and Potapov, Alexander and Potapova, Olga and
+              Rathmell, W Kimryn and Rotin, Daniil and Scarpace, Lisa and
+              Schilero, Cathy and Senecal, Kelly and Shimmel, Kristen and
+              Shurkhay, Vsevolod and Sifri, Suzanne and Singh, Rosy and Sloan,
+              Andrew E and Smolenski, Kathy and Staugaitis, Susan M and Steele,
+              Ruth and Thorne, Leigh and Tirapelli, Daniela P C and Unterberg,
+              Andreas and Vallurupalli, Mahitha and Wang, Yun and Warnick,
+              Ronald and Williams, Felicia and Wolinsky, Yingli and Bell, Sue
+              and Rosenberg, Mara and Stewart, Chip and Huang, Franklin and
+              Grimsby, Jonna L and Radenbaugh, Amie J and Zhang, Jianan",
+  abstract = "BACKGROUND: Diffuse low-grade and intermediate-grade gliomas
+              (which together make up the lower-grade gliomas, World Health
+              Organization grades II and III) have highly variable clinical
+              behavior that is not adequately predicted on the basis of
+              histologic class. Some are indolent; others quickly progress to
+              glioblastoma. The uncertainty is compounded by interobserver
+              variability in histologic diagnosis. Mutations in IDH, TP53, and
+              ATRX and codeletion of chromosome arms 1p and 19q (1p/19q
+              codeletion) have been implicated as clinically relevant markers
+              of lower-grade gliomas. METHODS: We performed genomewide analyses
+              of 293 lower-grade gliomas from adults, incorporating exome
+              sequence, DNA copy number, DNA methylation, messenger RNA
+              expression, microRNA expression, and targeted protein expression.
+              These data were integrated and tested for correlation with
+              clinical outcomes. RESULTS: Unsupervised clustering of mutations
+              and data from RNA, DNA-copy-number, and DNA-methylation platforms
+              uncovered concordant classification of three robust,
+              nonoverlapping, prognostically significant subtypes of
+              lower-grade glioma that were captured more accurately by IDH,
+              1p/19q, and TP53 status than by histologic class. Patients who
+              had lower-grade gliomas with an IDH mutation and 1p/19q
+              codeletion had the most favorable clinical outcomes. Their
+              gliomas harbored mutations in CIC, FUBP1, NOTCH1, and the TERT
+              promoter. Nearly all lower-grade gliomas with IDH mutations and
+              no 1p/19q codeletion had mutations in TP53 (94\%) and ATRX
+              inactivation (86\%). The large majority of lower-grade gliomas
+              without an IDH mutation had genomic aberrations and clinical
+              behavior strikingly similar to those found in primary
+              glioblastoma. CONCLUSIONS: The integration of genomewide data
+              from multiple platforms delineated three molecular classes of
+              lower-grade gliomas that were more concordant with IDH, 1p/19q,
+              and TP53 status than with histologic class. Lower-grade gliomas
+              with an IDH mutation either had 1p/19q codeletion or carried a
+              TP53 mutation. Most lower-grade gliomas without an IDH mutation
+              were molecularly and clinically similar to glioblastoma. (Funded
+              by the National Institutes of Health.).",
+  journal  = "N. Engl. J. Med.",
+  volume   =  372,
+  number   =  26,
+  year     =  2015,
+  language = "en"
+}
+
+@ARTICLE{Brennan2013-xc,
+  title     = "The somatic genomic landscape of glioblastoma",
+  author    = "Brennan, Cameron W and Verhaak, Roel G W and McKenna, Aaron and
+               Campos, Benito and Noushmehr, Houtan and Salama, Sofie R and
+               Zheng, Siyuan and Chakravarty, Debyani and Sanborn, J Zachary
+               and Berman, Samuel H and Beroukhim, Rameen and Bernard, Brady
+               and Wu, Chang-Jiun and Genovese, Giannicola and Shmulevich, Ilya
+               and Barnholtz-Sloan, Jill and Zou, Lihua and Vegesna,
+               Rahulsimham and Shukla, Sachet A and Ciriello, Giovanni and
+               Yung, W K and Zhang, Wei and Sougnez, Carrie and Mikkelsen, Tom
+               and Aldape, Kenneth and Bigner, Darell D and Van Meir, Erwin G
+               and Prados, Michael and Sloan, Andrew and Black, Keith L and
+               Eschbacher, Jennifer and Finocchiaro, Gaetano and Friedman,
+               William and Andrews, David W and Guha, Abhijit and Iacocca, Mary
+               and O'Neill, Brian P and Foltz, Greg and Myers, Jerome and
+               Weisenberger, Daniel J and Penny, Robert and Kucherlapati, Raju
+               and Perou, Charles M and Hayes, D Neil and Gibbs, Richard and
+               Marra, Marco and Mills, Gordon B and Lander, Eric and Spellman,
+               Paul and Wilson, Richard and Sander, Chris and Weinstein, John
+               and Meyerson, Matthew and Gabriel, Stacey and Laird, Peter W and
+               Haussler, David and Getz, Gad and Chin, Lynda and {TCGA Research
+               Network}",
+  abstract  = "We describe the landscape of somatic genomic alterations based
+               on multidimensional and comprehensive characterization of more
+               than 500 glioblastoma tumors (GBMs). We identify several novel
+               mutated genes as well as complex rearrangements of signature
+               receptors, including EGFR and PDGFRA. TERT promoter mutations
+               are shown to correlate with elevated mRNA expression, supporting
+               a role in telomerase reactivation. Correlative analyses confirm
+               that the survival advantage of the proneural subtype is
+               conferred by the G-CIMP phenotype, and MGMT DNA methylation may
+               be a predictive biomarker for treatment response only in
+               classical subtype GBM. Integrative analysis of genomic and
+               proteomic profiles challenges the notion of therapeutic
+               inhibition of a pathway as an alternative to inhibition of the
+               target itself. These data will facilitate the discovery of
+               therapeutic and diagnostic target candidates, the validation of
+               research and clinical observations and the generation of
+               unanticipated hypotheses that can advance our molecular
+               understanding of this lethal cancer.",
+  journal   = "Cell",
+  volume    =  155,
+  number    =  2,
+  year      =  2013,
+  copyright = "http://www.elsevier.com/open-access/userlicense/1.0/",
+  language  = "en"
+}
+
+@ARTICLE{Cancer_Genome_Atlas_Research_Network2008-ud,
+  title     = "Comprehensive genomic characterization defines human
+               glioblastoma genes and core pathways",
+  author    = "{Cancer Genome Atlas Research Network}",
+  abstract  = "Human cancer cells typically harbour multiple chromosomal
+               aberrations, nucleotide substitutions and epigenetic
+               modifications that drive malignant transformation. The Cancer
+               Genome Atlas (TCGA) pilot project aims to assess the value of
+               large-scale multi-dimensional analysis of these molecular
+               characteristics in human cancer and to provide the data rapidly
+               to the research community. Here we report the interim
+               integrative analysis of DNA copy number, gene expression and DNA
+               methylation aberrations in 206 glioblastomas--the most common
+               type of adult brain cancer--and nucleotide sequence aberrations
+               in 91 of the 206 glioblastomas. This analysis provides new
+               insights into the roles of ERBB2, NF1 and TP53, uncovers
+               frequent mutations of the phosphatidylinositol-3-OH kinase
+               regulatory subunit gene PIK3R1, and provides a network view of
+               the pathways altered in the development of glioblastoma.
+               Furthermore, integration of mutation, DNA methylation and
+               clinical treatment data reveals a link between MGMT promoter
+               methylation and a hypermutator phenotype consequent to mismatch
+               repair deficiency in treated glioblastomas, an observation with
+               potential clinical implications. Together, these findings
+               establish the feasibility and power of TCGA, demonstrating that
+               it can rapidly expand knowledge of the molecular basis of
+               cancer.",
+  journal   = "Nature",
+  volume    =  455,
+  number    =  7216,
+  year      =  2008,
+  language  = "en"
+}
+
+@ARTICLE{Vu2022-vf,
+  title     = "Wound healing in aged skin exhibits systems-level alterations in
+               cellular composition and cell-cell communication",
+  author    = "Vu, Remy and Jin, Suoqin and Sun, Peng and Haensel, Daniel and
+               Nguyen, Quy Hoa and Dragan, Morgan and Kessenbrock, Kai and Nie,
+               Qing and Dai, Xing",
+  abstract  = "Delayed and often impaired wound healing in the elderly presents
+               major medical and socioeconomic challenges. A comprehensive
+               understanding of the cellular/molecular changes that shape
+               complex cell-cell communications in aged skin wounds is lacking.
+               Here, we use single-cell RNA sequencing to define the
+               epithelial, fibroblast, immune cell types, and encompassing
+               heterogeneities in young and aged skin during homeostasis and
+               identify major changes in cell compositions, kinetics, and
+               molecular profiles during wound healing. Our comparative study
+               uncovers a more pronounced inflammatory phenotype in aged skin
+               wounds, featuring neutrophil persistence and higher abundance of
+               an inflammatory/glycolytic Arg1Hi macrophage subset that is more
+               likely to signal to fibroblasts via interleukin (IL)-1 than in
+               young counterparts. We predict systems-level differences in the
+               number, strength, route, and signaling mediators of putative
+               cell-cell communications in young and aged skin wounds. Our
+               study exposes numerous cellular/molecular targets for functional
+               interrogation and provides a hypothesis-generating resource for
+               future wound healing studies.",
+  journal   = "Cell Rep.",
+  volume    =  40,
+  number    =  5,
+  year      =  2022,
+  keywords  = "CP: Cell biology; CP: Developmental biology; aging; cell-cell
+               communication; cellular heterogeneity; dendritic cell;
+               macrophage; neutrophil; signaling; single-cell RNA-seq; skin;
+               wound healing",
+  copyright = "http://creativecommons.org/licenses/by-nc-nd/4.0/",
+  language  = "en"
+}
+
+@ARTICLE{Mascharak2022-wc,
+  title     = "Multi-omic analysis reveals divergent molecular events in
+               scarring and regenerative wound healing",
+  author    = "Mascharak, Shamik and Talbott, Heather E and Januszyk, Michael
+               and Griffin, Michelle and Chen, Kellen and Davitt, Michael F and
+               Demeter, Janos and Henn, Dominic and Bonham, Clark A and Foster,
+               Deshka S and Mooney, Nancie and Cheng, Ran and Jackson, Peter K
+               and Wan, Derrick C and Gurtner, Geoffrey C and Longaker, Michael
+               T",
+  abstract  = "Regeneration is the holy grail of tissue repair, but skin injury
+               typically yields fibrotic, non-functional scars. Developing
+               pro-regenerative therapies requires rigorous understanding of
+               the molecular progression from injury to fibrosis or
+               regeneration. Here, we report the divergent molecular events
+               driving skin wound cells toward scarring or regenerative fates.
+               We profile scarring versus YAP-inhibition-induced wound
+               regeneration at the transcriptional (single-cell RNA
+               sequencing), protein (timsTOF proteomics), and tissue
+               (extracellular matrix ultrastructural analysis) levels. Using
+               cell-surface barcoding, we integrate these data to reveal
+               fibrotic and regenerative ``molecular trajectories'' of healing.
+               We show that disrupting YAP mechanotransduction yields
+               regenerative repair by fibroblasts with activated Trps1 and Wnt
+               signaling. Finally, via in vivo gene knockdown and
+               overexpression in wounds, we identify Trps1 as a key regulatory
+               gene that is necessary and partially sufficient for wound
+               regeneration. Our findings serve as a multi-omic map of wound
+               regeneration and could have therapeutic implications for
+               pathologic fibroses.",
+  journal   = "Cell Stem Cell",
+  volume    =  29,
+  number    =  2,
+  year      =  2022,
+  keywords  = "fibroblast heterogeneity; fibrosis; mechanotransduction
+               signaling; regeneration; wound healing",
+  copyright = "http://www.elsevier.com/open-access/userlicense/1.0/",
+  language  = "en"
+}
+
+@inproceedings{10.5555/3295222.3295327,
+author = {Gulrajani, Ishaan and Ahmed, Faruk and Arjovsky, Martin and Dumoulin, Vincent and Courville, Aaron},
+title = {Improved training of wasserstein GANs},
+year = {2017},
+abstract = {Generative Adversarial Networks (GANs) are powerful generative models, but suffer from training instability. The recently proposed Wasserstein GAN (WGAN) makes progress toward stable training of GANs, but sometimes can still generate only poor samples or fail to converge. We find that these problems are often due to the use of weight clipping in WGAN to enforce a Lipschitz constraint on the critic, which can lead to undesired behavior. We propose an alternative to clipping weights: penalize the norm of gradient of the critic with respect to its input. Our proposed method performs better than standard WGAN and enables stable training of a wide variety of GAN architectures with almost no hyperparameter tuning, including 101-layer ResNets and language models with continuous generators. We also achieve high quality generations on CIFAR-10 and LSUN bedrooms.},
+booktitle = {Proceedings of the 31st International Conference on Neural Information Processing Systems},
+numpages = {11},
+location = {Long Beach, California, USA},
+series = {NIPS'17}
+}
+
+@ARTICLE{He2025-ip,
+  title    = "Partially characterized topology guides reliable anchor-free
+              {scRNA-integration}",
+  author   = "He, Chuan and Filippidis, Paraskevas and Kleinstein, Steven H and
+              Guan, Leying",
+  abstract = "Single-cell RNA sequencing (scRNA-seq) is an important technique
+              for obtaining biological insights at cellular resolution, with
+              scRNA-seq batch integration a key step before downstream
+              statistical analysis. Despite the plethora of methods proposed,
+              achieving reliable batch correction while preserving the
+              heterogeneity of biological signals that define cell type
+              continues to pose a challenge. To address this, we propose
+              scCRAFT, an autoencoder model that separates cell-type-related
+              signals from batch effects for reliable multi-batch integration.
+              scCRAFT integrates three key loss components: a reconstruction
+              loss for observation reconstruction, a multi-domain adaptation
+              loss to eliminate batch effects, and an innovative
+              dual-resolution triplet loss to preserve intra-batch, introduced
+              as an effective mechanism to counteract the over-correction
+              effect of domain adaptation loss amid heterogeneous cell
+              distributions across batches. We show that scCRAFT effectively
+              manages unbalanced batches, rare cell types, and batch-specific
+              cell phenotypes in simulations, and surpasses state-of-the-art
+              methods in a diverse set of real datasets.",
+  journal  = "Communications Biology",
+  volume   =  8,
+  number   =  1,
+  year     =  2025
+}
+
+@ARTICLE{Luecken2022-fb,
+  title    = "Benchmarking atlas-level data integration in single-cell genomics",
+  author   = "Luecken, Malte D and B{\"u}ttner, M and Chaichoompu, K and
+              Danese, A and Interlandi, M and Mueller, M F and Strobl, D C and
+              Zappia, L and Dugas, M and Colom{\'e}-Tatch{\'e}, M and Theis,
+              Fabian J",
+  abstract = "Single-cell atlases often include samples that span locations,
+              laboratories and conditions, leading to complex, nested batch
+              effects in data. Thus, joint analysis of atlas datasets requires
+              reliable data integration. To guide integration method choice, we
+              benchmarked 68 method and preprocessing combinations on 85
+              batches of gene expression, chromatin accessibility and
+              simulation data from 23 publications, altogether representing
+              >1.2 million cells distributed in 13 atlas-level integration
+              tasks. We evaluated methods according to scalability, usability
+              and their ability to remove batch effects while retaining
+              biological variation using 14 evaluation metrics. We show that
+              highly variable gene selection improves the performance of data
+              integration methods, whereas scaling pushes methods to prioritize
+              batch removal over conservation of biological variation. Overall,
+              scANVI, Scanorama, scVI and scGen perform well, particularly on
+              complex integration tasks, while single-cell ATAC-sequencing
+              integration performance is strongly affected by choice of feature
+              space. Our freely available Python module and benchmarking
+              pipeline can identify optimal data integration methods for new
+              data, benchmark new methods and improve method development.",
+  journal  = "Nature Methods",
+  volume   =  19,
+  number   =  1,
+  year     =  2022
+}
+
+@ARTICLE{Healy2024-ld,
+  title    = "Uniform manifold approximation and projection",
+  author   = "Healy, John and McInnes, Leland",
+  abstract = "Uniform manifold approximation and projection is a nonlinear
+              dimension reduction method often used for visualizing data and as
+              pre-processing for further machine-learning tasks such as
+              clustering. In this Primer, we provide an introduction to the
+              uniform manifold approximation and projection algorithm, the
+              intuitions behind how it works, how best to apply it on data and
+              how to interpret and understand results.",
+  journal  = "Nature Reviews Methods Primers",
+  volume   =  4,
+  number   =  1,
+  year     =  2024
+}
+
+@ARTICLE{Zhang2024-nh,
+  title    = "Highly effective batch effect correction method for {RNA-seq}
+              count data",
+  author   = "Zhang, Xiaoyu",
+  abstract = "RNA sequencing (RNA-seq) has become a cornerstone of
+              transcriptomics, providing detailed insights into gene expression
+              across diverse biological conditions and sample types. However,
+              RNA-seq data are often confounded by batch effects, systematic
+              non-biological variations that compromise data reliability and
+              obscure true biological differences. To address these challenges,
+              we introduce ComBat-ref, a refined batch effect correction method
+              designed to enhance the statistical power and reliability of
+              differential expression analysis in RNA-seq data. Building on the
+              principles of ComBat-seq, ComBat-ref employs a negative binomial
+              model for count data adjustment but innovates by selecting a
+              reference batch with the smallest dispersion, preserving count
+              data for the reference batch, and adjusting other batches towards
+              the reference batch. Our method demonstrated superior performance
+              in both simulated environments and real-world datasets, including
+              the growth factor receptor network (GFRN) data and NASA GeneLab
+              transcriptomic datasets, significantly improving sensitivity and
+              specificity compared to existing methods. By effectively
+              mitigating batch effects while maintaining high detection power,
+              ComBat-ref provides a robust solution for improving the accuracy
+              and interpretability of RNA-seq data analyses.",
+  journal  = "Comput Struct Biotechnol J",
+  volume   =  27,
+  year     =  2024,
+  keywords = "Batch effect correction; Generalized linear model; Minimum
+              dispersion; Negative binomial distribution; RNA-seq data",
+  language = "en"
+}
+
+@ARTICLE{Sprang2022-ux,
+  title    = "Batch effect detection and correction in {RNA-seq} data using
+              machine-learning-based automated assessment of quality",
+  author   = "Sprang, Maximilian and Andrade-Navarro, Miguel A and Fontaine,
+              Jean-Fred",
+  abstract = "The constant evolving and development of next-generation
+              sequencing techniques lead to high throughput data composed of
+              datasets that include a large number of biological samples.
+              Although a large number of samples are usually experimentally
+              processed by batches, scientific publications are often elusive
+              about this information, which can greatly impact the quality of
+              the samples and confound further statistical analyzes. Because
+              dedicated bioinformatics methods developed to detect unwanted
+              sources of variance in the data can wrongly detect real
+              biological signals, such methods could benefit from using a
+              quality-aware approach.",
+  journal  = "BMC Bioinformatics",
+  volume   =  23,
+  number   =  6,
+  year     =  2022
+}
+
+@article{10.1093/bioinformatics/btac427,
+    author = {Wang, Yuge and Liu, Tianyu and Zhao, Hongyu},
+    title = {ResPAN: a powerful batch correction model for scRNA-seq data through residual adversarial networks},
+    journal = {Bioinformatics},
+    volume = {38},
+    number = {16},
+    year = {2022},
+    abstract = {With the advancement of technology, we can generate and access large-scale, high dimensional and diverse genomics data, especially through single-cell RNA sequencing (scRNA-seq). However, integrative downstream analysis from multiple scRNA-seq datasets remains challenging due to batch effects.In this article, we propose a light-structured deep learning framework called ResPAN for scRNA-seq data integration. ResPAN is based on Wasserstein Generative Adversarial Network (WGAN) combined with random walk mutual nearest neighbor pairing and fully skip-connected autoencoders to reduce the differences among batches. We also discuss the limitations of existing methods and demonstrate the advantages of our model over seven other methods through extensive benchmarking studies on both simulated data under various scenarios and real datasets across different scales. Our model achieves leading performance on both batch correction and biological information conservation and maintains scalable to datasets with over half a million cells.An open-source implementation of ResPAN and scripts to reproduce the results can be downloaded from: https://github.com/AprilYuge/ResPAN.Supplementary data are available at Bioinformatics online.},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/38/16/3942/49889943/btac427.pdf},
+}
+
+@ARTICLE{Monnier2024-id,
+  title    = "A novel batch-effect correction method for {scRNA-seq} data based
+              on Adversarial Information Factorization",
+  author   = "Monnier, Lily and Courn{\`e}de, Paul-Henry",
+  abstract = "Single-cell RNA sequencing (scRNA-seq) technology produces an
+              unprecedented resolution at the level of a unique cell, raising
+              great hopes in medicine. Nevertheless, scRNA-seq data suffer from
+              high variations due to the experimental conditions, called batch
+              effects, preventing any aggregated downstream analysis.
+              Adversarial Information Factorization provides a robust
+              batch-effect correction method that does not rely on prior
+              knowledge of the cell types nor a specific normalization strategy
+              while being adapted to any downstream analysis task. It compares
+              to and even outperforms state-of-the-art methods in several
+              scenarios: low signal-to-noise ratio, batch-specific cell types
+              with few cells, and a multi-batches dataset with imbalanced
+              batches and batch-specific cell types. Moreover, it best
+              preserves the relative gene expression between cell types,
+              yielding superior differential expression analysis results.
+              Finally, in a more complex setting of a Leukemia cohort, our
+              method preserved most of the underlying biological information
+              for each patient while aligning the batches, improving the
+              clustering metrics in the aggregated dataset.",
+  journal  = "PLoS Comput Biol",
+  volume   =  20,
+  number   =  2,
+  year     =  2024,
+  language = "en"
+}
+
+@ARTICLE{Tran2020-ar,
+  title    = "A benchmark of batch-effect correction methods for single-cell
+              {RNA} sequencing data",
+  author   = "Tran, Hoa Thi Nhu and Ang, Kok Siong and Chevrier, Marion and
+              Zhang, Xiaomeng and Lee, Nicole Yee Shin and Goh, Michelle and
+              Chen, Jinmiao",
+  abstract = "Large-scale single-cell transcriptomic datasets generated using
+              different technologies contain batch-specific systematic
+              variations that present a challenge to batch-effect removal and
+              data integration. With continued growth expected in scRNA-seq
+              data, achieving effective batch integration with available
+              computational resources is crucial. Here, we perform an in-depth
+              benchmark study on available batch correction methods to
+              determine the most suitable method for batch-effect removal.",
+  journal  = "Genome Biology",
+  volume   =  21,
+  number   =  1,
+  year     =  2020
+}
+
+@article{10.1109/TCBB.2024.3487574,
+author = {Zhu, Qi and Li, Aizhen and Zhang, Zheng and Zheng, Chuhang and Zhao, Junyong and Liu, Jin-Xing and Zhang, Daoqiang and Shao, Wei},
+title = {Discriminative Domain Adaption Network for Simultaneously Removing Batch Effects and Annotating Cell Types in Single-Cell RNA-Seq},
+year = {2024},
+issue_date = {Nov.-Dec. 2024},
+volume = {21},
+number = {6},
+abstract = {Machine learning techniques have become increasingly important in analyzing single-cell RNA and identifying cell types, providing valuable insights into cellular development and disease mechanisms. However, the presence of batch effects poses major challenges in scRNA-seq analysis due to data distribution variation across batches. Although several batch effect mitigation algorithms have been proposed, most of them focus only on the correlation of local structure embeddings, ignoring global distribution matching and discriminative feature representation in batch correction. In this paper, we proposed the discriminative domain adaption network (D2AN) for joint batch effects correction and type annotation with single-cell RNA-seq. Specifically, we first captured the global low-dimensional embeddings of samples from the source and target domains by adversarial domain adaption strategy. Second, a contrastive loss is developed to preliminarily align the source domain samples. Moreover, the semantic alignment of class centroids in the source and target domains is achieved for further local alignment. Finally, a self-paced learning mechanism based on inter-domain loss is adopted to gradually select samples with high similarity to the target domain for training, which is used to improve the robustness of the model. Experimental results demonstrated that the proposed method on multiple real datasets outperforms several state-of-the-art methods.},
+journal = {IEEE/ACM Trans. Comput. Biol. Bioinformatics},
+numpages = {13}
+}
+
+@article{10.1093/bioadv/vbae134,
+    author = {Hastings, Joseph and Lee, Donghyung and O’Connell, Michael J},
+    title = {Batch-effect correction in single-cell RNA sequencing data using JIVE},
+    journal = {Bioinformatics Advances},
+    volume = {4},
+    number = {1},
+    year = {2024},
+    abstract = {In single-cell RNA sequencing analysis, addressing batch effects—technical artifacts stemming from factors such as varying sequencing technologies, equipment, and capture times—is crucial. These factors can cause unwanted variation and obfuscate the underlying biological signal of interest. The joint and individual variation explained (JIVE) method can be used to extract shared biological patterns from multi-source sequencing data while adjusting for individual non-biological variations (i.e. batch effect). However, its current implementation is originally designed for bulk sequencing data, making it computationally infeasible for large-scale single-cell sequencing datasets.In this study, we enhance JIVE for large-scale single-cell data by boosting its computational efficiency. Additionally, we introduce a novel application of JIVE for batch-effect correction on multiple single-cell sequencing datasets. Our enhanced method aims to decompose single-cell sequencing datasets into a joint structure capturing the true biological variability and individual structures, which capture technical variability within each batch. This joint structure is then suitable for use in downstream analyses. We benchmarked the results against four popular tools, Seurat v5, Harmony, LIGER, and Combat-seq, which were developed for this purpose. JIVE performed best in terms of preserving cell-type effects and in scenarios in which the batch sizes are balanced.The JIVE implementation used for this analysis can be found at https://github.com/oconnell-statistics-lab/scJIVE.},
+    eprint = {https://academic.oup.com/bioinformaticsadvances/article-pdf/4/1/vbae134/59645694/vbae134.pdf},
+}
+
+@ARTICLE{Danino2023-it,
+  title    = "Batch correction of single-cell sequencing data via an
+              autoencoder architecture",
+  author   = "Danino, Reut and Nachman, Iftach and Sharan, Roded",
+  abstract = "MOTIVATION: Technical differences between gene expression
+              sequencing experiments can cause variations in the data in the
+              form of batch effect biases. These do not represent true
+              biological variations between samples and can lead to false
+              conclusions or hinder the ability to integrate multiple datasets.
+              Since there is a growing need for the joint analysis of
+              single-cell sequencing datasets from different sources, there is
+              also a need to correct the resulting batch effects while
+              maintaining the true biological variations in the data. RESULTS:
+              We developed a semi-supervised deep learning architecture called
+              Autoencoder-based Batch Correction (ABC) for integrating
+              single-cell sequencing datasets. Our method removes batch effects
+              through a guided process of data compression using supervised
+              cell type classifier branches for biological signal retention. It
+              aligns the different batches using an adversarial training
+              approach. We comprehensively evaluate the performance of our
+              method using four single-cell sequencing datasets and multiple
+              measures for batch effect removal and biological variation
+              conservation. ABC outperforms 10 state-of-the-art methods for
+              this task including Seurat, scGen, ComBat, scanorama, scVI,
+              scANVI, AutoClass, Harmony, scDREAMER, and CLEAR, correcting
+              various types of batch effects while preserving intricate
+              biological variations.",
+  journal  = "Bioinform Adv",
+  volume   =  4,
+  number   =  1,
+  year     =  2023,
+  language = "en"
+}
+
+@article{10.1093/bib/bbab281,
+    author = {Zhou, Xiang and Chai, Hua and Zeng, Yuansong and Zhao, Huiying and Yang, Yuedong},
+    title = {scAdapt: virtual adversarial domain adaptation network for single cell RNA-seq data classification across platforms and species},
+    journal = {Briefings in Bioinformatics},
+    volume = {22},
+    number = {6},
+    year = {2021},
+    abstract = {In single cell analyses, cell types are conventionally identified based on expressions of known marker genes, whose identifications are time-consuming and irreproducible. To solve this issue, many supervised approaches have been developed to identify cell types based on the rapid accumulation of public datasets. However, these approaches are sensitive to batch effects or biological variations since the data distributions are different in cross-platforms or species predictions. In this study, we developed scAdapt, a virtual adversarial domain adaptation network, to transfer cell labels between datasets with batch effects. scAdapt used both the labeled source and unlabeled target data to train an enhanced classifier and aligned the labeled source centroids and pseudo-labeled target centroids to generate a joint embedding. The scAdapt was demonstrated to outperform existing methods for classification in simulated, cross-platforms, cross-species, spatial transcriptomic and COVID-19 immune datasets. Further quantitative evaluations and visualizations for the aligned embeddings confirm the superiority in cell mixing and the ability to preserve discriminative cluster structure present in the original datasets.},
+    eprint = {https://academic.oup.com/bib/article-pdf/22/6/bbab281/41088828/bbab281.pdf},
+}
+
+@ARTICLE{Tung2017-zb,
+  title    = "Batch effects and the effective design of single-cell gene
+              expression studies",
+  author   = "Tung, Po-Yuan and Blischak, John D and Hsiao, Chiaowen Joyce and
+              Knowles, David A and Burnett, Jonathan E and Pritchard, Jonathan
+              K and Gilad, Yoav",
+  abstract = "Single-cell RNA sequencing (scRNA-seq) can be used to
+              characterize variation in gene expression levels at high
+              resolution. However, the sources of experimental noise in
+              scRNA-seq are not yet well understood. We investigated the
+              technical variation associated with sample processing using the
+              single-cell Fluidigm C1 platform. To do so, we processed three C1
+              replicates from three human induced pluripotent stem cell (iPSC)
+              lines. We added unique molecular identifiers (UMIs) to all
+              samples, to account for amplification bias. We found that the
+              major source of variation in the gene expression data was driven
+              by genotype, but we also observed substantial variation between
+              the technical replicates. We observed that the conversion of
+              reads to molecules using the UMIs was impacted by both biological
+              and technical variation, indicating that UMI counts are not an
+              unbiased estimator of gene expression levels. Based on our
+              results, we suggest a framework for effective scRNA-seq studies.",
+  journal  = "Sci Rep",
+  volume   =  7,
+  year     =  2017,
+  language = "en"
+}
+
+@ARTICLE{Leek2010-ho,
+  title    = "Tackling the widespread and critical impact of batch effects in
+              high-throughput data",
+  author   = "Leek, Jeffrey T and Scharpf, Robert B and Bravo, H{\'e}ctor
+              Corrada and Simcha, David and Langmead, Benjamin and Johnson, W
+              Evan and Geman, Donald and Baggerly, Keith and Irizarry, Rafael A",
+  abstract = "Batch effects can lead to incorrect biological conclusions but
+              are not widely considered. The authors show that batch effects
+              are relevant to a range of high-throughput 'omics' data sets and
+              are crucial to address. They also explain how batch effects can
+              be mitigated.",
+  journal  = "Nature Reviews Genetics",
+  volume   =  11,
+  number   =  10,
+  year     =  2010
+}
+
+@article{10.1093/nar/gkv007,
+    author = {Ritchie, Matthew E. and Phipson, Belinda and Wu, Di and Hu, Yifang and Law, Charity W. and Shi, Wei and Smyth, Gordon K.},
+    title = {limma powers differential expression analyses for RNA-sequencing and microarray studies},
+    journal = {Nucleic Acids Research},
+    volume = {43},
+    number = {7},
+    year = {2015},
+    abstract = {limma is an R/Bioconductor software package that provides an integrated solution for analysing data from gene expression experiments. It contains rich features for handling complex experimental designs and for information borrowing to overcome the problem of small sample sizes. Over the past decade, limma has been a popular choice for gene discovery through differential expression analyses of microarray and high-throughput PCR data. The package contains particularly strong facilities for reading, normalizing and exploring such data. Recently, the capabilities of limma have been significantly expanded in two important directions. First, the package can now perform both differential expression and differential splicing analyses of RNA sequencing (RNA-seq) data. All the downstream analysis tools previously restricted to microarray data are now available for RNA-seq as well. These capabilities allow users to analyse both RNA-seq and microarray data with very similar pipelines. Second, the package is now able to go past the traditional gene-wise expression analyses in a variety of ways, analysing expression profiles in terms of co-regulated sets of genes or in terms of higher-order expression signatures. This provides enhanced possibilities for biological interpretation of gene expression differences. This article reviews the philosophy and design of the limma package, summarizing both new and historical features, with an emphasis on recent enhancements and features that have not been previously described.},
+    eprint = {https://academic.oup.com/nar/article-pdf/43/7/e47/7207289/gkv007.pdf},
+}
+
+@article{10.1093/biostatistics/kxj037,
+    author = {Johnson, W. Evan and Li, Cheng and Rabinovic, Ariel},
+    title = {Adjusting batch effects in microarray expression data using empirical Bayes methods},
+    journal = {Biostatistics},
+    volume = {8},
+    number = {1},
+    year = {2006},
+    abstract = {Non-biological experimental variation or “batch effects" are commonly observed across multiple batches of microarray experiments, often rendering the task of combining data from these batches difficult. The ability to combine microarray data sets is advantageous to researchers to increase statistical power to detect biological phenomena from studies where logistical considerations restrict sample size or in studies that require the sequential hybridization of arrays. In general, it is inappropriate to combine data sets without adjusting for batch effects. Methods have been proposed to filter batch effects from data, but these are often complicated and require large batch sizes (\&gt;25) to implement. Because the majority of microarray studies are conducted using much smaller sample sizes, existing methods are not sufficient. We propose parametric and non-parametric empirical Bayes frameworks for adjusting data for batch effects that is robust to outliers in small sample sizes and performs comparable to existing methods for large samples. We illustrate our methods using two example data sets and show that our methods are justifiable, easy to apply, and useful in practice. Software for our method is freely available at: http://biosun1.harvard.edu/complab/batch/.},
+    eprint = {https://academic.oup.com/biostatistics/article-pdf/8/1/118/25435561/kxj037.pdf},
+}
+
+@ARTICLE{Welch2019-ri,
+  title     = "{Single-Cell} Multi-omic Integration Compares and Contrasts
+               Features of Brain Cell Identity",
+  author    = "Welch, Joshua D and Kozareva, Velina and Ferreira, Ashley and
+               Vanderburg, Charles and Martin, Carly and Macosko, Evan Z",
+  journal   = "Cell",
+  volume    =  177,
+  number    =  7,
+  year      =  2019
+}
+
+@ARTICLE{Lopez2018-bl,
+  title    = "Deep generative modeling for single-cell transcriptomics",
+  author   = "Lopez, Romain and Regier, Jeffrey and Cole, Michael B and Jordan,
+              Michael I and Yosef, Nir",
+  abstract = "Single-cell transcriptome measurements can reveal unexplored
+              biological diversity, but they suffer from technical noise and
+              bias that must be modeled to account for the resulting
+              uncertainty in downstream analyses. Here we introduce single-cell
+              variational inference (scVI), a ready-to-use scalable framework
+              for the probabilistic representation and analysis of gene
+              expression in single cells (https://github.com/YosefLab/scVI).
+              scVI uses stochastic optimization and deep neural networks to
+              aggregate information across similar cells and genes and to
+              approximate the distributions that underlie observed expression
+              values, while accounting for batch effects and limited
+              sensitivity. We used scVI for a range of fundamental analysis
+              tasks including batch correction, visualization, clustering, and
+              differential expression, and achieved high accuracy for each
+              task.",
+  journal  = "Nature Methods",
+  volume   =  15,
+  number   =  12,
+  year     =  2018
+}
+
+@article{10.1093/bioinformatics/btx196,
+    author = {Shaham, Uri and Stanton, Kelly P and Zhao, Jun and Li, Huamin and Raddassi, Khadir and Montgomery, Ruth and Kluger, Yuval},
+    title = {Removal of batch effects using distribution-matching residual networks},
+    journal = {Bioinformatics},
+    volume = {33},
+    number = {16},
+    year = {2017},
+    abstract = {Sources of variability in experimentally derived data include measurement error in addition to the physical phenomena of interest. This measurement error is a combination of systematic components, originating from the measuring instrument and random measurement errors. Several novel biological technologies, such as mass cytometry and single-cell RNA-seq (scRNA-seq), are plagued with systematic errors that may severely affect statistical analysis if the data are not properly calibrated.We propose a novel deep learning approach for removing systematic batch effects. Our method is based on a residual neural network, trained to minimize the Maximum Mean Discrepancy between the multivariate distributions of two replicates, measured in different batches. We apply our method to mass cytometry and scRNA-seq datasets, and demonstrate that it effectively attenuates batch effects.our codes and data are publicly available at https://github.com/ushaham/BatchEffectRemoval.gitSupplementary data are available at Bioinformatics online.},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/33/16/2539/49040696/bioinformatics_33_16_2539.pdf},
+}
+
+@ARTICLE{Haghverdi2018-xm,
+  title    = "Batch effects in single-cell {RNA-sequencing} data are corrected
+              by matching mutual nearest neighbors",
+  author   = "Haghverdi, Laleh and Lun, Aaron T L and Morgan, Michael D and
+              Marioni, John C",
+  abstract = "Differences in gene expression between individual cells of the
+              same type are measured across batches and used to correct
+              technical artifacts in single-cell RNA-sequencing data.",
+  journal  = "Nature Biotechnology",
+  volume   =  36,
+  number   =  5,
+  year     =  2018
+}
+
+@ARTICLE{Stuart2019-uw,
+  title     = "Comprehensive Integration of {Single-Cell} Data",
+  author    = "Stuart, Tim and Butler, Andrew and Hoffman, Paul and
+               Hafemeister, Christoph and Papalexi, Efthymia and Mauck, III,
+               William M and Hao, Yuhan and Stoeckius, Marlon and Smibert,
+               Peter and Satija, Rahul",
+  journal   = "Cell",
+  volume    =  177,
+  number    =  7,
+  year      =  2019
+}
+
+@article{
+doi:10.1126/science.aam8999,
+author = {Alexander B. Rosenberg  and Charles M. Roco  and Richard A. Muscat  and Anna Kuchina  and Paul Sample  and Zizhen Yao  and Lucas T. Graybuck  and David J. Peeler  and Sumit Mukherjee  and Wei Chen  and Suzie H. Pun  and Drew L. Sellers  and Bosiljka Tasic  and Georg Seelig },
+title = {Single-cell profiling of the developing mouse brain and spinal cord with split-pool barcoding},
+journal = {Science},
+volume = {360},
+number = {6385},
+year = {2018},
+eprint = {https://www.science.org/doi/pdf/10.1126/science.aam8999},
+}
+
+@ARTICLE{Wolf2018-lc,
+  title    = "{SCANPY}: large-scale single-cell gene expression data analysis",
+  author   = "Wolf, F Alexander and Angerer, Philipp and Theis, Fabian J",
+  abstract = "Scanpy is a scalable toolkit for analyzing single-cell gene
+              expression data. It includes methods for preprocessing,
+              visualization, clustering, pseudotime and trajectory inference,
+              differential expression testing, and simulation of gene
+              regulatory networks. Its Python-based implementation efficiently
+              deals with data sets of more than one million cells
+              (https://github.com/theislab/Scanpy). Along with Scanpy, we
+              present AnnData, a generic class for handling annotated data
+              matrices (https://github.com/theislab/anndata).",
+  journal  = "Genome Biology",
+  volume   =  19,
+  number   =  1,
+  year     =  2018
+}
+
+@ARTICLE{Stegle2015-gr,
+  title    = "Computational and analytical challenges in single-cell
+              transcriptomics",
+  author   = "Stegle, Oliver and Teichmann, Sarah A and Marioni, John C",
+  abstract = "Until recently, RNA profiling was limited to ensemble-based
+              approaches, which average over bulk populations of cells.
+              Technological advances in single-cell RNA sequencing (scRNA-seq)
+              now enable the transcriptomes of large numbers of individual
+              cells to be assayed in an unbiased manner.To ensure that
+              scRNA-seq data are fully exploited and interpreted correctly, it
+              is important to apply appropriate computational and statistical
+              approaches. Methods and principles previously developed for bulk
+              RNA sequencing can be reused for this purpose; however, scRNA-seq
+              data analysis poses several unique challenges that require new
+              analytical strategies.At the experimental design stage, unique
+              molecular identifiers and quantitative standards such as
+              spike-ins need to be considered to allow accurate normalization
+              and quality control of the raw data.Prior to using scRNA-seq data
+              for biological discovery, it is important to consider both
+              technical variability and confounding factors such as batch
+              effects, the cell cycle or apoptosis. Computational methods that
+              account for technical variation and remove confounding factors
+              are beginning to emerge.The processed and normalized scRNA-seq
+              data provide unique analysis opportunities that allow novel
+              biological discoveries to be made. These include identification
+              and characterization of cell types and the study of their
+              organization in space and/or time; inference of gene regulatory
+              networks and their robustness across individual cells; and
+              characterization of the stochastic component of transcription.",
+  journal  = "Nature Reviews Genetics",
+  volume   =  16,
+  number   =  3,
+  year     =  2015
+}
+
+@article{McInnes2018UMAPUM,
+  title={UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction},
+  author={Leland McInnes and John Healy},
+  journal={ArXiv},
+  year={2018},
+  volume={abs/1802.03426},
+}
+
+@article{ROUSSEEUW198753,
+title = {Silhouettes: A graphical aid to the interpretation and validation of cluster analysis},
+journal = {Journal of Computational and Applied Mathematics},
+volume = {20},
+year = {1987},
+author = {Peter J. Rousseeuw},
+keywords = {Graphical display, cluster analysis, clustering validity, classification},
+abstract = {A new graphical display is proposed for partitioning techniques. Each cluster is represented by a so-called silhouette, which is based on the comparison of its tightness and separation. This silhouette shows which objects lie well within their cluster, and which ones are merely somewhere in between clusters. The entire clustering is displayed by combining the silhouettes into a single plot, allowing an appreciation of the relative quality of the clusters and an overview of the data configuration. The average silhouette width provides an evaluation of clustering validity, and might be used to select an ‘appropriate’ number of clusters.}
+}
+
+@ARTICLE{Nadeau2003-vp,
+  title    = "Inference for the Generalization Error",
+  author   = "Nadeau, Claude and Bengio, Yoshua",
+  abstract = "In order to compare learning algorithms, experimental results
+              reported in the machine learning literature often use statistical
+              tests of significance to support the claim that a new learning
+              algorithm generalizes better. Such tests should take into account
+              the variability due to the choice of training set and not only
+              that due to the test examples, as is often the case. This could
+              lead to gross underestimation of the variance of the
+              cross-validation estimator, and to the wrong conclusion that the
+              new algorithm is significantly better when it is not. We perform
+              a theoretical investigation of the variance of a variant of the
+              cross-validation estimator of the generalization error that takes
+              into account the variability due to the randomness of the
+              training set as well as test examples. Our analysis shows that
+              all the variance estimators that are based only on the results of
+              the cross-validation experiment must be biased. This analysis
+              allows us to propose new estimators of this variance. We show,
+              via simulations, that tests of hypothesis about the
+              generalization error using those new variance estimators have
+              better properties than tests involving variance estimators
+              currently in use and listed in Dietterich (1998). In particular,
+              the new tests have correct size and good power. That is, the new
+              tests do not reject the null hypothesis too often when the
+              hypothesis is true, but they tend to frequently reject the null
+              hypothesis when the latter is false.",
+  journal  = "Machine Learning",
+  volume   =  52,
+  number   =  3,
+  year     =  2003
+}
+
+@Article{ijms24065502,
+AUTHOR = {Wang, Xun and Zhang, Chaogang and Wang, Lulu and Zheng, Pan},
+TITLE = {Integrating Multiple Single-Cell RNA Sequencing Datasets Using Adversarial Autoencoders},
+JOURNAL = {International Journal of Molecular Sciences},
+VOLUME = {24},
+YEAR = {2023},
+NUMBER = {6},
+ARTICLE-NUMBER = {5502},
+PubMedID = {36982574},
+ABSTRACT = {Single-cell RNA sequencing (RNA-seq) has been demonstrated to be a proven method for quantifying gene-expression heterogeneity and providing insight into the transcriptome at the single-cell level. When combining multiple single-cell transcriptome datasets for analysis, it is common to first correct the batch effect. Most of the state-of-the-art processing methods are unsupervised, i.e., they do not utilize single-cell cluster labeling information, which could improve the performance of batch correction methods, especially in the case of multiple cell types. To better utilize known labels for complex dataset scenarios, we propose a novel deep learning model named IMAAE (i.e., integrating multiple single-cell datasets via an adversarial autoencoder) to correct the batch effects. After conducting experiments with various dataset scenarios, the results show that IMAAE outperforms existing methods for both qualitative measures and quantitative evaluation. In addition, IMAAE is able to retain both corrected dimension reduction data and corrected gene expression data. These features make it a potential new option for large-scale single-cell gene expression data analysis.},
+}
+
+@misc{diazmejia2025benchmarkingoptimizingorganismwide,
+      title={Benchmarking and optimizing organism wide single-cell RNA alignment methods}, 
+      author={Juan Javier Diaz-Mejia and Elias Williams and Octavian Focsa and Dylan Mendonca and Swechha Singh and Brendan Innes and Sam Cooper},
+      year={2025},
+      eprint={2503.20730},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2503.20730}, 
+}
+
+@article{doi:10.1137/100805741,
+author = {Agueh, Martial and Carlier, Guillaume},
+title = {Barycenters in the Wasserstein Space},
+journal = {SIAM Journal on Mathematical Analysis},
+volume = {43},
+number = {2},
+year = {2011},
+}
+
+@ARTICLE{Regev2017-pb,
+  title     = "The Human Cell Atlas",
+  author    = "Regev, Aviv and Teichmann, Sarah A and Lander, Eric S and Amit,
+               Ido and Benoist, Christophe and Birney, Ewan and Bodenmiller,
+               Bernd and Campbell, Peter and Carninci, Piero and Clatworthy,
+               Menna and Clevers, Hans and Deplancke, Bart and Dunham, Ian and
+               Eberwine, James and Eils, Roland and Enard, Wolfgang and Farmer,
+               Andrew and Fugger, Lars and G{\"o}ttgens, Berthold and Hacohen,
+               Nir and Haniffa, Muzlifah and Hemberg, Martin and Kim, Seung and
+               Klenerman, Paul and Kriegstein, Arnold and Lein, Ed and
+               Linnarsson, Sten and Lundberg, Emma and Lundeberg, Joakim and
+               Majumder, Partha and Marioni, John C and Merad, Miriam and
+               Mhlanga, Musa and Nawijn, Martijn and Netea, Mihai and Nolan,
+               Garry and Pe'er, Dana and Phillipakis, Anthony and Ponting,
+               Chris P and Quake, Stephen and Reik, Wolf and Rozenblatt-Rosen,
+               Orit and Sanes, Joshua and Satija, Rahul and Schumacher, Ton N
+               and Shalek, Alex and Shapiro, Ehud and Sharma, Padmanee and
+               Shin, Jay W and Stegle, Oliver and Stratton, Michael and
+               Stubbington, Michael J T and Theis, Fabian J and Uhlen, Matthias
+               and van Oudenaarden, Alexander and Wagner, Allon and Watt, Fiona
+               and Weissman, Jonathan and Wold, Barbara and Xavier, Ramnik and
+               Yosef, Nir and {Human Cell Atlas Meeting Participants}",
+  abstract  = "The recent advent of methods for high-throughput single-cell
+               molecular profiling has catalyzed a growing sense in the
+               scientific community that the time is ripe to complete the
+               150-year-old effort to identify all cell types in the human
+               body. The Human Cell Atlas Project is an international
+               collaborative effort that aims to define all human cell types in
+               terms of distinctive molecular profiles (such as gene expression
+               profiles) and to connect this information with classical
+               cellular descriptions (such as location and morphology). An open
+               comprehensive reference map of the molecular state of cells in
+               healthy human tissues would propel the systematic study of
+               physiological states, developmental trajectories, regulatory
+               circuitry and interactions of cells, and also provide a
+               framework for understanding cellular dysregulation in human
+               disease. Here we describe the idea, its potential utility, early
+               proofs-of-concept, and some design considerations for the Human
+               Cell Atlas, including a commitment to open data, code, and
+               community.",
+  journal   = "Elife",
+  publisher = "eLife Sciences Publications, Ltd",
+  volume    =  6,
+  year      =  2017,
+  keywords  = "cell atlas; cell biology; computational biology; human; lineage;
+               mouse; science forum; single-cell genomics; systems biology",
+  copyright = "http://creativecommons.org/licenses/by/4.0/",
+  language  = "en"
+}
+
+@article{Goh2022AreBE,
+  title={Are batch effects still relevant in the age of big data?},
+  author={Wilson Wen Bin Goh and Chern Han Yong and Limsoon Wong},
+  journal={Trends in biotechnology},
+  year={2022},
+}
+
+@article{Yu2024AssessingAM,
+  title={Assessing and mitigating batch effects in large-scale omics studies},
+  author={Ying Yu and Yuanbang Mai and Yuanting Zheng and Leming Shi},
+  journal={Genome Biology},
+  year={2024},
+  volume={25},
+}
+
+@ARTICLE{Luecken2025-sd,
+  title   = "Defining and benchmarking open problems in single-cell analysis",
+  author  = "Luecken, Malte D and Gigante, Scott and Burkhardt, Daniel B and
+             Cannoodt, Robrecht and Strobl, Daniel C and Markov, Nikolay S and
+             Zappia, Luke and Palla, Giovanni and Lewis, Wesley and Dimitrov,
+             Daniel and Vinyard, Michael E and Magruder, D S and Mueller,
+             Michaela F and Andersson, Alma and Dann, Emma and Qin, Qian and
+             Otto, Dominik J and Klein, Michal and Botvinnik, Olga Borisovna
+             and Deconinck, Louise and Waldrant, Kai and Yasa, Sai Nirmayi and
+             Sza{\l}ata, Artur and Benz, Andrew and Li, Zhijian and Rieck,
+             Bastian and Ahlmann-Eltze, Constantin and da Veiga Beltrame,
+             Eduardo and Bravo Gonz{\'a}lez-Blas, Carmen and Chen, Ann T and
+             DeMeo, Benjamin and Ergen, Can and Floc'hlay, Swann and Gayoso,
+             Adam and Hicks, Stephanie and Ji, Yuge and Kleshchevnikov, Vitalii
+             and La Manno, Gioele and Lombardo, Maximilian G and Lopez, Romain
+             and Righelli, Dario and Sarkar, Hirak and Svensson, Valentine and
+             Tong, Alexander and Xing, Galen and Xu, Chenling and Bloom,
+             Jonathan M and Pisco, Angela Oliveira and Saez-Rodriguez, Julio
+             and Wulsin, Drausin and Pinello, Luca and Saeys, Yvan and Theis,
+             Fabian J and Krishnaswamy, Smita and {Open Problems Jamboree
+             Members}",
+  journal = "Nature Biotechnology",
+  volume  =  43,
+  number  =  7,
+  year    =  2025
+}
+
+@ARTICLE{Wolf2019-paga,
+  title     = "{PAGA}: graph abstraction reconciles clustering with trajectory
+               inference through a topology preserving map of single cells",
+  author    = "Wolf, F Alexander and Hamey, Fiona K and Plass, Mireya and
+               Solana, Jordi and Dahlin, Joakim S and G{\"o}ttgens, Berthold
+               and Rajewsky, Nikolaus and Simon, Lukas and Theis, Fabian J",
+  journal   = "Genome Biol.",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  20,
+  number    =  1,
+  pages     = "59",
+  month     =  mar,
+  year      =  2019,
+  language  = "en"
+}
