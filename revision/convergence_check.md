@@ -12,17 +12,22 @@ Run on synthetic (16k cells, no biological structure) and on real pancreas (1638
 
 | dataset | head | L_vae plateau | jumps (\|Δ\|>0.5) | last-50 Δ% |
 |---|---|---|---|---|
-| **pancreas (real)** | discriminator | flat ~0.76 by epoch ~100 | **0** | 3.15% |
-| **pancreas (real)** | critic | flat ~0.74 by epoch ~100 | **0** | 1.19% |
+| **pancreas (real)** | discriminator | slow monotonic rise 0.65→0.78, no jumps | **0** | 3.15% |
+| **pancreas (real)** | critic | slow monotonic rise 0.68→0.75, no jumps | **0** | 1.19% |
 | synthetic | discriminator | step-up 2.1→4.0 at epoch ~175 | 2 | 0.94% |
 | synthetic | critic | step-up 2.1→4.0 at epoch ~117 | 2 | 0.56% |
 
-**Interpretation.** On real data both heads converge smoothly and are flat well before
-epoch 150 (drift <3.2% over the final 50 epochs, zero discrete jumps). The mid-training
+**Interpretation.** On real data both heads rise gently and monotonically with NO discrete
+jumps; the curve has not fully plateaued by epoch 150 but its drift is small and smooth
+(disc L_vae 0.725 at e100 -> 0.757 at e150 -> 0.781 at e299; <3.2% over the final 50
+epochs). The mid-training
 L_vae "regime switch" seen on synthetic data does NOT occur on real data — it was an
 artifact of the model abandoning reconstruction of structureless synthetic counts once
 the adversary engaged. Real data has genuine biological signal to reconstruct, so the
 loss settles monotonically.
 
-**Decision:** keep epochs = 150 for the production wave. It is past convergence on real
-data, matches the original validated setting, and minimises fan-out cost.
+**Decision:** keep epochs = 150 for the production wave. The loss is still drifting
+slightly at 150 (not a hard plateau) but smoothly and without instability, so 150 is a
+reasonable operating point; it matches the original validated setting and minimises
+fan-out cost. (The critical finding is the ABSENCE of the synthetic-data regime switch,
+not a fully-flat plateau.)
