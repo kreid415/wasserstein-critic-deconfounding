@@ -1,0 +1,249 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- REQUIRED PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{booktabs}   % For \toprule, \midrule, etc.
+\usepackage{multirow}
+\usepackage{xltabular}
+
+% --- CAPTION FORMATTING FOR SUPPLEMENT ---
+\DeclareCaptionLabelFormat{suppfigure}{Supplementary Figure #2}
+\captionsetup[figure]{labelformat=suppfigure, labelfont=bf}
+
+\DeclareCaptionLabelFormat{supptable}{Supplementary Table #2}
+\captionsetup[table]{labelformat=supptable, labelfont=bf}
+
+\title{\textbf{Supplementary Materials for:} \\ 
+Topology Matters: The Trade-off Between Wasserstein Critics and Discriminators in Single-Cell Data Integration}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Supplementary Note 1: Computational Efficiency}
+The Wasserstein critic requires multiple extra forward and backward passes during training. We investigated how this impacted total training time across our datasets.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Fig/training_time_comparison.png}
+    \caption{\textbf{Computational Efficiency and Runtime.} 
+    Comparison of total training time across the Pancreas, Immune, and Lung datasets. The JS discriminator achieves faster convergence and requires significantly less computational overhead, as it does not require the computationally expensive gradient penalty computations inherent to the Wasserstein approach.}
+    \label{fig:timing}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Detailed computational time differences per dataset and phase.}
+\label{tab:detailed_metrics}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{ll|rrrr}
+\toprule
+ &  & Critic & Discriminator & Diff Seconds (Critic - Disc) & Diff Percentage \\
+Dataset Condition & Phase &  &  &  &  \\
+\midrule
+\multirow[c]{2}{*}{Immune (Balanced)} & Final Outer Model & 113.6200 & 91.7980 & 21.8220 & 23.7718 \\
+ & Inner CV Fold & 37.0415 & 30.5373 & 6.5041 & 21.2990 \\
+\multirow[c]{2}{*}{Immune (Unbalanced)} & Final Outer Model & 138.3800 & 114.4960 & 23.8840 & 20.8601 \\
+ & Inner CV Fold & 45.9227 & 38.3869 & 7.5357 & 19.6310 \\
+\multirow[c]{2}{*}{Lung (Balanced)} & Final Outer Model & 92.9860 & 72.9340 & 20.0520 & 27.4934 \\
+ & Inner CV Fold & 30.8929 & 24.5988 & 6.2941 & 25.5872 \\
+\multirow[c]{2}{*}{Lung (Unbalanced)} & Final Outer Model & 137.2920 & 108.5220 & 28.7700 & 26.5108 \\
+ & Inner CV Fold & 46.0029 & 36.8245 & 9.1784 & 24.9247 \\
+\multirow[c]{2}{*}{Pancreas (Balanced)} & Final Outer Model & 31.4280 & 25.4040 & 6.0240 & 23.7128 \\
+ & Inner CV Fold & 11.1949 & 8.9272 & 2.2677 & 25.4025 \\
+\multirow[c]{2}{*}{Pancreas (Unbalanced)} & Final Outer Model & 30.5960 & 24.2800 & 6.3160 & 26.0132 \\
+ & Inner CV Fold & 10.8571 & 8.6091 & 2.2480 & 26.1120 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
+\newpage
+
+\section*{Supplementary Note 2: Dataset Composition}
+To evaluate the limits of adversarial integration, we utilized three highly complex single-cell transcriptomic datasets (Pancreas, Lung, Immune) characterized by severe batch effects, varying sequencing depths, and extreme class imbalances. Supplementary Table \ref{tab:detailed_composition} details the hierarchical composition of all three datasets.
+
+% --- XLTABULAR INTEGRATION ---
+\begin{xltabular}{\textwidth}{>{\raggedright\arraybackslash}X r >{\raggedright\arraybackslash}X r >{\raggedright\arraybackslash}X r}
+\caption{Hierarchical composition of datasets by Batch and Cell Type.} \label{tab:detailed_composition} \\
+
+% --- HEADER FOR FIRST PAGE ---
+\toprule
+\multicolumn{2}{c}{\textbf{Pancreas Dataset}} & \multicolumn{2}{c}{\textbf{Lung Dataset}} & \multicolumn{2}{c}{\textbf{Immune Dataset}} \\
+\cmidrule(lr){1-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\textbf{Batch / Cell Type} & \textbf{N} & \textbf{Batch / Cell Type} & \textbf{N} & \textbf{Batch / Cell Type} & \textbf{N} \\
+\midrule
+\endfirsthead
+
+% --- HEADER FOR SUBSEQUENT PAGES ---
+\caption[]{Hierarchical composition of datasets by Batch and Cell Type (Continued)}\\
+\toprule
+\multicolumn{2}{c}{\textbf{Pancreas Dataset}} & \multicolumn{2}{c}{\textbf{Lung Dataset}} & \multicolumn{2}{c}{\textbf{Immune Dataset}} \\
+\cmidrule(lr){1-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\textbf{Batch / Cell Type} & \textbf{N} & \textbf{Batch / Cell Type} & \textbf{N} & \textbf{Batch / Cell Type} & \textbf{N} \\
+\midrule
+\endhead
+
+% --- FOOTER FOR BOTTOM OF TABLE ---
+\bottomrule
+\endlastfoot
+
+% --- DATA ROWS ---
+\textbf{CEL-Seq} & \textbf{1,004} & \textbf{10x Chromium} & \textbf{22,771} & \textbf{10X} & \textbf{8,829} \\
+\quad acinar & 228 & \quad B cell & 103 & \quad CD4+ T cells & 4,312 \\
+\quad activated\_stellate & 19 & \quad Basal 1 & 1,972 & \quad CD8+ T cells & 578 \\
+\quad alpha & 191 & \quad Basal 2 & 3,072 & \quad CD14+ Monocytes & 1,501 \\
+\quad beta & 161 & \quad Ciliated & 2,722 & \quad CD16+ Monocytes & 271 \\
+\quad delta & 50 & \quad Dendritic cell & 1,367 & \quad CD20+ B cells & 409 \\
+\quad ductal & 327 & \quad Endothelium & 628 & \quad Megakaryocyte progenitors & 14 \\
+\quad endothelial & 5 & \quad Fibroblast & 529 & \quad Monocyte-derived dendritic cells & 82 \\
+\quad epsilon & 1 & \quad Ionocytes & 46 & \quad NK cells & 973 \\
+\quad gamma & 18 & \quad Lymphatic & 146 & \quad NKT cells & 649 \\
+\quad macrophage & 1 & \quad Macrophage & 4,614 & \quad Plasmacytoid dendritic cells & 40 \\
+\quad mast & 1 & \quad Mast cell & 229 & \textbf{smart-seq2} & \textbf{1,022} \\
+\quad quiescent\_stellate & 1 & \quad Neutrophil\_CD14\_high & 1,626 & \quad CD14+ Monocytes & 145 \\
+\quad schwann & 1 & \quad Neutrophils\_IL1R2 & 472 & \quad CD16+ Monocytes & 172 \\
+\textbf{CEL-Seq2} & \textbf{2,285} & \quad Secretory & 1,753 & \quad Monocyte-derived dendritic cells & 534 \\
+\quad acinar & 274 & \quad T/NK cell & 616 & \quad Plasmacytoid dendritic cells & 171 \\
+\quad activated\_stellate & 90 & \quad Type 2 & 2,876 & \textbf{10x Chromium v2} & \textbf{12,928} \\
+\quad alpha & 843 & \textbf{Drop-Seq} & \textbf{6,485} & \quad CD4+ T cells & 3,762 \\
+\quad beta & 445 & \quad B cell & 916 & \quad CD8+ T cells & 1,255 \\
+\quad delta & 203 & \quad Ciliated & 313 & \quad CD10+ B cells & 207 \\
+\quad ductal & 258 & \quad Endothelium & 219 & \quad CD14+ Monocytes & 1,449 \\
+\quad endothelial & 21 & \quad Fibroblast & 147 & \quad CD16+ Monocytes & 190 \\
+\quad epsilon & 4 & \quad Lymphatic & 128 & \quad CD20+ B cells & 918 \\
+\quad gamma & 110 & \quad Macrophage & 2,036 & \quad Erythrocytes & 1,502 \\
+\quad macrophage & 15 & \quad Mast cell & 488 & \quad Erythroid progenitors & 463 \\
+\quad mast & 6 & \quad Secretory & 295 & \quad HSPCs & 445 \\
+\quad quiescent\_stellate & 12 & \quad T/NK cell & 749 & \quad Megakaryocyte progenitors & 235 \\
+\quad schwann & 4 & \quad Type 1 & 297 & \quad Monocyte progenitors & 428 \\
+\textbf{Fluidigm C1} & \textbf{638} & \quad Type 2 & 897 & \quad Monocyte-derived dendritic cells & 214 \\
+\quad acinar & 21 &  &  & \quad NK cells & 565 \\
+\quad activated\_stellate & 16 &  &  & \quad NKT cells & 1,040 \\
+\quad alpha & 239 &  &  & \quad Plasma cells & 111 \\
+\quad beta & 258 &  &  & \quad Plasmacytoid dendritic cells & 144 \\
+\quad delta & 25 &  &  & \textbf{10x Chromium v3} & \textbf{10,727} \\
+\quad ductal & 36 &  &  & \quad CD4+ T cells & 2,937 \\
+\quad endothelial & 14 &  &  & \quad CD8+ T cells & 350 \\
+\quad epsilon & 1 &  &  & \quad CD14+ Monocytes & 3,388 \\
+\quad gamma & 18 &  &  & \quad CD16+ Monocytes & 364 \\
+\quad macrophage & 1 &  &  & \quad CD20+ B cells & 1,546 \\
+\quad mast & 3 &  &  & \quad HSPCs & 28 \\
+\quad quiescent\_stellate & 1 &  &  & \quad Megakaryocyte progenitors & 21 \\
+\quad schwann & 5 &  &  & \quad Monocyte-derived dendritic cells & 182 \\
+\textbf{inDrop-Seq V1} & \textbf{1,937} &  &  & \quad NK cells & 756 \\
+\quad acinar & 110 &  &  & \quad NKT cells & 1,056 \\
+\quad activated\_stellate & 51 &  &  & \quad Plasma cells & 18 \\
+\quad alpha & 236 &  &  & \quad Plasmacytoid dendritic cells & 81 \\
+\quad beta & 872 &  &  &  &  \\
+\quad delta & 214 &  &  &  &  \\
+\quad ductal & 120 &  &  &  &  \\
+\quad endothelial & 130 &  &  &  &  \\
+\quad epsilon & 13 &  &  &  &  \\
+\quad gamma & 70 &  &  &  &  \\
+\quad macrophage & 14 &  &  &  &  \\
+\quad mast & 8 &  &  &  &  \\
+\quad quiescent\_stellate & 92 &  &  &  &  \\
+\quad schwann & 5 &  &  &  &  \\
+\quad t\_cell & 2 &  &  &  &  \\
+\textbf{inDrop-Seq V2} & \textbf{1,724} &  &  &  &  \\
+\quad acinar & 3 &  &  &  &  \\
+\quad activated\_stellate & 81 &  &  &  &  \\
+\quad alpha & 676 &  &  &  &  \\
+\quad beta & 371 &  &  &  &  \\
+\quad delta & 125 &  &  &  &  \\
+\quad ductal & 301 &  &  &  &  \\
+\quad endothelial & 23 &  &  &  &  \\
+\quad epsilon & 2 &  &  &  &  \\
+\quad gamma & 86 &  &  &  &  \\
+\quad macrophage & 17 &  &  &  &  \\
+\quad mast & 9 &  &  &  &  \\
+\quad quiescent\_stellate & 22 &  &  &  &  \\
+\quad schwann & 6 &  &  &  &  \\
+\quad t\_cell & 2 &  &  &  &  \\
+\textbf{inDrop-Seq V3} & \textbf{3,605} &  &  &  &  \\
+\quad acinar & 843 &  &  &  &  \\
+\quad activated\_stellate & 100 &  &  &  &  \\
+\quad alpha & 1,130 &  &  &  &  \\
+\quad beta & 787 &  &  &  &  \\
+\quad delta & 161 &  &  &  &  \\
+\quad ductal & 376 &  &  &  &  \\
+\quad endothelial & 92 &  &  &  &  \\
+\quad epsilon & 2 &  &  &  &  \\
+\quad gamma & 36 &  &  &  &  \\
+\quad macrophage & 14 &  &  &  &  \\
+\quad mast & 7 &  &  &  &  \\
+\quad quiescent\_stellate & 54 &  &  &  &  \\
+\quad schwann & 1 &  &  &  &  \\
+\quad t\_cell & 2 &  &  &  &  \\
+\textbf{inDrop-Seq V4} & \textbf{1,303} &  &  &  &  \\
+\quad acinar & 2 &  &  &  &  \\
+\quad activated\_stellate & 52 &  &  &  &  \\
+\quad alpha & 284 &  &  &  &  \\
+\quad beta & 495 &  &  &  &  \\
+\quad delta & 101 &  &  &  &  \\
+\quad ductal & 280 &  &  &  &  \\
+\quad endothelial & 7 &  &  &  &  \\
+\quad epsilon & 1 &  &  &  &  \\
+\quad gamma & 63 &  &  &  &  \\
+\quad macrophage & 10 &  &  &  &  \\
+\quad mast & 1 &  &  &  &  \\
+\quad quiescent\_stellate & 5 &  &  &  &  \\
+\quad schwann & 1 &  &  &  &  \\
+\quad t\_cell & 1 &  &  &  &  \\
+\textbf{SMARTer} & \textbf{1,492} &  &  &  &  \\
+\quad alpha & 886 &  &  &  &  \\
+\quad beta & 472 &  &  &  &  \\
+\quad delta & 49 &  &  &  &  \\
+\quad gamma & 85 &  &  &  &  \\
+\textbf{Smart-Seq V2} & \textbf{2,394} &  &  &  &  \\
+\quad acinar & 188 &  &  &  &  \\
+\quad activated\_stellate & 55 &  &  &  &  \\
+\quad alpha & 1,008 &  &  &  &  \\
+\quad beta & 308 &  &  &  &  \\
+\quad delta & 127 &  &  &  &  \\
+\quad ductal & 444 &  &  &  &  \\
+\quad endothelial & 21 &  &  &  &  \\
+\quad epsilon & 8 &  &  &  &  \\
+\quad gamma & 213 &  &  &  &  \\
+\quad macrophage & 7 &  &  &  &  \\
+\quad mast & 7 &  &  &  &  \\
+\quad quiescent\_stellate & 6 &  &  &  &  \\
+\quad schwann & 2 &  &  &  &  \\
+\end{xltabular}
+
+\newpage
+
+\section*{Supplementary Note 3: Visualization of Confounded Gene Expression Data}
+To gain an intuitive understanding of the different latent spaces, we compared the UMAP results from the Pancreas dataset before and after deconfounding with both the discriminator and critic.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Fig/pancreas_2x2_comparison.png}
+    \caption{\textbf{Pancreas Dataset before Deconfounding.} 
+    Visualization of the Pancreas dataset. \textbf{Top row:} UMAP of inDrop-Seq and Smart-Seq datasets colored by cell type. \textbf{Bottom left:} Combined UMAP of inDrop-Seq (blue) and Smart-Seq (yellow) colored by technology. The two technologies are strongly separated. \textbf{Bottom right:} Combined UMAP of inDrop-Seq and Smart-Seq colored by cell type. There are two islands for each cell type corresponding to the two different technologies.}
+    \label{fig:before}
+\end{figure}
+
+\newpage
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Fig/comparison_umap.png}
+    \caption{\textbf{Pancreas Dataset after Deconfounding.} 
+    Visualization of the Pancreas dataset latent space for both the critic and discriminator. \textbf{Top left:} The critic latent space colored by technology. The two technologies are strongly overlapped. \textbf{Top right:} The critic latent space colored by cell type. The cell populations blend together along the boundaries of the respective clusters. \textbf{Bottom left:} The discriminator latent space colored by technology. The two technologies are integrated in most areas; however, there are some distinct regions that remain unmixed. \textbf{Bottom right:} The discriminator latent space colored by cell type. The different cell type clusters are very distinct.}
+    \label{fig:after}
+\end{figure}
+
+\end{document}

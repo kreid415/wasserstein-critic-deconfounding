@@ -1,0 +1,434 @@
+%%
+%% Copyright 2025 Oxford University Press
+%%
+%% This file is part of the 'oup-authoring-template Bundle'.
+%% ---------------------------------------------
+%%
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.3 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    https://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%%
+%% The list of all files belonging to the 'oup-authoring-template Bundle' is
+%% given in the file `manifest.txt'.
+%%
+%% Template article for Oxford University Press's document class `oup-authoring-template'
+%% with bibliographic references
+%%
+
+%%%CONTEMPORARY%%%
+\documentclass[unnumsec,webpdf,contemporary,large]{oup-authoring-template}%
+%\documentclass[unnumsec,webpdf,contemporary,large,numbered]{oup-authoring-template}% uncomment this line to get the numbered reference output
+%\documentclass[unnumsec,webpdf,contemporary,medium]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,contemporary,mediumone]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,contemporary,small]{oup-authoring-template}
+
+%%%MODERN%%%
+%\documentclass[unnumsec,webpdf,modern,large]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,modern,large,numbered]{oup-authoring-template}%   uncomment this line to get the numbered reference output
+%\documentclass[unnumsec,webpdf,modern,medium]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,modern,mediumone]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,modern,small]{oup-authoring-template}
+
+%%%TRADITIONAL%%%
+%\documentclass[unnumsec,webpdf,traditional,large]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,traditional,large,numbered]{oup-authoring-template}%   uncomment this line to get the numbered reference output
+%\documentclass[unnumsec,webpdf,traditional,medium]{oup-authoring-template}
+%\documentclass[unnumsec,webpdf,traditional,mediumone]{oup-authoring-template}
+%\documentclass[namedate,webpdf,traditional,small]{oup-authoring-template}
+
+%\onecolumn % for one column layouts
+
+%\usepackage{showframe}
+\usepackage{booktabs}
+\graphicspath{{Fig/}}
+
+% line numbers
+% \usepackage[mathlines, switch]{lineno}
+% \usepackage[right]{lineno}
+
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%  meant for continuous numbers
+%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+\newtheorem{proposition}[theorem]{Proposition}%
+%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}
+
+%\usepackage{draftwatermark}
+%\SetWatermarkText{Draft}
+%%Uncomment  \usepackage{draftwatermark} and \SetWatermarkText{Draft} to watermark your PDF as a draft
+\begin{document}
+
+\journaltitle{Bioinformatics}
+\DOI{DOI added during production}
+\copyrightyear{2026}
+\pubyear{2026}
+\vol{XX}
+\issue{x}
+\access{Advance Access Publication Date: Day Month Year}
+\appnotes{}
+
+\firstpage{1}
+
+%\subtitle{Subject Section}
+
+\title[Critics vs Discriminators: A Multi-Architecture Benchmark]{Wasserstein critics versus discriminators for single-cell batch correction: a controlled, multi-architecture benchmark}
+
+\author[1,$\ast$]{Kendall Reid \ORCID{0000-0002-2105-6471}}
+\author[1,$\dagger$]{Genevieve Stein-O'Brien \ORCID{0000-0001-8681-9110}}
+\author[2,$\dagger$]{Erhan Guven \ORCID{0000-0002-7601-1051}}
+
+% Standard Affiliations
+\address[1]{\orgdiv{Neuroscience}, \orgname{Johns Hopkins University}, \orgaddress{\street{Baltimore}, \postcode{21218}, \state{MD}, \country{USA}}}
+\address[2]{\orgname{Johns Hopkins University Applied Physics Laboratory}, \orgaddress{\street{Laurel}, \postcode{20707}, \state{MD}, \country{USA}}}
+
+% Discrete metadata blocks for the symbols
+\corresp[$\ast$]{Corresponding author: \href{email:kreid20@jh.edu}{kreid20@jh.edu}.}
+\corresp[$\dagger$]{These authors contributed equally to this work.}
+
+
+\received{Date}{0}{Year}
+\revised{Date}{0}{Year}
+\accepted{Date}{0}{Year}
+
+%\editor{Associate Editor: Name}
+
+\abstract{
+\textbf{Background:} Integrating single-cell RNA sequencing (scRNA-seq) experiments across technologies is hindered by severe technical batch effects that confound analysis and mask biological variation. Adversarial autoencoders are a popular correction strategy, most often relying on discriminator networks that approximate the Jensen--Shannon divergence. Because the Jensen--Shannon divergence provides vanishing gradients when batch distributions do not overlap---a common situation across sequencing technologies---the Wasserstein distance has been proposed as a more stable adversarial objective. Yet no study has isolated the adversarial objective itself, holding the autoencoder backbone constant, to measure its impact on batch mixing, biological conservation, and scalability.\\
+\textbf{Results:} We implement a multi-class, reference-based Wasserstein critic and a matched Jensen--Shannon discriminator as interchangeable heads on a fixed variational-autoencoder backbone, and benchmark them across eight datasets (six scRNA-seq/simulation and two scATAC gene-activity), four autoencoder backbones, and batch counts from two to nine. The Wasserstein critic is the more aggressive integrator, achieving higher local mixing (iLISI) at low regularization. However, this mixing is systematically purchased at the expense of biology: across datasets, backbones, and modalities the critic degrades cell-type conservation (cLISI, ASW cell type, ARI), collapses rare populations, and lowers cross-batch label-transfer accuracy. At the recommended operating point the discriminator matches or exceeds the critic on both mixing and conservation, and it scales better as the number of batches grows. The critic's advantage is confined to a narrow low-regularization regime and does not survive to higher batch counts. We further show that all eight benchmark tasks exhibit genuinely disjoint batch support, and that the local/global metric mismatch previously attributed to the critic does not translate into an advantage at the operating point.\\
+\textbf{Conclusions:} Replacing the discriminator with a Wasserstein critic makes single-cell batch correction a stronger but less faithful integrator. For practical use we recommend the discriminator head with a moderate adversarial weight; the reference Wasserstein critic is better regarded as an object of study than a default tool. Source code is available at \url{https://github.com/kreid415/wasserstein-critic-deconfounding}.\\
+}
+
+\keywords{Adversarial Deconfounding, Single-cell Integration, Wasserstein Critic, Batch Effect Correction}
+
+% \keywords[Abbreviations]{abbreviation1, abbreviation2, abbreviation3, abbreviation4}
+
+% \otherabstract[Additional Abstract]{Use this element for elements such as Graphical abstract, Lay summary, Translated abstract etc. Que cum aut etum qui ium dolupta ssequia autati odis demporepe ad et es alit rem repudaerae min et volorum re volupta nobit volectur aut fuga.}
+
+% \otherabstract[Graphical Abstract]{\colorbox{black!20}{\hbox to 0.97\textwidth{\vbox to 50pt{}}}}
+
+% \boxedtext{Key Messages}{
+% \begin{itemize}
+% \item Key boxed text here.
+% \item Key boxed text here.
+% \item Key boxed text here.
+% \end{itemize}}
+
+\maketitle
+
+\section{Background}
+High-throughput transcriptomic profiling provides high-resolution snapshots of cellular states, enabling the study of complex biological systems. However, these measurements are highly susceptible to systematic confounding that obscures true biological variation. These confounders arise primarily from technical batch effects---such as the sequencing technology utilized \citep{Tung2017-zb} or specific laboratory protocols---and are often complicated by underlying biological covariates, such as sample age \citep{Stegle2015-gr}. This problem is compounded across experiments and laboratory conditions, making it impossible to compare gene expression results without controlling for these confounding variables \citep{Leek2010-ho, Goh2022AreBE, Yu2024AssessingAM}.
+
+Latent-space models trained with adversarial losses constitute a popular class of algorithms for removing confounding bias, operating by encouraging learned representations free of information from confounding variables \citep{10.1093/bioinformatics/btaa796, He2025-ip}. These techniques typically rely on discriminator networks that predict the batch origin of a sample, thereby approximating the Jensen-Shannon (JS) divergence between batch distributions. A fundamental theoretical limitation of the JS divergence is that it fails to provide a meaningful gradient when two distributions have non-overlapping support \citep{10.5555/3305381.3305404}. In this scenario, a standard discriminator can perfectly separate the batches, leading to gradient saturation and training instability that prevents the generative model from successfully aligning the underlying data.
+
+This instability has been addressed in the broader deep learning literature by replacing the discriminator with a Wasserstein critic---a network constrained to approximate the Earth Mover's (Wasserstein) distance \citep{10.5555/3305381.3305404}. Unlike the JS divergence, the Wasserstein distance remains a continuous and differentiable metric even when distributions are non-overlapping, providing robust gradients that drive alignment regardless of the initial separation. While Wasserstein-based approaches have been proposed for biological batch correction \citep{10.1093/bioinformatics/btac427, ijms24065502}, they often include additional steps that obscure the contribution of the adversarial mechanism. To date, a rigorous isolation of the adversarial mechanism---comparing the standard discriminator against a Wasserstein critic while holding the autoencoder backbone constant---has not been performed.
+
+In this work, we strip away these auxiliary constraints to isolate the Wasserstein objective and investigate the specific contribution of the adversarial mechanism. To enable this rigorous comparison in realistic multi-batch settings, we implement a \textit{multi-headed critic} formulation that generalizes the Wasserstein distance to multiple batches. This formulation allows us to explicitly and simultaneously minimize the Earth Mover's distance between each source batch and a biologically grounded reference. By holding the autoencoder backbone constant, we control for architectural variables and directly test the efficacy of the objective function. We demonstrate that while replacing the standard Jensen-Shannon discriminator with the Wasserstein critic improves performance in disjoint settings, it introduces a topological bottleneck in scaling and a tendency to over-correct for batch effects, resulting in the loss of biological signal. Our results reveal a fundamental trade-off: the Wasserstein objective is a stronger integrator and is ideal for scenarios with severe, disjoint batch effects and overlapping cell types, whereas the discriminator scales more effectively in fragmented atlases with disjoint cell types or sensitive cellular boundaries.
+
+The integration of experimental gene expression data remains a critical challenge in computational biology \citep{Luecken2025-sd}, giving rise to a suite of solutions tailored to different analytical constraints \citep{Tran2020-ar}. These methods can be broadly categorized into traditional statistical frameworks, geometric alignment heuristics, and deep generative models \citep{Luecken2022-fb}. Traditional statistical methods, such as limma \citep{10.1093/nar/gkv007} and ComBat \citep{10.1093/biostatistics/kxj037}, model expression data through linear frameworks to regress out confounding technical factors. Conversely, geometric methods rely on iterative alignment to map query datasets into a shared space, utilizing heuristics like Mutual Nearest Neighbors (MNN) \citep{Haghverdi2018-xm} or clustering-aware projections (Harmony \citep{Korsunsky2019-kj}, Seurat \citep{Stuart2019-uw}).
+
+More recently, deep generative models, such as the conditional variational autoencoder scVI \citep{Lopez2018-bl}, have emerged to model the underlying non-linear data-generating process. Within this class, adversarial learning offers a powerful alternative, allowing for end-to-end differentiable deconfounding. Early adversarial approaches, such as AD-AE \citep{10.1093/bioinformatics/btaa796}, utilize standard discriminator networks to remove confounding information from the latent space. Recent works have begun to incorporate Wasserstein-based objectives, like ResPAN \citep{10.1093/bioinformatics/btac427}, which combines a Wasserstein critic with Random Walk Mutual Nearest Neighbors (RW-MNN) to guide alignment. Similarly, IMAAE \citep{ijms24065502} employs a Wasserstein-based adversarial autoencoder to tackle scenarios where cell types are disjoint across batches. Notably, \citeauthor{ijms24065502} explicitly attribute the failure of reference-based alignment in these settings to a ``lack of constraints'' when the anchor batch is sparse, motivating their decision to enforce a global Gaussian prior. Consequently, the specific contribution of the \textit{Wasserstein critic itself}---as a stable replacement for the discriminator in pure adversarial deconfounding—has not been isolated or rigorously evaluated. In this work, we bridge this gap by stripping away these auxiliary additions and systematically comparing the Wasserstein critic against the standard discriminator within a controlled, state-of-the-art autoencoder framework.
+
+\section{Results}
+
+\subsection{The Wasserstein Critic Achieves Superior Local Integration at the Cost of Biological Conservation}
+
+We first explore the utility of the Wasserstein critic in the simplest deconfounding scenario: integrating two distinct batches. This reduces the problem to binary classification and the corresponding binary Wasserstein formulation. We restricted the analysis to the two largest batches for each dataset (Pancreas, Immune, and Lung) under both balanced and unbalanced confounding scenarios. Hyperparameters were optimized using nested cross-validation, and performance was evaluated using six metrics covering both integration and biological conservation (Figure \ref{fig:binary_results}). Statistical significance was assessed using corrected paired t-tests \citep{Nadeau2003-vp} (Table \ref{tab:ttest_results_compact}).
+
+\textbf{Integration Performance.} The Wasserstein critic demonstrated a strong advantage in local batch mixing. The critic achieved higher iLISI scores across all scenarios, indicating superior removal of local batch effects. Interestingly, global integration measures (ASW Batch) did not show the same effect; the discriminator performed comparably or slightly better (e.g., Lung and Pancreas). This discrepancy suggests that while the discriminator effectively aligns global distributions, the critic better resolves fine-grained batch structures within local cell neighborhoods.
+
+\textbf{Biological Conservation.} A consistent trade-off was observed in biological conservation, with the aggressive batch mixing of the Wasserstein critic resulting in a reduction in cell-type purity. In terms of local neighborhood structure (cLISI), the critic exhibited higher scores compared to the discriminator, indicating that distinct cell types were less strictly separated in the local manifold. This pattern was corroborated by the global ASW Cell Type metric, where the critic yielded consistently lower scores, reflecting less compact clusters. The Adjusted Rand Index (ARI), which measures clustering agreement, showed similar patterns with the discriminator consistently outperforming the critic in the Pancreas and Immune datasets. The continuous topology metric (PAGA) showed a trend of cell type collapse in the critic compared to the discriminator, highlighting the over-corrective effects of the Wasserstein approach.
+
+\textbf{Sensitivity to Confounding Structure.} We examined whether the correlation between batch and biological variables (Unbalanced scenarios) disproportionately affected either method. Contrary to the theoretical expectation that correlated confounding would universally degrade performance, we found no systematic pattern across datasets. For example, while the discriminator's iLISI performance notably dropped in the Immune dataset, it actually improved in the Pancreas dataset. Similarly, the Wasserstein critic showed variable sensitivity: it maintained high performance in the Pancreas dataset but suffered a significant drop in the Immune and Lung datasets.
+
+\textbf{Summary.} Overall, these results highlight a distinct behavior between the two adversaries. The discriminator acts as a conservative regularizer, preserving high within-cluster density (high ASW Cell Type) and cell type manifold (PAGA Spearman), but fails to fully integrate local neighborhoods (low iLISI). In contrast, the Wasserstein critic serves as a stronger adversary, forcing the encoder to thoroughly mix batches. This yields significant improvements in integration (iLISI) at the cost of a consistent reduction in cell-type compactness (ASW Cell Type) and topological location (PAGA Spearman), though the downstream effect on clustering (ARI) varies by biological context. 
+
+To visually confirm these quantitative trade-offs, we provide UMAP projections of the confounded gene expression data and deconfounded latent spaces in Supplementary Figures S3 and S4.
+
+\begin{figure*}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{binary_experiment_comparison.png}
+    \caption{\textbf{Performance comparison of adversarial deconfounding methods across datasets and batch scenarios.} 
+    We evaluated the Wasserstein critic (Red circles, solid line) against a standard discriminator (Blue triangles, dashed line) across three datasets (Pancreas, Immune, Lung). 
+    Performance was assessed using six metrics. 
+    \textbf{Integration metrics:} iLISI and ASW Batch (higher is better) measure the removal of batch effects. 
+    \textbf{Conservation metrics:} ASW Cell Type, ARI, and PAGA Spearman (higher is better) and cLISI (lower is better) measure the retention of biological signal.
+    The x-axis denotes the confounding scenario (Balanced vs. Unbalanced). 
+    Points represent the mean score across 5-fold cross-validation, and error bars indicate the 95\% confidence interval.}
+    \label{fig:binary_results}
+\end{figure*}
+
+\begin{table*}[t!]
+\centering
+\caption{\textbf{Statistical comparison of the Wasserstein Critic and baseline Discriminator across balanced and unbalanced integration scenarios.} The table reports the mean and standard deviation (SD) of various integration (iLISI, ASW Batch) and biological preservation metrics (cLISI, ASW Cell, ARI, PAGA Spearman) for the Pancreas, Immune, and Lung datasets. P-values represent the significance of the difference between the two models, corrected for cross-validation overlap (Nadeau \& Bengio, 2003).}
+\label{tab:ttest_results_compact}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l l r r r r r r }
+\toprule
+ & & \multicolumn{3}{c}{\textbf{Balanced Scenario}} & \multicolumn{3}{c}{\textbf{Unbalanced Scenario}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+Dataset & Metric & Critic (SD) & Discrim (SD) & p-value & Critic (SD) & Discrim (SD) & p-value \\
+\midrule
+\textbf{Pancreas} & & & & & & & \\
+ & iLISI & 0.736 (0.022) & 0.620 (0.036) & 0.0064 & 0.740 (0.038) & 0.648 (0.029) & 0.0987 \\
+ & ASW Batch & 0.894 (0.022) & 0.930 (0.017) & 0.0014 & 0.895 (0.014) & 0.932 (0.017) & 0.0141 \\
+ & cLISI & 0.027 (0.007) & 0.010 (0.005) & 0.0138 & 0.024 (0.008) & 0.012 (0.005) & 0.1739 \\
+ & ASW Cell & 0.570 (0.009) & 0.604 (0.006) & 0.0224 & 0.570 (0.009) & 0.605 (0.010) & 0.0012 \\
+ & ARI & 0.670 (0.057) & 0.942 (0.018) & 0.0017 & 0.692 (0.113) & 0.938 (0.019) & 0.0399 \\
+ & PAGA Spearman & 0.417 (0.090) & 0.506 (0.098) & 0.4402 & 0.410 (0.086) & 0.545 (0.073) & 0.0570 \\
+\addlinespace
+\textbf{Immune} & & & & & & & \\
+ & iLISI & 0.713 (0.012) & 0.603 (0.013) & 4.84e-04 & 0.689 (0.030) & 0.562 (0.008) & 0.0040 \\
+ & ASW Batch & 0.853 (0.021) & 0.872 (0.013) & 0.2607 & 0.873 (0.013) & 0.878 (0.008) & 0.5216 \\
+ & cLISI & 0.035 (0.004) & 0.019 (0.003) & 0.0113 & 0.030 (0.002) & 0.016 (0.003) & 0.0012 \\
+ & ASW Cell & 0.553 (0.003) & 0.571 (0.004) & 0.0073 & 0.517 (0.008) & 0.566 (0.003) & 0.0024 \\
+ & ARI & 0.447 (0.030) & 0.556 (0.006) & 0.0051 & 0.439 (0.028) & 0.554 (0.007) & 0.0062 \\
+ & PAGA Spearman & 0.459 (0.070) & 0.615 (0.083) & 0.1479 & 0.524 (0.071) & 0.559 (0.049) & 0.3811 \\
+\addlinespace
+\textbf{Lung} & & & & & & & \\
+ & iLISI & 0.622 (0.041) & 0.498 (0.021) & 0.0175 & 0.455 (0.016) & 0.370 (0.024) & 0.0080 \\
+ & ASW Batch & 0.870 (0.006) & 0.910 (0.007) & 0.0026 & 0.861 (0.011) & 0.898 (0.009) & 0.0212 \\
+ & cLISI & 0.034 (0.004) & 0.017 (0.003) & 0.0031 & 0.025 (0.003) & 0.017 (0.001) & 0.0253 \\
+ & ASW Cell & 0.551 (0.004) & 0.578 (0.005) & 8.63e-04 & 0.549 (0.006) & 0.566 (0.005) & 0.0290 \\
+ & ARI & 0.473 (0.021) & 0.534 (0.009) & 0.0315 & 0.607 (0.074) & 0.565 (0.059) & 0.5359 \\
+ & PAGA Spearman & 0.298 (0.031) & 0.526 (0.035) & 1.22e-04 & 0.554 (0.064) & 0.657 (0.055) & 0.2536 \\
+\bottomrule
+\end{tabular*}
+\end{table*}
+
+\subsection{Scalability and Stability in Multi-Batch Integration}
+To systematically evaluate the scalability of these methods, we incrementally increased the integration complexity from the binary baseline ($\lvert\mathcal{V}\rvert=2$) up to the full dataset ($\lvert\mathcal{V}\rvert=9$ for Pancreas, $\lvert\mathcal{V}\rvert=4$ for Immune). We excluded the Lung dataset from this analysis as it contains only two batches. This experiment assesses whether the multi-headed Wasserstein formulation maintains its advantage as the number of alignment tasks grows (Figure \ref{fig:multiclass}).
+
+\textbf{Performance Decay.} As expected, integration difficulty increases with the number of batches. We observed a decrease in performance across all scenarios for both methods, reflecting the inherent challenge of aligning multiple disjoint distributions into a shared low-dimensional manifold.
+
+\textbf{The Discriminator Out-scales the Wasserstein Critic.} The Wasserstein critic outperformed the discriminator on the iLISI metric in the binary case but scaled poorly as the number of batches increased. We hypothesize this highlights a critical trade-off in our reference-based multi-headed formulation. As $\lvert\mathcal{V}\rvert$ increases, our critic must solve $\lvert\mathcal{V}\rvert-1$ distinct transport problems to a single reference batch. In comparison, the discriminator optimizes a joint objective across the entire dataset, avoiding the topological bottleneck induced by forcing $\lvert\mathcal{V}\rvert-1$ independent distributions to map onto a single fixed target.
+
+\begin{figure*}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{multibatch_trends_grouped.png}
+    \caption{\textbf{Impact of batch complexity on deconfounding performance.} 
+    We evaluated the stability of the Wasserstein critic (Red line) and discriminator (Blue line) as the number of distinct batches increased (x-axis). 
+    The experiment was conducted across the Immune and Pancreas datasets under both Balanced and Unbalanced confounding scenarios. 
+    Performance is reported for \textbf{iLISI} (Integration, higher is better) and \textbf{cLISI} (Biological Conservation, lower is better). 
+    Solid lines represent the mean score, and error bars indicate the 95\% confidence interval.}
+    \label{fig:multiclass}
+\end{figure*}
+
+\subsection{Hyperparameter Sensitivity and Stability}
+A major practical limitation of adversarial deconfounding is the difficulty of tuning the regularization strength, $\lambda$. To evaluate the stability of the two objectives, we analyzed the impact of varying $\lambda$ across orders of magnitude on both integration (iLISI) and conservation (cLISI) (Figure \ref{fig:hyperparameter_sensitivity}).
+
+\textbf{Robustness to Regularization.} Both the Wasserstein critic and the discriminator exhibit broad optimal operating windows on the iLISI metric, with the critic performing consistently higher than the discriminator. For the cLISI metric, the discriminator maintains a broad, flat curve that is highly insensitive to the choice of adversarial coefficient. In contrast, the Wasserstein critic's cLISI score gradually increases as regularization strengthens, explicitly highlighting the continuous trade-off between aggressive batch integration and biological preservation.
+
+\begin{figure*}[htbp]\centering\includegraphics[width=\textwidth]{d_coef_sensitivity.png}
+\caption{\textbf{Sensitivity analysis of the adversarial coefficient across datasets.} We evaluated the impact of varying the adversarial regularization strength ($\lambda$) on the performance of the Wasserstein critic (Red line) and discriminator (Blue line). The evaluation spans three datasets (Pancreas, Immune, Lung) under both Balanced and Unbalanced confounding scenarios. Performance is reported for \textbf{iLISI} (Integration, higher is better) and \textbf{cLISI} (Biological Conservation, lower is better). The x-axis represents the adversarial coefficient ($\lambda$) on a logarithmic scale. Solid lines represent the mean score across validation folds, and error bars indicate the 95\% confidence interval.}
+\label{fig:hyperparameter_sensitivity}
+\end{figure*}
+
+\subsection{Impact of Reference Batch Selection}
+A unique architectural feature of our multi-headed critic is its alignment to a specific reference manifold. While this avoids the $O(\lvert\mathcal{V}\rvert^2)$ complexity of all-versus-all matching, it introduces a dependency on the quality of the chosen reference batch. To quantify this, we exhaustively trained models using every possible batch as the reference target and analyzed the variance in performance (Figure \ref{fig:reference_sensitivity}).
+
+\textbf{Sensitivity to Batch Completeness.} The performance variance across reference batches reflects the underlying algorithmic sensitivity to reference density. As shown in Figure \ref{fig:reference_sensitivity}, significant outliers in iLISI performance emerge across both confounding scenarios. These outliers are strictly driven by the cell-type representation present in the target reference batch. Because the Wasserstein objective enforces a strict optimal transport plan, the model must map all cells from the source batch onto the reference manifold, even when the reference lacks corresponding cell populations. Consequently, when the chosen reference batch lacks representation of key cell types found in the query batches, the strict transport constraint forces the encoder to improperly project query-specific biological signals onto unrelated reference populations, effectively erasing true biological variance.
+
+\begin{figure*}[htbp]
+\centering\includegraphics[width=\textwidth]{reference_sensitivity_critic_only.png}
+\caption{\textbf{Sensitivity of the Wasserstein critic to reference batch selection.} To assess the sensitivity to the reference manifold, we evaluated the performance of the Wasserstein critic using every possible batch as the reference target. The experiment spans the Pancreas and Immune datasets under both Balanced and Unbalanced confounding scenarios. Box plots summarize the distribution of performance scores, where each individual point (Red) represents the integrated result from a specific reference batch choice. Performance is reported for \textbf{iLISI} (Integration, higher is better) and \textbf{cLISI} (Biological Conservation, lower is better). A tighter distribution indicates that the method's performance is robust regardless of which batch is chosen as the reference.}
+\label{fig:reference_sensitivity}
+\end{figure*}
+
+\section{Discussion}
+Adversarial deconfounding has become a cornerstone of deep learning-based batch correction, yet the choice of the adversarial objective itself has largely remained an implementation detail rather than a subject of rigorous study. In this work, we demonstrated that this choice is not merely technical but fundamental to the quality of integration. Our experiments reveal the following key results:
+
+\textbf{The Wasserstein Critic is a Stronger Integrator than the JS-Discriminator.} In scenarios with strong confounding or disjoint distributions, the discriminator frequently failed to mix local neighborhoods effectively. In contrast, the Wasserstein critic forced mixing even when batches were initially far apart.
+
+\textbf{The Integration-Conservation Trade-off.} While the Wasserstein critic significantly outperformed the discriminator in removing batch effects (higher iLISI), it incurred a consistent penalty in biological conservation (higher cLISI). Additionally, the continuous manifold (PAGA) was more warped in the case of the Wasserstein critic, forcing unrelated cell types together. Future work might explore adaptive weighting schemes, such as an annealing schedule that relaxes the adversarial penalty ($\lambda_{\text{adv}}$) once a sufficiency threshold for mixing is reached. This could potentially capture the best of both worlds, achieving the aggressive mixing of the critic with the conservation of the discriminator.
+
+\textbf{Structural Bottlenecks in Multi-Batch Scaling.} While the Wasserstein critic excels in binary alignment, its integration performance degrades significantly faster than the discriminator as the number of experimental batches increases. Because this scalability drop occurs equally in both biologically balanced and unbalanced scenarios, it cannot be attributed to the reference batch lacking specific cell types. Instead, it reveals a fundamental architectural limitation of the reference-based multi-headed formulation. As the number of batches $\lvert\mathcal{V}\rvert$ grows, the critic forces the network to solve $\lvert\mathcal{V}\rvert-1$ independent, pairwise transport problems onto a single target geometry. This uncoordinated radial projection topology creates a geometric bottleneck, where multiple independent mappings inevitably distort the latent space to satisfy their individual transport constraints. In comparison, the discriminator optimizes a single, global $\lvert\mathcal{V}\rvert$-way classification task. By minimizing a joint divergence across the entire dataset simultaneously, the discriminator implicitly coordinates the latent geometry, smoothly aligning all batches toward a shared, centralized manifold without the compounding structural constraints of forcing multiple independent distributions to map onto a single anchor.
+
+\textbf{From Reference Matching to Wasserstein Barycenters.} The Wasserstein critic is further limited by the sparsity inherent to the reference matching induced by our multi-headed formulation, where a single reference batch acts as the central hub for $\lvert\mathcal{V}\rvert-1$ target batches. While this topology avoids the quadratic complexity of all-vs-all matching, it is topologically fragile: if the reference is incomplete, the entire alignment suffers. The theoretical solution to this limitation is the \textit{Wasserstein barycenter} \citep{doi:10.1137/100805741}. Unlike our current approach which fixes the center to an existing batch, a barycenter approach would learn a ``virtual'' center---the geometric median of all batch distributions. Implementing a barycenter objective would allow the model to align all batches to a shared, optimal manifold containing the union of all biological states, effectively combining the robust gradients of the Wasserstein critic with the global robustness of the discriminator.
+
+\textbf{Limitations and Future Directions.} To isolate the impact of the adversarial objective, we deliberately restricted our analysis to a single, state-of-the-art VAE backbone. While this controlled design was necessary to validate the mechanism, future work should evaluate whether these findings generalize to other architectures and models. Additionally, our current multi-headed formulation addresses a single categorical confounder. Extending this to handle multiple simultaneous confounders or continuous covariates would significantly broaden the applicability of the Wasserstein objective.
+
+Our analysis indicates that the primary limitation of the Wasserstein objective in its isolated form is its propensity for biological over-correction. Future methodological developments must prioritize dynamic regularizers that prevent this topological collapse without sacrificing the robust optimization gradients provided by the Wasserstein metric.
+
+\section{Methods}
+To rigorously isolate the impact of the adversarial objective, we employ a fixed Variational Autoencoder (VAE) backbone from scCRAFT \citep{He2025-ip}. We hold the encoder, decoder, and auxiliary loss functions constant across all experiments, varying only the adversarial regularization mechanism (standard discriminator vs. Wasserstein critic). The total objective consists of four components: (1) a reconstruction loss, (2) a prior regularization loss, (3) a triplet loss to preserve local structure, and (4) the adversarial deconfounding loss. A simplified architecture is shown in Figure \ref{fig1}.
+
+\subsection{Variational Autoencoder and Reconstruction Loss}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth, trim=100pt 10pt 100pt 10pt, clip]{arch.png}
+    \caption{\textbf{Experimental Architecture.} To isolate the impact of the adversarial objective, we employ a fixed VAE backbone. We systematically swap the adversarial regularizer between a standard discriminator and Wasserstein critic to compare their efficacy in removing confounding information.}
+    \label{fig1}
+\end{figure}
+
+The model takes log1p-transformed gene expression data, $\tilde{x} = \log(1 + x)$, as input and aims to reconstruct the original count values, $x$. To account for the sparsity of genomic data, the model assumes the target data $x$ follows a negative binomial (NB) distribution. The encoder network, $q_\phi(z|\tilde{x})$, is a two-layer feedforward network that maps the input vector $\tilde{x}$ to a vector of size $512$, ($\lvert\tilde{x}\rvert \rightarrow 1024 \rightarrow 512$). This vector is fed into parallel linear layers that output the mean ($\mu$) and variance ($\sigma^2$), each of size $256$, which parameterize the latent normal distribution $Z \sim N(\mu, \sigma^2)$. Within the encoder, batch normalization layers and ReLU activations are applied after the hidden dense layers to ensure training stability.
+
+The decoder network reconstructs the count-based expression profile by combining the sampled latent code $z \sim Z$ with a one-hot encoded vector representing the known batch variable ID, $v$. This is achieved via two parallel networks $G_1$ and $G_2$:
+\begin{equation*}
+   \hat{z} = \text{ReLU}(G_1(z, v) + G_2(v))
+\end{equation*}
+where $G_1$ maps the concatenated latent code and batch variable code back to gene space ($z || v \rightarrow 512 \rightarrow 1024 \rightarrow \lvert x\rvert$ where $||$ is the concatenation operator), and $G_2$ captures baseline batch-specific effects ($v \rightarrow 512 \rightarrow 1024 \rightarrow \lvert x \rvert$). This combined representation $\hat{z}$ is fed into a final linear layer, followed by an exponential activation function, to predict strictly positive NB parameters for each gene (mean $\mu$ and dispersion $r$).
+
+The reconstruction objective combines the NB negative log-likelihood with a cosine similarity loss to prevent the model from overfitting to high-count genes. To ensure stable optimization gradients across varying dataset sizes, the negative log-likelihood is computed as the mean across all genes $G$, rather than the sum:
+\begin{equation}
+    \mathcal{L}_{\text{NB}} = - \frac{1}{G} \sum_{g=1}^{G} \log P_{\text{NB}}(x | \mu, r)
+    \label{eq:nb}
+\end{equation}
+
+\begin{equation}
+    \mathcal{L}_{\cos} = \mathbb{E}\left[1-\frac{\langle \tilde{x}, \log(1+\mu) \rangle}{\| \tilde{x} \|_{2} \hspace{0.2em} \| \log(1+\mu) \|_{2}}\right]
+    \label{eq:cos}
+\end{equation}
+where $\langle \cdot, \cdot \rangle$ denotes the dot product between the log-transformed original and the log-transformed reconstructed gene expression profiles.
+
+To mitigate latent over-correction, the backbone model includes a dual-resolution triplet loss. To ensure training remains unsupervised and to prevent data leakage, we approximate cell types using pre-computed, two-tier Leiden clustering (coarse and fine resolutions, set empirically to 1.0 and 7.0, respectively) derived from the unintegrated data. For a given cell's latent embedding acting as an anchor ($z_{a}$), we initially sample positive ($z_{p}$) and negative ($z_{n}$) pairs based on the coarse cluster assignments. Crucially, to enforce strict local manifold preservation, we apply a high-resolution filter: if the anchor and the positive sample do not also share the same fine-resolution cluster assignment, the pair is discarded from the loss calculation. This objective enforces that cells of the strict same type remain closer in latent space than cells of different types:
+\begin{equation}
+    \mathcal{L}_{\text{triplet}}=\max (\parallel {z}_{a}-{z}_{p}{\parallel }_{2}-\parallel {z}_{a}-{z}_{n}{\parallel }_{2}+{\rm{margin}}\,,0)
+    \label{eq:triplet}
+\end{equation}
+
+where the margin is set empirically to 5 as per the original implementation.
+
+Equations \ref{eq:nb}, \ref{eq:cos}, and \ref{eq:triplet} are summed with the Kullback-Leibler (KL) divergence, which regularizes the latent space toward a standard normal prior to give the VAE-backbone:
+\begin{equation*}
+    \mathcal{L}_{\text{VAE}} = 
+    \mathcal{L}_{\text{NB}} + \lambda_{\cos}\mathcal{L}_{\cos}
+    + 
+    \mathcal{L}_{\text{triplet}}
+    +
+    \beta_{\text{KL}}\mathrm{KL}\left( q_\phi(z \mid \tilde{x}) \,\|\, N(0,I) \right)
+    \label{eq:vae_total}
+\end{equation*}
+In our experiments, we set the hyperparameters $\lambda_{\cos}=20$ and $\beta_{\text{KL}}=0.005$, identical to the original implementation \citep{He2025-ip}.
+
+\subsection{Baseline: Discriminator-Based Deconfounding}
+To serve as a baseline for comparison, we implement a standard adversarial deconfounding approach using a discriminator network $h_\upsilon: \mathcal{Z}\rightarrow\mathcal{V}$, that attempts to predict the confounding variable $v \in \mathcal{V}$ (e.g., batch ID) from the latent embedding code $z \in \mathcal{Z}$. The discriminator is trained to minimize the prediction error (typically cross-entropy), effectively approximating the Jensen-Shannon divergence between confounding distributions from the data source, $\mathcal{D}$:
+\begin{equation*}
+    \min_\upsilon \mathbb{E}_{\tilde{x} \sim \mathcal{D}, z \sim q_\phi(z|\tilde{x})} \left[ \mathcal{L}_{\text{CE}}(h_\upsilon(z), v) \right]
+\end{equation*}
+
+where $\mathcal{L}_{\text{CE}}$ is the cross-entropy loss.
+
+The discriminator architecture consists of a three-layer Multi-Layer Perceptron (MLP) mapping from the sampled latent codes to a vector of probabilities for each batch ($\lvert z \rvert=256 \rightarrow 128 \rightarrow 128 \rightarrow \lvert \mathcal{V} \rvert$), with ReLU activations following the first two layers. The final linear layer outputs raw logits, which are subsequently passed through a log-softmax operation within the cross-entropy objective.
+
+\subsection{Multi-Headed Wasserstein Critic Formulation}
+To avoid the quadratic computational cost ($O(\lvert \mathcal{V} \rvert^2)$) of pairwise matching in multi-batch settings, we formulate a \textit{reference-based multi-headed critic}. We designate one batch as the \textit{reference} ($r$) and align all other source batches ($i \neq r$) to this biological ground truth. To measure the impact of reference choice, we perform sensitivity analysis by training with each batch as reference and compare the variance in results.
+
+We modify the critic network $C_\rho: \mathcal{Z} \to \mathbb{R}^{\lvert \mathcal{V} \rvert}$ to output a vector of scores. The $i$-th component, $C_\rho(z)_i$, outputs the Kantorovich potential (critic score) required to estimate the Wasserstein distance between batch $i$ and the reference batch. The critic is trained to maximize the estimated Wasserstein distance between the reference and source batches, finding the tightest Kantorovich-Rubinstein bound. In practice, this is implemented by minimizing the negative of the distance, regularized by a gradient penalty across all non-reference batches:
+\begin{equation*}
+    \mathcal{L}_C = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} \left( -\mathcal{W}_i + \lambda \mathcal{GP}_i \right)
+\end{equation*}
+where $\mathcal{W}_i$ represents the unconstrained Wasserstein distance estimation and $\mathcal{GP}_i$ is the gradient penalty for batch $i$:
+\begin{align*}
+    \mathcal{W}_i &= \mathbb{E}_{z \sim P_r} [C_\rho(z)_i] - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
+    \\
+    \mathcal{GP}_i &= \mathbb{E}_{z_{inter}} \left[ \left( \| \nabla_{z_{inter}} C_\rho(z_{inter})_i \|_2 - 1 \right)^2 \right] 
+\end{align*}
+where $\lambda$ is the gradient penalty coefficient (set to 10 in our experiments). To enforce the 1-Lipschitz constraint required by the Wasserstein-1 metric, we apply a Gradient Penalty (GP) \citep{10.5555/3295222.3295327} individually for each head. This penalty is evaluated on samples $z_{inter}$ interpolated uniformly along straight lines between the latent representations of the reference batch and the specific non-reference batch $i$: $z_{inter} = \epsilon z_i + (1 - \epsilon) z_r \text{, with } \epsilon \sim U[0, 1]$. We calculate this penalty on points interpolated strictly between the source batch and the reference batch to enforce the constraint along the relevant transport manifold. Crucially, to ensure this penalty remains well-defined, we employ a stratified sampling strategy that forces every mini-batch to contain samples from the reference distribution. This prevents the instability that arises if a mini-batch randomly lacks reference samples. 
+
+Simultaneously, the encoder network acts as the generator in this minimax game. While the critic maximizes the distance, the generator seeks to minimize it, thereby aligning the non-reference batches with the reference manifold. Because the generator has no influence over the reference batch distribution $P_r$ or the gradient penalty, it minimizes the Wasserstein distance strictly by maximizing the critic's score for its encoded source samples ($P_i$). Consequently, the generator's adversarial objective simplifies to:
+\begin{equation}
+    \mathcal{L}_{\text{adv}} = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
+    \label{eq:adv}
+\end{equation}
+By minimizing this term, the encoder forces the latent representations of the disjoint source batches to become indistinguishable from the reference manifold under the evaluation of the critic.
+
+We use a 10:1 (critic:encoder) update ratio, as the Wasserstein objective provides stable gradients even near optimality.
+
+\subsection{Final Objective}
+To evaluate the impact of the Wasserstein objective, we define two distinct total loss functions for the encoder network. In both configurations, the encoder optimizes the fixed backbone losses ($\mathcal{L}_{\text{VAE}}$), but the adversarial penalty varies depending on the chosen framework.
+
+For the baseline discriminator model, the encoder acts as a standard generator, minimizing the negative cross-entropy to maximize classification error and successfully confuse the discriminator:
+\begin{equation*}
+    \mathcal{L}_{\text{Total-CE}} = \mathcal{L}_{\text{VAE}} - \lambda_{\text{adv}} \mathcal{L}_{\text{CE}}
+\end{equation*}
+
+Conversely, for the Wasserstein critic formulation, the encoder acts as the generator, minimizing its specific adversarial component (Eq \ref{eq:adv}) to conceptually minimize the Wasserstein distance and align the latent distributions. Thus, the total encoder objective becomes strictly additive:
+\begin{equation*}
+    \mathcal{L}_{\text{Total-W}} = \mathcal{L}_{\text{VAE}} + \lambda_{\text{adv}} \mathcal{L}_{\text{adv}}
+\end{equation*}
+
+\subsection{Implementation, Training, and Model Selection}
+To evaluate performance across varying degrees of topological complexity and batch overlap, we utilized three standard benchmark datasets \citep{Luecken2022-fb}: \textbf{Pancreas} (9 batches), \textbf{Lung} (2 batches), and \textbf{Immune} (4 batches). All models were implemented in PyTorch and trained on a single NVIDIA RTX 4090 GPU using the Adam optimizer (learning rate = 0.001, $\beta_1=0.5, \beta_2=0.9$); the $\beta_1$ momentum parameter was intentionally reduced to stabilize adversarial dynamics. Models were trained with a batch size of 1024. Due to the multiple local updates required to enforce the Lipschitz constraint (10 critic updates per generator step), the Wasserstein-based models required approximately ~24\% more training time per epoch than the baseline discriminator (see detailed breakdown in Supplementary Figure S1 and Supplementary Table S1).
+
+To ensure stability, the Gradient Penalty weight was fixed at $\lambda_{GP}=10$ \citep{10.5555/3295222.3295327}, and we employed a warmup period for the first 10 epochs where $\lambda_{\text{adv}}=0$ and the adversary's weights were frozen. This allows for valid autoencoder reconstruction before adversarial alignment. We utilized class-balanced sampling with replacement across all experiments; this ensured equal representation of all source batches within each mini-batch, which both prevented mode collapse in smaller experimental batches and guaranteed well-defined interpolations for the Gradient Penalty. To prevent combinatorial explosion during training, triplet mining was capped at a maximum of 15 random positive pairs per cell-type per batch within each training step. Models were trained and evaluated using a nested cross-validation scheme (5 outer folds, 3 inner folds), where inner loops ran for 40 epochs and outer loops for 80 epochs. Hyperparameters were systematically selected to maximize the composite integration score, $(\text{iLISI} - 10*\text{cLISI})$, on held-out data, where the cLISI penalty is scaled by a factor of 10 to balance the magnitude of the respective metrics.
+
+\subsection{Experiments and Datasets}
+We conducted three targeted experiments to assess performance across varying levels of integration complexity:
+
+\begin{enumerate}
+    \item \textbf{Binary Integration (Fundamental Baseline):} We first restricted the problem to the two largest batches in each dataset, simplifying the multi-class problem to a foundational binary classification task.
+    \item \textbf{Multi-Batch Scalability:} To understand how the adversarial objectives scale with problem complexity, we incrementally increased the number of source batches from 2 to $\lvert \mathcal{V} \rvert$ (adding batches in descending order of size). The reference batch for these experiments was fixed to the largest batch in each respective dataset.
+    \item \textbf{Reference Sensitivity Analysis:} To evaluate the robustness of the multi-headed critic formulation, we exhaustively trained models using every possible batch as the reference target. This experiment determines whether the critic's integrative performance is strictly dependent on the specific topology and cellular density of the chosen reference.
+\end{enumerate}
+    
+\textbf{Confounding Scenarios.} For every experiment, we evaluated two distinct confounding scenarios to test robustness against covariate correlation:
+\begin{itemize}
+    \item \textbf{Balanced (Ideal):} We restricted the datasets to the intersection of shared cell types across all batches. In this scenario, batch and cell-type distributions are independent, representing an idealized integration task without biological confounding.
+    \item \textbf{Unbalanced (Realistic):} We utilized the raw datasets where cell type proportions vary significantly between batches. This introduces a strong correlation between batch and underlying biology, a scenario known to drive severe over-correction and the ablation of biological signal in standard adversarial deconfounding.
+\end{itemize}
+
+For every combination of dataset, experiment, and scenario, we trained both a discriminator-based and a Wasserstein critic-based VAE and evaluated performance on held-out test data. For statistical comparisons, we applied the corrected paired $t$-test \citep{Nadeau2003-vp} to account for the variance introduced by cross-validation overlap.
+
+\subsubsection{Data Preprocessing}
+Prior to downstream analysis, we applied standard quality control filters, removing cells expressing fewer than 300 genes and genes expressed in fewer than 5 cells. Feature selection was performed by identifying the top 2,000 highly variable genes (HVGs) using the standard Seurat dispersion method. To satisfy the dual-input requirements of our architecture, the raw count matrices for these selected HVGs were retained as the reconstruction target ($x$) for the negative binomial loss. For the encoder input ($\tilde{x}$), these counts were library-size normalized (scaled to $10^4$ reads per cell) and log1p-transformed ($\log(x+1)$).
+
+A summary of the dataset compositions, including the total number of cells and distinct sequencing technologies (batches), is provided in Table \ref{tab:batch_details}. A comprehensive breakdown is available in Supplementary Table S2.
+
+\begin{table*}[h!]
+\centering
+\caption{\textbf{Characteristics of the three scRNA-seq benchmark datasets.} The table details the batch composition for the Pancreas, Lung, and Immune datasets, including the specific sequencing technology or protocol, total cell count, and distinct cell type diversity per batch. These datasets span a wide range of protocols, establishing a highly heterogeneous testbed for evaluating batch effect correction.}
+\label{tab:batch_details}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrlrrlrr}
+\toprule
+\multicolumn{3}{c}{\textbf{Pancreas Dataset (9 Batches)}} & \multicolumn{3}{c}{\textbf{Lung Dataset (2 Batches)}} & \multicolumn{3}{c}{\textbf{Immune Dataset (4 Batches)}} \\
+\cmidrule(lr){1-3} \cmidrule(lr){4-6} \cmidrule(lr){7-9}
+\textbf{Tech} & \textbf{Cells} & \textbf{Types} & \textbf{Protocol} & \textbf{Cells} & \textbf{Types} & \textbf{Chemistry} & \textbf{Cells} & \textbf{Types} \\
+\midrule
+CEL-Seq & 1,004 & 13 & 10x Chromium & 22,771 & 16 & 10x & 8,829 & 10 \\
+CEL-Seq2 & 2,285 & 13 & Drop-Seq & 6,485 & 11 & Smart-seq2 & 1,022 & 4 \\
+Fluidigm C1 & 638 & 13 &  &  &  & 10x Chromium v2 & 12,928 & 16 \\
+inDrop-Seq V1 & 1,937 & 14 &  &  &  & 10x Chromium v3 & 10,727 & 12 \\
+inDrop-Seq V2 & 1,724 & 14 &  &  &  &  &  &  \\
+inDrop-Seq V3 & 3,605 & 14 &  &  &  &  &  &  \\
+inDrop-Seq V4 & 1,303 & 14 &  &  &  &  &  &  \\
+SMARTer & 1,492 & 4 &  &  &  &  &  &  \\
+Smart-Seq V2 & 2,394 & 13 &  &  &  &  &  &  \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+\subsubsection{Evaluation Framework}
+To strictly quantify the trade-off between removing confounding artifacts and preserving biological signal, we utilize a suite of complementary metrics. We categorize these into local and global measures to ensure our evaluation captures both fine-grained manifold alignment and macro-scale cluster structure. Before metric calculation, the 256-dimensional latent embeddings were reduced to 50 principal components using PCA to remove residual noise and standardize the dimensionality for distance calculations.
+
+\textbf{Local Metrics (Primary).} We prioritize the Local Inverse Simpson's Index (LISI) \citep{Korsunsky2019-kj} as our primary evaluation tool. Unlike global summary statistics, LISI provides a cell-specific measure of integration quality, allowing us to assess how well the model aligns distributions within the local neighborhood of each cell:
+
+\begin{itemize}
+    \item \textbf{iLISI (Integration):} Measures the effective number of batches in a cell's local neighborhood. Like cLISI, we scale this metric to the interval [0, 1] via the transformation $\frac{x - 1}{\lvert \mathcal{V} \rvert - 1}$, where $\lvert \mathcal{V} \rvert$ is the total number of batches. Higher values indicate superior mixing of distinct experimental batches.
+    \item \textbf{cLISI (Conservation):} Measures the effective number of cell types in a neighborhood. We scale this metric to the interval [0, 1] via the transformation $\frac{x - 1}{\lvert \mathcal{C} \rvert - 1}$, where $x$ is the raw LISI score and $\lvert \mathcal{C} \rvert$ is the total number of unique cell types in the dataset. Consequently, lower values indicate superior conservation, signifying that distinct cell types remain separated and are not erroneously merged.
+\end{itemize}
+
+LISI metrics were calculated with a perplexity of 30 and $k=90$ nearest neighbors \citep{Korsunsky2019-kj}.
+
+\textbf{Global Metrics (Secondary).} To assess macro-scale alignment, we employ standard metrics calculated using the \texttt{scib} Python framework \citep{Luecken2022-fb}. To ensure consistent interpretability, we utilize the scaled versions of these metrics, where \textit{higher values always indicate better performance}:
+\begin{itemize}
+    \item \textbf{ASW Batch (Integration):} The Batch Silhouette Width measures the degree of batch mixing. We report the absolute scaled value, $1 - \lvert\text{ASW}_{\text{batch}}\rvert$, normalized to the interval [0, 1]. A score of 1 indicates perfect batch mixing, while 0 indicates complete separation.
+    \item \textbf{ASW Cell Type (Conservation):} The Biological Silhouette Width measures the compactness of cell-type clusters. We report the standard silhouette width scaled to [0, 1], where 1 indicates perfectly distinct cell types and 0 indicates overlapping biological populations.
+    \item \textbf{ARI (Adjusted Rand Index):} Measures the agreement between latent clustering and true cell-type labels (0 indicates random assignment; 1 indicates a perfect match).
+    \item \textbf{PAGA Topology Preservation (Conservation):} Quantifies the preservation of the original biological manifold. We establish a baseline biological topology by computing the Partition-based Graph Abstraction (PAGA) \citep{Wolf2019-paga} connectivity matrix exclusively on unconfounded, single-technology batches in the raw PCA space. We then calculate the correlation between this baseline matrix and the PAGA matrix derived from the integrated latent space. Because neural networks non-linearly compress latent dimensions, absolute linear distances are inherently warped; therefore, we utilize the Spearman rank correlation coefficient ($r$) to accurately assess the preservation of the monotonic rank-order of biological neighborhoods. A higher score ($\rightarrow 1$) indicates the model successfully shielded the natural biological topology from artificial geometric collapse.
+\end{itemize}
+
+\textbf{Generalization to Unseen Data.} A critical component of our study is evaluating whether the adversarial alignment generalizes to new data. Unlike standard benchmarks that often evaluate on the training set, we compute all reported metrics on \textit{held-out test data}. Specifically, we project test cells into the learned latent space and construct a joint $k$-nearest neighbor graph containing both training and test cells. Metrics are then computed specifically for the test nodes, measuring how well unseen query cells integrate into the established reference manifold.
+
+\bibliographystyle{oup-abbrvnat}
+\bibliography{reference}
+\end{document}
