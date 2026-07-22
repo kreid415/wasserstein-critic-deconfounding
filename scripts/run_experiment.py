@@ -68,6 +68,9 @@ def main():
     ap.add_argument("--balance", action="store_true")
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--zdim", type=int, default=256)
+    ap.add_argument("--backbone", default=None,
+                    help="backbone for E1/E8 (default NB primary post-scCRAFT-drop); "
+                         "E2 sweeps its own set and ignores this")
     ap.add_argument("--data-root", default=None)
     ap.add_argument("--head", choices=["discriminator", "critic", "both"], default="both",
                     help="run only one adversarial head (lets E1 split into two shorter jobs)")
@@ -107,8 +110,11 @@ def main():
             if bool(cfg.get("critic")) != want_critic:
                 continue
         cfg = dict(cfg, epochs=args.epochs, z_dim=args.zdim)
+        # --backbone sets the E1/E8 backbone (E2 configs already carry their own).
+        if args.backbone is not None and "backbone" not in cfg:
+            cfg["backbone"] = args.backbone
         method = "critic" if cfg.get("critic") else "discriminator"
-        key = (method, cfg.get("backbone", "scCRAFT"), float(cfg["d_coef"]), int(cfg["seed"]))
+        key = (method, cfg.get("backbone", "NB"), float(cfg["d_coef"]), int(cfg["seed"]))
         if key in done:
             continue
         try:

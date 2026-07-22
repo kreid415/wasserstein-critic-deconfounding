@@ -34,6 +34,8 @@ def main():
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--data-root", default=None)
     ap.add_argument("--d-coef", type=float, default=0.2)
+    ap.add_argument("--backbone", default="NB",
+                    help="backbone (default NB, the post-scCRAFT-drop primary)")
     ap.add_argument("--resume", action="store_true",
                     help="skip (ref_design, seed) rows already present in --out")
     args = ap.parse_args()
@@ -69,7 +71,7 @@ def main():
                 continue
             try:
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
-                                      seed=seed, epochs=args.epochs, **cfg)
+                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg)
                 row.update({"experiment": "E4", "dataset": args.dataset, "ref_design": tag,
                             "balanced": args.balance, "n_batches": n_batches})
                 rows.append(row)

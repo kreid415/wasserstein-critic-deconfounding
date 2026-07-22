@@ -116,6 +116,8 @@ def main():
     ap.add_argument("--d-coef", type=float, default=0.2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--data-root", default=None)
+    ap.add_argument("--backbone", default="NB",
+                    help="backbone (default NB, the post-scCRAFT-drop primary)")
     args = ap.parse_args()
 
     os.makedirs(args.outdir, exist_ok=True)
@@ -138,7 +140,8 @@ def main():
         head = "critic" if critic else "discriminator"
         ad = adata.copy()
         vae, _ = train_one(ad, batch_key, critic=critic, d_coef=args.d_coef, seed=args.seed,
-                           reference_batch=0 if critic else None, epochs=args.epochs)
+                           reference_batch=0 if critic else None, epochs=args.epochs,
+                           backbone=args.backbone)
         obtain_embeddings(ad, vae.to(device))
         res = analyse_embedding(ad, "X_scCRAFT", batch_key, celltype_key)
         conf = celltype_confusion(ad.obsm["X_scCRAFT"], ad.obs[celltype_key].astype(str).values)
