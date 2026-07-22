@@ -109,6 +109,10 @@ def main():
             want_critic = args.head == "critic"
             if bool(cfg.get("critic")) != want_critic:
                 continue
+        # E2 fan-out: when --backbone names a config that E2 already carries, run ONLY
+        # that backbone's arm (one short job per backbone across idle CPU nodes).
+        if args.experiment == "E2" and args.backbone is not None and cfg.get("backbone") != args.backbone:
+            continue
         cfg = dict(cfg, epochs=args.epochs, z_dim=args.zdim)
         # --backbone sets the E1/E8 backbone (E2 configs already carry their own).
         if args.backbone is not None and "backbone" not in cfg:
