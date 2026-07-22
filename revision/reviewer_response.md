@@ -194,9 +194,17 @@ So the over-correction is **not** merely a tuning artifact removable by lowering
 there is no λ_adv at which the critic matches the discriminator's conservation at equal
 mixing — the critic's front is shifted toward mixing-over-conservation at every matched
 weight. We keep the trade-off claim but state it as a **Pareto-dominance result on the
-tested datasets**, not an "intrinsically worse" universal. See Figure E1
-(`fig_E1_pareto_immune.png`), `E1_immune_pareto.csv`. (Cross-species immune sweep is
-running and will be added as a second Pareto panel.)
+tested datasets**, not an "intrinsically worse" universal.
+
+On the **disjoint cross-species immune** task the Pareto front looks qualitatively
+different and even more damning for the critic: the critic's ARI is **pinned at ≈0.23 for
+every λ_adv > 0** (it destroys the cross-species cell-type structure as soon as it starts
+aligning and never recovers, even though it mixes hard — iLISI 0.58 already at λ=0.01),
+whereas the discriminator retains higher ARI (0.31–0.34) at low-to-moderate λ before it,
+too, is forced to over-mix on this genuinely non-overlapping data. So on disjoint data the
+critic's damage is immediate and λ-insensitive — lowering λ_adv does not rescue it. See
+Figure E1 (`fig_E1_pareto.png`, two panels: immune and cross-species),
+`E1_immune_pareto.csv`, `E1_xspecies_pareto.csv`.
 
 ### R2.3 — Feels like an ablation; mechanistic language (topology, reference bottleneck) outruns evidence
 
