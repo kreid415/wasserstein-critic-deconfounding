@@ -258,9 +258,16 @@ Adversarial deconfounding has become a cornerstone of deep learning-based batch 
 Our analysis indicates that the primary limitation of the Wasserstein objective in its isolated form is its propensity for biological over-correction. Future methodological developments must prioritize dynamic regularizers that prevent this topological collapse without sacrificing the robust optimization gradients provided by the Wasserstein metric.
 
 \section{Methods}
-To rigorously isolate the impact of the adversarial objective, we employ a fixed Variational Autoencoder (VAE) backbone from scCRAFT \citep{He2025-ip}. We hold the encoder, decoder, and auxiliary loss functions constant across all experiments, varying only the adversarial regularization mechanism (standard discriminator vs. Wasserstein critic). The total objective consists of four components: (1) a reconstruction loss, (2) a prior regularization loss, (3) a triplet loss to preserve local structure, and (4) the adversarial deconfounding loss. A simplified architecture is shown in Figure \ref{fig1}.
+Our method separates cleanly into two parts: a general adversarial deconfounding framework that operates entirely on the latent code $z$, and an autoencoder backbone that produces $z$ from gene expression. Because the adversarial head never sees gene space---it acts only on $z$---the framework is backbone-agnostic: any encoder can be substituted without changing the objective. We exploit this separation to isolate the adversarial objective (holding the backbone fixed, \S\ref{sec:framework}) and, separately, to test whether our findings depend on the specific backbone (varying it, \S\ref{sec:backbones}). We first define the framework, then the backbones, then implementation and evaluation.
 
-\subsection{Variational Autoencoder and Reconstruction Loss}
+\subsection{Adversarial deconfounding framework}\label{sec:framework}
+The task is to learn a latent representation $z$ in which cells are organized by biology but not by batch. We cast this as a two-player adversarial game over batch identity, played on the latent code. Let the encoder map each cell to $z$, and let the batches induce per-batch latent distributions $P_1,\dots,P_{\lvert\mathcal{V}\rvert}$. An adversarial \textit{head}, operating only on $z$, quantifies how distinguishable these batch distributions are through a measure $\mathcal{D}(P_1,\dots,P_{\lvert\mathcal{V}\rvert})$. The head is trained to \textit{maximize} $\mathcal{D}$ (make batches distinguishable), while the encoder acts as a generator trained to \textit{minimize} it (make batches indistinguishable---i.e.\ mix them)---subject to the backbone losses that keep $z$ faithful to biology:
+\begin{equation}
+    \min_{\text{encoder}}\ \max_{\text{head}}\quad \mathcal{L}_{\text{backbone}}(\text{encoder}) \;+\; \lambda_{\text{adv}}\,\mathcal{D}\big(P_1,\dots,P_{\lvert\mathcal{V}\rvert}\big),
+    \label{eq:framework}
+\end{equation}
+where $\mathcal{L}_{\text{backbone}}$ is the reconstruction and regularization loss of the chosen autoencoder (\S\ref{sec:backbones}) and $\lambda_{\text{adv}}$ weights the adversarial term. Minimizing $\mathcal{D}$ with respect to the encoder \textit{is} batch mixing; the heads below differ \textit{only} in the choice of $\mathcal{D}$ and how it is estimated, which is precisely what makes this a controlled comparison of adversarial objectives. A schematic of the framework and the interchangeable head is shown in Figure \ref{fig1}.
+
 \begin{figure}[t]
     \centering
     \includegraphics[width=\linewidth, trim=100pt 10pt 100pt 10pt, clip]{arch.png}
@@ -268,6 +275,62 @@ To rigorously isolate the impact of the adversarial objective, we employ a fixed
     \label{fig1}
 \end{figure}
 
+\subsubsection{Discriminator baseline (Jensen--Shannon divergence)}
+To serve as a baseline for comparison, we implement a standard adversarial deconfounding approach using a discriminator network $h_\upsilon: \mathcal{Z}\rightarrow\mathcal{V}$, that attempts to predict the confounding variable $v \in \mathcal{V}$ (e.g., batch ID) from the latent embedding code $z \in \mathcal{Z}$. The discriminator is trained to minimize the prediction error (typically cross-entropy), effectively approximating the Jensen-Shannon divergence between confounding distributions from the data source, $\mathcal{D}$:
+\begin{equation*}
+    \min_\upsilon \mathbb{E}_{\tilde{x} \sim \mathcal{D}, z \sim q_\phi(z|\tilde{x})} \left[ \mathcal{L}_{\text{CE}}(h_\upsilon(z), v) \right]
+\end{equation*}
+
+where $\mathcal{L}_{\text{CE}}$ is the cross-entropy loss.
+
+The discriminator architecture consists of a three-layer Multi-Layer Perceptron (MLP) mapping from the sampled latent codes to a vector of probabilities for each batch ($\lvert z \rvert=256 \rightarrow 128 \rightarrow 128 \rightarrow \lvert \mathcal{V} \rvert$), with ReLU activations following the first two layers. The final linear layer outputs raw logits, which are subsequently passed through a log-softmax operation within the cross-entropy objective.
+
+\subsubsection{Reference-based Wasserstein critic}\label{sec:refcritic}
+To avoid the quadratic computational cost ($O(\lvert \mathcal{V} \rvert^2)$) of pairwise matching in multi-batch settings, we formulate a \textit{reference-based multi-headed critic}. We designate one batch as the \textit{reference} ($r$) and align all other source batches ($i \neq r$) to this biological ground truth. To measure the impact of reference choice, we perform sensitivity analysis by training with each batch as reference and compare the variance in results.
+
+We modify the critic network $C_\rho: \mathcal{Z} \to \mathbb{R}^{\lvert \mathcal{V} \rvert}$ to output a vector of scores. The $i$-th component, $C_\rho(z)_i$, outputs the Kantorovich potential (critic score) required to estimate the Wasserstein distance between batch $i$ and the reference batch. The critic is trained to maximize the estimated Wasserstein distance between the reference and source batches, finding the tightest Kantorovich-Rubinstein bound. In practice, this is implemented by minimizing the negative of the distance, regularized by a gradient penalty across all non-reference batches:
+\begin{equation*}
+    \mathcal{L}_C = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} \left( -\mathcal{W}_i + \lambda \mathcal{GP}_i \right)
+\end{equation*}
+where $\mathcal{W}_i$ represents the unconstrained Wasserstein distance estimation and $\mathcal{GP}_i$ is the gradient penalty for batch $i$:
+\begin{align*}
+    \mathcal{W}_i &= \mathbb{E}_{z \sim P_r} [C_\rho(z)_i] - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
+    \\
+    \mathcal{GP}_i &= \mathbb{E}_{z_{inter}} \left[ \left( \| \nabla_{z_{inter}} C_\rho(z_{inter})_i \|_2 - 1 \right)^2 \right] 
+\end{align*}
+where $\lambda$ is the gradient penalty coefficient (set to 10 in our experiments). To enforce the 1-Lipschitz constraint required by the Wasserstein-1 metric, we apply a Gradient Penalty (GP) \citep{10.5555/3295222.3295327} individually for each head. This penalty is evaluated on samples $z_{inter}$ interpolated uniformly along straight lines between the latent representations of the reference batch and the specific non-reference batch $i$: $z_{inter} = \epsilon z_i + (1 - \epsilon) z_r \text{, with } \epsilon \sim U[0, 1]$. We calculate this penalty on points interpolated strictly between the source batch and the reference batch to enforce the constraint along the relevant transport manifold. Crucially, to ensure this penalty remains well-defined, we employ a stratified sampling strategy that forces every mini-batch to contain samples from the reference distribution. This prevents the instability that arises if a mini-batch randomly lacks reference samples. 
+
+Simultaneously, the encoder network acts as the generator in this minimax game. While the critic maximizes the distance, the generator seeks to minimize it, thereby aligning the non-reference batches with the reference manifold. Because the generator has no influence over the reference batch distribution $P_r$ or the gradient penalty, it minimizes the Wasserstein distance strictly by maximizing the critic's score for its encoded source samples ($P_i$). Consequently, the generator's adversarial objective simplifies to:
+\begin{equation}
+    \mathcal{L}_{\text{adv}} = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
+    \label{eq:adv}
+\end{equation}
+By minimizing this term, the encoder forces the latent representations of the disjoint source batches to become indistinguishable from the reference manifold under the evaluation of the critic.
+
+We use a 10:1 (critic:encoder) update ratio, as the Wasserstein objective provides stable gradients even near optimality.
+
+\subsubsection{Pooled and barycenter critic formulations}\label{sec:altcritic}
+% [FILL from E9 results: pooled (global-pool target, V-way joint) and barycenter
+%  (learnable Frechet-mean anchors) formulations; jobs E9_immune/pancreas/immune_hum_mou
+%  + E9scale_pancreas running. Describe D for each and the learnable-anchor optimization.]
+
+\subsubsection{Per-head encoder objectives}
+To evaluate the impact of the Wasserstein objective, we define two distinct total loss functions for the encoder network. In both configurations, the encoder optimizes the fixed backbone losses ($\mathcal{L}_{\text{VAE}}$), but the adversarial penalty varies depending on the chosen framework.
+
+For the baseline discriminator model, the encoder acts as a standard generator, minimizing the negative cross-entropy to maximize classification error and successfully confuse the discriminator:
+\begin{equation*}
+    \mathcal{L}_{\text{Total-CE}} = \mathcal{L}_{\text{VAE}} - \lambda_{\text{adv}} \mathcal{L}_{\text{CE}}
+\end{equation*}
+
+Conversely, for the Wasserstein critic formulation, the encoder acts as the generator, minimizing its specific adversarial component (Eq \ref{eq:adv}) to conceptually minimize the Wasserstein distance and align the latent distributions. Thus, the total encoder objective becomes strictly additive:
+\begin{equation*}
+    \mathcal{L}_{\text{Total-W}} = \mathcal{L}_{\text{VAE}} + \lambda_{\text{adv}} \mathcal{L}_{\text{adv}}
+\end{equation*}
+
+\subsection{Autoencoder backbones}\label{sec:backbones}
+The adversarial framework above is agnostic to how $z$ is produced. Our primary experiments use the scCRAFT VAE as the reference backbone; to test whether our findings depend on this choice, we additionally evaluate three alternative backbones that share the same encoder/decoder interface but differ in their generative assumptions, described per architecture below.
+
+\subsubsection{Reference backbone: scCRAFT}
 The model takes log1p-transformed gene expression data, $\tilde{x} = \log(1 + x)$, as input and aims to reconstruct the original count values, $x$. To account for the sparsity of genomic data, the model assumes the target data $x$ follows a negative binomial (NB) distribution. The encoder network, $q_\phi(z|\tilde{x})$, is a two-layer feedforward network that maps the input vector $\tilde{x}$ to a vector of size $512$, ($\lvert\tilde{x}\rvert \rightarrow 1024 \rightarrow 512$). This vector is fed into parallel linear layers that output the mean ($\mu$) and variance ($\sigma^2$), each of size $256$, which parameterize the latent normal distribution $Z \sim N(\mu, \sigma^2)$. Within the encoder, batch normalization layers and ReLU activations are applied after the hidden dense layers to ensure training stability.
 
 The decoder network reconstructs the count-based expression profile by combining the sampled latent code $z \sim Z$ with a one-hot encoded vector representing the known batch variable ID, $v$. This is achieved via two parallel networks $G_1$ and $G_2$:
@@ -307,53 +370,6 @@ Equations \ref{eq:nb}, \ref{eq:cos}, and \ref{eq:triplet} are summed with the Ku
     \label{eq:vae_total}
 \end{equation*}
 In our experiments, we set the hyperparameters $\lambda_{\cos}=20$ and $\beta_{\text{KL}}=0.005$, identical to the original implementation \citep{He2025-ip}.
-
-\subsection{Baseline: Discriminator-Based Deconfounding}
-To serve as a baseline for comparison, we implement a standard adversarial deconfounding approach using a discriminator network $h_\upsilon: \mathcal{Z}\rightarrow\mathcal{V}$, that attempts to predict the confounding variable $v \in \mathcal{V}$ (e.g., batch ID) from the latent embedding code $z \in \mathcal{Z}$. The discriminator is trained to minimize the prediction error (typically cross-entropy), effectively approximating the Jensen-Shannon divergence between confounding distributions from the data source, $\mathcal{D}$:
-\begin{equation*}
-    \min_\upsilon \mathbb{E}_{\tilde{x} \sim \mathcal{D}, z \sim q_\phi(z|\tilde{x})} \left[ \mathcal{L}_{\text{CE}}(h_\upsilon(z), v) \right]
-\end{equation*}
-
-where $\mathcal{L}_{\text{CE}}$ is the cross-entropy loss.
-
-The discriminator architecture consists of a three-layer Multi-Layer Perceptron (MLP) mapping from the sampled latent codes to a vector of probabilities for each batch ($\lvert z \rvert=256 \rightarrow 128 \rightarrow 128 \rightarrow \lvert \mathcal{V} \rvert$), with ReLU activations following the first two layers. The final linear layer outputs raw logits, which are subsequently passed through a log-softmax operation within the cross-entropy objective.
-
-\subsection{Multi-Headed Wasserstein Critic Formulation}
-To avoid the quadratic computational cost ($O(\lvert \mathcal{V} \rvert^2)$) of pairwise matching in multi-batch settings, we formulate a \textit{reference-based multi-headed critic}. We designate one batch as the \textit{reference} ($r$) and align all other source batches ($i \neq r$) to this biological ground truth. To measure the impact of reference choice, we perform sensitivity analysis by training with each batch as reference and compare the variance in results.
-
-We modify the critic network $C_\rho: \mathcal{Z} \to \mathbb{R}^{\lvert \mathcal{V} \rvert}$ to output a vector of scores. The $i$-th component, $C_\rho(z)_i$, outputs the Kantorovich potential (critic score) required to estimate the Wasserstein distance between batch $i$ and the reference batch. The critic is trained to maximize the estimated Wasserstein distance between the reference and source batches, finding the tightest Kantorovich-Rubinstein bound. In practice, this is implemented by minimizing the negative of the distance, regularized by a gradient penalty across all non-reference batches:
-\begin{equation*}
-    \mathcal{L}_C = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} \left( -\mathcal{W}_i + \lambda \mathcal{GP}_i \right)
-\end{equation*}
-where $\mathcal{W}_i$ represents the unconstrained Wasserstein distance estimation and $\mathcal{GP}_i$ is the gradient penalty for batch $i$:
-\begin{align*}
-    \mathcal{W}_i &= \mathbb{E}_{z \sim P_r} [C_\rho(z)_i] - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
-    \\
-    \mathcal{GP}_i &= \mathbb{E}_{z_{inter}} \left[ \left( \| \nabla_{z_{inter}} C_\rho(z_{inter})_i \|_2 - 1 \right)^2 \right] 
-\end{align*}
-where $\lambda$ is the gradient penalty coefficient (set to 10 in our experiments). To enforce the 1-Lipschitz constraint required by the Wasserstein-1 metric, we apply a Gradient Penalty (GP) \citep{10.5555/3295222.3295327} individually for each head. This penalty is evaluated on samples $z_{inter}$ interpolated uniformly along straight lines between the latent representations of the reference batch and the specific non-reference batch $i$: $z_{inter} = \epsilon z_i + (1 - \epsilon) z_r \text{, with } \epsilon \sim U[0, 1]$. We calculate this penalty on points interpolated strictly between the source batch and the reference batch to enforce the constraint along the relevant transport manifold. Crucially, to ensure this penalty remains well-defined, we employ a stratified sampling strategy that forces every mini-batch to contain samples from the reference distribution. This prevents the instability that arises if a mini-batch randomly lacks reference samples. 
-
-Simultaneously, the encoder network acts as the generator in this minimax game. While the critic maximizes the distance, the generator seeks to minimize it, thereby aligning the non-reference batches with the reference manifold. Because the generator has no influence over the reference batch distribution $P_r$ or the gradient penalty, it minimizes the Wasserstein distance strictly by maximizing the critic's score for its encoded source samples ($P_i$). Consequently, the generator's adversarial objective simplifies to:
-\begin{equation}
-    \mathcal{L}_{\text{adv}} = \frac{1}{\lvert \mathcal{V} \rvert-1} \sum_{\substack{i=1 \\ i \neq r}}^{\lvert \mathcal{V} \rvert} - \mathbb{E}_{z \sim P_i} [C_\rho(z)_i]
-    \label{eq:adv}
-\end{equation}
-By minimizing this term, the encoder forces the latent representations of the disjoint source batches to become indistinguishable from the reference manifold under the evaluation of the critic.
-
-We use a 10:1 (critic:encoder) update ratio, as the Wasserstein objective provides stable gradients even near optimality.
-
-\subsection{Final Objective}
-To evaluate the impact of the Wasserstein objective, we define two distinct total loss functions for the encoder network. In both configurations, the encoder optimizes the fixed backbone losses ($\mathcal{L}_{\text{VAE}}$), but the adversarial penalty varies depending on the chosen framework.
-
-For the baseline discriminator model, the encoder acts as a standard generator, minimizing the negative cross-entropy to maximize classification error and successfully confuse the discriminator:
-\begin{equation*}
-    \mathcal{L}_{\text{Total-CE}} = \mathcal{L}_{\text{VAE}} - \lambda_{\text{adv}} \mathcal{L}_{\text{CE}}
-\end{equation*}
-
-Conversely, for the Wasserstein critic formulation, the encoder acts as the generator, minimizing its specific adversarial component (Eq \ref{eq:adv}) to conceptually minimize the Wasserstein distance and align the latent distributions. Thus, the total encoder objective becomes strictly additive:
-\begin{equation*}
-    \mathcal{L}_{\text{Total-W}} = \mathcal{L}_{\text{VAE}} + \lambda_{\text{adv}} \mathcal{L}_{\text{adv}}
-\end{equation*}
 
 \subsection{Implementation, Training, and Model Selection}
 To evaluate performance across varying degrees of topological complexity and batch overlap, we utilized three standard benchmark datasets \citep{Luecken2022-fb}: \textbf{Pancreas} (9 batches), \textbf{Lung} (2 batches), and \textbf{Immune} (4 batches). All models were implemented in PyTorch and trained on a single NVIDIA RTX 4090 GPU using the Adam optimizer (learning rate = 0.001, $\beta_1=0.5, \beta_2=0.9$); the $\beta_1$ momentum parameter was intentionally reduced to stabilize adversarial dynamics. Models were trained with a batch size of 1024. Due to the multiple local updates required to enforce the Lipschitz constraint (10 critic updates per generator step), the Wasserstein-based models required approximately ~24\% more training time per epoch than the baseline discriminator (see detailed breakdown in Supplementary Figure S1 and Supplementary Table S1).
