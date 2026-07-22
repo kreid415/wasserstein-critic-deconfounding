@@ -1,20 +1,17 @@
 """wcd_vae package.
 
-Back-compatibility shims: the modules ``wcd_vae.data``, ``wcd_vae.hyperparameter``,
-``wcd_vae.metrics`` and ``wcd_vae.scCRAFT.model`` were relocated during the
-authored-vs-upstream refactor. The names below re-export from their new homes so
-existing scripts and notebooks keep importing the old paths. New code should import
-from ``wcd_vae.wcd`` (authored) or ``wcd_vae.scCRAFT`` (upstream backbone).
+All code is authored (K. Reid). Back-compatibility shims re-export the relocated
+modules ``wcd_vae.data``, ``wcd_vae.hyperparameter``, and ``wcd_vae.metrics`` from their
+homes under ``wcd_vae.wcd`` so existing scripts keep importing the old paths. New code
+should import from ``wcd_vae.wcd``.
 """
 import sys as _sys
 
 from wcd_vae.wcd import data as _data
 from wcd_vae.wcd import evaluation as _evaluation
 from wcd_vae.wcd import hyperparameter as _hyperparameter
-from wcd_vae.wcd import training as _training
 
 # Map legacy dotted module paths to the relocated modules.
 _sys.modules.setdefault("wcd_vae.data", _data)
 _sys.modules.setdefault("wcd_vae.metrics", _evaluation)
 _sys.modules.setdefault("wcd_vae.hyperparameter", _hyperparameter)
-_sys.modules.setdefault("wcd_vae.scCRAFT.model", _training)

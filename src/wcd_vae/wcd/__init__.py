@@ -1,7 +1,10 @@
-"""wcd — authored contribution: reference-based Wasserstein critic, adversarial-head
-dispatch, alternative backbones, training engine, evaluation metrics, and the
-CV/Pareto experiment harness. Distinct from the upstream scCRAFT backbone (see
-``wcd_vae.scCRAFT`` and scCRAFT/NOTICE)."""
+"""wcd — the complete authored codebase: adversarial critic/discriminator heads and
+their formulations, native VAE backbones (Gaussian/Poisson/NB/ZINB/LDVAE with a decoder
+batch-conditioning axis), core numerical primitives, the training engine, evaluation
+metrics, and the CV/Pareto experiment harness. The numerical primitives
+(``wcd.primitives``) are clean-room implementations validated against scvi-tools; the
+training engine and adversarial head were derived by modifying scCRAFT's originals and
+substantially rewritten (see each module's docstring for provenance)."""
 
 from wcd_vae.wcd.adversarial import Discriminator
 from wcd_vae.wcd.critic import (

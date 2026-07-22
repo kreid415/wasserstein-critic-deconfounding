@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 import scanpy as sc
 
-from wcd_vae.scCRAFT.utils import multi_resolution_cluster
 from wcd_vae.wcd.training import SCIntegrationModel, train_integration_model
 
 
@@ -25,7 +24,6 @@ def _toy():
     a.layers["counts"] = a.X.copy()
     sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
     sc.pp.log1p(a)
-    multi_resolution_cluster(a, resolution1=1, method="Leiden")
     return a
 
 
@@ -48,8 +46,8 @@ def test_barycenter_anchors_move():
                            seed=0, formulation="barycenter")
     assert m.D_Z.anchors is not None
     a0 = m.D_Z.anchors.detach().clone()
-    m.train_model(a, "batch", epochs=4, d_coef=0.2, kl_coef=0.005, triplet_coef=1,
-                  cos_coef=20, warmup_epoch=1, disc_iter=3, batch_size=128)
+    m.train_model(a, "batch", epochs=4, d_coef=0.2, kl_coef=0.005,
+                  warmup_epoch=1, disc_iter=3, batch_size=128)
     moved = float((m.D_Z.anchors.detach() - a0).abs().mean())
     assert moved > 1e-4, f"barycenter anchors did not move (moved={moved})"
 

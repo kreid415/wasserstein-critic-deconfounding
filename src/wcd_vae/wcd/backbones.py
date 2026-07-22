@@ -23,8 +23,7 @@ from torch.distributions import kl_divergence as kl
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 
-from wcd_vae.scCRAFT.networks import VAE as scCRAFTVAE  # noqa: N811
-from wcd_vae.scCRAFT.networks import log_nb_positive, reparameterize_gaussian
+from wcd_vae.wcd.primitives import gaussian_sample, nb_log_likelihood
 
 
 class _Encoder(nn.Module):
@@ -45,38 +44,13 @@ class _Encoder(nn.Module):
         x = self.relu(self.bn2(self.fc2(x)))
         q_m = self.fc_mean(x)
         q_v = torch.exp(torch.clamp(self.fc_var(x), max=15)) + 1e-4
-        z = reparameterize_gaussian(q_m, q_v)
+        z = gaussian_sample(q_m, q_v)
         return q_m, q_v, z
 
 
 def _kl_standard_normal(q_m, q_v):
     return kl(Normal(q_m, torch.sqrt(q_v)), Normal(torch.zeros_like(q_m), torch.ones_like(q_v))).sum(dim=1)
 
-
-
-# --- legacy scVI_NB (pre-pivot, retained for artifact replay) ---
-class ScviNBVAE(nn.Module):
-    """scVI-style NB VAE: NB decoder conditioned on batch, no scCRAFT batch-effect
-    residual pathway. Represents the mainstream NB-VAE design (R3.1)."""
-
-    def __init__(self, p_dim, v_dim, latent_dim):
-        super().__init__()
-        self.encoder = _Encoder(p_dim, latent_dim)
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_dim + v_dim, 512), nn.ReLU(),
-            nn.Linear(512, 1024), nn.ReLU(),
-        )
-        self.px_scale = nn.Linear(1024, p_dim)
-        self.px_r = nn.Linear(1024, p_dim)
-
-    def forward(self, x, x_raw, ec, warmup):
-        q_m, q_v, z = self.encoder(x, warmup)
-        h = self.decoder(torch.cat((z, ec), dim=-1))
-        px_scale = torch.exp(torch.clamp(self.px_scale(h), max=15, min=-15))
-        px_r = torch.exp(torch.clamp(self.px_r(h), max=15, min=-15))
-        reconst_loss = -log_nb_positive(x_raw, px_scale, px_r)
-        kl_div = _kl_standard_normal(q_m, q_v)
-        return reconst_loss, kl_div, z, px_scale
 
 
 # =============================================================================
@@ -187,7 +161,7 @@ class NBVAE(_NativeVAE):
     def forward(self, x, x_raw, ec, warmup):
         q_m, q_v, z = self.encoder(x, warmup)
         px_scale, px_r = self._decode(z, ec)
-        reconst_loss = -log_nb_positive(x_raw, px_scale, px_r)
+        reconst_loss = -nb_log_likelihood(x_raw, px_scale, px_r)
         kl_div = _kl_standard_normal(q_m, q_v)
         return reconst_loss, kl_div, z, px_scale
 
@@ -221,7 +195,7 @@ class ZinbVAE(_NativeVAE):
     @staticmethod
     def _log_zinb(x, mu, theta, pi_logit, eps=1e-8):
         softplus = nn.functional.softplus
-        nb_ll = log_nb_positive(x, mu, theta, eps=eps)
+        nb_ll = nb_log_likelihood(x, mu, theta, eps=eps)
         log_nb_zero = theta * (torch.log(theta + eps) - torch.log(theta + mu + eps))
         case_zero = softplus(-pi_logit + log_nb_zero) - softplus(-pi_logit)
         case_nonzero = -softplus(pi_logit) + nb_ll
@@ -245,20 +219,9 @@ BACKBONE_CONFIGS = {
     "LDVAE_uncond": (LDVAE,       {"conditioned": False}),
 }
 
-# Backward-compatible aliases (pre-pivot; scCRAFT recipe applied aux losses globally).
-BACKBONES = {
-    "scCRAFT": scCRAFTVAE,
-    "scVI_NB": ScviNBVAE,
-}
-
-
 def build_backbone(name, p_dim, v_dim, latent_dim):
-    """Factory: return an initialised backbone by config or legacy name."""
-    if name in BACKBONE_CONFIGS:
-        cls, kw = BACKBONE_CONFIGS[name]
-        return cls(p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim, **kw)
-    if name in BACKBONES:  # legacy path (scCRAFT / scVI_NB)
-        return BACKBONES[name](p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim)
-    raise KeyError(
-        f"Unknown backbone '{name}'. Known: {sorted(BACKBONE_CONFIGS) + sorted(BACKBONES)}"
-    )
+    """Factory: return an initialised backbone by config name."""
+    if name not in BACKBONE_CONFIGS:
+        raise KeyError(f"Unknown backbone '{name}'. Known: {sorted(BACKBONE_CONFIGS)}")
+    cls, kw = BACKBONE_CONFIGS[name]
+    return cls(p_dim=p_dim, v_dim=v_dim, latent_dim=latent_dim, **kw)

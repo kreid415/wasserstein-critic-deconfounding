@@ -1,7 +1,5 @@
 import scanpy as sc
 
-from wcd_vae.scCRAFT.utils import multi_resolution_cluster
-
 
 def prep_data(
     anndata_path,
@@ -76,13 +74,10 @@ def prep_data(
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, batch_key=batch_key)
         adata = adata[:, adata.var["highly_variable"]]
 
-    # WHY: the dual-resolution Leiden clustering is only needed as the triplet-loss
-    #      supervision for TRAINING; analyses that only need the PCA embedding (e.g.
-    #      E6 support-overlap) can skip this expensive step.
-    if cluster:
-        multi_resolution_cluster(adata, resolution1=1, method="Leiden")
-    else:
-        sc.tl.pca(adata, n_comps=50)
+    # PCA embedding is used as the PCR baseline in the metric suite. (The dual-resolution
+    #      Leiden clustering that formerly supervised a triplet loss is no longer used: the
+    #      native backbones train on reconstruction + KL only, so it has been removed.)
+    sc.tl.pca(adata, n_comps=50)
 
     # --- FINAL STEP: Determine Largest Batch Name from FINAL data ---
     largest_batch_name = adata.obs[batch_key].value_counts().idxmax()

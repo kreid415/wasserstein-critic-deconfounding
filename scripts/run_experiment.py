@@ -100,7 +100,7 @@ def main():
         prev = pd.read_csv(args.out)
         rows = prev.to_dict("records")
         for r in rows:
-            done.add((r["method"], r.get("backbone", "scCRAFT"), float(r["d_coef"]), int(r["seed"])))
+            done.add((r["method"], r.get("backbone", "NB"), float(r["d_coef"]), int(r["seed"])))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
     for i, cfg in enumerate(configs_for(args.experiment, entry)):

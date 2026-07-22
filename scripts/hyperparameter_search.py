@@ -4,7 +4,7 @@ import warnings
 from wcd_vae.data import prep_data
 from wcd_vae.hyperparameter import run_comprehensive_nested_cv
 
-from wcd_vae.scCRAFT.utils import set_seed
+from wcd_vae.wcd.primitives import seed_everything
 
 warnings.filterwarnings("ignore")
 
@@ -32,7 +32,7 @@ def main():
 
     args = parser.parse_args()
 
-    set_seed(42)
+    seed_everything(42)
 
     data_set = args.dataset.lower()
     output_dir = args.output_dir

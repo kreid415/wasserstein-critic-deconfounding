@@ -5,12 +5,11 @@ import numpy as np
 import pytest
 import scanpy as sc
 
-from wcd_vae.scCRAFT.utils import multi_resolution_cluster
-from wcd_vae.wcd.backbones import BACKBONE_CONFIGS, BACKBONES
+from wcd_vae.wcd.backbones import BACKBONE_CONFIGS
 from wcd_vae.wcd.training import train_integration_model
 
-# The rebuilt-E2 native backbones (likelihood x conditioning) plus legacy aliases.
-ALL_BACKBONES = list(BACKBONE_CONFIGS) + list(BACKBONES)
+# All native backbone configs (likelihood x decoder batch-conditioning).
+ALL_BACKBONES = list(BACKBONE_CONFIGS)
 
 
 def _toy():
@@ -28,7 +27,6 @@ def _toy():
     a.layers["counts"] = a.X.copy()
     sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
     sc.pp.log1p(a)
-    multi_resolution_cluster(a, resolution1=1, method="Leiden")
     return a
 
 

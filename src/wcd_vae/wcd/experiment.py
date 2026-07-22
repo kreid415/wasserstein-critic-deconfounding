@@ -22,9 +22,9 @@ import numpy as np
 import scanpy as sc
 import scib
 
-from wcd_vae.scCRAFT.utils import set_seed
 from wcd_vae.wcd.data import prep_data
 from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph
+from wcd_vae.wcd.primitives import seed_everything
 from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 # Metric taxonomy for the local-vs-global decomposition (E6 / R1.major.1).
@@ -95,9 +95,9 @@ def train_one(
 
     `critic` selects the adversarial head (True=reference-Wasserstein, False=JS
     discriminator). `d_coef` is lambda_adv. `backbone` (optional) selects an
-    alternative VAE for E2 (None -> scCRAFT default inside train_integration_model).
+    native VAE backbone name (None -> NB default inside train_integration_model).
     """
-    set_seed(seed)
+    seed_everything(seed)
     iters = disc_iter if disc_iter is not None else (10 if critic else 1)
     kwargs = {
         "batch_key": batch_key,
@@ -122,7 +122,7 @@ def full_metric_suite(
     adata,
     batch_key,
     celltype_key,
-    embed_key="X_scCRAFT",
+    embed_key="X_latent",
     perplexity=30,
     include=("kbet", "pcr", "isolated_asw"),
 ):
@@ -228,10 +228,10 @@ def evaluate_config(
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
-    metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_scCRAFT", **(metric_kwargs or {}))
+    metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_latent", **(metric_kwargs or {}))
     row = {
         "method": "critic" if critic else "discriminator",
-        "backbone": backbone or "scCRAFT",
+        "backbone": backbone or "NB",
         "d_coef": d_coef,
         "seed": seed,
         "reference_batch": reference_batch,

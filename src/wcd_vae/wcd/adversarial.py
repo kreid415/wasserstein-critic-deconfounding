@@ -5,16 +5,19 @@
 # HOW: A single MLP head (fc1->fc2->fc3) whose loss is either V-way CrossEntropy
 #      (JS-divergence discriminator) or the reference Wasserstein critic, selected
 #      by the ``critic`` flag; the WGAN gradient penalty is applied only in critic mode.
-Modified from scCRAFT's `discriminator` (renamed `Discriminator`); the critic branch,
-reference plumbing, and gradient-penalty call are authored additions.
+Provenance: the discriminator MLP scaffold was originally derived by modifying scCRAFT's
+discriminator (renamed ``Discriminator``); the critic branch, formulation dispatch,
+reference/anchor plumbing, and gradient-penalty call are authored additions, and the
+cross-entropy primitive it calls is the clean-room ``wcd.primitives.MultiClassCrossEntropy``.
+Not a clean-room reimplementation.
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 
-from wcd_vae.scCRAFT.networks import CrossEntropy
 from wcd_vae.wcd.critic import ReferenceWassersteinLoss, multi_class_gradient_penalty
+from wcd_vae.wcd.primitives import MultiClassCrossEntropy
 
 
 class Discriminator(nn.Module):
@@ -56,7 +59,7 @@ class Discriminator(nn.Module):
             )
         else:
             # If not using critic, use cross-entropy loss
-            self.loss = CrossEntropy()
+            self.loss = MultiClassCrossEntropy()
 
     def forward(self, x, batch_ids, generator=False, reference_batch=None):
         # Forward pass through layers

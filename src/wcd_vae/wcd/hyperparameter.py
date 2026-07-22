@@ -12,13 +12,13 @@ from scipy.stats import spearmanr
 from sklearn.model_selection import StratifiedKFold
 import torch
 
-from wcd_vae.scCRAFT.utils import set_seed
 from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph
+from wcd_vae.wcd.primitives import seed_everything
 from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 
 def compute_mean_paga_spearman(
-    adata, tech_key="tech", celltype_key="celltype", embed_key="X_scCRAFT", baseline_rep="X_pca"
+    adata, tech_key="tech", celltype_key="celltype", embed_key="X_latent", baseline_rep="X_pca"
 ):
     """
     Computes the mean Spearman correlation of PAGA connectivities
@@ -77,7 +77,7 @@ def compute_mean_paga_spearman(
         return np.mean(spearman_scores) if spearman_scores else 0.0
 
 
-def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_scCRAFT"):
+def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_latent"):
     """
     Helper function to calculate ASW_batch, ASW_celltype, ARI, and Graph Connectivity.
     Optimized to use existing embeddings and silence noisy output.
@@ -152,7 +152,7 @@ def run_comprehensive_nested_cv(
     on the final test set. Inner loops use only iLISI/cLISI for speed.
     """
 
-    set_seed(random_state)
+    seed_everything(random_state)
 
     num_adversarias = 2 if not skip_discr else 1
 
@@ -250,14 +250,14 @@ def run_comprehensive_nested_cv(
                         adata_inner_comb,
                         batch_key=batch_key,
                         type="embed",
-                        use_rep="X_scCRAFT",
+                        use_rep="X_latent",
                         subset_indices=inner_val_indices,
                     )
                     clisi_val = clisi_graph(
                         adata_inner_comb,
                         label_key=celltype_key,
                         type="embed",
-                        use_rep="X_scCRAFT",
+                        use_rep="X_latent",
                         subset_indices=inner_val_indices,
                     )
 
@@ -343,21 +343,21 @@ def run_comprehensive_nested_cv(
                 adata_outer_comb,
                 batch_key=batch_key,
                 type="embed",
-                use_rep="X_scCRAFT",
+                use_rep="X_latent",
                 subset_indices=test_indices,
             )
             test_clisi = clisi_graph(
                 adata_outer_comb,
                 label_key=celltype_key,
                 type="embed",
-                use_rep="X_scCRAFT",
+                use_rep="X_latent",
                 subset_indices=test_indices,
             )
 
             # 2. Calculate expensive scib metrics here
             test_asw_batch, test_asw_celltype, test_ari, test_graph_conn, test_paga_correlation = (
                 calculate_additional_metrics(
-                    adata_test_only, batch_key, celltype_key, embed_key="X_scCRAFT"
+                    adata_test_only, batch_key, celltype_key, embed_key="X_latent"
                 )
             )
 

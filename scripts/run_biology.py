@@ -143,8 +143,8 @@ def main():
                            reference_batch=0 if critic else None, epochs=args.epochs,
                            backbone=args.backbone)
         obtain_embeddings(ad, vae.to(device))
-        res = analyse_embedding(ad, "X_scCRAFT", batch_key, celltype_key)
-        conf = celltype_confusion(ad.obsm["X_scCRAFT"], ad.obs[celltype_key].astype(str).values)
+        res = analyse_embedding(ad, "X_latent", batch_key, celltype_key)
+        conf = celltype_confusion(ad.obsm["X_latent"], ad.obs[celltype_key].astype(str).values)
         confusions[head] = conf
         conf.to_csv(os.path.join(args.outdir, f"confusion_{args.dataset}_{head}.csv"))
         for ct, p in res["purity_per_celltype"].items():

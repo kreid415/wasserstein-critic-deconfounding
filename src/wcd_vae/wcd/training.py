@@ -1,15 +1,21 @@
 """Adversarial-deconfounding training engine — AUTHORED CONTRIBUTION (K. Reid).
 
-# WHY: Train the VAE backbone against an adversarial head so the latent space is
-#      mixed across batches while cell-type structure (triplet + cosine terms) is kept.
-# HOW: Alternating optimisation — a stratified sampler guarantees the reference batch
-#      appears in every mini-batch (required for a stable critic gradient penalty),
-#      the head takes ``disc_iter`` steps, then the generator/VAE takes one step with
-#      the adversarial term weighted by ``d_coef`` (= lambda_adv).
-Modified from scCRAFT's SCIntegrationModel (upstream had a single dataloader and a
-discriminator-only loop); the reference-batch handling, stratified epoch sampler,
-per-batch adversarial step, and critic support are authored. The backbone is injected,
-so this engine trains any ``wcd.backbones`` architecture unchanged.
+# WHY: Train a VAE backbone against an adversarial head so the latent space mixes
+#      batches while its reconstruction likelihood preserves biology. The backbone loss
+#      is reconstruction + KL only; the adversarial head is the sole shared component
+#      across backbones, which isolates the objective under study.
+# HOW: Alternating optimisation — a stratified epoch sampler guarantees the reference
+#      batch appears in every mini-batch (required for a stable critic gradient penalty);
+#      the head takes ``disc_iter`` steps, then the encoder/generator takes one step
+#      minimising L_backbone + lambda_adv * L_adv (lambda_adv = ``d_coef``, zero in warmup).
+The backbone is injected, so this engine trains any ``wcd.backbones`` architecture
+unchanged. Provenance: the training-loop scaffold was originally derived by modifying
+scCRAFT's ``SCIntegrationModel`` (a single-dataloader, discriminator-only loop) and has
+since been substantially rewritten — reference-batch handling, the stratified epoch
+sampler, the per-batch adversarial step, critic support, the backbone-agnostic objective
+(reconstruction + KL only), and removal of the triplet/cosine terms are authored. It is
+not a clean-room reimplementation; the numerical primitives it calls (see
+``wcd.primitives``) are.
 """
 
 import time
@@ -19,17 +25,11 @@ import scipy
 from sklearn.decomposition import PCA
 import torch
 import torch.nn as nn
-import torch.nn.functional as F  # noqa: N812
 import torch.optim as optim
 
-from wcd_vae.scCRAFT.networks import VAE
-from wcd_vae.scCRAFT.utils import (
-    create_triplets,
-    generate_adata_to_dataloader,
-    set_seed,
-    weights_init_normal,
-)
 from wcd_vae.wcd.adversarial import Discriminator
+from wcd_vae.wcd.backbones import build_backbone
+from wcd_vae.wcd.primitives import inference_dataloader, init_batchnorm_weights, seed_everything
 
 
 class SCIntegrationModel(nn.Module):
@@ -55,15 +55,9 @@ class SCIntegrationModel(nn.Module):
         # formulation selects the critic alignment target: reference | pooled | barycenter.
         self.formulation = formulation
 
-        # WHY: E2 swaps only the z-producing backbone while holding the adversarial head
-        #      fixed; HOW: backbone=None keeps the upstream scCRAFT VAE (reference),
-        #      otherwise build the named alternative sharing the same forward contract.
-        if backbone is None or backbone == "scCRAFT":
-            self.VAE = VAE(p_dim=self.p_dim, v_dim=self.v_dim, latent_dim=self.z_dim)
-        else:
-            from wcd_vae.wcd.backbones import build_backbone
-
-            self.VAE = build_backbone(backbone, self.p_dim, self.v_dim, self.z_dim)
+        # WHY: the adversarial head is held fixed while the z-producing backbone varies;
+        #      HOW: build the named native VAE. NB (conditioned) is the primary backbone.
+        self.VAE = build_backbone(backbone or "NB", self.p_dim, self.v_dim, self.z_dim)
         self.D_Z = Discriminator(
             n_input=self.z_dim,
             domain_number=self.v_dim,
@@ -77,9 +71,9 @@ class SCIntegrationModel(nn.Module):
         self.D_Z.to(self.device)
 
         if seed is not None:
-            set_seed(seed)
-        self.VAE.apply(weights_init_normal)
-        self.D_Z.apply(weights_init_normal)
+            seed_everything(seed)
+        self.VAE.apply(init_batchnorm_weights)
+        self.D_Z.apply(init_batchnorm_weights)
 
     def _prepare_tensors(self, adata, batch_key, reference_batch_name_str=None):
         """
@@ -120,22 +114,16 @@ class SCIntegrationModel(nn.Module):
 
         # Create tensors (initially on CPU)
         batch_tensor = torch.tensor(batch_indices, dtype=torch.int64)
-        label1_tensor = torch.tensor(adata.obs["leiden1"].cat.codes.values, dtype=torch.int64)
-        label2_tensor = torch.tensor(adata.obs["leiden2"].cat.codes.values, dtype=torch.int64)
 
         # Move to device (e.g., GPU)
         X_tensor = X_tensor.to(self.device)
         batch_tensor = batch_tensor.to(self.device)
-        label1_tensor = label1_tensor.to(self.device)
-        label2_tensor = label2_tensor.to(self.device)
         X_raw_tensor = X_raw_tensor.to(self.device)
 
         data_dict = {
             "X": X_tensor,
             "X_raw": X_raw_tensor,
             "batch_labels": batch_tensor,
-            "l1": label1_tensor,
-            "l2": label2_tensor,
         }
 
         # Pre-calculate indices for each batch for fast sampling
@@ -217,64 +205,35 @@ class SCIntegrationModel(nn.Module):
         """
         Performs the forward and backward pass for a single mini-batch.
         """
-        x, x_raw, v, labels_low, labels_high = batch_data
+        x, x_raw, v = batch_data
         opt_g, opt_d = optimizers
-        d_coef, kl_coef, triplet_coef, cos_coef, disc_iter = params
+        d_coef, kl_coef, disc_iter = params
 
         batch_size = x.size(0)
         v_true = v
         v_one_hot = torch.zeros(batch_size, self.v_dim, device=self.device)
         v_one_hot.scatter_(1, v.unsqueeze(1), 1)
 
-        # 1. VAE Forward Pass
-        reconst_loss, kl_divergence, z, x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
-
-        # WHY (de-scCRAFT rebuild): the cosine + triplet auxiliary losses are scCRAFT's
-        #      training recipe, not universal. Each backbone declares which it natively
-        #      uses via `aux_losses`; native VAEs (Gaussian/Poisson/NB/ZINB/LDVAE) declare
-        #      () so ONLY reconstruction + KL applies, leaving the adversarial head as the
-        #      sole globally-fixed component. Legacy scCRAFT has no attribute -> full recipe.
-        aux = getattr(self.VAE, "aux_losses", ("cosine", "triplet"))
-        if "cosine" in aux:
-            loss_cos = (
-                1 - torch.sum(F.normalize(torch.log1p(x_tilde), p=2) * F.normalize(x, p=2), 1)
-            ).mean()
-        else:
-            loss_cos = torch.zeros((), device=self.device)
-        self._use_triplet = "triplet" in aux
+        # 1. VAE forward pass -> backbone loss L_backbone = reconstruction + KL.
+        #    Each backbone owns its reconstruction likelihood; no shared auxiliary terms.
+        reconst_loss, kl_divergence, z, _x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
         loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
-        # 2. Discriminator Steps
+        # 2. Adversary (critic/discriminator) updates on detached z.
         for _ in range(disc_iter):
             opt_d.zero_grad()
-            loss_d_z, gp = self.D_Z(
-                z.detach(), v_true, reference_batch=reference_batch_idx
-            )  # D_Z handles 'critic' flag internally
+            loss_d_z, gp = self.D_Z(z.detach(), v_true, reference_batch=reference_batch_idx)
             loss_d_z += gp
             if not warmup:
                 loss_d_z.backward(retain_graph=True)
                 opt_d.step()
 
-        # 3. Generator/VAE Update
+        # 3. Encoder/generator update: minimize L_backbone + lambda_adv * L_adv
+        #    (the framework objective; lambda_adv = d_coef, zeroed during warmup).
         opt_g.zero_grad()
         loss_da, gp = self.D_Z(z, v_true, reference_batch=reference_batch_idx)
-        if getattr(self, "_use_triplet", True):
-            triplet_loss = create_triplets(z, labels_low, labels_high, v_true, margin=5)
-        else:
-            triplet_loss = torch.zeros((), device=self.device)
-
-        if warmup:
-            all_loss = (
-                -0 * loss_da + 1 * loss_vae + triplet_coef * triplet_loss + cos_coef * loss_cos
-            )
-        else:
-            all_loss = (
-                -d_coef * loss_da
-                + 1 * loss_vae
-                + triplet_coef * triplet_loss
-                + cos_coef * loss_cos
-            )
-
+        lam = 0.0 if warmup else d_coef
+        all_loss = loss_vae - lam * loss_da
         all_loss.backward()
         opt_g.step()
 
@@ -287,7 +246,6 @@ class SCIntegrationModel(nn.Module):
         return (
             all_loss,
             loss_da,
-            triplet_loss,
             loss_vae,
             reconst_loss.mean(),
             reconst_loss_non_zero,
@@ -300,8 +258,6 @@ class SCIntegrationModel(nn.Module):
         epochs,
         d_coef,
         kl_coef,
-        triplet_coef,
-        cos_coef,
         warmup_epoch,
         disc_iter,
         batch_size=1024,
@@ -311,7 +267,6 @@ class SCIntegrationModel(nn.Module):
         training_history = {
             "all_loss": [],
             "loss_da": [],
-            "triplet_loss": [],
             "loss_vae": [],
             "reconst_loss": [],
             "reconst_loss_non_zero": [],
@@ -367,7 +322,6 @@ class SCIntegrationModel(nn.Module):
             epoch_vae = 0
             epoch_critic = 0
             epoch_gen_adv = 0
-            epoch_triplet = 0
             epoch_total = 0
             epoch_reconst_non_zero = 0
             batch_count = 0
@@ -379,7 +333,7 @@ class SCIntegrationModel(nn.Module):
             total_samples = len(train_idxs)
 
             warmup = epoch < warmup_epoch
-            params = (d_coef, kl_coef, triplet_coef, cos_coef, disc_iter)
+            params = (d_coef, kl_coef, disc_iter)
 
             # E4: resolve the reference batch index used for THIS epoch.
             if reference_batch_idx is None:
@@ -401,11 +355,9 @@ class SCIntegrationModel(nn.Module):
                     data_dict["X"][mb_idxs],
                     data_dict["X_raw"][mb_idxs],
                     train_v[i:end],
-                    data_dict["l1"][mb_idxs],
-                    data_dict["l2"][mb_idxs],
                 )
 
-                all_loss, loss_da, triplet_loss, loss_vae, reconst_loss, reconst_loss_non_zero = (
+                all_loss, loss_da, loss_vae, reconst_loss, reconst_loss_non_zero = (
                     self._train_batch(batch_data, optimizers, params, warmup, epoch_ref_idx)
                 )
 
@@ -415,13 +367,11 @@ class SCIntegrationModel(nn.Module):
                 epoch_vae += loss_vae.item()
                 epoch_critic += reconst_loss.item()
                 epoch_reconst_non_zero += reconst_loss_non_zero.item()
-                epoch_triplet += triplet_loss.item()
                 batch_count += 1
 
             # Average losses for the epoch
             training_history["all_loss"].append(epoch_total / batch_count)
             training_history["loss_da"].append(epoch_gen_adv / batch_count)
-            training_history["triplet_loss"].append(epoch_triplet / batch_count)
             training_history["loss_vae"].append(epoch_vae / batch_count)
             training_history["reconst_loss"].append(epoch_critic / batch_count)
             training_history["reconst_loss_non_zero"].append(epoch_reconst_non_zero / batch_count)
@@ -439,8 +389,6 @@ def train_integration_model(
     epochs=150,
     d_coef=0.2,
     kl_coef=0.005,
-    triplet_coef=1,
-    cos_coef=20,
     warmup_epoch=5,
     critic=False,
     scale=None,
@@ -477,8 +425,6 @@ def train_integration_model(
         epochs=epochs,
         d_coef=d_coef,
         kl_coef=kl_coef,
-        triplet_coef=triplet_coef,
-        cos_coef=cos_coef,
         warmup_epoch=warmup_epoch,
         disc_iter=disc_iter,
         reference_batch_name_str=reference_batch_name_str,
@@ -494,10 +440,10 @@ def train_integration_model(
 
 def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
     if seed is not None:
-        set_seed(seed)
+        seed_everything(seed)
 
     vae.eval()
-    data_loader = generate_adata_to_dataloader(adata)
+    data_loader = inference_dataloader(adata)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     all_z = []
     all_indices = []
@@ -514,13 +460,13 @@ def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
     all_z_np = all_z_reordered.cpu().detach().numpy()
 
     # Create anndata object with reordered embeddings
-    adata.obsm["X_scCRAFT"] = all_z_np
+    adata.obsm["X_latent"] = all_z_np
 
     if pca:
         pca_model = PCA(n_components=dim)
         # Fit and transform the data
-        x_sccraft_pca = pca_model.fit_transform(adata.obsm["X_scCRAFT"])
+        x_latent_pca = pca_model.fit_transform(adata.obsm["X_latent"])
         # Store the PCA-reduced data back into adata.obsm
-        adata.obsm["X_scCRAFT"] = x_sccraft_pca
+        adata.obsm["X_latent"] = x_latent_pca
 
     return adata
