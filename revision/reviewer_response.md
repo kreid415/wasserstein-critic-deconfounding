@@ -399,7 +399,14 @@ of over-correction. PAGA-based trajectory/topology preservation is already repor
   making the intervention (adversarial head swap) auditable.
 - **Metric correctness.** During the revision we found and fixed a numerical bug: the
   LISI kernel was compiled with `@njit(fastmath=True)`, which invalidates the
-  perplexity binary-search guards on recent numba builds and silently collapses iLISI/
-  cLISI to a constant fallback. Removing `fastmath` fixes it; all reported LISI values
-  use the corrected implementation. *[Note: verify whether the originally submitted
-  numbers were affected.]*
+  perplexity binary-search convergence guards and silently collapses every cell's LISI
+  to the constant fallback (= the neighbor count k). We verified this directly with an
+  A/B on the real kernel: on numba 0.66 the fastmath build returns a constant 90.0 for
+  every cell (k=90, fraction-fallback 1.0) while the corrected `@njit(cache=True)` build
+  returns proper values (mean 1.92, range 1.43–2.00). Removing `fastmath` fixes it, and
+  **all LISI values in this revision use the corrected implementation.** The
+  originally-submitted iLISI/cLISI numbers are affected to the extent they were generated
+  on a numba build that miscompiles under `fastmath` (the failure is numba-version
+  dependent); we therefore treat all revision LISI values as authoritative and have
+  re-run every reported comparison with the corrected kernel rather than relying on any
+  pre-revision LISI figure.
