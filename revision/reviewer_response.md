@@ -317,11 +317,15 @@ Wasserstein objective is motivated at all. See `E3_external_baselines.csv`,
 ### R3.2 — Robustness to architecture/hyperparameters (depth, latent dim, loss weights)
 
 **Response (E2 capacity sweep).** Beyond backbone identity we vary latent
-dimensionality (z_dim ∈ {32, 128, 256}) on immune, both heads, holding everything else
-fixed, to test whether the trade-off is intrinsic or a capacity artifact. *[Numbers to be
-inserted from the running z_dim={32,128} jobs; the z_dim=256 point is the main E2 result.
-Expectation stated as hypothesis until filled: if ΔcLISI>0 and ΔARI<0 persist at every
-z_dim, the trade-off is not a capacity artifact.]*
+dimensionality (z_dim ∈ {128, 256}) on immune, both heads (scCRAFT backbone), holding
+everything else fixed. **The trade-off is capacity-invariant, not a capacity artifact.**
+The critic's degradation relative to the discriminator is essentially the same at both
+capacities: at z_dim=128, ΔcLISI = +0.012 and ΔARI = −0.201 (critic ARI 0.409 vs
+discriminator 0.610); at z_dim=256, ΔcLISI = +0.017 and ΔARI = −0.184 (critic 0.429 vs
+0.613). Reducing latent dimensionality does not close the gap. (We attempted z_dim=32 as a
+third point but the scIB scoring path requires ≥50 embedding dimensions for its internal
+PCA, so 32 is not measurable with the same suite; the 128↔256 comparison already spans a
+2× capacity range with a flat conclusion.) See `E2_capacity_sweep.csv`.
 
 ### R3.3 — Provide practical guidance / mitigation
 
@@ -361,9 +365,16 @@ were de-scoped for this revision by mutual agreement.)*
 ~11k and large ~85k cell datasets). The data prep uses a modality-aware branch (ATAC skips
 RNA-specific QC/HVG, keeps counts+normalize+log1p). We further confirmed via E6 that both
 ATAC datasets exhibit the disjoint-support condition (separability 0.68/0.91, kNN
-cross-batch fraction 0.12/0.17). A critic-vs-discriminator comparison on both ATAC datasets
-is running. *[Fill the ΔcLISI/ΔARI once the ATAC E2 jobs land; state whether the trade-off
-transfers to the ATAC modality.]*
+cross-batch fraction 0.12/0.17). **The trade-off transfers to the ATAC modality.** On both
+ATAC datasets (scCRAFT backbone, 3 seeds) the critic shows its characteristic local
+cell-type degradation — cLISI rises (worse) relative to the discriminator by +0.027 on
+atac-small and +0.027 on atac-large — while ARI is equal-or-worse (atac-small ΔARI 0.000 at
++0.227 iLISI over-mixing; atac-large ΔARI −0.031 at matched mixing). ATAC ARI is low overall
+for both heads (~0.13–0.19) because the gene-activity integration task is intrinsically
+harder, but the critic-vs-discriminator direction is the same as on RNA. See
+`E2_atac_tradeoff.csv`. (The 85k-cell atac-large E2 run exceeded its wall after completing
+the scCRAFT backbone for both heads, which is the comparison reported here; the remaining
+backbones were de-scoped as secondary.)
 
 ### R3.minor.2 — Downstream analyses (DE, trajectory, label transfer)
 
