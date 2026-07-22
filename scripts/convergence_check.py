@@ -21,7 +21,7 @@ def main():
 
     with open(args.registry) as fh:
         registry = json.load(fh)
-    adata, batch_key, celltype_key, _ = load_task(
+    adata, batch_key, _celltype_key, _ = load_task(
         args.dataset, data_root=args.data_root, registry=registry,
     )
     print(f"[{args.dataset}] n_obs={adata.n_obs} n_batches={adata.obs[batch_key].nunique()}",
