@@ -270,8 +270,8 @@ where $\mathcal{L}_{\text{backbone}}$ is the reconstruction and regularization l
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\linewidth, trim=100pt 10pt 100pt 10pt, clip]{arch.png}
-    \caption{\textbf{Experimental Architecture.} To isolate the impact of the adversarial objective, we employ a fixed VAE backbone. We systematically swap the adversarial regularizer between a standard discriminator and Wasserstein critic to compare their efficacy in removing confounding information.}
+    \includegraphics[width=\linewidth]{arch_redrawn.png}
+    \caption{\textbf{Experimental architecture.} A variational autoencoder encodes expression $X$ into a latent code $z$ and reconstructs $\hat{X}$; the decoder is optionally conditioned on the batch label $v$. A single adversarial head attached to $z$ removes batch information --- exactly one objective per model, either a discriminator (a $\lvert\mathcal{V}\rvert$-way classifier trained by multi-class cross-entropy, approximating the Jensen--Shannon divergence) or a Wasserstein critic (a multi-headed network constrained 1-Lipschitz by a gradient penalty; we evaluate several critic formulations that differ in what each batch is aligned to). We compare the two heads across a panel of VAE backbones (Table~\ref{tab:backbones}).}
     \label{fig1}
 \end{figure}
 
