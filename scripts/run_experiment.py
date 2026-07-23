@@ -96,11 +96,16 @@ def main():
     # resume: load already-computed configs so a re-run skips them.
     done = set()
     rows = []
-    if args.resume and os.path.exists(args.out):
-        prev = pd.read_csv(args.out)
-        rows = prev.to_dict("records")
-        for r in rows:
-            done.add((r["method"], r.get("backbone", "NB"), float(r["d_coef"]), int(r["seed"])))
+    if args.resume and os.path.exists(args.out) and os.path.getsize(args.out) > 0:
+        try:
+            prev = pd.read_csv(args.out)
+        except pd.errors.EmptyDataError:
+            prev = None
+        if prev is not None and len(prev) > 0:
+            rows = prev.to_dict("records")
+            for r in rows:
+                done.add((r["method"], r.get("backbone", "NB"), float(r["d_coef"]),
+                          int(r["seed"])))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
     for i, cfg in enumerate(configs_for(args.experiment, entry)):

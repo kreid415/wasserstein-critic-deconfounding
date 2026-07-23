@@ -57,11 +57,15 @@ def main():
     # WHY: cross-species (98k cells) can exceed the wall; --resume lets a follow-up job
     #      skip (tag, seed) rows already present so we only compute the remainder.
     done_keys = set()
-    if getattr(args, "resume", False) and os.path.exists(args.out):
-        prev = pd.read_csv(args.out)
-        rows.extend(prev.to_dict("records"))
-        if "ref_design" in prev.columns and "seed" in prev.columns:
-            done_keys = {(str(t), int(s)) for t, s in zip(prev["ref_design"], prev["seed"])}
+    if getattr(args, "resume", False) and os.path.exists(args.out) and os.path.getsize(args.out) > 0:
+        try:
+            prev = pd.read_csv(args.out)
+        except pd.errors.EmptyDataError:
+            prev = None
+        if prev is not None and len(prev) > 0:
+            rows.extend(prev.to_dict("records"))
+            if "ref_design" in prev.columns and "seed" in prev.columns:
+                done_keys = {(str(t), int(s)) for t, s in zip(prev["ref_design"], prev["seed"])}
         print(f"[resume] loaded {len(rows)} existing rows; {len(done_keys)} (tag,seed) done", flush=True)
 
     def run(tag, **cfg):

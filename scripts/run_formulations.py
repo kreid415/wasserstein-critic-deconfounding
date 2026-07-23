@@ -62,15 +62,19 @@ def main():
 
     rows = []
     done_keys = set()
-    if args.resume and os.path.exists(args.out):
-        prev = pd.read_csv(args.out)
-        rows.extend(prev.to_dict("records"))
-        if "formulation" in prev.columns and "method" in prev.columns and "seed" in prev.columns:
-            # tag = discriminator when method==discriminator else the formulation
-            done_keys = {
-                (("discriminator" if m == "discriminator" else f), int(s))
-                for m, f, s in zip(prev["method"], prev["formulation"], prev["seed"])
-            }
+    if args.resume and os.path.exists(args.out) and os.path.getsize(args.out) > 0:
+        try:
+            prev = pd.read_csv(args.out)
+        except pd.errors.EmptyDataError:
+            prev = None
+        if prev is not None and len(prev) > 0:
+            rows.extend(prev.to_dict("records"))
+            if "formulation" in prev.columns and "method" in prev.columns and "seed" in prev.columns:
+                # tag = discriminator when method==discriminator else the formulation
+                done_keys = {
+                    (("discriminator" if m == "discriminator" else f), int(s))
+                    for m, f, s in zip(prev["method"], prev["formulation"], prev["seed"])
+                }
         print(f"[resume] loaded {len(rows)} rows; {len(done_keys)} (arm,seed) done", flush=True)
 
     selected = set(args.arms.split(",")) if args.arms else {a for a, _ in ARMS}
