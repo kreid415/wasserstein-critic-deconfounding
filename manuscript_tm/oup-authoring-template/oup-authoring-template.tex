@@ -276,9 +276,9 @@ where $\mathcal{L}_{\text{backbone}}$ is the reconstruction and regularization l
 \end{figure}
 
 \subsubsection{Discriminator baseline (Jensen--Shannon divergence)}
-To serve as a baseline for comparison, we implement a standard adversarial deconfounding approach using a discriminator network $h_\upsilon: \mathcal{Z}\rightarrow\mathcal{V}$, that attempts to predict the confounding variable $v \in \mathcal{V}$ (e.g., batch ID) from the latent embedding code $z \in \mathcal{Z}$. The discriminator is trained to minimize the prediction error (typically cross-entropy), effectively approximating the Jensen-Shannon divergence between confounding distributions from the data source, $\mathcal{D}$:
+To serve as a baseline for comparison, we implement a standard adversarial deconfounding approach using a discriminator network $h: \mathcal{Z}\rightarrow\mathbb{R}^{\lvert\mathcal{V}\rvert}$ --- a single $\lvert\mathcal{V}\rvert$-way classifier that outputs one logit per batch --- which attempts to predict the confounding variable $v \in \mathcal{V}$ (e.g., batch ID) from the latent embedding code $z \in \mathcal{Z}$. The discriminator is trained to minimize the multi-class cross-entropy prediction error, effectively approximating the Jensen-Shannon divergence between confounding distributions from the data source, $\mathcal{D}$:
 \begin{equation*}
-    \min_\upsilon \mathbb{E}_{\tilde{x} \sim \mathcal{D}, z \sim q_\phi(z|\tilde{x})} \left[ \mathcal{L}_{\text{CE}}(h_\upsilon(z), v) \right]
+    \min_h \mathbb{E}_{\tilde{x} \sim \mathcal{D}, z \sim q_\phi(z|\tilde{x})} \left[ \mathcal{L}_{\text{CE}}(h(z), v) \right]
 \end{equation*}
 
 where $\mathcal{L}_{\text{CE}}$ is the cross-entropy loss.
@@ -328,53 +328,56 @@ Conversely, for the Wasserstein critic formulation, the encoder acts as the gene
 \end{equation*}
 
 \subsection{Autoencoder backbones}\label{sec:backbones}
-The adversarial framework above is agnostic to how $z$ is produced. Our primary experiments use the scCRAFT VAE as the reference backbone; to test whether our findings depend on this choice, we additionally evaluate three alternative backbones that share the same encoder/decoder interface but differ in their generative assumptions, described per architecture below.
-
-\subsubsection{Reference backbone: scCRAFT}
-The model takes log1p-transformed gene expression data, $\tilde{x} = \log(1 + x)$, as input and aims to reconstruct the original count values, $x$. To account for the sparsity of genomic data, the model assumes the target data $x$ follows a negative binomial (NB) distribution. The encoder network, $q_\phi(z|\tilde{x})$, is a two-layer feedforward network that maps the input vector $\tilde{x}$ to a vector of size $512$, ($\lvert\tilde{x}\rvert \rightarrow 1024 \rightarrow 512$). This vector is fed into parallel linear layers that output the mean ($\mu$) and variance ($\sigma^2$), each of size $256$, which parameterize the latent normal distribution $Z \sim N(\mu, \sigma^2)$. Within the encoder, batch normalization layers and ReLU activations are applied after the hidden dense layers to ensure training stability.
-
-The decoder network reconstructs the count-based expression profile by combining the sampled latent code $z \sim Z$ with a one-hot encoded vector representing the known batch variable ID, $v$. This is achieved via two parallel networks $G_1$ and $G_2$:
+The adversarial framework above attaches only to the encoder output $z$ and is therefore agnostic to the choice of autoencoder. To test whether the critic-versus-discriminator trade-off depends on the generative model, we evaluate the adversarial heads on a panel of established variational autoencoder (VAE) backbones spanning the decoder likelihoods in common single-cell use, applying the identical adversarial head, training loop, and evaluation to each. We use each backbone in its originally published form, trained with only its own reconstruction likelihood and the KL regularizer \citep{Kingma2014}:
 \begin{equation*}
-   \hat{z} = \text{ReLU}(G_1(z, v) + G_2(v))
+    \mathcal{L}_{\text{VAE}} = \mathcal{L}_{\text{recon}} + \beta_{\text{KL}}\,\mathrm{KL}\!\left(q_\phi(z\mid\tilde{x})\,\|\,\mathcal{N}(0,I)\right)
 \end{equation*}
-where $G_1$ maps the concatenated latent code and batch variable code back to gene space ($z || v \rightarrow 512 \rightarrow 1024 \rightarrow \lvert x\rvert$ where $||$ is the concatenation operator), and $G_2$ captures baseline batch-specific effects ($v \rightarrow 512 \rightarrow 1024 \rightarrow \lvert x \rvert$). This combined representation $\hat{z}$ is fed into a final linear layer, followed by an exponential activation function, to predict strictly positive NB parameters for each gene (mean $\mu$ and dispersion $r$).
+with $\beta_{\text{KL}}=0.005$. All backbones share a common two-layer encoder $q_\phi(z\mid\tilde{x})$ ($\lvert\tilde{x}\rvert\!\rightarrow\!1024\!\rightarrow\!512$, then parallel linear maps to the mean and variance of $Z\sim\mathcal{N}(\mu,\sigma^2)$, $\lvert z\rvert=256$) and, unless stated otherwise, a two-layer decoder trunk ($\cdot\!\rightarrow\!512\!\rightarrow\!1024$) feeding per-gene parameter heads. Isolating the decoder likelihood as the sole source of variation across the panel ensures that any backbone-dependence of the trade-off is attributable to the generative assumption rather than to confounding modeling choices.
 
-The reconstruction objective combines the NB negative log-likelihood with a cosine similarity loss to prevent the model from overfitting to high-count genes. To ensure stable optimization gradients across varying dataset sizes, the negative log-likelihood is computed as the mean across all genes $G$, rather than the sum:
+A second, orthogonal design axis is decoder batch conditioning. Supplying the batch label to the decoder is itself a form of batch correction --- a conditioned decoder can absorb batch effects that the encoder would otherwise have to remove --- so it is entangled with the adversarial head's job. We therefore treat conditioning as an explicit variable and evaluate every count backbone in both a conditioned and an unconditioned form: a conditioned decoder receives the batch one-hot $v$ concatenated to $z$, while an unconditioned decoder receives $z$ alone. Crossing decoder likelihood with conditioning yields the backbone panel summarized in Table~\ref{tab:backbones}; the paragraphs below describe each likelihood, ordered from simplest to most expressive.
+
+\begin{table}[t]
+\caption{Autoencoder backbone panel: decoder likelihood $\times$ batch conditioning.
+Each configuration is trained with both the discriminator and the Wasserstein-critic head.}
+\label{tab:backbones}
+\centering
+\begin{tabular}{llcc}
+\toprule
+Backbone & Decoder likelihood & Conditioned & Unconditioned \\
+\midrule
+Gaussian & Gaussian (MSE)        & --          & \checkmark \\
+Poisson  & Poisson               & --          & \checkmark \\
+NB       & Negative binomial     & \checkmark  & \checkmark \\
+ZINB     & Zero-inflated NB      & \checkmark  & \checkmark \\
+LDVAE    & NB, linear decoder    & \checkmark  & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Gaussian VAE}
+The simplest control \citep{Kingma2014}: a Gaussian likelihood on the log-normalized input, optimized as mean-squared reconstruction error, $\mathcal{L}_{\text{recon}}=\lVert \hat{x}-\tilde{x}\rVert_2^2$. As it has no count model and no natural batch-covariate pathway, it is evaluated unconditioned only.
+
+\subsubsection{Poisson VAE}
+The simplest count likelihood \citep{Townes2019-multinomial}. The decoder emits a per-gene rate $\lambda_g=\exp(\cdot)$, and reconstruction is the Poisson negative log-likelihood $\mathcal{L}_{\text{recon}}=\frac{1}{G}\sum_g \big(\lambda_g - x_g\log\lambda_g\big)$ (dropping the data-independent $\log x_g!$ term).
+
+\subsubsection{Negative-binomial (NB) VAE}
+The standard single-cell count model \citep{Lopez2018-bl}. The decoder emits a per-gene mean $\mu_g=\exp(\cdot)$ and an \emph{inverse-dispersion} $\theta_g=\exp(\cdot)$, and reconstruction is the NB negative log-likelihood, computed as the mean over genes $G$ for gradient scale-invariance across dataset sizes:
 \begin{equation}
-    \mathcal{L}_{\text{NB}} = - \frac{1}{G} \sum_{g=1}^{G} \log P_{\text{NB}}(x | \mu, r)
+    \mathcal{L}_{\text{recon}} = -\frac{1}{G}\sum_{g=1}^{G} \log P_{\text{NB}}\!\left(x_g \mid \mu_g, \theta_g\right)
     \label{eq:nb}
 \end{equation}
+We confirmed this likelihood is numerically identical to the reference \texttt{scvi-tools} implementation. It is evaluated both conditioned and unconditioned.
 
-\begin{equation}
-    \mathcal{L}_{\cos} = \mathbb{E}\left[1-\frac{\langle \tilde{x}, \log(1+\mu) \rangle}{\| \tilde{x} \|_{2} \hspace{0.2em} \| \log(1+\mu) \|_{2}}\right]
-    \label{eq:cos}
-\end{equation}
-where $\langle \cdot, \cdot \rangle$ denotes the dot product between the log-transformed original and the log-transformed reconstructed gene expression profiles.
+\subsubsection{Zero-inflated NB (ZINB) VAE}
+Extends the NB decoder with a per-gene dropout-logit head $\pi_g$, giving a zero-inflated NB likelihood \citep{Risso2018-zinbwave} that models excess zeros beyond the NB expectation. Evaluated conditioned and unconditioned.
 
-To mitigate latent over-correction, the backbone model includes a dual-resolution triplet loss. To ensure training remains unsupervised and to prevent data leakage, we approximate cell types using pre-computed, two-tier Leiden clustering (coarse and fine resolutions, set empirically to 1.0 and 7.0, respectively) derived from the unintegrated data. For a given cell's latent embedding acting as an anchor ($z_{a}$), we initially sample positive ($z_{p}$) and negative ($z_{n}$) pairs based on the coarse cluster assignments. Crucially, to enforce strict local manifold preservation, we apply a high-resolution filter: if the anchor and the positive sample do not also share the same fine-resolution cluster assignment, the pair is discarded from the loss calculation. This objective enforces that cells of the strict same type remain closer in latent space than cells of different types:
-\begin{equation}
-    \mathcal{L}_{\text{triplet}}=\max (\parallel {z}_{a}-{z}_{p}{\parallel }_{2}-\parallel {z}_{a}-{z}_{n}{\parallel }_{2}+{\rm{margin}}\,,0)
-    \label{eq:triplet}
-\end{equation}
-
-where the margin is set empirically to 5 as per the original implementation.
-
-Equations \ref{eq:nb}, \ref{eq:cos}, and \ref{eq:triplet} are summed with the Kullback-Leibler (KL) divergence, which regularizes the latent space toward a standard normal prior to give the VAE-backbone:
-\begin{equation*}
-    \mathcal{L}_{\text{VAE}} = 
-    \mathcal{L}_{\text{NB}} + \lambda_{\cos}\mathcal{L}_{\cos}
-    + 
-    \mathcal{L}_{\text{triplet}}
-    +
-    \beta_{\text{KL}}\mathrm{KL}\left( q_\phi(z \mid \tilde{x}) \,\|\, N(0,I) \right)
-    \label{eq:vae_total}
-\end{equation*}
-In our experiments, we set the hyperparameters $\lambda_{\cos}=20$ and $\beta_{\text{KL}}=0.005$, identical to the original implementation \citep{He2025-ip}.
+\subsubsection{Linearly-decoded VAE (LDVAE)}
+The interpretable scVI variant \citep{Svensson2020-ldvae}: the same NB likelihood as above, but with a \emph{single linear} decoder mapping the (optionally conditioned) latent directly to the per-gene parameters, trading decoder capacity for interpretable gene loadings. Evaluated conditioned and unconditioned.
 
 \subsection{Implementation, Training, and Model Selection}
 To evaluate performance across varying degrees of topological complexity and batch overlap, we utilized three standard benchmark datasets \citep{Luecken2022-fb}: \textbf{Pancreas} (9 batches), \textbf{Lung} (2 batches), and \textbf{Immune} (4 batches). All models were implemented in PyTorch and trained on a single NVIDIA RTX 4090 GPU using the Adam optimizer (learning rate = 0.001, $\beta_1=0.5, \beta_2=0.9$); the $\beta_1$ momentum parameter was intentionally reduced to stabilize adversarial dynamics. Models were trained with a batch size of 1024. Due to the multiple local updates required to enforce the Lipschitz constraint (10 critic updates per generator step), the Wasserstein-based models required approximately ~24\% more training time per epoch than the baseline discriminator (see detailed breakdown in Supplementary Figure S1 and Supplementary Table S1).
 
-To ensure stability, the Gradient Penalty weight was fixed at $\lambda_{GP}=10$ \citep{10.5555/3295222.3295327}, and we employed a warmup period for the first 10 epochs where $\lambda_{\text{adv}}=0$ and the adversary's weights were frozen. This allows for valid autoencoder reconstruction before adversarial alignment. We utilized class-balanced sampling with replacement across all experiments; this ensured equal representation of all source batches within each mini-batch, which both prevented mode collapse in smaller experimental batches and guaranteed well-defined interpolations for the Gradient Penalty. To prevent combinatorial explosion during training, triplet mining was capped at a maximum of 15 random positive pairs per cell-type per batch within each training step. Models were trained and evaluated using a nested cross-validation scheme (5 outer folds, 3 inner folds), where inner loops ran for 40 epochs and outer loops for 80 epochs. Hyperparameters were systematically selected to maximize the composite integration score, $(\text{iLISI} - 10*\text{cLISI})$, on held-out data, where the cLISI penalty is scaled by a factor of 10 to balance the magnitude of the respective metrics.
+To ensure stability, the Gradient Penalty weight was fixed at $\lambda_{GP}=10$ \citep{10.5555/3295222.3295327}, and we employed a warmup period for the first 10 epochs where $\lambda_{\text{adv}}=0$ and the adversary's weights were frozen. This allows for valid autoencoder reconstruction before adversarial alignment. We utilized class-balanced sampling with replacement across all experiments; this ensured equal representation of all source batches within each mini-batch, which both prevented mode collapse in smaller experimental batches and guaranteed well-defined interpolations for the Gradient Penalty. Models were trained and evaluated using a nested cross-validation scheme (5 outer folds, 3 inner folds), where inner loops ran for 40 epochs and outer loops for 80 epochs. Hyperparameters were systematically selected to maximize the composite integration score, $(\text{iLISI} - 10*\text{cLISI})$, on held-out data, where the cLISI penalty is scaled by a factor of 10 to balance the magnitude of the respective metrics.
 
 \subsection{Experiments and Datasets}
 We conducted three targeted experiments to assess performance across varying levels of integration complexity:
