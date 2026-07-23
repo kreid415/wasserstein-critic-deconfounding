@@ -90,6 +90,7 @@ def train_one(
     batch_size=1024,
     backbone=None,
     reference_mode="fixed",
+    formulation="reference",
 ):
     """Train ONE configuration and return the fitted VAE + history.
 
@@ -111,6 +112,7 @@ def train_one(
         "reference_batch": reference_batch,
         "reference_batch_name_str": reference_batch_name_str,
         "reference_mode": reference_mode,
+        "formulation": formulation,
     }
     if backbone is not None:
         kwargs["backbone"] = backbone

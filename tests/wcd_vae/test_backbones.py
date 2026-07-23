@@ -42,3 +42,16 @@ def test_backbone_trains_finite(backbone, critic):
     )
     assert np.isfinite(h["all_loss"][-1])
     assert np.isfinite(h["loss_da"][-1])
+
+
+def test_evaluate_config_harness_path():
+    """Regression: evaluate_config -> train_one -> train_integration_model must accept
+    the E2 backbone configs (this path passes `formulation` through train_one)."""
+    from wcd_vae.wcd.experiment import evaluate_config
+    a = _toy()
+    import scanpy as sc
+    sc.pp.pca(a, n_comps=50)
+    for bb in ["NB", "Gaussian"]:
+        r = evaluate_config(a, "batch", "celltype", critic=False, d_coef=0.2, seed=0,
+                            backbone=bb, epochs=2)
+        assert "ari" in r and r["backbone"] == bb
