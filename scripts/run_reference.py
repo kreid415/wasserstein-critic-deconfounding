@@ -36,6 +36,8 @@ def main():
     ap.add_argument("--d-coef", type=float, default=0.2)
     ap.add_argument("--backbone", default="NB",
                     help="backbone (default NB, the post-scCRAFT-drop primary)")
+    ap.add_argument("--ref-design-only", default=None,
+                    help="run only this single reference design tag (split E4 per design)")
     ap.add_argument("--resume", action="store_true",
                     help="skip (ref_design, seed) rows already present in --out")
     args = ap.parse_args()
@@ -69,6 +71,8 @@ def main():
         print(f"[resume] loaded {len(rows)} existing rows; {len(done_keys)} (tag,seed) done", flush=True)
 
     def run(tag, **cfg):
+        if args.ref_design_only is not None and tag != args.ref_design_only:
+            return
         for seed in SEEDS:
             if (str(tag), int(seed)) in done_keys:
                 print(f"  {tag:16s} seed={seed} | SKIP (resume)", flush=True)
