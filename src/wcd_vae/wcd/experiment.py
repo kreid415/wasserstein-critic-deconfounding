@@ -23,13 +23,15 @@ import scanpy as sc
 import scib
 
 from wcd_vae.wcd.data import prep_data
-from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph
+from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph, probe_metrics
 from wcd_vae.wcd.primitives import seed_everything
 from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 # Metric taxonomy for the local-vs-global decomposition (E6 / R1.major.1).
 LOCAL_METRICS = ("ilisi", "clisi", "graph_conn", "kbet")
 GLOBAL_METRICS = ("asw_batch", "asw_celltype", "ari", "nmi", "pcr", "isolated_asw")
+# Probe-based conservation/residual-batch metrics (geometry-free; see evaluation.probe_metrics).
+PROBE_METRICS = ("knn_label_lift", "linear_label_lift", "knn_batch_lift", "linear_batch_lift")
 
 
 def _registry_path():
@@ -185,6 +187,15 @@ def full_metric_suite(
             sys.stdout = old
         out["ari"] = float(scib.me.ari(adata, celltype_key, "louvain_opt"))
         out["nmi"] = float(scib.me.nmi(adata, celltype_key, "louvain_opt"))
+
+        # WHY: ARI/NMI/ASW_celltype all need compact clusters; probes measure the
+        #      cell-type information actually present, and the batch probe doubles as
+        #      a guard against a silently inert adversary.
+        try:
+            out.update(probe_metrics(adata, celltype_key, batch_key, embed_key=embed_key))
+        except Exception:
+            for k in PROBE_METRICS:
+                out[k] = np.nan
 
     return out
 

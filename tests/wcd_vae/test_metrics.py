@@ -52,3 +52,61 @@ def test_clisi_lower_when_celltypes_separated():
     sep_val = clisi_graph(a_sep, label_key="celltype", use_rep="X_emb", perplexity=30)
     mix_val = clisi_graph(a_mix, label_key="celltype", use_rep="X_emb", perplexity=30)
     assert sep_val < mix_val
+
+
+# --- probe-based conservation metrics -------------------------------------------------
+
+def test_probe_metrics_detect_celltype_and_ignore_absent_batch():
+    """A latent separable by cell type but not batch: high label lift, ~zero batch lift.
+
+    # WHY: guards the metric that replaces ARI/NMI when the latent encodes cell type
+    #      diffusely rather than in compact clusters.
+    """
+    import anndata as ad
+    import numpy as np
+    import pandas as pd
+
+    from wcd_vae.wcd.evaluation import probe_metrics
+
+    rng = np.random.default_rng(0)
+    n = 900
+    centers = rng.normal(0, 6, size=(3, 8))
+    labels = np.repeat(["A", "B", "C"], n // 3)
+    z = np.vstack([centers[i] + rng.normal(0, 0.5, size=(n // 3, 8)) for i in range(3)])
+    batch = rng.choice(["b0", "b1"], size=n)
+
+    adata = ad.AnnData(
+        X=rng.normal(size=(n, 4)).astype("float32"),
+        obs=pd.DataFrame({"ct": pd.Categorical(labels), "batch": pd.Categorical(batch)}),
+    )
+    adata.obsm["X_latent"] = z.astype("float32")
+
+    m = probe_metrics(adata, "ct", "batch")
+    assert m["knn_label_lift"] > 0.3, f"cell type not detected: {m['knn_label_lift']}"
+    assert abs(m["knn_batch_lift"]) < 0.1, f"phantom batch signal: {m['knn_batch_lift']}"
+
+
+def test_probe_metrics_report_zero_lift_on_noise():
+    """Pure-noise latent must yield ~zero lift for both label and batch."""
+    import anndata as ad
+    import numpy as np
+    import pandas as pd
+
+    from wcd_vae.wcd.evaluation import probe_metrics
+
+    rng = np.random.default_rng(1)
+    n = 600
+    adata = ad.AnnData(
+        X=rng.normal(size=(n, 4)).astype("float32"),
+        obs=pd.DataFrame(
+            {
+                "ct": pd.Categorical(rng.choice(["A", "B", "C"], size=n)),
+                "batch": pd.Categorical(rng.choice(["b0", "b1"], size=n)),
+            }
+        ),
+    )
+    adata.obsm["X_latent"] = rng.normal(size=(n, 8)).astype("float32")
+
+    m = probe_metrics(adata, "ct", "batch")
+    assert abs(m["knn_label_lift"]) < 0.1
+    assert abs(m["knn_batch_lift"]) < 0.1

@@ -243,3 +243,83 @@ def clisi_graph(
 
     # Return mean normalized cLISI score
     return np.mean(normalized_scores)
+
+
+# ---------------------------------------------------------------------------
+# Probe-based conservation / mixing metrics — AUTHORED (K. Reid).
+#
+# WHY: scIB's ARI/NMI/ASW_celltype all require the latent to hold cell types in
+#      COMPACT, geometrically separable clusters. A latent can encode cell type
+#      perfectly well in a linearly-decodable but diffuse way and still score ~0 on
+#      all three (observed: native NB_uncond on pancreas scores ARI 0.036 /
+#      asw_celltype 0.497 while a linear probe reads cell type at 0.724 vs a 0.333
+#      majority baseline). Probing measures the information that is present rather
+#      than the geometry a clustering algorithm happens to recover.
+# HOW: cross-validated classifiers on the embedding. Reported ABOVE the majority-class
+#      baseline so the number is interpretable when classes are imbalanced.
+#      The batch probe is the mirror image: it should be near ZERO after successful
+#      integration, and it doubles as a guard against a silently inert adversary
+#      (a batch probe far above baseline at high lambda_adv means no mixing happened).
+# ---------------------------------------------------------------------------
+
+
+def _probe_accuracy(embedding, labels, kind="knn", n_splits=3, max_cells=6000, seed=0):
+    """Cross-validated probe accuracy and the majority-class baseline.
+
+    Returns ``(accuracy, majority_baseline, lift)`` where ``lift = accuracy - majority``.
+    ``lift`` near 0 means the embedding carries no information about ``labels``.
+    """
+    from collections import Counter
+
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import StratifiedKFold, cross_val_score
+    from sklearn.neighbors import KNeighborsClassifier
+
+    x = np.asarray(embedding)
+    y = np.asarray(labels).astype(str)
+
+    # Subsample for tractability on atlas-scale data; stratification keeps rare types.
+    rng = np.random.default_rng(seed)
+    if len(x) > max_cells:
+        idx = rng.choice(len(x), size=max_cells, replace=False)
+        x, y = x[idx], y[idx]
+
+    # Drop classes too small to appear in every CV fold.
+    counts = Counter(y)
+    keep = np.array([counts[v] >= n_splits for v in y])
+    if keep.sum() < n_splits or len(set(y[keep])) < 2:
+        return float("nan"), float("nan"), float("nan")
+    x, y = x[keep], y[keep]
+
+    clf = (
+        KNeighborsClassifier(n_neighbors=15)
+        if kind == "knn"
+        else LogisticRegression(max_iter=1000)
+    )
+    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    acc = float(cross_val_score(clf, x, y, cv=cv, scoring="accuracy").mean())
+    majority = float(max(Counter(y).values()) / len(y))
+    return acc, majority, acc - majority
+
+
+def probe_metrics(adata, label_key, batch_key, embed_key="X_latent", seed=0):
+    """Probe-based conservation (cell type) and residual-batch-signal metrics.
+
+    Conservation: ``knn_label_acc`` / ``linear_label_acc`` with their ``*_lift`` over the
+    majority-class baseline — higher is better.
+    Residual batch: ``knn_batch_acc`` / ``linear_batch_acc`` and lifts — LOWER is better;
+    a large positive ``linear_batch_lift`` means batch is still linearly decodable, i.e.
+    integration did not remove it.
+    """
+    z = adata.obsm[embed_key]
+    out = {}
+    for kind, tag in (("knn", "knn"), ("linear", "linear")):
+        acc, maj, lift = _probe_accuracy(z, adata.obs[label_key], kind=kind, seed=seed)
+        out[f"{tag}_label_acc"] = acc
+        out[f"{tag}_label_majority"] = maj
+        out[f"{tag}_label_lift"] = lift
+        acc_b, maj_b, lift_b = _probe_accuracy(z, adata.obs[batch_key], kind=kind, seed=seed)
+        out[f"{tag}_batch_acc"] = acc_b
+        out[f"{tag}_batch_majority"] = maj_b
+        out[f"{tag}_batch_lift"] = lift_b
+    return out
