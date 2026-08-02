@@ -76,6 +76,8 @@ def main():
                     help="run only one adversarial head (lets E1 split into two shorter jobs)")
     ap.add_argument("--d-coef-only", type=float, default=None,
                     help="E1: run only this single lambda value")
+    ap.add_argument("--seed-only", type=int, default=None,
+                    help="run only this single seed (makes each SLURM task exactly one config)")
     ap.add_argument("--resume", action="store_true",
                     help="skip configs already present in --out (by method,backbone,d_coef,seed)")
     args = ap.parse_args()
@@ -117,6 +119,9 @@ def main():
             if bool(cfg.get("critic")) != want_critic:
                 continue
         if args.d_coef_only is not None and abs(float(cfg["d_coef"]) - args.d_coef_only) > 1e-9:
+            continue
+        # Seed-level split: one SLURM task == exactly one config (wall-safe fan-out).
+        if args.seed_only is not None and int(cfg["seed"]) != args.seed_only:
             continue
         # E2 fan-out: when --backbone names a config that E2 already carries, run ONLY
         # that backbone's arm (one short job per backbone across idle CPU nodes).
