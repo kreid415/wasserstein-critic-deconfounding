@@ -40,6 +40,8 @@ def main():
                     help="run only this single reference design tag (split E4 per design)")
     ap.add_argument("--resume", action="store_true",
                     help="skip (ref_design, seed) rows already present in --out")
+    ap.add_argument("--embed-out", default=None,
+                    help="directory to persist latents (.npz per config); use SCRATCH")
     args = ap.parse_args()
 
     with open(args.registry) as fh:
@@ -79,7 +81,7 @@ def main():
                 continue
             try:
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
-                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg)
+                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg, embed_out=args.embed_out)
                 row.update({"experiment": "E4", "dataset": args.dataset, "ref_design": tag,
                             "balanced": args.balance, "n_batches": n_batches})
                 rows.append(row)

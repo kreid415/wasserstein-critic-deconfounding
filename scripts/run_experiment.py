@@ -78,6 +78,8 @@ def main():
                     help="E1: run only this single lambda value")
     ap.add_argument("--seed-only", type=int, default=None,
                     help="run only this single seed (makes each SLURM task exactly one config)")
+    ap.add_argument("--embed-out", default=None,
+                    help="directory to persist latents (.npz per config); use SCRATCH")
     ap.add_argument("--resume", action="store_true",
                     help="skip configs already present in --out (by method,backbone,d_coef,seed)")
     args = ap.parse_args()
@@ -136,7 +138,7 @@ def main():
         if key in done:
             continue
         try:
-            row = evaluate_config(adata, batch_key, celltype_key, **cfg)
+            row = evaluate_config(adata, batch_key, celltype_key, **cfg, embed_out=args.embed_out)
             row.update({"experiment": args.experiment, "dataset": args.dataset,
                         "balanced": args.balance, "batch_count": adata.obs[batch_key].nunique()})
             rows.append(row)

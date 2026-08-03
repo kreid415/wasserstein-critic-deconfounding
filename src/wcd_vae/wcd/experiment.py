@@ -32,6 +32,8 @@ LOCAL_METRICS = ("ilisi", "clisi", "graph_conn", "kbet")
 GLOBAL_METRICS = ("asw_batch", "asw_celltype", "ari", "nmi", "pcr", "isolated_asw")
 # Probe-based conservation/residual-batch metrics (geometry-free; see evaluation.probe_metrics).
 PROBE_METRICS = ("knn_label_lift", "linear_label_lift", "knn_batch_lift", "linear_batch_lift")
+# Continuous-topology conservation, as reported in the submitted manuscript.
+TOPOLOGY_METRICS = ("paga_spearman",)
 
 
 def _registry_path():
@@ -197,6 +199,23 @@ def full_metric_suite(
             for k in PROBE_METRICS:
                 out[k] = np.nan
 
+        # WHY: PAGA Spearman is a headline CONSERVATION metric in the submitted
+        #      manuscript (reported per dataset with p-values), but it lived only in the
+        #      nested-CV hyperparameter path and was never wired into this suite, so no
+        #      revision experiment reported it. Baseline topology comes from per-batch
+        #      PAGA on raw PCA; NaN means "not measurable", never 0.0.
+        try:
+            from wcd_vae.wcd.hyperparameter import compute_mean_paga_spearman
+
+            out["paga_spearman"] = float(
+                compute_mean_paga_spearman(
+                    adata, tech_key=batch_key, celltype_key=celltype_key,
+                    embed_key=embed_key, baseline_rep="X_pca",
+                )
+            )
+        except Exception:
+            out["paga_spearman"] = np.nan
+
     return out
 
 
@@ -226,9 +245,17 @@ def evaluate_config(
     warmup_epoch=5,
     batch_size=1024,
     metric_kwargs=None,
+    embed_out=None,
 ):
     """Train one config and return {**metrics, config columns}. The atomic unit
-    every experiment loops over."""
+    every experiment loops over.
+
+    ``embed_out``: directory to persist the trained latent to (one .npz per config).
+    # WHY: metrics-only CSVs cannot be re-analysed -- adding any new embedding-derived
+    #      metric (PAGA, probes, trajectory) otherwise costs a full retraining wave.
+    #      Persisting z lets future metrics be computed from disk in seconds. Belongs on
+    #      SCRATCH, never $HOME: these are large and regenerable.
+    """
     import torch
 
     ad = adata.copy()
@@ -241,6 +268,19 @@ def evaluate_config(
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
+    if embed_out:
+        import os
+
+        os.makedirs(embed_out, exist_ok=True)
+        tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
+               f"_lam{str(d_coef).replace('.', 'p')}_s{seed}")
+        np.savez_compressed(
+            os.path.join(embed_out, f"{tag}.npz"),
+            z=np.asarray(ad.obsm["X_latent"], dtype=np.float32),
+            batch=ad.obs[batch_key].astype(str).to_numpy(),
+            celltype=ad.obs[celltype_key].astype(str).to_numpy(),
+            X_pca=np.asarray(ad.obsm["X_pca"], dtype=np.float32) if "X_pca" in ad.obsm else np.empty(0),
+        )
     metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_latent", **(metric_kwargs or {}))
     row = {
         "method": "critic" if critic else "discriminator",
