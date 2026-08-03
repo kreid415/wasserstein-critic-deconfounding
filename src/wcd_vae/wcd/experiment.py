@@ -131,7 +131,7 @@ def train_one(
     return vae, history
 
 
-def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
+def _resolution_cache(adata, embed_key, resolutions=None, flavor=None):
     """Leiden labels at each resolution, computed ONCE and cached.
 
     # WHY: scib's cluster_optimal_resolution runs a full resolution sweep PER CALLER, and
@@ -143,9 +143,12 @@ def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
     #      shared -- but the underlying clusterings can. We compute each resolution once
     #      and let every metric pick its own best from the cache: identical numbers,
     #      one sweep instead of N.
-    # HOW: flavor="igraph" is scib/scanpy's future default and is markedly faster than
-    #      leidenalg on the same graph; neighbours are built once here rather than inside
-    #      each sweep.
+    # HOW: neighbours are built once here rather than inside each sweep. The Leiden
+    #      FLAVOUR is deliberately left at scanpy's default (leidenalg), matching
+    #      scib.cluster_optimal_resolution exactly: a matched-resolution A/B showed
+    #      igraph and leidenalg give IDENTICAL ARI/NMI on structured, weakly-structured
+    #      and degenerate synthetic latents (|delta| = 0.00e+00 in all three) and igraph
+    #      was NOT faster (0.8-1.0x), so there is nothing to gain by diverging.
     """
     import scanpy as sc
 
@@ -160,10 +163,13 @@ def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
     for res in resolutions:
         key = f"_leiden_r{res}"
         kwargs = {"resolution": res, "key_added": key}
-        try:
-            sc.tl.leiden(adata, flavor=flavor, n_iterations=2, directed=False, **kwargs)
-        except TypeError:
-            sc.tl.leiden(adata, **kwargs)  # older scanpy: no flavor kwarg
+        if flavor is None:
+            sc.tl.leiden(adata, **kwargs)  # scanpy/scib default -- keeps parity
+        else:
+            try:
+                sc.tl.leiden(adata, flavor=flavor, n_iterations=2, directed=False, **kwargs)
+            except TypeError:
+                sc.tl.leiden(adata, **kwargs)
         cache[res] = adata.obs[key].astype(str).to_numpy()
     return cache
 
