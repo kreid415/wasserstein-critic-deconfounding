@@ -122,15 +122,14 @@ def test_paga_spearman_returns_nan_not_zero_when_unmeasurable():
     import anndata as ad
     import numpy as np
     import pandas as pd
-
     import pytest
-
-    from wcd_vae.wcd.hyperparameter import compute_mean_paga_spearman
 
     # scanpy 1.9.8 + igraph 1.0.0 crash inside get_sparse_from_igraph on non-empty
     # edge lists, so PAGA is unusable in that combination (cluster runs scanpy 1.11.5).
     # Skip rather than assert, so the test is meaningful where PAGA actually works.
     import scanpy as sc
+
+    from wcd_vae.wcd.hyperparameter import compute_mean_paga_spearman
 
     _probe = sc.AnnData(np.random.default_rng(0).normal(size=(60, 5)).astype("float32"))
     sc.pp.neighbors(_probe, use_rep="X")

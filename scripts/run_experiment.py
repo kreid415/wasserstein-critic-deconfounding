@@ -110,6 +110,10 @@ def main():
         if prev is not None and len(prev) > 0:
             rows = prev.to_dict("records")
             for r in rows:
+                # WHY: a FAILED row records a gap, not a completed config -- treating it
+                #      as done would make the failure permanent across every retry.
+                if isinstance(r.get("failed"), str) and r["failed"]:
+                    continue
                 done.add((r["method"], r.get("backbone", "NB"), float(r["d_coef"]),
                           int(r["seed"])))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
@@ -148,7 +152,20 @@ def main():
             # incremental save so a timeout still yields partial results
             pd.DataFrame(rows).to_csv(args.out, index=False)
         except Exception as e:
+            # WHY: a dropped config leaves NO trace in the CSV, so an incomplete wave
+            #      looks identical to a complete one. Record the failure as a row with
+            #      NaN metrics so completeness audits can see it.
             print(f"  [{i}] cfg={cfg} FAILED {type(e).__name__}: {e}", flush=True)
+            rows.append({
+                "method": "critic" if cfg.get("critic") else "discriminator",
+                "backbone": cfg.get("backbone", "NB"),
+                "d_coef": cfg.get("d_coef"),
+                "seed": cfg.get("seed"),
+                "experiment": args.experiment,
+                "dataset": args.dataset,
+                "failed": f"{type(e).__name__}: {e}",
+            })
+            pd.DataFrame(rows).to_csv(args.out, index=False)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     pd.DataFrame(rows).to_csv(args.out, index=False)
