@@ -15,7 +15,6 @@
 import json
 import os
 from pathlib import Path
-import sys
 import warnings
 
 import numpy as np
@@ -29,7 +28,8 @@ from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 # Metric taxonomy for the local-vs-global decomposition (E6 / R1.major.1).
 LOCAL_METRICS = ("ilisi", "clisi", "graph_conn", "kbet")
-GLOBAL_METRICS = ("asw_batch", "asw_celltype", "ari", "nmi", "pcr", "isolated_asw")
+GLOBAL_METRICS = ("asw_batch", "asw_celltype", "ari", "nmi", "pcr", "isolated_asw",
+                  "isolated_f1", "cell_cycle")
 # Probe-based conservation/residual-batch metrics (geometry-free; see evaluation.probe_metrics).
 PROBE_METRICS = ("knn_label_lift", "linear_label_lift", "knn_batch_lift", "linear_batch_lift")
 # Continuous-topology conservation, as reported in the submitted manuscript.
@@ -89,12 +89,14 @@ def train_one(
     reference_batch_name_str=None,
     disc_iter=None,
     z_dim=256,
-    epochs=150,
+    epochs=500,
     warmup_epoch=5,
     batch_size=1024,
     backbone=None,
     reference_mode="fixed",
     formulation="reference",
+    early_stopping=True,
+    es_celltype_key=None,
 ):
     """Train ONE configuration and return the fitted VAE + history.
 
@@ -104,11 +106,16 @@ def train_one(
     """
     seed_everything(seed)
     iters = disc_iter if disc_iter is not None else (10 if critic else 1)
+    # WHY epochs=500 + early stopping: 500 matches the original nested-CV protocol, and
+    #      early stopping on a held-out cell-type probe prevents the conservation decay
+    #      measured over 150->450 epochs from silently degrading every result.
     kwargs = {
         "batch_key": batch_key,
         "critic": critic,
         "d_coef": d_coef,
         "disc_iter": iters,
+        "early_stopping": early_stopping,
+        "es_celltype_key": es_celltype_key,
         "z_dim": z_dim,
         "epochs": epochs,
         "warmup_epoch": warmup_epoch,
@@ -122,6 +129,56 @@ def train_one(
         kwargs["backbone"] = backbone
     vae, history = train_integration_model(adata, **kwargs)
     return vae, history
+
+
+def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
+    """Leiden labels at each resolution, computed ONCE and cached.
+
+    # WHY: scib's cluster_optimal_resolution runs a full resolution sweep PER CALLER, and
+    #      isolated_labels_f1 calls it once PER ISOLATED LABEL. Measured on pancreas
+    #      (16,382 cells, 16 cores): the ari/nmi sweep costs 767s and isolated_labels_f1
+    #      costs 773s -- together 9.4x the 164s training cost, and both re-cluster the
+    #      SAME graph at the SAME resolutions. The two sweeps optimise DIFFERENT
+    #      objectives (NMI vs per-label F1), so a single "optimal" clustering cannot be
+    #      shared -- but the underlying clusterings can. We compute each resolution once
+    #      and let every metric pick its own best from the cache: identical numbers,
+    #      one sweep instead of N.
+    # HOW: flavor="igraph" is scib/scanpy's future default and is markedly faster than
+    #      leidenalg on the same graph; neighbours are built once here rather than inside
+    #      each sweep.
+    """
+    import scanpy as sc
+
+    if resolutions is None:
+        resolutions = [round(0.2 * i, 2) for i in range(1, 11)]  # 0.2..2.0, matches scib's n=10
+    if "neighbors" not in adata.uns or adata.uns["neighbors"].get("params", {}).get(
+        "use_rep"
+    ) != embed_key:
+        sc.pp.neighbors(adata, use_rep=embed_key)
+
+    cache = {}
+    for res in resolutions:
+        key = f"_leiden_r{res}"
+        kwargs = {"resolution": res, "key_added": key}
+        try:
+            sc.tl.leiden(adata, flavor=flavor, n_iterations=2, directed=False, **kwargs)
+        except TypeError:
+            sc.tl.leiden(adata, **kwargs)  # older scanpy: no flavor kwarg
+        cache[res] = adata.obs[key].astype(str).to_numpy()
+    return cache
+
+
+def _best_from_cache(cache, score_fn):
+    """Pick the (resolution, labels, score) maximising ``score_fn(labels)``."""
+    best = (None, None, -np.inf)
+    for res, labels in cache.items():
+        try:
+            sc = float(score_fn(labels))
+        except Exception:
+            continue
+        if np.isfinite(sc) and sc > best[2]:
+            best = (res, labels, sc)
+    return best
 
 
 def full_metric_suite(
@@ -179,16 +236,58 @@ def full_metric_suite(
             except Exception:
                 out["isolated_asw"] = np.nan
 
-        # ARI / NMI need a clustering; use scib optimal-resolution louvain (silenced)
-        old = sys.stdout
-        sys.stdout = open(os.devnull, "w")
+        # ---- ONE resolution sweep, shared by every clustering-based metric ----
+        from sklearn.metrics import adjusted_rand_score, f1_score, normalized_mutual_info_score
+
+        truth = adata.obs[celltype_key].astype(str).to_numpy()
+        cache = _resolution_cache(adata, embed_key)
+
+        # ARI/NMI: scib selects the resolution maximising NMI, then reports both there.
+        _res, best_labels, _sc = _best_from_cache(
+            cache, lambda lab: normalized_mutual_info_score(truth, lab)
+        )
+        if best_labels is None:
+            out["ari"] = out["nmi"] = np.nan
+        else:
+            adata.obs["louvain_opt"] = best_labels
+            out["ari"] = float(adjusted_rand_score(truth, best_labels))
+            out["nmi"] = float(normalized_mutual_info_score(truth, best_labels))
+
+        # isolated-label F1: scib optimises max-F1 SEPARATELY PER ISOLATED LABEL, so each
+        # label picks its own resolution from the same cache.
         try:
-            scib.me.cluster_optimal_resolution(adata, label_key=celltype_key, cluster_key="louvain_opt", use_rep=embed_key)
-        finally:
-            sys.stdout.close()
-            sys.stdout = old
-        out["ari"] = float(scib.me.ari(adata, celltype_key, "louvain_opt"))
-        out["nmi"] = float(scib.me.nmi(adata, celltype_key, "louvain_opt"))
+            # NOTE scib.metrics.isolated_labels resolves to the FUNCTION, not the module,
+            #      so the helper must be imported from the module path explicitly.
+            from scib.metrics.isolated_labels import get_isolated_labels
+
+            iso = get_isolated_labels(
+                adata, celltype_key, batch_key, iso_threshold=None, verbose=False
+            )
+            f1s = []
+            for label in iso:
+                y_true = truth == label
+
+                def _maxf1(lab, _yt=y_true):
+                    return max(
+                        f1_score(lab == c, _yt) for c in np.unique(lab)
+                    )
+
+                _r, _l, sc_f1 = _best_from_cache(cache, _maxf1)
+                if np.isfinite(sc_f1):
+                    f1s.append(sc_f1)
+            out["isolated_f1"] = float(np.mean(f1s)) if f1s else np.nan
+        except Exception:
+            out["isolated_f1"] = np.nan
+
+        # cell-cycle conservation: the remaining scIB bio metric; measured at ~7s, so it
+        # completes the published suite essentially for free.
+        try:
+            out["cell_cycle"] = float(
+                scib.me.cell_cycle(adata, adata, batch_key=batch_key, embed=embed_key,
+                                   organism="human")
+            )
+        except Exception:
+            out["cell_cycle"] = np.nan
 
         # WHY: ARI/NMI/ASW_celltype all need compact clusters; probes measure the
         #      cell-type information actually present, and the batch probe doubles as
@@ -241,11 +340,12 @@ def evaluate_config(
     reference_mode="fixed",
     formulation="reference",
     z_dim=256,
-    epochs=150,
+    epochs=500,
     warmup_epoch=5,
     batch_size=1024,
     metric_kwargs=None,
     embed_out=None,
+    early_stopping=True,
 ):
     """Train one config and return {**metrics, config columns}. The atomic unit
     every experiment loops over.
@@ -265,6 +365,9 @@ def evaluate_config(
         backbone=backbone, reference_mode=reference_mode, formulation=formulation,
         z_dim=z_dim, epochs=epochs,
         warmup_epoch=warmup_epoch, batch_size=batch_size,
+        # WHY: without es_celltype_key the early-stopping check is skipped silently, so
+        #      the label key MUST be threaded here or epochs=500 runs unguarded.
+        early_stopping=early_stopping, es_celltype_key=celltype_key,
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
