@@ -73,8 +73,12 @@ def compute_mean_paga_spearman(
                 if not np.isnan(corr):
                     spearman_scores.append(corr)
 
-        # Return the average preservation score
-        return np.mean(spearman_scores) if spearman_scores else 0.0
+        # WHY: returning 0.0 when NO batch produced a usable correlation is
+        #      indistinguishable from "topology fully destroyed" -- a silent fallback
+        #      that reads as a real measurement. NaN means "not measurable" (e.g. every
+        #      PAGA connectivity matrix was constant, as happens when clusters are
+        #      fully disconnected), which callers can drop rather than average in.
+        return float(np.mean(spearman_scores)) if spearman_scores else float("nan")
 
 
 def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_latent"):
