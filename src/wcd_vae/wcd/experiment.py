@@ -277,8 +277,11 @@ def evaluate_config(
         np.savez_compressed(
             os.path.join(embed_out, f"{tag}.npz"),
             z=np.asarray(ad.obsm["X_latent"], dtype=np.float32),
-            batch=ad.obs[batch_key].astype(str).to_numpy(),
-            celltype=ad.obs[celltype_key].astype(str).to_numpy(),
+            # WHY: numpy stores <U dtype string arrays fine, but object-dtype arrays
+            #      require allow_pickle on load. Cast to a fixed-width unicode dtype so
+            #      np.load(...) works with the safe default.
+            batch=ad.obs[batch_key].astype(str).to_numpy(dtype="U64"),
+            celltype=ad.obs[celltype_key].astype(str).to_numpy(dtype="U64"),
             X_pca=np.asarray(ad.obsm["X_pca"], dtype=np.float32) if "X_pca" in ad.obsm else np.empty(0),
         )
     metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_latent", **(metric_kwargs or {}))
