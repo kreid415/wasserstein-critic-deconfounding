@@ -21,7 +21,7 @@ import numpy as np
 import scanpy as sc
 import scib
 
-from wcd_vae.wcd.data import prep_data
+from wcd_vae.wcd.data import prep_data, select_reference_batch
 from wcd_vae.wcd.evaluation import clisi_graph, ilisi_graph, probe_metrics
 from wcd_vae.wcd.primitives import seed_everything
 from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
@@ -53,10 +53,19 @@ def load_registry():
         return json.load(fh)
 
 
-def load_task(name, batch_count=None, balance=False, data_root=None, registry=None):
+def load_task(name, batch_count=None, balance=False, data_root=None, registry=None,
+              reference_rule="entropy"):
     """Load and preprocess a registered task by name.
 
-    Returns (adata, batch_key, celltype_key, largest_batch_name).
+    Returns ``(adata, batch_key, celltype_key, reference_batch_name)``.
+
+    # WHY reference_rule: the 4th return value is the batch every caller uses as the
+    #   critic's alignment target. It used to be the LARGEST batch, while the harnesses
+    #   separately passed ``reference_batch=0`` -- the ALPHABETICALLY first batch, which on
+    #   4 of 6 datasets was one of the smallest. Neither is a principled target. The
+    #   default is now ``"entropy"``: the batch whose cell-type distribution has maximum
+    #   Shannon entropy (ties broken by size), i.e. the batch that best represents the
+    #   biology. Pass ``reference_rule="largest"`` to reproduce pre-2026-08 results.
     """
     registry = registry or load_registry()
     if name not in registry:
@@ -75,7 +84,15 @@ def load_task(name, batch_count=None, balance=False, data_root=None, registry=No
         balance=balance,
         modality=entry.get("prep", "rna"),
     )
-    return adata, entry["batch_key"], entry["celltype_key"], largest
+    if reference_rule == "entropy":
+        reference = select_reference_batch(adata, entry["batch_key"], entry["celltype_key"])
+    elif reference_rule == "largest":
+        reference = largest
+    else:
+        raise ValueError(f"reference_rule must be 'entropy' or 'largest', got {reference_rule!r}")
+    if reference != largest:
+        print(f"[reference] entropy rule selects '{reference}' (largest batch was '{largest}')")
+    return adata, entry["batch_key"], entry["celltype_key"], reference
 
 
 def train_one(

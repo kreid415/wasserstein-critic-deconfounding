@@ -128,6 +128,80 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_la
     return asw_batch, asw_celltype, ari, graph_conn, paga_spearman
 
 
+# scIB categories (Luecken et al. 2022). kBET is omitted -- it requires rpy2 + the R kBET
+# package, which is not installed, and returns all-NaN here.
+_SCIB_BATCH = {"ilisi": +1, "asw_batch": +1, "graph_conn": +1, "pcr": +1}
+_SCIB_BIO = {"clisi": -1, "ari": +1, "nmi": +1, "asw_celltype": +1,
+             "isolated_asw": +1, "isolated_f1": +1, "cell_cycle": +1,
+             "paga_spearman": +1}
+
+
+def _scib_overall(suite_rows, w_batch=0.4):
+    """0.4*batch + 0.6*bio over a list of metric dicts, scaled within this comparison.
+
+    # WHY: scIB ships no scalar aggregate (verified in scib 1.1.7), so the overall score
+    #   must be computed. We follow the paper: min-max scale each metric across the
+    #   candidates being compared, average within category, then weight 0.4/0.6.
+    # HOW: sign-corrects lower-is-better metrics (cLISI) before scaling; metrics that are
+    #   all-NaN or constant across candidates contribute nothing rather than 0 or 0.5.
+    """
+    import numpy as np
+
+    def cat_score(spec):
+        vals = []
+        for m, sign in spec.items():
+            xs = np.array([r.get(m, np.nan) for r in suite_rows], dtype=float) * sign
+            if not np.isfinite(xs).any():
+                continue
+            lo, hi = np.nanmin(xs), np.nanmax(xs)
+            if not np.isfinite(lo) or hi - lo < 1e-12:
+                continue
+            vals.append(np.nanmean((xs - lo) / (hi - lo)))
+        return float(np.mean(vals)) if vals else np.nan
+
+    b, o = cat_score(_SCIB_BATCH), cat_score(_SCIB_BIO)
+    if not np.isfinite(b) and not np.isfinite(o):
+        return float("nan")
+    if not np.isfinite(b):
+        return o
+    if not np.isfinite(o):
+        return b
+    return w_batch * b + (1.0 - w_batch) * o
+
+
+def _scib_overall_per_candidate(suite_rows, w_batch=0.4):
+    """Per-candidate scIB overall score: one value PER row in ``suite_rows``.
+
+    # WHY: selection compares candidates, so each candidate needs its own score. The
+    #   scaling is still done ACROSS candidates (that is what makes the categories
+    #   commensurable), but the result is a vector, not a single number.
+    """
+    import numpy as np
+
+    n = len(suite_rows)
+
+    def cat_scores(spec):
+        acc = np.zeros(n, dtype=float)
+        used = 0
+        for m, sign in spec.items():
+            xs = np.array([r.get(m, np.nan) for r in suite_rows], dtype=float) * sign
+            if not np.isfinite(xs).all():
+                continue
+            lo, hi = xs.min(), xs.max()
+            if hi - lo < 1e-12:
+                continue
+            acc += (xs - lo) / (hi - lo)
+            used += 1
+        return acc / used if used else np.full(n, np.nan)
+
+    b, o = cat_scores(_SCIB_BATCH), cat_scores(_SCIB_BIO)
+    out = np.where(
+        np.isfinite(b) & np.isfinite(o), w_batch * b + (1 - w_batch) * o,
+        np.where(np.isfinite(o), o, b),
+    )
+    return out
+
+
 def run_comprehensive_nested_cv(
     adata,
     batch_key,
@@ -148,6 +222,10 @@ def run_comprehensive_nested_cv(
     random_state=42,
     skip_discr=False,
     clisi_weight=1.0,
+    backbone="NB_uncond",
+    registry=None,
+    criterion="scib",
+    early_stopping=True,
 ):
     """
     Performs optimized nested cross-validation.
@@ -204,6 +282,7 @@ def run_comprehensive_nested_cv(
             )
 
             inner_selection_scores = {}
+            inner_suite = {}
             train_labels = cell_labels[train_idx]
 
             for d_coef in d_coef_range:
@@ -238,6 +317,9 @@ def run_comprehensive_nested_cv(
                         batch_size=batch_size,
                         reference_batch=reference_batch,
                         reference_batch_name_str=reference_batch_name_str,
+                        backbone=backbone,
+                        early_stopping=early_stopping,
+                        es_celltype_key=celltype_key,
                     )
 
                     # 3. Evaluate on Inner Validation Set (FAST METRICS ONLY)
@@ -267,6 +349,25 @@ def run_comprehensive_nested_cv(
 
                     temp_inner_ilisi.append(ilisi_val)
                     temp_inner_clisi.append(clisi_val)
+
+                    # WHY: selection now maximises the scIB overall score rather than
+                    #   (iLISI - 10*cLISI). The old form was effectively single-metric --
+                    #   over the lambda sweep iLISI swings 0.021 while cLISI swings 0.036,
+                    #   so a x10 penalty let cLISI dominate by 17.7x. We collect the full
+                    #   suite on the inner validation cells and combine 0.4*batch +
+                    #   0.6*bio, the published scIB weighting.
+                    if criterion == "scib":
+                        try:
+                            from wcd_vae.wcd.experiment import full_metric_suite
+
+                            inner_suite.setdefault(d_coef, []).append(
+                                full_metric_suite(
+                                    adata_inner_comb, batch_key, celltype_key,
+                                    embed_key="X_latent",
+                                )
+                            )
+                        except Exception as exc:  # keep the fold, fall back to LISI
+                            print(f"    [warn] scIB suite failed on inner fold: {exc}")
 
                     # Log inner fold result
                     sensitivity_records.append(
@@ -305,6 +406,26 @@ def run_comprehensive_nested_cv(
                 )
 
             # --- SELECTION & FINAL TRAINING (Outer Fold) ---
+            # WHY: the scIB overall score min-max scales each metric ACROSS THE
+            #   CANDIDATES BEING COMPARED, so it must be computed over all lambda values
+            #   together -- scoring each lambda's folds in isolation would scale every
+            #   candidate onto the same [0,1] range and make selection arbitrary.
+            if criterion == "scib" and inner_suite:
+                lams = [lam for lam in d_coef_range if inner_suite.get(lam)]
+                if lams:
+                    # mean metric dict per lambda, then one scaling pass over lambdas
+                    per_lam = []
+                    for lam in lams:
+                        keys = {k for r in inner_suite[lam] for k in r}
+                        per_lam.append({
+                            k: float(np.nanmean([r.get(k, np.nan) for r in inner_suite[lam]]))
+                            for k in keys
+                        })
+                    scored = _scib_overall_per_candidate(per_lam)
+                    for lam, sc in zip(lams, scored):
+                        if np.isfinite(sc):
+                            inner_selection_scores[lam] = sc
+
             best_d_coef = max(inner_selection_scores, key=inner_selection_scores.get)
             print(f"  >>> Best d_coef selected for {critic_label}: {best_d_coef}")
 
@@ -319,6 +440,9 @@ def run_comprehensive_nested_cv(
                 disc_iter=iters,
                 reference_batch=reference_batch,
                 reference_batch_name_str=reference_batch_name_str,
+                backbone=backbone,
+                early_stopping=early_stopping,
+                es_celltype_key=celltype_key,
                 batch_size=batch_size,
             )
 

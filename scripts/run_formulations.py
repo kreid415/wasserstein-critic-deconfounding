@@ -89,8 +89,15 @@ def main():
                 print(f"  {tag:14s} seed={seed} | SKIP (resume)", flush=True)
                 continue
             try:
+                # WHY: the "reference" arm aligns onto a single batch, so it must use the
+                #   entropy-selected reference (by NAME, so training resolves the index).
+                #   pooled/barycenter/discriminator have no single reference and pass None.
+                cfg_run = dict(cfg)
+                if cfg_run.get("reference_batch") is not None:
+                    cfg_run["reference_batch_name_str"] = largest
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
-                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg, embed_out=args.embed_out)
+                                      seed=seed, epochs=args.epochs, backbone=args.backbone,
+                                      **cfg_run, embed_out=args.embed_out)
                 row.update({"experiment": "E9", "dataset": args.dataset, "arm": tag,
                             "balanced": args.balance, "n_batches": n_batches})
                 rows.append(row)

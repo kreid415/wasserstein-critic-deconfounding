@@ -30,15 +30,21 @@ BACKBONES = [
 SEEDS = [0, 1, 2]
 
 
-def configs_for(experiment, task_entry):
-    """Yield config dicts (kwargs for evaluate_config) for the requested experiment."""
+def configs_for(experiment, task_entry, reference_name=None):
+    """Yield config dicts (kwargs for evaluate_config) for the requested experiment.
+
+    ``reference_name`` is the ENTROPY-selected reference batch from load_task; it is
+    passed by name so training resolves the correct index (the literal
+    ``reference_batch=0`` retained alongside it is the legacy positional fallback).
+    """
     if experiment == "E1":
         # Pareto front: both heads x full lambda grid x 3 seeds, default backbone.
         for critic in (False, True):
             for lam in LAMBDA_GRID:
                 for seed in SEEDS:
                     yield {"critic": critic, "d_coef": lam, "seed": seed,
-                           "reference_batch": 0 if critic else None}
+                           "reference_batch": 0 if critic else None,
+                       "reference_batch_name_str": reference_name if critic else None}
     elif experiment == "E2":
         # Architecture generality: 4 backbones x both heads x 3 seeds at the paper's
         # operating point (d_coef=0.2). Capacity sweep handled by --zdim/--override.
@@ -46,14 +52,16 @@ def configs_for(experiment, task_entry):
             for critic in (False, True):
                 for seed in SEEDS:
                     yield {"critic": critic, "d_coef": 0.2, "seed": seed, "backbone": backbone,
-                           "reference_batch": 0 if critic else None}
+                           "reference_batch": 0 if critic else None,
+                       "reference_batch_name_str": reference_name if critic else None}
     elif experiment == "E8":
         # Multibatch scaling handled by caller varying --batch-count; here just both
         # heads x 3 seeds at the operating point with the full metric suite.
         for critic in (False, True):
             for seed in SEEDS:
                 yield {"critic": critic, "d_coef": 0.2, "seed": seed,
-                       "reference_batch": 0 if critic else None}
+                       "reference_batch": 0 if critic else None,
+                       "reference_batch_name_str": reference_name if critic else None}
     else:
         raise ValueError(f"run_experiment does not handle '{experiment}' (see dedicated script)")
 
@@ -95,8 +103,11 @@ def main():
         args.dataset, batch_count=args.batch_count, balance=args.balance,
         data_root=args.data_root, registry=registry,
     )
-    # reference-batch name -> index for the critic (largest batch, matching scripts).
-    print(f"[{args.dataset}] n_obs={adata.n_obs} batch_key={batch_key} largest={largest} "
+    # WHY: load_task now returns the ENTROPY-selected reference batch (max cell-type
+    #   Shannon entropy, ties by size). We pass it by NAME via reference_batch_name_str so
+    #   training resolves the correct index -- the old `reference_batch=0` was the
+    #   ALPHABETICALLY first batch, which on 4/6 datasets was one of the smallest.
+    print(f"[{args.dataset}] n_obs={adata.n_obs} batch_key={batch_key} reference={largest} "
           f"n_batches={adata.obs[batch_key].nunique()}")
 
     # resume: load already-computed configs so a re-run skips them.
@@ -118,7 +129,7 @@ def main():
                           int(r["seed"])))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
-    for i, cfg in enumerate(configs_for(args.experiment, entry)):
+    for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest)):
         # head filter: lets E1 be split into two shorter jobs (one per adversarial head).
         if args.head != "both":
             want_critic = args.head == "critic"

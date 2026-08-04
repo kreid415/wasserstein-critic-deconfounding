@@ -124,7 +124,7 @@ def main():
     with open(args.registry) as fh:
         registry = json.load(fh)
 
-    adata, batch_key, celltype_key, _largest = load_task(
+    adata, batch_key, celltype_key, ref_batch = load_task(
         args.dataset, batch_count=args.batch_count, balance=args.balance,
         data_root=args.data_root, registry=registry,
     )
@@ -140,7 +140,9 @@ def main():
         head = "critic" if critic else "discriminator"
         ad = adata.copy()
         vae, _ = train_one(ad, batch_key, critic=critic, d_coef=args.d_coef, seed=args.seed,
-                           reference_batch=0 if critic else None, epochs=args.epochs,
+                           reference_batch=0 if critic else None,
+                           reference_batch_name_str=ref_batch if critic else None,
+                           epochs=args.epochs,
                            backbone=args.backbone)
         obtain_embeddings(ad, vae.to(device))
         res = analyse_embedding(ad, "X_latent", batch_key, celltype_key)
