@@ -1,96 +1,85 @@
+"""Nested cross-validation with in-fold lambda_adv selection.
+
+# WHY this script was rewritten: the previous version hardcoded three dataset paths under
+#   /workspaces/data (a sandbox layout that no longer exists on either cluster), imported
+#   `wcd_vae.data` / `wcd_vae.hyperparameter` (the modules live under `wcd_vae.wcd.`), and
+#   exposed no --backbone, so it could not run the unconditioned backbones the revision
+#   uses. It now goes through the same registry + load_task path as every other harness,
+#   which also gives it the entropy-based reference batch for free.
+"""
+
 import argparse
+import json
+import os
 import warnings
 
-from wcd_vae.data import prep_data
-from wcd_vae.hyperparameter import run_comprehensive_nested_cv
-
+from wcd_vae.wcd.experiment import load_task
+from wcd_vae.wcd.hyperparameter import run_comprehensive_nested_cv
 from wcd_vae.wcd.primitives import seed_everything
 
 warnings.filterwarnings("ignore")
 
+LAMBDA_GRID = (0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0)
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Hyperparameter search for WCD-VAE")
-    parser.add_argument("--dataset", type=str, required=True, help="Dataset name")
-    parser.add_argument(
-        "--output_dir", type=str, required=True, help="Output directory for results"
+    ap = argparse.ArgumentParser(description="Nested CV with in-fold lambda selection")
+    ap.add_argument("--dataset", required=True)
+    ap.add_argument("--output-dir", dest="output_dir", required=True)
+    ap.add_argument("--registry", default="configs/dataset_registry_cluster.json")
+    ap.add_argument("--data-root", dest="data_root", default=None)
+    ap.add_argument("--backbone", default="NB_uncond")
+    ap.add_argument("--batch-count", dest="batch_count", type=int, default=None)
+    ap.add_argument("--epochs", type=int, default=500, help="outer-fold ceiling (early stopping applies)")
+    ap.add_argument("--inner-epochs", dest="inner_epochs", type=int, default=500)
+    ap.add_argument("--warmup-epoch", dest="warmup_epoch", type=int, default=5)
+    ap.add_argument("--batch-size", dest="batch_size", type=int, default=1024)
+    ap.add_argument("--outer-folds", dest="outer_folds", type=int, default=5)
+    ap.add_argument("--inner-folds", dest="inner_folds", type=int, default=3)
+    ap.add_argument("--criterion", default="scib", choices=["scib", "lisi"])
+    ap.add_argument("--no-early-stopping", dest="early_stopping", action="store_false")
+    ap.add_argument("--reference-rule", dest="reference_rule", default="entropy",
+                    choices=["entropy", "largest"])
+    ap.add_argument("--skip-discr", dest="skip_discr", action="store_true")
+    ap.add_argument("--seed", type=int, default=42)
+    args = ap.parse_args()
+
+    seed_everything(args.seed)
+    with open(args.registry) as fh:
+        registry = json.load(fh)
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    adata, batch_key, celltype_key, reference = load_task(
+        args.dataset, batch_count=args.batch_count, data_root=args.data_root,
+        registry=registry, reference_rule=args.reference_rule,
     )
-    parser.add_argument("--batch_count", type=int, default=2, help="Number of batches to consider")
-    parser.add_argument("--epochs", type=int, default=80, help="Number of training epochs")
-    parser.add_argument("--inner_epochs", type=int, default=40, help="Number of inner CV epochs")
-    parser.add_argument("--warmup_epoch", type=int, default=10, help="Number of warmup epochs")
-    parser.add_argument("--reference_batch", type=int, default=0, help="Reference batch index")
-    parser.add_argument(
-        "--balance", action="store_true", help="Whether to balance batches during training"
-    )
-    parser.add_argument("--batch_size", type=int, default=1024, help="Batch size for training")
-    parser.add_argument(
-        "--skip_discr",
-        action="store_true",
-        help="Whether to skip discriminator training",
-    )
-
-    args = parser.parse_args()
-
-    seed_everything(42)
-
-    data_set = args.dataset.lower()
-    output_dir = args.output_dir
-    batch_count = args.batch_count
-    epochs = args.epochs
-    inner_epochs = args.inner_epochs
-    warmup_epoch = args.warmup_epoch
-    reference_batch = args.reference_batch
-    balance = args.balance
-    skip_discr = args.skip_discr
-    batch_size = args.batch_size
-
-    if data_set == "pancreas":
-        batch_key = "tech"
-        celltype_key = "celltype"
-        data_path = "/workspaces/data/human_pancreas_norm_complexBatch.h5ad"
-
-    elif data_set == "immune":
-        batch_key = "chemistry"
-        celltype_key = "final_annotation"
-        data_path = "/workspaces/data/Immune_ALL_human.h5ad"
-
-    elif data_set == "lung":
-        batch_key = "protocol"
-        celltype_key = "cell_type"
-        data_path = "/workspaces/data/Lung_atlas_public.h5ad"
-
-    adata, largest_batch_name = prep_data(
-        data_path,
-        batch_key=batch_key,
-        celltype_key=celltype_key,
-        batch_count=batch_count,
-        min_genes=300,
-        min_cells=5,
-        norm_val=1e4,
-        n_top_genes=2000,
-        balance=balance,
-    )
-
-    reference_batch_name = largest_batch_name if reference_batch == -1 else None
+    print(f"[{args.dataset}] n_obs={adata.n_obs} n_batches={adata.obs[batch_key].nunique()} "
+          f"reference={reference} backbone={args.backbone} criterion={args.criterion}",
+          flush=True)
 
     run_comprehensive_nested_cv(
         adata,
         batch_key=batch_key,
         celltype_key=celltype_key,
-        reference_batch=reference_batch,
-        reference_batch_name_str=reference_batch_name,
-        epochs=epochs,
-        inner_epochs=inner_epochs,
-        warmup_epoch=warmup_epoch,
-        n_outer_folds=5,
-        n_inner_folds=3,
-        output_dir=output_dir,
-        output_prefix=f"{data_set}",
-        random_state=42,
-        skip_discr=skip_discr,
-        clisi_weight=10,
-        batch_size=batch_size,
+        output_dir=args.output_dir,
+        output_prefix=args.dataset,
+        d_coef_range=LAMBDA_GRID,
+        n_outer_folds=args.outer_folds,
+        n_inner_folds=args.inner_folds,
+        epochs=args.epochs,
+        inner_epochs=args.inner_epochs,
+        warmup_epoch=args.warmup_epoch,
+        batch_size=args.batch_size,
+        # WHY by NAME: training resolves the name to the correct batch index; the integer
+        #   reference_batch is the legacy positional fallback and is NOT the entropy pick.
+        reference_batch=0,
+        reference_batch_name_str=reference,
+        backbone=args.backbone,
+        registry=registry,
+        criterion=args.criterion,
+        early_stopping=args.early_stopping,
+        skip_discr=args.skip_discr,
+        random_state=args.seed,
     )
 
 
