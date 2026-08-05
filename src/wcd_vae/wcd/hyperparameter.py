@@ -226,6 +226,8 @@ def run_comprehensive_nested_cv(
     registry=None,
     criterion="scib",
     early_stopping=True,
+    outer_fold_only=None,
+    head_only=None,
 ):
     """
     Performs optimized nested cross-validation.
@@ -265,14 +267,28 @@ def run_comprehensive_nested_cv(
 
     sensitivity_records = []
 
+    # WHY outer_fold_only / head_only: a full nested run is 5 outer folds x (3 inner x 10
+    #   lambda + 1) x 2 heads = 310 fits, which is 120 h on pancreas and 1,506 h on the
+    #   cross-species dataset -- far past any wall (max 72 h). Splitting to one
+    #   (outer_fold, head) task keeps every task inside the wall. The StratifiedKFold split
+    #   is deterministic given random_state, so a task computing only fold k sees exactly
+    #   the same train/test partition it would in a full run -- the results are identical,
+    #   just distributed. Output files are per-(fold, head) and merged afterwards.
     for outer_fold_idx, (train_idx, test_idx) in enumerate(
         outer_kf.split(cell_indices, cell_labels)
     ):
+        if outer_fold_only is not None and outer_fold_idx != int(outer_fold_only):
+            continue
         print(f"\n=== Starting Outer Fold {outer_fold_idx + 1}/{n_outer_folds} ===")
         adata_train = adata[train_idx].copy()
         adata_test = adata[test_idx].copy()
 
-        for use_critic in [True, False] if not skip_discr else [True]:
+        heads = [True, False] if not skip_discr else [True]
+        if head_only is not None:
+            if head_only not in ("critic", "discriminator"):
+                raise ValueError(f"head_only must be 'critic' or 'discriminator', got {head_only!r}")
+            heads = [head_only == "critic"]
+        for use_critic in heads:
             critic_label = "critic" if use_critic else "no_critic"
             iters = disc_iter if use_critic else 1
             print(f"  --- Processing method: {critic_label} ---")
@@ -552,11 +568,20 @@ def run_comprehensive_nested_cv(
         )
         prefix.mkdir(parents=True, exist_ok=True)
 
-        final_results_df.to_csv(f"{prefix}final_best_results.csv", index=False)
+        # WHY the suffix: parallel per-(fold, head) tasks must not write the same path --
+        #   truncate-mode writes from concurrent jobs silently interleave.
+        suffix = ""
+        if outer_fold_only is not None:
+            suffix += f"_fold{int(outer_fold_only)}"
+        if head_only is not None:
+            suffix += f"_{head_only}"
+        final_results_df.to_csv(f"{prefix}final_best_results{suffix}.csv", index=False)
         with open(f"{prefix}final_results_dict.pkl", "wb") as f:
             pickle.dump(outer_fold_results_dict, f)
 
-        sensitivity_df.to_csv(f"{prefix}comprehensive_sensitivity_records.csv", index=False)
+        sensitivity_df.to_csv(
+            f"{prefix}comprehensive_sensitivity_records{suffix}.csv", index=False
+        )
 
         print(f"\nResults saved to directory: {output_dir}")
 

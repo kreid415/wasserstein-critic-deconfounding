@@ -40,6 +40,11 @@ def main():
     ap.add_argument("--no-early-stopping", dest="early_stopping", action="store_false")
     ap.add_argument("--reference-rule", dest="reference_rule", default="entropy",
                     choices=["entropy", "largest"])
+    ap.add_argument("--outer-fold-only", dest="outer_fold_only", type=int, default=None,
+                    help="run only this outer fold (0-indexed); splits the run across tasks")
+    ap.add_argument("--head-only", dest="head_only", default=None,
+                    choices=["critic", "discriminator"],
+                    help="run only this adversarial head")
     ap.add_argument("--skip-discr", dest="skip_discr", action="store_true")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
@@ -79,6 +84,8 @@ def main():
         criterion=args.criterion,
         early_stopping=args.early_stopping,
         skip_discr=args.skip_discr,
+        outer_fold_only=args.outer_fold_only,
+        head_only=args.head_only,
         random_state=args.seed,
     )
 
