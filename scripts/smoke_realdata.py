@@ -104,7 +104,12 @@ def main():
     only = args.datasets.split(",") if args.datasets else None
     out = os.path.join(ROOT, args.out)
     os.makedirs(out, exist_ok=True)
-    reg_path = os.path.join(out, "registry.json")
+    # Each invocation gets its OWN registry file. Multiple workers sharing one --out
+    # directory each call build_registry(), and a shared filename means the last writer
+    # wins -- every other worker then dies with KeyError on its own dataset. Keying the
+    # filename by the dataset subset makes concurrent workers safe.
+    reg_tag = "_".join(sorted(only)) if only else "all"
+    reg_path = os.path.join(out, f"registry_{reg_tag}.json")
     reg = build_registry(reg_path, only)
     if not reg:
         print("no datasets available"); return 2
