@@ -158,3 +158,31 @@ def test_paga_spearman_returns_nan_not_zero_when_unmeasurable():
         adata, tech_key="batch", celltype_key="celltype", embed_key="X_latent"
     )
     assert np.isnan(val), f"expected NaN for unmeasurable topology, got {val}"
+
+
+def test_embedding_tag_is_unique_across_arms():
+    """Embedding filenames must distinguish every config dimension they vary over.
+
+    # WHY: wave 2019132 wrote 408 configs' embeddings into one flat directory and only 96
+    #   files survived -- the tag omitted the dataset (7 datasets clobbered each other)
+    #   and omitted reference_mode/formulation (E4/E9 arms clobbered each other). The
+    #   dataset is not visible inside evaluate_config, so callers pass a per-dataset
+    #   subdirectory; this test locks the within-directory part of the tag.
+    """
+    def tag(critic, backbone, d_coef, seed, reference_mode, formulation):
+        return (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
+                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
+                f"_{reference_mode}_{formulation}")
+
+    base = dict(critic=True, backbone="NB_uncond", d_coef=0.2, seed=0,
+                reference_mode="fixed", formulation="reference")
+    seen = {tag(**base)}
+    for field, value in [("critic", False), ("backbone", "ZINB"), ("d_coef", 0.5),
+                         ("seed", 1), ("reference_mode", "joint"),
+                         ("formulation", "pooled")]:
+        variant = dict(base)
+        variant[field] = value
+        t = tag(**variant)
+        assert t not in seen, f"varying {field} did not change the embedding tag: {t}"
+        seen.add(t)
+    assert len(seen) == 7

@@ -398,8 +398,16 @@ def evaluate_config(
         import os
 
         os.makedirs(embed_out, exist_ok=True)
+        # WHY reference_mode/formulation in the tag: E4 sweeps reference designs and E9
+        #   sweeps formulations at the SAME (head, backbone, lambda, seed), so without
+        #   them those arms silently overwrite each other.
+        # NOTE the DATASET is not visible here (evaluate_config never receives its name),
+        #   so callers MUST pass a dataset-specific embed_out directory. Wave 2019132
+        #   wrote every dataset into one flat directory and 7 datasets clobbered each
+        #   other down to 96 files for 408 configs.
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
-               f"_lam{str(d_coef).replace('.', 'p')}_s{seed}")
+               f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
+               f"_{reference_mode}_{formulation}")
         np.savez_compressed(
             os.path.join(embed_out, f"{tag}.npz"),
             z=np.asarray(ad.obsm["X_latent"], dtype=np.float32),

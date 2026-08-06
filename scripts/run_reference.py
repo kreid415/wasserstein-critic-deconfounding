@@ -81,7 +81,7 @@ def main():
                 continue
             try:
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
-                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg, embed_out=args.embed_out)
+                                      seed=seed, epochs=args.epochs, backbone=args.backbone, **cfg, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None))
                 row.update({"experiment": "E4", "dataset": args.dataset, "ref_design": tag,
                             "balanced": args.balance, "n_batches": n_batches})
                 rows.append(row)

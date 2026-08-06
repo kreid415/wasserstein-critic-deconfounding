@@ -97,7 +97,7 @@ def main():
                     cfg_run["reference_batch_name_str"] = largest
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
                                       seed=seed, epochs=args.epochs, backbone=args.backbone,
-                                      **cfg_run, embed_out=args.embed_out)
+                                      **cfg_run, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None))
                 row.update({"experiment": "E9", "dataset": args.dataset, "arm": tag,
                             "balanced": args.balance, "n_batches": n_batches})
                 rows.append(row)
