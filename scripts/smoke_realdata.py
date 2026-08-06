@@ -58,11 +58,12 @@ def build_registry(path, only=None):
     return reg
 
 
-def run_one(py, reg, out, dataset, backbone, head, epochs, extra=None):
-    csv = os.path.join(out, f"{dataset}_{backbone}_{head}.csv")
+def run_one(py, reg, out, dataset, backbone, head, epochs, lam=0.2, extra=None):
+    tag = f"{dataset}_{backbone}_{head}_lam{str(lam).replace('.','p')}"
+    csv = os.path.join(out, f"{tag}.csv")
     cmd = [py, "scripts/run_experiment.py", "--experiment", "E1", "--dataset", dataset,
            "--registry", reg, "--backbone", backbone, "--head", head,
-           "--d-coef-only", "0.2", "--seed-only", "0", "--epochs", str(epochs),
+           "--d-coef-only", str(lam), "--seed-only", "0", "--epochs", str(epochs),
            "--out", csv] + (extra or [])
     env = dict(os.environ)
     env.update(KMP_AFFINITY="disabled", OMP_NUM_THREADS="4", NUMBA_NUM_THREADS="4",
@@ -77,6 +78,17 @@ def run_one(py, reg, out, dataset, backbone, head, epochs, extra=None):
     if len(df) == 0:
         return {"ok": False, "seconds": dt, "why": "empty csv"}
     row = df.iloc[0].to_dict()
+    # A row can EXIST and still be a failure: the harness records failed configs with a
+    # `failed` column holding the exception text and no metrics. Treating a written row as
+    # success hid a real error (scib's pd.value_counts against pandas>=2) behind
+    # "pass ... loss_da=None". Check the column, and require the metrics we gate on.
+    fail = row.get("failed")
+    if isinstance(fail, str) and fail.strip():
+        return {"ok": False, "seconds": dt, "why": f"harness recorded failure: {fail[:200]}"}
+    missing = [k for k in ("ilisi", "final_loss_da") if k not in row or pd.isna(row.get(k))]
+    if missing:
+        return {"ok": False, "seconds": dt,
+                "why": f"row written but missing/NaN metrics: {missing}"}
     row.update(ok=True, seconds=dt)
     return row
 
@@ -108,16 +120,31 @@ def main():
                 if not r["ok"]:
                     fails.append(tag); print(f"FAIL {tag}: {r['why'][:160]}", flush=True); continue
                 lda = r.get("final_loss_da")
-                # the engagement gate applies to the DISCRIMINATOR only: its loss is a
-                # V-way cross-entropy with a known chance value. The Wasserstein critic
-                # loss is unbounded and legitimately negative, so ln(V) says nothing there.
+                # ENGAGEMENT GATE -- must be evaluated at lambda=0, NOT at the operating
+                # point. At a WORKING operating point the generator has removed the batch
+                # signal, so the discriminator returning to chance is the SUCCESS condition.
+                # Measured on real data: at lambda=0.2 only 1/6 datasets beats chance, but
+                # at lambda=0 five of six do. Gating at 0.2 would flag healthy runs as inert.
+                # Discriminator-only: the Wasserstein critic loss is unbounded, so ln(V) is
+                # a vacuous threshold for critic arms.
                 eng = None
-                if head == "discriminator" and lda is not None and not pd.isna(lda):
-                    eng = bool(lda < chance - 0.15)
-                    if not eng:
-                        inert.append(f"{tag} (loss_da={lda:.3f} vs chance={chance:.3f})")
+                if head == "discriminator":
+                    # Run the control at FULL epochs. At half-epochs the control is
+                    # undertrained and under-reports engagement: atac_small reaches
+                    # loss_da 0.962 (gap 0.137, below the 0.15 threshold) at 30 epochs but
+                    # 0.721 (gap 0.378) at 150 -- the same model, just converged.
+                    c = run_one(sys.executable, reg_path, out, ds, bb, head,
+                                args.epochs, lam=0.0)
+                    lda0 = c.get("final_loss_da") if c.get("ok") else None
+                    if lda0 is not None and not pd.isna(lda0):
+                        eng = bool(lda0 < chance - 0.15)
+                        if not eng:
+                            inert.append(f"{tag} (lambda=0 loss_da={lda0:.3f} "
+                                         f"vs chance={chance:.3f})")
+                    else:
+                        inert.append(f"{tag} (lambda=0 control did not produce loss_da)")
                 print(f"pass {tag}  {r['seconds']/60:.1f}min  loss_da={lda}  "
-                      f"engaged={eng}  ilisi={r.get('ilisi')}", flush=True)
+                      f"engaged@lam0={eng}  ilisi={r.get('ilisi')}", flush=True)
                 rows.append({"dataset": ds, "backbone": bb, "head": head,
                              "seconds": r["seconds"], "engaged": eng, **{
                                  k: r.get(k) for k in
