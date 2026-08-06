@@ -464,8 +464,11 @@ def run_comprehensive_nested_cv(
 
             if output_dir:
                 # Create a specific filename for this fold/method
+                # WHY 0-based: --outer-fold-only is 0-indexed and the results suffix uses
+                #   f"_fold{outer_fold_only}", so a 1-based history name meant the SAME
+                #   fold appeared as fold0 in one file and fold1 in another -- a merge trap.
                 hist_filename = (
-                    f"{output_prefix}_fold{outer_fold_idx + 1}_{critic_label}_history.csv"
+                    f"{output_prefix}_fold{outer_fold_idx}_{critic_label}_history.csv"
                 )
                 full_hist_path = Path(output_dir) / hist_filename
                 full_hist_path.parent.mkdir(parents=True, exist_ok=True)
