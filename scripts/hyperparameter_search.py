@@ -36,6 +36,10 @@ def main():
     ap.add_argument("--batch-size", dest="batch_size", type=int, default=1024)
     ap.add_argument("--outer-folds", dest="outer_folds", type=int, default=5)
     ap.add_argument("--inner-folds", dest="inner_folds", type=int, default=3)
+    ap.add_argument("--lambda-grid", dest="lambda_grid", default=None,
+                    help="comma-separated lambda values; default is the full 10-point grid. "
+                         "A reduced grid is for smoke tests only -- selection over a coarse "
+                         "grid is not a valid nested-CV result.")
     ap.add_argument("--criterion", default="scib", choices=["scib", "lisi"])
     ap.add_argument("--no-early-stopping", dest="early_stopping", action="store_false")
     ap.add_argument("--reference-rule", dest="reference_rule", default="entropy",
@@ -48,6 +52,12 @@ def main():
     ap.add_argument("--skip-discr", dest="skip_discr", action="store_true")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
+
+    grid = (tuple(float(x) for x in args.lambda_grid.split(","))
+            if args.lambda_grid else LAMBDA_GRID)
+    if grid != LAMBDA_GRID:
+        print(f"[warn] reduced lambda grid {grid} -- smoke test only, not a valid result",
+              flush=True)
 
     seed_everything(args.seed)
     with open(args.registry) as fh:
@@ -68,7 +78,7 @@ def main():
         celltype_key=celltype_key,
         output_dir=args.output_dir,
         output_prefix=args.dataset,
-        d_coef_range=LAMBDA_GRID,
+        d_coef_range=grid,
         n_outer_folds=args.outer_folds,
         n_inner_folds=args.inner_folds,
         epochs=args.epochs,
