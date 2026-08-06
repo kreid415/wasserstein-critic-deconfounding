@@ -29,3 +29,10 @@ build/
 **/logs/
 *.nbc
 *.nbi
+
+# generated figure placeholders (scripts/check_manuscript.sh) -- real figures live in the
+# artifact store, these exist only so a structural compile can run
+manuscript_tm/oup-authoring-template/binary_experiment_comparison.png
+manuscript_tm/oup-authoring-template/multibatch_trends_grouped.png
+manuscript_tm/oup-authoring-template/d_coef_sensitivity.png
+manuscript_tm/oup-authoring-template/reference_sensitivity_critic_only.png
