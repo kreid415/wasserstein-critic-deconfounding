@@ -292,9 +292,14 @@ class SCIntegrationModel(nn.Module):
             "loss_vae": [],
             "reconst_loss": [],
             "reconst_loss_non_zero": [],
-            "es_epoch": [],
-            "es_score": [],
         }
+        # WHY separate: training_history is consumed as pd.DataFrame(history), so EVERY
+        #   value must be a per-epoch list of equal length. The early-stopping trace is
+        #   sampled every es_check_every epochs and the best-epoch summary is scalar, so
+        #   putting them in the same dict makes it RAGGED and pandas raises
+        #   "All arrays must be of the same length". They live in a sidecar dict instead.
+        es_trace = {"es_epoch": [], "es_score": [], "es_best_epoch": None,
+                    "es_best_score": None}
 
         # 1. Prepare Data (One-time GPU transfer)
         data_dict, batch_indices_map, reference_batch_idx = self._prepare_tensors(
@@ -409,8 +414,8 @@ class SCIntegrationModel(nn.Module):
                     score = self._es_probe_score(
                         adata, es_celltype_key, data_dict, es_holdout_frac
                     )
-                    training_history["es_epoch"].append(epoch + 1)
-                    training_history["es_score"].append(score)
+                    es_trace["es_epoch"].append(epoch + 1)
+                    es_trace["es_score"].append(score)
                     if score > _es_best[0] + 1e-4:
                         _es_best[0] = score
                         _es_best[1] = epoch + 1
@@ -427,9 +432,11 @@ class SCIntegrationModel(nn.Module):
         # restore the best-scoring weights rather than the last ones
         if early_stopping and _es_best[2] is not None:
             self.VAE.load_state_dict(_es_best[2])
-            training_history["es_best_epoch"] = _es_best[1]
-            training_history["es_best_score"] = _es_best[0]
+            es_trace["es_best_epoch"] = _es_best[1]
+            es_trace["es_best_score"] = _es_best[0]
 
+        # attached, not merged: keeps pd.DataFrame(training_history) rectangular
+        self.es_trace = es_trace
         return training_history
 
     def _es_probe_score(self, adata, celltype_key, data_dict, holdout_frac):

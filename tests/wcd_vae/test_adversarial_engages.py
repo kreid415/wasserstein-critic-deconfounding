@@ -128,3 +128,43 @@ def test_adversarial_pressure_changes_the_objective():
         f"lambda_adv has no effect on the adversarial loss: "
         f"loss_da(lambda=0)={da_off:.4f} vs loss_da(lambda=1)={da_on:.4f}"
     )
+
+
+def test_training_history_is_rectangular_with_early_stopping():
+    """pd.DataFrame(training_history) must not raise when early stopping is on.
+
+    # WHY: the nested-CV path does exactly `pd.DataFrame(training_history).to_csv(...)`.
+    #   Early stopping originally appended its trace (sampled every es_check_every epochs)
+    #   and a scalar best-epoch summary into the SAME dict, making it ragged -- pandas
+    #   raised "All arrays must be of the same length" AFTER the full training run had
+    #   already completed, so 45 nested-CV tasks burned their compute and then died.
+    """
+    import numpy as np
+    import pandas as pd
+    import anndata as ad
+    from wcd_vae.wcd.training import SCIntegrationModel
+
+    rng = np.random.default_rng(0)
+    n = 400
+    obs = pd.DataFrame({
+        "b": rng.choice(["b0", "b1"], n),
+        "ct": rng.choice(["t0", "t1", "t2"], n),
+    })
+    counts = rng.poisson(3.0, size=(n, 60)).astype("float32")
+    a = ad.AnnData(X=counts, obs=obs)
+    a.layers["counts"] = counts.copy()
+
+    m = SCIntegrationModel(a, "b", z_dim=16, critic=False, reference_batch=None,
+                           seed=0, backbone="NB_uncond")
+    hist = m.train_model(a, "b", epochs=30, d_coef=0.2, kl_coef=0.005, warmup_epoch=2,
+                         disc_iter=1, batch_size=128, reference_batch_name_str=None,
+                         early_stopping=True, es_celltype_key="ct", es_check_every=5,
+                         es_patience=100)
+
+    lens = {k: len(v) for k, v in hist.items()}
+    assert len(set(lens.values())) == 1, f"ragged training_history: {lens}"
+    pd.DataFrame(hist)  # must not raise
+
+    # the trace is still available, just not inside the per-epoch frame
+    assert hasattr(m, "es_trace")
+    assert "es_score" in m.es_trace
