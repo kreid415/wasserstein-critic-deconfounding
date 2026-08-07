@@ -66,6 +66,36 @@ if [ -s "$OUT/oup-authoring-template.pdf" ]; then
 else
   echo "  PDF:                    NOT PRODUCED"
 fi
+# --- supplement.tex: same structural check. Its Fig/*.png are also artifact-store
+# --- figures absent from git, so placeholders are generated the same way.
+python - <<'PYEOF'
+import struct, zlib, os
+os.makedirs("Fig", exist_ok=True)
+def png(path, w=800, h=600):
+    if os.path.exists(path): return
+    def chunk(t,d):
+        c=t+d; return struct.pack(">I",len(d))+c+struct.pack(">I",zlib.crc32(c)&0xffffffff)
+    raw=b"".join(b"\x00"+bytes([200,200,200])*w for _ in range(h))
+    open(path,"wb").write(b"\x89PNG\r\n\x1a\n"
+        +chunk(b"IHDR",struct.pack(">IIBBBBB",w,h,8,2,0,0,0))
+        +chunk(b"IDAT",zlib.compress(raw))+chunk(b"IEND",b""))
+for f in ("Fig/comparison_umap.png","Fig/pancreas_2x2_comparison.png",
+          "Fig/training_time_comparison.png"):
+    png(f)
+PYEOF
+tectonic -X compile supplement.tex --outdir "$OUT" --keep-logs > "$OUT/supp.stdout" 2>&1
+SUPPLOG="$OUT/supplement.log"
+SERRS=$(count "^error:" "$OUT/supp.stdout")
+SUNDEF=$(count "Undefined control sequence" "$SUPPLOG")
+echo "  supplement errors:      $SERRS"
+echo "  supplement undefined:   $SUNDEF"
+if [ -s "$OUT/supplement.pdf" ]; then
+  echo "  supplement PDF:         $(du -h "$OUT/supplement.pdf" | cut -f1)"
+else
+  echo "  supplement PDF:         NOT PRODUCED"
+fi
+
 [ "$ERRS" -eq 0 ] && [ "$UNDEF" -eq 0 ] && [ -s "$OUT/oup-authoring-template.pdf" ] \
+  && [ "$SERRS" -eq 0 ] && [ "$SUNDEF" -eq 0 ] && [ -s "$OUT/supplement.pdf" ] \
   && { echo "=== PASS ==="; exit 0; } \
   || { echo "=== FAIL ==="; grep -E "^error:" "$LOG" | head -5; exit 1; }

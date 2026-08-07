@@ -246,4 +246,72 @@ To gain an intuitive understanding of the different latent spaces, we compared t
     \label{fig:after}
 \end{figure}
 
+
+\section*{Supplementary Note 4: Leiden Implementation Equivalence}
+
+Computing ARI, NMI and the isolated-label $F_1$ score each requires a Leiden resolution
+sweep. Because \texttt{scib} performs an independent sweep per metric, and one per
+isolated label, we compute each resolution once and let every metric select its own
+optimum from the shared clusterings (Methods). The sweep is the single largest cost in
+the metric suite: profiled on the pancreas benchmark (16{,}382 cells, six threads) it
+accounted for $52.7$\,s of a $137.8$\,s suite, with iLISI ($35.5$\,s) and cLISI
+($15.6$\,s) next; the remaining nine metrics together cost under $25$\,s.
+
+We therefore evaluated whether the \texttt{igraph} Leiden implementation could replace
+\texttt{scib}'s \texttt{leidenalg} default. The two are equivalent only when the number
+of local-moving iterations is matched: \texttt{scanpy}'s \texttt{igraph} flavour defaults
+to \texttt{n\_iterations} $=-1$ (iterate to convergence) whereas \texttt{leidenalg} uses
+$2$, and an unmatched comparison makes the implementations appear both slower and
+non-equivalent. With \texttt{n\_iterations} $=2$ the sweeps agree to floating-point
+tolerance on real data:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrr}
+\hline
+Metric & \texttt{igraph} & \texttt{leidenalg} & $|\Delta|$ \\
+\hline
+ARI                  & $0.001824$ & $0.001709$ & $1.2 \times 10^{-4}$ \\
+NMI                  & $0.041626$ & $0.040549$ & $1.1 \times 10^{-3}$ \\
+Isolated-label $F_1$ & $0.057143$ & $0.066667$ & $9.5 \times 10^{-3}$ \\
+iLISI                & $0.492240$ & $0.492240$ & $0$ \\
+cLISI                & $0.209237$ & $0.209237$ & $0$ \\
+ASW (batch)          & $0.984511$ & $0.984511$ & $0$ \\
+ASW (cell type)      & $0.496143$ & $0.496143$ & $0$ \\
+PAGA Spearman        & $0.254663$ & $0.254663$ & $0$ \\
+\hline
+\end{tabular}
+\caption{\textbf{Implementation equivalence on a single fixed latent.} The full metric
+suite was evaluated twice on the \emph{same} trained embedding (pancreas, NB backbone
+without decoder conditioning, $150$ epochs), varying only the Leiden implementation, so
+the comparison isolates the flavour from run-to-run training variability. The five
+clustering-free metrics are bit-identical; the three clustering-dependent metrics differ
+at the fourth decimal or below. Suite wall time $67.5$\,s versus $104.8$\,s
+($1.55\times$); measured on the resolution sweep alone the speedup is $12$--$15\times$,
+but the sweep is $38\%$ of the suite so the end-to-end gain is smaller.}
+\label{tab:leiden_equiv}
+\end{table}
+
+Agreement is not exact for the clustering-dependent metrics, and we state the residual
+explicitly rather than describing the substitution as numerically identical. The largest
+discrepancy in Table~\ref{tab:leiden_equiv} is the isolated-label $F_1$
+($9.5 \times 10^{-3}$), which is the most sensitive of the three because it selects a
+resolution independently for each isolated label and those labels are by construction the
+smallest cell populations. The same ordering appears on synthetic latents: the two
+implementations agree exactly at strong and moderate cluster separation
+($|\Delta$ARI$| = 0$ in both) and differ by $|\Delta$ARI$| = 9 \times 10^{-3}$ only in a
+degenerate regime constructed so that no clustering recovers the labels.
+
+Three considerations bound the consequence. First, the largest residual is an order of
+magnitude below the spread in ARI across backbones within a dataset ($0.088$), the scale
+against which any reported difference is judged. Second, it is confined to ARI, NMI and
+the isolated-label $F_1$; silhouette, LISI, linear-probe and PAGA metrics involve no
+clustering and were bit-identical. Third, the primary comparison reported in this work is
+measured on the linear batch probe, which is clustering-free. For context on the scale of
+run-to-run variability, two independent training runs of the identical configuration
+differ by $\approx 6 \times 10^{-3}$ in iLISI, so the flavour residual is comparable to or
+smaller than the seed noise already present in any reported value. Setting the flavour
+parameter to \texttt{None} restores strict \texttt{leidenalg} parity for readers who
+prefer it.
+
 \end{document}

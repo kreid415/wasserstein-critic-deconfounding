@@ -36,3 +36,6 @@ manuscript_tm/oup-authoring-template/binary_experiment_comparison.png
 manuscript_tm/oup-authoring-template/multibatch_trends_grouped.png
 manuscript_tm/oup-authoring-template/d_coef_sensitivity.png
 manuscript_tm/oup-authoring-template/reference_sensitivity_critic_only.png
+manuscript_tm/oup-authoring-template/Fig/comparison_umap.png
+manuscript_tm/oup-authoring-template/Fig/pancreas_2x2_comparison.png
+manuscript_tm/oup-authoring-template/Fig/training_time_comparison.png

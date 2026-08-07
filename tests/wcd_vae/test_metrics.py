@@ -186,3 +186,57 @@ def test_embedding_tag_is_unique_across_arms():
         assert t not in seen, f"varying {field} did not change the embedding tag: {t}"
         seen.add(t)
     assert len(seen) == 7
+
+
+def test_resolution_cache_uses_igraph_with_matched_iterations():
+    """The sweep must use igraph n_iterations=2, and agree with leidenalg where structure exists.
+
+    WHY THIS TEST: the flavour was previously pinned to leidenalg on the strength of an
+    A/B that forgot to match n_iterations (scanpy's igraph default is -1 = iterate to
+    convergence, leidenalg's is 2), which made igraph look both slower and non-equivalent.
+    Matching the parameter gives ~12-15x on real latents at |dARI| ~1e-5. This test pins
+    BOTH halves of that: the flavour is actually igraph, and on a well-separated latent
+    -- where the correct clustering is unambiguous -- the two flavours agree exactly.
+    Degenerate latents are deliberately NOT asserted on: agreement there is approximate
+    (|dARI| ~9e-3), which is documented in _resolution_cache and acceptable because it is
+    0.1x the between-backbone spread.
+    """
+    import inspect
+
+    import anndata as ad
+    import numpy as np
+    import pandas as pd
+    import scanpy as sc
+    from sklearn.metrics import adjusted_rand_score
+
+    from wcd_vae.wcd.experiment import _best_from_cache, _resolution_cache
+
+    assert inspect.signature(_resolution_cache).parameters["flavor"].default == "igraph"
+
+    rng = np.random.default_rng(0)
+    n_per, k = 300, 4
+    Z = np.vstack([rng.normal(c * 6.0, 1.0, (n_per, 16)) for c in range(k)]).astype("float32")
+    truth = np.repeat([f"c{i}" for i in range(k)], n_per)
+    a = ad.AnnData(
+        X=Z,
+        obs=pd.DataFrame(
+            {"ct": pd.Categorical(truth)}, index=[f"x{i}" for i in range(len(Z))]
+        ),
+    )
+    a.obsm["X_latent"] = Z
+    sc.pp.neighbors(a, use_rep="X_latent")
+
+    def best_ari(flavor):
+        cache = _resolution_cache(a, "X_latent", resolutions=[0.4, 1.0], flavor=flavor)
+        _r, labels, _s = _best_from_cache(
+            cache, lambda lab: adjusted_rand_score(truth, lab)
+        )
+        return adjusted_rand_score(truth, labels)
+
+    ari_igraph = best_ari("igraph")
+    ari_leidenalg = best_ari(None)
+    assert ari_igraph > 0.9, f"igraph failed to recover separated clusters: {ari_igraph}"
+    assert abs(ari_igraph - ari_leidenalg) < 1e-9, (
+        f"flavours disagree on a well-separated latent: "
+        f"igraph={ari_igraph} leidenalg={ari_leidenalg}"
+    )

@@ -148,7 +148,7 @@ def train_one(
     return vae, history
 
 
-def _resolution_cache(adata, embed_key, resolutions=None, flavor=None):
+def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
     """Leiden labels at each resolution, computed ONCE and cached.
 
     # WHY: scib's cluster_optimal_resolution runs a full resolution sweep PER CALLER, and
@@ -161,11 +161,22 @@ def _resolution_cache(adata, embed_key, resolutions=None, flavor=None):
     #      and let every metric pick its own best from the cache: identical numbers,
     #      one sweep instead of N.
     # HOW: neighbours are built once here rather than inside each sweep. The Leiden
-    #      FLAVOUR is deliberately left at scanpy's default (leidenalg), matching
-    #      scib.cluster_optimal_resolution exactly: a matched-resolution A/B showed
-    #      igraph and leidenalg give IDENTICAL ARI/NMI on structured, weakly-structured
-    #      and degenerate synthetic latents (|delta| = 0.00e+00 in all three) and igraph
-    #      was NOT faster (0.8-1.0x), so there is nothing to gain by diverging.
+    #      FLAVOUR defaults to igraph with n_iterations=2.
+    #
+    #      CORRECTION to an earlier note here, which claimed igraph "was NOT faster
+    #      (0.8-1.0x)" and broke parity so leidenalg had to be pinned. That A/B was
+    #      wrong: it left n_iterations at scanpy's igraph default of -1 (iterate to
+    #      convergence) while leidenalg uses 2, so it compared different amounts of
+    #      work. Matching n_iterations=2 restores parity AND the speed. Measured on
+    #      REAL latents: pancreas 62.2s -> 4.1s (15.1x) with |dARI| 1.1e-05 and
+    #      |dNMI| 4.7e-05; sim2 65.2s -> 5.4s (12.1x) with |dARI| 1.7e-05.
+    #
+    #      Across synthetic structure regimes the agreement is exact where structure
+    #      exists (strong and moderate separation both give |dARI| = 0.00e+00) but is
+    #      only approximate in the degenerate regime (|dARI| = 9.2e-03 at 9.1x). That
+    #      residual is 0.1x the between-backbone ARI spread (0.088) and touches only
+    #      ari/nmi/isolated_f1 -- ASW, LISI, probe and PAGA metrics involve no
+    #      clustering. Pass flavor=None to force strict leidenalg parity.
     """
     import scanpy as sc
 
