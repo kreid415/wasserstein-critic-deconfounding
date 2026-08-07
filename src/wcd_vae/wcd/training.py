@@ -270,6 +270,8 @@ class SCIntegrationModel(nn.Module):
         es_check_every=10,
         es_holdout_frac=0.15,
         es_celltype_key=None,
+        lr_g=1e-3,
+        lr_d=1e-3,
     ):
         """Train the model.
 
@@ -335,8 +337,12 @@ class SCIntegrationModel(nn.Module):
         else:
             critic_params = list(self.D_Z.parameters())
             gen_params = list(self.VAE.parameters())
-        optimizer_d_z = optim.Adam(critic_params, lr=0.001, betas=(0.5, 0.9))
-        optimizer_g = optim.Adam(gen_params, lr=0.001, betas=(0.5, 0.9))
+        # lr is parameterised (default unchanged at 1e-3) so batch-size / learning-rate
+        # interactions can be studied without altering any existing result. betas=(0.5,
+        # 0.9) is the GAN convention: a low beta1 keeps the adversary responsive to a
+        # generator that is moving under it.
+        optimizer_d_z = optim.Adam(critic_params, lr=lr_d, betas=(0.5, 0.9))
+        optimizer_g = optim.Adam(gen_params, lr=lr_g, betas=(0.5, 0.9))
         optimizers = (optimizer_g, optimizer_d_z)
 
         batch_size_loader = batch_size
