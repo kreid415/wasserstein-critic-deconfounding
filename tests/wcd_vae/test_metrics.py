@@ -240,3 +240,72 @@ def test_resolution_cache_uses_igraph_with_matched_iterations():
         f"flavours disagree on a well-separated latent: "
         f"igraph={ari_igraph} leidenalg={ari_leidenalg}"
     )
+
+
+def test_gpu_silhouette_matches_sklearn():
+    """The GPU silhouette kernel must agree with sklearn to machine precision.
+
+    Covers the cases that actually bit during implementation: singleton clusters
+    (sklearn defines their silhouette as 0), and the two call conventions scib uses
+    (positional, and X=/labels= by keyword). Runs on CPU fallback when no GPU is
+    present, which still exercises the signature handling.
+    """
+    import numpy as np
+    from sklearn.metrics import silhouette_samples, silhouette_score
+
+    from wcd_vae.wcd.evaluation import gpu_silhouette_samples, gpu_silhouette_score
+
+    rng = np.random.default_rng(0)
+    x = np.vstack(
+        [rng.normal(0, 1, (60, 8)), rng.normal(5, 1, (60, 8)), rng.normal(11, 1, (1, 8))]
+    )
+    labels = np.array(["a"] * 60 + ["b"] * 60 + ["solo"])
+
+    ref = silhouette_samples(x, labels)
+    got = gpu_silhouette_samples(x, labels)
+    assert np.abs(ref - got).max() < 1e-7, f"max |delta| {np.abs(ref - got).max():.2e}"
+    # sklearn's convention for a singleton cluster
+    assert abs(got[-1]) < 1e-12, f"singleton silhouette should be 0, got {got[-1]}"
+
+    # scib calls silhouette_score with a CAPITAL X keyword (sklearn's own name)
+    assert abs(gpu_silhouette_score(X=x, labels=labels) - silhouette_score(x, labels)) < 1e-7
+    # ...and silhouette_samples positionally, with metric= passed through
+    assert np.abs(gpu_silhouette_samples(x, labels, metric="euclidean") - ref).max() < 1e-7
+    # a non-euclidean metric must fall through to sklearn, not silently return euclidean
+    ref_cos = silhouette_samples(x, labels, metric="cosine")
+    got_cos = gpu_silhouette_samples(x, labels, metric="cosine")
+    assert np.abs(ref_cos - got_cos).max() < 1e-12
+
+
+def test_gpu_silhouette_backend_patches_the_real_call_sites():
+    """The patch must reach the bindings scib actually calls, and restore them.
+
+    WHY: `from scib.metrics import silhouette` binds the FUNCTION, not the module.
+    Patching that object succeeded silently, did nothing, and the suite ran at CPU
+    speed with correct numbers -- undetectable without this assertion. The context
+    manager now resolves the real modules via importlib and raises if a target is
+    missing, so a future scib reorganisation fails loudly instead of regressing.
+    """
+    import importlib
+
+    import sklearn.metrics as skm
+
+    from wcd_vae.wcd.experiment import _gpu_silhouette_backend
+
+    sil_mod = importlib.import_module("scib.metrics.silhouette")
+    iso_mod = importlib.import_module("scib.metrics.isolated_labels")
+
+    # the binding sites must exist -- this is what the fail-loud guard protects
+    for mod, name in (
+        (skm, "silhouette_samples"),
+        (skm, "silhouette_score"),
+        (sil_mod, "silhouette_samples"),
+        (sil_mod, "silhouette_score"),
+        (iso_mod, "silhouette_samples"),
+    ):
+        assert hasattr(mod, name), f"missing patch target {mod.__name__}.{name}"
+
+    before = sil_mod.silhouette_samples
+    with _gpu_silhouette_backend():
+        pass
+    assert sil_mod.silhouette_samples is before, "backend did not restore the original"

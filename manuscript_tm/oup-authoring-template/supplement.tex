@@ -247,7 +247,7 @@ To gain an intuitive understanding of the different latent spaces, we compared t
 \end{figure}
 
 
-\section*{Supplementary Note 4: Leiden Implementation Equivalence}
+\section*{Supplementary Note 4: Metric Implementation and Equivalence}
 
 Computing ARI, NMI and the isolated-label $F_1$ score each requires a Leiden resolution
 sweep. Because \texttt{scib} performs an independent sweep per metric, and one per
@@ -292,6 +292,28 @@ at the fourth decimal or below. Suite wall time $67.5$\,s versus $104.8$\,s
 but the sweep is $38\%$ of the suite so the end-to-end gain is smaller.}
 \label{tab:leiden_equiv}
 \end{table}
+
+\subsection*{Silhouette computation}
+
+The three silhouette-derived metrics (ASW-batch, ASW-cell-type and the isolated-label
+ASW) are the largest remaining cost in the suite: $14.77$\,s of the $41.9$\,s warm suite
+on pancreas, rising to $353$\,s of an $\approx\!875$\,s configuration on the
+$84{,}813$-cell ATAC dataset. Because their cost is dominated by an
+$\mathcal{O}(n^2)$ pairwise-distance computation, we evaluate them on the GPU, which is
+otherwise near-idle during metric computation. Distances are accumulated directly into
+per-cluster sums in row-blocks, so the full $n \times n$ matrix is never materialised
+(peak GPU memory $3.25$\,GB at $n = 84{,}813$). Only the distance backend changes: the
+aggregation, rescaling and label-selection logic remains \texttt{scib}'s throughout.
+
+Computation is performed in double precision. Single precision is faster still but
+disagrees with the reference implementation by up to $8 \times 10^{-5}$ per cell, whereas
+double precision reproduces it to machine precision while retaining most of the speedup.
+Evaluated on the same fixed embedding, the GPU and CPU paths agree to
+$|\Delta| \leq 2.3 \times 10^{-8}$ across all three metrics on both the pancreas and ATAC
+datasets, at $5.1\times$ and $10.3\times$ lower cost respectively; the advantage grows
+with dataset size, saving $327$\,s per configuration on the larger dataset. Where no GPU
+is available the implementation falls back to \texttt{scikit-learn}, so results are
+independent of the execution environment.
 
 Agreement is not exact for the clustering-dependent metrics, and we state the residual
 explicitly rather than describing the substitution as numerically identical. The largest

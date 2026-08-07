@@ -12,6 +12,7 @@
 #      `full_metric_suite` returns every metric tagged LOCAL (neighbourhood-scale) or
 #      GLOBAL (embedding-scale) so E6 can decompose the iLISI-vs-ASW_batch mismatch.
 """
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -148,6 +149,64 @@ def train_one(
     return vae, history
 
 
+@contextlib.contextmanager
+def _gpu_silhouette_backend():
+    """Route sklearn's silhouette functions through the GPU kernel for this block.
+
+    scib's silhouette wrappers import ``silhouette_samples`` / ``silhouette_score``
+    into their own module namespace at import time, so patching ``sklearn.metrics``
+    alone would not reach them -- both binding sites are replaced here and restored
+    on exit, including on exception. A no-op when CUDA is unavailable.
+    """
+    import sklearn.metrics as skm
+
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            yield
+            return
+    except ImportError:
+        yield
+        return
+
+    # NOTE `from scib.metrics import silhouette` binds the FUNCTION, not the module --
+    # scib.metrics re-exports its symbols. The modules that actually hold the sklearn
+    # bindings are scib.metrics.silhouette / scib.metrics.isolated_labels, which must be
+    # imported via importlib. Getting this wrong is silent: setattr on the wrong object
+    # succeeds, the patch does nothing, and the suite runs at CPU speed with correct
+    # numbers -- which is exactly how it first shipped.
+    import importlib
+
+    from wcd_vae.wcd.evaluation import gpu_silhouette_samples, gpu_silhouette_score
+
+    _sil = importlib.import_module("scib.metrics.silhouette")
+    _iso = importlib.import_module("scib.metrics.isolated_labels")
+
+    targets = [
+        (skm, "silhouette_samples", gpu_silhouette_samples),
+        (skm, "silhouette_score", gpu_silhouette_score),
+        (_sil, "silhouette_samples", gpu_silhouette_samples),
+        (_sil, "silhouette_score", gpu_silhouette_score),
+        (_iso, "silhouette_samples", gpu_silhouette_samples),
+    ]
+    # Fail loudly if a binding site disappears in a future scib: a missing target means
+    # the metric silently reverts to CPU, which is a performance regression no test
+    # would catch.
+    missing = [f"{m.__name__}.{n}" for m, n, _ in targets if not hasattr(m, n)]
+    if missing:
+        raise AttributeError(f"GPU silhouette patch targets not found: {missing}")
+
+    saved = [(mod, name, getattr(mod, name)) for mod, name, _ in targets]
+    try:
+        for mod, name, repl in targets:
+            setattr(mod, name, repl)
+        yield
+    finally:
+        for mod, name, orig in saved:
+            setattr(mod, name, orig)
+
+
 def _resolution_cache(adata, embed_key, resolutions=None, flavor="igraph"):
     """Leiden labels at each resolution, computed ONCE and cached.
 
@@ -251,24 +310,41 @@ def full_metric_suite(
                 out["kbet"] = np.nan
 
         # ---- GLOBAL (embedding-scale) ----
-        out["asw_batch"] = float(
-            scib.me.silhouette_batch(adata, batch_key=batch_key, group_key=celltype_key, embed=embed_key, verbose=False)
-        )
-        out["asw_celltype"] = float(scib.me.silhouette(adata, group_key=celltype_key, embed=embed_key))
-        if "pcr" in include:
-            try:
-                out["pcr"] = float(scib.me.pcr(adata, covariate=batch_key, embed=embed_key))
-            except Exception:
-                out["pcr"] = np.nan
-        if "isolated_asw" in include:
-            try:
-                out["isolated_asw"] = float(
-                    scib.me.isolated_labels(
-                        adata, label_key=celltype_key, batch_key=batch_key, embed=embed_key, cluster=False
-                    )
+        # WHY the backend swap: asw_celltype, asw_batch and isolated_asw are 35% of the
+        #   warm suite on pancreas and 40% of an entire config on atac_large (353.05s of
+        #   ~875s) -- the largest GPU-addressable block, while the GPU otherwise idles
+        #   near 20% because the rest of the suite is CPU-bound. The share GROWS with n,
+        #   so this pays most on the datasets that dominate the programme.
+        # WHY a patch rather than a rewrite: all three bottom out in sklearn's
+        #   silhouette_samples / silhouette_score. Swapping only the BACKEND lets scib's
+        #   own aggregation run unchanged -- the abs(), the 1-x rescaling, the per-group
+        #   means, the singleton and single-batch skips. Reimplementing those wrappers
+        #   would risk silent drift in exactly the conventions that keep these numbers
+        #   comparable to the published scIB benchmark.
+        # SAFETY: gpu_silhouette_samples runs in float64 and falls back to sklearn when
+        #   CUDA is absent, so results never depend on which backend ran. Measured
+        #   agreement: 6.4e-09 (pancreas) and 1.3e-11 (atac_large) -- machine precision.
+        with _gpu_silhouette_backend():
+            out["asw_batch"] = float(
+                scib.me.silhouette_batch(
+                    adata, batch_key=batch_key, group_key=celltype_key, embed=embed_key, verbose=False
                 )
-            except Exception:
-                out["isolated_asw"] = np.nan
+            )
+            out["asw_celltype"] = float(scib.me.silhouette(adata, group_key=celltype_key, embed=embed_key))
+            if "pcr" in include:
+                try:
+                    out["pcr"] = float(scib.me.pcr(adata, covariate=batch_key, embed=embed_key))
+                except Exception:
+                    out["pcr"] = np.nan
+            if "isolated_asw" in include:
+                try:
+                    out["isolated_asw"] = float(
+                        scib.me.isolated_labels(
+                            adata, label_key=celltype_key, batch_key=batch_key, embed=embed_key, cluster=False
+                        )
+                    )
+                except Exception:
+                    out["isolated_asw"] = np.nan
 
         # ---- ONE resolution sweep, shared by every clustering-based metric ----
         from sklearn.metrics import adjusted_rand_score, f1_score, normalized_mutual_info_score

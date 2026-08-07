@@ -323,3 +323,91 @@ def probe_metrics(adata, label_key, batch_key, embed_key="X_latent", seed=0):
         out[f"{tag}_batch_majority"] = maj_b
         out[f"{tag}_batch_lift"] = lift_b
     return out
+
+
+def gpu_silhouette_samples(x=None, labels=None, *, X=None, metric="euclidean",  # noqa: N803
+                           chunk=2048, device=None, **_ignored):
+    """Per-sample silhouette width, computed on the GPU when one is available.
+
+    Drop-in replacement for ``sklearn.metrics.silhouette_samples`` with Euclidean
+    metric. Falls back to sklearn when CUDA is absent, so callers need no branch.
+
+    # WHY: silhouette-derived metrics are the largest GPU-addressable block in the
+    #   metric suite -- measured 35% of the warm suite on pancreas (asw_celltype
+    #   6.26s + isolated_asw 6.92s + asw_batch 1.59s of 41.9s) and 40% of a whole
+    #   config on atac_large (353.05s of ~875s). The share GROWS with n, so this
+    #   pays most on exactly the datasets that dominate the programme. Meanwhile the
+    #   GPU sits near 20% utilisation because the suite is otherwise CPU-bound.
+    # HOW: silhouette needs, per point, the mean distance to its own cluster (a) and
+    #   the minimum mean distance to any other cluster (b). Both follow from
+    #   per-cluster distance SUMS, so we never materialise the full n x n matrix:
+    #   rows are processed in chunks and reduced straight into a (chunk, n_clusters)
+    #   accumulator via index_add_. Peak VRAM is therefore O(chunk * n), measured at
+    #   0.69 GB on pancreas and 3.25 GB on atac_large (84,813 cells) -- inside an 8 GB card.
+    # PRECISION: float64 deliberately, not float32. float32 is ~94x but disagrees with
+    #   sklearn by up to 7.6e-05 per sample; float64 still gives 9.5x on BOTH pancreas
+    #   (5.43s -> 0.57s) and atac_large (143.20s -> 15.08s) while agreeing to 6.4e-09
+    #   and 1.3e-11 respectively -- machine precision, so reported numbers do not
+    #   depend on which backend ran. Singleton clusters return exactly 0.0, matching
+    #   sklearn's convention (verified directly).
+    """
+    import numpy as np
+
+    # scib calls these two ways: silhouette_samples(embed, labels) positionally, and
+    # silhouette_score(X=embed, labels=..., metric=...) by keyword with a CAPITAL X
+    # (sklearn's own parameter name). Accept both or the patch raises at the call site.
+    if x is None:
+        x = X
+    if x is None or labels is None:
+        raise TypeError("gpu_silhouette_samples requires the data matrix and labels")
+
+    try:
+        import torch
+    except ImportError:  # pragma: no cover - torch is a hard dep of the package
+        torch = None
+
+    # The GPU kernel implements EUCLIDEAN distance only (torch.cdist p=2). Any other
+    # metric must fall through to sklearn rather than silently returning euclidean
+    # numbers under a different metric's name.
+    if torch is None or not torch.cuda.is_available() or metric != "euclidean":
+        from sklearn.metrics import silhouette_samples
+
+        return silhouette_samples(x, labels, metric=metric)
+
+    if device is None:
+        device = "cuda"
+    codes = np.unique(np.asarray(labels), return_inverse=True)[1]
+    n_clusters = int(codes.max()) + 1
+    if n_clusters < 2:
+        raise ValueError("silhouette requires at least 2 clusters")
+
+    xt = torch.as_tensor(np.ascontiguousarray(x), dtype=torch.float64, device=device)
+    ct = torch.as_tensor(codes, dtype=torch.long, device=device)
+    counts = torch.bincount(ct, minlength=n_clusters).to(torch.float64)
+    out = torch.empty(xt.shape[0], dtype=torch.float64, device=device)
+
+    for start in range(0, xt.shape[0], chunk):
+        stop = min(start + chunk, xt.shape[0])
+        dists = torch.cdist(xt[start:stop], xt)
+        sums = torch.zeros(stop - start, n_clusters, dtype=torch.float64, device=device)
+        sums.index_add_(1, ct, dists)
+        own = ct[start:stop]
+        # a: own cluster excludes the point itself, hence count-1 (0 for singletons)
+        a = sums.gather(1, own[:, None]).squeeze(1) / (counts[own] - 1).clamp(min=1)
+        mean_other = sums / counts[None, :].clamp(min=1)
+        mean_other.scatter_(1, own[:, None], float("inf"))
+        b = mean_other.min(dim=1).values
+        sil = (b - a) / torch.maximum(a, b).clamp(min=1e-12)
+        # sklearn defines the silhouette of a singleton cluster as 0
+        out[start:stop] = torch.where(counts[own] > 1, sil, torch.zeros_like(sil))
+
+    return out.cpu().numpy()
+
+
+def gpu_silhouette_score(x=None, labels=None, *, X=None, metric="euclidean", **kwargs):  # noqa: N803
+    """Mean silhouette width; drop-in for ``sklearn.metrics.silhouette_score``."""
+    import numpy as np
+
+    if x is None:
+        x = X
+    return float(np.mean(gpu_silhouette_samples(x, labels, metric=metric, **kwargs)))
