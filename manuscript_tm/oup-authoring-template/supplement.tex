@@ -255,7 +255,8 @@ isolated label, we compute each resolution once and let every metric select its 
 optimum from the shared clusterings (Methods). The sweep is the single largest cost in
 the metric suite: profiled on the pancreas benchmark (16{,}382 cells, six threads) it
 accounted for $52.7$\,s of a $137.8$\,s suite, with iLISI ($35.5$\,s) and cLISI
-($15.6$\,s) next; the remaining nine metrics together cost under $25$\,s.
+($15.6$\,s) next; these three account for $75\%$ of the suite, with the remaining nine
+metrics together costing $33.9$\,s.
 
 We therefore evaluated whether the \texttt{igraph} Leiden implementation could replace
 \texttt{scib}'s \texttt{leidenalg} default. The two are equivalent only when the number
