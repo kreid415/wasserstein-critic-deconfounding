@@ -345,3 +345,57 @@ def test_knn_helper_is_exact_and_cached():
     y = rng.normal(size=(400, 24))
     _, idx_y = ev._knn(y, k)
     assert not np.array_equal(idx_y, idx), "different data returned cached neighbours"
+
+
+def test_paga_baseline_cache_keys_on_content_not_pointers():
+    """The PAGA baseline cache must hit on identical input and miss on changed labels.
+
+    WHY: the per-batch reference graphs are built on the UNINTEGRATED representation, so
+    they are invariant across every configuration a sweep evaluates (measured 9.3s/config
+    on atac_large). The first implementation hashed `obs[key].astype(str).to_numpy()`
+    via .tobytes() -- a dtype=object array of str POINTERS. The key changed on every call
+    so the cache never hit, and address reuse could equally have produced a false HIT on
+    different labels. Both directions are asserted here.
+    """
+    import anndata as ad_mod
+    import numpy as np
+    import pandas as pd
+
+    from wcd_vae.wcd import hyperparameter as hp
+
+    rng = np.random.default_rng(0)
+    # PAGA needs genuine neighbourhood structure: give each cell type a separated
+    # centroid so the per-batch graphs are well defined. 300 cells x 3 batches x 5 types.
+    n_per, n_types, n_batches = 20, 5, 3
+    n = n_per * n_types * n_batches
+    types = np.tile(np.repeat(np.arange(n_types), n_per), n_batches)
+    coords = rng.normal(size=(n, 4)).astype(np.float32) * 0.35
+    coords += (types[:, None] * 6.0).astype(np.float32)
+    obs = pd.DataFrame(
+        {
+            "batch": np.repeat([f"b{i}" for i in range(n_batches)], n_per * n_types),
+            "celltype": np.array([f"t{i}" for i in types]),
+        }
+    )
+    adata = ad_mod.AnnData(X=coords.copy(), obs=obs)
+    adata.obsm["X_pca"] = coords
+
+    hp._PAGA_BASELINE_CACHE.clear()
+    hp._paga_baseline(adata, "batch", "celltype", "X_pca")
+    key1 = next(iter(hp._PAGA_BASELINE_CACHE))
+    hp._paga_baseline(adata, "batch", "celltype", "X_pca")
+    key2 = next(iter(hp._PAGA_BASELINE_CACHE))
+    assert key1 == key2, "key must be stable across identical calls, or the cache never hits"
+
+    # changed labels must MISS -- a false hit would silently reuse the wrong graphs
+    adata.obs["batch"] = np.asarray(rng.permutation(adata.obs["batch"].to_numpy()))
+    hp._paga_baseline(adata, "batch", "celltype", "X_pca")
+    assert next(iter(hp._PAGA_BASELINE_CACHE)) != key1, "permuted labels reused the cache"
+
+    # changed baseline coordinates must also MISS
+    hp._PAGA_BASELINE_CACHE.clear()
+    hp._paga_baseline(adata, "batch", "celltype", "X_pca")
+    key3 = next(iter(hp._PAGA_BASELINE_CACHE))
+    adata.obsm["X_pca"] = (coords + rng.normal(size=coords.shape).astype(np.float32)).copy()
+    hp._paga_baseline(adata, "batch", "celltype", "X_pca")
+    assert next(iter(hp._PAGA_BASELINE_CACHE)) != key3, "changed X_pca reused the cache"

@@ -17,6 +17,64 @@ from wcd_vae.wcd.primitives import seed_everything
 from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 
 
+_PAGA_BASELINE_CACHE = {}
+
+
+def _paga_baseline(adata, tech_key, celltype_key, baseline_rep):
+    """Per-batch PAGA connectivity matrices on the unintegrated representation.
+
+    Returns {batch_name: DataFrame}. Memoised: the result depends only on the dataset
+    (baseline coordinates, batch labels, cell-type labels), so it is identical for every
+    configuration a sweep evaluates. See the call site for measured costs.
+
+    Batches with fewer than 3 cell types are omitted, matching the original behaviour --
+    a Spearman correlation over fewer than 3 points is not meaningful.
+    """
+    import hashlib
+
+    import numpy as np
+
+    # NOTE label arrays must be hashed via their CATEGORY CODES, not .tobytes().
+    # `adata.obs[k].astype(str).to_numpy()` produces a dtype=object array of Python str
+    # POINTERS, so .tobytes() hashes memory addresses: the key changed on every call
+    # (cache never hit) and, worse, address reuse could produce a false HIT on different
+    # labels. Codes are plain integers, so the hash reflects the actual assignment.
+    rep = np.ascontiguousarray(adata.obsm[baseline_rep])
+
+    def _label_hash(col):
+        cat = adata.obs[col].astype("category")
+        codes = np.ascontiguousarray(cat.cat.codes.to_numpy())
+        names = "\x00".join(map(str, cat.cat.categories)).encode()
+        return hashlib.blake2b(codes.tobytes() + names, digest_size=8).hexdigest()
+
+    key = (
+        hashlib.blake2b(rep.view(np.uint8), digest_size=16).hexdigest(),
+        _label_hash(tech_key),
+        _label_hash(celltype_key),
+        baseline_rep,
+    )
+    hit = _PAGA_BASELINE_CACHE.get(key)
+    if hit is not None:
+        return hit
+
+    out = {}
+    for tech in adata.obs[tech_key].unique():
+        adata_tech = adata[adata.obs[tech_key] == tech].copy()
+        if len(adata_tech.obs[celltype_key].unique()) < 3:
+            continue
+        sc.pp.neighbors(adata_tech, use_rep=baseline_rep)
+        sc.tl.paga(adata_tech, groups=celltype_key)
+        cats = adata_tech.obs[celltype_key].cat.categories
+        out[tech] = pd.DataFrame(
+            adata_tech.uns["paga"]["connectivities"].toarray(), index=cats, columns=cats
+        )
+
+    # one dataset at a time: holding more would pin large graphs for no benefit
+    _PAGA_BASELINE_CACHE.clear()
+    _PAGA_BASELINE_CACHE[key] = out
+    return out
+
+
 def compute_mean_paga_spearman(
     adata, tech_key="tech", celltype_key="celltype", embed_key="X_latent", baseline_rep="X_pca"
 ):
@@ -39,19 +97,22 @@ def compute_mean_paga_spearman(
         spearman_scores = []
 
         # 2. Loop through each technology
-        for tech in adata.obs[tech_key].unique():
-            adata_tech = adata[adata.obs[tech_key] == tech].copy()
-            tech_cats = adata_tech.obs[celltype_key].unique()
+        #
+        # WHY CACHED: the per-batch reference graphs are built on baseline_rep (X_pca),
+        # the UNINTEGRATED representation. They therefore depend only on the dataset --
+        # not on the embedding, the adversarial head, lambda, the seed or the backbone --
+        # yet a sweep recomputes an identical result for every configuration it
+        # evaluates. Measured cost per config: 2.36s on pancreas (9 batches) and 10.51s
+        # on atac_large (84,813 cells), against a global (embedding-dependent) part of
+        # 3.37s and 12.12s that genuinely must be recomputed.
+        #
+        # The key covers everything the result depends on: the baseline coordinates
+        # themselves (content-hashed -- X_pca is recomputed per config and could differ),
+        # the batch and cell-type assignments, and the representation name.
+        baseline = _paga_baseline(adata, tech_key, celltype_key, baseline_rep)
 
-            if len(tech_cats) < 3:
-                continue  # Need at least 3 cell types for a meaningful correlation
-
-            sc.pp.neighbors(adata_tech, use_rep=baseline_rep)
-            sc.tl.paga(adata_tech, groups=celltype_key)
-
-            tech_matrix = adata_tech.uns["paga"]["connectivities"].toarray()
-            tech_cats = adata_tech.obs[celltype_key].cat.categories
-            df_tech = pd.DataFrame(tech_matrix, index=tech_cats, columns=tech_cats)
+        for df_tech in baseline.values():
+            tech_cats = df_tech.index
 
             # 3. Align and Extract
             common_ct = list(set(global_celltypes) & set(tech_cats))

@@ -328,6 +328,17 @@ search serves both. The search remains exact (brute force, as
 identical to the reference implementation and the resulting LISI values agree to
 $5 \times 10^{-9}$, at $5.2\times$ lower cost.
 
+\subsection*{Trajectory-preservation baseline}
+
+The PAGA-based trajectory metric compares a per-batch connectivity graph built on the
+unintegrated representation against a global graph built on the integrated embedding.
+The per-batch reference graphs depend only on the dataset, and are therefore identical
+for every configuration evaluated in a sweep; we compute them once per dataset and reuse
+them, saving $9.3$\,s per configuration on the largest dataset. The cache is keyed on the
+baseline coordinates and on the batch and cell-type assignments, so any change to the
+inputs recomputes the graphs. Reported values are unchanged
+($|\Delta| = 0$ across repeated evaluation).
+
 Agreement is not exact for the clustering-dependent metrics, and we state the residual
 explicitly rather than describing the substitution as numerically identical. The largest
 discrepancy in Table~\ref{tab:leiden_equiv} is the isolated-label $F_1$
