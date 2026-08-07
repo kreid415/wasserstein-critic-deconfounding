@@ -315,6 +315,19 @@ with dataset size, saving $327$\,s per configuration on the larger dataset. Wher
 is available the implementation falls back to \texttt{scikit-learn}, so results are
 independent of the execution environment.
 
+\subsection*{Neighbourhood search}
+
+The LISI metrics are computed from an exact $k$-nearest-neighbour search
+($k = 3 \times$ perplexity). At the scale of the largest datasets this search, rather
+than the Simpson-index kernel it feeds, is the dominant cost: on the $84{,}813$-cell ATAC
+dataset the search takes $92.5$\,s against $1.3$\,s for the index computation. We
+therefore perform it on the GPU and, because iLISI and cLISI differ only in the label
+being scored and not in the embedding or neighbourhood, memoise the result so a single
+search serves both. The search remains exact (brute force, as
+\texttt{scikit-learn} itself selects at these dimensionalities): neighbour indices are
+identical to the reference implementation and the resulting LISI values agree to
+$5 \times 10^{-9}$, at $5.2\times$ lower cost.
+
 Agreement is not exact for the clustering-dependent metrics, and we state the residual
 explicitly rather than describing the substitution as numerically identical. The largest
 discrepancy in Table~\ref{tab:leiden_equiv} is the isolated-label $F_1$

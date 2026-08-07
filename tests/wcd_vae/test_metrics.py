@@ -309,3 +309,39 @@ def test_gpu_silhouette_backend_patches_the_real_call_sites():
     with _gpu_silhouette_backend():
         pass
     assert sil_mod.silhouette_samples is before, "backend did not restore the original"
+
+
+def test_knn_helper_is_exact_and_cached():
+    """_knn must match sklearn exactly, and memoise across the two LISI calls.
+
+    WHY: at scale the kNN search IS the LISI cost (atac_large: 92.53s search vs 1.34s
+    numba kernel). iLISI and cLISI differ only in the label they score, so the search
+    was being run twice on an identical embedding. Both properties are asserted here
+    because a silent cache miss is a pure performance regression no other test sees.
+    """
+    import numpy as np
+    from sklearn.neighbors import NearestNeighbors
+
+    from wcd_vae.wcd import evaluation as ev
+
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(400, 24))
+    k = 15
+
+    ev._KNN_CACHE.clear()
+    dist, idx = ev._knn(x, k)
+    ref_d, ref_i = NearestNeighbors(n_neighbors=k + 1, algorithm="brute").fit(x).kneighbors(x)
+    assert idx.shape == ref_i.shape
+    assert (idx == ref_i).mean() == 1.0, "neighbour indices must be exact, not approximate"
+    assert np.abs(dist - ref_d).max() < 1e-6
+
+    # a second call on the same embedding must hit the cache, not search again
+    assert len(ev._KNN_CACHE) == 1
+    again = ev._knn(x, k)
+    assert again[1] is idx, "identical query should return the cached arrays"
+    assert len(ev._KNN_CACHE) == 1
+
+    # a DIFFERENT embedding of the same shape must NOT collide (content-hash key)
+    y = rng.normal(size=(400, 24))
+    _, idx_y = ev._knn(y, k)
+    assert not np.array_equal(idx_y, idx), "different data returned cached neighbours"
