@@ -548,6 +548,13 @@ def train_integration_model(
     training_time = end_time - start_time
     print(f"Training completed in {training_time:.2f} seconds")
     model.VAE.eval()
+    # Attach the early-stopping trace to the history so callers can record WHICH epoch
+    # was actually selected. Without this the result row reports the requested epoch
+    # budget (500) for every run, and a wave gives no way to tell a converged run from
+    # one that stopped at epoch 60 -- see es_best_epoch in the result row.
+    if getattr(model, "es_trace", None) is not None:
+        training_history = dict(training_history)
+        training_history["_es_trace"] = model.es_trace
     return model.VAE, training_history
 
 

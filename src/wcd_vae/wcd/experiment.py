@@ -523,6 +523,11 @@ def evaluate_config(
         "reference_batch": reference_batch,
         "reference_mode": reference_mode,
         "formulation": formulation,
+        # WHY: with early_stopping=True the "epochs" column records the requested BUDGET
+        # (500), not where training actually stopped. Recording the selected epoch makes
+        # each row self-describing and lets a wave be audited for runs that stopped early.
+        "epochs_run": len(hist["all_loss"]),
+        "es_best_epoch": (hist.get("_es_trace") or {}).get("es_best_epoch"),
         "final_loss": float(hist["all_loss"][-1]),
         "final_loss_da": float(hist["loss_da"][-1]),
         **metrics,

@@ -39,6 +39,20 @@ LR_MULTS = [1.0, 2.0, 4.0]
 BASE_LR = 1e-3
 
 
+def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None):
+    """Identity of a configuration for --resume.
+
+    MUST include every field the experiment grid varies. E10 varies batch_size and lr
+    while holding method/backbone/d_coef/seed fixed, so a key without them collapses its
+    24 configs to 6 and silently skips 18 as already done. Defaults (None -> the
+    production settings) keep keys stable for rows written before these columns existed,
+    so an in-progress E1/E2/E8 wave still resumes correctly.
+    """
+    bs = 1024 if batch_size is None or (isinstance(batch_size, float) and batch_size != batch_size) else int(batch_size)
+    lr = 1e-3 if lr_g is None or (isinstance(lr_g, float) and lr_g != lr_g) else float(lr_g)
+    return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12))
+
+
 def configs_for(experiment, task_entry, reference_name=None):
     """Yield config dicts (kwargs for evaluate_config) for the requested experiment.
 
@@ -149,8 +163,9 @@ def main():
                 #      as done would make the failure permanent across every retry.
                 if isinstance(r.get("failed"), str) and r["failed"]:
                     continue
-                done.add((r["method"], r.get("backbone", "NB"), float(r["d_coef"]),
-                          int(r["seed"])))
+                done.add(_resume_key(
+                    r["method"], r.get("backbone", "NB"), r["d_coef"], r["seed"],
+                    r.get("batch_size"), r.get("lr_g")))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
     for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest)):
@@ -173,7 +188,8 @@ def main():
         if args.backbone is not None and "backbone" not in cfg:
             cfg["backbone"] = args.backbone
         method = "critic" if cfg.get("critic") else "discriminator"
-        key = (method, cfg.get("backbone", "NB"), float(cfg["d_coef"]), int(cfg["seed"]))
+        key = _resume_key(method, cfg.get("backbone", "NB"), cfg["d_coef"], cfg["seed"],
+                          cfg.get("batch_size"), cfg.get("lr_g"))
         if key in done:
             continue
         try:

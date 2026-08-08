@@ -445,3 +445,41 @@ def test_e10_grid_is_balanced_and_has_a_matched_baseline():
 
     counts = Counter((c["critic"], c["batch_size"], round(c["lr_g"] / BASE_LR, 3)) for c in cfgs)
     assert len(set(counts.values())) == 1, f"unbalanced seed counts: {counts}"
+
+
+def test_resume_key_covers_every_field_each_grid_varies():
+    """--resume must not collapse configs that differ only in a newer grid dimension.
+
+    WHY: the key was (method, backbone, d_coef, seed). E10 holds all four fixed and varies
+    batch_size and lr, so resuming an interrupted E10 wave would have skipped 18 of its 24
+    configs as 'already done' and produced a silently truncated experiment. Asserted
+    generically: for every experiment, distinct configs must yield distinct resume keys.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from run_experiment import _resume_key, configs_for
+
+    for exp in ("E1", "E2", "E8", "E10"):
+        cfgs = list(configs_for(exp, None, "refA"))
+        keys = {
+            _resume_key(
+                "critic" if c.get("critic") else "discriminator",
+                c.get("backbone", "NB"),
+                c["d_coef"],
+                c["seed"],
+                c.get("batch_size"),
+                c.get("lr_g"),
+            )
+            for c in cfgs
+        }
+        assert len(keys) == len(cfgs), (
+            f"{exp}: {len(cfgs)} configs collapse to {len(keys)} resume keys -- "
+            "a resumed wave would skip the difference"
+        )
+
+    # rows written before batch_size/lr_g columns existed must still match a default config
+    assert _resume_key("critic", "NB", 0.2, 0, None, None) == _resume_key(
+        "critic", "NB", 0.2, 0, 1024, 1e-3
+    ), "legacy rows would be re-run instead of resumed"
