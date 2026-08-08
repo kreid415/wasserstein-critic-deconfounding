@@ -553,3 +553,49 @@ def test_embedding_filename_encodes_every_varied_field():
         assert len(tags) == len(cfgs), (
             f"{exp}: {len(cfgs)} configs collapse to {len(tags)} embedding filenames"
         )
+
+
+def test_paga_survives_a_fully_disconnected_cluster_graph():
+    """Well-separated cell types must yield NaN, not a crash.
+
+    WHY: when no k-NN edge joins two different cell types, the contracted cluster graph
+    has zero edges and igraph's get_adjacency_sparse hands scipy an empty index array --
+    `sc.tl.paga` raises ValueError instead of returning the all-zero matrix it implies.
+    Separation makes PAGA fail, which is the opposite of the intuition that clean data is
+    the easy case, and evaluate_config's blanket `except Exception` would have swallowed
+    it into a silent NaN column for an entire wave.
+
+    NaN is the correct value here (an all-zero matrix has zero variance, so every batch
+    is already rejected by the existing guard) -- this asserts it arrives WITHOUT an
+    exception, and that the same input does not crash the cached baseline path either.
+    """
+    import anndata as ad_mod
+    import numpy as np
+    import pandas as pd
+
+    from wcd_vae.wcd import hyperparameter as hp
+
+    rng = np.random.default_rng(0)
+    n_per, n_types, n_batches = 20, 5, 3
+    n = n_per * n_types * n_batches
+    types = np.tile(np.repeat(np.arange(n_types), n_per), n_batches)
+    # 6.0 sigma apart: verified to leave the contracted graph with exactly 0 edges.
+    coords = rng.normal(size=(n, 4)).astype(np.float32) * 0.35
+    coords += (types[:, None] * 6.0).astype(np.float32)
+    obs = pd.DataFrame(
+        {
+            "batch": np.repeat([f"b{i}" for i in range(n_batches)], n_per * n_types),
+            "celltype": np.array([f"t{i}" for i in types]),
+        }
+    )
+    adata = ad_mod.AnnData(X=coords.copy(), obs=obs)
+    adata.obsm["X_pca"] = coords
+    adata.obsm["X_latent"] = coords
+
+    hp._PAGA_BASELINE_CACHE.clear()
+    assert hp._paga_baseline(adata, "batch", "celltype", "X_pca") == {}
+
+    val = hp.compute_mean_paga_spearman(
+        adata, tech_key="batch", celltype_key="celltype", embed_key="X_latent"
+    )
+    assert np.isnan(val), f"expected NaN for an unmeasurable topology, got {val}"

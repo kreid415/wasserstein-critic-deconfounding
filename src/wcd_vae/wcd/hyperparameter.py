@@ -20,6 +20,38 @@ from wcd_vae.wcd.training import obtain_embeddings, train_integration_model
 _PAGA_BASELINE_CACHE = {}
 
 
+def _paga_connectivities(adata_sub, celltype_key):
+    """PAGA connectivities as a DataFrame, or None when the graph is degenerate.
+
+    WHY: when no k-NN edge joins two different cell types -- every cluster a separate
+    connected component -- the contracted cluster graph has ZERO edges, and
+    ``igraph.Graph.get_adjacency_sparse`` builds ``csr_matrix((weights, zip(*edges)))``
+    from an empty edge list, which scipy rejects with
+
+        ValueError: mismatching number of index arrays for shape; got 0, expected 2
+
+    So ``sc.tl.paga`` RAISES on well-separated data rather than returning the all-zero
+    matrix it logically implies. Reproduced on scanpy 1.11.5 / igraph 0.11.8 / scipy
+    1.14.1 at cluster separations of 2.0 sigma and above; below ~1.5 sigma stray edges
+    appear and PAGA succeeds, which is why real datasets have never hit this.
+
+    Returning None is BEHAVIOUR-PRESERVING, not a new fallback: had scanpy returned the
+    all-zero matrix, ``np.var(tech_edges) > 0`` downstream would have rejected that batch
+    anyway, and an all-zero GLOBAL matrix rejects every batch and yields NaN. This turns
+    a crash into the value the existing guards already produce.
+    """
+    try:
+        sc.tl.paga(adata_sub, groups=celltype_key)
+    except ValueError as exc:  # degenerate cluster graph -- see docstring
+        if "mismatching number of index arrays" not in str(exc):
+            raise
+        return None
+    cats = adata_sub.obs[celltype_key].cat.categories
+    return pd.DataFrame(
+        adata_sub.uns["paga"]["connectivities"].toarray(), index=cats, columns=cats
+    )
+
+
 def _paga_baseline(adata, tech_key, celltype_key, baseline_rep):
     """Per-batch PAGA connectivity matrices on the unintegrated representation.
 
@@ -63,11 +95,11 @@ def _paga_baseline(adata, tech_key, celltype_key, baseline_rep):
         if len(adata_tech.obs[celltype_key].unique()) < 3:
             continue
         sc.pp.neighbors(adata_tech, use_rep=baseline_rep)
-        sc.tl.paga(adata_tech, groups=celltype_key)
-        cats = adata_tech.obs[celltype_key].cat.categories
-        out[tech] = pd.DataFrame(
-            adata_tech.uns["paga"]["connectivities"].toarray(), index=cats, columns=cats
-        )
+        df_tech = _paga_connectivities(adata_tech, celltype_key)
+        if df_tech is None:
+            # no inter-cell-type edges in this batch: nothing to correlate against
+            continue
+        out[tech] = df_tech
 
     # one dataset at a time: holding more would pin large graphs for no benefit
     _PAGA_BASELINE_CACHE.clear()
@@ -88,11 +120,12 @@ def compute_mean_paga_spearman(
         # 1. Global Integrated PAGA
         adata_global = adata.copy()
         sc.pp.neighbors(adata_global, use_rep=embed_key)
-        sc.tl.paga(adata_global, groups=celltype_key)
-
-        global_matrix = adata_global.uns["paga"]["connectivities"].toarray()
-        global_celltypes = adata_global.obs[celltype_key].cat.categories
-        df_global = pd.DataFrame(global_matrix, index=global_celltypes, columns=global_celltypes)
+        df_global = _paga_connectivities(adata_global, celltype_key)
+        if df_global is None:
+            # Degenerate global graph -> every edge weight is 0 -> the np.var guard below
+            # would reject every batch. NaN ("not measurable"), never 0.0.
+            return float("nan")
+        global_celltypes = df_global.index
 
         spearman_scores = []
 
@@ -158,8 +191,11 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_la
     sc.pp.neighbors(adata, use_rep=embed_key)
 
     # --- ADDED FOR PAGA & TOPOLOGY ---
-    # Compute PAGA (stores connectivity matrix in adata.uns['paga']['connectivities'])
-    sc.tl.paga(adata, groups=celltype_key)
+    # Compute PAGA (stores connectivity matrix in adata.uns['paga']['connectivities']).
+    # Guarded: a fully disconnected cluster graph makes sc.tl.paga raise rather than
+    # return zeros, and this call exists only to populate .uns for downstream readers --
+    # graph_connectivity and paga_spearman below do not depend on it.
+    _paga_connectivities(adata, celltype_key)
 
     # Compute Graph Connectivity (Quantitative topological metric between 0 and 1)
     graph_conn = scib.me.graph_connectivity(adata, label_key=celltype_key)
