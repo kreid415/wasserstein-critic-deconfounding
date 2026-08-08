@@ -84,6 +84,36 @@ def compute_simpson_numba(indices, distances, batch_codes, n_batches, perplexity
     return lisi_scores
 
 
+def _vram_safe_chunk(n, dim, default=2048, bytes_per=8):
+    """Row-block size for the chunked GPU kernels, sized to FREE VRAM at call time.
+
+    # WHY: the chunked kernels allocate an (chunk x n) float64 distance block. At
+    #   n=84,813 a 2048-row block is ~1.4 GB, and measured peak for one worker on that
+    #   dataset is 3.09 GB against a 7.6 GB usable card. Two concurrent workers OOM.
+    #   A fixed chunk therefore turns a memory-pressure situation into a hard crash
+    #   mid-wave; scaling the block to what is actually free degrades to a slower run
+    #   instead. Verified: 1 worker on atac_large peaks at 3.09 GB and succeeds, 2
+    #   workers OOM with a fixed chunk.
+    # The floor of 256 keeps the kernel correct (never zero) even under heavy pressure;
+    # if even that does not fit, the caller's OOM is genuine and should surface.
+    """
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            return default
+        free, _total = torch.cuda.mem_get_info()
+    except Exception:
+        return default
+
+    # keep a third of free memory as headroom for the model, activations and the
+    # topk/index_add temporaries the block itself feeds
+    budget = free * 0.33
+    per_row = max(n * bytes_per, 1)
+    fitted = int(budget // per_row)
+    return max(256, min(default, fitted))
+
+
 _KNN_CACHE = {}
 
 
@@ -137,7 +167,7 @@ def _knn(x, k):
         n = xt.shape[0]
         dist = torch.empty(n, k + 1, dtype=torch.float64, device="cuda")
         idx = torch.empty(n, k + 1, dtype=torch.long, device="cuda")
-        chunk = 2048
+        chunk = _vram_safe_chunk(n, xt.shape[1])
         for start in range(0, n, chunk):
             stop = min(start + chunk, n)
             d = torch.cdist(xt[start:stop], xt)
@@ -395,7 +425,7 @@ def probe_metrics(adata, label_key, batch_key, embed_key="X_latent", seed=0):
 
 
 def gpu_silhouette_samples(x=None, labels=None, *, X=None, metric="euclidean",  # noqa: N803
-                           chunk=2048, device=None, **_ignored):
+                           chunk=None, device=None, **_ignored):
     """Per-sample silhouette width, computed on the GPU when one is available.
 
     Drop-in replacement for ``sklearn.metrics.silhouette_samples`` with Euclidean
@@ -455,6 +485,8 @@ def gpu_silhouette_samples(x=None, labels=None, *, X=None, metric="euclidean",  
     counts = torch.bincount(ct, minlength=n_clusters).to(torch.float64)
     out = torch.empty(xt.shape[0], dtype=torch.float64, device=device)
 
+    if chunk is None:
+        chunk = _vram_safe_chunk(xt.shape[0], xt.shape[1])
     for start in range(0, xt.shape[0], chunk):
         stop = min(start + chunk, xt.shape[0])
         dists = torch.cdist(xt[start:stop], xt)

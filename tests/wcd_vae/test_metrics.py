@@ -483,3 +483,73 @@ def test_resume_key_covers_every_field_each_grid_varies():
     assert _resume_key("critic", "NB", 0.2, 0, None, None) == _resume_key(
         "critic", "NB", 0.2, 0, 1024, 1e-3
     ), "legacy rows would be re-run instead of resumed"
+
+
+def test_gpu_chunk_size_does_not_change_results():
+    """Chunk size is a memory knob, never a numerical one.
+
+    WHY: _vram_safe_chunk picks the row-block from FREE VRAM at call time, so two runs of
+    the same config on a differently-loaded GPU use different chunks. If that changed any
+    value, results would depend on what else was running -- irreproducible in the worst
+    possible way. Both kernels must be exactly block-invariant.
+    """
+    import numpy as np
+
+    from wcd_vae.wcd import evaluation as ev
+
+    rng = np.random.default_rng(0)
+    x = np.vstack([rng.normal(i * 4, 1, (300, 16)) for i in range(4)]).astype(np.float64)
+    labels = np.repeat([f"t{i}" for i in range(4)], 300)
+
+    big = ev.gpu_silhouette_samples(x, labels, chunk=2048)
+    small = ev.gpu_silhouette_samples(x, labels, chunk=256)
+    assert np.abs(big - small).max() < 1e-12, "silhouette depends on chunk size"
+
+    ev._KNN_CACHE.clear()
+    d1, i1 = ev._knn(x, 10)
+    ev._KNN_CACHE.clear()
+    orig = ev._vram_safe_chunk
+    ev._vram_safe_chunk = lambda *a, **k: 128
+    try:
+        d2, i2 = ev._knn(x, 10)
+    finally:
+        ev._vram_safe_chunk = orig
+        ev._KNN_CACHE.clear()
+    assert (i1 == i2).all(), "kNN neighbours depend on chunk size"
+    assert np.abs(d1 - d2).max() < 1e-12
+
+
+def test_embedding_filename_encodes_every_varied_field():
+    """Two configs that differ in ANY grid dimension must not share an embedding file.
+
+    WHY: the tag was method/backbone/lambda/seed/mode/formulation. E10 holds all of those
+    fixed and varies batch_size and lr, so its four cells per head would have written to
+    one filename -- three embeddings silently lost, with a complete-looking CSV. This is
+    the same failure mode as the historical flat-directory collision.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from run_experiment import configs_for
+
+    def tag(c):
+        bs = c.get("batch_size", 1024)
+        lr = c.get("lr_g", 1e-3)
+        opt = ""
+        if bs != 1024:
+            opt += f"_bs{int(bs)}"
+        if abs(lr - 1e-3) > 1e-12:
+            opt += f"_lr{str(lr).replace('.', 'p').replace('-', 'm')}"
+        return (
+            f"{'critic' if c.get('critic') else 'discriminator'}_{c.get('backbone', 'NB')}"
+            f"_lam{str(c['d_coef']).replace('.', 'p')}_s{c['seed']}"
+            f"_{c.get('reference_mode', 'fixed')}_{c.get('formulation', 'reference')}{opt}"
+        )
+
+    for exp in ("E1", "E2", "E8", "E10"):
+        cfgs = list(configs_for(exp, None, "refA"))
+        tags = {tag(c) for c in cfgs}
+        assert len(tags) == len(cfgs), (
+            f"{exp}: {len(cfgs)} configs collapse to {len(tags)} embedding filenames"
+        )

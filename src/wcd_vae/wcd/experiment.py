@@ -498,9 +498,20 @@ def evaluate_config(
         #   so callers MUST pass a dataset-specific embed_out directory. Wave 2019132
         #   wrote every dataset into one flat directory and 7 datasets clobbered each
         #   other down to 96 files for 408 configs.
+        # WHY batch_size/lr are in the tag: the filename must encode EVERY field any
+        #   experiment grid varies, or configs silently overwrite each other. E10 holds
+        #   method/backbone/lambda/seed fixed and varies exactly these two, so without
+        #   them its four cells per head collapse to one file -- the same failure as the
+        #   flat-directory collision above, and invisible in the CSV. Suffixes are
+        #   omitted at the production defaults so existing filenames are unchanged.
+        opt = ""
+        if batch_size != 1024:
+            opt += f"_bs{int(batch_size)}"
+        if abs(lr_g - 1e-3) > 1e-12 or abs(lr_d - 1e-3) > 1e-12:
+            opt += f"_lr{str(lr_g).replace('.', 'p').replace('-', 'm')}"
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
-               f"_{reference_mode}_{formulation}")
+               f"_{reference_mode}_{formulation}{opt}")
         np.savez_compressed(
             os.path.join(embed_out, f"{tag}.npz"),
             z=np.asarray(ad.obsm["X_latent"], dtype=np.float32),
