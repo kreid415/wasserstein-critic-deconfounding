@@ -9,12 +9,13 @@ pipeline, the measurements behind each decision, the changes that were **rejecte
 why, and the bugs found along the way. Every figure quoted here was measured on this
 machine; none are estimates unless labelled as such.
 
-**Net effect on the local programme:**
+**Net effect on the local programme** (including experiment E10, and the measured
+concurrency limits in §8):
 
-| scope | before | after | with E10 added |
-|---|---|---|---|
-| 6 light datasets | 2.1 days | **1.5 days** | 1.6 days |
-| all 8 datasets | 7.2 days | **4.1 days** | 4.5 days |
+| scope | before | after |
+|---|---|---|
+| 6 light datasets | 2.1 days | **1.3 days** |
+| all 8 datasets | 7.2 days | **4.1 days** |
 
 Per-configuration cost on the two datasets that dominate the schedule fell by roughly
 50%: `atac_large` from 836 s to 420 s, `immune_hum_mou` (extrapolated) from 1024 s to
@@ -268,3 +269,30 @@ python -m pytest tests/wcd_vae/test_metrics.py -q -k "silhouette or knn or paga 
 Supplementary Note 4 ("Metric Implementation and Equivalence") documents the silhouette,
 neighbourhood-search and PAGA-baseline changes with their equivalence figures.
 Supplementary Note 5 documents the optimiser-sensitivity result.
+
+---
+
+## 8. VRAM limits the wave, not CPU
+
+The GPU work in §2 made the pipeline VRAM-hungry, and this constrains how many
+configurations can run concurrently. Measured on the RTX 2080 (7.6 GiB usable):
+
+| dataset class | peak VRAM per worker | safe concurrency |
+|---|---|---|
+| light (≤ 35k cells) | 0.66 GB | **3 workers** |
+| heavy (≥ 85k cells) | 2.98 GB | **2 workers** — 3 OOM |
+
+Three concurrent workers on `atac_large` all die with CUDA out-of-memory. With the
+original fixed 2048-row chunk, even two failed: a float64 distance block of that size is
+~1.4 GB at n = 84,813.
+
+`_vram_safe_chunk()` now sizes the row-block from free VRAM at call time (a third of it,
+floor 256 rows), so memory pressure degrades to a slower run rather than a crash. Two
+workers on the heavy datasets now succeed. Three still fail, but in model and training
+allocation rather than in the metric chunks, so chunking cannot rescue that case — the
+heavy datasets are capped at two concurrent workers, and the schedule above reflects it.
+
+Chunk size is a memory knob and must never be a numerical one: otherwise a result would
+depend on what else happened to be running on the GPU. Both kernels are verified exactly
+block-invariant (silhouette max |Δ| 1.9e-15 between chunk 2048 and 256; k-NN neighbour
+indices identical, zero distance difference), and a regression test asserts it.
