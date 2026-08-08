@@ -29,6 +29,15 @@ BACKBONES = [
 ]
 SEEDS = [0, 1, 2]
 
+# E10 -- optimisation sensitivity. WHY these values: bs 1024 is the production setting;
+# 4096 is a 4x increase (gradient steps 2400 -> 600 on pancreas) chosen because it is the
+# largest that fits the 8 GB card at every dataset. The lr multipliers span "no
+# compensation" (1x), the sqrt-scaling rule (2x = sqrt(4)) and linear scaling (4x), so the
+# arm tests whether a larger batch can be compensated at all.
+BATCH_SIZES = [1024, 4096]
+LR_MULTS = [1.0, 2.0, 4.0]
+BASE_LR = 1e-3
+
 
 def configs_for(experiment, task_entry, reference_name=None):
     """Yield config dicts (kwargs for evaluate_config) for the requested experiment.
@@ -62,13 +71,28 @@ def configs_for(experiment, task_entry, reference_name=None):
                 yield {"critic": critic, "d_coef": 0.2, "seed": seed,
                        "reference_batch": 0 if critic else None,
                        "reference_batch_name_str": reference_name if critic else None}
+    elif experiment == "E10":
+        # Optimisation sensitivity: does the critic-vs-discriminator comparison depend on
+        # the optimiser settings? Both heads x {bs} x {lr} x 3 seeds at the operating
+        # point. bs=1024/lr=1x is the production setting and serves as the baseline cell;
+        # it is included so every other cell has a matched within-experiment reference.
+        for critic in (False, True):
+            for bs in BATCH_SIZES:
+                for mult in LR_MULTS:
+                    if bs == 1024 and mult != 1.0:
+                        continue  # only the production batch size needs its lr baseline
+                    for seed in SEEDS:
+                        yield {"critic": critic, "d_coef": 0.2, "seed": seed,
+                               "batch_size": bs, "lr_g": BASE_LR * mult, "lr_d": BASE_LR * mult,
+                               "reference_batch": 0 if critic else None,
+                               "reference_batch_name_str": reference_name if critic else None}
     else:
         raise ValueError(f"run_experiment does not handle '{experiment}' (see dedicated script)")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--experiment", required=True, choices=["E1", "E2", "E8"])
+    ap.add_argument("--experiment", required=True, choices=["E1", "E2", "E8", "E10"])
     ap.add_argument("--dataset", required=True)
     ap.add_argument("--registry", required=True)
     ap.add_argument("--out", required=True)

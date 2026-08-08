@@ -80,6 +80,11 @@ Afterwards, all figures and tables can be generated from **`results.ipynb`** in 
 * **Mixing vs. Conservation**: The Wasserstein Critic achieves significantly higher **iLISI** (Integration) scores but is more prone to biological over-correction.
 * **Reference Sensitivity**: Integration performance is dependent on a topologically dense reference batch.
 * **Scalability**: Standard discriminators scale more effectively to large numbers of batches by avoiding the geometric bottleneck of a single fixed reference.
+* **Optimisation fragility**: The two adversarial heads have different optimisation requirements. Quadrupling the minibatch size leaves the discriminator unchanged but causes the critic to stop mixing batches almost entirely; raising the learning rate moves the critic back only partially. Run as experiment `E10`:
+  ```bash
+  python scripts/run_experiment.py --experiment E10 --dataset pancreas \
+    --registry configs/dataset_registry.json --out results/E10
+  ```
 
 ## Citation
 If you use this code or our findings in your research, please cite:

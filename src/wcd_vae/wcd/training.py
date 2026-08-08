@@ -502,6 +502,8 @@ def train_integration_model(
     es_celltype_key=None,
     es_patience=5,
     es_check_every=10,
+    lr_g=1e-3,
+    lr_d=1e-3,
 ):
     number_of_cells = adata.n_obs
     number_of_batches = np.unique(adata.obs[batch_key]).shape[0]
@@ -539,6 +541,8 @@ def train_integration_model(
         es_celltype_key=es_celltype_key,
         es_patience=es_patience,
         es_check_every=es_check_every,
+        lr_g=lr_g,
+        lr_d=lr_d,
     )
     end_time = time.time()
     training_time = end_time - start_time

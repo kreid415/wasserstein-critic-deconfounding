@@ -361,4 +361,43 @@ smaller than the seed noise already present in any reported value. Setting the f
 parameter to \texttt{None} restores strict \texttt{leidenalg} parity for readers who
 prefer it.
 
+\section*{Supplementary Note 5: Sensitivity to Optimiser Settings}
+
+The comparison between the two adversarial heads is made at a fixed optimiser
+configuration: minibatch size $1024$, and Adam with learning rate $10^{-3}$ and
+$\beta = (0.5,\,0.9)$ for both the generator and the adversary. A conclusion that held
+only at a single point in optimiser space would be of limited value, so we measured how
+each head responds when that configuration is changed (experiment E10: both heads
+$\times$ minibatch size $\times$ learning rate $\times$ 3 seeds, at the operating point
+$\lambda_{\mathrm{adv}} = 0.2$).
+
+Quadrupling the minibatch to $4096$ reduces the number of gradient updates four-fold at a
+fixed epoch budget ($2400 \rightarrow 600$ on the pancreas dataset). The two heads respond
+very differently. The discriminator is insensitive: across all three learning-rate
+settings every metric lies within $1.4$ standard deviations of its baseline, and iLISI is
+essentially unchanged ($0.492$ at baseline against $0.486$, $0.481$ and $0.498$ at
+$1\times$, $2\times$ and $4\times$ the base learning rate). The critic is not: at the
+unchanged learning rate its batch mixing collapses (iLISI $0.252 \rightarrow 0.027$, a
+shift of $2.4$ standard deviations, with residual batch signal rising by $0.274$),
+leaving a latent space in which the batches are essentially unmixed.
+
+Raising the learning rate compensates only partially. The critic's iLISI recovers
+monotonically ($0.027 \rightarrow 0.143 \rightarrow 0.368$ at $1\times$, $2\times$ and
+$4\times$) but does not recover baseline behaviour: at $4\times$ it overshoots in the
+opposite direction on residual batch signal ($-0.145$ relative to baseline). A larger
+batch therefore cannot simply be traded against a larger step size for the critic; each
+combination substitutes one bias for another, and would require its own convergence
+study to defend.
+
+This asymmetry is consistent with the mechanism described in the main text. A Wasserstein
+critic approximates a supremum over Lipschitz functions and requires many updates to track
+a generator moving beneath it, whereas the discriminator's cross-entropy objective is
+better conditioned and tolerates a coarser update schedule. The observation also carries a
+practical consequence for benchmarking: an optimiser setting that degrades one head while
+leaving the other untouched would bias a head-to-head comparison in favour of the
+untouched head. Reported differences between adversarial formulations should therefore be
+accompanied by evidence that the optimiser configuration is not itself driving the result.
+We retain $1024$ and $10^{-3}$ throughout for this reason, in preference to the faster
+setting.
+
 \end{document}

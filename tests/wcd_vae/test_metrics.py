@@ -399,3 +399,49 @@ def test_paga_baseline_cache_keys_on_content_not_pointers():
     adata.obsm["X_pca"] = (coords + rng.normal(size=coords.shape).astype(np.float32)).copy()
     hp._paga_baseline(adata, "batch", "celltype", "X_pca")
     assert next(iter(hp._PAGA_BASELINE_CACHE)) != key3, "changed X_pca reused the cache"
+
+
+def test_optimiser_settings_thread_through_the_whole_call_chain():
+    """lr_g/lr_d/batch_size must survive every layer down to the optimizer.
+
+    WHY: the chain is evaluate_config -> train_one -> train_integration_model ->
+    train_model -> optim.Adam, and a parameter dropped at ANY layer fails silently --
+    the run completes, the row records the requested value, and the model trains at the
+    default. This asserts the signature chain rather than the behaviour, so it fails at
+    import time rather than after a multi-day wave produces mislabelled results.
+    """
+    import inspect
+
+    from wcd_vae.wcd.experiment import evaluate_config, train_one
+    from wcd_vae.wcd.training import SCIntegrationModel, train_integration_model
+
+    chain = [evaluate_config, train_one, train_integration_model, SCIntegrationModel.train_model]
+    for fn in chain:
+        params = inspect.signature(fn).parameters
+        for name in ("lr_g", "lr_d", "batch_size"):
+            assert name in params, f"{fn.__qualname__} does not accept {name}"
+
+    # ...and the optimizers must actually READ them, not use a literal
+    src = inspect.getsource(SCIntegrationModel.train_model)
+    assert "lr=lr_d" in src and "lr=lr_g" in src, "Adam is not using the lr parameters"
+
+
+def test_e10_grid_is_balanced_and_has_a_matched_baseline():
+    """E10 must contain the production cell for BOTH heads, or deltas are unanchored."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from run_experiment import BASE_LR, configs_for
+
+    cfgs = list(configs_for("E10", None, "refA"))
+    cells = {(c["critic"], c["batch_size"], round(c["lr_g"] / BASE_LR, 3)) for c in cfgs}
+    for crit in (False, True):
+        assert (crit, 1024, 1.0) in cells, "missing the production baseline cell"
+        for mult in (1.0, 2.0, 4.0):
+            assert (crit, 4096, mult) in cells, f"missing bs=4096 lr={mult}x"
+    # every cell must carry the same number of seeds, or arms are not comparable
+    from collections import Counter
+
+    counts = Counter((c["critic"], c["batch_size"], round(c["lr_g"] / BASE_LR, 3)) for c in cfgs)
+    assert len(set(counts.values())) == 1, f"unbalanced seed counts: {counts}"
