@@ -292,6 +292,12 @@ workers on the heavy datasets now succeed. Three still fail, but in model and tr
 allocation rather than in the metric chunks, so chunking cannot rescue that case — the
 heavy datasets are capped at two concurrent workers, and the schedule above reflects it.
 
+The concurrency ceiling costs **+0.6 days** on the all-8 programme (3.5 days if the heavy
+datasets could run three-wide, against 4.1 actual). The headline figures in this document
+moved from 1.6/4.5 days to 1.3/4.1 days for a separate reason: the earlier estimate
+carried a flat +35% term for nested cross-validation, which the current one replaces with
+an explicit per-experiment accounting. Both changes are folded into the table at the top.
+
 Chunk size is a memory knob and must never be a numerical one: otherwise a result would
 depend on what else happened to be running on the GPU. Both kernels are verified exactly
 block-invariant (silhouette max |Δ| 1.9e-15 between chunk 2048 and 256; k-NN neighbour
