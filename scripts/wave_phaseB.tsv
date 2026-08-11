@@ -1,0 +1,8 @@
+worker	tag	est_hours	cmd
+1	lung_E10_disc	0.846	$PY scripts/run_experiment.py --experiment E10 --dataset lung --registry configs/dataset_registry.json --data-root $R --epochs 500 --head discriminator --out results/wave/lung_E10_disc.csv --resume
+1	atac_small_E10_disc	0.453	$PY scripts/run_experiment.py --experiment E10 --dataset atac_small --registry configs/dataset_registry.json --data-root $R --epochs 500 --head discriminator --out results/wave/atac_small_E10_disc.csv --resume
+1	immune_E10_disc	0.746	$PY scripts/run_experiment.py --experiment E10 --dataset immune --registry configs/dataset_registry.json --data-root $R --epochs 500 --head discriminator --out results/wave/immune_E10_disc.csv --resume
+1	atac_small_E10_critic	0.497	$PY scripts/run_experiment.py --experiment E10 --dataset atac_small --registry configs/dataset_registry.json --data-root $R --epochs 500 --head critic --out results/wave/atac_small_E10_critic.csv --resume
+1	sim1_E10_disc	0.406	$PY scripts/run_experiment.py --experiment E10 --dataset sim1 --registry configs/dataset_registry.json --data-root $R --epochs 500 --head discriminator --out results/wave/sim1_E10_disc.csv --resume
+1	immune_E10_critic	1.977	$PY scripts/run_experiment.py --experiment E10 --dataset immune --registry configs/dataset_registry.json --data-root $R --epochs 500 --head critic --out results/wave/immune_E10_critic.csv --resume
+1	sim1_E10_critic	1.067	$PY scripts/run_experiment.py --experiment E10 --dataset sim1 --registry configs/dataset_registry.json --data-root $R --epochs 500 --head critic --out results/wave/sim1_E10_critic.csv --resume
