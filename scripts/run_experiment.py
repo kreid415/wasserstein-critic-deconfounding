@@ -125,10 +125,35 @@ def main():
     ap.add_argument("--seed-only", type=int, default=None,
                     help="run only this single seed (makes each SLURM task exactly one config)")
     ap.add_argument("--embed-out", default=None,
-                    help="directory to persist latents (.npz per config); use SCRATCH")
+                    help="directory to persist latents (.npz per config); use SCRATCH. "
+                         "OMITTING THIS IS ALMOST ALWAYS A MISTAKE on a production wave -- "
+                         "see the warning emitted at startup.")
+    ap.add_argument("--no-embed-ok", action="store_true",
+                    help="acknowledge running WITHOUT --embed-out (suppresses the warning); "
+                         "only appropriate for smoke tests and timing probes")
     ap.add_argument("--resume", action="store_true",
                     help="skip configs already present in --out (by method,backbone,d_coef,seed)")
     args = ap.parse_args()
+
+    # WHY THIS WARNING EXISTS: metrics-only CSVs cannot be re-analysed. Adding ANY new
+    # embedding-derived metric (PAGA, kBET, probes, trajectory) to a finished wave costs a
+    # full retraining run, because the latent is gone. This has now happened TWICE on this
+    # project: once for PAGA, and again on 2026-08-11 when kbet was requested after a
+    # 918-config / 24 h wave that had been launched without --embed-out. The flag is
+    # optional and defaults to None, so the omission is silent and only surfaces weeks
+    # later as a re-run bill. Embeddings are ~19 GB for the full light wave -- always
+    # cheaper than the compute needed to regenerate them.
+    if not args.embed_out and not args.no_embed_ok:
+        import warnings
+        warnings.warn(
+            "\n"
+            "*** RUNNING WITHOUT --embed-out: latents will NOT be persisted. ***\n"
+            "    Any future embedding-derived metric (kBET, PAGA, probes, trajectory)\n"
+            "    will require RETRAINING every config in this run.\n"
+            "    Pass --embed-out <dir> (dataset-specific; a flat dir makes datasets\n"
+            "    clobber each other), or --no-embed-ok if this is a smoke/timing run.\n",
+            stacklevel=2,
+        )
 
     with open(args.registry) as fh:
         registry = json.load(fh)
