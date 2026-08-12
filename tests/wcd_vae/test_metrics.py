@@ -871,3 +871,32 @@ def test_embed_tag_encodes_batch_count_subset(tmp_path):
     p_sub = save_embedding(a, str(d), tag_for(2, 3), "batch", "celltype")
     assert p_full != p_sub
     assert len(list(d.glob("*.npz"))) == 2
+
+
+def test_embed_tag_encodes_fixed_reference_batch():
+    """E4's fixed_refN arms must not share one embedding filename.
+
+    WHY: E4 sweeps ref_design over fixed_ref0 .. fixed_ref{N-1} plus rotating/joint, and
+    EVERY fixed_refN arm carries reference_mode="fixed" -- so reference_mode alone does
+    not distinguish them and all N would write to one .npz. Which batch the critic aligns
+    to changes the model: on pancreas, fixed_ref0 gave ARI 0.480 where the same
+    (backbone, lambda, seed) at the E1/E2 grid point gave 0.049.
+
+    Caught before any E4 latent was lost, unlike the E8 batch_count case. The suffix must
+    be omitted for reference_batch=0 (the default) and for the discriminator (which has
+    no reference batch), so pre-existing filenames are unchanged.
+    """
+    def suffix(reference_mode, reference_batch):
+        return (f"_ref{int(reference_batch)}"
+                if reference_mode == "fixed" and reference_batch not in (None, 0) else "")
+
+    assert suffix("fixed", 0) == "", "default reference must not gain a suffix"
+    assert suffix("fixed", None) == "", "discriminator has no reference batch"
+    assert suffix("fixed", 1) == "_ref1"
+    assert suffix("fixed", 8) == "_ref8"
+    # rotating/joint are already separated by reference_mode in the tag body
+    assert suffix("rotating", 0) == ""
+    assert suffix("joint", 0) == ""
+    # the distinguishing property: no two fixed_refN arms collide
+    tags = {f"critic_NB_lam0p2_s0_fixed_reference{suffix('fixed', b)}" for b in range(9)}
+    assert len(tags) == 9, "all nine fixed_refN designs must map to distinct filenames"

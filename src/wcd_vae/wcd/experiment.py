@@ -556,6 +556,17 @@ def evaluate_config(
         n_batches_here = int(ad.obs[batch_key].nunique())
         if full_n_batches is not None and n_batches_here != int(full_n_batches):
             opt += f"_bc{n_batches_here}"
+        # WHY THE REFERENCE BATCH IS IN THE TAG: E4 sweeps ref_design over
+        #   fixed_ref0 .. fixed_ref{N-1} plus rotating/joint, and ALL the fixed_refN arms
+        #   carry reference_mode="fixed" -- so reference_mode alone does not distinguish
+        #   them and all N would write to one file. Which batch the critic aligns to
+        #   changes the model: on pancreas, fixed_ref0 gave ARI 0.480 where the same
+        #   (backbone, lambda, seed) at the E1/E2 grid point gave 0.049.
+        #   Caught before any E4 latent was lost, unlike the E8 case (8ea5ea4).
+        # Suffix omitted for the discriminator (no reference batch) and for the default
+        #   reference_batch=0, so all pre-existing filenames are unchanged.
+        if reference_mode == "fixed" and reference_batch not in (None, 0):
+            opt += f"_ref{int(reference_batch)}"
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
                f"_{reference_mode}_{formulation}{opt}")
