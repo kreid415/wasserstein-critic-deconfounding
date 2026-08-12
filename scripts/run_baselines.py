@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
-from wcd_vae.wcd.experiment import full_metric_suite, load_task
+from wcd_vae.wcd.experiment import full_metric_suite, load_task, save_embedding
 
 
 def emb_unintegrated(adata, batch_key, celltype_key):
@@ -111,7 +111,20 @@ def main():
     ap.add_argument("--balance", action="store_true")
     ap.add_argument("--data-root", default=None)
     ap.add_argument("--methods", nargs="*", default=list(METHODS))
+    ap.add_argument("--embed-out", default=None,
+                    help="directory to persist baseline latents (.npz per method); a "
+                         "DATASET-SPECIFIC subdirectory is created under it")
+    ap.add_argument("--no-embed-ok", action="store_true",
+                    help="acknowledge running WITHOUT --embed-out (smoke runs only)")
     args = ap.parse_args()
+
+    if not args.embed_out and not args.no_embed_ok:
+        import warnings
+        warnings.warn(
+            "\n*** RUNNING WITHOUT --embed-out: baseline latents will NOT be persisted. ***\n"
+            "    Pass --embed-out <dir>, or --no-embed-ok for a smoke run.\n",
+            stacklevel=2,
+        )
 
     with open(args.registry) as fh:
         registry = json.load(fh)
@@ -129,6 +142,12 @@ def main():
         try:
             ad = adata.copy()
             METHODS[name](ad, batch_key, celltype_key)
+            if args.embed_out:
+                # E3 varies exactly one field -- the baseline method -- so the method
+                # name is a sufficient tag. Persisted so a new embedding-derived metric
+                # does not require re-running scVI/scANVI/Harmony/Scanorama either.
+                save_embedding(ad, os.path.join(args.embed_out, args.dataset), name,
+                               batch_key, celltype_key, embed_key="X_emb")
             metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_emb")
             row = {"experiment": "E3", "dataset": args.dataset, "method": name,
                    "balanced": args.balance, "n_batches": int(adata.obs[batch_key].nunique()),

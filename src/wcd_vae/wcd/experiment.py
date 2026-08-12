@@ -432,6 +432,40 @@ def full_metric_suite(
     return out
 
 
+def save_embedding(ad, embed_out, tag, batch_key, celltype_key, embed_key="X_latent"):
+    """Persist one latent embedding as ``<embed_out>/<tag>.npz``.
+
+    # WHY THIS IS A SHARED HELPER: metrics-only CSVs cannot be re-analysed. Adding any
+    #   new embedding-derived metric (kBET, PAGA, probes, trajectory) to a finished wave
+    #   otherwise costs a full retraining run. This project has paid that bill twice --
+    #   once for PAGA, then again when kBET was requested after a 918-config / 24 h wave
+    #   that persisted nothing. Every harness that trains a model must call this.
+    # NOTE the DATASET is not part of ``tag``: callers MUST pass a dataset-specific
+    #   ``embed_out`` directory. Wave 2019132 wrote every dataset into one flat directory
+    #   and 7 datasets clobbered each other down to 96 files for 408 configs.
+    # ``tag`` must encode EVERY field the calling experiment's grid varies, or configs
+    #   silently overwrite each other with a complete-looking CSV.
+    """
+    import os
+
+    # embed_key is a parameter because the baseline harness (scVI/Harmony/Scanorama)
+    # writes its embedding to obsm["X_emb"] rather than obsm["X_latent"]. Persisting
+    # baseline latents matters for the same reason as our own: a new embedding-derived
+    # metric must not require re-running the baselines either.
+    os.makedirs(embed_out, exist_ok=True)
+    np.savez_compressed(
+        os.path.join(embed_out, f"{tag}.npz"),
+        z=np.asarray(ad.obsm[embed_key], dtype=np.float32),
+        # WHY the dtype cast: numpy stores <U dtype string arrays fine, but object-dtype
+        #      arrays require allow_pickle on load. Fixed-width unicode keeps np.load
+        #      working with the safe default.
+        batch=ad.obs[batch_key].astype(str).to_numpy(dtype="U64"),
+        celltype=ad.obs[celltype_key].astype(str).to_numpy(dtype="U64"),
+        X_pca=np.asarray(ad.obsm["X_pca"], dtype=np.float32) if "X_pca" in ad.obsm else np.empty(0),
+    )
+    return os.path.join(embed_out, f"{tag}.npz")
+
+
 # Higher-is-better (+1) or lower-is-better (-1) for building composite / Pareto scores.
 # clisi is -1 because THIS MODULE imports the LOCAL clisi_graph (see the import above,
 # ``from wcd_vae.wcd.evaluation import clisi_graph``), which normalises
@@ -494,22 +528,15 @@ def evaluate_config(
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
     if embed_out:
-        import os
-
-        os.makedirs(embed_out, exist_ok=True)
         # WHY reference_mode/formulation in the tag: E4 sweeps reference designs and E9
         #   sweeps formulations at the SAME (head, backbone, lambda, seed), so without
         #   them those arms silently overwrite each other.
-        # NOTE the DATASET is not visible here (evaluate_config never receives its name),
-        #   so callers MUST pass a dataset-specific embed_out directory. Wave 2019132
-        #   wrote every dataset into one flat directory and 7 datasets clobbered each
-        #   other down to 96 files for 408 configs.
         # WHY batch_size/lr are in the tag: the filename must encode EVERY field any
         #   experiment grid varies, or configs silently overwrite each other. E10 holds
         #   method/backbone/lambda/seed fixed and varies exactly these two, so without
-        #   them its four cells per head collapse to one file -- the same failure as the
-        #   flat-directory collision above, and invisible in the CSV. Suffixes are
-        #   omitted at the production defaults so existing filenames are unchanged.
+        #   them its four cells per head collapse to one file -- invisible in the CSV.
+        #   Suffixes are omitted at the production defaults so existing filenames are
+        #   unchanged.
         opt = ""
         if batch_size != 1024:
             opt += f"_bs{int(batch_size)}"
@@ -518,16 +545,7 @@ def evaluate_config(
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
                f"_{reference_mode}_{formulation}{opt}")
-        np.savez_compressed(
-            os.path.join(embed_out, f"{tag}.npz"),
-            z=np.asarray(ad.obsm["X_latent"], dtype=np.float32),
-            # WHY: numpy stores <U dtype string arrays fine, but object-dtype arrays
-            #      require allow_pickle on load. Cast to a fixed-width unicode dtype so
-            #      np.load(...) works with the safe default.
-            batch=ad.obs[batch_key].astype(str).to_numpy(dtype="U64"),
-            celltype=ad.obs[celltype_key].astype(str).to_numpy(dtype="U64"),
-            X_pca=np.asarray(ad.obsm["X_pca"], dtype=np.float32) if "X_pca" in ad.obsm else np.empty(0),
-        )
+        save_embedding(ad, embed_out, tag, batch_key, celltype_key)
     metrics = full_metric_suite(ad, batch_key, celltype_key, embed_key="X_latent", **(metric_kwargs or {}))
     row = {
         "method": "critic" if critic else "discriminator",

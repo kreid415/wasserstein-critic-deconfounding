@@ -53,7 +53,7 @@ def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None):
     return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12))
 
 
-def configs_for(experiment, task_entry, reference_name=None):
+def configs_for(experiment, task_entry, reference_name=None, batch_size_only=None):
     """Yield config dicts (kwargs for evaluate_config) for the requested experiment.
 
     ``reference_name`` is the ENTROPY-selected reference batch from load_task; it is
@@ -90,8 +90,15 @@ def configs_for(experiment, task_entry, reference_name=None):
         # the optimiser settings? Both heads x {bs} x {lr} x 3 seeds at the operating
         # point. bs=1024/lr=1x is the production setting and serves as the baseline cell;
         # it is included so every other cell has a matched within-experiment reference.
+        # batch_size_only lets the wave split E10 by batch size. WHY THAT SPLIT EXISTS:
+        # the bs=4096 arm exhausts the 8 GiB card whenever ~6 workers share it (observed
+        # on BOTH heads, three times in one wave), so those shards must run alone -- but
+        # the bs=1024 arm is the production setting and has never OOM'd, so serialising
+        # it too would waste ~11 h of lane time for nothing.
         for critic in (False, True):
             for bs in BATCH_SIZES:
+                if batch_size_only is not None and bs != batch_size_only:
+                    continue
                 for mult in LR_MULTS:
                     if bs == 1024 and mult != 1.0:
                         continue  # only the production batch size needs its lr baseline
@@ -122,6 +129,9 @@ def main():
                     help="run only one adversarial head (lets E1 split into two shorter jobs)")
     ap.add_argument("--d-coef-only", type=float, default=None,
                     help="E1: run only this single lambda value")
+    ap.add_argument("--batch-size-only", type=int, default=None,
+                    help="E10: run only this batch size (lets the wave serialise the "
+                         "VRAM-heavy bs=4096 arm without serialising bs=1024)")
     ap.add_argument("--seed-only", type=int, default=None,
                     help="run only this single seed (makes each SLURM task exactly one config)")
     ap.add_argument("--embed-out", default=None,
@@ -193,7 +203,7 @@ def main():
                     r.get("batch_size"), r.get("lr_g")))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
-    for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest)):
+    for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest, batch_size_only=args.batch_size_only)):
         # head filter: lets E1 be split into two shorter jobs (one per adversarial head).
         if args.head != "both":
             want_critic = args.head == "critic"

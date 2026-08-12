@@ -743,3 +743,86 @@ def test_disc_iter_differs_by_head_and_must_be_recorded():
         "evaluate_config's result row to match"
     )
     assert "10 if critic else 1" in src
+
+
+def _build_manifest(tmp_path, scope="light"):
+    import subprocess
+    import sys
+    out = tmp_path / "m.tsv"
+    subprocess.run(
+        [sys.executable, "scripts/build_manifest.py", "--scope", scope, "-o", str(out)],
+        check=True, capture_output=True,
+    )
+    rows = [dict(zip(("phase", "worker", "tag", "est", "cmd"), ln.split("\t")))
+            for ln in out.read_text().splitlines()[1:]]
+    return rows
+
+
+def test_every_training_shard_persists_embeddings(tmp_path):
+    """No shard may train a model without --embed-out.
+
+    WHY: metrics-only CSVs cannot be re-analysed. Adding any embedding-derived metric
+    (kBET, PAGA, probes, trajectory) to a finished wave otherwise costs a full retraining
+    run -- this project paid that bill twice, most recently a 918-config / 24 h wave that
+    persisted nothing and made a kBET request a 14-37 h re-run instead of a 30 s backfill.
+    The flag defaults to None, so its omission is silent; only a test makes it loud.
+    """
+    for row in _build_manifest(tmp_path):
+        if "support_overlap" in row["cmd"]:
+            continue  # E6 trains no model -- there is no latent to persist
+        assert "--embed-out" in row["cmd"], f"{row['tag']} does not persist embeddings"
+
+
+def test_e10_high_batch_shards_are_serial_and_low_batch_are_not(tmp_path):
+    """The bs=4096 arm must run alone; bs=1024 must not waste the lanes.
+
+    WHY: E10 sweeps batch_size in {1024, 4096} and the 4096 arm exhausts the 8 GiB card
+    whenever ~6 workers share it. Observed three times in ONE wave and on BOTH heads
+    (immune/critic lost 9 of 12 configs, sim1/critic 9 of 12, lung/DISCRIMINATOR 4 of 12),
+    which is why the mitigation cannot be scoped to the critic. bs=1024 is the production
+    setting and has never OOM'd, so serialising it too would idle five lanes for hours.
+    """
+    rows = _build_manifest(tmp_path)
+    e10 = [r for r in rows if "_E10_" in r["tag"]]
+    assert e10, "no E10 shards emitted"
+    for r in e10:
+        assert "--batch-size-only" in r["cmd"], f"{r['tag']} must split E10 by batch size"
+        expect = "serial" if "bs4096" in r["tag"] else "parallel"
+        assert r["phase"] == expect, f"{r['tag']} should be {expect}, got {r['phase']}"
+
+
+def test_manifest_covers_every_experiment_and_scales_with_scope(tmp_path):
+    """All eight experiments must be present, and --scope must actually change the set.
+
+    WHY: the previous manifest silently covered only E1/E2/E8/E10 -- half the programme
+    (E3 baselines, E4 reference designs, E5 biology, E6 support overlap, E9 formulations)
+    lives in separate harnesses and was simply absent, so a "full relaunch" would have
+    quietly skipped it.
+    """
+    light = _build_manifest(tmp_path, "light")
+    allds = _build_manifest(tmp_path, "all")
+    for exp in ("E1", "E2", "E3", "E4", "E5", "E6", "E8", "E9", "E10"):
+        assert any(exp in r["tag"] for r in light), f"{exp} missing from the light manifest"
+    assert len(allds) > len(light), "scope=all must add the two heavy datasets"
+    heavy_tags = [r for r in allds if r["tag"].startswith(("atac_large", "immune_hum_mou"))]
+    assert heavy_tags, "scope=all emitted no heavy-dataset shards"
+    assert not [r for r in light if r["tag"].startswith(("atac_large", "immune_hum_mou"))]
+
+
+def test_e8_never_emitted_for_two_batch_datasets(tmp_path):
+    """E8 sweeps batch_count 2..n_batches, which is degenerate when n_batches == 2."""
+    import json
+
+    reg = json.load(open("configs/dataset_registry.json"))
+    for r in _build_manifest(tmp_path, "all"):
+        if "_E8_" in r["tag"]:
+            ds = r["tag"].split("_E8_")[0]
+            assert reg[ds]["n_batches"] > 2, f"E8 emitted for 2-batch dataset {ds}"
+            assert "--batch-count" in r["cmd"], f"{r['tag']} missing --batch-count"
+
+
+def test_every_resumable_shard_requests_resume(tmp_path):
+    """A failed shard must cost only its missing configs on the next pass, not all of them."""
+    for r in _build_manifest(tmp_path):
+        if any(k in r["tag"] for k in ("_E1_", "_E2_", "_E8_", "_E10_", "_E4_", "_E9_")):
+            assert "--resume" in r["cmd"], f"{r['tag']} is not resumable"

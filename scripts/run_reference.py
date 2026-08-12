@@ -42,7 +42,18 @@ def main():
                     help="skip (ref_design, seed) rows already present in --out")
     ap.add_argument("--embed-out", default=None,
                     help="directory to persist latents (.npz per config); use SCRATCH")
+    ap.add_argument("--no-embed-ok", action="store_true",
+                    help="acknowledge running WITHOUT --embed-out (smoke runs only)")
     args = ap.parse_args()
+
+    if not args.embed_out and not args.no_embed_ok:
+        import warnings
+        warnings.warn(
+            "\n*** RUNNING WITHOUT --embed-out: latents will NOT be persisted. ***\n"
+            "    Any future embedding-derived metric will require RETRAINING.\n"
+            "    Pass --embed-out <dir>, or --no-embed-ok for a smoke run.\n",
+            stacklevel=2,
+        )
 
     with open(args.registry) as fh:
         registry = json.load(fh)

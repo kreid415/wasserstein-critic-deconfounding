@@ -27,7 +27,7 @@ import pandas as pd
 from sklearn.metrics import f1_score
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 
-from wcd_vae.wcd.experiment import load_task, train_one
+from wcd_vae.wcd.experiment import load_task, save_embedding, train_one
 from wcd_vae.wcd.training import obtain_embeddings
 
 
@@ -116,9 +116,24 @@ def main():
     ap.add_argument("--d-coef", type=float, default=0.2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--data-root", default=None)
+    ap.add_argument("--embed-out", default=None,
+                    help="directory to persist latents (.npz per config); a DATASET-SPECIFIC "
+                         "subdirectory is created under it. Omitting this means any future "
+                         "embedding-derived metric needs a full retraining run.")
+    ap.add_argument("--no-embed-ok", action="store_true",
+                    help="acknowledge running WITHOUT --embed-out (smoke/timing runs only)")
     ap.add_argument("--backbone", default="NB",
                     help="backbone (default NB, the post-scCRAFT-drop primary)")
     args = ap.parse_args()
+
+    if not args.embed_out and not args.no_embed_ok:
+        import warnings
+        warnings.warn(
+            "\n*** RUNNING WITHOUT --embed-out: latents will NOT be persisted. ***\n"
+            "    Any future embedding-derived metric will require RETRAINING.\n"
+            "    Pass --embed-out <dir>, or --no-embed-ok for a smoke run.\n",
+            stacklevel=2,
+        )
 
     os.makedirs(args.outdir, exist_ok=True)
     with open(args.registry) as fh:
@@ -145,6 +160,16 @@ def main():
                            epochs=args.epochs,
                            backbone=args.backbone)
         obtain_embeddings(ad, vae.to(device))
+        if args.embed_out:
+            # E5 varies only (head, backbone, lambda, seed) at a fixed reference design,
+            # so the tag encodes exactly those -- matching evaluate_config's scheme so
+            # E5 latents are loadable by the same downstream code.
+            save_embedding(
+                ad, os.path.join(args.embed_out, args.dataset),
+                f"{head}_{args.backbone}_lam{str(args.d_coef).replace('.', 'p')}"
+                f"_s{args.seed}_fixed_reference",
+                batch_key, celltype_key,
+            )
         res = analyse_embedding(ad, "X_latent", batch_key, celltype_key)
         conf = celltype_confusion(ad.obsm["X_latent"], ad.obs[celltype_key].astype(str).values)
         confusions[head] = conf
