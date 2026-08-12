@@ -502,6 +502,7 @@ def evaluate_config(
     metric_kwargs=None,
     embed_out=None,
     early_stopping=True,
+    full_n_batches=None,
 ):
     """Train one config and return {**metrics, config columns}. The atomic unit
     every experiment loops over.
@@ -542,6 +543,19 @@ def evaluate_config(
             opt += f"_bs{int(batch_size)}"
         if abs(lr_g - 1e-3) > 1e-12 or abs(lr_d - 1e-3) > 1e-12:
             opt += f"_lr{str(lr_g).replace('.', 'p').replace('-', 'm')}"
+        # WHY THE BATCH COUNT IS IN THE TAG: E8 sweeps batch_count, subsetting the data to
+        #   k batches while holding (head, backbone, lambda, seed) FIXED -- so without this
+        #   every level of the sweep writes to ONE file. Measured on the 2026-08-12 wave:
+        #   26 E8 rows collapsed onto 6 filenames, silently overwriting 20 embeddings, and
+        #   the surviving .npz for each tag was whichever level finished last. The CSVs
+        #   looked complete throughout (bc=2 ARI 0.360 vs bc=8 ARI 0.020, both present).
+        # The caller passes full_n_batches (the dataset's UNSUBSET batch count) because
+        #   load_task subsets the data BEFORE evaluate_config sees it -- so the batch count
+        #   cannot be recovered here by comparison; both adata and ad are already subset.
+        #   The suffix is omitted when the two agree, keeping non-E8 filenames unchanged.
+        n_batches_here = int(ad.obs[batch_key].nunique())
+        if full_n_batches is not None and n_batches_here != int(full_n_batches):
+            opt += f"_bc{n_batches_here}"
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
                f"_{reference_mode}_{formulation}{opt}")

@@ -228,7 +228,10 @@ def main():
         if key in done:
             continue
         try:
-            row = evaluate_config(adata, batch_key, celltype_key, **cfg, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None))
+            row = evaluate_config(adata, batch_key, celltype_key, **cfg, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None),
+                                  # registry n_batches, so the embed tag can record a
+                                  # subset level (E8) without colliding with the full run
+                                  full_n_batches=entry.get("n_batches"))
             row.update({"experiment": args.experiment, "dataset": args.dataset,
                         "balanced": args.balance, "batch_count": adata.obs[batch_key].nunique()})
             rows.append(row)

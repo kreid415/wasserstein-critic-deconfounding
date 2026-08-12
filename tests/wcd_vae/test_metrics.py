@@ -826,3 +826,48 @@ def test_every_resumable_shard_requests_resume(tmp_path):
     for r in _build_manifest(tmp_path):
         if any(k in r["tag"] for k in ("_E1_", "_E2_", "_E8_", "_E10_", "_E4_", "_E9_")):
             assert "--resume" in r["cmd"], f"{r['tag']} is not resumable"
+
+
+def test_embed_tag_encodes_batch_count_subset(tmp_path):
+    """A batch_count subset must not overwrite the full-dataset embedding.
+
+    WHY: E8 sweeps batch_count while holding (head, backbone, lambda, seed) FIXED, so
+    without the subset level in the filename every level of the sweep writes to ONE
+    .npz. Measured on the 2026-08-12 wave before the fix: 26 E8 rows collapsed onto 6
+    filenames, silently overwriting 20 embeddings, and the survivor for each tag was
+    whichever level finished last. The CSVs looked complete the whole time (bc=2 gave
+    ARI 0.360 and bc=8 gave 0.020 -- both recorded, only one latent kept).
+
+    The suffix must be OMITTED when the data is not subset, so that all pre-existing
+    non-E8 filenames are unchanged.
+    """
+    import numpy as np
+    import pandas as pd
+    import anndata as ad
+    from wcd_vae.wcd.experiment import save_embedding
+
+    def tag_for(n_batches_here, full_n_batches):
+        """Mirror the tag construction in evaluate_config for the batch-count field."""
+        opt = ""
+        if full_n_batches is not None and n_batches_here != int(full_n_batches):
+            opt += f"_bc{n_batches_here}"
+        return f"critic_NB_lam0p2_s0_fixed_reference{opt}"
+
+    assert tag_for(3, 3) == "critic_NB_lam0p2_s0_fixed_reference", "full run must not gain a suffix"
+    assert tag_for(2, 3) == "critic_NB_lam0p2_s0_fixed_reference_bc2"
+    assert tag_for(8, 9) == "critic_NB_lam0p2_s0_fixed_reference_bc8"
+    assert tag_for(2, 3) != tag_for(3, 3), "subset and full run must not collide"
+
+    # and the writes must land in distinct files
+    rng = np.random.default_rng(0)
+    a = ad.AnnData(
+        X=rng.normal(size=(20, 4)).astype("float32"),
+        obs=pd.DataFrame({"batch": pd.Categorical(["b0", "b1"] * 10),
+                          "celltype": pd.Categorical(["t0", "t1"] * 10)}),
+    )
+    a.obsm["X_latent"] = a.X
+    d = tmp_path / "emb"
+    p_full = save_embedding(a, str(d), tag_for(3, 3), "batch", "celltype")
+    p_sub = save_embedding(a, str(d), tag_for(2, 3), "batch", "celltype")
+    assert p_full != p_sub
+    assert len(list(d.glob("*.npz"))) == 2
