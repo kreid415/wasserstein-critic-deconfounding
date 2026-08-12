@@ -599,3 +599,46 @@ def test_paga_survives_a_fully_disconnected_cluster_graph():
         adata, tech_key="batch", celltype_key="celltype", embed_key="X_latent"
     )
     assert np.isnan(val), f"expected NaN for an unmeasurable topology, got {val}"
+
+
+def test_clisi_is_higher_is_better_and_signs_are_all_positive():
+    """Every scIB metric in the criterion must be +1, cLISI included.
+
+    WHY: cLISI carried -1 until 2026-08-12 on the intuition that a LISI score over cell
+    labels is lower-is-better. That holds for the RAW score, but scib's clisi_graph is
+    called with its default scale=True and returns (nlabs - clisi) / (nlabs - 1) -- it is
+    already inverted. The -1 therefore made the bio-conservation category REWARD
+    embeddings that destroy cell-type structure, and re-scoring the E1 lambda sweep with
+    the correct sign flips 5 of 12 dataset x head selections.
+
+    This asserts the invariant directly (all signs +1) rather than the downstream score,
+    so it fails loudly if anyone reintroduces a sign correction for a scaled metric.
+    """
+    from wcd_vae.wcd import hyperparameter as hp
+    from wcd_vae.wcd.experiment import METRIC_DIRECTION
+
+    bad = {m: s for m, s in {**hp._SCIB_BATCH, **hp._SCIB_BIO}.items() if s != +1}
+    assert not bad, f"scIB criterion metrics must all be higher-is-better, got {bad}"
+    assert METRIC_DIRECTION["clisi"] == +1, "clisi is scaled by scib; higher is better"
+
+    # paga_spearman is this project's own metric, not scIB -- it must not silently
+    # redefine the published bio category.
+    assert "paga_spearman" not in hp._SCIB_BIO
+    assert "paga_spearman" not in hp._SCIB_BATCH
+
+
+def test_scib_categories_match_the_published_metric_set():
+    """The criterion's categories must be the scIB ones, not a house blend.
+
+    WHY: a score labelled "scIB" that quietly swaps in a custom metric is not comparable
+    to published scIB numbers, which is the entire reason for using it in a resubmission.
+    hvg_score (gene-space, undefined for an embedding) and trajectory (not computed here)
+    are legitimately absent; the scorer skips absent metrics rather than imputing them.
+    """
+    from wcd_vae.wcd import hyperparameter as hp
+
+    assert set(hp._SCIB_BATCH) == {"pcr", "asw_batch", "ilisi", "graph_conn", "kbet"}
+    assert set(hp._SCIB_BIO) <= {
+        "nmi", "ari", "asw_celltype", "isolated_f1", "isolated_asw",
+        "clisi", "hvg_score", "cell_cycle", "trajectory",
+    }, "bio category contains a non-scIB metric"

@@ -225,12 +225,36 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_la
     return asw_batch, asw_celltype, ari, graph_conn, paga_spearman
 
 
-# scIB categories (Luecken et al. 2022). kBET is omitted -- it requires rpy2 + the R kBET
-# package, which is not installed, and returns all-NaN here.
-_SCIB_BATCH = {"ilisi": +1, "asw_batch": +1, "graph_conn": +1, "pcr": +1}
-_SCIB_BIO = {"clisi": -1, "ari": +1, "nmi": +1, "asw_celltype": +1,
-             "isolated_asw": +1, "isolated_f1": +1, "cell_cycle": +1,
-             "paga_spearman": +1}
+# scIB categories exactly as published (Luecken et al. 2022, Nat Methods, Fig. 1 /
+# Supplementary Note 3). Batch correction = PCR, ASW batch, iLISI, graph connectivity,
+# kBET. Bio conservation = NMI, ARI, ASW celltype, isolated-label F1, isolated-label ASW,
+# cLISI, HVG conservation, cell-cycle conservation, trajectory conservation.
+#
+# ALL ENTRIES ARE +1 BY CONSTRUCTION. scib returns every one of these already oriented
+# higher-is-better, so no sign correction belongs here.
+#
+# THE cLISI SIGN WAS A BUG (fixed 2026-08-12). This table previously carried
+# ``"clisi": -1`` on the intuition that cLISI is a "lower is better" LISI quantity. That
+# is true of the RAW LISI score, but scib's clisi_graph is called with its default
+# scale=True and returns ``(nlabs - clisi) / (nlabs - 1)`` -- already inverted. Measured
+# on separated vs mixed cell types: cLISI = 1.0000 (good bio) vs 0.2085 (bad bio), so
+# higher IS better. The -1 therefore rewarded embeddings that DESTROY cell-type structure
+# within the bio-conservation category. Re-scoring the E1 lambda sweep flips 5 of the 12
+# dataset x head selections.
+#
+# WHY hvg_score AND trajectory ARE ABSENT: hvg_score is a gene-space metric and is
+# undefined for a latent-embedding output (scIB itself skips it for embedding methods);
+# trajectory conservation is not computed by this project. Both are simply not in the
+# dict -- the scorer skips absent/all-NaN metrics rather than imputing them, so the
+# category mean is over whatever is genuinely available.
+#
+# WHY paga_spearman IS NOT HERE: it is this project's own topology metric, not a scIB
+# metric. Including it silently redefined the published bio category (9 members -> a
+# custom 8) and shifted 2 of 12 selections. It remains reported as its own column and is
+# used for the topology analysis; it must not enter a score labelled "scIB".
+_SCIB_BATCH = {"ilisi": +1, "asw_batch": +1, "graph_conn": +1, "pcr": +1, "kbet": +1}
+_SCIB_BIO = {"clisi": +1, "ari": +1, "nmi": +1, "asw_celltype": +1,
+             "isolated_asw": +1, "isolated_f1": +1, "cell_cycle": +1}
 
 
 def _scib_overall(suite_rows, w_batch=0.4):
