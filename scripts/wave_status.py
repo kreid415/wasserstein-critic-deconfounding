@@ -7,6 +7,7 @@ full_metric_suite, so a config inside its metric window has an .npz but no row y
 bounded by the lane count. Equality is not the invariant; zero missing is.
 """
 import glob
+import json
 import os
 import sys
 
@@ -14,6 +15,8 @@ import pandas as pd
 
 WS = os.path.abspath("..")
 EMB = os.environ.get("WCD_EMBED_OUT", os.path.join(WS, "embeddings"))
+with open("configs/dataset_registry.json") as _fh:
+    _REG = json.load(_fh)
 
 
 def tag(r):
@@ -25,8 +28,15 @@ def tag(r):
     lr = r.get("lr_g", 1e-3)
     if pd.notna(lr) and abs(float(lr) - 1e-3) > 1e-12:
         opt += f"_lr{str(float(lr)).replace('.', 'p').replace('-', 'm')}"
-    bc, nb = r.get("batch_count"), r.get("n_batches")
-    if pd.notna(bc) and pd.notna(nb) and int(bc) != int(nb):
+    # WHY THE REGISTRY, NOT THE ROW: result rows carry `batch_count` (the level actually
+    # trained) but NOT `n_batches` (the dataset's full count), so comparing the two row
+    # fields silently yields no suffix -- and the check then looks for the PLAIN filename,
+    # which exists because E1/E2 wrote it, so a genuinely missing E8 latent passes
+    # unnoticed. The full count has to come from the registry, exactly as
+    # run_experiment.py passes it to evaluate_config as full_n_batches.
+    bc = r.get("batch_count")
+    full = _REG.get(r.get("dataset"), {}).get("n_batches")
+    if pd.notna(bc) and full is not None and int(bc) != int(full):
         opt += f"_bc{int(bc)}"
     return (f"{r['method']}_{r['backbone']}_lam{str(r['d_coef']).replace('.', 'p')}"
             f"_s{int(r['seed'])}_{r.get('reference_mode', 'fixed')}"
