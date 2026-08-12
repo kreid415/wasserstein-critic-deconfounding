@@ -601,25 +601,52 @@ def test_paga_survives_a_fully_disconnected_cluster_graph():
     assert np.isnan(val), f"expected NaN for an unmeasurable topology, got {val}"
 
 
-def test_clisi_is_higher_is_better_and_signs_are_all_positive():
-    """Every scIB metric in the criterion must be +1, cLISI included.
+def test_clisi_sign_matches_the_clisi_implementation_actually_imported():
+    """The cLISI sign must match the FUNCTION THIS CODE CALLS, not scib's docs.
 
-    WHY: cLISI carried -1 until 2026-08-12 on the intuition that a LISI score over cell
-    labels is lower-is-better. That holds for the RAW score, but scib's clisi_graph is
-    called with its default scale=True and returns (nlabs - clisi) / (nlabs - 1) -- it is
-    already inverted. The -1 therefore made the bio-conservation category REWARD
-    embeddings that destroy cell-type structure, and re-scoring the E1 lambda sweep with
-    the correct sign flips 5 of 12 dataset x head selections.
+    WHY THIS TEST EXISTS: there are two cLISI implementations with OPPOSITE orientation.
+    scib.metrics.clisi_graph(scale=True) returns (nlabs - clisi)/(nlabs - 1), so 1.0 =
+    cell types separated and higher is better. wcd_vae.wcd.evaluation.clisi_graph -- the
+    one experiment.py imports, and therefore the one behind every ``clisi`` column in
+    every results CSV -- normalises (lisi - 1)/(n_celltypes - 1), the iLISI direction, so
+    1.0 = cell types fully MIXED and LOWER is better.
 
-    This asserts the invariant directly (all signs +1) rather than the downstream score,
-    so it fails loudly if anyone reintroduces a sign correction for a scaled metric.
+    On 2026-08-12 the sign was "corrected" from -1 to +1 after reading scib's source,
+    which would have inverted the bio-conservation category for all existing results. It
+    was caught by measuring the local function instead of trusting the package. This test
+    measures rather than asserts a constant, so it fails if the import is ever switched to
+    scib's implementation without flipping the sign in the same commit.
     """
-    from wcd_vae.wcd import hyperparameter as hp
-    from wcd_vae.wcd.experiment import METRIC_DIRECTION
+    import numpy as np
+    import pandas as pd
+    import anndata as ad_mod
 
-    bad = {m: s for m, s in {**hp._SCIB_BATCH, **hp._SCIB_BIO}.items() if s != +1}
-    assert not bad, f"scIB criterion metrics must all be higher-is-better, got {bad}"
-    assert METRIC_DIRECTION["clisi"] == +1, "clisi is scaled by scib; higher is better"
+    from wcd_vae.wcd.evaluation import clisi_graph
+    from wcd_vae.wcd.experiment import METRIC_DIRECTION
+    from wcd_vae.wcd import hyperparameter as hp
+
+    rng = np.random.default_rng(0)
+    n_per, n_ct = 120, 4
+    ct = np.repeat([f"t{i}" for i in range(n_ct)], n_per)
+    obs = pd.DataFrame({"celltype": pd.Categorical(ct)})
+
+    separated = np.zeros((len(ct), 8), dtype="float32")
+    for i in range(n_ct):
+        separated[ct == f"t{i}", i] = 8.0
+    separated += rng.normal(size=separated.shape).astype("float32") * 0.3
+    mixed = rng.normal(size=(len(ct), 8)).astype("float32")
+
+    vals = {}
+    for name, X in (("separated", separated), ("mixed", mixed)):
+        a = ad_mod.AnnData(X=X.copy(), obs=obs.copy())
+        a.obsm["X_e"] = X
+        vals[name] = float(clisi_graph(a, label_key="celltype", type="embed", use_rep="X_e"))
+
+    assert vals["separated"] < vals["mixed"], (
+        f"local clisi_graph is expected LOWER for good bio; got {vals}"
+    )
+    assert METRIC_DIRECTION["clisi"] == -1
+    assert hp._SCIB_BIO["clisi"] == -1
 
     # paga_spearman is this project's own metric, not scIB -- it must not silently
     # redefine the published bio category.

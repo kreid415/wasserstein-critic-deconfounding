@@ -230,17 +230,21 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_la
 # kBET. Bio conservation = NMI, ARI, ASW celltype, isolated-label F1, isolated-label ASW,
 # cLISI, HVG conservation, cell-cycle conservation, trajectory conservation.
 #
-# ALL ENTRIES ARE +1 BY CONSTRUCTION. scib returns every one of these already oriented
-# higher-is-better, so no sign correction belongs here.
-#
-# THE cLISI SIGN WAS A BUG (fixed 2026-08-12). This table previously carried
-# ``"clisi": -1`` on the intuition that cLISI is a "lower is better" LISI quantity. That
-# is true of the RAW LISI score, but scib's clisi_graph is called with its default
-# scale=True and returns ``(nlabs - clisi) / (nlabs - 1)`` -- already inverted. Measured
-# on separated vs mixed cell types: cLISI = 1.0000 (good bio) vs 0.2085 (bad bio), so
-# higher IS better. The -1 therefore rewarded embeddings that DESTROY cell-type structure
-# within the bio-conservation category. Re-scoring the E1 lambda sweep flips 5 of the 12
-# dataset x head selections.
+# cLISI IS -1 HERE AND THAT IS CORRECT -- do not "fix" it to +1 without reading this.
+# There are TWO cLISI implementations in play and they are oriented OPPOSITELY:
+#   * scib.metrics.clisi_graph (scale=True) returns (nlabs - clisi)/(nlabs - 1)
+#     -> 1.0 = cell types SEPARATED. Higher is better.
+#   * wcd_vae.wcd.evaluation.clisi_graph -- WHAT THIS PROJECT ACTUALLY CALLS, via
+#     experiment.py's ``from wcd_vae.wcd.evaluation import clisi_graph`` -- normalises
+#     (lisi - 1)/(n_celltypes - 1), i.e. the iLISI direction
+#     -> 1.0 = cell types fully MIXED. LOWER is better.
+# Measured side by side on identical data (separated vs mixed cell types):
+#     local clisi  -0.0000 (good) / 0.7909 (bad)
+#     scib  clisi   1.0000 (good) / 0.2085 (bad)
+# So the ``clisi`` column in every results CSV is the LOCAL convention and needs the -1.
+# A 2026-08-12 change to +1 was made from the scib source and was WRONG; it was caught by
+# measuring the function this code actually imports. If the local implementation is ever
+# replaced by scib's, this sign must flip to +1 in the same commit.
 #
 # WHY hvg_score AND trajectory ARE ABSENT: hvg_score is a gene-space metric and is
 # undefined for a latent-embedding output (scIB itself skips it for embedding methods);
@@ -253,7 +257,7 @@ def calculate_additional_metrics(adata, batch_key, celltype_key, embed_key="X_la
 # custom 8) and shifted 2 of 12 selections. It remains reported as its own column and is
 # used for the topology analysis; it must not enter a score labelled "scIB".
 _SCIB_BATCH = {"ilisi": +1, "asw_batch": +1, "graph_conn": +1, "pcr": +1, "kbet": +1}
-_SCIB_BIO = {"clisi": +1, "ari": +1, "nmi": +1, "asw_celltype": +1,
+_SCIB_BIO = {"clisi": -1, "ari": +1, "nmi": +1, "asw_celltype": +1,
              "isolated_asw": +1, "isolated_f1": +1, "cell_cycle": +1}
 
 

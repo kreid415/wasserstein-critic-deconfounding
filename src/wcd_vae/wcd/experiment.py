@@ -433,14 +433,14 @@ def full_metric_suite(
 
 
 # Higher-is-better (+1) or lower-is-better (-1) for building composite / Pareto scores.
-# EVERY scib metric here is +1: scib returns them already oriented higher-is-better.
-# cLISI was WRONGLY -1 until 2026-08-12. The raw LISI score is indeed lower-is-better for
-# labels, but clisi_graph is called with its default scale=True and returns
-# ``(nlabs - clisi) / (nlabs - 1)``, which is already inverted -- measured 1.0000 on
-# separated cell types vs 0.2085 on mixed ones. Any composite using -1 was rewarding loss
-# of cell-type structure.
+# clisi is -1 because THIS MODULE imports the LOCAL clisi_graph (see the import above,
+# ``from wcd_vae.wcd.evaluation import clisi_graph``), which normalises
+# (lisi - 1)/(n_celltypes - 1) so 1.0 = cell types fully MIXED -> lower is better.
+# scib's own clisi_graph is scaled the OTHER way (1.0 = separated, higher is better); if
+# the import is ever switched to scib's, flip this to +1 in the same commit. Measured
+# side by side: local -0.0000 (separated) / 0.7909 (mixed); scib 1.0000 / 0.2085.
 METRIC_DIRECTION = {
-    "ilisi": +1, "clisi": +1, "graph_conn": +1, "kbet": +1,
+    "ilisi": +1, "clisi": -1, "graph_conn": +1, "kbet": +1,
     "asw_batch": +1, "asw_celltype": +1, "ari": +1, "nmi": +1,
     "pcr": +1, "isolated_asw": +1, "isolated_f1": +1, "cell_cycle": +1,
 }
