@@ -19,7 +19,23 @@ cd "$(dirname "$0")/.."
 export KMP_AFFINITY=disabled OMP_NUM_THREADS=1 NUMBA_NUM_THREADS=1 \
        MKL_THREADING_LAYER=SEQUENTIAL PYTHONWARNINGS=ignore
 export PYTHONPATH=$(pwd)/src
-PY=${WCD_PYTHON:-/home/kendall/.claude-science/conda/envs/wcd-gpu/bin/python}
+# DEFAULT ENVIRONMENT IS wcd-kbet, NOT wcd-gpu. kBET is a scIB BATCH-CORRECTION metric
+# that wraps the R kBET package through rpy2; wcd-gpu has neither, so a wave run there
+# silently records kbet=NaN for every row -- which is exactly how the kbet column ended up
+# empty across all 918 rows of the previous wave. wcd-kbet is a fork of wcd-gpu with
+# r-base + rpy2 + anndata2ri==1.3.2 + the R kBET package, and it was verified to reproduce
+# wcd-gpu BIT-IDENTICALLY on all 11 other metrics for the same config, so results from the
+# two environments are directly comparable.
+#
+# rpy2 needs R_HOME or it dies at import with "openrlib.R_HOME cannot be None", and the
+# R kBET package lives in a workspace library because conda's R library is read-only to
+# this sandbox. Both are derived from the interpreter path so overriding WCD_PYTHON alone
+# keeps them consistent; override WCD_R_HOME / WCD_R_LIBS only for a non-standard layout.
+WCD_ENV_DEFAULT=/home/kendall/.claude-science/conda/envs/wcd-kbet
+PY=${WCD_PYTHON:-$WCD_ENV_DEFAULT/bin/python}
+PY_PREFIX=$(cd "$(dirname "$PY")/.." && pwd)
+export R_HOME=${WCD_R_HOME:-$PY_PREFIX/lib/R}
+export R_LIBS=${WCD_R_LIBS:-$(pwd)/../Rlib_kbet}
 R=${WCD_DATA:-$(pwd)/../data}
 # EMBEDDINGS ARE ON BY DEFAULT. Metrics-only CSVs cannot be re-analysed: adding any new
 # embedding-derived metric (kBET, PAGA, probes) to a finished wave otherwise costs a full
@@ -27,6 +43,31 @@ R=${WCD_DATA:-$(pwd)/../data}
 EMB=${WCD_EMBED_OUT:-$(pwd)/../embeddings}
 export PY R EMB
 mkdir -p results/wave logs/wave "$EMB"
+
+# PREFLIGHT: fail BEFORE burning days of GPU time if the metric stack is not importable.
+# WHY a hard gate rather than a warning: the failure this guards against is silent by
+# construction -- full_metric_suite catches kBET's ImportError and records NaN, so the
+# wave completes, every CSV looks well-formed, and the gap only surfaces when someone
+# asks for the batch-correction axis. Skip only for a deliberate no-kBET run.
+if [ -z "${WCD_SKIP_PREFLIGHT:-}" ]; then
+  if ! "$PY" - <<'PYEOF'
+import sys
+try:
+    import anndata2ri, rpy2  # noqa: F401
+    from rpy2.robjects.packages import importr
+    importr("kBET")
+except Exception as exc:
+    print(f"PREFLIGHT FAIL: kBET stack unavailable -- {type(exc).__name__}: {exc}", file=sys.stderr)
+    sys.exit(1)
+print("preflight: kBET stack OK")
+PYEOF
+  then
+    echo "" >&2
+    echo "The wave would record kbet=NaN for every config. Either fix the environment or" >&2
+    echo "re-run with WCD_SKIP_PREFLIGHT=1 to proceed deliberately without kBET." >&2
+    exit 1
+  fi
+fi
 
 MANIFEST=${1:-scripts/wave_manifest.tsv}
 WORKERS=${WCD_WORKERS:-6}
@@ -53,7 +94,7 @@ WORKERS=${WCD_WORKERS:-6}
 # launcher can be dry-run against a stub. The stub must NOT also be what validates
 # results -- during a stub run every check would trivially pass and the launcher's
 # failure handling would be untested. WCD_CHECK_PYTHON stays a real interpreter.
-CHECK_PY=${WCD_CHECK_PYTHON:-/home/kendall/.claude-science/conda/envs/wcd-gpu/bin/python}
+CHECK_PY=${WCD_CHECK_PYTHON:-$WCD_ENV_DEFAULT/bin/python}
 export CHECK_PY
 
 shard_ok() {
