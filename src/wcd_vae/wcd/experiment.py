@@ -537,6 +537,25 @@ def evaluate_config(
         "batch_size": batch_size,
         "lr_g": lr_g,
         "lr_d": lr_d,
+        # WHY these are recorded: a results CSV has to be self-describing. Six training
+        # parameters used to be settable here but absent from the row, so a reader could
+        # not reconstruct the protocol from the results file and had to read code at the
+        # right commit. disc_iter is the important one -- it defaults to 10 for the critic
+        # and 1 for the discriminator, a 10x asymmetry in adversary updates BETWEEN THE
+        # TWO ARMS BEING COMPARED. It is deliberate (standard WGAN practice), but an
+        # undisclosed 10x difference in a controlled ablation is exactly what a reviewer
+        # should be able to see without reading source.
+        # kl_coef is deliberately NOT here: evaluate_config does not expose it, so it is
+        # always train_integration_model's default (0.005). Recording a value this
+        # function cannot vary would imply a knob that does not exist.
+        # evaluate_config does not pass disc_iter, so train_one applies its head default.
+        # Mirror that SAME expression here rather than hardcoding a number, so the two
+        # cannot drift apart silently.
+        "disc_iter": 10 if critic else 1,
+        "z_dim": z_dim,
+        "warmup_epoch": warmup_epoch,
+        "epochs_budget": epochs,
+        "early_stopping": bool(early_stopping),
         "reference_batch": reference_batch,
         "reference_mode": reference_mode,
         "formulation": formulation,

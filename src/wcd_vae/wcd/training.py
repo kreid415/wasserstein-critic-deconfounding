@@ -492,7 +492,10 @@ def train_integration_model(
     kl_coef=0.005,
     warmup_epoch=5,
     critic=False,
-    scale=None,
+    # `scale` was accepted here and never read by anything -- removed 2026-08-12. It was
+    # dead in the exact way this codebase has been bitten by before: a training parameter
+    # that is accepted, silently ignored, and would have made any caller passing it
+    # believe it had an effect.
     flex_epochs=False,
     batch_size=1024,
     backbone=None,

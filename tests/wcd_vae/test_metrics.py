@@ -669,3 +669,77 @@ def test_scib_categories_match_the_published_metric_set():
         "nmi", "ari", "asw_celltype", "isolated_f1", "isolated_asw",
         "clisi", "hvg_score", "cell_cycle", "trajectory",
     }, "bio category contains a non-scIB metric"
+
+
+def test_lambda_zero_is_not_a_clean_control_across_heads():
+    """DOCUMENTS A KNOWN LIMITATION: lambda=0 does NOT make the two heads identical.
+
+    At d_coef=0 the generator's adversarial term is multiplied by zero, so the naive
+    expectation is that critic and discriminator produce the SAME model for a given seed.
+    They do not, and this test pins the reason so nobody "fixes" the symptom by reseeding.
+
+    CAUSE: the adversary still trains at lambda=0 -- opt_d.step() is gated on `warmup`,
+    not on d_coef -- and the critic's gradient penalty draws from the GLOBAL torch RNG
+    (torch.rand / torch.randint in multi_class_gradient_penalty). The critic therefore
+    consumes a different amount of randomness per minibatch than the discriminator, which
+    desynchronises every subsequent shuffle. Verified: VAE weights at INITIALISATION are
+    bit-identical across heads (max|delta| = 0), so the divergence is entirely RNG
+    consumed during training.
+
+    MEASURED IMPACT on the completed wave: mean |dARI| at lambda=0 is 0.0153, BELOW the
+    seed-to-seed noise floor of 0.0230, signed mean -0.0032 with wilcoxon p=0.77 -- i.e.
+    noisy but UNBIASED, and the head effect at lambda>0 survives subtracting each
+    dataset's lambda=0 offset (+0.0835 -> +0.0867). So this is a reporting caveat, not a
+    confound. If a clean control is ever required, either skip the adversary update
+    entirely when d_coef == 0 or give the gradient penalty its own torch.Generator.
+    """
+    import torch
+
+    from wcd_vae.wcd.critic import multi_class_gradient_penalty
+    from wcd_vae.wcd.adversarial import Discriminator
+
+    torch.manual_seed(0)
+    V, N, Dm = 3, 60, 8
+    z = torch.randn(N, Dm, requires_grad=True)
+    bid = torch.arange(N) % V
+    head = Discriminator(Dm, V, critic=True, reference_batch=0)
+
+    # The gradient penalty must consume global RNG -- that is the mechanism above.
+    torch.manual_seed(123)
+    before = torch.rand(1).item()
+    torch.manual_seed(123)
+    multi_class_gradient_penalty(head, z, bid, reference_batch=0, formulation="reference")
+    after = torch.rand(1).item()
+    assert before != after, (
+        "gradient penalty no longer consumes global RNG -- if it was given its own "
+        "Generator, lambda=0 may now be a clean control and the docstring above, plus "
+        "the manuscript caveat, should be updated"
+    )
+
+
+def test_disc_iter_differs_by_head_and_must_be_recorded():
+    """The heads get DIFFERENT adversary budgets, so the value has to reach the row.
+
+    WHY: evaluate_config defaults disc_iter to 10 for the critic and 1 for the
+    discriminator -- a 10x asymmetry in adversary updates that is part of the protocol,
+    not an accident (standard WGAN practice). But it was absent from the result row, so
+    no results CSV recorded it and a reader could not tell the arms apart on that axis
+    without reading code at the right commit. Six training parameters were unrecorded;
+    this is the one that DIFFERS BETWEEN THE ARMS BEING COMPARED.
+    """
+    import inspect
+
+    from wcd_vae.wcd import experiment as ex
+
+    src = inspect.getsource(ex.evaluate_config)
+    assert '"disc_iter"' in src, "disc_iter must be written into the result row"
+
+    # The recorded value is a MIRROR of train_one's default expression, so pin the two
+    # together: if train_one's default ever changes, this fails rather than silently
+    # recording a number the run did not use.
+    train_src = inspect.getsource(ex.train_one)
+    assert "10 if critic else 1" in train_src, (
+        "train_one's disc_iter default changed; update the mirrored expression in "
+        "evaluate_config's result row to match"
+    )
+    assert "10 if critic else 1" in src
