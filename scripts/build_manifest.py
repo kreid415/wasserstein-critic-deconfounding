@@ -35,6 +35,7 @@ SUITE = {"atac_small": 35.7, "sim1": 39.2, "pancreas": 57.8, "sim2": 71.1,
 KBET = {"atac_small": 47.0, "sim1": 53.7, "pancreas": 74.9, "sim2": 85.5,
         "lung": 137.8, "immune": 140.2, "atac_large": 355.0, "immune_hum_mou": 410.0}
 STARTUP = 81.0          # process startup, paid once per shard
+EPOCHS = 500            # CEILING; early stopping decides. Never 150 -- see build()
 LIGHT = ["pancreas", "immune", "lung", "sim1", "sim2", "atac_small"]
 HEAVY = ["atac_large", "immune_hum_mou"]
 
@@ -69,8 +70,14 @@ def build(reg, datasets, embed_root):
     for ds in datasets:
         d_s, c_s, o_s = costs(reg, ds)
         nb = reg[ds]["n_batches"]
+        # WHY --epochs 500 ON EVERY SHARD: 500 is a CEILING, not a target -- early
+        #   stopping decides when to stop. Every harness DEFAULTS to 150, and at 150 the
+        #   critic head never early-stopped on pancreas, lung or sim2: it was truncated
+        #   mid-improvement. Measured on the run this fixed: 41% of rows hit the 150
+        #   ceiling with a median es_best_epoch of 140, i.e. still improving. The default
+        #   is silent, so the flag must be explicit here.
         common = (f'--registry configs/dataset_registry.json --dataset {ds} '
-                  f'--data-root "$R" --embed-out "$EMB"')
+                  f'--data-root "$R" --embed-out "$EMB" --epochs {EPOCHS}')
 
         # ---- E1: lambda sweep, 10 lambdas x 3 seeds x 2 heads ----
         for head, tsec in (("disc", d_s), ("critic", c_s)):
@@ -147,13 +154,18 @@ def build(reg, datasets, embed_root):
         # ---- E5: biological readouts (both heads inside one process) ----
         add(f"{ds}_E5",
             f'$PY scripts/run_biology.py --registry configs/dataset_registry.json '
-            f'--dataset {ds} --data-root "$R" --embed-out "$EMB" '
+            f'--dataset {ds} --data-root "$R" --embed-out "$EMB" --epochs {EPOCHS} '
             f'--outdir results/wave/E5_{ds}',
             (d_s + c_s + 2 * o_s))
 
-        # ---- E3: external baselines. No adversary, so cheap; still persists latents. ----
+        # ---- E3: external baselines. No adversary, so cheap; still persists latents.
+        #      NOTE: run_baselines.py has NO --epochs flag (scVI/scANVI own their own
+        #      training schedules and harmony/scanorama/combat do not train at all), so it
+        #      cannot reuse `common` -- passing --epochs there is an argparse error that
+        #      kills the shard instantly. ----
         add(f"{ds}_E3",
-            f'$PY scripts/run_baselines.py {common} '
+            f'$PY scripts/run_baselines.py --registry configs/dataset_registry.json '
+            f'--dataset {ds} --data-root "$R" --embed-out "$EMB" '
             f'--out results/wave/{ds}_E3.csv',
             5 * o_s)
 
@@ -221,6 +233,14 @@ def main():
     for s in shards:
         if any(k in s["tag"] for k in ("_E1_", "_E2_", "_E8_", "_E10_", "_E4_", "_E9_")):
             assert "--resume" in s["cmd"], f"{s['tag']} is not resumable"
+    # Every shard that TRAINS must set the epoch ceiling explicitly. E3 runs external
+    # baselines (no adversary, no epoch budget) and E6 trains nothing.
+    for s in shards:
+        if s["tag"].endswith("_E3") or "support_overlap" in s["cmd"]:
+            continue
+        assert f"--epochs {EPOCHS}" in s["cmd"], (
+            f"{s['tag']} does not set --epochs {EPOCHS}; the harness default is 150, "
+            f"which truncates the critic head mid-improvement")
 
     with open(args.out, "w") as fh:
         fh.write("phase\tworker\ttag\test_hours\tcmd\n")

@@ -900,3 +900,50 @@ def test_embed_tag_encodes_fixed_reference_batch():
     # the distinguishing property: no two fixed_refN arms collide
     tags = {f"critic_NB_lam0p2_s0_fixed_reference{suffix('fixed', b)}" for b in range(9)}
     assert len(tags) == 9, "all nine fixed_refN designs must map to distinct filenames"
+
+
+def test_every_training_shard_sets_the_epoch_ceiling(tmp_path):
+    """500 is a CEILING that early stopping decides against; 150 truncates the critic.
+
+    WHY: every harness DEFAULTS to --epochs 150, and at 150 the critic head never
+    early-stopped on pancreas, lung or sim2 -- it was cut off mid-improvement. The user
+    directed 500 precisely so early stopping ends runs instead of the budget. Measured on
+    the run this test was written for: 41% of rows hit the 150 ceiling with a median
+    es_best_epoch of 140, i.e. still improving at truncation.
+
+    The regression that made this necessary: the hand-made manifest passed --epochs 500 on
+    all 90 shards, and the build_manifest.py rewrite dropped the flag entirely, silently
+    reverting the whole programme to 150.
+    """
+    rows = _build_manifest(tmp_path)
+    for r in rows:
+        if r["tag"].endswith("_E3") or "support_overlap" in r["cmd"]:
+            continue  # E3's baselines own their schedules; E6 trains nothing
+        assert "--epochs 500" in r["cmd"], f"{r['tag']} does not set the 500-epoch ceiling"
+
+
+def test_every_manifest_flag_is_accepted_by_its_harness(tmp_path):
+    """A flag the target script does not define kills the shard instantly at argparse.
+
+    WHY: run_baselines.py has no --epochs (scVI/scANVI own their training schedules and
+    harmony/scanorama/combat do not train), so adding the epoch ceiling to the shared flag
+    string made all six E3 shards fail on 'unrecognized arguments' -- caught here rather
+    than at launch.
+    """
+    import shlex
+    import subprocess
+    import sys
+
+    checked = set()
+    for r in _build_manifest(tmp_path):
+        args = shlex.split(r["cmd"].replace("$PY", "").replace('"$R"', "/tmp")
+                           .replace('"$EMB"', "/tmp/emb"))
+        script = args[0]
+        flags = tuple(a for a in args if a.startswith("--"))
+        if (script, flags) in checked:
+            continue
+        checked.add((script, flags))
+        help_text = subprocess.run([sys.executable, script, "--help"],
+                                   capture_output=True, text=True).stdout
+        for a in flags:
+            assert a in help_text, f"{script} does not accept {a} (shard {r['tag']})"
