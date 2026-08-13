@@ -72,6 +72,14 @@ fi
 MANIFEST=${1:-scripts/wave_manifest.tsv}
 WORKERS=${WCD_WORKERS:-6}
 
+# EXPORT IT: _vram_safe_chunk in evaluation.py divides its GPU chunk budget by
+# WCD_WORKERS, because the metric suite's kNN claims 33% of FREE VRAM and six lanes each
+# claiming a third oversubscribes an 8 GiB card (measured: 1870 MiB per config once the
+# suite runs, and the wave lost 31 rows to this). Without the export the shards do not
+# inherit it and the divisor silently falls back to 1 -- i.e. the unsafe behaviour, with no
+# error. Verified by reading /proc/<shard>/environ: unexported, it is absent there.
+export WCD_WORKERS="$WORKERS"
+
 # TAB-delimited, not CSV: the command field is free text and a flag with a
 # comma-separated value (--override a,b) would split mid-command under IFS=','.
 #
