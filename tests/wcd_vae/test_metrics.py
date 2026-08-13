@@ -1033,3 +1033,51 @@ def test_embed_tag_separates_positional_from_named_reference():
     assert suffix(0, "inDrop1") != suffix(0, None)
     # and every positional index maps to its own filename
     assert len({suffix(b, None) for b in range(9)}) == 9
+
+
+def test_large_dataset_shards_are_confined_to_a_lane_subset(tmp_path):
+    """At most LARGE_LANE_CAP large-VRAM shards may ever be co-resident.
+
+    WHY: the 8 GiB card cannot hold six concurrent large-dataset shards. Measured in
+    isolation, peak torch allocation tracks CELL COUNT and not head -- 795 MiB for immune
+    (33.5k cells), 731 for lung, 532 for pancreas, critic and discriminator within 1 MiB of
+    each other -- but nvidia-smi charges the same immune config 1018 MiB once the CUDA
+    context and the caching allocator's reserved blocks count. At the observed failure five
+    immune lanes plus one lung lane held 7058 MiB of 8192 and allocations of just 16-256 MiB
+    were failing, ~1 GB above what any per-process model predicts, because allocator
+    fragmentation across six long-lived processes is not static. The metric suite is
+    CPU-only, so it is not the source.
+
+    Counting large shards per lane cannot bound co-residency -- lanes pull their next shard
+    whenever they finish, so the instantaneous count is a runtime property. Confining large
+    shards to the first LARGE_LANE_CAP lanes makes the bound structural.
+
+    E3 counts as large despite not training our model: its default method list includes
+    scvi and scanvi, which fit torch models on the GPU. E8 does NOT, because it trains a
+    batch_count subset whose footprint is proportionally smaller.
+    """
+    import json
+    import sys
+
+    sys.path.insert(0, "scripts")
+    import build_manifest
+
+    rows = _build_manifest(tmp_path)
+    with open("configs/dataset_registry.json") as fh:
+        reg = json.load(fh)
+
+    lanes_with_large = set()
+    for r in rows:
+        if r["phase"] != "parallel":
+            continue
+        ds = r["tag"].split("_")[0]
+        if ds not in reg or reg[ds]["n_obs"] < build_manifest.BIG_DATASET_CELLS:
+            continue
+        if "_E8_" in r["tag"]:      # subset training, proportionally smaller
+            continue
+        lanes_with_large.add(int(r["worker"]))
+
+    assert lanes_with_large, "no large shards found -- the test is not exercising anything"
+    assert len(lanes_with_large) <= build_manifest.LARGE_LANE_CAP, (
+        f"large shards spread across lanes {sorted(lanes_with_large)}, "
+        f"exceeding LARGE_LANE_CAP={build_manifest.LARGE_LANE_CAP}")

@@ -36,6 +36,24 @@ KBET = {"atac_small": 47.0, "sim1": 53.7, "pancreas": 74.9, "sim2": 85.5,
         "lung": 137.8, "immune": 140.2, "atac_large": 355.0, "immune_hum_mou": 410.0}
 STARTUP = 81.0          # process startup, paid once per shard
 EPOCHS = 500            # CEILING; early stopping decides. Never 150 -- see build()
+
+# VRAM-AWARE PACKING. The 8 GiB card cannot hold six concurrent LARGE-dataset shards.
+#   MEASURED, isolated, one config at a time: peak torch allocation is 795 MiB for immune
+#   (33.5k cells), 731 for lung (32.5k), 532 for pancreas (16.4k) -- it tracks CELL COUNT,
+#   not head (critic and discriminator are within 1 MiB of each other). But
+#   max_memory_allocated UNDERSTATES what fills the card: nvidia-smi charges the same
+#   immune config 1018 MiB once the CUDA context and the caching allocator's reserved
+#   blocks are counted.
+#   Even that understates the multi-process reality. At the observed failure five immune
+#   lanes plus one lung lane held 7058 MiB of 8192 and allocations of just 16-256 MiB were
+#   failing -- roughly 1 GB above what a per-process model predicts, because allocator
+#   fragmentation across six long-lived processes is not a static quantity. The metric
+#   suite is CPU-only, so it is not the source.
+#   Rather than trust a model that mispredicts the one failure on record, cap concurrency
+#   on the measured fact: six large lanes OOM, so allow at most LARGE_LANE_CAP of them.
+#   4 lanes at the observed per-lane share is ~4.7 GiB, leaving ~1.1 GiB of headroom.
+BIG_DATASET_CELLS = 25000   # immune (33.5k) and lung (32.5k) qualify; pancreas (16.4k) does not
+LARGE_LANE_CAP = 4          # max simultaneous large-dataset shards across all lanes
 LIGHT = ["pancreas", "immune", "lung", "sim1", "sim2", "atac_small"]
 HEAVY = ["atac_large", "immune_hum_mou"]
 
@@ -63,13 +81,18 @@ def build(reg, datasets, embed_root):
     """Return a list of shard dicts. Each shard is ONE process looping its own grid."""
     shards = []
 
-    def add(tag, cmd, seconds, serial=False):
+    def add(tag, cmd, seconds, serial=False, big=False):
         shards.append({"tag": tag, "cmd": cmd, "seconds": seconds + STARTUP,
-                       "phase": "serial" if serial else "parallel"})
+                       "phase": "serial" if serial else "parallel", "big": big})
 
     for ds in datasets:
         d_s, c_s, o_s = costs(reg, ds)
         nb = reg[ds]["n_batches"]
+        # A shard is "big" when its dataset alone pushes per-process VRAM high enough that
+        # six concurrent copies exhaust the card -- see BIG_DATASET_CELLS. E8 shards are
+        # exempt: they train a batch_count SUBSET, so their footprint is proportionally
+        # smaller than the full dataset's.
+        big_ds = reg[ds]["n_obs"] >= BIG_DATASET_CELLS
         # WHY --epochs 500 ON EVERY SHARD: 500 is a CEILING, not a target -- early
         #   stopping decides when to stop. Every harness DEFAULTS to 150, and at 150 the
         #   critic head never early-stopped on pancreas, lung or sim2: it was truncated
@@ -87,7 +110,7 @@ def build(reg, datasets, embed_root):
                     f'$PY scripts/run_experiment.py --experiment E1 {common} '
                     f'--head {h} --seed-only {seed} --resume '
                     f'--out results/wave/{ds}_E1_{head}_s{seed}.csv',
-                    10 * (tsec + o_s))
+                    10 * (tsec + o_s), big=big_ds)
 
         # ---- E2: 8 backbones x 3 seeds x 2 heads, at the operating point ----
         for head, tsec in (("disc", d_s), ("critic", c_s)):
@@ -97,7 +120,7 @@ def build(reg, datasets, embed_root):
                     f'$PY scripts/run_experiment.py --experiment E2 {common} '
                     f'--head {h} --seed-only {seed} --resume '
                     f'--out results/wave/{ds}_E2_{head}_s{seed}.csv',
-                    8 * (tsec + o_s))
+                    8 * (tsec + o_s), big=big_ds)
 
         # ---- E8: multi-batch scaling. EXCLUDED for 2-batch datasets by construction:
         #      the experiment sweeps batch_count from 2..n_batches, which is a single
@@ -128,12 +151,12 @@ def build(reg, datasets, embed_root):
                 f'$PY scripts/run_experiment.py --experiment E10 {common} '
                 f'--head {h} --batch-size-only 1024 --resume '
                 f'--out results/wave/{ds}_E10_{head}_bs1024.csv',
-                3 * (tsec + o_s))
+                3 * (tsec + o_s), big=big_ds)
             add(f"{ds}_E10_{head}_bs4096",
                 f'$PY scripts/run_experiment.py --experiment E10 {common} '
                 f'--head {h} --batch-size-only 4096 --resume '
                 f'--out results/wave/{ds}_E10_{head}_bs4096.csv',
-                9 * (tsec + o_s), serial=True)
+                9 * (tsec + o_s), serial=True, big=big_ds)
 
         # ---- E4: reference-design sweep (critic only; designs are dataset-specific) ----
         designs = [f"fixed_ref{i}" for i in range(nb)] + ["rotating", "joint", "discriminator"]
@@ -141,7 +164,7 @@ def build(reg, datasets, embed_root):
             add(f"{ds}_E4_{dsg}",
                 f'$PY scripts/run_reference.py {common} --ref-design-only {dsg} --resume '
                 f'--out results/wave/{ds}_E4_{dsg}.csv',
-                3 * (c_s + o_s))
+                3 * (c_s + o_s), big=big_ds)
 
         # ---- E9: critic formulation comparison, 4 arms x 3 seeds ----
         for arm in ("reference", "pooled", "barycenter", "discriminator"):
@@ -149,25 +172,29 @@ def build(reg, datasets, embed_root):
             add(f"{ds}_E9_{arm}",
                 f'$PY scripts/run_formulations.py {common} --arms {arm} --resume '
                 f'--out results/wave/{ds}_E9_{arm}.csv',
-                3 * (tsec + o_s))
+                3 * (tsec + o_s), big=big_ds)
 
         # ---- E5: biological readouts (both heads inside one process) ----
         add(f"{ds}_E5",
             f'$PY scripts/run_biology.py --registry configs/dataset_registry.json '
             f'--dataset {ds} --data-root "$R" --embed-out "$EMB" --epochs {EPOCHS} '
             f'--outdir results/wave/E5_{ds}',
-            (d_s + c_s + 2 * o_s))
+            (d_s + c_s + 2 * o_s), big=big_ds)
 
         # ---- E3: external baselines. No adversary, so cheap; still persists latents.
         #      NOTE: run_baselines.py has NO --epochs flag (scVI/scANVI own their own
         #      training schedules and harmony/scanorama/combat do not train at all), so it
         #      cannot reuse `common` -- passing --epochs there is an argparse error that
         #      kills the shard instantly. ----
+        # E3 IS a large-VRAM shard despite not training OUR model: its default method list
+        # includes scvi and scanvi, which fit their own torch models on the GPU. The first
+        # three methods (unintegrated/harmony/scanorama) are CPU-only, which is why a
+        # partially-complete E3 shard looks harmless.
         add(f"{ds}_E3",
             f'$PY scripts/run_baselines.py --registry configs/dataset_registry.json '
             f'--dataset {ds} --data-root "$R" --embed-out "$EMB" '
             f'--out results/wave/{ds}_E3.csv',
-            5 * o_s)
+            5 * o_s, big=big_ds)
 
     # ---- E6: support overlap. Trains NO model, runs over all datasets at once. ----
     add("E6_support_overlap",
@@ -179,11 +206,23 @@ def build(reg, datasets, embed_root):
 
 
 def pack(shards, workers):
-    """Longest-processing-time packing of the PARALLEL shards onto lanes."""
+    """Longest-processing-time packing of the PARALLEL shards onto lanes.
+
+    # WHY LARGE SHARDS ARE CONFINED TO A LANE SUBSET, NOT MERELY COUNTED:
+    #   lanes run independently and each pulls its next shard the moment it is free, so how
+    #   many large shards are co-resident at any instant is a property of RUNTIME
+    #   INTERLEAVING, which a static assignment cannot bound by counting alone. Confining
+    #   every large shard to the first LARGE_LANE_CAP lanes makes the bound STRUCTURAL: at
+    #   most that many can ever run at once, whatever the timings turn out to be.
+    #   This costs makespan balance -- the large-capable lanes carry the heavy work -- which
+    #   main() reports so the trade is visible rather than silent.
+    """
     load = [0.0] * workers
-    for s in sorted([x for x in shards if x["phase"] == "parallel"],
-                    key=lambda x: -x["seconds"]):
-        i = min(range(workers), key=lambda j: load[j])
+    big_lanes = min(LARGE_LANE_CAP, workers)
+    par = sorted([x for x in shards if x["phase"] == "parallel"], key=lambda x: -x["seconds"])
+    for s in par:
+        allowed = range(big_lanes) if s.get("big") else range(workers)
+        i = min(allowed, key=lambda j: load[j])
         s["worker"] = i + 1
         load[i] += s["seconds"]
     for s in shards:
