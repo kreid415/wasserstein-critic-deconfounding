@@ -995,3 +995,41 @@ def test_wave_status_tag_matches_evaluate_config_tag():
     row8 = row.copy()
     row8["reference_batch"], row8["batch_count"] = 0, 2
     assert monitor_tag(row8).endswith("_bc2"), monitor_tag(row8)
+
+
+def test_embed_tag_separates_positional_from_named_reference():
+    """E4's positional reference sweep must not collide with the entropy-named reference.
+
+    THE BUG THIS PINS: the two harnesses interpret reference_batch differently.
+    E1/E2/E8/E10/E5/E9 pass reference_batch_name_str -- the ENTROPY-selected batch, per
+    experiment_protocol.md S9 item 2 -- and training resolves by NAME, ignoring the index.
+    E4 passes no name and resolves POSITIONALLY, because sweeping references is its purpose
+    (also settled in that protocol item, so E4 being non-comparable is BY DESIGN, not a
+    defect). Both record reference_batch=0, so keying the filename suffix on the index
+    alone made E4's fixed_ref0 overwrite E1's latent: measured ARI 0.072 (E1, entropy ref
+    inDrop1 = index 3) vs 0.480 (E4 fixed_ref0, positional celseq = index 0) at the same
+    (backbone, lambda, seed).
+
+    The tag must encode WHICH RESOLUTION was used, not just the index value.
+    """
+    def suffix(reference_batch, reference_batch_name_str, reference_mode="fixed"):
+        if reference_mode != "fixed" or reference_batch is None:
+            return ""
+        if reference_batch_name_str is None:
+            return f"_refidx{int(reference_batch)}"
+        return f"_ref{int(reference_batch)}" if int(reference_batch) != 0 else ""
+
+    # named (entropy) resolution: index 0 is the legacy placeholder and must stay bare,
+    # so every latent written before this change keeps its filename
+    assert suffix(0, "inDrop1") == ""
+    # positional resolution: ALWAYS tagged, including index 0 -- that is the collision fix
+    assert suffix(0, None) == "_refidx0"
+    assert suffix(3, None) == "_refidx3"
+    # discriminator has no reference batch at all
+    assert suffix(None, None) == ""
+    # rotating/joint are separated by reference_mode in the tag body
+    assert suffix(0, None, reference_mode="rotating") == ""
+    # the property that matters: named-ref and positional-ref-0 differ
+    assert suffix(0, "inDrop1") != suffix(0, None)
+    # and every positional index maps to its own filename
+    assert len({suffix(b, None) for b in range(9)}) == 9

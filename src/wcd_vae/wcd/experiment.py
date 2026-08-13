@@ -563,10 +563,22 @@ def evaluate_config(
         #   changes the model: on pancreas, fixed_ref0 gave ARI 0.480 where the same
         #   (backbone, lambda, seed) at the E1/E2 grid point gave 0.049.
         #   Caught before any E4 latent was lost, unlike the E8 case (8ea5ea4).
-        # Suffix omitted for the discriminator (no reference batch) and for the default
-        #   reference_batch=0, so all pre-existing filenames are unchanged.
-        if reference_mode == "fixed" and reference_batch not in (None, 0):
-            opt += f"_ref{int(reference_batch)}"
+        # WHY reference_batch==0 IS NOT SAFE TO OMIT: the two harnesses interpret the
+        #   index differently. E1/E2/E8/E10/E5/E9 pass reference_batch_name_str (the
+        #   ENTROPY-selected batch, per experiment_protocol.md S9 item 2) and training
+        #   resolves by NAME, ignoring the index -- on pancreas that is inDrop1, index 3.
+        #   E4 passes no name and resolves POSITIONALLY, so its fixed_ref0 aligns to
+        #   celseq, index 0. Both correctly record reference_batch=0 yet train different
+        #   models: measured ARI 0.072 (E1) vs 0.480 (E4 fixed_ref0) at the same
+        #   (backbone, lambda, seed). Keying the suffix on the index alone therefore let
+        #   E4's fixed_ref0 overwrite E1's latent. The tag must record WHICH RESOLUTION
+        #   was used, not just the index value.
+        if reference_mode == "fixed" and reference_batch is not None:
+            if reference_batch_name_str is None:
+                # positional resolution (E4's reference sweep): always tag the index
+                opt += f"_refidx{int(reference_batch)}"
+            elif int(reference_batch) != 0:
+                opt += f"_ref{int(reference_batch)}"
         tag = (f"{'critic' if critic else 'discriminator'}_{backbone or 'NB'}"
                f"_lam{str(d_coef).replace('.', 'p')}_s{seed}"
                f"_{reference_mode}_{formulation}{opt}")

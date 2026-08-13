@@ -49,6 +49,18 @@ def tag(r):
             f"_{r.get('formulation', 'reference')}{opt}")
 
 
+# E4 IS INTENTIONALLY NOT COMPARABLE to the other experiments at any grid point, and its
+# rows must be excluded from the shared-filename metric check. Per experiment_protocol.md
+# S9 item 2 (commit 0ebd02c): the entropy reference rule is threaded BY NAME through
+# E1/E5/E9 via reference_batch_name_str, while "E4 stays index-based because sweeping
+# references is its purpose". So E4's fixed_ref0 aligns to positional batch 0 (celseq on
+# pancreas) whereas E1 at the same (backbone, lambda, seed) aligns to the entropy-selected
+# batch (inDrop1, index 3) -- different models, and both correctly record
+# reference_batch=0. The arm comparable to the rest of the programme is fixed_ref{k} where
+# k is the index of the entropy-selected batch, NOT fixed_ref0.
+E4_NOT_COMPARABLE = True
+
+
 def main():
     manifest = sys.argv[1] if len(sys.argv) > 1 else "scripts/wave_manifest.tsv"
     M = pd.read_csv(manifest, sep="\t")
@@ -81,6 +93,21 @@ def main():
         print(f"datasets    {sorted(d.dataset.unique()) if 'dataset' in d.columns else 'n/a'}")
     for m in sorted(want - have)[:5]:
         print(f"  MISSING: {m}")
+
+    # Shared filenames are legitimate when the SAME config is trained twice: E1 and E2
+    # overlap at (NB, lambda=0.2), and E8/E10 include that grid point too, so those rows
+    # are bit-identical. A shared filename whose METRICS DIFFER is a real collision. E4 is
+    # excluded -- see E4_NOT_COMPARABLE above.
+    if len(d):
+        t = d.copy()
+        t["_tag"] = [f"{r['dataset']}/{tag(r)}" for _, r in t.iterrows()]
+        cmp_rows = t[t.experiment != "E4"] if E4_NOT_COMPARABLE else t
+        dup = cmp_rows[cmp_rows.duplicated("_tag", keep=False)]
+        bad = [tg for tg, g in dup.groupby("_tag")
+               if g.ari.nunique() > 1 or g.nmi.nunique() > 1]
+        print(f"COLLISIONS  {len(bad)}   (shared filename, differing metrics; E4 excluded)")
+        for tg in bad[:4]:
+            print(f"  COLLISION: {tg}")
 
 
 if __name__ == "__main__":
