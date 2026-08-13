@@ -613,6 +613,20 @@ def evaluate_config(
         "early_stopping": bool(early_stopping),
         "reference_batch": reference_batch,
         "reference_mode": reference_mode,
+        # WHY reference_resolution IS RECORDED: reference_batch ALONE IS AMBIGUOUS.
+        #   E1/E2/E8/E10/E5/E9 pass reference_batch_name_str (the entropy-selected batch)
+        #   and training resolves BY NAME, leaving the index at its legacy 0; E4 passes no
+        #   name and resolves POSITIONALLY. Both then record reference_batch=0 while
+        #   training against different batches -- on pancreas inDrop1 (index 3) versus
+        #   celseq (index 0), measured ARI 0.072 vs 0.480 at the same
+        #   (backbone, lambda, seed). Without this field no consumer -- reader, reviewer,
+        #   or the wave monitor rebuilding embedding filenames -- can tell which model a
+        #   row describes, and the embed tag itself has to encode the same distinction.
+        "reference_resolution": (
+            None if reference_batch is None
+            else ("name" if reference_batch_name_str is not None else "index")
+        ),
+        "reference_batch_name": reference_batch_name_str,
         "formulation": formulation,
         # WHY: with early_stopping=True the "epochs" column records the requested BUDGET
         # (500), not where training actually stopped. Recording the selected epoch makes

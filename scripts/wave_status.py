@@ -41,9 +41,19 @@ def tag(r):
     # E4's fixed_refN designs: must mirror evaluate_config exactly, or every refN>0 latent
     # is reported as an orphan and its row as missing. Omitted for reference_batch=0 (the
     # default) and for the discriminator, which has no reference batch.
+    # Mirror evaluate_config exactly. reference_batch alone is AMBIGUOUS: a named (entropy)
+    # resolution leaves the index at its legacy 0 while E4's positional sweep means it, so
+    # the row's recorded `reference_resolution` is what disambiguates. Rows written before
+    # that field existed fall back to ref_design, which only E4 populates.
     rb, rm = r.get("reference_batch"), r.get("reference_mode", "fixed")
-    if rm == "fixed" and pd.notna(rb) and int(rb) != 0:
-        opt += f"_ref{int(rb)}"
+    if rm == "fixed" and pd.notna(rb):
+        res = r.get("reference_resolution")
+        if not isinstance(res, str):
+            res = "index" if isinstance(r.get("ref_design"), str) else "name"
+        if res == "index":
+            opt += f"_refidx{int(rb)}"
+        elif int(rb) != 0:
+            opt += f"_ref{int(rb)}"
     return (f"{r['method']}_{r['backbone']}_lam{str(r['d_coef']).replace('.', 'p')}"
             f"_s{int(r['seed'])}_{r.get('reference_mode', 'fixed')}"
             f"_{r.get('formulation', 'reference')}{opt}")
