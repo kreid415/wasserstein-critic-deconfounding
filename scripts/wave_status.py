@@ -38,6 +38,12 @@ def tag(r):
     full = _REG.get(r.get("dataset"), {}).get("n_batches")
     if pd.notna(bc) and full is not None and int(bc) != int(full):
         opt += f"_bc{int(bc)}"
+    # E4's fixed_refN designs: must mirror evaluate_config exactly, or every refN>0 latent
+    # is reported as an orphan and its row as missing. Omitted for reference_batch=0 (the
+    # default) and for the discriminator, which has no reference batch.
+    rb, rm = r.get("reference_batch"), r.get("reference_mode", "fixed")
+    if rm == "fixed" and pd.notna(rb) and int(rb) != 0:
+        opt += f"_ref{int(rb)}"
     return (f"{r['method']}_{r['backbone']}_lam{str(r['d_coef']).replace('.', 'p')}"
             f"_s{int(r['seed'])}_{r.get('reference_mode', 'fixed')}"
             f"_{r.get('formulation', 'reference')}{opt}")

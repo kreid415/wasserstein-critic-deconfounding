@@ -947,3 +947,51 @@ def test_every_manifest_flag_is_accepted_by_its_harness(tmp_path):
                                    capture_output=True, text=True).stdout
         for a in flags:
             assert a in help_text, f"{script} does not accept {a} (shard {r['tag']})"
+
+
+def test_wave_status_tag_matches_evaluate_config_tag():
+    """The monitor's tag() must reproduce evaluate_config's embed tag EXACTLY.
+
+    WHY THIS TEST EXISTS: scripts/wave_status.py rebuilds each result row's expected
+    embedding filename to check none is missing. When the tag builder in experiment.py
+    gains a suffix and the monitor does not, every affected latent is silently reported as
+    an orphan and its row as missing -- so the check that exists to catch lost embeddings
+    starts crying wolf, and a REAL loss hides among the false ones. That happened twice in
+    one wave: first with E8's _bc suffix (the monitor read `n_batches` off the row, which
+    the harness never records, so it looked for the plain filename and passed by
+    coincidence), then with E4's _ref suffix (absent from the monitor entirely, reporting
+    10 healthy E4 latents as orphans and masking one genuinely deleted file).
+
+    Pinning them together means a future suffix breaks this test rather than the wave.
+    """
+    import pandas as pd
+
+    def monitor_tag(row):
+        import importlib
+        import sys
+        sys.path.insert(0, "scripts")
+        import wave_status
+        importlib.reload(wave_status)
+        return wave_status.tag(row)
+
+    # E4 fixed_ref3: the suffix must appear
+    row = pd.Series({"dataset": "pancreas", "method": "critic", "backbone": "NB",
+                     "d_coef": 0.2, "seed": 0, "reference_mode": "fixed",
+                     "formulation": "reference", "reference_batch": 3,
+                     "batch_count": None, "batch_size": 1024, "lr_g": 1e-3})
+    assert monitor_tag(row).endswith("_ref3"), monitor_tag(row)
+
+    # reference_batch=0 is the default and must NOT gain a suffix
+    row0 = row.copy()
+    row0["reference_batch"] = 0
+    assert monitor_tag(row0) == "critic_NB_lam0p2_s0_fixed_reference", monitor_tag(row0)
+
+    # the discriminator has no reference batch
+    rowd = row.copy()
+    rowd["method"], rowd["reference_batch"] = "discriminator", float("nan")
+    assert monitor_tag(rowd) == "discriminator_NB_lam0p2_s0_fixed_reference", monitor_tag(rowd)
+
+    # E8 subset: _bc comes from the REGISTRY's full count, not a row field
+    row8 = row.copy()
+    row8["reference_batch"], row8["batch_count"] = 0, 2
+    assert monitor_tag(row8).endswith("_bc2"), monitor_tag(row8)
