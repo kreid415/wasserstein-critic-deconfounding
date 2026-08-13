@@ -1081,3 +1081,44 @@ def test_large_dataset_shards_are_confined_to_a_lane_subset(tmp_path):
     assert len(lanes_with_large) <= build_manifest.LARGE_LANE_CAP, (
         f"large shards spread across lanes {sorted(lanes_with_large)}, "
         f"exceeding LARGE_LANE_CAP={build_manifest.LARGE_LANE_CAP}")
+
+
+def test_vram_chunk_budget_divides_by_worker_count(monkeypatch):
+    """The chunk budget must shrink as concurrent workers rise.
+
+    WHY: _vram_safe_chunk sizes its (chunk x n) float64 block from mem_get_info -- FREE
+    VRAM at call time -- and takes 33%. That is safe for ONE process and unsafe for
+    several, because each samples independently and none knows the others also intend to
+    claim a third. Measured phase-by-phase on immune: 1126 MiB after training, 1274 after
+    obtain_embeddings, 1870 once the metric suite runs. The suite is ~600 MiB of that and
+    runs for EVERY dataset, so six lanes exhausted a 7.6 GiB card and the wave lost 31 rows
+    across 6 shards -- including sim1 at 12k cells, which no dataset-size heuristic would
+    have caught. Verified after the fix: six concurrent full evaluate_config runs on immune
+    peak at 6214 MiB and all succeed, against 7058 MiB and 31 failures before.
+    """
+    from wcd_vae.wcd import evaluation
+
+    class _FakeCuda:
+        @staticmethod
+        def is_available():
+            return True
+
+        @staticmethod
+        def mem_get_info():
+            return (7_000 * 2 ** 20, 8_192 * 2 ** 20)   # 7 GiB free
+
+    import torch as _t
+    monkeypatch.setattr(_t, "cuda", _FakeCuda, raising=False)
+
+    # n large enough that the 2048 default cap is not what binds
+    n, dim = 200_000, 256
+    monkeypatch.setenv("WCD_WORKERS", "1")
+    one = evaluation._vram_safe_chunk(n, dim)
+    monkeypatch.setenv("WCD_WORKERS", "6")
+    six = evaluation._vram_safe_chunk(n, dim)
+
+    assert six < one, f"chunk did not shrink with workers: 1 worker={one}, 6 workers={six}"
+    assert six >= 256, "the 256-row floor must be preserved so the kernel stays correct"
+    # six workers each claiming their share must not oversubscribe what one worker sees
+    assert six * 6 <= one * 1.05, (
+        f"6 workers x {six} rows exceeds the single-worker budget of {one}")

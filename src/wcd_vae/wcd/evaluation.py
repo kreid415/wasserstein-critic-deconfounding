@@ -1,3 +1,5 @@
+import os
+
 from numba import njit
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
@@ -109,6 +111,23 @@ def _vram_safe_chunk(n, dim, default=2048, bytes_per=8):
     # keep a third of free memory as headroom for the model, activations and the
     # topk/index_add temporaries the block itself feeds
     budget = free * 0.33
+
+    # THEN DIVIDE BY THE NUMBER OF CONCURRENT WORKERS. The 33% rule is safe for ONE
+    # process and unsafe for several, because each samples mem_get_info independently and
+    # none knows the others also intend to claim a third. Measured: a single immune config
+    # peaks at 1126 MiB after training, 1274 after obtain_embeddings and 1870 once the
+    # suite runs -- the suite is ~600 MiB of it, and it runs for EVERY dataset, not just
+    # large ones. Six lanes each claiming a third of what they see free exhausts a 7.6 GiB
+    # card after the third one: the wave lost 31 rows across 6 shards to exactly this,
+    # including sim1 (12k cells), which no dataset-size heuristic would have protected.
+    # WCD_WORKERS is what the launcher already exports to size its lane pool, so reuse it
+    # rather than inventing a second knob that can drift from the real concurrency.
+    try:
+        workers = max(1, int(os.environ.get("WCD_WORKERS", "1")))
+    except ValueError:
+        workers = 1
+    budget /= workers
+
     per_row = max(n * bytes_per, 1)
     fitted = int(budget // per_row)
     return max(256, min(default, fitted))

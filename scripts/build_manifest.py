@@ -53,7 +53,16 @@ EPOCHS = 500            # CEILING; early stopping decides. Never 150 -- see buil
 #   on the measured fact: six large lanes OOM, so allow at most LARGE_LANE_CAP of them.
 #   4 lanes at the observed per-lane share is ~4.7 GiB, leaving ~1.1 GiB of headroom.
 BIG_DATASET_CELLS = 25000   # immune (33.5k) and lung (32.5k) qualify; pancreas (16.4k) does not
-LARGE_LANE_CAP = 4          # max simultaneous large-dataset shards across all lanes
+# LARGE_LANE_CAP IS DELIBERATELY 6 (= no constraint). The first fix for the OOMs capped
+# this at 4 on the theory that co-resident LARGE DATASETS exhaust the card. That was the
+# wrong variable and the next wave OOM'd again, including sim1 at 12k cells, which no
+# size heuristic protects. The real driver is _vram_safe_chunk in evaluation.py: the
+# metric suite's GPU kNN sizes its distance block from FREE VRAM at call time and takes
+# 33%, which is safe for one process and oversubscribes for six -- and the suite runs for
+# EVERY dataset. Fixed there by dividing the budget by WCD_WORKERS. The knob is kept
+# because it is the right lever if a single dataset ever genuinely does not fit alongside
+# others, but it must not be mistaken for the OOM fix.
+LARGE_LANE_CAP = 6          # max simultaneous large-dataset shards across all lanes
 LIGHT = ["pancreas", "immune", "lung", "sim1", "sim2", "atac_small"]
 HEAVY = ["atac_large", "immune_hum_mou"]
 
