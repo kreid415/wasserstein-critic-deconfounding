@@ -19,6 +19,22 @@ with open("configs/dataset_registry.json") as _fh:
     _REG = json.load(_fh)
 
 
+def is_training_row(r):
+    """True when the row came from evaluate_config and so owns an embed tag.
+
+    NOT every result row does. E3 runs external baselines (scVI/scANVI/Harmony/Scanorama/
+    Combat) whose rows carry no backbone, d_coef or seed -- those knobs do not exist for
+    them -- and they persist latents under their own method-keyed scheme. E5 writes a
+    DIRECTORY of differently-shaped files (per-celltype purity, a summary, and confusion
+    matrices) rather than one config-per-row CSV. Reconciling either against the
+    evaluate_config tag raises KeyError, which is how this surfaced mid-wave.
+    """
+    # Presence is not enough: after pd.concat of mixed schemas every frame gains every
+    # column, and the E3 rows carry NaN in the training fields. Check the VALUES.
+    return all(c in r.index and pd.notna(r[c])
+               for c in ("backbone", "d_coef", "seed", "method"))
+
+
 def tag(r):
     """Rebuild the embed tag exactly as evaluate_config does."""
     opt = ""
@@ -82,10 +98,10 @@ def main():
         if not len(d):
             continue
         frames.append(d)
-        ds = os.path.basename(f).split("_")[0]
         for _, r in d.iterrows():
-            want.add(f"{ds}/{tag(r)}")
-    d = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+            if is_training_row(r):
+                want.add(f"{r.get('dataset', os.path.basename(f).split('_')[0])}/{tag(r)}")
+    d = pd.concat(frames, ignore_index=True, sort=False) if frames else pd.DataFrame()
     have = {f"{os.path.basename(os.path.dirname(p))}/{os.path.basename(p)[:-4]}"
             for p in glob.glob(os.path.join(EMB, "*", "*.npz"))}
 
@@ -110,6 +126,9 @@ def main():
     # excluded -- see E4_NOT_COMPARABLE above.
     if len(d):
         t = d.copy()
+        t = t[t.apply(is_training_row, axis=1)]
+        if not len(t):
+            return 0
         t["_tag"] = [f"{r['dataset']}/{tag(r)}" for _, r in t.iterrows()]
         cmp_rows = t[t.experiment != "E4"] if E4_NOT_COMPARABLE else t
         dup = cmp_rows[cmp_rows.duplicated("_tag", keep=False)]
