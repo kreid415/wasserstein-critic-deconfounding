@@ -99,6 +99,16 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--datasets", nargs="*", default=None, help="subset of registry keys")
     ap.add_argument("--k", type=int, default=30)
+    # WHY --data-root EXISTS HERE TOO: this was the ONLY harness of the nine that could not
+    # be pointed at a data directory. It resolved entry["path"], an ABSOLUTE path baked into
+    # the registry (/home/kendall/data_gsteino1/wcd_data/...), while every other harness
+    # joins --data-root to entry["file"]. On any machine where the data lives elsewhere,
+    # all 12 configs failed with FileNotFoundError and the shard wrote a 1-byte CSV with no
+    # header -- which then raises EmptyDataError in every downstream reader. Defaults to
+    # $WCD_DATA so the launcher's existing export is honoured.
+    ap.add_argument("--data-root", default=os.environ.get("WCD_DATA"),
+                    help="directory holding the .h5ad files; joined to registry entry['file']. "
+                         "Falls back to registry entry['path'] when unset.")
     args = ap.parse_args()
 
     with open(args.registry) as fh:
@@ -111,8 +121,11 @@ def main():
         for balance in (False, True):
             # simulations have exactly-shared groups; balancing is a no-op but harmless.
             try:
+                path = (os.path.join(args.data_root, entry["file"])
+                        if args.data_root and entry.get("file")
+                        else entry["path"])
                 adata, _largest = prep_data(
-                    os.path.expandvars(os.path.expanduser(entry["path"])),
+                    os.path.expandvars(os.path.expanduser(path)),
                     batch_key=entry["batch_key"],
                     celltype_key=entry["celltype_key"],
                     batch_count=entry.get("n_batches", 2),
