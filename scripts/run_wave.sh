@@ -44,6 +44,38 @@ EMB=${WCD_EMBED_OUT:-$(pwd)/../embeddings}
 export PY R EMB
 mkdir -p results/wave logs/wave "$EMB"
 
+# WHY THIS WARNING EXISTS -- THE THIRD INSTANCE OF THE SAME LOSS.
+#   1. A wave ran with no --embed-out at all: PAGA could not be added post-hoc.
+#   2. A wave ran with the flag omitted from the manifest: kBET could not be backfilled.
+#   3. A wave ran WITH the flag, pointed at the session workspace. The files were written
+#      correctly and then the workspace was swept on an idle timeout. All ~990 latents
+#      (~18 GB) were lost; only the metrics CSVs survived, because those had been promoted
+#      to durable artifact storage and the latents never had been.
+# Passing the flag is NOT the same as persisting the data. A path under a scratch or
+# session-workspace root satisfies the flag and still evaporates, so warn loudly and name
+# the harvest step rather than letting a 26-hour run end with nothing durable.
+case "$EMB" in
+  */workspaces/*|/tmp/*|*/scratch/*)
+    cat >&2 <<WARN
+
+  ================================ EPHEMERAL LATENTS ================================
+  --embed-out resolves to:  $EMB
+  That path is under a session-workspace / scratch root, which is swept on idle. Latents
+  written there do NOT survive the run. This has already cost this project one full wave.
+
+  Either point WCD_EMBED_OUT at durable storage:
+      WCD_EMBED_OUT=/durable/path bash scripts/run_wave.sh <manifest>
+  or harvest them the moment the wave finishes:
+      tar -czf latents.tar.gz -C "$EMB" . && <promote latents.tar.gz to artifact storage>
+
+  Metrics CSVs are not enough: adding any new embedding-derived metric without the
+  latents costs a full retraining wave (~186 worker-hours for the light scope).
+  ===================================================================================
+
+WARN
+    ;;
+esac
+
 # PREFLIGHT: fail BEFORE burning days of GPU time if the metric stack is not importable.
 # WHY a hard gate rather than a warning: the failure this guards against is silent by
 # construction -- full_metric_suite catches kBET's ImportError and records NaN, so the

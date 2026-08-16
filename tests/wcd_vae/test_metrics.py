@@ -1122,3 +1122,69 @@ def test_vram_chunk_budget_divides_by_worker_count(monkeypatch):
     # six workers each claiming their share must not oversubscribe what one worker sees
     assert six * 6 <= one * 1.05, (
         f"6 workers x {six} rows exceeds the single-worker budget of {one}")
+
+
+def test_collector_refuses_a_table_missing_an_experiment(tmp_path):
+    """The merged results table must cover every experiment in the manifest.
+
+    WHY: the wave was merged with a flat results/wave/*.csv glob plus an
+    epochs_run.notna() filter. That dropped E5 (writes a nested E5_<ds>/ directory), E3
+    (external baselines have no epochs_run) and E6 (trains no model, no epochs_run) --
+    three of nine experiments -- with no error. The table looked healthy at 1128 rows.
+    """
+    import subprocess
+    import sys
+
+    res = tmp_path / "wave"
+    (res / "E5_atac").mkdir(parents=True)
+    man = tmp_path / "m.tsv"
+    man.write_text(
+        "phase\tworker\ttag\test_hours\tcmd\n"
+        "parallel\t1\tatac_E1_critic_s0\t0.1\ttrue\n"
+        "parallel\t1\tatac_E3\t0.1\ttrue\n"
+    )
+    # only the E1 shard produced rows; E3 is missing
+    (res / "atac_E1_critic_s0.csv").write_text(
+        "experiment,method,epochs_run,ari\nE1,critic,100,0.5\n")
+
+    def run():
+        return subprocess.run(
+            [sys.executable, "scripts/collect_results.py",
+             "--results", str(res), "--manifest", str(man),
+             "--out", str(tmp_path / "out.csv")],
+            capture_output=True, text=True)
+
+    r = run()
+    assert r.returncode != 0, "collector accepted a table missing E3"
+    assert "E3" in r.stderr
+
+    # once the E3 shard exists -- with NO epochs_run, as the baselines harness emits --
+    # the collector must accept it and keep its rows.
+    (res / "atac_E3.csv").write_text("experiment,method,ari\nE3,harmony,0.4\n")
+    r = run()
+    assert r.returncode == 0, f"collector rejected a complete table: {r.stderr[-400:]}"
+    out = pd.read_csv(tmp_path / "out.csv")
+    assert set(out.experiment) == {"E1", "E3"}, out.experiment.tolist()
+
+
+def test_collector_reads_the_nested_e5_summary(tmp_path):
+    """E5's summary lives in results/wave/E5_<ds>/, not the flat directory."""
+    import subprocess
+    import sys
+
+    res = tmp_path / "wave"
+    (res / "E5_atac").mkdir(parents=True)
+    (res / "E5_atac" / "E5_summary_atac.csv").write_text("head,purity\ncritic,0.8\n")
+    # a sidecar with a different shape must NOT be merged
+    (res / "E5_atac" / "E5_purity_atac.csv").write_text("celltype,frac\nB,0.2\n")
+    man = tmp_path / "m.tsv"
+    man.write_text("phase\tworker\ttag\test_hours\tcmd\nparallel\t1\tatac_E5\t0.1\ttrue\n")
+    r = subprocess.run(
+        [sys.executable, "scripts/collect_results.py", "--results", str(res),
+         "--manifest", str(man), "--out", str(tmp_path / "out.csv")],
+        capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-400:]
+    out = pd.read_csv(tmp_path / "out.csv")
+    assert list(out.experiment.unique()) == ["E5"]
+    assert "E5_summary_atac.csv" in out._source.iloc[0]
+    assert not any("purity" in s for s in out._source), "sidecar was merged"
