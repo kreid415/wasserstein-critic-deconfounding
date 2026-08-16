@@ -35,8 +35,25 @@ WCD_ENV_DEFAULT=/home/kendall/.claude-science/conda/envs/wcd-kbet
 PY=${WCD_PYTHON:-$WCD_ENV_DEFAULT/bin/python}
 PY_PREFIX=$(cd "$(dirname "$PY")/.." && pwd)
 export R_HOME=${WCD_R_HOME:-$PY_PREFIX/lib/R}
-export R_LIBS=${WCD_R_LIBS:-$(pwd)/../Rlib_kbet}
-R=${WCD_DATA:-$(pwd)/../data}
+# R_LIBS AND THE DATA ROOT ARE FORCED ABSOLUTE. `$(pwd)/../x` is textually absolute but
+# still contains a `..` that R and the shards re-resolve against THEIR cwd; a caller who
+# exports a relative WCD_R_LIBS (e.g. ./Rlib_kbet) gets a libPath that only works when cwd
+# happens to be the workspace root. Observed live: .libPaths() reported "./Rlib_kbet",
+# which resolves for the driver and silently would not for a shard run elsewhere.
+# `cd -- "$dir" && pwd` collapses the `..` to a real path, and -P avoids symlink surprises.
+#   A bare `cd -P -- "$dir"` is not enough: a relative input is resolved against the
+#   SUBSHELL's cwd (the repo root, since the launcher runs from there), so ./Rlib_kbet --
+#   which lives one level up in the workspace -- silently stays relative and R never finds
+#   it. Resolve relative inputs against the repo's PARENT, which is where the sibling
+#   Rlib_kbet/data/embeddings directories actually live, and leave absolute inputs alone.
+_abspath() {
+  case "$1" in
+    /*) ( cd -P -- "$1" 2>/dev/null && pwd ) || echo "$1" ;;
+    *)  ( cd -P -- "$(pwd)/../${1#./}" 2>/dev/null && pwd ) || echo "$1" ;;
+  esac
+}
+export R_LIBS=$(_abspath "${WCD_R_LIBS:-$(pwd)/../Rlib_kbet}")
+R=$(_abspath "${WCD_DATA:-$(pwd)/../data}")
 # EMBEDDINGS ARE ON BY DEFAULT. Metrics-only CSVs cannot be re-analysed: adding any new
 # embedding-derived metric (kBET, PAGA, probes) to a finished wave otherwise costs a full
 # retraining run. This project paid that bill twice. Override only for smoke runs.
@@ -54,8 +71,14 @@ mkdir -p results/wave logs/wave "$EMB"
 # Passing the flag is NOT the same as persisting the data. A path under a scratch or
 # session-workspace root satisfies the flag and still evaporates, so warn loudly and name
 # the harvest step rather than letting a 26-hour run end with nothing durable.
-case "$EMB" in
-  */workspaces/*|/tmp/*|*/scratch/*)
+# tmpfs is checked as well as the path patterns: a RAM-backed mount looks like ordinary
+# disk to `df -h` and to any name-based rule, so a path that passes the pattern test can
+# still be volatile. This was caught live -- /home/kendall is tmpfs on this box, so a
+# "durable" directory created there would have satisfied the pattern check and still been
+# lost. Name-based heuristics are not sufficient; ask the filesystem.
+EMB_FSTYPE=$(df -PT "$EMB" 2>/dev/null | awk 'NR==2{print $2}')
+case "$EMB:$EMB_FSTYPE" in
+  */workspaces/*:*|/tmp/*:*|*/scratch/*:*|*:tmpfs|*:ramfs)
     cat >&2 <<WARN
 
   ================================ EPHEMERAL LATENTS ================================
