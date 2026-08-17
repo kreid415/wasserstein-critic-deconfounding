@@ -226,7 +226,13 @@ while IFS=$'\t' read -r phase worker tag est cmd; do
   run_shard "serial" "$tag" "$est" "$cmd"
 done < "$MANIFEST"
 
-n_done=$(ls results/wave/*.done 2>/dev/null | wc -l)
+# COUNT ONLY THIS MANIFEST'S SHARDS. `ls results/wave/*.done | wc -l` counts every marker
+# in the directory, including those from previous manifests, so a small follow-up manifest
+# printed nonsense like "257/36 shards done ... INCOMPLETE" and exited 1 while all 36 of
+# its shards had in fact succeeded. A completion signal that is wrong in the SAFE-looking
+# direction ("incomplete" when done) wastes a re-run; wrong the other way hides real gaps.
 n_tot=$(( $(wc -l < "$MANIFEST") - 1 ))
+n_done=$(awk -F'\t' 'NR>1 && $3!="" {print $3}' "$MANIFEST" \
+         | while read -r t; do [ -f "results/wave/${t}.done" ] && echo x; done | wc -l)
 echo "wave complete: ${n_done}/${n_tot} shards done, $(ls results/wave/*.csv 2>/dev/null | wc -l) CSVs"
 [ "$n_done" -eq "$n_tot" ] || { echo "INCOMPLETE -- re-run the same command to resume the rest" >&2; exit 1; }

@@ -53,7 +53,8 @@ def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None):
     return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12))
 
 
-def configs_for(experiment, task_entry, reference_name=None, batch_size_only=None):
+def configs_for(experiment, task_entry, reference_name=None, batch_size_only=None,
+                extra_lambdas=None):
     """Yield config dicts (kwargs for evaluate_config) for the requested experiment.
 
     ``reference_name`` is the ENTROPY-selected reference batch from load_task; it is
@@ -62,8 +63,20 @@ def configs_for(experiment, task_entry, reference_name=None, batch_size_only=Non
     """
     if experiment == "E1":
         # Pareto front: both heads x full lambda grid x 3 seeds, default backbone.
+        #
+        # WHY extra_lambdas EXISTS: LAMBDA_GRID stops at 1.0, and the critic's scIB
+        # composite optimum sits AT that edge and is still climbing (bio conservation
+        # 0.111 at lam=0 -> 0.241 at lam=1, Spearman rho=+0.65, p=1.2e-22), so the grid is
+        # right-censored and the method was never evaluated at its optimum. --d-coef-only
+        # is a FILTER over this grid, not an injection, so a value above 1.0 selects zero
+        # configs silently. Appending rather than editing LAMBDA_GRID keeps every existing
+        # resume key and embedding filename unchanged.
+        lambdas = list(LAMBDA_GRID) + [
+            x for x in (extra_lambdas or [])
+            if not any(abs(x - g) < 1e-9 for g in LAMBDA_GRID)
+        ]
         for critic in (False, True):
-            for lam in LAMBDA_GRID:
+            for lam in lambdas:
                 for seed in SEEDS:
                     yield {"critic": critic, "d_coef": lam, "seed": seed,
                            "reference_batch": 0 if critic else None,
@@ -128,7 +141,14 @@ def main():
     ap.add_argument("--head", choices=["discriminator", "critic", "both"], default="both",
                     help="run only one adversarial head (lets E1 split into two shorter jobs)")
     ap.add_argument("--d-coef-only", type=float, default=None,
-                    help="E1: run only this single lambda value")
+                    help="E1: run only this single lambda value (a FILTER over the grid; "
+                         "to use a value above LAMBDA_GRID's max, also pass --extra-lambda)")
+    ap.add_argument("--extra-lambda", type=float, action="append", default=None,
+                    metavar="LAM",
+                    help="E1: append a lambda beyond LAMBDA_GRID (repeatable). The grid "
+                         "stops at 1.0 but the critic's scIB optimum is AT that edge and "
+                         "still rising, so the published sweep is right-censored. Appending "
+                         "leaves existing resume keys and embedding filenames untouched.")
     ap.add_argument("--batch-size-only", type=int, default=None,
                     help="E10: run only this batch size (lets the wave serialise the "
                          "VRAM-heavy bs=4096 arm without serialising bs=1024)")
@@ -203,7 +223,7 @@ def main():
                     r.get("batch_size"), r.get("lr_g")))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
-    for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest, batch_size_only=args.batch_size_only)):
+    for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest, batch_size_only=args.batch_size_only, extra_lambdas=args.extra_lambda)):
         # head filter: lets E1 be split into two shorter jobs (one per adversarial head).
         if args.head != "both":
             want_critic = args.head == "critic"
