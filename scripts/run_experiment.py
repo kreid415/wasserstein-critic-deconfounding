@@ -143,6 +143,12 @@ def main():
     ap.add_argument("--d-coef-only", type=float, default=None,
                     help="E1: run only this single lambda value (a FILTER over the grid; "
                          "to use a value above LAMBDA_GRID's max, also pass --extra-lambda)")
+    ap.add_argument("--es-check-every", type=int, default=10,
+                    help="epochs between early-stopping probe evaluations (default 10). "
+                         "Lower it for high-lambda runs where the selected checkpoint "
+                         "clusters at the first check (left-censored criterion).")
+    ap.add_argument("--es-patience", type=int, default=5,
+                    help="early-stopping patience in checks (default 5)")
     ap.add_argument("--extra-lambda", type=float, action="append", default=None,
                     metavar="LAM",
                     help="E1: append a lambda beyond LAMBDA_GRID (repeatable). The grid "
@@ -251,7 +257,9 @@ def main():
             row = evaluate_config(adata, batch_key, celltype_key, **cfg, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None),
                                   # registry n_batches, so the embed tag can record a
                                   # subset level (E8) without colliding with the full run
-                                  full_n_batches=entry.get("n_batches"))
+                                  full_n_batches=entry.get("n_batches"),
+                                  es_check_every=args.es_check_every,
+                                  es_patience=args.es_patience)
             row.update({"experiment": args.experiment, "dataset": args.dataset,
                         "balanced": args.balance, "batch_count": adata.obs[batch_key].nunique()})
             rows.append(row)

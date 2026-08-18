@@ -117,6 +117,8 @@ def train_one(
     formulation="reference",
     early_stopping=True,
     es_celltype_key=None,
+    es_patience=5,
+    es_check_every=10,
 ):
     """Train ONE configuration and return the fitted VAE + history.
 
@@ -136,6 +138,15 @@ def train_one(
         "disc_iter": iters,
         "early_stopping": early_stopping,
         "es_celltype_key": es_celltype_key,
+        # WHY THREADED: the ES criterion (held-out cell-type probe accuracy) is sampled
+        # every es_check_every epochs. At high lambda the selected checkpoint clustered at
+        # the FIRST check (epoch 10 = warmup_epoch 5 + one interval), i.e. the criterion is
+        # LEFT-censored: es_check_every=10 is too coarse to locate the optimum there.
+        # These were pinned at train_integration_model's defaults because evaluate_config
+        # never forwarded them; now a high-lambda run can tighten the cadence without
+        # editing training defaults (which would silently change every other experiment).
+        "es_patience": es_patience,
+        "es_check_every": es_check_every,
         "z_dim": z_dim,
         "epochs": epochs,
         "warmup_epoch": warmup_epoch,
@@ -502,6 +513,8 @@ def evaluate_config(
     metric_kwargs=None,
     embed_out=None,
     early_stopping=True,
+    es_patience=5,
+    es_check_every=10,
     full_n_batches=None,
 ):
     """Train one config and return {**metrics, config columns}. The atomic unit
@@ -525,6 +538,7 @@ def evaluate_config(
         # WHY: without es_celltype_key the early-stopping check is skipped silently, so
         #      the label key MUST be threaded here or epochs=500 runs unguarded.
         early_stopping=early_stopping, es_celltype_key=celltype_key,
+        es_patience=es_patience, es_check_every=es_check_every,
     )
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obtain_embeddings(ad, vae.to(device))
@@ -611,6 +625,10 @@ def evaluate_config(
         "warmup_epoch": warmup_epoch,
         "epochs_budget": epochs,
         "early_stopping": bool(early_stopping),
+        # Recorded so a checkpoint selected at the first check is auditable: es_best_epoch
+        # == warmup_epoch + es_check_every is the signature of a left-censored selection.
+        "es_patience": es_patience,
+        "es_check_every": es_check_every,
         "reference_batch": reference_batch,
         "reference_mode": reference_mode,
         # WHY reference_resolution IS RECORDED: reference_batch ALONE IS AMBIGUOUS.
