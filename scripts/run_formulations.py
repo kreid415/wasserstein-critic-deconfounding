@@ -41,6 +41,12 @@ def main():
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--data-root", default=None)
     ap.add_argument("--d-coef", type=float, default=0.2)
+    ap.add_argument("--kl-coef", type=float, default=0.005,
+                    help="VAE KL weight (default 0.005). Recorded in the row and embed tag.")
+    ap.add_argument("--zdim", type=int, default=256,
+                    help="latent width (default 256).")
+    ap.add_argument("--seeds", default=None,
+                    help="comma-separated seeds to run (default all of SEEDS=[0,1,2]); use for quick previews, e.g. --seeds 0")
     ap.add_argument("--backbone", default="NB",
                     help="backbone (default NB, the post-scCRAFT-drop primary)")
     ap.add_argument("--arms", default=None,
@@ -95,7 +101,8 @@ def main():
     for tag, cfg in ARMS:
         if tag not in selected:
             continue
-        for seed in SEEDS:
+        seeds = [int(x) for x in args.seeds.split(",")] if args.seeds else SEEDS
+        for seed in seeds:
             if (tag, int(seed)) in done_keys:
                 print(f"  {tag:14s} seed={seed} | SKIP (resume)", flush=True)
                 continue
@@ -108,6 +115,7 @@ def main():
                     cfg_run["reference_batch_name_str"] = largest
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
                                       seed=seed, epochs=args.epochs, backbone=args.backbone,
+                                      kl_coef=args.kl_coef, z_dim=args.zdim,
                                       **cfg_run, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None))
                 row.update({"experiment": "E9", "dataset": args.dataset, "arm": tag,
                             "balanced": args.balance, "n_batches": n_batches})
