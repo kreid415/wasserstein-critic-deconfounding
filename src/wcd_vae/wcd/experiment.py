@@ -553,6 +553,13 @@ def evaluate_config(
         #   Suffixes are omitted at the production defaults so existing filenames are
         #   unchanged.
         opt = ""
+        if z_dim != 256:
+            # WHY z_dim IS IN THE TAG: a capacity sweep varies z_dim while holding
+            # method/backbone/lambda/seed fixed. Without this suffix every z_dim writes the
+            # SAME filename and silently overwrites the production 256-dim latent -- the
+            # identity-string bug this repo has hit three times. Omitted at the 256 default
+            # so existing filenames are unchanged.
+            opt += f"_zd{int(z_dim)}"
         if batch_size != 1024:
             opt += f"_bs{int(batch_size)}"
         if abs(lr_g - 1e-3) > 1e-12 or abs(lr_d - 1e-3) > 1e-12:

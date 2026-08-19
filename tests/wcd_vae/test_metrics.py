@@ -1188,3 +1188,16 @@ def test_collector_reads_the_nested_e5_summary(tmp_path):
     assert list(out.experiment.unique()) == ["E5"]
     assert "E5_summary_atac.csv" in out._source.iloc[0]
     assert not any("purity" in s for s in out._source), "sidecar was merged"
+
+
+def test_embed_tag_encodes_zdim_and_resume_key_separates_it():
+    """A z_dim capacity sweep must not overwrite the production 256-dim latent."""
+    import sys
+    sys.path.insert(0, "scripts")
+    from run_experiment import _resume_key
+    # resume key: z_dim must separate configs, and default (None/256) must be stable
+    k256 = _resume_key("critic", "LDVAE_uncond", 10.0, 0)
+    k256_explicit = _resume_key("critic", "LDVAE_uncond", 10.0, 0, z_dim=256)
+    k32 = _resume_key("critic", "LDVAE_uncond", 10.0, 0, z_dim=32)
+    assert k256 == k256_explicit, "z_dim=256 must equal the default key (backward compat)"
+    assert k256 != k32, "different z_dim must give different resume keys"

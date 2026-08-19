@@ -586,7 +586,11 @@ def obtain_embeddings(adata, vae, dim=50, pca=True, seed=None):
     adata.obsm["X_latent"] = all_z_np
 
     if pca:
-        pca_model = PCA(n_components=dim)
+        # Clamp PCA components to the latent width. The default dim=50 assumes z_dim>=50
+        # (production z_dim=256); a capacity sweep with z_dim<50 would otherwise raise
+        # inside PCA. n_components cannot exceed the number of features.
+        n_comp = min(dim, adata.obsm["X_latent"].shape[1])
+        pca_model = PCA(n_components=n_comp)
         # Fit and transform the data
         x_latent_pca = pca_model.fit_transform(adata.obsm["X_latent"])
         # Store the PCA-reduced data back into adata.obsm

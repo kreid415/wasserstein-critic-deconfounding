@@ -39,18 +39,20 @@ LR_MULTS = [1.0, 2.0, 4.0]
 BASE_LR = 1e-3
 
 
-def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None):
+def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None, z_dim=None):
     """Identity of a configuration for --resume.
 
     MUST include every field the experiment grid varies. E10 varies batch_size and lr
     while holding method/backbone/d_coef/seed fixed, so a key without them collapses its
-    24 configs to 6 and silently skips 18 as already done. Defaults (None -> the
-    production settings) keep keys stable for rows written before these columns existed,
-    so an in-progress E1/E2/E8 wave still resumes correctly.
+    24 configs to 6 and silently skips 18 as already done. A capacity sweep varies z_dim
+    the same way, so it is keyed here too. Defaults (None -> the production settings) keep
+    keys stable for rows written before these columns existed, so an in-progress
+    E1/E2/E8 wave still resumes correctly.
     """
     bs = 1024 if batch_size is None or (isinstance(batch_size, float) and batch_size != batch_size) else int(batch_size)
     lr = 1e-3 if lr_g is None or (isinstance(lr_g, float) and lr_g != lr_g) else float(lr_g)
-    return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12))
+    zd = 256 if z_dim is None or (isinstance(z_dim, float) and z_dim != z_dim) else int(z_dim)
+    return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12), zd)
 
 
 def configs_for(experiment, task_entry, reference_name=None, batch_size_only=None,
@@ -226,7 +228,7 @@ def main():
                     continue
                 done.add(_resume_key(
                     r["method"], r.get("backbone", "NB"), r["d_coef"], r["seed"],
-                    r.get("batch_size"), r.get("lr_g")))
+                    r.get("batch_size"), r.get("lr_g"), r.get("z_dim")))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
     for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest, batch_size_only=args.batch_size_only, extra_lambdas=args.extra_lambda)):
@@ -250,7 +252,7 @@ def main():
             cfg["backbone"] = args.backbone
         method = "critic" if cfg.get("critic") else "discriminator"
         key = _resume_key(method, cfg.get("backbone", "NB"), cfg["d_coef"], cfg["seed"],
-                          cfg.get("batch_size"), cfg.get("lr_g"))
+                          cfg.get("batch_size"), cfg.get("lr_g"), cfg.get("z_dim"))
         if key in done:
             continue
         try:
