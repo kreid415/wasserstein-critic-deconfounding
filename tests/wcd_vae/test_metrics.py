@@ -1201,3 +1201,15 @@ def test_embed_tag_encodes_zdim_and_resume_key_separates_it():
     k32 = _resume_key("critic", "LDVAE_uncond", 10.0, 0, z_dim=32)
     assert k256 == k256_explicit, "z_dim=256 must equal the default key (backward compat)"
     assert k256 != k32, "different z_dim must give different resume keys"
+
+
+def test_resume_key_and_tag_separate_kl_coef():
+    """A KL-weight sweep must not overwrite the production kl_coef=0.005 latent."""
+    import sys
+    sys.path.insert(0, "scripts")
+    from run_experiment import _resume_key
+    k_def = _resume_key("critic", "LDVAE_uncond", 10.0, 0)
+    k_def_explicit = _resume_key("critic", "LDVAE_uncond", 10.0, 0, kl_coef=0.005)
+    k_hi = _resume_key("critic", "LDVAE_uncond", 10.0, 0, kl_coef=0.05)
+    assert k_def == k_def_explicit, "kl_coef=0.005 must equal the default key (backward compat)"
+    assert k_def != k_hi, "different kl_coef must give different resume keys"

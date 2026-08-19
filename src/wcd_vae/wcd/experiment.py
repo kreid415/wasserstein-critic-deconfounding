@@ -107,6 +107,7 @@ def train_one(
     reference_batch_name_str=None,
     disc_iter=None,
     z_dim=256,
+    kl_coef=0.005,
     epochs=500,
     warmup_epoch=5,
     batch_size=1024,
@@ -148,6 +149,13 @@ def train_one(
         "es_patience": es_patience,
         "es_check_every": es_check_every,
         "z_dim": z_dim,
+        # WHY THREADED: kl_coef (VAE KL weight, default 0.005) controls the
+        # reconstruction/bottleneck trade-off. Biology loss is the reconstruction
+        # bottleneck, not the adversary (bio ~0.11 at lambda=0 vs 0.46 for raw PCA), so a
+        # tighter KL is a candidate lever for that failure. It was accepted by
+        # train_integration_model but never forwarded from evaluate_config, pinning it at
+        # 0.005; now a sweep can vary it without editing training defaults.
+        "kl_coef": kl_coef,
         "epochs": epochs,
         "warmup_epoch": warmup_epoch,
         "batch_size": batch_size,
@@ -505,6 +513,7 @@ def evaluate_config(
     reference_mode="fixed",
     formulation="reference",
     z_dim=256,
+    kl_coef=0.005,
     epochs=500,
     warmup_epoch=5,
     batch_size=1024,
@@ -533,7 +542,7 @@ def evaluate_config(
         ad, batch_key, critic=critic, d_coef=d_coef, seed=seed,
         reference_batch=reference_batch, reference_batch_name_str=reference_batch_name_str,
         backbone=backbone, reference_mode=reference_mode, formulation=formulation,
-        z_dim=z_dim, epochs=epochs,
+        z_dim=z_dim, kl_coef=kl_coef, epochs=epochs,
         warmup_epoch=warmup_epoch, batch_size=batch_size, lr_g=lr_g, lr_d=lr_d,
         # WHY: without es_celltype_key the early-stopping check is skipped silently, so
         #      the label key MUST be threaded here or epochs=500 runs unguarded.
@@ -553,6 +562,13 @@ def evaluate_config(
         #   Suffixes are omitted at the production defaults so existing filenames are
         #   unchanged.
         opt = ""
+        if abs(kl_coef - 0.005) > 1e-12:
+            # WHY IN THE TAG: a KL-weight sweep varies kl_coef while holding
+            # method/backbone/lambda/seed fixed, so without this every kl_coef writes the
+            # same filename and overwrites the production latent. Omitted at the 0.005
+            # default so existing filenames are unchanged. Format is filename-safe: '.'->'p'
+            # and '-'->'m' (e.g. kl_coef=0.05 -> _kl0p05, 0.0005 -> _kl0p0005).
+            opt += f"_kl{str(kl_coef).replace('.', 'p').replace('-', 'm')}"
         if z_dim != 256:
             # WHY z_dim IS IN THE TAG: a capacity sweep varies z_dim while holding
             # method/backbone/lambda/seed fixed. Without this suffix every z_dim writes the
@@ -621,9 +637,10 @@ def evaluate_config(
         # TWO ARMS BEING COMPARED. It is deliberate (standard WGAN practice), but an
         # undisclosed 10x difference in a controlled ablation is exactly what a reviewer
         # should be able to see without reading source.
-        # kl_coef is deliberately NOT here: evaluate_config does not expose it, so it is
-        # always train_integration_model's default (0.005). Recording a value this
-        # function cannot vary would imply a knob that does not exist.
+        # kl_coef IS now recorded: evaluate_config exposes it (a KL-weight sweep), so the
+        # row must carry the actual value used or a swept result is indistinguishable from
+        # a default one.
+        "kl_coef": kl_coef,
         # evaluate_config does not pass disc_iter, so train_one applies its head default.
         # Mirror that SAME expression here rather than hardcoding a number, so the two
         # cannot drift apart silently.

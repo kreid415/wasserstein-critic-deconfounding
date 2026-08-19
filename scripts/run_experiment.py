@@ -39,20 +39,22 @@ LR_MULTS = [1.0, 2.0, 4.0]
 BASE_LR = 1e-3
 
 
-def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None, z_dim=None):
+def _resume_key(method, backbone, d_coef, seed, batch_size=None, lr_g=None, z_dim=None,
+                kl_coef=None):
     """Identity of a configuration for --resume.
 
     MUST include every field the experiment grid varies. E10 varies batch_size and lr
     while holding method/backbone/d_coef/seed fixed, so a key without them collapses its
     24 configs to 6 and silently skips 18 as already done. A capacity sweep varies z_dim
-    the same way, so it is keyed here too. Defaults (None -> the production settings) keep
-    keys stable for rows written before these columns existed, so an in-progress
-    E1/E2/E8 wave still resumes correctly.
+    and a KL-weight sweep varies kl_coef the same way, so both are keyed here too.
+    Defaults (None -> the production settings) keep keys stable for rows written before
+    these columns existed, so an in-progress E1/E2/E8 wave still resumes correctly.
     """
     bs = 1024 if batch_size is None or (isinstance(batch_size, float) and batch_size != batch_size) else int(batch_size)
     lr = 1e-3 if lr_g is None or (isinstance(lr_g, float) and lr_g != lr_g) else float(lr_g)
     zd = 256 if z_dim is None or (isinstance(z_dim, float) and z_dim != z_dim) else int(z_dim)
-    return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12), zd)
+    kl = 0.005 if kl_coef is None or (isinstance(kl_coef, float) and kl_coef != kl_coef) else float(kl_coef)
+    return (method, backbone, float(d_coef), int(seed), bs, round(lr, 12), zd, round(kl, 12))
 
 
 def configs_for(experiment, task_entry, reference_name=None, batch_size_only=None,
@@ -136,6 +138,10 @@ def main():
     ap.add_argument("--balance", action="store_true")
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--zdim", type=int, default=256)
+    ap.add_argument("--kl-coef", type=float, default=0.005,
+                    help="VAE KL weight (default 0.005). Sweep this to probe the "
+                         "reconstruction/bottleneck trade-off that dominates bio "
+                         "conservation; recorded in the row and the embed tag.")
     ap.add_argument("--backbone", default=None,
                     help="backbone for E1/E8 (default NB primary post-scCRAFT-drop); "
                          "E2 sweeps its own set and ignores this")
@@ -228,7 +234,7 @@ def main():
                     continue
                 done.add(_resume_key(
                     r["method"], r.get("backbone", "NB"), r["d_coef"], r["seed"],
-                    r.get("batch_size"), r.get("lr_g"), r.get("z_dim")))
+                    r.get("batch_size"), r.get("lr_g"), r.get("z_dim"), r.get("kl_coef")))
         print(f"[resume] loaded {len(done)} completed configs from {args.out}")
 
     for i, cfg in enumerate(configs_for(args.experiment, entry, reference_name=largest, batch_size_only=args.batch_size_only, extra_lambdas=args.extra_lambda)):
@@ -246,13 +252,14 @@ def main():
         # that backbone's arm (one short job per backbone across idle CPU nodes).
         if args.experiment == "E2" and args.backbone is not None and cfg.get("backbone") != args.backbone:
             continue
-        cfg = dict(cfg, epochs=args.epochs, z_dim=args.zdim)
+        cfg = dict(cfg, epochs=args.epochs, z_dim=args.zdim, kl_coef=args.kl_coef)
         # --backbone sets the E1/E8 backbone (E2 configs already carry their own).
         if args.backbone is not None and "backbone" not in cfg:
             cfg["backbone"] = args.backbone
         method = "critic" if cfg.get("critic") else "discriminator"
         key = _resume_key(method, cfg.get("backbone", "NB"), cfg["d_coef"], cfg["seed"],
-                          cfg.get("batch_size"), cfg.get("lr_g"), cfg.get("z_dim"))
+                          cfg.get("batch_size"), cfg.get("lr_g"), cfg.get("z_dim"),
+                          cfg.get("kl_coef"))
         if key in done:
             continue
         try:
