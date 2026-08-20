@@ -45,6 +45,19 @@ def main():
                     help="VAE KL weight (default 0.005). Recorded in the row and embed tag.")
     ap.add_argument("--zdim", type=int, default=256,
                     help="latent width (default 256).")
+    ap.add_argument("--contrast-coef", type=float, default=0.0,
+                    help="weight of the scCRAFT dual-resolution triplet loss (barycenter arm only; default 0.0 = off; scCRAFT uses 1.0). Recorded in the row and embed tag.")
+    ap.add_argument("--contrast-margin", type=float, default=5.0,
+                    help="triplet margin (scCRAFT uses 5.0).")
+    ap.add_argument("--contrast-res-low", type=float, default=0.5,
+                    help="coarse Leiden resolution defining triplet positives (scCRAFT 0.5).")
+    ap.add_argument("--contrast-res-high", type=float, default=7.0,
+                    help="fine Leiden resolution for the positive-pair veto (scCRAFT 7.0).")
+    ap.add_argument("--cos-coef", type=float, default=0.0,
+                    help="weight of the cosine reconstruction loss (barycenter arm only; default 0.0 = off; scCRAFT uses 20.0). Recorded in the row and embed tag.")
+    ap.add_argument("--warmup", type=int, default=5,
+                    help="warmup epochs with the adversary off (lambda=0) so the VAE learns "
+                         "biology before batch-mixing pressure starts (default 5; scCRAFT uses 50).")
     ap.add_argument("--seeds", default=None,
                     help="comma-separated seeds to run (default all of SEEDS=[0,1,2]); use for quick previews, e.g. --seeds 0")
     ap.add_argument("--backbone", default="NB",
@@ -116,6 +129,9 @@ def main():
                 row = evaluate_config(adata, batch_key, celltype_key, d_coef=args.d_coef,
                                       seed=seed, epochs=args.epochs, backbone=args.backbone,
                                       kl_coef=args.kl_coef, z_dim=args.zdim,
+                                      contrast_coef=args.contrast_coef, contrast_margin=args.contrast_margin,
+                                      contrast_res_low=args.contrast_res_low, contrast_res_high=args.contrast_res_high,
+                                      cos_coef=args.cos_coef, warmup_epoch=args.warmup,
                                       **cfg_run, embed_out=(os.path.join(args.embed_out, args.dataset) if args.embed_out else None))
                 row.update({"experiment": "E9", "dataset": args.dataset, "arm": tag,
                             "balanced": args.balance, "n_batches": n_batches})
