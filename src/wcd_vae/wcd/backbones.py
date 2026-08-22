@@ -24,6 +24,7 @@ import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
 
 from wcd_vae.wcd.primitives import gaussian_sample, nb_log_likelihood
+from wcd_vae.wcd.scvi_backbone import LinearSCVIBackbone as _LinearSCVIBackbone
 
 
 class _Encoder(nn.Module):
@@ -217,6 +218,18 @@ BACKBONE_CONFIGS = {
     "ZINB_uncond":  (ZinbVAE,     {"conditioned": False}),
     "LDVAE":        (LDVAE,       {"conditioned": True}),
     "LDVAE_uncond": (LDVAE,       {"conditioned": False}),
+    # Faithful scvi-tools 1.4.2 LinearSCVI (library latent + softmax composition + per-gene
+    # dispersion); numeric equivalence to real scVI proven by scripts/scvi_gate_*.py. Always
+    # decoder-conditioned (scVI's setup_anndata(batch_key)); pair with an adversary head to
+    # ask whether an adversary adds anything on top of scVI's decoder-side conditioning.
+    "LinearSCVI":   (_LinearSCVIBackbone, {"conditioned": True}),
+    # DELIBERATE ABLATION (not faithful scVI -- scVI's LinearSCVI is ALWAYS decoder-conditioned):
+    # the decoder gets NO batch one-hot, so the adversary is the SOLE batch-correction mechanism.
+    # This isolates the adversary's contribution -- on the conditioned backbone the decoder's own
+    # batch channel does the integration and confounds the critic-vs-discriminator comparison.
+    # Shares the exact scVI generative machinery (library latent, softmax composition, per-gene NB)
+    # and the scVI training profile; only the decoder conditioning differs.
+    "LinearSCVI_uncond": (_LinearSCVIBackbone, {"conditioned": False}),
 }
 
 def build_backbone(name, p_dim, v_dim, latent_dim):

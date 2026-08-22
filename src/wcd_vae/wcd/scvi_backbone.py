@@ -152,6 +152,12 @@ class LinearSCVIBackbone(nn.Module):
             "kl_warmup_epochs": 400,
             "skip_bn_init": True,
             "early_stopping": False,
+            # scVI's loss reduction: mean_N( recon_SUM_over_genes + kl_coef*kl_z_SUM + kl_l_SUM ),
+            # with kl_coef == beta. The default harness form mean_{N,G}(recon) + kl_coef*mean_N(kl)
+            # under-weights reconstruction by a factor G relative to KL, over-regularizing the
+            # latent (the scVI reproduction gate caught this). loss_reduction="sum" selects the
+            # scVI form in _train_batch. kl_l is folded into the [N,G] reconst (row-sum adds kl_l).
+            "loss_reduction": "sum",
         }
 
     # -- library prior ---------------------------------------------------------------
@@ -208,16 +214,12 @@ class LinearSCVIBackbone(nn.Module):
         # KL terms. z-KL is the warmup/kl_coef-weighted term (returned separately). Library-KL
         # is against the per-batch prior and is ALWAYS full weight in scVI -> fold into reconst
         # so _train_batch's single kl_coef anneals only the z-KL (exactly scVI's kl_weight).
-        # KL SCALING SO kl_coef == scVI's beta. The harness minimizes
-        #   mean_{N,G}(reconst) + kl_coef * mean_N(kl_divergence)
-        # -> multiplying by G, that is  recon_sum + kl_l + (G*kl_coef)*kl_z. scVI's objective
-        # is recon_sum + kl_l + beta*kl_z. To make kl_coef DIRECTLY equal beta (so --kl-coef 1.0
-        # is scVI's default), return kl_z/G here: then kl_coef*mean(kl_z/G) sits at the same
-        # per-gene scale as reconstruction and the effective z-KL weight is exactly kl_coef.
-        # (This is why the NATIVE backbones use kl_coef=5e-4 ~ 1/G to reach beta~1; this backbone
-        # instead absorbs the 1/G so its kl_coef reads as a true beta.)
+        # z-KL, SUMMED over latent dims -> [N] (scVI's kl_divergence_z reduction). Returned raw;
+        # the training loop applies scVI's reduction (mean_N(recon_sum + kl_coef*kl_z + kl_l_sum),
+        # kl_coef == beta) for profile backbones via loss_reduction="sum". Do NOT pre-divide by G
+        # here -- an earlier /p_dim rescaling over-regularized the latent (KL-to-reconstruction
+        # ratio G x too high), which the scVI reproduction gate exposed (z std 0.67 vs scVI 0.81).
         kl_z = kl(Normal(q_m, q_v.sqrt()), Normal(torch.zeros_like(q_m), torch.ones_like(q_v))).sum(dim=1)
-        kl_z = kl_z / self.p_dim
         pl_m, pl_v = self._local_library_params(ec if self.n_batch else torch.zeros(z.size(0), 1, device=z.device))
         kl_l = kl(Normal(ql_m, ql_v.sqrt()), Normal(pl_m, pl_v.sqrt())).sum(dim=1)   # [N]
         # Fold the per-cell library-KL into the [N,G] reconst at FULL weight while preserving
