@@ -118,6 +118,42 @@ class LinearSCVIBackbone(nn.Module):
         self.register_buffer("library_log_means", torch.zeros(1, max(self.n_batch, 1)))
         self.register_buffer("library_log_vars", torch.ones(1, max(self.n_batch, 1)))
 
+    # -- scVI training regimen -------------------------------------------------------
+    def training_profile(self):
+        """scVI TrainingPlan knobs that have NO CLI flag, applied by train_model ONLY for
+        this backbone (native backbones return no profile, so every existing wave is
+        byte-identical). Fixes faithfulness gaps 1,3,4,5:
+
+          gen_betas       (0.9, 0.999)  -- scVI's Adam betas on the GENERATOR (VAE) optimizer.
+                          The ADVERSARY optimizer keeps the GAN convention (0.5, 0.9): scVI has
+                          no adversary to match, and beta1=0.5 is correct for critic dynamics.
+                          At lambda=0 the adversary contributes nothing to the generator update,
+                          so a scVI-matched generator optimizer makes the lambda=0 arm a true
+                          plain-scVI reproduction.
+          weight_decay    1e-6, adam_eps 1e-2  -- scVI Adam defaults (gap 4), generator only.
+          batch_size      128  -- scVI train() default (gap 3); native backbones use 1024.
+          kl_warmup_epochs 400 -- scVI linear KL ramp 0->max over 400 epochs (gap 1). Combined
+                          with the immune epoch budget (239, scVI's n_obs heuristic) the effective
+                          final beta is ~0.60, NOT 1.0 -- exactly what real scVI does on immune.
+          skip_bn_init    True -- use torch default BatchNorm init, not the project's
+                          N(1,0.02) perturbation (gap 5).
+          early_stopping  False -- scVI runs the full epoch budget (no ES).
+
+        Gap 6 (epoch budget) and max_kl are set by the CALLER via --epochs / --kl-coef so the
+        matched manifest reads them explicitly. Gap 7 (posterior-mean latent) is a documented
+        caveat: obtain_embeddings uses the sampled z for all backbones and changing it would
+        alter every existing wave's embeddings.
+        """
+        return {
+            "gen_betas": (0.9, 0.999),
+            "weight_decay": 1e-6,
+            "adam_eps": 1e-2,
+            "batch_size": 128,
+            "kl_warmup_epochs": 400,
+            "skip_bn_init": True,
+            "early_stopping": False,
+        }
+
     # -- library prior ---------------------------------------------------------------
     def set_library_prior(self, counts, batch_idx):
         """Empirical per-batch mean/var of log library size (log total counts), like scVI's
