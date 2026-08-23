@@ -4,7 +4,9 @@ scvi-tools generative model can be trained with:
 
     adversary = "none"           -> stock scvi training (seeded => BIT-IDENTICAL to LinearSCVI)
               | "discriminator"  -> V-way cross-entropy domain classifier (JS adversary)
-              | "reference"      -> reference Wasserstein critic (align to a reference batch)
+              | "reference"      -> reference Wasserstein critic (align to a designated batch)
+              | "pooled"         -> pooled Wasserstein critic (align to the global pool; the
+                                    fair W1 counterpart to the discriminator's JS objective)
               | "barycenter"     -> barycenter Wasserstein critic (align to a learnable centre)
 
 WHY THIS DESIGN (upstreamable):
@@ -40,6 +42,12 @@ import torch.nn.functional as F  # noqa: N812
 
 from scvi.train import AdversarialTrainingPlan
 from scvi import REGISTRY_KEYS
+
+
+# Wasserstein-critic formulations (all use the critic branch + gradient penalty + disc_iter inner
+# loop). "discriminator" (JS classifier) and "none" are NOT critics. Keep this the single source of
+# truth so the head-construction and inner-loop gates cannot drift apart.
+_CRITIC_FORMULATIONS = ("reference", "pooled", "barycenter")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -122,7 +130,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             src_root = wcd_src_root or os.environ.get("WCD_SRC")
             Discriminator, _critic = _load_wcd_heads(src_root)
             n_batch = int(n_domains) if n_domains is not None else int(self.module.n_batch)
-            crit = adversary in ("reference", "barycenter")
+            crit = adversary in _CRITIC_FORMULATIONS
             self._wcd_head = Discriminator(
                 n_input=int(self.module.n_latent),
                 domain_number=n_batch,
@@ -170,7 +178,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         loss_vae = scvi_loss.loss
 
         # 1) adversary (critic/discriminator) update on detached z, disc_iter times
-        for _ in range(self.disc_iter if self.adversary in ("reference", "barycenter") else 1):
+        for _ in range(self.disc_iter if self.adversary in _CRITIC_FORMULATIONS else 1):
             loss_da_d, gp = self._adv_loss(z.detach(), batch_index)
             loss_d = loss_da_d + gp
             opt_d.zero_grad()
