@@ -21,6 +21,7 @@ COND = os.environ.get("COND", "1") == "1"
 SEED = int(os.environ.get("SEED", "0"))
 MAXEP = int(os.environ.get("MAXEP", "239"))
 BATCH = int(os.environ.get("BATCH", "512"))
+MODEL = os.environ.get("SCVI_MODEL", "LinearSCVI")  # LinearSCVI (linear dec) | SCVI (nonlinear dec)
 OUT = os.environ["OUT"]
 
 adata = sc.read_h5ad(f"results/scvi_single/{DS}_prepped.h5ad")
@@ -33,7 +34,7 @@ print(f"[{DS} adv={ADV} λ={DCOEF} cond={COND} s{SEED}] fitting {MAXEP}ep batch=
 Z = fit_adversarial_linearscvi(
     adata, bk, adversary=ADV, d_coef=DCOEF, disc_iter=DISC_ITER,
     reference_batch=0, n_latent=30, max_epochs=MAXEP, batch_size=BATCH,
-    seed=SEED, conditioned=COND,
+    seed=SEED, conditioned=COND, model_name=MODEL,
 )
 dt = time.time() - t
 

@@ -203,12 +203,20 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
 def fit_adversarial_linearscvi(
     adata, batch_key, *, adversary="none", d_coef=0.0, disc_iter=10, reference_batch=0,
     n_latent=30, max_epochs=239, batch_size=512, seed=0, conditioned=True, wcd_src_root=None,
+    model_name="LinearSCVI",
 ):
-    """Fit LinearSCVI + swappable adversary. conditioned=False omits batch_key from setup so the
-    decoder is NOT batch-conditioned (adversary is then the sole integrator). Returns the latent Z."""
+    """Fit an scvi module (LinearSCVI = linear decoder; SCVI = nonlinear decoder) + swappable
+    adversary. conditioned=False omits batch_key from setup so the decoder is NOT batch-conditioned
+    (adversary is then the sole integrator). The plan reads inference_outputs["z"], which both
+    modules provide identically, so the adversary is model-agnostic. Returns the latent Z."""
     import functools
     import scvi
-    from scvi.model import LinearSCVI
+    if model_name == "SCVI":
+        from scvi.model import SCVI as Model   # nonlinear DecoderSCVI
+    elif model_name == "LinearSCVI":
+        from scvi.model import LinearSCVI as Model   # LinearDecoderSCVI
+    else:
+        raise ValueError(f"model_name must be 'LinearSCVI' or 'SCVI', got {model_name!r}")
 
     scvi.settings.seed = seed
     a = adata.copy()
@@ -217,14 +225,14 @@ def fit_adversarial_linearscvi(
     n_domains = int(a.obs[batch_key].nunique())
     if conditioned:
         # decoder IS batch-conditioned; adversary reads BATCH_KEY.
-        LinearSCVI.setup_anndata(a, batch_key=batch_key)
+        Model.setup_anndata(a, batch_key=batch_key)
         adv_batch_slot = "batch"
     else:
         # decoder NOT conditioned (no batch_key); real batches go to the LABELS slot so the
         # adversary still sees them and is the SOLE integrator.
-        LinearSCVI.setup_anndata(a, labels_key=batch_key)
+        Model.setup_anndata(a, labels_key=batch_key)
         adv_batch_slot = "labels"
-    model = LinearSCVI(a, n_latent=n_latent)
+    model = Model(a, n_latent=n_latent)
 
     # inject the custom plan class + its extra kwargs
     model._training_plan_cls = WassersteinAdversarialTrainingPlan
