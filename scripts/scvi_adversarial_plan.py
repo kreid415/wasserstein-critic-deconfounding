@@ -46,8 +46,25 @@ from scvi import REGISTRY_KEYS
 
 # Wasserstein-critic formulations (all use the critic branch + gradient penalty + disc_iter inner
 # loop). "discriminator" (JS classifier) and "none" are NOT critics. Keep this the single source of
-# truth so the head-construction and inner-loop gates cannot drift apart.
+# truth so the head-construction and inner-loop gates cannot drift apart. The suffix "_sn" selects
+# the spectral-norm Lipschitz variant of the same critic (GP is then skipped).
 _CRITIC_FORMULATIONS = ("reference", "pooled", "barycenter")
+
+# Critic-FREE alignment divergences: no adversary network, no inner loop, no gradient penalty --
+# a closed-form/fixed-iteration divergence between each batch and the pool, added straight to the
+# generator objective. Isolates the IPM GEOMETRY from the ADVERSARIAL ESTIMATOR.
+_CRITIC_FREE = ("mmd", "sinkhorn")
+
+
+def _parse_adversary(adversary):
+    """Return (base, spectral_norm). 'reference_sn' -> ('reference', True); else (adversary, False).
+    Only critic formulations accept the _sn suffix."""
+    if adversary.endswith("_sn"):
+        base = adversary[:-3]
+        if base not in _CRITIC_FORMULATIONS:
+            raise ValueError(f"spectral-norm suffix _sn only valid on a critic formulation, got {adversary!r}")
+        return base, True
+    return adversary, False
 
 
 # ---------------------------------------------------------------------------------------------
@@ -87,7 +104,8 @@ def _load_wcd_heads(src_root):
 
     critic_mod = _load("wcd_vae.wcd.critic", "critic.py")
     adv_mod = _load("wcd_vae.wcd.adversarial", "adversarial.py")
-    return adv_mod.Discriminator, critic_mod
+    align_mod = _load("wcd_vae.wcd.alignment", "alignment.py")   # critic-free MMD/Sinkhorn
+    return adv_mod.Discriminator, critic_mod, align_mod
 
 
 class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
@@ -125,20 +143,30 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         #   in explicitly (the true #batches). The adversary is then the SOLE integrator.
         self.adv_batch_slot = adv_batch_slot
         self._wcd_head = None
+        self._align_fn = None
+        # split e.g. "reference_sn" -> base="reference", spectral_norm=True
+        base, self.spectral_norm = _parse_adversary(adversary)
+        self.adversary_base = base
+        self.is_critic = base in _CRITIC_FORMULATIONS
+        self.is_critic_free = base in _CRITIC_FREE
 
         if adversary != "none":
             src_root = wcd_src_root or os.environ.get("WCD_SRC")
-            Discriminator, _critic = _load_wcd_heads(src_root)
+            Discriminator, _critic, align_mod = _load_wcd_heads(src_root)
             n_batch = int(n_domains) if n_domains is not None else int(self.module.n_batch)
-            crit = adversary in _CRITIC_FORMULATIONS
-            self._wcd_head = Discriminator(
-                n_input=int(self.module.n_latent),
-                domain_number=n_batch,
-                critic=crit,
-                reference_batch=(reference_batch if adversary == "reference" else None),
-                formulation=(adversary if crit else "reference"),
-            )
-            self.register_module("wcd_adversary", self._wcd_head)
+            if self.is_critic_free:
+                # No adversary network at all -- a differentiable divergence on z directly.
+                self._align_fn = align_mod.CRITIC_FREE_LOSSES[base]
+            else:
+                self._wcd_head = Discriminator(
+                    n_input=int(self.module.n_latent),
+                    domain_number=n_batch,
+                    critic=self.is_critic,
+                    reference_batch=(reference_batch if base == "reference" else None),
+                    formulation=(base if self.is_critic else "reference"),
+                    spectral_norm=self.spectral_norm,
+                )
+                self.register_module("wcd_adversary", self._wcd_head)
             # the barycenter anchors are trained by the GENERATOR optimizer (they define the target
             # the encoder aligns to); everything else in the head is the adversary optimizer's.
 
@@ -146,6 +174,12 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
     def configure_optimizers(self):
         if self.adversary == "none":
             return super().configure_optimizers()
+        if self.is_critic_free:
+            # No adversary network -> ONE optimizer (the generator). The alignment divergence is
+            # differentiable and added straight to the generator loss; nothing to train adversarially.
+            opt_g = torch.optim.Adam(self.module.parameters(), lr=self.lr, eps=self.eps,
+                                     weight_decay=self.weight_decay, betas=(0.9, 0.999))
+            return [opt_g]
         # generator params: the scvi module + (for barycenter) the learnable anchors
         gen_params = list(self.module.parameters())
         adv_params = []
@@ -171,14 +205,31 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         # decoder's BATCH_KEY is all-zeros but the real batches live in the labels slot).
         _slot = REGISTRY_KEYS.LABELS_KEY if self.adv_batch_slot == "labels" else REGISTRY_KEYS.BATCH_KEY
         batch_index = batch[_slot].long().squeeze(-1)
-        opt_g, opt_d = self.optimizers()
 
+        if self.is_critic_free:
+            # CRITIC-FREE: one optimizer, no inner loop, no GP. The alignment divergence D(z, batch)
+            # is a differentiable measure of how separable the batches are; the generator minimises
+            # loss_vae + lambda * D (batches more mixed => D smaller). Sign is + here (D>=0, and we
+            # DRIVE IT DOWN), matching "loss_vae - lambda*loss_da" with loss_da = -D.
+            opt_g = self.optimizers()   # single optimizer (Lightning returns it unwrapped)
+            inference_outputs, _, scvi_loss = self.forward(batch, loss_kwargs=self.loss_kwargs)
+            z = inference_outputs["z"]
+            loss_vae = scvi_loss.loss
+            align = self._align_fn(z, batch_index)
+            gen_loss = loss_vae + self.d_coef * align
+            opt_g.zero_grad()
+            self.manual_backward(gen_loss)
+            opt_g.step()
+            self.log("train_loss", loss_vae, on_step=self.on_step, on_epoch=self.on_epoch, prog_bar=True)
+            return loss_vae
+
+        opt_g, opt_d = self.optimizers()
         inference_outputs, _, scvi_loss = self.forward(batch, loss_kwargs=self.loss_kwargs)
         z = inference_outputs["z"]
         loss_vae = scvi_loss.loss
 
         # 1) adversary (critic/discriminator) update on detached z, disc_iter times
-        for _ in range(self.disc_iter if self.adversary in _CRITIC_FORMULATIONS else 1):
+        for _ in range(self.disc_iter if self.is_critic else 1):
             loss_da_d, gp = self._adv_loss(z.detach(), batch_index)
             loss_d = loss_da_d + gp
             opt_d.zero_grad()
@@ -196,11 +247,16 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         return loss_vae
 
     def _adv_loss(self, z, batch_index):
-        """Call the wcd head; returns (adversarial_loss, gradient_penalty)."""
-        ref = self.reference_batch if self.adversary == "reference" else None
+        """Call the wcd head; returns (adversarial_loss, gradient_penalty). When spectral_norm is on,
+        the head's Lipschitz constraint is enforced per-layer, so the sampled gradient penalty is
+        DROPPED (the two must not be stacked)."""
+        ref = self.reference_batch if self.adversary_base == "reference" else None
         out = self._wcd_head(z, batch_index, reference_batch=ref)
         if isinstance(out, tuple):
-            return out[0], (out[1] if len(out) > 1 and out[1] is not None else z.new_zeros(()))
+            gp = out[1] if (len(out) > 1 and out[1] is not None) else z.new_zeros(())
+            if self.spectral_norm:
+                gp = z.new_zeros(())   # SN already constrains Lipschitz; do not add GP on top
+            return out[0], gp
         return out, z.new_zeros(())
 
 

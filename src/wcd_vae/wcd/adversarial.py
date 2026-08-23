@@ -30,15 +30,24 @@ class Discriminator(nn.Module):
         reference_batch_name_str=None,
         formulation="reference",
         n_anchors=64,
+        spectral_norm=False,
     ):
         super().__init__()
         n_hidden = 128
         self.critic = critic
         self.formulation = formulation
+        # WHY spectral_norm: an ALTERNATIVE way to enforce the critic's 1-Lipschitz constraint.
+        #      WGAN-GP penalises the gradient norm (a soft, sampled constraint); spectral
+        #      normalisation bounds each layer's spectral norm directly (a hard, per-layer
+        #      constraint). Switching GP->SN isolates whether the critic's underperformance comes
+        #      from the Lipschitz-enforcement mechanism. When True, the PLAN must skip the gradient
+        #      penalty (SN already constrains Lipschitz); the two must not be stacked.
+        self.spectral_norm = spectral_norm
+        _sn = (lambda m: nn.utils.parametrizations.spectral_norm(m)) if spectral_norm else (lambda m: m)
         # Define layers
-        self.fc1 = nn.Linear(n_input, n_hidden)
-        self.fc2 = nn.Linear(n_hidden, n_hidden)
-        self.fc3 = nn.Linear(n_hidden, domain_number)
+        self.fc1 = _sn(nn.Linear(n_input, n_hidden))
+        self.fc2 = _sn(nn.Linear(n_hidden, n_hidden))
+        self.fc3 = _sn(nn.Linear(n_hidden, domain_number))
 
         # WHY (formulation study): the barycenter critic aligns every batch to a LEARNABLE
         #      virtual center rather than an existing batch, testing whether the critic's
