@@ -22,6 +22,7 @@ SEED = int(os.environ.get("SEED", "0"))
 MAXEP = int(os.environ.get("MAXEP", "239"))
 BATCH = int(os.environ.get("BATCH", "512"))
 MODEL = os.environ.get("SCVI_MODEL", "LinearSCVI")  # LinearSCVI (linear dec) | SCVI (nonlinear dec)
+MKL = os.environ.get("SCVI_MAX_KL")                  # scvi max_kl_weight (KL scale); None => scvi default 1.0
 OUT = os.environ["OUT"]
 
 adata = sc.read_h5ad(f"results/scvi_single/{DS}_prepped.h5ad")
@@ -35,6 +36,7 @@ Z = fit_adversarial_linearscvi(
     adata, bk, adversary=ADV, d_coef=DCOEF, disc_iter=DISC_ITER,
     reference_batch=0, n_latent=30, max_epochs=MAXEP, batch_size=BATCH,
     seed=SEED, conditioned=COND, model_name=MODEL,
+    max_kl_weight=(float(MKL) if MKL is not None else None),
 )
 dt = time.time() - t
 

@@ -267,7 +267,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
 def fit_adversarial_linearscvi(
     adata, batch_key, *, adversary="none", d_coef=0.0, disc_iter=10, reference_batch=0,
     n_latent=30, max_epochs=239, batch_size=512, seed=0, conditioned=True, wcd_src_root=None,
-    model_name="LinearSCVI",
+    model_name="LinearSCVI", max_kl_weight=None, n_epochs_kl_warmup=None,
 ):
     """Fit an scvi module (LinearSCVI = linear decoder; SCVI = nonlinear decoder) + swappable
     adversary. conditioned=False omits batch_key from setup so the decoder is NOT batch-conditioned
@@ -304,6 +304,14 @@ def fit_adversarial_linearscvi(
                        reference_batch=reference_batch, n_domains=n_domains,
                        adv_batch_slot=adv_batch_slot,
                        wcd_src_root=(wcd_src_root or os.environ.get("WCD_SRC")))
+    # KL controls (scvi anneals kl_weight from min to max_kl_weight over n_epochs_kl_warmup).
+    # max_kl_weight is the scvi-native equivalent of the wcd harness's fixed kl_coef -- sweep it to
+    # test whether looser KL lifts the critics (default scvi max_kl_weight=1.0). Flows through the
+    # plan's **kwargs to the base TrainingPlan.
+    if max_kl_weight is not None:
+        plan_kwargs["max_kl_weight"] = float(max_kl_weight)
+    if n_epochs_kl_warmup is not None:
+        plan_kwargs["n_epochs_kl_warmup"] = int(n_epochs_kl_warmup)
     model.train(max_epochs=max_epochs, batch_size=batch_size, early_stopping=False,
                 enable_progress_bar=False, plan_kwargs=plan_kwargs)
     return model.get_latent_representation()
