@@ -1,0 +1,7 @@
+LinearSCVI	uncond	0	mmd	500	1	immune_XOP_lin_uncond_mmd_lam500
+LinearSCVI	uncond	0	mmd	1000	1	immune_XOP_lin_uncond_mmd_lam1000
+LinearSCVI	uncond	0	mmd	2000	1	immune_XOP_lin_uncond_mmd_lam2000
+LinearSCVI	uncond	0	sinkhorn	10	1	immune_XOP_lin_uncond_sinkhorn_lam10
+LinearSCVI	uncond	0	sinkhorn	50	1	immune_XOP_lin_uncond_sinkhorn_lam50
+LinearSCVI	uncond	0	sinkhorn	200	1	immune_XOP_lin_uncond_sinkhorn_lam200
+LinearSCVI	uncond	0	sinkhorn	500	1	immune_XOP_lin_uncond_sinkhorn_lam500
