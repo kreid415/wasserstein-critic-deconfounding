@@ -1,0 +1,16 @@
+LinearSCVI	uncond	0	mmd	1	1	immune_XO_lin_uncond_mmd_lam1
+LinearSCVI	uncond	0	mmd	5	1	immune_XO_lin_uncond_mmd_lam5
+LinearSCVI	uncond	0	mmd	20	1	immune_XO_lin_uncond_mmd_lam20
+LinearSCVI	uncond	0	mmd	50	1	immune_XO_lin_uncond_mmd_lam50
+LinearSCVI	uncond	0	sinkhorn	1	1	immune_XO_lin_uncond_sinkhorn_lam1
+LinearSCVI	uncond	0	sinkhorn	5	1	immune_XO_lin_uncond_sinkhorn_lam5
+LinearSCVI	uncond	0	sinkhorn	20	1	immune_XO_lin_uncond_sinkhorn_lam20
+LinearSCVI	uncond	0	sinkhorn	50	1	immune_XO_lin_uncond_sinkhorn_lam50
+SCVI	uncond	0	mmd	1	1	immune_XO_nl_uncond_mmd_lam1
+SCVI	uncond	0	mmd	5	1	immune_XO_nl_uncond_mmd_lam5
+SCVI	uncond	0	mmd	20	1	immune_XO_nl_uncond_mmd_lam20
+SCVI	uncond	0	mmd	50	1	immune_XO_nl_uncond_mmd_lam50
+SCVI	uncond	0	sinkhorn	1	1	immune_XO_nl_uncond_sinkhorn_lam1
+SCVI	uncond	0	sinkhorn	5	1	immune_XO_nl_uncond_sinkhorn_lam5
+SCVI	uncond	0	sinkhorn	20	1	immune_XO_nl_uncond_sinkhorn_lam20
+SCVI	uncond	0	sinkhorn	50	1	immune_XO_nl_uncond_sinkhorn_lam50

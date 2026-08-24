@@ -1,6 +1,7 @@
 """Fit ONE adversarial-LinearSCVI config and save the latent npz (scored later in wcd-kbet).
 
-Env: SCVI_DS, ADV (none|discriminator|reference|barycenter), DCOEF, DISC_ITER, COND (1/0),
+Env: SCVI_DS, ADV (none|discriminator|reference|pooled|barycenter|{ref,pooled,bary}_sn|mmd|sinkhorn),
+     DCOEF, DISC_ITER, COND (1/0), SCVI_MAX_KL (optional KL scale),
      SEED, MAXEP, BATCH, OUT (npz path), WCD_SRC.
 """
 import os
