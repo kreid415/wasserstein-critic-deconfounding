@@ -5,12 +5,22 @@ REPRODUCIBILITY CONTRACT: this file + the raw datasets (figshare IDs, recorded m
 committed code regenerate the entire benchmark. No prior latent, scored row, or probe is reused.
 
 FIXED A-PRIORI LAMBDA GRID (declared BEFORE any sweep result exists; not this run's argmax).
-Two families because their loss-injection scales differ by a MEASURABLE, reproducible factor:
+Two families because their loss-injection scales differ. Provenance of each scale:
 
-  loss_vae (scVI sum-reduction ELBO, immune) ~ 868      [measured, objective property]
-  adversarial fool-loss (JS/W1 critic)       ~ O(1-10)  -> lambda*loss_da is 10-50% of loss_vae
-                                                           at lambda ~ 10-150  => ADV grid
-  critic-free divergence (MMD/Sinkhorn, per-minibatch) ~ O(0.01-0.5) -> lambda ~ 100-1500 => CF grid
+  loss_vae (scVI sum-reduction ELBO, immune)           ~ 868    [MEASURED: m.get_elbo(), |value|;
+                                                                  scVI reports negative ELBO, magnitude used]
+  critic-free divergence (MMD/Sinkhorn, per-minibatch  MMD ~0.10, Sinkhorn ~0.44
+    bs=512)                                            [MEASURED on immune X_pca minibatches]
+  adversarial fool-loss (JS cross-entropy / W1 critic) ~ O(1-10)  [ANALYTIC: CE ~ ln(n_batch) at
+                                                                  init ~1-2; W1 critic output O(1) —
+                                                                  NOT independently measured here]
+
+  => lambda*loss_da a meaningful (10-50%) fraction of loss_vae~868 requires:
+       adversarial families: lambda ~ 10-150   (fool-loss O(1-10))       => ADV_LAMBDAS
+       critic-free families: lambda ~ 200-4000 (divergence ~0.1-0.4)     => CF_LAMBDAS
+  The grids are set WIDE (0 -> past-saturation) so the true optimum falls INSIDE, not tuned to it;
+  correctness of the range is VERIFIED IN-RUN by checking each dataset's peak is interior (Phase 3),
+  NOT asserted from these anchors alone.
 
 The grids span 0 -> past-saturation on a log scale, WIDE ENOUGH that each dataset's peak falls
 INSIDE the grid rather than being tuned to it. Same grid for every dataset/decoder/seed.
