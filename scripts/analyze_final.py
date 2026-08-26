@@ -29,7 +29,37 @@ PREREG = {"adv": 20.0, "cf": 200.0}   # matches manifest header
 def load_scored(csv_path):
     df = pd.read_csv(csv_path)
     # 'adv' column already carries formulation / baseline name; lam=0 rows are the 'none' controls
+    df["diverged"] = False
     return df
+
+def load_divergences(driver_log, manifest):
+    """Return diverged (NaN) configs as explicit rows so the curve marks them, not drops them.
+
+    A config that appears in the driver log as [FAIL] with a NaN encoder output is a genuine
+    training divergence (high-lambda adversarial instability), NOT a missing computation. We
+    record it with scIB=NaN and diverged=True so the frontier curve shows the arm ENDING at the
+    last stable lambda rather than silently omitting the point.
+    """
+    if not (driver_log and os.path.exists(driver_log)):
+        return pd.DataFrame()
+    fails = []
+    for line in open(driver_log):
+        if "[FAIL]" in line:
+            tag = line.split("[FAIL]", 1)[1].strip().split()[0]
+            fails.append(tag)
+    if not fails:
+        return pd.DataFrame()
+    # parse tag: <dataset>_XZ_<dec>_uncond_<adv>_lam<lam>_s<seed>
+    import re
+    rows = []
+    for tag in sorted(set(fails)):
+        m = re.match(r"(.+)_XZ_(lin|nl)_uncond_([a-z]+)_lam(\d+)_s(\d+)", tag)
+        if not m:
+            continue
+        ds, dec, adv, lam, seed = m.groups()
+        rows.append(dict(tag=tag, dataset=ds, adv=adv, lam=float(lam), dec=dec,
+                         seed=int(seed), batch=np.nan, bio=np.nan, scIB=np.nan, diverged=True))
+    return pd.DataFrame(rows)
 
 def ci95(vals):
     vals = np.asarray([v for v in vals if v == v], dtype=float)
@@ -44,10 +74,12 @@ def build_curve_table(df):
     """One row per (dataset, decoder, formulation, lambda): 5-seed mean +/- CI of scIB/batch/bio."""
     rows = []
     for (ds, dec, adv, lam), g in df.groupby(["dataset", "dec", "adv", "lam"]):
+        n_div = int(g["diverged"].sum()) if "diverged" in g else 0
         for axis in ("scIB", "batch", "bio"):
             m, lo, hi, n = ci95(g[axis].values)
             rows.append(dict(dataset=ds, dec=dec, formulation=adv, lam=lam,
-                             axis=axis, mean=m, ci_lo=lo, ci_hi=hi, n_seeds=n))
+                             axis=axis, mean=m, ci_lo=lo, ci_hi=hi, n_seeds=n,
+                             n_diverged=n_div))
     return pd.DataFrame(rows)
 
 def frontier_dominance(curve):
@@ -91,12 +123,21 @@ def prereg_table(df):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scored", required=True, help="scored config CSV (score_final_config output)")
+    ap.add_argument("--driver-log", default="logs/wave/_driver_final.log",
+                    help="sweep driver log — [FAIL] lines flag diverged (NaN) configs")
     ap.add_argument("--outdir", default="results/final")
     ap.add_argument("--make-figures", action="store_true")
     args = ap.parse_args()
     os.makedirs(args.outdir, exist_ok=True)
 
     df = load_scored(args.scored)
+    div = load_divergences(args.driver_log, None)
+    if len(div):
+        # keep diverged rows only if they were NOT later rescored (a retry that succeeded)
+        div = div[~div["tag"].isin(set(df["tag"]))]
+        df = pd.concat([df, div], ignore_index=True)
+        print(f"[analyze] diverged (NaN) configs recorded: {len(div)} "
+              f"({sorted(div['dataset'].unique())} at lam {sorted(div['lam'].unique())})")
     curve = build_curve_table(df)
     curve.to_csv(f"{args.outdir}/scvi_final_full_curve.csv", index=False)
     dom = frontier_dominance(curve)
