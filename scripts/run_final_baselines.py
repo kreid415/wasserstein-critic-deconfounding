@@ -47,6 +47,12 @@ def main():
     ap.add_argument("--methods", nargs="*", default=METHODS)
     ap.add_argument("--datasets", nargs="*", default=DATASETS)
     ap.add_argument("--seeds", nargs="*", type=int, default=SEEDS)
+    ap.add_argument("--prepped-dir", default=None,
+                    help="If set, read {prepped_dir}/{ds}_prepped.h5ad DIRECTLY (the exact same "
+                         "input the adversarial fits consumed via results/scvi_single/{ds}_prepped.h5ad) "
+                         "instead of re-running load_task from raw. This is the reproducible-parity "
+                         "path: baselines and adversarial arms then integrate byte-identical inputs. "
+                         "The prepped files carry standardized obs keys 'batch'/'celltype' and X_pca.")
     args = ap.parse_args()
 
     # ephemeral guard (same rule as the sweep driver)
@@ -62,7 +68,16 @@ def main():
     import json
     registry = json.load(open(args.registry))
     for ds in args.datasets:
-        adata, bk, ck, _ref = load_task(ds, data_root=args.data_root, registry=registry)
+        if args.prepped_dir:
+            # PARITY PATH: read the identical prepped h5ad the adversarial fits used.
+            path = os.path.join(args.prepped_dir, f"{ds}_prepped.h5ad")
+            adata = sc.read_h5ad(path)
+            bk, ck = "batch", "celltype"   # standardized keys written at prep time
+            assert bk in adata.obs and ck in adata.obs, \
+                f"{path} missing standardized obs keys 'batch'/'celltype' (have {list(adata.obs.columns)})"
+            print(f"[parity] {ds}: read prepped {path} n_obs={adata.n_obs}", flush=True)
+        else:
+            adata, bk, ck, _ref = load_task(ds, data_root=args.data_root, registry=registry)
         if "X_pca" not in adata.obsm:
             sc.tl.pca(adata, n_comps=50)
         for method in args.methods:
