@@ -32,27 +32,48 @@ def load_scored(csv_path):
     df["diverged"] = False
     return df
 
-def load_divergences(driver_log, manifest):
+def load_divergences(driver_logs, manifest):
     """Return diverged (NaN) configs as explicit rows so the curve marks them, not drops them.
 
-    A config that appears in the driver log as [FAIL] with a NaN encoder output is a genuine
+    A config that appears in a driver log as [FAIL] with a NaN encoder output is a genuine
     training divergence (high-lambda adversarial instability), NOT a missing computation. We
     record it with scIB=NaN and diverged=True so the frontier curve shows the arm ENDING at the
     last stable lambda rather than silently omitting the point.
+
+    driver_logs may be a single path OR a glob pattern OR a list of paths/globs. A resumed sweep
+    spreads its [FAIL] lines across several allocation logs (each Slurm job writes its own
+    slurm-<id>.out under a separate job dir), so ALL of them must be read and the tags de-duped —
+    reading only one log silently drops the divergences recorded by the other allocations, which
+    would erase the discriminator-divergence finding from the frontier curves.
     """
-    if not (driver_log and os.path.exists(driver_log)):
+    import glob, re
+    if isinstance(driver_logs, str):
+        driver_logs = [driver_logs]
+    paths = []
+    for pat in driver_logs:
+        if not pat:
+            continue
+        hits = glob.glob(pat)
+        paths.extend(hits if hits else ([pat] if os.path.exists(pat) else []))
+    if not paths:
         return pd.DataFrame()
-    fails = []
-    for line in open(driver_log):
-        if "[FAIL]" in line:
-            tag = line.split("[FAIL]", 1)[1].strip().split()[0]
-            fails.append(tag)
+    fails = set()
+    # the runner logs:  [FAIL] gpu<N> <tag> rc=<code>
+    # so the tag is the token that looks like a config tag (contains '_XZ_'), NOT simply the
+    # first token after [FAIL] (which is the 'gpu0' lane id). Pick the _XZ_ token robustly.
+    for p in paths:
+        for line in open(p):
+            if "[FAIL]" not in line:
+                continue
+            after = line.split("[FAIL]", 1)[1].strip()
+            tok = next((t for t in after.split() if "_XZ_" in t), None)
+            if tok:
+                fails.add(tok)
     if not fails:
         return pd.DataFrame()
     # parse tag: <dataset>_XZ_<dec>_uncond_<adv>_lam<lam>_s<seed>
-    import re
     rows = []
-    for tag in sorted(set(fails)):
+    for tag in sorted(fails):
         m = re.match(r"(.+)_XZ_(lin|nl)_uncond_([a-z]+)_lam(\d+)_s(\d+)", tag)
         if not m:
             continue
@@ -123,8 +144,12 @@ def prereg_table(df):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scored", required=True, help="scored config CSV (score_final_config output)")
-    ap.add_argument("--driver-log", default="logs/wave/_driver_final.log",
-                    help="sweep driver log — [FAIL] lines flag diverged (NaN) configs")
+    ap.add_argument("--driver-log", nargs="+",
+                    default=["logs/wave/_driver_final.log",
+                             os.path.expanduser("~/.claude-science-scratch/.claude-science/jobs/*/slurm-*.out")],
+                    help="sweep driver log(s) — [FAIL] lines flag diverged (NaN) configs. "
+                         "Accepts multiple paths/globs; a resumed sweep spreads FAILs across "
+                         "several allocation logs, so ALL must be read.")
     ap.add_argument("--outdir", default="results/final")
     ap.add_argument("--make-figures", action="store_true")
     args = ap.parse_args()
@@ -155,10 +180,82 @@ def main():
         make_figures(curve, ranks, args.outdir)
 
 def make_figures(curve, ranks, outdir):
-    # imported lazily so the analysis (CSV) path works without the figure stack
+    """Two publication figures, both from the selection-free curve table (no best-lambda pick).
+
+    FIG 1 scvi_final_lambda_curves.png — the PRIMARY result. Per (dataset, decoder) panel, the
+    scIB lambda-response curve of each formulation: 5-seed mean line + 95% CI band over the fixed
+    grid. A diverged arm (all seeds NaN at a lambda) is drawn ENDING at its last stable lambda with
+    an open marker at the divergence point, so the discriminator instability is visible, not hidden.
+
+    FIG 2 scvi_final_ranking.png — the mean-rank across datasets per formulation (lower = better),
+    one bar group per decoder. Summarises the curve dominance as a single ordering.
+    """
     import matplotlib; matplotlib.use("Agg")
-    from figure_style_helpers import plot_lambda_curves, plot_ranking  # placeholder; inline below
-    # (figures implemented in a follow-up cell against real data so styling can be verified)
+    import matplotlib.pyplot as plt
+
+    FORMS = ["discriminator", "reference", "pooled", "barycenter", "mmd", "sinkhorn", "none"]
+    COL = {"discriminator": "#d62728", "reference": "#1f77b4", "pooled": "#2ca02c",
+           "barycenter": "#9467bd", "mmd": "#ff7f0e", "sinkhorn": "#17becf", "none": "#7f7f7f"}
+    sc = curve[curve.axis == "scIB"].copy()
+    dsets = [d for d in DATASETS if d in set(sc.dataset)]
+    decs = sorted(set(sc.dec))
+    if dsets and decs:
+        nrow, ncol = len(decs), len(dsets)
+        fig, axes = plt.subplots(nrow, ncol, figsize=(2.9 * ncol, 3.0 * nrow),
+                                 squeeze=False, sharey="row")
+        for i, dec in enumerate(decs):
+            for j, ds in enumerate(dsets):
+                ax = axes[i][j]
+                g = sc[(sc.dataset == ds) & (sc.dec == dec)]
+                for form in FORMS:
+                    gf = g[g.formulation == form].sort_values("lam")
+                    if gf.empty:
+                        continue
+                    stable = gf[gf["mean"].notna()]
+                    if stable.empty:
+                        continue
+                    x, y = stable["lam"].values, stable["mean"].values
+                    ax.plot(x, y, "-o", ms=3, lw=1.3, color=COL.get(form, "k"),
+                            label=form if (i == 0 and j == 0) else None)
+                    lo, hi = stable["ci_lo"].values, stable["ci_hi"].values
+                    if (~np.isnan(lo)).any():
+                        ax.fill_between(x, lo, hi, color=COL.get(form, "k"), alpha=0.15, lw=0)
+                    # mark a divergence: a lambda where this arm has seeds but a NaN mean
+                    div = gf[(gf["mean"].isna()) & (gf["n_diverged"] > 0)]
+                    if not div.empty and not stable.empty:
+                        ax.plot([stable["lam"].values[-1]], [stable["mean"].values[-1]],
+                                marker="x", ms=8, mew=2, color=COL.get(form, "k"))
+                if i == nrow - 1:
+                    ax.set_xlabel(r"$\lambda$")
+                if j == 0:
+                    ax.set_ylabel(f"{dec}\nscIB")
+                if i == 0:
+                    ax.set_title(ds, fontsize=9)
+                ax.set_xscale("symlog")
+                ax.grid(alpha=0.25, lw=0.5)
+        handles, labels = axes[0][0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper center", ncol=len(labels),
+                   fontsize=8, frameon=False, bbox_to_anchor=(0.5, 1.02))
+        fig.tight_layout(rect=(0, 0, 1, 0.97))
+        fig.savefig(f"{outdir}/scvi_final_lambda_curves.png", dpi=200, bbox_inches="tight")
+        plt.close(fig)
+
+    if len(ranks):
+        decs2 = sorted(set(ranks.dec))
+        fig, axes = plt.subplots(1, len(decs2), figsize=(4.2 * len(decs2), 3.4),
+                                 squeeze=False, sharey=True)
+        for k, dec in enumerate(decs2):
+            ax = axes[0][k]
+            g = ranks[ranks.dec == dec].sort_values("mean_rank")
+            ax.barh(g["method"], g["mean_rank"],
+                    color=[COL.get(m, "#555") for m in g["method"]])
+            ax.invert_yaxis()
+            ax.set_xlabel("mean rank across datasets (1 = best)")
+            ax.set_title(f"decoder: {dec}", fontsize=9)
+            ax.grid(axis="x", alpha=0.25, lw=0.5)
+        fig.tight_layout()
+        fig.savefig(f"{outdir}/scvi_final_ranking.png", dpi=200, bbox_inches="tight")
+        plt.close(fig)
 
 if __name__ == "__main__":
     main()
