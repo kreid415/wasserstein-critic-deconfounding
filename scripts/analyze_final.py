@@ -122,13 +122,30 @@ def frontier_dominance(curve):
     return pd.DataFrame(out)
 
 def prereg_table(df):
-    """Each formulation at its PRE-REGISTERED lambda + baselines; mean-rank across datasets."""
-    # adversarial at prereg lambda; baselines at lam=0 (their only config); none control at lam=0
+    """Each formulation at its PRE-REGISTERED lambda + baselines; mean-rank across datasets.
+
+    The external baselines (harmony/scvi/scanvi/scanorama/unintegrated) are decoder-AGNOSTIC — they
+    do not use the scVI decoder at all, so they carry dec='base'. To rank them HEAD-TO-HEAD against
+    the adversarial arms (which are split into lin/nl decoder groups), we replicate each baseline
+    into BOTH decoder groups. Otherwise baselines would rank only among themselves (a meaningless
+    5-method ranking) and the reader could not see where scVI/scANVI sit relative to the critics.
+    """
+    # adversarial at prereg lambda; baselines (only config); none control (lam=0)
     adv = df[((df.adv.isin(ADV_FORMS)) & (df.lam == PREREG["adv"])) |
              ((df.adv.isin(CF_FORMS)) & (df.lam == PREREG["cf"]))]
-    base = df[df.adv.isin(BASELINES)]
-    none = df[df.adv == "none"]
-    pooled = pd.concat([adv, base, none], ignore_index=True)
+    base = df[df.adv.isin(BASELINES)].copy()
+    none = df[df.adv == "none"].copy()
+    # decoder groups the adversarial arms actually span
+    adv_decs = [d for d in adv["dec"].unique() if d not in ("base",)]
+    if not adv_decs:
+        adv_decs = ["lin", "nl"]
+    # replicate decoder-agnostic rows (baselines + none control) into each adversarial decoder group
+    dec_agnostic = pd.concat([base, none], ignore_index=True)
+    replicated = []
+    for dec in adv_decs:
+        r = dec_agnostic.copy(); r["dec"] = dec
+        replicated.append(r)
+    pooled = pd.concat([adv] + replicated, ignore_index=True)
     # per (method, dataset, decoder): 5-seed mean scIB
     agg = pooled.groupby(["adv", "dataset", "dec"])["scIB"].agg(["mean", "std", "count"]).reset_index()
     # mean-rank across datasets, within decoder (Friedman-blocked on dataset)
@@ -215,8 +232,8 @@ def make_figures(curve, ranks, outdir):
                     if stable.empty:
                         continue
                     x, y = stable["lam"].values, stable["mean"].values
-                    ax.plot(x, y, "-o", ms=3, lw=1.3, color=COL.get(form, "k"),
-                            label=form if (i == 0 and j == 0) else None)
+                    # label on every panel; the legend builder dedups by label
+                    ax.plot(x, y, "-o", ms=3, lw=1.3, color=COL.get(form, "k"), label=form)
                     lo, hi = stable["ci_lo"].values, stable["ci_hi"].values
                     if (~np.isnan(lo)).any():
                         ax.fill_between(x, lo, hi, color=COL.get(form, "k"), alpha=0.15, lw=0)
@@ -233,9 +250,16 @@ def make_figures(curve, ranks, outdir):
                     ax.set_title(ds, fontsize=9)
                 ax.set_xscale("symlog")
                 ax.grid(alpha=0.25, lw=0.5)
-        handles, labels = axes[0][0].get_legend_handles_labels()
-        fig.legend(handles, labels, loc="upper center", ncol=len(labels),
-                   fontsize=8, frameon=False, bbox_to_anchor=(0.5, 1.02))
+        # collect legend entries across ALL panels (a single panel may not plot every arm),
+        # dedup by label, and guard against an empty legend
+        hl = {}
+        for row in axes:
+            for ax in row:
+                for h, l in zip(*ax.get_legend_handles_labels()):
+                    hl.setdefault(l, h)
+        if hl:
+            fig.legend(list(hl.values()), list(hl.keys()), loc="upper center",
+                       ncol=len(hl), fontsize=8, frameon=False, bbox_to_anchor=(0.5, 1.02))
         fig.tight_layout(rect=(0, 0, 1, 0.97))
         fig.savefig(f"{outdir}/scvi_final_lambda_curves.png", dpi=200, bbox_inches="tight")
         plt.close(fig)
