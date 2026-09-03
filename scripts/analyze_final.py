@@ -215,7 +215,9 @@ def make_figures(curve, ranks, outdir):
            "barycenter": "#9467bd", "mmd": "#ff7f0e", "sinkhorn": "#17becf", "none": "#7f7f7f"}
     sc = curve[curve.axis == "scIB"].copy()
     dsets = [d for d in DATASETS if d in set(sc.dataset)]
-    decs = sorted(set(sc.dec))
+    # baselines carry dec='base' and are single-point at lam=0 — they have no lambda-response
+    # curve, so exclude them from the curve panels (they appear in the ranking figure instead)
+    decs = [d for d in sorted(set(sc.dec)) if d != "base"]
     if dsets and decs:
         nrow, ncol = len(decs), len(dsets)
         fig, axes = plt.subplots(nrow, ncol, figsize=(2.9 * ncol, 3.0 * nrow),
