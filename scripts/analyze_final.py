@@ -74,7 +74,7 @@ def load_divergences(driver_logs, manifest):
     # parse tag: <dataset>_XZ_<dec>_uncond_<adv>_lam<lam>_s<seed>
     rows = []
     for tag in sorted(fails):
-        m = re.match(r"(.+)_XZ_(lin|nl)_uncond_([a-z]+)_lam(\d+)_s(\d+)", tag)
+        m = re.match(r"(.+)_XZ_(lin|nl)_uncond_([a-z]+)_lam([\d.]+)_s(\d+)", tag)
         if not m:
             continue
         ds, dec, adv, lam, seed = m.groups()
