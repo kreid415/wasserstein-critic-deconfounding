@@ -1,6 +1,20 @@
 import scanpy as sc
 
 
+def _assert_integer_counts(X, source, n_check=200_000):
+    """Raise unless X holds non-negative integer counts (checks the first n_check stored values)."""
+    import numpy as np
+    import scipy.sparse as sp
+
+    v = X.data[:n_check] if sp.issparse(X) else np.asarray(X).ravel()[:n_check]
+    bad = np.mean((v < 0) | (np.abs(v - np.round(v)) > 1e-6)) if v.size else 0.0
+    if bad > 0:
+        raise ValueError(
+            f"{source}: {bad:.1%} of sampled values are negative or non-integer; scVI's NB/ZINB "
+            "likelihood needs raw counts. Fix the counts layer before prepping this dataset."
+        )
+
+
 def select_reference_batch(adata, batch_key, celltype_key):
     """Pick the reference batch by MAXIMUM CELL-TYPE SHANNON ENTROPY, ties broken by size.
 
@@ -97,7 +111,18 @@ def prep_data(
         else:
             raise ValueError("No batches remained before balancing.")
 
-    # 3. Preprocessing (modality-dependent)
+    # 3. Raw counts.
+    # WHY: the benchmark h5ads store LOG-NORMALISED values in X and the integer counts in
+    #   layers["counts"]. The previous code copied X into layers["counts"], so every scVI-family
+    #   fit used an NB/ZINB likelihood on log data and PCA saw doubly-normalised values
+    #   (code audit 2026-10-01, finding C2). scVI's likelihood is defined on counts.
+    # HOW: take the source counts layer when present, then REFUSE non-integer input so the
+    #   bug cannot recur silently (scVI only warns, and the sweep logs suppressed warnings).
+    if "counts" in adata.layers:
+        adata.X = adata.layers["counts"].copy()
+    _assert_integer_counts(adata.X, anndata_path)
+
+    # 4. Preprocessing (modality-dependent), from the counts above
     adata.raw = adata
     adata.layers["counts"] = adata.X.copy()
     if modality == "atac":
