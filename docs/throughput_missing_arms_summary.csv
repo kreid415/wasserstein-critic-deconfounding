@@ -1,0 +1,13 @@
+label,median_ms,min_ms,max_ms,rel_spread,pf16_repeats_ok,median_rep01_ms,control,ratio_to_control_median,ratio_est_ms,control_csv_ms,session_vs_csv
+discriminator_r1,14.62,13.14,14.83,0.116,True,13.88,discriminator,1.034,12.04,11.65,
+discriminator_ref,16.53,15.89,19.92,0.244,True,17.91,discriminator,1.389,16.18,11.65,
+discriminator_iw,13.08,12.38,28.27,1.215,False,12.73,discriminator,1.143,13.32,11.65,
+reference_stratified,46.4,42.8,47.46,0.1,True,44.6,reference,0.967,45.46,47.03,
+reference_iw,50.23,41.82,65.42,0.47,False,46.02,reference,1.134,53.35,47.03,
+pooled_stratified,30.51,21.19,36.23,0.493,False,33.37,pooled,0.731,25.55,34.96,
+pooled_iw,36.92,35.28,60.28,0.677,False,36.1,pooled,0.885,30.92,34.96,
+mmd_iw,12.38,11.21,28.5,1.397,False,11.8,mmd,1.063,13.51,12.71,
+discriminator,12.71,11.44,22.03,0.833,False,12.07,,,,11.65,1.091
+reference,47.03,44.28,55.72,0.243,True,45.66,,,,47.03,1.0
+pooled,46.19,41.74,52.97,0.243,True,43.97,,,,34.96,1.321
+mmd,11.65,11.44,22.03,0.909,False,11.54,,,,12.71,0.917
