@@ -9,7 +9,6 @@ substantially rewritten (see each module's docstring for provenance)."""
 from wcd_vae.wcd.adversarial import Discriminator
 from wcd_vae.wcd.critic import (
     ReferenceWassersteinLoss,
-    gradient_penalty,
     multi_class_gradient_penalty,
 )
 from wcd_vae.wcd.data import prep_data
@@ -22,7 +21,6 @@ __all__ = [
     "ReferenceWassersteinLoss",
     "clisi_graph",
     "compute_lisi",
-    "gradient_penalty",
     "ilisi_graph",
     "multi_class_gradient_penalty",
     "obtain_embeddings",

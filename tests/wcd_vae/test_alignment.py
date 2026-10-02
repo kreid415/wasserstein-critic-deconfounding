@@ -57,7 +57,7 @@ def test_alignment_differentiable_wrt_z(fn):
 
 
 def test_registry_names():
-    assert set(CRITIC_FREE_LOSSES) == {"mmd", "sinkhorn"}
+    assert set(CRITIC_FREE_LOSSES) == {"mmd", "sinkhorn", "mmd_ref"}
 
 
 def test_spectral_norm_critic_builds_and_forwards():
@@ -66,7 +66,11 @@ def test_spectral_norm_critic_builds_and_forwards():
     for formu, ref in (("reference", 0), ("pooled", None), ("barycenter", None)):
         head = Discriminator(n_input=16, domain_number=2, critic=True,
                              reference_batch=ref, formulation=formu, spectral_norm=True)
-        out = head(z, b, reference_batch=ref)
+        tgt = None
+        if formu == "barycenter":
+            from wcd_vae.wcd.barycenter import batch_barycenter_support
+            tgt = batch_barycenter_support(z, b)
+        out = head(z, b, reference_batch=ref, target_samples=tgt)
         assert isinstance(out, tuple) and torch.isfinite(out[0]).all()
         # spectral_norm registers a parametrization on each fc layer
         assert any("parametrizations" in n for n, _ in head.named_modules()), \

@@ -1,0 +1,3 @@
+arm,lanes,t_single,t_concurrent,speedup
+pooled,8,35.6,70.8375,4.02
+barycenter,8,48.0,82.0375,4.68

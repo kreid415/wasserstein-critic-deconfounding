@@ -12,8 +12,13 @@ This script writes RAW metric values only. The scIB overall score (per-metric mi
 within a dataset across all runs, then 0.4*batch + 0.6*bio) is computed at analysis time by
 scib_overall() below, because the scaling depends on the full set of runs.
 
-Env: PREPPED (unintegrated h5ad: X = log-normalised counts, obsm X_pca, obs batch/celltype),
-     NPZ (latent: z, batch, celltype), TAG, META (json dict of config fields), OUT_CSV, ORGANISM.
+Env: PREPPED (prep_scib_task.py output: X = scIB's normalised values, obsm X_pca, obs batch/celltype,
+     uns organism / modality), NPZ (latent: z, batch, celltype, obs_names), TAG, META (json), OUT_CSV.
+Per-task settings follow scIB (code review N13): cell-cycle conservation only for RNA tasks with a
+real organism (scIB did not compute it for ATAC, and simulations have no cell-cycle genes);
+trajectory conservation for the immune tasks (obs dpt_pseudotime, scIB's trajectory label); the
+organism comes from the prepped file, never from a default. Subsampled fits (X3, X8) are scored
+against the same cells of the unintegrated data (matched by obs_names).
 """
 import os, json, time, numpy as np, pandas as pd, scanpy as sc, scib
 
@@ -45,17 +50,22 @@ def main():
     pre = sc.read_h5ad(os.environ["PREPPED"])
     bk, ck = pre.uns.get("batch_key", "batch"), pre.uns.get("celltype_key", "celltype")
     d = np.load(os.environ["NPZ"], allow_pickle=True)
+    if "obs_names" in d and len(d["obs_names"]) != pre.n_obs:
+        pre = pre[pd.Index(pre.obs_names).get_indexer(d["obs_names"].astype(str))].copy()
+        sc.pp.pca(pre, n_comps=50, mask_var="highly_variable")   # PCR reference on the same cells
     assert (d["batch"].astype(str) == pre.obs[bk].astype(str).values).all(), "cell order mismatch"
     integ = pre.copy()
     integ.obsm["X_emb"] = d["z"].astype(np.float32)
     sc.pp.neighbors(integ, use_rep="X_emb")          # scIB pipeline: kNN graph on the embedding
-    org = os.environ.get("ORGANISM", "human")
+    org = str(pre.uns["organism"])
+    cell_cycle = pre.uns.get("modality") == "rna" and org in ("human", "mouse")
+    trajectory = "dpt_pseudotime" in pre.obs and pre.obs["dpt_pseudotime"].notna().any()
     res = scib.metrics.metrics(
         pre, integ, batch_key=bk, label_key=ck, embed="X_emb", type_="embed",
         ari_=True, nmi_=True, silhouette_=True, pcr_=True, isolated_labels_f1_=True,
         isolated_labels_asw_=True, graph_conn_=True, kBET_=True, ilisi_=True, clisi_=True,
-        cell_cycle_=(org in ("human", "mouse")), organism=org,
-        hvg_score_=False, trajectory_=False,
+        cell_cycle_=cell_cycle, organism=(org if cell_cycle else "human"),
+        hvg_score_=False, trajectory_=trajectory,
     )
     row = dict(tag=os.environ["TAG"], **json.loads(os.environ.get("META", "{}")))
     row.update({k: float(v) for k, v in res.iloc[:, 0].items()})

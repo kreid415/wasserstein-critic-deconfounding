@@ -31,10 +31,12 @@ class Discriminator(nn.Module):
         formulation="reference",
         n_anchors=64,
         spectral_norm=False,
+        n_hidden=128,
     ):
         super().__init__()
-        n_hidden = 128
+        n_hidden = int(n_hidden)
         self.critic = critic
+        self.domain_number = int(domain_number)
         self.formulation = formulation
         # WHY spectral_norm: an ALTERNATIVE way to enforce the critic's 1-Lipschitz constraint.
         #      WGAN-GP penalises the gradient norm (a soft, sampled constraint); spectral
@@ -49,14 +51,12 @@ class Discriminator(nn.Module):
         self.fc2 = _sn(nn.Linear(n_hidden, n_hidden))
         self.fc3 = _sn(nn.Linear(n_hidden, domain_number))
 
-        # WHY (formulation study): the barycenter critic aligns every batch to a LEARNABLE
-        #      virtual center rather than an existing batch, testing whether the critic's
-        #      pathologies stem from the fixed-reference design or the Wasserstein objective.
-        # HOW: M anchor points in latent space, updated by the generator optimiser toward
-        #      the Frechet mean of the batch distributions.
-        self.anchors = None
-        if self.critic and formulation == "barycenter":
-            self.anchors = nn.Parameter(torch.randn(n_anchors, n_input) * 0.01)
+        # Barycenter formulation: the target is the free-support Wasserstein barycenter of the
+        # batch distributions, computed by the CALLER (wcd.barycenter) from the current latents
+        # and passed to forward() as `target_samples`. It is not a learnable parameter
+        # (2026-10-02, code review N3: the old 64 learnable anchors started at ~0 and were moved by
+        # the generator optimiser, giving a near-origin fixed point / contracting quantiser).
+        self.anchors = None   # kept only so legacy callers that test `anchors is None` still work
 
         if self.critic:
             # If using critic, use Wasserstein loss with the chosen alignment target.
@@ -70,7 +70,8 @@ class Discriminator(nn.Module):
             # If not using critic, use cross-entropy loss
             self.loss = MultiClassCrossEntropy()
 
-    def forward(self, x, batch_ids, generator=False, reference_batch=None):
+    def forward(self, x, batch_ids, generator=False, reference_batch=None, target_samples=None,
+                with_gp=True):
         # Forward pass through layers
         h = F.relu(self.fc1(x))
         h = F.relu(self.fc2(h))
@@ -84,7 +85,10 @@ class Discriminator(nn.Module):
             # Compute anchor scores once for the barycenter formulation.
             target_output = None
             if self.formulation == "barycenter":
-                a = F.relu(self.fc1(self.anchors))
+                if target_samples is None:
+                    raise ValueError("barycenter critic needs target_samples (wcd.barycenter support)")
+                target_samples = target_samples.detach()
+                a = F.relu(self.fc1(target_samples))
                 a = F.relu(self.fc2(a))
                 target_output = self.fc3(a)
             discriminator_loss = self.loss(
@@ -99,14 +103,15 @@ class Discriminator(nn.Module):
             discriminator_loss = discriminator_loss.mean()
         elif self.loss.reduction == "sum":
             discriminator_loss = discriminator_loss.sum()
-        if self.critic:
+        if self.critic and with_gp:   # the generator step does not need the penalty
             gp_loss = multi_class_gradient_penalty(
                 self,
                 x,
                 batch_ids,
                 reference_batch=reference_batch,
                 formulation=self.formulation,
-                target_samples=self.anchors if self.formulation == "barycenter" else None,
+                target_samples=target_samples if self.formulation == "barycenter" else None,
+                num_domains=self.domain_number,
             )
 
         return discriminator_loss, gp_loss

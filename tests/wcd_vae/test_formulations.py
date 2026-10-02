@@ -40,16 +40,15 @@ def test_formulation_trains_finite(formulation):
     assert np.all(np.isfinite(hist["loss_da"])), f"{formulation}: non-finite adversarial loss"
 
 
-def test_barycenter_anchors_move():
+def test_barycenter_has_no_learnable_anchors():
+    """2026-10-02 (code review N3): the barycenter target is computed by OT each step, not learned."""
     a = _toy()
     m = SCIntegrationModel(a, "batch", z_dim=32, critic=True, reference_batch=None,
                            seed=0, formulation="barycenter")
-    assert m.D_Z.anchors is not None
-    a0 = m.D_Z.anchors.detach().clone()
-    m.train_model(a, "batch", epochs=4, d_coef=0.2, kl_coef=0.005,
+    m.train_model(a, "batch", epochs=3, d_coef=0.2, kl_coef=0.005,
                   warmup_epoch=1, disc_iter=3, batch_size=128)
-    moved = float((m.D_Z.anchors.detach() - a0).abs().mean())
-    assert moved > 1e-4, f"barycenter anchors did not move (moved={moved})"
+    assert m.D_Z.anchors is None
+    assert all("anchor" not in n for n, _ in m.D_Z.named_parameters())
 
 
 def test_reference_only_has_no_anchors():

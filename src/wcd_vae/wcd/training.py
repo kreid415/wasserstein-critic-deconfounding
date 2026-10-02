@@ -221,10 +221,18 @@ class SCIntegrationModel(nn.Module):
         reconst_loss, kl_divergence, z, _x_tilde = self.VAE(x, x_raw, v_one_hot, warmup)
         loss_vae = torch.mean(reconst_loss.mean() + kl_coef * kl_divergence.mean())
 
+        # Barycenter formulation: the target is the free-support W2 barycenter of the batch
+        # distributions in this minibatch (wcd.barycenter), shared by the critic and generator steps.
+        target = None
+        if getattr(self.D_Z, "formulation", None) == "barycenter" and self.D_Z.critic:
+            from wcd_vae.wcd.barycenter import batch_barycenter_support
+            target = batch_barycenter_support(z.detach(), v_true)
+
         # 2. Adversary (critic/discriminator) updates on detached z.
         for _ in range(disc_iter):
             opt_d.zero_grad()
-            loss_d_z, gp = self.D_Z(z.detach(), v_true, reference_batch=reference_batch_idx)
+            loss_d_z, gp = self.D_Z(z.detach(), v_true, reference_batch=reference_batch_idx,
+                                    target_samples=target)
             loss_d_z += gp
             if not warmup:
                 loss_d_z.backward(retain_graph=True)
@@ -233,7 +241,8 @@ class SCIntegrationModel(nn.Module):
         # 3. Encoder/generator update: minimize L_backbone + lambda_adv * L_adv
         #    (the framework objective; lambda_adv = d_coef, zeroed during warmup).
         opt_g.zero_grad()
-        loss_da, gp = self.D_Z(z, v_true, reference_batch=reference_batch_idx)
+        loss_da, gp = self.D_Z(z, v_true, reference_batch=reference_batch_idx, target_samples=target,
+                               with_gp=False)
         lam = 0.0 if warmup else d_coef
         all_loss = loss_vae - lam * loss_da
         all_loss.backward()
@@ -326,17 +335,9 @@ class SCIntegrationModel(nn.Module):
         n_batches_total = len(batch_indices_map)
         base_ref = reference_batch_idx if reference_batch_idx is not None else 0
 
-        # WHY (barycenter formulation): the learnable anchors approximate the Frechet mean,
-        #      so they must be MINIMISED with the generator (pulling the virtual centre toward
-        #      the batches) and EXCLUDED from the critic step (which maximises distance and
-        #      would otherwise push the anchors away adversarially).
-        if self.D_Z.anchors is not None:
-            anchor_ids = {id(self.D_Z.anchors)}
-            critic_params = [p for p in self.D_Z.parameters() if id(p) not in anchor_ids]
-            gen_params = list(self.VAE.parameters()) + [self.D_Z.anchors]
-        else:
-            critic_params = list(self.D_Z.parameters())
-            gen_params = list(self.VAE.parameters())
+        # (The barycenter target is computed per minibatch by wcd.barycenter; no learnable anchors.)
+        critic_params = list(self.D_Z.parameters())
+        gen_params = list(self.VAE.parameters())
         # lr is parameterised (default unchanged at 1e-3) so batch-size / learning-rate
         # interactions can be studied without altering any existing result. betas=(0.5,
         # 0.9) is the GAN convention: a low beta1 keeps the adversary responsive to a

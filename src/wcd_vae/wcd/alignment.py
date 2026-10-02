@@ -1,131 +1,174 @@
-"""Critic-free batch-alignment divergences — AUTHORED (K. Reid).
+"""Critic-free batch-alignment divergences -- AUTHORED (K. Reid). Rewritten 2026-10-02.
 
-# WHY: The adversarial critic/discriminator confounds two things: the integral-probability-metric
-#      GEOMETRY (Wasserstein / MMD) and the ADVERSARIAL TRAINING (an inner-loop network estimating
-#      it). These losses keep the geometry and drop the adversary — they are differentiable,
-#      closed-form (or fixed-iteration) divergences between each batch and the global pool, added
-#      DIRECTLY to the generator objective. That makes them the sharpest test of the project's
-#      standing finding ("the adversary is not the lever"): if a critic-FREE OT/MMD loss also fails
-#      to beat the discriminator, the deficiency is the objective family, not the adversarial
-#      estimator.
-#
-# TARGET = the global pool (every cell in the minibatch), mirroring the "pooled" critic so the
-#      critic-free vs adversarial comparison is like-for-like. Each returns a NON-NEGATIVE
-#      divergence (0 iff every batch matches the pool); higher = batches more separable = worse
-#      mixing. The generator MINIMISES it (the plan negates it into the fool-objective sign).
-#
-# COST: O(n^2) in the minibatch (pairwise kernel / cost matrix). At batch_size 512 that is a 512x512
-#      matrix per batch group -- cheap. Do NOT call on the full dataset.
+Both losses compare each batch with the OTHER batches in the minibatch and average over the
+batches present (equal weight per batch, the same target and weighting as the pooled critic):
+
+    L(z) = mean_k D(P_k, P_{-k})
+
+  mmd       : D = MMD^2 with a fixed multi-scale RBF kernel (V-statistic).
+  sinkhorn  : D = debiased Sinkhorn divergence S_eps (Genevay et al. 2018; Feydy et al. 2019)
+              with Euclidean ground cost (p=1), so for small blur it approximates W1, the
+              distance the Wasserstein critics estimate.
+
+Changes from the previous version (code review H2/N16):
+  * Target was the whole minibatch (it contained the batch itself), so each term was a
+    (1 - pi_k)-shrunk comparison; now the other batches, as in the pooled critic.
+  * Sinkhorn used a squared-Euclidean cost (W2^2, not W1) -> Euclidean cost (p=1 default).
+  * Sinkhorn returned the linear transport cost <P, C> inside the debiasing formula and clamped
+    the result at 0 (which also zeroes the gradient); now the regularised dual value
+    OT_eps = <a, f> + <b, g>, for which the debiased divergence is non-negative.
+  * Both losses rescaled z by a statistic computed under no_grad at every step. The loss then
+    never registered a uniform contraction of the latent while every step's gradient still
+    favoured it. Scales are now FIXED: kernel bandwidths and the Sinkhorn blur are set relative
+    to the N(0, I_d) prior scale (sqrt(d) and sqrt(2d)). Latent-scale shortcuts are handled the
+    same way for every arm by the optional standardisation of the adversary input (plan zstd).
+  * Sinkhorn unrolled 15 differentiable iterations; now eps-annealed iterations run without
+    gradient and one final extrapolation step carries the gradient (the envelope-theorem
+    gradient at convergence, as in geomloss).
+  * Vectorised over batches (one kernel / cost matrix per step instead of one per batch).
 """
+import math
 
 import torch
 
-
-# -------------------------------------------------------------------------------------------------
-# MMD -- multi-kernel RBF maximum mean discrepancy (kernel IPM), each batch vs the pool.
-# -------------------------------------------------------------------------------------------------
-def _pdist2(a, b):
-    """Squared Euclidean distances, [n, m]. Clamped at 0 for numerical safety."""
-    return torch.cdist(a, b, p=2).pow(2).clamp_min(0.0)
+BW_MULTIPLIERS = (0.25, 0.5, 1.0, 2.0, 4.0)      # RBF sigma = sqrt(d) * multiplier
+SINKHORN_BLUR_FRAC = 0.05                          # blur = 0.05 * sqrt(2 d)
+SINKHORN_SCALING = 0.8                             # eps annealing ratio per iteration (per blur)
 
 
-def _median_bandwidth(d2):
-    """Median-heuristic RBF bandwidth from a squared-distance matrix (detached scalar)."""
-    with torch.no_grad():
-        m = d2[d2 > 0]
-        med = m.median() if m.numel() else d2.new_tensor(1.0)
-    return med.clamp_min(1e-6)
+def _sqdist(z):
+    """Pairwise squared Euclidean distances via the expansion |x|^2 + |y|^2 - 2<x, y>.
+    (torch.cdist's backward is undefined at zero distance, i.e. on the diagonal.)"""
+    sq = (z * z).sum(1)
+    return (sq[:, None] + sq[None, :] - 2.0 * z @ z.T).clamp_min(0.0)
 
 
-def mmd_batch_pool(z, batch_index, scales=(0.5, 1.0, 2.0, 4.0)):
-    """Mean over batches of MMD^2(batch, pool) using a sum of RBF kernels at median-heuristic
-    bandwidth times ``scales``. Non-negative; 0 iff each batch is distributed like the pool.
-
-    MMD^2(X, Y) = E[k(x,x')] + E[k(y,y')] - 2 E[k(x,y)]   (biased estimator; batches are small).
-    """
-    z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
-    n = z.shape[0]
-    if n < 4:
-        return z.new_zeros(())
-    dpp = _pdist2(z, z)                       # pool-pool, reused for every batch
-    base_bw = _median_bandwidth(dpp)
-    gammas = [1.0 / (2.0 * base_bw * s) for s in scales]
-
-    def _mmd2(idx):
-        x = z[idx]
-        nx = x.shape[0]
-        if nx < 2:
-            return z.new_zeros(())
-        dxx = _pdist2(x, x)
-        dxy = _pdist2(x, z)                   # batch vs the whole pool
-        val = z.new_zeros(())
-        for g in gammas:
-            kxx = torch.exp(-g * dxx)
-            kyy = torch.exp(-g * dpp)
-            kxy = torch.exp(-g * dxy)
-            val = val + kxx.mean() + kyy.mean() - 2.0 * kxy.mean()
-        return val / len(gammas)
-
+def _batch_masks(batch_index, z):
+    """(A, B, keep): row-normalised weights of batch k (A) and of all other cells (B), [K, n]."""
     ubs = torch.unique(batch_index)
-    terms = [_mmd2((batch_index == b).nonzero(as_tuple=True)[0]) for b in ubs]
-    terms = [t for t in terms if torch.isfinite(t)]
-    return torch.stack(terms).mean() if terms else z.new_zeros(())
+    onehot = (batch_index[None, :] == ubs[:, None]).to(z.dtype)          # [K, n]
+    n_k = onehot.sum(1)
+    n_other = batch_index.numel() - n_k
+    keep = (n_k > 0) & (n_other > 0)
+    A = onehot / n_k.clamp_min(1)[:, None]
+    B = (1.0 - onehot) / n_other.clamp_min(1)[:, None]
+    return A[keep], B[keep], int(keep.sum())
 
 
-# -------------------------------------------------------------------------------------------------
-# Sinkhorn divergence -- debiased entropic optimal transport, each batch vs the pool.
-# -------------------------------------------------------------------------------------------------
-def _sinkhorn_cost(x, y, eps, n_iter):
-    """Entropic OT cost OT_eps(x, y) with uniform marginals, squared-Euclidean ground cost,
-    ``n_iter`` Sinkhorn iterations in log space. Returns a scalar (the transport cost)."""
-    C = _pdist2(x, y)                         # [n, m] ground cost
-    n, m = C.shape
-    log_a = x.new_full((n,), -torch.log(torch.tensor(float(n), device=x.device)))
-    log_b = y.new_full((m,), -torch.log(torch.tensor(float(m), device=y.device)))
-    f = torch.zeros(n, device=x.device)
-    g = torch.zeros(m, device=y.device)
-    Ce = C / eps
-    for _ in range(n_iter):
-        # f_i = -eps * logsumexp_j( log_b_j + g_j/eps - C_ij/eps )   (and symmetric for g)
-        f = -eps * torch.logsumexp(log_b[None, :] + (g[None, :] / eps) - Ce, dim=1)
-        g = -eps * torch.logsumexp(log_a[:, None] + (f[:, None] / eps) - Ce, dim=0)
-    # transport cost = <P, C> recovered from the dual potentials
-    log_P = log_a[:, None] + log_b[None, :] + (f[:, None] + g[None, :]) / eps - Ce
-    P = torch.exp(log_P)
-    return (P * C).sum()
-
-
-def sinkhorn_batch_pool(z, batch_index, eps=0.1, n_iter=15):
-    """Mean over batches of the DEBIASED Sinkhorn divergence S(batch, pool), where
-    S(a, b) = OT_eps(a, b) - 1/2 OT_eps(a, a) - 1/2 OT_eps(b, b).
-    Debiasing makes S >= 0 with S = 0 iff a == b (a proper divergence, unlike raw entropic OT).
-
-    n_iter=15 is the tractable default: the divergence is converged by ~10 iterations at eps=0.1
-    (measured: S differs from the 50-iter value by <0.1%), while 50 iters made a full 239-epoch fit
-    ~1.7h. Raise n_iter for tighter eps (smaller eps needs more iterations to converge)."""
+def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS):
+    """mean_k MMD^2(P_k, P_{-k}), RBF kernel averaged over sigma = sqrt(d) * multipliers."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
-    n = z.shape[0]
-    if n < 4:
+    A, B, K = _batch_masks(batch_index, z)
+    if K == 0:
         return z.new_zeros(())
-    # normalise scale so eps is comparable across datasets (cost ~ O(1))
+    d2 = _sqdist(z)
+    d = z.shape[1]
+    kmat = sum(torch.exp(-d2 / (2.0 * d * m * m)) for m in multipliers) / len(multipliers)
+    AK, BK = A @ kmat, B @ kmat           # plain matmuls (a 3-operand einsum dispatches to a
+    aka = (AK * A).sum(1)                 # Triton kernel in recent torch builds)
+    bkb = (BK * B).sum(1)
+    akb = (AK * B).sum(1)
+    return (aka + bkb - 2.0 * akb).mean()
+
+
+def mmd_reference(z, batch_index, reference_batch, multipliers=BW_MULTIPLIERS):
+    """mean over non-reference batches k of MMD^2(P_k, P_ref) (same kernel as mmd_batch_others).
+    Reference-anchored alignment without a Wasserstein critic (X7 control)."""
+    z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
+    ref = batch_index == int(reference_batch)
+    others = torch.unique(batch_index[~ref])
+    if not bool(ref.any()) or others.numel() == 0:
+        return z.new_zeros(())
+    onehot = (batch_index[None, :] == others[:, None]).to(z.dtype)
+    A = onehot / onehot.sum(1, keepdim=True)
+    B = (ref.to(z.dtype) / ref.sum())[None, :].expand_as(A)
+    d2 = _sqdist(z)
+    d = z.shape[1]
+    kmat = sum(torch.exp(-d2 / (2.0 * d * m * m)) for m in multipliers) / len(multipliers)
+    AK, BK = A @ kmat, B @ kmat
+    return ((AK * A).sum(1) + (BK * B).sum(1) - 2.0 * (AK * B).sum(1)).mean()
+
+
+def _log_w(W):
+    return torch.where(W > 0, W.log(), torch.full_like(W, -math.inf))
+
+
+def _softmin(eps, C, log_w, h):
+    """-eps * logsumexp_j( log_w[k, j] + (h[k, j] - C[i, j]) / eps )  ->  [K, n]."""
+    return -eps * torch.logsumexp(log_w[:, None, :] + (h[:, None, :] - C[None, :, :]) / eps, dim=2)
+
+
+def _eps_schedule(diameter, blur, p, scaling):
+    eps_list = [diameter ** p]
+    while eps_list[-1] > blur ** p * (1.0 / scaling ** p):
+        eps_list.append(eps_list[-1] * scaling ** p)
+    eps_list.append(blur ** p)
+    return eps_list
+
+
+def _ot_eps(C, la, lb, eps_list):
+    """Regularised OT value OT_eps(a, b) for K problems sharing the cost C. Gradient flows through
+    C only via the final extrapolation step."""
     with torch.no_grad():
-        scale = _pdist2(z, z).mean().clamp_min(1e-6).sqrt()
-    zz = z / scale
-    ott_pool = _sinkhorn_cost(zz, zz, eps, n_iter)   # OT_eps(pool, pool), reused
-    ubs = torch.unique(batch_index)
-    terms = []
-    for b in ubs:
-        x = zz[(batch_index == b).nonzero(as_tuple=True)[0]]
-        if x.shape[0] < 2:
-            continue
-        s = _sinkhorn_cost(x, zz, eps, n_iter) - 0.5 * _sinkhorn_cost(x, x, eps, n_iter) - 0.5 * ott_pool
-        terms.append(s)
-    terms = [t for t in terms if torch.isfinite(t)]
-    return torch.stack(terms).mean().clamp_min(0.0) if terms else z.new_zeros(())
+        Cd = C.detach()
+        f = torch.zeros_like(la)
+        g = torch.zeros_like(lb)
+        for eps in eps_list:
+            f_new = _softmin(eps, Cd, lb, g)
+            g_new = _softmin(eps, Cd.T, la, f)
+            f, g = 0.5 * (f + f_new), 0.5 * (g + g_new)
+    eps = eps_list[-1]
+    f_fin = _softmin(eps, C, lb, g)
+    g_fin = _softmin(eps, C.T, la, f)
+    a, b = la.exp(), lb.exp()
+    return (a * f_fin).sum(1) + (b * g_fin).sum(1)
+
+
+def _ot_eps_sym(C, la, eps_list):
+    """OT_eps(a, a) by symmetric iterations (single potential)."""
+    with torch.no_grad():
+        Cd = C.detach()
+        f = torch.zeros_like(la)
+        for eps in eps_list:
+            f = 0.5 * (f + _softmin(eps, Cd, la, f))
+    f_fin = _softmin(eps_list[-1], C, la, f.detach())
+    return 2.0 * (la.exp() * f_fin).sum(1)
+
+
+def sinkhorn_divergence_weighted(C, A, B, blur, p=1, scaling=SINKHORN_SCALING):
+    """Debiased S_eps(a_k, b_k) for each row k of the weight matrices A, B (shared cost C)."""
+    diameter = float(C.detach().max().clamp_min(blur)) ** (1.0 / p)
+    eps_list = _eps_schedule(diameter, blur, p, scaling)
+    la, lb = _log_w(A), _log_w(B)
+    return _ot_eps(C, la, lb, eps_list) - 0.5 * _ot_eps_sym(C, la, eps_list) - 0.5 * _ot_eps_sym(C, lb, eps_list)
+
+
+def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, scaling=SINKHORN_SCALING):
+    """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2)."""
+    z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
+    A, B, K = _batch_masks(batch_index, z)
+    if K == 0:
+        return z.new_zeros(())
+    d2 = _sqdist(z)
+    if p == 1:
+        # |x - y| is not differentiable at 0 (the diagonal); +1e-12 inside the root fixes that
+        C = torch.sqrt(d2 + 1e-12)
+    elif p == 2:
+        C = 0.5 * d2
+    else:
+        raise ValueError("p must be 1 or 2")
+    blur = blur_frac * math.sqrt(2.0 * z.shape[1])
+    return sinkhorn_divergence_weighted(C, A, B, blur, p=p, scaling=scaling).mean()
 
 
 # Registry of critic-free alignment divergences, by the `adversary` name the plan accepts.
 CRITIC_FREE_LOSSES = {
-    "mmd": mmd_batch_pool,
-    "sinkhorn": sinkhorn_batch_pool,
+    "mmd": mmd_batch_others,
+    "sinkhorn": sinkhorn_batch_others,
+    "mmd_ref": mmd_reference,          # needs reference_batch
 }
+NEEDS_REFERENCE = {"mmd_ref"}
+
+# Backwards-compatible names (the old functions compared each batch with the whole minibatch).
+mmd_batch_pool = mmd_batch_others
+sinkhorn_batch_pool = sinkhorn_batch_others
