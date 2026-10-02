@@ -99,4 +99,10 @@
 - rule: Tier 1+2 lambda design: A1 pilot (full 10-point grid on atac_small, immune, sim1; 3 seeds; both decoders) fixes a 6-point grid per arm family for X1; 5 seeds in both X1 blocks
 - source: "A1 pilot, 5 uncond seeds (Recommended)" (user, ask_user answer to the lambda design question, 2026-10-02)
 - added: 2026-10-02
-- keywords: l, a, m, b, d, a, ,, g, r, i, d, ,, p, i, l, o, t, ,, A, 1, ,, s, e, e, d, s
+- keywords: l, a, m, b, d, a, g, r, i, d, p, i, l, o, t, A, 1, s, e, e, d, s
+
+## SI-17 · active · process
+- rule: Compute: split the Tier 1+2 run between the local RTX 3080 and JHPCE, by task (all arms, seeds and lambda of a task on one machine; one pinned GPU model per machine)
+- source: "Local + one cluster split" and "JHPCE (Recommended)" (user, ask_user answers, 2026-10-02; split-by-task stated in the question)
+- added: 2026-10-02
+- keywords: G, P, U, ,, c, l, u, s, t, e, r, ,, J, H, P, C, E, ,, s, p, l, i, t, ,, c, o, m, p, u, t, e
