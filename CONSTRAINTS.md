@@ -106,3 +106,35 @@
 - source: "Local + one cluster split" and "JHPCE (Recommended)" (user, ask_user answers, 2026-10-02; split-by-task stated in the question)
 - added: 2026-10-02
 - keywords: GPU, cluster, JHPCE, split, compute
+
+## SI-18 · active · method
+- rule: X6 discriminator_r1: one-vs-rest R1 penalty (gamma/2) mean_i ||grad_z D_{b_i}(z_i)||^2 with D_k = l_k - log sum_{j!=k} exp(l_j), at every minibatch cell, gamma = 10, in the discriminator step only, 1 discriminator step per generator step
+- source: "One-vs-rest R1, gamma 10 (Recommended)" (user, ask_user answer to "X6 discriminator_r1: how should the R1 penalty (Mescheder et al. 2018, Eq. 9) be defined for our K-way batch classifier, and with which gamma?", 2026-10-02)
+- added: 2026-10-02
+- keywords: R1, discriminator_r1, gamma, gradient penalty, X6
+- files: docs/SPECS_missing_arms.md, scripts/build_paper_manifest.py
+- notebook: NB-20261002-01
+
+## SI-19 · active · method
+- rule: X7 discriminator_ref (reference JS): per-batch binary heads 'batch k vs reference', class-balanced cross-entropy, non-saturating generator loss with labels flipped on both sides, reference cells not detached, 1 discriminator step per generator step
+- source: "Non-saturating, labels flipped (Recommended)" (user, ask_user answer to "X7 discriminator_ref ("reference JS"): which generator loss?", 2026-10-02)
+- added: 2026-10-02
+- keywords: reference JS, discriminator_ref, X7, reference
+- files: docs/SPECS_missing_arms.md, scripts/build_paper_manifest.py
+- notebook: NB-20261002-02
+
+## SI-20 · active · method
+- rule: X8 stratified sampler for the critic arms only (reference, pooled): 128/V cells per batch per minibatch, without replacement per batch, epoch = ceil(n_train/128) steps, fit fails when a batch has fewer training cells than its quota
+- source: "Critics only: reference, pooled (Recommended)" (user, ask_user answer to "X8 stratified sampler: which arms get it?", 2026-10-02)
+- added: 2026-10-02
+- keywords: stratified, sampler, X8, minibatch
+- files: docs/SPECS_missing_arms.md, scripts/build_paper_manifest.py
+- notebook: NB-20261002-03
+
+## SI-21 · active · method
+- rule: X3 oracle importance weights undo the induced depletion: target = each batch's pre-depletion composition, w = 1/keep-fraction for depleted-type cells of the depleted batch and 1 otherwise, same weights in discriminator, reference, pooled and MMD, self-normalised in adversary and generator steps, doses 50/80/95 only
+- source: "Undo the induced depletion (Recommended)" (user, ask_user answer to "X3 oracle importance-weighted control: which target composition?", 2026-10-02)
+- added: 2026-10-02
+- keywords: importance, IW, iw, X3, composition, weights
+- files: docs/SPECS_missing_arms.md, scripts/build_paper_manifest.py
+- notebook: NB-20261002-04

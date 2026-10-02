@@ -1,7 +1,7 @@
 # Specifications: the four arms the Tier 1+2 manifest still lacks (X6, X7, X8, X3)
 
-Branch `missing-arms` from `main` @ 8cda6de, 2026-10-02. Status: **draft for sign-off** (section 6 records the
-answers). Nothing in sections 1-4 is coded before its sign-off.
+Branch `missing-arms` from `main` @ 8cda6de, 2026-10-02. Status: **signed off by the user, 2026-10-02** (section 6).
+Nothing in sections 1-4 was coded before its sign-off.
 
 ## 0. What was checked
 
@@ -153,7 +153,7 @@ versions (IWDAN-O, ...) use the true weights (Sec. 4.1).
 present in every batch. On the X3 tasks no cell type is present in every batch of immune_hum_mou (23 batches)
 or sim2 (16 batches), at any dose (`docs/x3_shared_support_profile.csv`).
 
-**Target (proposed).** Each batch's own pre-depletion composition, i.e. the X3 base condition. The depletion is a
+**Target (signed off, SI-21).** Each batch's own pre-depletion composition, i.e. the X3 base condition. The depletion is a
 known selection on true labels: a cell of a depleted type in the depleted batch b survives with probability
 kappa_d = (n_hit - drop) / n_hit, drop = round(n_hit d / 100) (`fit_paper_config.subsample`), every other cell
 with probability 1. Eq. (4) applied to the joint label (batch, cell type), T = pre-depletion and S =
@@ -212,4 +212,15 @@ latent (adversary 'none'); existing arms bit-identical.
 
 ## 6. Sign-off
 
-(filled from the user's answers)
+All four answered by the user on 2026-10-02 (ask_user, one question per item, recommendation first). Recorded
+in CONSTRAINTS.md and the lab notebook.
+
+| item | question (abridged) | answer (verbatim) | ledger | notebook |
+|---|---|---|---|---|
+| X6 | How should the R1 penalty (Mescheder et al. 2018, Eq. 9) be defined for our K-way batch classifier, and with which gamma? | "One-vs-rest R1, gamma 10 (Recommended)" | SI-18 | NB-20261002-01 |
+| X7 | discriminator_ref ("reference JS"): which generator loss? | "Non-saturating, labels flipped (Recommended)" | SI-19 | NB-20261002-02 |
+| X8 | Stratified sampler: which arms get it? | "Critics only: reference, pooled (Recommended)" | SI-20 | NB-20261002-03 |
+| X3 | Oracle importance-weighted control: which target composition? | "Undo the induced depletion (Recommended)" | SI-21 | NB-20261002-04 |
+
+Alternatives offered and not chosen: X6 gamma grid {1, 10} (54 fits); X7 minimax (saturating) generator loss;
+X8 sampler on all four X8 adversarial arms (288 fits); X3 pairwise full composition matching (3 arms, 360 fits).
