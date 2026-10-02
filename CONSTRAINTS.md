@@ -81,4 +81,16 @@
 - rule: recreate all sweeps from base; reproducible from the baseline; no cherry-picking the best from past experiments
 - source: "we need to recreate all sweeps from base because this needs to be reproducible from the baseline. we can't just cherry pick the best based on past experiments. This is the reproducible final run." (user, 2026-08-26)
 - added: 2026-10-02
-- keywords: s, w, e, e, p, ,, l, a, m, b, d, a, ,, g, r, i, d, ,, r, e, u, s, e, ,, p, a, s, t
+- keywords: s, w, e, e, p, l, a, m, b, d, a, g, r, i, d, r, e, u, s, e, p, a, s, t
+
+## SI-14 · active · method
+- rule: Barycenter target: cold start (init = minibatch cells), 10 fixed-point iterations per training step; no warm start
+- source: "10 iterations" (user, ask_user answer to "Cold-start fixed-point iterations per training step for the barycenter target?", 2026-10-02)
+- added: 2026-10-02
+- keywords: b, a, r, y, c, e, n, t, e, r, b, a, r, y, _, i, t, e, r, w, a, r, m
+
+## SI-15 · active · data
+- rule: Fit the scIB files as distributed (the 'counts' layer exactly as scIB fed scVI); no strict-count main run
+- source: "scIB files as distributed" (user, ask_user answer to "Which data should our fits use?", 2026-10-02)
+- added: 2026-10-02
+- keywords: c, o, u, n, t, s, ,, v, a, l, i, d, ,, s, t, r, i, c, t, ,, n, o, n, -, i, n, t, e, g, e, r
