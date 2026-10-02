@@ -55,10 +55,34 @@ def _batch_masks(batch_index, z):
     return A[keep], B[keep], int(keep.sum())
 
 
-def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS):
-    """mean_k MMD^2(P_k, P_{-k}), RBF kernel averaged over sigma = sqrt(d) * multipliers."""
+def _batch_masks_weighted(batch_index, z, weights):
+    """As _batch_masks, with cell weights: row k of A holds w_i / sum_{i in k} w_i on batch k, row k of B holds
+    w_i / sum_{i not in k} w_i on the other cells (self-normalised importance weights; X3, SI-21). With all
+    weights 1 the arithmetic is that of _batch_masks."""
+    w = weights.to(z.dtype)
+    if w.dim() != 1 or w.shape[0] != batch_index.numel():
+        raise ValueError(f"weights must have shape [{batch_index.numel()}], got {tuple(w.shape)}")
+    if not bool(torch.isfinite(w).all()) or bool((w < 0).any()):
+        raise ValueError("MMD weights must be finite and non-negative")
+    ubs = torch.unique(batch_index)
+    onehot = (batch_index[None, :] == ubs[:, None]).to(z.dtype)          # [K, n]
+    a_w = onehot * w[None, :]
+    b_w = (1.0 - onehot) * w[None, :]
+    s_a, s_b = a_w.sum(1), b_w.sum(1)
+    keep = (s_a > 0) & (s_b > 0)
+    A = a_w / torch.where(s_a > 0, s_a, torch.ones_like(s_a))[:, None]
+    B = b_w / torch.where(s_b > 0, s_b, torch.ones_like(s_b))[:, None]
+    return A[keep], B[keep], int(keep.sum())
+
+
+def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None):
+    """mean_k MMD^2(P_k, P_{-k}), RBF kernel averaged over sigma = sqrt(d) * multipliers.
+    weights (X3 importance weights): every empirical measure becomes the self-normalised weighted measure."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
-    A, B, K = _batch_masks(batch_index, z)
+    if weights is None:
+        A, B, K = _batch_masks(batch_index, z)
+    else:
+        A, B, K = _batch_masks_weighted(batch_index, z, weights)
     if K == 0:
         return z.new_zeros(())
     d2 = _sqdist(z)

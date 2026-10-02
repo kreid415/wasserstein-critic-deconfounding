@@ -18,11 +18,22 @@ SWAPPABLE adversary on the latent of any scvi module (SCVI / LinearSCVI). Arms:
     mmd_ref         MMD of each batch to the reference batch (reference anchoring without W1; X7)
     <critic>_sn     spectral-norm Lipschitz variant of a critic (gradient penalty dropped)
     discriminator_sn  spectral-normalised discriminator (Lipschitz control on the JS arm; X6)
+    discriminator_r1  discriminator + R1 penalty on each cell's one-vs-rest log-odds, gamma = r1_gamma
+                    (Mescheder et al. 2018 Eq. 9; X6; docs/SPECS_missing_arms.md section 1, SI-18)
+    discriminator_ref reference-anchored JS: binary heads 'batch k vs reference', class-balanced
+                    cross-entropy, non-saturating label-flipped generator loss (X7; section 2, SI-19)
+
+Options (docs/SPECS_missing_arms.md; each off unless given):
+    sampler='stratified'  per-batch stratified training minibatches (X8; section 3, SI-20)
+    iw_weights            oracle importance weights per (batch, cell type), self-normalised in every
+                          average of the adversarial objective (X3: discriminator, reference, pooled,
+                          mmd; section 4, SI-21). Conditioned models only (cell types use the labels slot).
 
 Settings that change the science are REQUIRED arguments (no silent defaults): adv_input
 ('mean' = posterior mean, 'sample' = posterior sample z), n_critic (critic steps per generator
 step; the discriminator is always 1), zstd (standardise the adversary input per latent dimension
-with posterior-mean statistics, gradients kept, so no arm can lower its loss by rescaling z).
+with posterior-mean statistics, gradients kept, so no arm can lower its loss by rescaling z),
+r1_gamma for *_r1 arms (refused elsewhere).
 
 The adversary heads are the authored wcd modules, loaded by file path to bypass the wcd package
 __init__ (which imports scib, absent from the scvi environment).
@@ -32,6 +43,7 @@ import sys
 import types
 import importlib.util
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa: N812
@@ -41,19 +53,28 @@ from scvi import REGISTRY_KEYS
 
 _CRITIC_FORMULATIONS = ("reference", "reference_fixed", "pooled", "barycenter")
 _CRITIC_FREE = ("mmd", "sinkhorn", "mmd_ref")
-_ARMS = ("none", "scvi_adv", "discriminator") + _CRITIC_FORMULATIONS + _CRITIC_FREE
+_JS_ARMS = ("discriminator", "discriminator_ref")
+_ARMS = ("none", "scvi_adv") + _JS_ARMS + _CRITIC_FORMULATIONS + _CRITIC_FREE
+_IW_ARMS = ("discriminator", "reference", "pooled", "mmd")   # X3 arms with importance weights (SI-21)
+_SAMPLERS = (None, "stratified")
 
 
 def _parse_adversary(adversary):
-    """Return (base, spectral_norm). 'pooled_sn' -> ('pooled', True)."""
+    """Return (base, spectral_norm, r1). 'pooled_sn' -> ('pooled', True, False);
+    'discriminator_r1' -> ('discriminator', False, True)."""
     if adversary.endswith("_sn"):
         base = adversary[:-3]
         if base not in _CRITIC_FORMULATIONS + ("discriminator",):
             raise ValueError(f"_sn is only valid on a critic formulation or the discriminator, got {adversary!r}")
-        return base, True
+        return base, True, False
+    if adversary.endswith("_r1"):
+        base = adversary[:-3]
+        if base != "discriminator":
+            raise ValueError(f"_r1 is only valid on the discriminator, got {adversary!r}")
+        return base, False, True
     if adversary not in _ARMS:
-        raise ValueError(f"unknown adversary {adversary!r}; valid: {_ARMS}")
-    return adversary, False
+        raise ValueError(f"unknown adversary {adversary!r}; valid: {_ARMS} (+ _sn, discriminator_r1)")
+    return adversary, False, False
 
 
 # ---------------------------------------------------------------------------------------------
@@ -98,6 +119,18 @@ def _load_wcd_heads(src_root):
     return adv_mod.Discriminator, critic_mod, align_mod, bary_mod
 
 
+def _load_wcd_module(src_root, modname, filename):
+    """Import one self-contained wcd module (no wcd imports) by file path."""
+    if not src_root:
+        raise ValueError("wcd_src_root / WCD_SRC is not set")
+    path = os.path.join(src_root, "wcd_vae", "wcd", filename)
+    spec = importlib.util.spec_from_file_location(modname, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[modname] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
 class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
     """AdversarialTrainingPlan with a swappable adversary on the latent (see module docstring)."""
 
@@ -105,8 +138,18 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
                  adv_input=None, zstd=False, bary_support=None, bary_iter=10, bary_weights="equal",
                  wcd_src_root=None, n_domains=None, adv_batch_slot="batch",
                  critic_lr=1e-4, critic_betas=(0.0, 0.9), adv_hidden=128, disc_lr=1e-3,
-                 bary_warm_iter=None, **kwargs):
-        base, sn = _parse_adversary(adversary)
+                 bary_warm_iter=None, r1_gamma=None, iw_table=None, **kwargs):
+        base, sn, r1 = _parse_adversary(adversary)
+        # options that belong to specific arms are consumed by those arms or refused (no silent no-ops)
+        if r1 and r1_gamma is None:
+            raise ValueError(f"{adversary} needs r1_gamma (docs/SPECS_missing_arms.md section 1)")
+        if not r1 and r1_gamma is not None:
+            raise ValueError(f"r1_gamma is only used by *_r1 arms, got it for {adversary!r}")
+        if iw_table is not None:
+            if adversary not in _IW_ARMS:
+                raise ValueError(f"importance weights are defined for {_IW_ARMS} only, got {adversary!r}")
+            if adv_batch_slot != "batch":
+                raise ValueError("importance weights need a batch-conditioned model (cell types use the labels slot)")
         if base == "scvi_adv":
             kwargs["adversarial_classifier"] = True
             kwargs.setdefault("scale_adversarial_loss", "auto")
@@ -114,6 +157,10 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             kwargs.setdefault("adversarial_classifier", False)
         super().__init__(module, **kwargs)
         self.adversary, self.adversary_base, self.spectral_norm = adversary, base, sn
+        self.r1 = bool(r1)
+        self.r1_gamma = None if r1_gamma is None else float(r1_gamma)
+        self._iw_table = None if iw_table is None else torch.as_tensor(iw_table, dtype=torch.float32)
+        self._dl = None
         self.is_critic = base in _CRITIC_FORMULATIONS
         self.is_critic_free = base in _CRITIC_FREE
         self.d_coef = float(d_coef)
@@ -130,7 +177,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         if adv_input not in ("mean", "sample"):
             raise ValueError(f"adv_input must be 'mean' or 'sample', got {adv_input!r}")
         self.adv_input, self.zstd = adv_input, bool(zstd)
-        if base == "discriminator":
+        if base in _JS_ARMS:
             if n_critic not in (None, 1):
                 raise ValueError("the discriminator takes exactly one adversary step per generator step")
             self.adv_steps = 1
@@ -140,7 +187,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             self.adv_steps = int(n_critic)
         else:
             self.adv_steps = 0
-        if base in ("reference", "reference_fixed", "mmd_ref"):
+        if base in ("reference", "reference_fixed", "mmd_ref", "discriminator_ref"):
             if reference_batch is None:
                 raise ValueError("reference arms need reference_batch")
             self.reference_batch = int(reference_batch)
@@ -149,6 +196,8 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.bary_support, self.bary_iter, self.bary_weights = bary_support, int(bary_iter), bary_weights
         src_root = wcd_src_root or os.environ.get("WCD_SRC")
         Discriminator, _critic, align_mod, bary_mod = _load_wcd_heads(src_root)
+        if self.r1 or base == "discriminator_ref" or self._iw_table is not None:
+            self._dl = _load_wcd_module(src_root, "wcd_vae.wcd.discriminator_losses", "discriminator_losses.py")
         self._bary_fn = bary_mod.batch_barycenter_support
         n_batch = int(n_domains) if n_domains is not None else int(self.module.n_batch)
         if self.is_critic_free:
@@ -196,9 +245,21 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         s = mu.std(0, unbiased=False, keepdim=True).clamp_min(1e-4)
         return (z - m) / s
 
-    def _head(self, z, batch_index, target, with_gp):
+    def _iw_weights(self, batch, batch_index):
+        """Per-cell importance weights w[b_i, y_i] from the (batch, cell type) table (X3, SI-21)."""
+        labels = batch[REGISTRY_KEYS.LABELS_KEY].long().squeeze(-1)
+        w = self._iw_table.to(batch_index.device)[batch_index, labels]
+        if not bool(torch.isfinite(w).all()):
+            raise ValueError("a minibatch cell has a (batch, cell type) pair missing from the importance-weight table")
+        return w
+
+    def _head(self, z, batch_index, target, with_gp, weights=None):
         ref = self.reference_batch if self.adversary_base in ("reference", "reference_fixed") else None
-        out = self._wcd_head(z, batch_index, reference_batch=ref, target_samples=target, with_gp=with_gp)
+        if weights is None:
+            out = self._wcd_head(z, batch_index, reference_batch=ref, target_samples=target, with_gp=with_gp)
+        else:
+            out = self._wcd_head(z, batch_index, reference_batch=ref, target_samples=target, with_gp=with_gp,
+                                 weights=weights)
         loss, gp = out
         if self.spectral_norm or not with_gp or not torch.is_tensor(gp):
             gp = z.new_zeros(())
@@ -230,10 +291,14 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         loss_vae = scvi_loss.loss
         self.compute_and_log_metrics(scvi_loss, self.train_metrics, "train")
         self._log("z_rms", mu.pow(2).mean().sqrt())
+        w = None if self._iw_table is None else self._iw_weights(batch, batch_index)
 
         if self.is_critic_free:
             (opt_g,) = [self.optimizers()]
-            adv_term = self._align_fn(z_adv, batch_index)
+            if w is None:
+                adv_term = self._align_fn(z_adv, batch_index)
+            else:
+                adv_term = self._align_fn(z_adv, batch_index, weights=w)
             g = torch.autograd.grad(adv_term, z_adv, retain_graph=True)[0]
             gen_loss = loss_vae + self.d_coef * adv_term
             opt_g.zero_grad()
@@ -255,7 +320,16 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         z_d = z_adv.detach()
         for _ in range(self.adv_steps):
             if self.is_critic:
-                loss_d, gp = self._head(z_d, batch_index, target, with_gp=True)
+                loss_d, gp = self._head(z_d, batch_index, target, with_gp=True, weights=w)
+            elif self.adversary_base == "discriminator_ref":     # X7 (SI-19)
+                loss_d, _ = self._dl.reference_js_losses(self._wcd_head(z_d, None), batch_index, self.reference_batch)
+                gp = z_d.new_zeros(())
+            elif self.r1:                                         # X6 (SI-18): CE + R1 on the same forward pass
+                gp, logits = self._dl.r1_penalty(lambda x: self._wcd_head(x, None), z_d, batch_index, self.r1_gamma)
+                loss_d = F.cross_entropy(logits, batch_index)
+            elif w is not None:                                   # X3 (SI-21)
+                loss_d = self._dl.weighted_ce(self._wcd_head(z_d, None), batch_index, w)
+                gp = z_d.new_zeros(())
             else:
                 loss_d, gp = self._head(z_d, batch_index, None, with_gp=False)
             opt_d.zero_grad()
@@ -268,11 +342,16 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             if self.adversary_base == "reference_fixed":
                 is_ref = (batch_index == self.reference_batch)[:, None]
                 z_g = torch.where(is_ref, z_adv.detach(), z_adv)
-            loss_g, _ = self._head(z_g, batch_index, target, with_gp=False)
+            loss_g, _ = self._head(z_g, batch_index, target, with_gp=False, weights=w)
             adv_term = -loss_g                       # the critic's W1 estimate (mean over heads)
             self._log("adv_w1", adv_term)
+        elif self.adversary_base == "discriminator_ref":
+            _, adv_term = self._dl.reference_js_losses(self._wcd_head(z_adv, None), batch_index, self.reference_batch)
         else:
-            adv_term = self._fool_loss(z_adv, batch_index)
+            if w is None:
+                adv_term = self._fool_loss(z_adv, batch_index)
+            else:
+                adv_term = self._dl.fool_loss(self._wcd_head(z_adv, None), batch_index, w)
             with torch.no_grad():
                 acc = (self._wcd_head(z_d, None).argmax(1) == batch_index).float().mean()
             self._log("adv_acc", acc)
@@ -287,14 +366,73 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         return loss_vae
 
 
+def _make_stratified_splitter(src_root):
+    """DataSplitter whose TRAINING loader uses wcd.sampling.StratifiedBatchSampler (X8, SI-20); the validation
+    and test loaders are scvi-tools' own. Built lazily so importing this module needs no scvi.dataloaders."""
+    from scvi import settings as scvi_settings
+    from scvi.dataloaders import DataSplitter
+    from torch.utils.data import DataLoader
+
+    sampling = _load_wcd_module(src_root, "wcd_vae.wcd.sampling", "sampling.py")
+
+    class StratifiedDataSplitter(DataSplitter):
+        def __init__(self, adata_manager, *, strat_registry_key, **kwargs):
+            super().__init__(adata_manager, **kwargs)
+            if self.data_loader_kwargs.get("distributed_sampler"):
+                raise ValueError("the stratified sampler does not support distributed training")
+            self.strat_registry_key = strat_registry_key
+
+        def train_dataloader(self):
+            codes = np.asarray(self.adata_manager.get_from_registry(self.strat_registry_key)).ravel()
+            idx = np.asarray(self.train_idx)
+            sampler = sampling.StratifiedBatchSampler(codes[idx], self.data_loader_kwargs["batch_size"])
+            dataset = self.adata_manager.create_torch_dataset(indices=idx, data_and_attributes=None,
+                                                              load_sparse_tensor=self.load_sparse_tensor)
+            # scvi-tools' AnnDataLoader convention: the sampler yields index lists and batch_size=None, so
+            # every minibatch is one __getitem__ call on the dataset (same tensors as the default loader)
+            return DataLoader(dataset, sampler=sampler, batch_size=None, shuffle=False, pin_memory=self.pin_memory,
+                              num_workers=scvi_settings.dl_num_workers,
+                              persistent_workers=scvi_settings.dl_persistent_workers)
+
+    return StratifiedDataSplitter
+
+
+def _build_iw_table(model, iw_weights, iw_label_key, a, batch_key):
+    """[n_batch, n_labels] table of importance weights in scvi's code order. iw_weights = {batch: {cell type: w}}
+    must cover every (batch, cell type) pair present in the data."""
+    bmap = list(model.adata_manager.get_state_registry(REGISTRY_KEYS.BATCH_KEY).categorical_mapping)
+    lmap = list(model.adata_manager.get_state_registry(REGISTRY_KEYS.LABELS_KEY).categorical_mapping)
+    tab = np.full((len(bmap), len(lmap)), np.nan)
+    for bname, row in iw_weights.items():
+        if str(bname) not in [str(x) for x in bmap]:
+            raise KeyError(f"iw_weights batch {bname!r} not in the data")
+        for lname, wv in row.items():
+            if str(lname) not in [str(x) for x in lmap]:
+                raise KeyError(f"iw_weights cell type {lname!r} not in the data")
+            wv = float(wv)
+            if not (np.isfinite(wv) and wv >= 0):
+                raise ValueError(f"iw weight for ({bname}, {lname}) must be finite and >= 0, got {wv}")
+            tab[[str(x) for x in bmap].index(str(bname)), [str(x) for x in lmap].index(str(lname))] = wv
+    pairs = a.obs[[batch_key, iw_label_key]].astype(str).drop_duplicates().itertuples(index=False)
+    missing = [(b, c) for b, c in pairs
+               if not np.isfinite(tab[[str(x) for x in bmap].index(b), [str(x) for x in lmap].index(c)])]
+    if missing:
+        raise ValueError(f"iw_weights lacks {len(missing)} (batch, cell type) pairs present in the data, e.g. {missing[:3]}")
+    return tab
+
+
 def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, reference_batch, adv_input,
                          zstd, n_latent, max_epochs, batch_size, seed, conditioned, model_name="SCVI",
                          n_layers=1, n_hidden=128, gene_likelihood="zinb", train_size=0.9,
                          bary_support=None, bary_iter=10, bary_weights="equal", wcd_src_root=None,
                          critic_lr=1e-4, critic_betas=(0.0, 0.9), adv_hidden=128, disc_lr=1e-3,
-                         bary_warm_iter=None):
+                         bary_warm_iter=None, r1_gamma=None, sampler=None, iw_weights=None,
+                         iw_label_key="celltype"):
     """Fit one scvi model + adversary. Every design setting is a required keyword; the backbone
     settings default to scvi-tools' own defaults (n_layers=1, n_hidden=128, zinb, train_size=0.9).
+    Options (off unless given; docs/SPECS_missing_arms.md): r1_gamma (discriminator_r1), sampler='stratified'
+    (training minibatches stratified by batch), iw_weights {batch: {cell type: w}} (X3 importance weights,
+    conditioned models only; cell types from obs[iw_label_key] enter through scvi's labels slot).
     Returns (posterior-mean latent [n, n_latent], trained model)."""
     import scvi
     if model_name == "SCVI":
@@ -303,11 +441,18 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
         from scvi.model import LinearSCVI as Model
     else:
         raise ValueError(f"model_name must be 'SCVI' or 'LinearSCVI', got {model_name!r}")
+    if sampler not in _SAMPLERS:
+        raise ValueError(f"sampler must be one of {_SAMPLERS}, got {sampler!r}")
+    if iw_weights is not None and not conditioned:
+        raise ValueError("importance weights need a batch-conditioned model (the labels slot holds the batch otherwise)")
     scvi.settings.seed = seed
     a = adata.copy()
     a.X = a.layers["counts"].copy()
     n_domains = int(a.obs[batch_key].nunique())
-    if conditioned:
+    if conditioned and iw_weights is not None:
+        Model.setup_anndata(a, batch_key=batch_key, labels_key=iw_label_key)
+        slot = "batch"
+    elif conditioned:
         Model.setup_anndata(a, batch_key=batch_key)
         slot = "batch"
     else:
@@ -326,9 +471,15 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
                        bary_support=bary_support, bary_iter=bary_iter, bary_weights=bary_weights,
                        wcd_src_root=(wcd_src_root or os.environ.get("WCD_SRC")),
                        critic_lr=critic_lr, critic_betas=critic_betas, adv_hidden=adv_hidden, disc_lr=disc_lr,
-                       bary_warm_iter=bary_warm_iter)
+                       bary_warm_iter=bary_warm_iter, r1_gamma=r1_gamma,
+                       iw_table=(None if iw_weights is None else _build_iw_table(model, iw_weights, iw_label_key, a, batch_key)))
+    train_kwargs = {}
+    if sampler == "stratified":
+        model._data_splitter_cls = _make_stratified_splitter(wcd_src_root or os.environ.get("WCD_SRC"))
+        train_kwargs["datasplitter_kwargs"] = dict(
+            strat_registry_key=(REGISTRY_KEYS.BATCH_KEY if slot == "batch" else REGISTRY_KEYS.LABELS_KEY))
     model.train(max_epochs=max_epochs, batch_size=batch_size, early_stopping=False, train_size=train_size,
-                enable_progress_bar=False, plan_kwargs=plan_kwargs)
+                enable_progress_bar=False, plan_kwargs=plan_kwargs, **train_kwargs)
     return model.get_latent_representation(), model
 
 

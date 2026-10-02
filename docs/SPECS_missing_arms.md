@@ -121,7 +121,8 @@ unchanged), installed through a DataSplitter subclass that the fit sets as `mode
   128 - V m goes one extra cell each to that many batches drawn uniformly at random per step. When V divides 128
   (V = 2, 4, 8, 16 in X8) every minibatch holds exactly 128 / V cells per batch.
 - Within a batch: draws without replacement from a permutation of its training cells; when the permutation is
-  used up a new one starts, and cells already in the current minibatch are not repeated in it.
+  used up a new one starts, and cells already in the current minibatch are not repeated in it. The cycles
+  continue across epoch boundaries (no reshuffle at an epoch start), so each cell is drawn once per cycle.
 - Randomness: one generator per epoch, seeded from torch's global RNG (as RandomSampler does), so a fit is
   reproducible from scvi.settings.seed.
 - **Too few cells:** if a batch has fewer training cells than its per-step quota (ceil(128 / V)), the fit raises
