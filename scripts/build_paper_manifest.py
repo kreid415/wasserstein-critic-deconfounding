@@ -1,26 +1,42 @@
 #!/usr/bin/env python
-"""Build the pre-registered Tier 1 + 2 manifest (docs/PAPER_PLAN.md, revised 2026-10-02).
+"""Build the pre-registered Tier 1 + 2 manifest (docs/PAPER_PLAN.md; decision rules docs/PREREG.md).
 
-Decisions from 2026-10-02:
-  * the eight standard scIB tasks only, with scIB batch/label keys (no new datasets);
-  * the discriminator always takes ONE update per generator step;
+Decisions in force (CONSTRAINTS.md):
+  * the eight standard scIB tasks only, with scIB batch/label keys (SI-02, SI-03);
+  * the discriminator always takes ONE update per generator step (SI-01);
   * within a task every arm and every neural baseline uses the same backbone, epochs, batch size
-    and latent size (BACKBONES; epochs = the scvi-tools heuristic min(400, round(20000/n*400)));
-  * barycenter critic rebuilt (free-support W2 barycenter target, wcd.barycenter);
-  * critics use WGAN-GP Algorithm 1 defaults (n_critic 5, lambda_GP 10, Adam 1e-4, betas (0, 0.9)).
+    and latent size (SI-04; BACKBONES; epochs = the scvi-tools heuristic min(400, round(20000/n*400)));
+  * backbone of record: scvi-tools defaults ('stock', SI-10); barycenter target = free-support W2
+    barycenter, 10 cold fixed-point iterations per step (SI-14); critics use WGAN-GP Algorithm 1
+    defaults (n_critic 5, lambda_GP 10, Adam 1e-4, betas (0, 0.9)).
 
-Wall-time design (no sequential calibration stage):
-  * X1 uses ONE fixed log grid of lambda for every arm (LAMBDA_GRID). This replaces the A1
-    calibration pilot, so no lambda is chosen from the data before the main benchmark.
-  * Follow-up experiments use 'matched' lambdas, resolved from X1 by the pre-registered rule in
-    scripts/freeze_matched_lambda.py (per task x arm x conditioning: the grid point whose seed-mean
-    scIB batch score is closest to the target b*; lo / hi = its grid neighbours). Their X1 tasks are
-    queued first, so they never wait.
-  * Rows identical to an X1 row (all settings equal, seed included) are not refitted; the analysis
-    reads the X1 fit (column reuses_x1 in the summary).
+Design of record: --design pilot (SI-16), staged by the pre-registered rules of docs/PREREG.md:
+  A1     atac_small, immune, sim1 x both decoders x seeds A1_SEED0.. (100-102) x (lambda=0 + 6 arms x
+         LAMBDA_GRID), posterior-mean input, no standardisation. A1 seeds are disjoint from the X1
+         seeds (0-4), so no A1 fit is ever an X1 fit.
+  R1     scripts/freeze_a1_grid.py fixes a 6-point lambda grid per arm family x decoder (SI-18) and
+         resolves X1's lam g1..g6.
+  R4-a1  scripts/freeze_matched_lambda.py --stage a1 resolves the A2/A3 window (a1_matched_lo /
+         a1_matched / a1_matched_hi) from A1 scores (SI-21).
+  A2/A3  pilots, run BEFORE X1, on A1's tasks and seeds: posterior sample vs mean (A2), per-dimension
+         standardisation on vs off (A3). Their mean / off halves are A1 fits, so only the new halves
+         (sample; standardisation on) are rows of this manifest.
+  R2/R3  scripts/decide_a2_a3.py resolves X1's adv_input ('A2') and zstd ('A3') placeholders and sets
+         the follow-ups' adversarial rows (built with mean / 0) to the same decision (SI-19, SI-20).
+  X1     8 tasks x both decoders x seeds 0-4. Then R4-x1 (freeze_matched_lambda.py --stage x1)
+         resolves the follow-ups' 'matched*' lambdas: per task x arm x decoder, the grid point whose
+         seed-mean unscaled batch score is closest to b*; lo / hi = its grid neighbours.
+A row that holds a placeholder cannot be fitted: fit_paper_config.py refuses a non-numeric lambda and
+a non-integer zstd, and the training plan refuses an adv_input other than mean / sample.
+Rows identical to an X1 row (all settings equal, seed included) are not refitted; the analysis reads
+the X1 fit (column reuses_x1 in the summary). Follow-up rows that become identical to an X1 row only
+once the placeholders are resolved are deduplicated by freeze_matched_lambda.py --stage x1.
 
-Backbone of record: scvi-tools defaults ('stock'; CONSTRAINTS.md SI-10, user choice 2026-10-02).
-Usage: python scripts/build_paper_manifest.py --backbone stock --out scripts/paper_manifest.tsv
+--design shared (costing alternative without A1): X1 runs the 10-point LAMBDA_GRID for every arm and
+A2/A3 come after X1, with X1-matched lambdas and their mean / off halves taken from X1 rows.
+
+Usage: python scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 \\
+           --bary-iter 10 --out scripts/paper_manifest.tsv
 """
 import argparse
 import hashlib
@@ -39,6 +55,10 @@ BACKBONES = {
 }
 LAMBDA_GRID = [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]   # half-decade steps, 4.5 decades
 FAMILY_GRID = [f"g{i}" for i in range(1, 7)]   # design 'pilot': 6 per-family points fixed from A1
+A1_TASKS = ["atac_small", "immune", "sim1"]    # design 'pilot': A1 calibration tasks (3 of 8; disclosed, PREREG.md)
+A1_SEED0 = 100                                  # A1/A2/A3 seeds 100, 101, ...: disjoint from the X1 seeds 0-4
+A1_MATCHED = ["a1_matched_lo", "a1_matched", "a1_matched_hi"]   # A2/A3 window, resolved from A1 (R4 stage a1)
+ADV_INPUT_PENDING, ZSTD_PENDING = "A2", "A3"    # X1 placeholders, resolved by decide_a2_a3.py (R2 / R3)
 CRITICS = ["reference", "pooled", "barycenter"]
 ARMS = ["discriminator"] + CRITICS + ["mmd", "sinkhorn"]
 N_CRITIC = 5
@@ -92,32 +112,56 @@ def row(exp, task, arm, lam, seed, cond, bb, n_cells=None, **over):
 def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     R = []
     grid = LAMBDA_GRID if design == "shared" else FAMILY_GRID
+    a2_tasks, a2_arms = ["atac_small", "immune"], ["discriminator", "reference", "pooled"]
+    a3_arms = ["discriminator", "reference", "pooled", "mmd", "sinkhorn"]
     if design == "pilot":
-        # ---- A1: calibration pilot on the full shared grid; fixes each family's 6-point X1 grid
-        for t, s, cond in itertools.product(["atac_small", "immune", "sim1"], range(pilot_seeds), [True, False]):
-            R += [row("A1", t, a, lam, s, cond, bb) for a, lam in itertools.product(ARMS, LAMBDA_GRID)]
-    # ---- X1/X2: core benchmark. Conditioned: 5 seeds; unconditioned: 3 seeds.
+        # ---- A1: calibration pilot (docs/PREREG.md R1). Seeds are disjoint from every X1 seed (0-4), so no
+        #      A1 fit is an X1 fit. lambda=0 ('none') rows are the seed-paired reference of R1 and R4.
+        #      Posterior-mean input and no standardisation: the defaults that A2 / A3 test against.
+        a1_seeds = [A1_SEED0 + i for i in range(pilot_seeds)]
+        if set(a1_seeds) & set(range(5)):
+            raise ValueError(f"A1 seeds {a1_seeds} overlap the X1 seeds 0-4")
+        for t, s, cond in itertools.product(A1_TASKS, a1_seeds, [True, False]):
+            R.append(row("A1", t, "none", 0, s, cond, bb))
+            R += [row("A1", t, a, lam, s, cond, bb, adv_input="mean", zstd=0)
+                  for a, lam in itertools.product(ARMS, LAMBDA_GRID)]
+        # ---- A2 / A3 pilots, scheduled BEFORE X1 (R2 / R3 set X1's adversary input and standardisation).
+        #      lambda window a1_matched_lo / a1_matched / a1_matched_hi = R4 applied to A1 scores
+        #      (freeze_matched_lambda.py --stage a1), so every window value is an A1 grid point. Same tasks,
+        #      seeds and decoder as A1: the posterior-mean (A2) and standardisation-off (A3) halves ARE A1
+        #      fits and are not emitted; only the new halves are rows.
+        if not (set(a2_tasks) <= set(A1_TASKS) and set(a2_arms + a3_arms) <= set(ARMS)):
+            raise ValueError("A2/A3 tasks and arms must be A1 tasks and arms (their default halves are A1 fits)")
+        for t, s, arm, lam in itertools.product(a2_tasks, a1_seeds, a2_arms, A1_MATCHED):
+            R.append(row("A2", t, arm, lam, s, True, bb, adv_input="sample", zstd=0))
+        for t, s, arm, lam in itertools.product(a2_tasks, a1_seeds, a3_arms, A1_MATCHED):
+            R.append(row("A3", t, arm, lam, s, True, bb, adv_input="mean", zstd=1))
+    # ---- X1/X2: core benchmark, both decoders; conditioned 5 seeds, unconditioned --uncond-seeds (plan 5).
+    #      Pilot design: adversarial rows carry lam g1..g6 (R1 family grid) and the adv_input / zstd
+    #      placeholders of R2 / R3, so none can be fitted before its rule has run. 'none' and 'scvi_adv'
+    #      rows keep the inert mean / 0 and can run while A1-A3 are in progress.
+    pend = dict(adv_input=ADV_INPUT_PENDING, zstd=ZSTD_PENDING) if design == "pilot" else {}
     for t in TASKS:
         for s in range(5):
             R.append(row("X1", t, "none", 0, s, True, bb))
             R.append(row("X1", t, "scvi_adv", 0, s, True, bb))
-            R += [row("X1", t, a, lam, s, True, bb) for a, lam in itertools.product(ARMS, grid)]
+            R += [row("X1", t, a, lam, s, True, bb, **pend) for a, lam in itertools.product(ARMS, grid)]
         for s in range(uncond_seeds):
             R.append(row("X1", t, "none", 0, s, False, bb))
-            R += [row("X1", t, a, lam, s, False, bb) for a, lam in itertools.product(ARMS, grid)]
+            R += [row("X1", t, a, lam, s, False, bb, **pend) for a, lam in itertools.product(ARMS, grid)]
     # ---- X13: neural baselines, same backbone/epochs/batch/latent (scANVI: scIB protocol; sysVI cycle weight grid)
     for t, s in itertools.product(TASKS, range(5)):
         R.append(row("X13", t, "scanvi", 0, s, True, bb))
         R += [row("X13", t, "sysvi", w, s, True, bb) for w in [1, 2, 5, 10, 20, 50]]
-    # ---- A2: adversary input, posterior mean vs sample (mean half = X1 rows)
-    for t, s, inp, arm, lam in itertools.product(["atac_small", "immune"], range(3), ["mean", "sample"],
-                                                 ["discriminator", "reference", "pooled"], ["matched_lo", "matched", "matched_hi"]):
-        R.append(row("A2", t, arm, lam, s, True, bb, adv_input=inp))
-    # ---- A3: per-dimension standardisation of the adversary input (off half = X1 rows)
-    for t, s, z, arm, lam in itertools.product(["atac_small", "immune"], range(3), [0, 1],
-                                               ["discriminator", "reference", "pooled", "mmd", "sinkhorn"],
-                                               ["matched_lo", "matched", "matched_hi"]):
-        R.append(row("A3", t, arm, lam, s, True, bb, zstd=z))
+    if design == "shared":
+        # ---- A2 (no-A1 design): adversary input, posterior mean vs sample (mean half = X1 rows)
+        for t, s, inp, arm, lam in itertools.product(a2_tasks, range(3), ["mean", "sample"], a2_arms,
+                                                     ["matched_lo", "matched", "matched_hi"]):
+            R.append(row("A2", t, arm, lam, s, True, bb, adv_input=inp))
+        # ---- A3 (no-A1 design): per-dimension standardisation of the adversary input (off half = X1 rows)
+        for t, s, z, arm, lam in itertools.product(a2_tasks, range(3), [0, 1], a3_arms,
+                                                   ["matched_lo", "matched", "matched_hi"]):
+            R.append(row("A3", t, arm, lam, s, True, bb, zstd=z))
     # ---- X7: every batch as reference (K >= 3): reference W1, fixed-reference W1, MMD to reference
     for t in ["pancreas", "sim1", "atac_small"]:
         for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], range(3)):
