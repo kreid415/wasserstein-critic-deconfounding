@@ -35,19 +35,23 @@ def measure(bench_dir, out_csv):
         arm = r["arm"] + (f"_warm{ex['bary_warm_iter']}" if ex.get("bary_warm_iter") else "")
         rows[r["tag"]] = dict(tag=r["tag"], task=r["task"], arm=arm, n_critic=int(r["n_critic"]),
                               batch_size=int(r["batch_size"]), epochs=int(r["max_epochs"]), n=c["n_cells"],
-                              K=c["n_batches"], seconds=c["fit_seconds"], gpu=c["gpu"])
+                              K=c["n_batches"], seconds=c["fit_seconds"], gpu=c["gpu"],
+                              train_size=float(r["train_size"]), n_latent=int(r["n_latent"]), likelihood=r["likelihood"])
     out = []
     for tag, r in rows.items():
         if r["epochs"] != 3 or "conc8" in tag or (tag + "_e1") not in rows:
             continue
         t1 = rows[tag + "_e1"]["seconds"]
-        spe = math.ceil(r["n"] / r["batch_size"])
+        spe = math.ceil(r["n"] * r["train_size"] / r["batch_size"])
         out.append(dict(r, seconds_1ep=t1, ms_per_step=round(1e3 * (r["seconds"] - t1) / (2 * spe), 2),
                         setup_s=round(t1 - (r["seconds"] - t1) / 2, 1)))
     conc = []
     for arm in ("pooled", "barycenter"):
-        tc = [r["seconds"] for t, r in rows.items() if f"BENCH_immune_{arm}_conc8" in t]
-        ts = rows.get(f"BENCH_immune_{arm}", {}).get("seconds")
+        for pre in ("BENCH", "S"):
+            tc = [r["seconds"] for t, r in rows.items() if f"{pre}_immune_{arm}_conc8" in t]
+            ts = rows.get(f"{pre}_immune_{arm}", {}).get("seconds")
+            if tc and ts:
+                break
         if tc and ts:
             conc.append(dict(arm=arm, lanes=8, t_single=ts, t_concurrent=float(np.mean(tc)),
                              speedup=round(8 * ts / float(np.mean(tc)), 2)))

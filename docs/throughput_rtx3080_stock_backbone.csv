@@ -1,0 +1,10 @@
+tag,task,arm,n_critic,batch_size,epochs,n,K,seconds,gpu,train_size,n_latent,likelihood,seconds_1ep,ms_per_step,setup_s
+S_immune_barycenter_warm3,immune,barycenter_warm3,5,128,3,33506,10,31.1,NVIDIA GeForce RTX 3080,0.9,10,zinb,11.6,41.31,1.8
+S_immune_discriminator,immune,discriminator,1,128,3,33506,10,9.7,NVIDIA GeForce RTX 3080,0.9,10,zinb,4.2,11.65,1.5
+S_immune_mmd,immune,mmd,0,128,3,33506,10,10.1,NVIDIA GeForce RTX 3080,0.9,10,zinb,4.1,12.71,1.1
+S_immune_none,immune,none,0,128,3,33506,10,7.0,NVIDIA GeForce RTX 3080,0.9,10,zinb,3.1,8.26,1.2
+S_immune_pooled,immune,pooled,5,128,3,33506,10,27.1,NVIDIA GeForce RTX 3080,0.9,10,zinb,10.6,34.96,2.3
+S_immune_reference,immune,reference,5,128,3,33506,10,34.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,12.0,47.03,0.9
+S_immune_scvi_adv,immune,scvi_adv,0,128,3,33506,10,9.3,NVIDIA GeForce RTX 3080,0.9,10,zinb,3.9,11.44,1.2
+S_immune_sinkhorn,immune,sinkhorn,0,128,3,33506,10,16.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,6.5,20.55,1.7
+S_hummou_pooled,immune_hum_mou,pooled,5,128,3,97861,23,95.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,30.6,46.88,-1.7

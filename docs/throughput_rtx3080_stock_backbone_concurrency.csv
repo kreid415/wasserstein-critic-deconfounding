@@ -1,0 +1,2 @@
+arm,lanes,t_single,t_concurrent,speedup
+pooled,8,27.1,68.42500000000001,3.17
