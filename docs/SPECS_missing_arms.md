@@ -225,3 +225,39 @@ in CONSTRAINTS.md and the lab notebook.
 
 Alternatives offered and not chosen: X6 gamma grid {1, 10} (54 fits); X7 minimax (saturating) generator loss;
 X8 sampler on all four X8 adversarial arms (288 fits); X3 pairwise full composition matching (3 arms, 360 fits).
+
+## 7. Implementation and verification (as built, branch missing-arms)
+
+| item | code | tests |
+|---|---|---|
+| X6 discriminator_r1 | `wcd/discriminator_losses.py` (`one_vs_rest_logodds`, `r1_penalty`); plan arm `discriminator_r1`, `r1_gamma` required | gradcheck; R1 = 0 for a constant head; (gamma/2) times the squared norm of w1 - w0 for a linear two-batch head; finite differences (3 batches); one adversary step per generator step |
+| X7 discriminator_ref | `reference_js_losses`; plan arm `discriminator_ref` (n_adv 1, reference required) | gradcheck; log 4 at zero logits; log 4 - 2 JSD at the Bayes logit of two Gaussians; explicit per-head loop; generator gradient reaches reference cells; one adversary step |
+| X8 stratified sampler | `wcd/sampling.py` (`StratifiedBatchSampler`); plan `_make_stratified_splitter` (training loader only), option `sampler='stratified'` | exact 128/V counts (V = 2, 4, 8, 16); remainder within 1 and balanced; ceil(n/128) steps; once per cycle; reproducible; refusal below quota; fit-level counts in the training step (conditioned and unconditioned) |
+| X3 oracle IW | `critic.py` (`_forward_weighted`), `alignment.py` (`_batch_masks_weighted`), `weighted_ce` / `fool_loss`; runner `depletion_oracle_weights` from `subsample(..., return_info=True)` | unit weights = unweighted loss; integer weights = duplicated cells; zero-weight cells get no gradient; gradcheck; weights 1 at doses 0 / 100 and depleted count restored; labels slot changes no latent; unit-weight fits equal unweighted fits (pooled, mmd bit for bit) |
+| runner | `fit_paper_config.py`: every `extra` key consumed or refused; provenance git calls fail loudly | unknown / inconsistent keys refused; end-to-end rows for r1_gamma, discriminator_ref, sampler, iw; X3/X8 cells unchanged from 8cda6de on real obs |
+| manifest | `build_paper_manifest.py`: X3 +288 (IW, doses 50/80/95), X6 +27 (R1), X7 +54 (reference JS), X8 +144 (stratified critics); base rows unchanged | `test_manifest_adds_exactly_the_signed_off_rows`; fl_unique_outputs over 6,502 rows |
+
+Test runs on the final code (src/ and scripts/ unchanged since fe4ec94; X13 suite re-run after its negative-control fix): wcd-gpu `159 passed, 66 warnings in 81.65s (0:01:21)`; scvi-api `50 passed, 1 skipped, 132 warnings in 50.75s`; wcd-kbet (X13) `6 passed, 4 warnings in 121.97s (0:02:01)`.
+Bit-identity gate (`scripts/check_arm_bitidentity.py --base 8cda6de`, CPU): 34 of 34 configurations of the existing arms
+identical, max|dz| = 0 (`docs/bitidentity_existing_arms.csv`); a 0.025% MMD bandwidth change and a 1e-4 fool-loss change are detected.
+
+**Step cost (immune, single lane, `docs/throughput_missing_arms_summary.csv`), PROVISIONAL.** The run failed PF-16: repeat 2 ran
+while other workloads kept 8-13 of 12 CPU cores busy. Same-session controls vs the existing CSV (ms/step): discriminator 12.71 vs 11.65; reference 47.03 vs 47.03; pooled 46.19 vs 34.96; mmd 11.65 vs 12.71.
+
+| arm | median ms/step (3 repeats) | range | PF-16 | control-ratio estimate |
+|---|---|---|---|---|
+| discriminator_r1 | 14.62 | 13.14-14.83 | pass | 12.04 |
+| discriminator_ref | 16.53 | 15.89-19.92 | pass | 16.18 |
+| reference_stratified | 46.4 | 42.8-47.46 | pass | 45.46 |
+| pooled_stratified | 30.51 | 21.19-36.23 | fail | 25.55 |
+| discriminator_iw | 13.08 | 12.38-28.27 | fail | 13.32 |
+| reference_iw | 50.23 | 41.82-65.42 | fail | 53.35 |
+| pooled_iw | 36.92 | 35.28-60.28 | fail | 30.92 |
+| mmd_iw | 12.38 | 11.21-28.5 | fail | 13.51 |
+
+The 8 medians are appended to `docs/throughput_rtx3080_stock_backbone.csv`; re-measure on a quiet machine before relying on them.
+
+**X13 CPU baselines** (`scripts/run_cpu_baselines.py`, env wcd-kbet): on atac_small the 6 latents (PCA d10/d50, Harmony d10/d50,
+Scanorama d10/d100) were scored by `score_scib_native.py` unchanged. Two findings for the X13 design: Harmony through scib
+(harmony-pytorch 0.1.7, multithreaded float32) is not reproducible run to run here (atac_small d50: max|dz| 0.114, NMI -0.024
+between two runs), and kBET varies by up to 0.0047 on identical latents.

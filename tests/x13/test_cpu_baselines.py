@@ -2,7 +2,8 @@
     KMP_AFFINITY=disabled python -m pytest -q tests/x13
 
 1. The runner's Harmony statements reproduce scib.integration.harmony at the default setting to harmonize's own
-   rerun noise (<= 5.7e-06 measured; tolerance 1e-4), and a different theta differs by > 100x that.
+   rerun noise (<= 5.7e-06 measured; tolerance 1e-4); a shuffled batch column or the uncorrected PCA differs by
+   more than 100x that (theta 2.5 instead of 2 does not: max|dz| 1e-05 on this toy, so it is not used).
 2. Scanorama's output (concatenated by batch) is returned in the input cell order.
 3. Each method returns the declared number of dimensions at both settings.
 4. With PREPPED_DIR set: the runner on atac_small writes the npz format of fit_paper_config.py (z, obs_names,
@@ -56,8 +57,11 @@ def test_harmony_statements_reproduce_scib_harmony():
     import scanpy as sc
     b = a.copy()
     sc.tl.pca(b)
-    z_theta = np.asarray(harmonize(b.obsm["X_pca"], b.obs, batch_key="batch", theta=2.5))
-    assert float(np.abs(z_scib - z_theta).max()) > 100 * HARMONY_RERUN_TOL
+    shuffled = b.obs.copy()                      # a wrong batch column (the realistic bug)
+    shuffled["batch"] = pd.Categorical(np.random.default_rng(0).permutation(shuffled["batch"].astype(str).values))
+    z_wrong = np.asarray(harmonize(b.obsm["X_pca"], shuffled, batch_key="batch"))
+    assert float(np.abs(z_scib - z_wrong).max()) > 100 * HARMONY_RERUN_TOL
+    assert float(np.abs(z_scib - np.asarray(b.obsm["X_pca"])).max()) > 100 * HARMONY_RERUN_TOL   # uncorrected PCA
 
 
 def test_scanorama_output_is_in_input_cell_order():
