@@ -1,13 +1,13 @@
 """Unit tests for the X6 / X7 / X8 / X3 pieces (docs/SPECS_missing_arms.md, signed off 2026-10-02).
 
-R1 (SI-18): gradcheck; R1 = 0 for a constant head; linear two-batch head gives (gamma/2)||w1 - w0||^2 exactly;
+R1 (SI-22): gradcheck; R1 = 0 for a constant head; linear two-batch head gives (gamma/2)||w1 - w0||^2 exactly;
             three batches match a finite-difference evaluation; K = 2 log-odds are the binary logit.
-reference JS (SI-19): gradcheck; log 4 at zero logits; log 4 - 2 JSD at the Bayes logit of two Gaussians;
+reference JS (SI-23): gradcheck; log 4 at zero logits; log 4 - 2 JSD at the Bayes logit of two Gaussians;
             equals an explicit per-head loop; inactive heads; generator gradient reaches reference cells.
-importance weights (SI-21): for the discriminator CE / fool loss, the reference and pooled critic and MMD:
+importance weights (SI-25): for the discriminator CE / fool loss, the reference and pooled critic and MMD:
             unit weights give the unweighted loss, integer weights equal duplicated cells, zero-weight cells
             get no gradient, gradcheck.
-stratified sampler (SI-20): exact per-batch counts, step count, distinct indices, once per cycle,
+stratified sampler (SI-24): exact per-batch counts, step count, distinct indices, once per cycle,
             reproducibility, refusal below quota.
 """
 import math

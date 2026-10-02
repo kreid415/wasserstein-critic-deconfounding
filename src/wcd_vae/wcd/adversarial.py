@@ -82,7 +82,7 @@ class Discriminator(nn.Module):
             return output
 
         if weights is not None:
-            # Importance weights (X3, SI-21) are defined for the reference / pooled critic losses only; the
+            # Importance weights (X3, SI-25) are defined for the reference / pooled critic losses only; the
             # weighted discriminator cross-entropy is computed by the caller from the logits.
             if not isinstance(self.loss, ReferenceWassersteinLoss) or self.formulation == "barycenter":
                 raise NotImplementedError("weights are supported for the reference and pooled critic losses only")

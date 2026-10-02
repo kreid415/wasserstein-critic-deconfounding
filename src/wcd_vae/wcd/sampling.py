@@ -1,6 +1,6 @@
 """Per-batch stratified minibatch sampler for the X8 critic arms -- AUTHORED (K. Reid), 2026-10-02.
 
-Specification: docs/SPECS_missing_arms.md section 3 (signed off 2026-10-02, CONSTRAINTS.md SI-20). Precedent:
+Specification: docs/SPECS_missing_arms.md section 3 (signed off 2026-10-02, CONSTRAINTS.md SI-24). Precedent:
 domain-stratified minibatches in domain-adversarial training (Ganin & Lempitsky 2015, ICML, Sec. 5: half of
 each 128-cell batch from each domain). Replaces scvi-tools' BatchSampler(RandomSampler(train set), 128,
 drop_last=False) for the training loader only.

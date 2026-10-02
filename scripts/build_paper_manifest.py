@@ -122,7 +122,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     for t in ["pancreas", "sim1", "atac_small"]:
         for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], range(3)):
             R.append(row("X7", t, arm, "matched", s, True, bb, reference=str(ref)))
-        # reference JS (docs/SPECS_missing_arms.md section 2, CONSTRAINTS.md SI-19): one adversary step
+        # reference JS (docs/SPECS_missing_arms.md section 2, CONSTRAINTS.md SI-23): one adversary step
         for ref, s in itertools.product(range(TASKS[t][1]), range(3)):
             R.append(row("X7", t, "discriminator_ref", "matched", s, True, bb, reference=str(ref), n_critic=1))
     # ---- X8: number of batches V at fixed total cells and equal cells per batch
@@ -131,7 +131,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
             ex = json.dumps(dict(subsample=dict(kind="batches", n_batches=V, subset=sub, n_cells=n)))
             for arm in ["none", "discriminator", "mmd", "reference", "pooled"]:
                 R.append(row("X8", t, arm, 0 if arm == "none" else "matched", s, True, bb, n_cells=n, extra=ex))
-            # critics also with the per-batch stratified sampler (SPECS section 3, SI-20)
+            # critics also with the per-batch stratified sampler (SPECS section 3, SI-24)
             ex_s = json.dumps(dict(subsample=dict(kind="batches", n_batches=V, subset=sub, n_cells=n),
                                    sampler="stratified"))
             for arm in ["reference", "pooled"]:
@@ -144,7 +144,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
             R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex))
             R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex)
                   for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
-            # oracle importance-weighted control (SPECS section 4, SI-21): weights undo the induced depletion;
+            # oracle importance-weighted control (SPECS section 4, SI-25): weights undo the induced depletion;
             # at doses 0 and 100 every weight is 1 (= the unweighted rows above), so IW rows at 50 / 80 / 95 only
             if dose in (50, 80, 95):
                 ex_iw = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose,
@@ -157,7 +157,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
                                                   ("pooled", 10), ("pooled_sn", 1), ("pooled_sn", 5)],
                                                  ["matched_lo", "matched", "matched_hi"]):
         R.append(row("X6", t, arm, lam, s, True, bb, n_critic=k))
-    # JS + R1 penalty, gamma 10, one adversary step (SPECS section 1, SI-18)
+    # JS + R1 penalty, gamma 10, one adversary step (SPECS section 1, SI-22)
     for t, s, lam in itertools.product(["atac_small", "immune", "pancreas"], range(3), ["matched_lo", "matched", "matched_hi"]):
         R.append(row("X6", t, "discriminator_r1", lam, s, True, bb, n_critic=1, extra=json.dumps(dict(r1_gamma=10))))
     # ---- X12 (tier 2): 5 two-level factors. 8 runs = 2^(5-2), generators D = AB, E = AC (resolution III:

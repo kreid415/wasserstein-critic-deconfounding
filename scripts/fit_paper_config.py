@@ -28,9 +28,9 @@ ADVERSARIAL = {"discriminator", "discriminator_sn", "reference", "reference_fixe
 # every key of a row's `extra` must be consumed here; anything else is refused (fail-loud R4)
 EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
               "factorial_run",            # X12 run label: provenance only (the factors it encodes are row columns)
-              "r1_gamma",                 # X6 discriminator_r1 (docs/SPECS_missing_arms.md section 1, SI-18)
-              "sampler",                  # X8 'stratified' (section 3, SI-20)
-              "iw"}                       # X3 'depletion_oracle' (section 4, SI-21)
+              "r1_gamma",                 # X6 discriminator_r1 (docs/SPECS_missing_arms.md section 1, SI-22)
+              "sampler",                  # X8 'stratified' (section 3, SI-24)
+              "iw"}                       # X3 'depletion_oracle' (section 4, SI-25)
 
 
 def check_extra(tag, arm, extra):
@@ -50,7 +50,7 @@ def check_extra(tag, arm, extra):
 
 
 def depletion_oracle_weights(a, spec, info):
-    """X3 oracle importance weights (SI-21): w = 1 / kappa for cells of the depleted types in the depleted batch,
+    """X3 oracle importance weights (SI-25): w = 1 / kappa for cells of the depleted types in the depleted batch,
     1 for every other cell, kappa = (n_hit - n_drop) / n_hit the realised keep fraction of the depletion
     (Tachet des Combes et al. 2020, Eq. 4 on the joint label (batch, cell type), target = pre-depletion).
     Returns ({batch: {cell type: w}} over the pairs present in a, kappa). Defined only for 0 < kappa < 1."""

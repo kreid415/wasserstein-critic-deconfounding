@@ -1,7 +1,7 @@
 """JS-discriminator losses for the X6 / X7 / X3 arms -- AUTHORED (K. Reid), 2026-10-02.
 
-Specifications and sources: docs/SPECS_missing_arms.md (signed off 2026-10-02; CONSTRAINTS.md SI-18, SI-19,
-SI-21). All functions take the logits l(z) in R^K of the existing MLP head (wcd.adversarial.Discriminator with
+Specifications and sources: docs/SPECS_missing_arms.md (signed off 2026-10-02; CONSTRAINTS.md SI-22, SI-23,
+SI-25). All functions take the logits l(z) in R^K of the existing MLP head (wcd.adversarial.Discriminator with
 batch_ids=None) or a callable producing them.
 
   r1_penalty            X6: R1 penalty of Mescheder, Geiger & Nowozin 2018 (ICML, arXiv:1801.04406, Eq. 9)
@@ -28,7 +28,7 @@ def one_vs_rest_logodds(logits, idx):
 
 
 def r1_penalty(logits_fn, z, batch_ids, gamma, detach_input=True):
-    """(gamma / 2) * (1/n) sum_i ||grad_z D_{b_i}(z_i)||^2   (SPECS section 1, SI-18).
+    """(gamma / 2) * (1/n) sum_i ||grad_z D_{b_i}(z_i)||^2   (SPECS section 1, SI-22).
 
     logits_fn maps [n, d] -> [n, K] row-wise (no layer may couple rows, e.g. batch norm: the gradient of the
     summed log-odds is then the per-row gradient). The penalty is evaluated at z (the detached minibatch
@@ -47,7 +47,7 @@ def r1_penalty(logits_fn, z, batch_ids, gamma, detach_input=True):
 
 
 def reference_js_losses(logits, batch_ids, reference_batch):
-    """(L_D, L_G) of the reference-anchored JS discriminator (SPECS section 2, SI-19).
+    """(L_D, L_G) of the reference-anchored JS discriminator (SPECS section 2, SI-23).
 
     Output k (k != r) is the logit of a binary discriminator 'batch k (label 1) vs reference r (label 0)';
     output r is unused. A head is active when its batch is in the minibatch and the reference is too.
@@ -91,7 +91,7 @@ def _check_weights(w, n):
 
 
 def weighted_ce(logits, batch_ids, weights):
-    """sum_i w_i CE_i / sum_i w_i (self-normalised importance-weighted cross-entropy; SI-21)."""
+    """sum_i w_i CE_i / sum_i w_i (self-normalised importance-weighted cross-entropy; SI-25)."""
     _check_weights(weights, logits.shape[0])
     ce = F.cross_entropy(logits, batch_ids, reduction="none")
     w = weights.to(ce.dtype)

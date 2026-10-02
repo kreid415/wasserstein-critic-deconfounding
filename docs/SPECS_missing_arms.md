@@ -154,7 +154,7 @@ versions (IWDAN-O, ...) use the true weights (Sec. 4.1).
 present in every batch. On the X3 tasks no cell type is present in every batch of immune_hum_mou (23 batches)
 or sim2 (16 batches), at any dose (`docs/x3_shared_support_profile.csv`).
 
-**Target (signed off, SI-21).** Each batch's own pre-depletion composition, i.e. the X3 base condition. The depletion is a
+**Target (signed off, SI-25).** Each batch's own pre-depletion composition, i.e. the X3 base condition. The depletion is a
 known selection on true labels: a cell of a depleted type in the depleted batch b survives with probability
 kappa_d = (n_hit - drop) / n_hit, drop = round(n_hit d / 100) (`fit_paper_config.subsample`), every other cell
 with probability 1. Eq. (4) applied to the joint label (batch, cell type), T = pre-depletion and S =
@@ -216,12 +216,16 @@ latent (adversary 'none'); existing arms bit-identical.
 All four answered by the user on 2026-10-02 (ask_user, one question per item, recommendation first). Recorded
 in CONSTRAINTS.md and the lab notebook.
 
+Ledger ids: first recorded as SI-18..SI-21 (commit 6c46d68, notebook entries NB-20261002-01..04); renumbered
+SI-22..SI-25 because branch prereg-rules (commit 0c3ca24, one minute earlier) assigned SI-18..SI-21 to its rules
+R1-R4. Rule texts unchanged; correction logged in the notebook.
+
 | item | question (abridged) | answer (verbatim) | ledger | notebook |
 |---|---|---|---|---|
-| X6 | How should the R1 penalty (Mescheder et al. 2018, Eq. 9) be defined for our K-way batch classifier, and with which gamma? | "One-vs-rest R1, gamma 10 (Recommended)" | SI-18 | NB-20261002-01 |
-| X7 | discriminator_ref ("reference JS"): which generator loss? | "Non-saturating, labels flipped (Recommended)" | SI-19 | NB-20261002-02 |
-| X8 | Stratified sampler: which arms get it? | "Critics only: reference, pooled (Recommended)" | SI-20 | NB-20261002-03 |
-| X3 | Oracle importance-weighted control: which target composition? | "Undo the induced depletion (Recommended)" | SI-21 | NB-20261002-04 |
+| X6 | How should the R1 penalty (Mescheder et al. 2018, Eq. 9) be defined for our K-way batch classifier, and with which gamma? | "One-vs-rest R1, gamma 10 (Recommended)" | SI-22 | NB-20261002-01 |
+| X7 | discriminator_ref ("reference JS"): which generator loss? | "Non-saturating, labels flipped (Recommended)" | SI-23 | NB-20261002-02 |
+| X8 | Stratified sampler: which arms get it? | "Critics only: reference, pooled (Recommended)" | SI-24 | NB-20261002-03 |
+| X3 | Oracle importance-weighted control: which target composition? | "Undo the induced depletion (Recommended)" | SI-25 | NB-20261002-04 |
 
 Alternatives offered and not chosen: X6 gamma grid {1, 10} (54 fits); X7 minimax (saturating) generator loss;
 X8 sampler on all four X8 adversarial arms (288 fits); X3 pairwise full composition matching (3 arms, 360 fits).

@@ -57,7 +57,7 @@ def _batch_masks(batch_index, z):
 
 def _batch_masks_weighted(batch_index, z, weights):
     """As _batch_masks, with cell weights: row k of A holds w_i / sum_{i in k} w_i on batch k, row k of B holds
-    w_i / sum_{i not in k} w_i on the other cells (self-normalised importance weights; X3, SI-21). With all
+    w_i / sum_{i not in k} w_i on the other cells (self-normalised importance weights; X3, SI-25). With all
     weights 1 the arithmetic is that of _batch_masks."""
     w = weights.to(z.dtype)
     if w.dim() != 1 or w.shape[0] != batch_index.numel():

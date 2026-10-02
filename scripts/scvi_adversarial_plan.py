@@ -19,15 +19,15 @@ SWAPPABLE adversary on the latent of any scvi module (SCVI / LinearSCVI). Arms:
     <critic>_sn     spectral-norm Lipschitz variant of a critic (gradient penalty dropped)
     discriminator_sn  spectral-normalised discriminator (Lipschitz control on the JS arm; X6)
     discriminator_r1  discriminator + R1 penalty on each cell's one-vs-rest log-odds, gamma = r1_gamma
-                    (Mescheder et al. 2018 Eq. 9; X6; docs/SPECS_missing_arms.md section 1, SI-18)
+                    (Mescheder et al. 2018 Eq. 9; X6; docs/SPECS_missing_arms.md section 1, SI-22)
     discriminator_ref reference-anchored JS: binary heads 'batch k vs reference', class-balanced
-                    cross-entropy, non-saturating label-flipped generator loss (X7; section 2, SI-19)
+                    cross-entropy, non-saturating label-flipped generator loss (X7; section 2, SI-23)
 
 Options (docs/SPECS_missing_arms.md; each off unless given):
-    sampler='stratified'  per-batch stratified training minibatches (X8; section 3, SI-20)
+    sampler='stratified'  per-batch stratified training minibatches (X8; section 3, SI-24)
     iw_weights            oracle importance weights per (batch, cell type), self-normalised in every
                           average of the adversarial objective (X3: discriminator, reference, pooled,
-                          mmd; section 4, SI-21). Conditioned models only (cell types use the labels slot).
+                          mmd; section 4, SI-25). Conditioned models only (cell types use the labels slot).
 
 Settings that change the science are REQUIRED arguments (no silent defaults): adv_input
 ('mean' = posterior mean, 'sample' = posterior sample z), n_critic (critic steps per generator
@@ -55,7 +55,7 @@ _CRITIC_FORMULATIONS = ("reference", "reference_fixed", "pooled", "barycenter")
 _CRITIC_FREE = ("mmd", "sinkhorn", "mmd_ref")
 _JS_ARMS = ("discriminator", "discriminator_ref")
 _ARMS = ("none", "scvi_adv") + _JS_ARMS + _CRITIC_FORMULATIONS + _CRITIC_FREE
-_IW_ARMS = ("discriminator", "reference", "pooled", "mmd")   # X3 arms with importance weights (SI-21)
+_IW_ARMS = ("discriminator", "reference", "pooled", "mmd")   # X3 arms with importance weights (SI-25)
 _SAMPLERS = (None, "stratified")
 
 
@@ -246,7 +246,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         return (z - m) / s
 
     def _iw_weights(self, batch, batch_index):
-        """Per-cell importance weights w[b_i, y_i] from the (batch, cell type) table (X3, SI-21)."""
+        """Per-cell importance weights w[b_i, y_i] from the (batch, cell type) table (X3, SI-25)."""
         labels = batch[REGISTRY_KEYS.LABELS_KEY].long().squeeze(-1)
         w = self._iw_table.to(batch_index.device)[batch_index, labels]
         if not bool(torch.isfinite(w).all()):
@@ -321,13 +321,13 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         for _ in range(self.adv_steps):
             if self.is_critic:
                 loss_d, gp = self._head(z_d, batch_index, target, with_gp=True, weights=w)
-            elif self.adversary_base == "discriminator_ref":     # X7 (SI-19)
+            elif self.adversary_base == "discriminator_ref":     # X7 (SI-23)
                 loss_d, _ = self._dl.reference_js_losses(self._wcd_head(z_d, None), batch_index, self.reference_batch)
                 gp = z_d.new_zeros(())
-            elif self.r1:                                         # X6 (SI-18): CE + R1 on the same forward pass
+            elif self.r1:                                         # X6 (SI-22): CE + R1 on the same forward pass
                 gp, logits = self._dl.r1_penalty(lambda x: self._wcd_head(x, None), z_d, batch_index, self.r1_gamma)
                 loss_d = F.cross_entropy(logits, batch_index)
-            elif w is not None:                                   # X3 (SI-21)
+            elif w is not None:                                   # X3 (SI-25)
                 loss_d = self._dl.weighted_ce(self._wcd_head(z_d, None), batch_index, w)
                 gp = z_d.new_zeros(())
             else:
@@ -367,7 +367,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
 
 
 def _make_stratified_splitter(src_root):
-    """DataSplitter whose TRAINING loader uses wcd.sampling.StratifiedBatchSampler (X8, SI-20); the validation
+    """DataSplitter whose TRAINING loader uses wcd.sampling.StratifiedBatchSampler (X8, SI-24); the validation
     and test loaders are scvi-tools' own. Built lazily so importing this module needs no scvi.dataloaders."""
     from scvi import settings as scvi_settings
     from scvi.dataloaders import DataSplitter

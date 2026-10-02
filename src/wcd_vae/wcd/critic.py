@@ -89,7 +89,7 @@ class ReferenceWassersteinLoss(nn.Module):
         return -diff.mean()
 
     def _forward_weighted(self, output, batch_ids, reference_batch, weights):
-        """Importance-weighted version (X3, docs/SPECS_missing_arms.md section 4, CONSTRAINTS.md SI-21): every
+        """Importance-weighted version (X3, docs/SPECS_missing_arms.md section 4, CONSTRAINTS.md SI-25): every
         per-head mean becomes a self-normalised weighted mean, sum_i w_i C_k(z_i) / sum_i w_i, on both sides
         (Tachet des Combes et al. 2020, Sec. 3.5: the importance-weighted IPM). A batch whose weights sum to
         zero in the minibatch is inactive. With all weights 1 the arithmetic is that of forward() above."""
