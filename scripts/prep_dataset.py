@@ -11,6 +11,8 @@ adata.obs["celltype"]=adata.obs[ck].astype(str).astype("category")
 # standardized columns so every dataset presents an identical (batch, celltype) interface.
 adata.uns["batch_key"]="batch"
 adata.uns["celltype_key"]="celltype"
+adata.uns["reference_batch"]=str(ref)   # entropy rule (select_reference_batch), read by scvi_adv_fit.py
+adata.uns.pop("log1p", None)
 out_dur=f"{DUR}/prepped_final/{DS}_prepped.h5ad"
 out_loc=f"results/scvi_single/{DS}_prepped.h5ad"
 adata.write_h5ad(out_dur)

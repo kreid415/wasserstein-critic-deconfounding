@@ -17,6 +17,9 @@ from scvi_adversarial_plan import fit_adversarial_linearscvi  # noqa: E402
 
 DS = os.environ.get("SCVI_DS", "immune")
 ADV = os.environ.get("ADV", "none")
+ZSTD = ADV.endswith("_zs")          # arm suffix _zs = standardise z before the adversary
+if ZSTD:
+    ADV = ADV[:-3]
 DCOEF = float(os.environ.get("DCOEF", "0"))
 DISC_ITER = int(os.environ.get("DISC_ITER", "10"))
 COND = os.environ.get("COND", "1") == "1"
@@ -32,13 +35,18 @@ OUT = os.environ["OUT"]
 adata = sc.read_h5ad(f"results/scvi_single/{DS}_prepped.h5ad")
 bk = adata.uns["batch_key"]
 ck = adata.uns["celltype_key"]
+# reference batch: chosen at PREP time by the repo's entropy rule (select_reference_batch: most even
+# cell-type coverage) and stored in uns, replacing the old alphabetical index 0. Refuse to guess.
+if "reference_batch" not in adata.uns:
+    raise KeyError(f"{DS}_prepped.h5ad has no uns['reference_batch']; re-run prep (load_task returns it)")
+REF = str(adata.uns["reference_batch"])
 
 t = time.time()
 print(f"[{DS} adv={ADV} λ={DCOEF} cond={COND} s{SEED}] fitting {MAXEP}ep batch={BATCH} "
-      f"disc_iter={DISC_ITER}...", flush=True)
+      f"disc_iter={DISC_ITER} nlat={NLAT} zstd={ZSTD} ref={REF}...", flush=True)
 Z = fit_adversarial_linearscvi(
     adata, bk, adversary=ADV, d_coef=DCOEF, disc_iter=DISC_ITER,
-    reference_batch=0, n_latent=NLAT, max_epochs=MAXEP, batch_size=BATCH,
+    reference_batch=REF, zstd=ZSTD, n_latent=NLAT, max_epochs=MAXEP, batch_size=BATCH,
     seed=SEED, conditioned=COND, model_name=MODEL,
     max_kl_weight=(float(MKL) if MKL is not None else None),
 )

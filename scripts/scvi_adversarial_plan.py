@@ -127,7 +127,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
 
     def __init__(self, module, *, adversary="none", d_coef=0.0, disc_iter=10,
                  reference_batch=0, wcd_src_root=None, n_domains=None, adv_batch_slot="batch",
-                 **kwargs):
+                 zstd=False, **kwargs):
         # Build stock plan first WITHOUT scvi's own adversarial_classifier (we supply our own head).
         kwargs.setdefault("adversarial_classifier", False)
         super().__init__(module, **kwargs)
@@ -135,6 +135,10 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.d_coef = float(d_coef)
         self.disc_iter = int(disc_iter)
         self.reference_batch = reference_batch
+        # zstd: centre z and divide by its pooled minibatch SD (with gradients) before ANY adversary
+        #   sees it. W1/MMD/Sinkhorn shrink when the encoder contracts z; a JS classifier does not.
+        #   Standardising removes that scale shortcut for every arm equally (user-requested pilot).
+        self.zstd = bool(zstd)
         # WHICH registry slot carries the adversary's TRUE batch labels, and how many domains.
         # CONDITIONED backbone: decoder is batch-conditioned (setup batch_key), n_batch>1, labels in
         #   REGISTRY_KEYS.BATCH_KEY. adv_batch_slot="batch", n_domains=module.n_batch.
@@ -215,7 +219,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             inference_outputs, _, scvi_loss = self.forward(batch, loss_kwargs=self.loss_kwargs)
             z = inference_outputs["z"]
             loss_vae = scvi_loss.loss
-            align = self._align_fn(z, batch_index)
+            align = self._align_fn(self._adv_input(z), batch_index)
             gen_loss = loss_vae + self.d_coef * align
             opt_g.zero_grad()
             self.manual_backward(gen_loss)
@@ -228,23 +232,50 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         z = inference_outputs["z"]
         loss_vae = scvi_loss.loss
 
-        # 1) adversary (critic/discriminator) update on detached z, disc_iter times
-        for _ in range(self.disc_iter if self.is_critic else 1):
-            loss_da_d, gp = self._adv_loss(z.detach(), batch_index)
+        z_adv = self._adv_input(z)
+
+        # 1) adversary update on detached z, disc_iter times. WHY for BOTH heads: the previous
+        #    `range(disc_iter if critic else 1)` silently ignored disc_iter for the discriminator,
+        #    so a budget-matched discriminator control was impossible (fairness review 2026-10-02).
+        for _ in range(self.disc_iter):
+            loss_da_d, gp = self._adv_loss(z_adv.detach(), batch_index)
             loss_d = loss_da_d + gp
             opt_d.zero_grad()
             self.manual_backward(loss_d, retain_graph=False)
             opt_d.step()
 
-        # 2) generator update: minimise loss_vae - lambda * loss_da
-        loss_da_g, _gp = self._adv_loss(z, batch_index)
-        gen_loss = loss_vae - self.d_coef * loss_da_g
+        # 2) generator update.
+        if self.is_critic:
+            # Wasserstein: minimise loss_vae - lambda * loss_da (loss_da = -sum_k gap_k; signs audited)
+            loss_da_g, _gp = self._adv_loss(z_adv, batch_index)
+            gen_loss = loss_vae - self.d_coef * loss_da_g
+        else:
+            # JS discriminator: scvi-tools' BOUNDED fool loss (AdversarialTrainingPlan.
+            # loss_adversarial_classifier, predict_true_class=False): cross-entropy to the uniform
+            # distribution over the OTHER batches. WHY: maximising the classifier's cross-entropy
+            # (the previous objective) is unbounded and is the likely cause of every divergence.
+            gen_loss = loss_vae + self.d_coef * self._fool_loss(z_adv, batch_index)
         opt_g.zero_grad()
         self.manual_backward(gen_loss)
         opt_g.step()
 
         self.log("train_loss", loss_vae, on_step=self.on_step, on_epoch=self.on_epoch, prog_bar=True)
         return loss_vae
+
+    def _adv_input(self, z):
+        """z as the adversary sees it: unchanged, or centred and divided by its pooled SD."""
+        if not self.zstd:
+            return z
+        zc = z - z.mean(dim=0, keepdim=True)
+        return zc / (zc.pow(2).mean().sqrt() + 1e-6)
+
+    def _fool_loss(self, z, batch_index):
+        """scvi-tools fool loss: CE between the head's prediction and uniform-over-other-batches."""
+        logits = self._wcd_head(z, None)                      # head returns raw logits w/o labels
+        k = logits.shape[1]
+        logp = F.log_softmax(logits, dim=1)
+        other = (~F.one_hot(batch_index, k).bool()).float() / (k - 1)
+        return -(logp * other).sum(dim=1).mean()
 
     def _adv_loss(self, z, batch_index):
         """Call the wcd head; returns (adversarial_loss, gradient_penalty). When spectral_norm is on,
@@ -267,7 +298,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
 def fit_adversarial_linearscvi(
     adata, batch_key, *, adversary="none", d_coef=0.0, disc_iter=10, reference_batch=0,
     n_latent=30, max_epochs=239, batch_size=512, seed=0, conditioned=True, wcd_src_root=None,
-    model_name="LinearSCVI", max_kl_weight=None, n_epochs_kl_warmup=None,
+    model_name="LinearSCVI", max_kl_weight=None, n_epochs_kl_warmup=None, zstd=False,
 ):
     """Fit an scvi module (LinearSCVI = linear decoder; SCVI = nonlinear decoder) + swappable
     adversary. conditioned=False omits batch_key from setup so the decoder is NOT batch-conditioned
@@ -297,12 +328,17 @@ def fit_adversarial_linearscvi(
         Model.setup_anndata(a, labels_key=batch_key)
         adv_batch_slot = "labels"
     model = Model(a, n_latent=n_latent)
+    if isinstance(reference_batch, str):
+        # resolve a batch NAME to the code scvi assigned it (registry slot depends on conditioning)
+        slot = "batch" if conditioned else "labels"
+        mapping = list(model.adata_manager.get_state_registry(slot).categorical_mapping)
+        reference_batch = mapping.index(reference_batch)
 
     # inject the custom plan class + its extra kwargs
     model._training_plan_cls = WassersteinAdversarialTrainingPlan
     plan_kwargs = dict(adversary=adversary, d_coef=d_coef, disc_iter=disc_iter,
                        reference_batch=reference_batch, n_domains=n_domains,
-                       adv_batch_slot=adv_batch_slot,
+                       adv_batch_slot=adv_batch_slot, zstd=bool(zstd),
                        wcd_src_root=(wcd_src_root or os.environ.get("WCD_SRC")))
     # KL controls (scvi anneals kl_weight from min to max_kl_weight over n_epochs_kl_warmup).
     # max_kl_weight is the scvi-native equivalent of the wcd harness's fixed kl_coef -- sweep it to
