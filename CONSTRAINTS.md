@@ -93,4 +93,10 @@
 - rule: Fit the scIB files as distributed (the 'counts' layer exactly as scIB fed scVI); no strict-count main run
 - source: "scIB files as distributed" (user, ask_user answer to "Which data should our fits use?", 2026-10-02)
 - added: 2026-10-02
-- keywords: c, o, u, n, t, s, ,, v, a, l, i, d, ,, s, t, r, i, c, t, ,, n, o, n, -, i, n, t, e, g, e, r
+- keywords: c, o, u, n, t, s, v, a, l, i, d, s, t, r, i, c, t, n, o, n, -, i, n, t, e, g, e, r
+
+## SI-16 · active · method
+- rule: Tier 1+2 lambda design: A1 pilot (full 10-point grid on atac_small, immune, sim1; 3 seeds; both decoders) fixes a 6-point grid per arm family for X1; 5 seeds in both X1 blocks
+- source: "A1 pilot, 5 uncond seeds (Recommended)" (user, ask_user answer to the lambda design question, 2026-10-02)
+- added: 2026-10-02
+- keywords: l, a, m, b, d, a, ,, g, r, i, d, ,, p, i, l, o, t, ,, A, 1, ,, s, e, e, d, s
