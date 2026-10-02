@@ -1,2 +1,5 @@
-arm,lanes,t_single,t_concurrent,speedup
-pooled,8,27.1,68.42500000000001,3.17
+arm,base_tag,lanes,t_single,t_concurrent,speedup
+barycenter_warm3,S_immune_barycenter_warm3,8,31.1,69.775,3.57
+discriminator,S_immune_discriminator,8,9.7,21.825000000000003,3.56
+none,S_immune_none,8,7.0,17.2,3.26
+pooled,S_immune_pooled,8,27.1,68.42500000000001,3.17

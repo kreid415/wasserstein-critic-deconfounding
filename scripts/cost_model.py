@@ -26,13 +26,22 @@ TASK_N = {"pancreas": 16382, "lung": 32472, "immune": 33506, "immune_hum_mou": 9
           "sim2": 19318, "atac_small": 11270, "atac_large": 84813}
 
 
+def arm_label(arm, ex):
+    """Barycenter variants carry the solver setting: _warm<k> (warm start) or _iter<k> (cold, k != 10)."""
+    if ex.get("bary_warm_iter"):
+        return f"{arm}_warm{int(ex['bary_warm_iter'])}"
+    if arm.startswith("barycenter") and ex.get("bary_iter") and int(ex["bary_iter"]) != 10:
+        return f"{arm}_iter{int(ex['bary_iter'])}"
+    return arm
+
+
 def measure(bench_dir, out_csv):
     rows = {}
     for f in glob.glob(os.path.join(bench_dir, "*.npz")):
         c = json.loads(str(np.load(f)["config"]))
         r = c["row"]
         ex = json.loads(r.get("extra", "{}"))
-        arm = r["arm"] + (f"_warm{ex['bary_warm_iter']}" if ex.get("bary_warm_iter") else "")
+        arm = arm_label(r["arm"], ex)
         rows[r["tag"]] = dict(tag=r["tag"], task=r["task"], arm=arm, n_critic=int(r["n_critic"]),
                               batch_size=int(r["batch_size"]), epochs=int(r["max_epochs"]), n=c["n_cells"],
                               K=c["n_batches"], seconds=c["fit_seconds"], gpu=c["gpu"],
@@ -45,16 +54,19 @@ def measure(bench_dir, out_csv):
         spe = math.ceil(r["n"] * r["train_size"] / r["batch_size"])
         out.append(dict(r, seconds_1ep=t1, ms_per_step=round(1e3 * (r["seconds"] - t1) / (2 * spe), 2),
                         setup_s=round(t1 - (r["seconds"] - t1) / 2, 1)))
+    # concurrency: every group of tags '<base>_conc8_<k>' is compared with the single-lane fit '<base>'
+    import re
+    groups = {}
+    for t, r in rows.items():
+        mt = re.match(r"^(.*)_conc8_\d+$", t)
+        if mt:
+            groups.setdefault(mt.group(1), []).append(r["seconds"])
     conc = []
-    for arm in ("pooled", "barycenter"):
-        for pre in ("BENCH", "S"):
-            tc = [r["seconds"] for t, r in rows.items() if f"{pre}_immune_{arm}_conc8" in t]
-            ts = rows.get(f"{pre}_immune_{arm}", {}).get("seconds")
-            if tc and ts:
-                break
-        if tc and ts:
-            conc.append(dict(arm=arm, lanes=8, t_single=ts, t_concurrent=float(np.mean(tc)),
-                             speedup=round(8 * ts / float(np.mean(tc)), 2)))
+    for base, tc in sorted(groups.items()):
+        if base in rows:
+            ts = rows[base]["seconds"]
+            conc.append(dict(arm=rows[base]["arm"], base_tag=base, lanes=len(tc), t_single=ts,
+                             t_concurrent=float(np.mean(tc)), speedup=round(len(tc) * ts / float(np.mean(tc)), 2)))
     df = pd.DataFrame(out).sort_values(["task", "arm", "batch_size"])
     df.to_csv(out_csv, index=False)
     pd.DataFrame(conc).to_csv(out_csv.replace(".csv", "_concurrency.csv"), index=False)
@@ -70,15 +82,29 @@ def step_ms(T, arm, task, n_critic, batch_size):
         s = m[(m.arm == a) & ((m.n_critic == nc) if nc is not None else True) & ((m.task == tk) if tk else True)]
         return float(s.ms_per_step.mean()) if len(s) else None
 
-    if arm.startswith("barycenter"):
-        pts = m[m.arm == arm][["K", "ms_per_step"]].drop_duplicates()
-        slope, icpt = np.polyfit(pts.K, pts.ms_per_step, 1) if len(pts) > 1 else (0.0, float(pts.ms_per_step.iloc[0]))
-        ms = icpt + slope * K
+    def k_linear(a, nc=None):
+        """Linear in the number of batches K when the arm was measured at >= 2 values of K."""
+        s = m[(m.arm == a) & ((m.n_critic == nc) if nc is not None else True)]
+        pts = s.groupby("K").ms_per_step.mean()
+        if len(pts) < 2:
+            return None
+        slope, icpt = np.polyfit(pts.index.values.astype(float), pts.values, 1)
+        return float(icpt + slope * K)
+
+    if arm.startswith("barycenter_iter"):
+        # cold k-iteration solve: linear between the measured 3-iteration cost (warm-3 runs; the solver's
+        # per-call time is the same for cold and warm 3 iterations) and the measured 10-iteration cost,
+        # at this task's K. The solver time is linear in iterations (docs/barycenter_solver_check.csv).
+        k = int(arm.rsplit("iter", 1)[1])
+        ms3, ms10 = k_linear("barycenter_warm3"), k_linear("barycenter")
+        ms = ms3 + (k - 3) / 7.0 * (ms10 - ms3)
+    elif arm.startswith("barycenter"):
+        ms = k_linear(arm) or get(arm)
     elif arm in ("scanvi",):
         ms = get("none") * 1.1
     else:
         base = arm
-        ms = get(base, n_critic) or get(base)
+        ms = k_linear(base, n_critic) or get(base, n_critic) or get(base)
         if ms is None and base.startswith("reference"):
             ms = get("reference")
         if ms is None:
@@ -104,7 +130,7 @@ def cost(manifest, T, speedup, score_s_per_cell=None):
         if "subsample" in ex:
             n = ex["subsample"]["n_cells"]
         shrs.append(n * score_s_per_cell / 3600 if score_s_per_cell else np.nan)
-        arm = r.arm + (f"_warm{ex['bary_warm_iter']}" if ex.get("bary_warm_iter") else "")
+        arm = arm_label(r.arm, ex)
         steps = int(r.max_epochs) * math.ceil(n * float(r.train_size) / int(r.batch_size))
         ms = step_ms(T, arm, r.task, int(r.n_critic), int(r.batch_size))
         if r.arm == "scanvi":

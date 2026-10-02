@@ -140,9 +140,11 @@ def test_mmd_reference_matches_explicit_formula():
     assert torch.allclose(mmd_reference(z, b, 1), torch.stack(terms).mean(), atol=1e-10, rtol=0)
 
 
-def test_barycenter_warm_start_changes_speed_not_the_estimator():
+def test_barycenter_custom_init_stays_in_hull_and_near_cold_objective():
     """From any init, one fixed-point step puts every atom inside the convex hull of the current
-    minibatch, and warm-started iterations reach (nearly) the cold-start objective."""
+    minibatch, and 20 iterations from a bad init reach within 2% of the cold-start objective.
+    (This does NOT make a warm start equivalent: it can converge to a different support; see the
+    docstring of batch_barycenter_support.)"""
     torch.manual_seed(1)
     z, b = _two_clouds(n0=64, n1=64, d=4, shift=3.0)
     cold = batch_barycenter_support(z, b, n_support=64, n_iter=50)

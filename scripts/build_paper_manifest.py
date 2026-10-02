@@ -19,7 +19,8 @@ Wall-time design (no sequential calibration stage):
   * Rows identical to an X1 row (all settings equal, seed included) are not refitted; the analysis
     reads the X1 fit (column reuses_x1 in the summary).
 
-Usage: python scripts/build_paper_manifest.py --backbone scib --out scripts/paper_manifest_scib.tsv
+Backbone of record: scvi-tools defaults ('stock'; CONSTRAINTS.md SI-10, user choice 2026-10-02).
+Usage: python scripts/build_paper_manifest.py --backbone stock --out scripts/paper_manifest.tsv
 """
 import argparse
 import hashlib
@@ -69,15 +70,21 @@ def n_adv_steps(arm):
     return 1 if base == "discriminator" else 0
 
 
-BARY_WARM_ITER = None   # set by --bary-warm-iter; recorded in each barycenter row's extra
+BARY_WARM_ITER = None   # set by --bary-warm-iter (diagnostic only: converges to a different fixed point)
+BARY_ITER = None        # set by --bary-iter: cold fixed-point iterations per step (runner default 10)
 
 
 def row(exp, task, arm, lam, seed, cond, bb, n_cells=None, **over):
     r = dict(experiment=exp, task=task, counts="scib", arm=arm, lam=lam, n_critic=n_adv_steps(arm),
              adv_input="mean", zstd=0, cond=int(cond), seed=seed, reference="auto", extra="{}", **bb)
     r.update(over)
-    if arm.startswith("barycenter") and BARY_WARM_ITER:
-        ex = json.loads(r["extra"]); ex["bary_warm_iter"] = int(BARY_WARM_ITER); r["extra"] = json.dumps(ex)
+    if arm.startswith("barycenter") and (BARY_WARM_ITER or BARY_ITER):
+        ex = json.loads(r["extra"])
+        if BARY_ITER:
+            ex["bary_iter"] = int(BARY_ITER)
+        if BARY_WARM_ITER:
+            ex["bary_warm_iter"] = int(BARY_WARM_ITER)
+        r["extra"] = json.dumps(ex)
     r["max_epochs"] = scvi_epochs(n_cells or TASKS[task][0])
     return r
 
@@ -179,16 +186,18 @@ def main():
     ap.add_argument("--pilot-seeds", type=int, default=3)
     ap.add_argument("--uncond-seeds", type=int, default=5, help="seeds of the unconditioned X1 block (plan: 5)")
     ap.add_argument("--x12-runs", type=int, choices=[8, 16], default=8, help="X12 fractional factorial size (plan: 8)")
+    ap.add_argument("--bary-iter", type=int, default=None,
+                    help="barycenter: cold fixed-point iterations per step, init = minibatch cells (default 10)")
     ap.add_argument("--bary-warm-iter", type=int, default=None,
-                    help="barycenter: fixed-point iterations warm-started from the previous step (default: cold, 10)")
+                    help="DIAGNOSTIC ONLY: warm start from the previous step converges to a different fixed point")
     a = ap.parse_args()
-    global BARY_WARM_ITER
-    BARY_WARM_ITER = a.bary_warm_iter
+    global BARY_WARM_ITER, BARY_ITER
+    BARY_WARM_ITER, BARY_ITER = a.bary_warm_iter, a.bary_iter
     R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs))
     fit = [r for r in R if not r["reuses_x1"]]
     with open(a.out, "w") as f:
         f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}, uncond_seeds={a.uncond_seeds}, "
-                f"x12_runs={a.x12_runs}, bary_warm_iter={a.bary_warm_iter}; "
+                f"x12_runs={a.x12_runs}, bary_iter={a.bary_iter or 10}, bary_warm_iter={a.bary_warm_iter}; "
                 f"lambda grid {LAMBDA_GRID}; 'g*' = per-family "
                 f"grid from A1; 'matched*' lambdas are "
                 f"resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted "

@@ -39,10 +39,14 @@ def batch_barycenter_support(z, batch_ids, n_support=None, n_iter=10, weights="e
     """Support points [m, d] of the free-support W2 barycenter of the per-batch empirical measures
     in this minibatch (uniform weights 1/m on the support). Returned detached, on z's device.
 
-    init: optional [m, d] starting support (e.g. the previous step's barycenter). The fixed-point
-    update replaces every atom by a weighted average of CURRENT minibatch points, so after one
-    iteration the support depends on `init` only through the OT assignment; a warm start changes
-    the convergence speed, not the estimator (tests/wcd_vae/test_divergences_v2.py)."""
+    Default initialisation (init=None, n_support = minibatch size): the support starts at the
+    minibatch cells themselves, so the solve is (up to ties) a deterministic function of the minibatch.
+    init: optional [m, d] starting support, e.g. the previous step's barycenter ("warm start").
+    The problem is non-convex in the support: a warm start converges to a DIFFERENT fixed point
+    (measured 2026-10-02 on a scVI latent of immune, 35 minibatches: W2^2 to the cold solution was
+    26-29% of the minibatch-to-minibatch sampling difference after 3-20 iterations, vs 3.2% / 1.4% /
+    0.14% for 3 / 5 / 10 cold iterations). The benchmark therefore uses cold starts only; `init` is
+    kept for diagnostics (docs/barycenter_solver_check.csv; scripts/check_barycenter_solver.py)."""
     if ot is None:
         raise ImportError(f"POT is required for the barycenter critic: {_OT_ERR}")
     zd = z.detach()

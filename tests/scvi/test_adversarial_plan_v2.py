@@ -113,3 +113,19 @@ def test_reference_fixed_sends_no_gradient_to_reference_cells():
     loss, _ = head(z_g, b, reference_batch=0, with_gp=False)
     (g,) = torch.autograd.grad(loss, z)
     assert torch.all(g[b == 0] == 0) and g[b != 0].abs().sum() > 0
+
+
+def test_unconditioned_decoder_never_sees_the_batch():
+    """Unconditioned arms register the batch in the labels slot (for the adversary only). With adversary
+    'none' the fit must equal stock SCVI set up with NO batch information at all (same seed), i.e. the
+    labels slot reaches neither encoder nor decoder."""
+    a = _toy()
+    scvi.settings.seed = 0
+    s = a.copy(); s.X = s.layers["counts"].copy()
+    scvi.model.SCVI.setup_anndata(s)                       # no batch, no labels
+    m = scvi.model.SCVI(s, n_latent=4)
+    m.train(max_epochs=2, batch_size=128, early_stopping=False, enable_progress_bar=False)
+    z_nobatch = m.get_latent_representation()
+    z_unc, model = plan.fit_adversarial_scvi(a, "batch", conditioned=False, **{**_kw("none"), **COMMON, "max_epochs": 2})
+    assert model.module.n_batch == 1                       # one dummy batch level: FCLayers drops it
+    assert np.array_equal(z_nobatch, z_unc), float(np.abs(z_nobatch - z_unc).max())
