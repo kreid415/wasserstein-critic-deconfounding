@@ -281,10 +281,22 @@
       "history": []
     },
     "PF-16": {
-      "status": "pass",
-      "evidence": "single lane (run_bench.py runs fits sequentially, OMP_NUM_THREADS=1); 3 interleaved repeats; setup removed by the 3-minus-1-epoch difference; GPU utilisation logged before/after each fit (smoke: 0% before both fits); 4 existing arms re-measured as controls; pf_check_timing_repeats run on the result",
-      "at": "2026-10-02T22:41:35Z",
-      "history": []
+      "status": "fail",
+      "evidence": "[auto:pf_check_timing_repeats] run1: 7 of 12 arms exceed 25% spread across 3 repeats; repeat 2 ran under 8-13 busy CPU cores of 12 (host stats 23:04-23:14 UTC, other workloads); controls vs existing CSV: discriminator 12.71 vs 11.65, mmd 11.65 vs 12.71, pooled 46.19 vs 34.96, reference 47.03 vs 47.03 ms/step",
+      "at": "2026-10-02T23:15:18Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "single lane (run_bench.py runs fits sequentially, OMP_NUM_THREADS=1); 3 interleaved repeats; setup removed by the 3-minus-1-epoch difference; GPU utilisation logged before/after each fit (smoke: 0% before both fits); 4 existing arms re-measured as controls; pf_check_timing_repeats run on the result",
+          "at": "2026-10-02T22:41:35Z"
+        }
+      ],
+      "auto": {
+        "check": "pf_check_timing_repeats",
+        "ok": false,
+        "summary": "run1: 7 of 12 arms exceed 25% spread across 3 repeats; repeat 2 ran under 8-13 busy CPU cores of 12 (host stats 23:04-23:14 UTC, other workloads); controls vs existing CSV: discriminator 12.71 vs 11.65, mmd 11.65 vs 12.71, pooled 46.19 vs 34.96, reference 47.03 vs 47.03 ms/step",
+        "warnings": null
+      }
     },
     "PF-17": {
       "status": "pass",
@@ -498,16 +510,18 @@
     }
   },
   "verdict": {
-    "go": true,
-    "blocking": [],
+    "go": false,
+    "blocking": [
+      "PF-16"
+    ],
     "unanswered": [],
     "major_fail": [],
     "minor_fail": [],
     "plan_changed": false,
     "n_items": 46,
-    "n_pass": 15,
+    "n_pass": 14,
     "n_na": 31,
-    "at": "2026-10-02T22:41:35Z"
+    "at": "2026-10-02T23:15:18Z"
   },
   "path": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/9c73f1c4-a415-4e42-8952-1c72c6c26abf/wcd/experiments/bench_missing_arms_step_cost"
 }

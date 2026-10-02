@@ -1,6 +1,8 @@
 # PREFLIGHT: bench_missing_arms_step_cost
 
-**Verdict: GO**  (checked 2026-10-02T22:41:35Z; plan_sha aa17fd171140c894)
+**Verdict: NO-GO**  (checked 2026-10-02T23:15:18Z; plan_sha aa17fd171140c894)
+
+Blocking, not satisfied: PF-16
 
 ## Plan
 
@@ -32,7 +34,7 @@
 | PF-13 | major | Estimator noise | pass | timing noise is estimated from 3 repeats per arm and reported with the medians; controls show session drift against the existing CSV |
 | PF-14 | major | Test vs control | n/a | timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores |
 | PF-15 | major | Attribution | n/a | timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores |
-| PF-16 | blocking | Timing confounds | pass | single lane (run_bench.py runs fits sequentially, OMP_NUM_THREADS=1); 3 interleaved repeats; setup removed by the 3-minus-1-epoch difference; GPU utilisation logged before/after each fit (smoke: 0% before both fits); 4 existing arms re-measured as controls; pf_check_timing_repeats run on the result |
+| PF-16 | blocking | Timing confounds | fail | [auto:pf_check_timing_repeats] run1: 7 of 12 arms exceed 25% spread across 3 repeats; repeat 2 ran under 8-13 busy CPU cores of 12 (host stats 23:04-23:14 UTC, other workloads); controls vs existing CSV: discriminator 12.71 vs 11.65, mmd 11.65 vs 12.71, pooled 46.19 vs 34.96, reference 47.03 vs 4... |
 | PF-17 | blocking | Cost estimate | pass | per-step costs feed scripts/cost_model.py at production settings (same backbone, batch 128, n_critic as the manifest rows); this run is 72 short fits, single lane, no walltime request |
 | PF-18 | major | Co-scheduling | pass | single lane; one fit at a time; VRAM per fit below 1 GB (smoke: 477 MiB in use); other GPU users visible as utilisation in bench_log.csv |
 | PF-19 | blocking | Launch manifest | pass | pf_check_manifest: 72 rows carry all 9 intended flags |

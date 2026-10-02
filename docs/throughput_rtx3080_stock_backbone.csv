@@ -23,3 +23,11 @@ S_immune_sysvi,immune,sysvi,0,128,3,33506,10,10.1,NVIDIA GeForce RTX 3080,0.9,10
 S_hummou_barycenter,immune_hum_mou,barycenter,5,128,3,97861,23,154.1,NVIDIA GeForce RTX 3080,0.9,10,zinb,53.6,72.93,3.4
 S_hummou_barycenter_warm3,immune_hum_mou,barycenter_warm3,5,128,3,97861,23,96.6,NVIDIA GeForce RTX 3080,0.9,10,zinb,34.2,45.28,3.0
 S_hummou_pooled,immune_hum_mou,pooled,5,128,3,97861,23,95.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,30.6,46.88,-1.7
+S_immune_discriminator_r1_rep0,immune,discriminator_r1,1,128,3,33506,10,11.4,NVIDIA GeForce RTX 3080,0.9,10,zinb,4.5,14.62,1.0
+S_immune_discriminator_ref_rep2,immune,discriminator_ref,1,128,3,33506,10,12.5,NVIDIA GeForce RTX 3080,0.9,10,zinb,4.7,16.53,0.8
+S_immune_reference_stratified_rep0,immune,reference_stratified,5,128,3,33506,10,33.4,NVIDIA GeForce RTX 3080,0.9,10,zinb,11.5,46.4,0.6
+S_immune_pooled_stratified_rep0,immune,pooled_stratified,5,128,3,33506,10,24.6,NVIDIA GeForce RTX 3080,0.9,10,zinb,10.2,30.51,3.0
+S_immune_discriminator_iw_rep0,immune,discriminator_iw,1,128,3,30344,10,9.5,NVIDIA GeForce RTX 3080,0.9,10,zinb,3.9,13.08,1.1
+S_immune_reference_iw_rep1,immune,reference_iw,5,128,3,30344,10,32.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,10.7,50.23,-0.1
+S_immune_pooled_iw_rep0,immune,pooled_iw,5,128,3,30344,10,26.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,10.4,36.92,2.5
+S_immune_mmd_iw_rep0,immune,mmd_iw,0,128,3,30344,10,9.2,NVIDIA GeForce RTX 3080,0.9,10,zinb,3.9,12.38,1.3
