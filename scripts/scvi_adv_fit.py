@@ -2,7 +2,8 @@
 
 Env: SCVI_DS, ADV (none|discriminator|reference|pooled|barycenter|{ref,pooled,bary}_sn|mmd|sinkhorn),
      DCOEF, DISC_ITER, COND (1/0), SCVI_MAX_KL (optional KL scale),
-     SEED, MAXEP, BATCH, OUT (npz path), WCD_SRC.
+     SEED, MAXEP (int, or "auto" = scvi-tools default epoch heuristic), BATCH, NLAT (latent dim,
+     default 30; scvi-tools default is 10), OUT (npz path), WCD_SRC.
 """
 import os
 import sys
@@ -20,7 +21,9 @@ DCOEF = float(os.environ.get("DCOEF", "0"))
 DISC_ITER = int(os.environ.get("DISC_ITER", "10"))
 COND = os.environ.get("COND", "1") == "1"
 SEED = int(os.environ.get("SEED", "0"))
-MAXEP = int(os.environ.get("MAXEP", "239"))
+_mx = os.environ.get("MAXEP", "239")
+MAXEP = None if _mx == "auto" else int(_mx)   # None -> scvi heuristic min(400, 20000/n*400)
+NLAT = int(os.environ.get("NLAT", "30"))
 BATCH = int(os.environ.get("BATCH", "512"))
 MODEL = os.environ.get("SCVI_MODEL", "LinearSCVI")  # LinearSCVI (linear dec) | SCVI (nonlinear dec)
 MKL = os.environ.get("SCVI_MAX_KL")                  # scvi max_kl_weight (KL scale); None => scvi default 1.0
@@ -35,7 +38,7 @@ print(f"[{DS} adv={ADV} λ={DCOEF} cond={COND} s{SEED}] fitting {MAXEP}ep batch=
       f"disc_iter={DISC_ITER}...", flush=True)
 Z = fit_adversarial_linearscvi(
     adata, bk, adversary=ADV, d_coef=DCOEF, disc_iter=DISC_ITER,
-    reference_batch=0, n_latent=30, max_epochs=MAXEP, batch_size=BATCH,
+    reference_batch=0, n_latent=NLAT, max_epochs=MAXEP, batch_size=BATCH,
     seed=SEED, conditioned=COND, model_name=MODEL,
     max_kl_weight=(float(MKL) if MKL is not None else None),
 )

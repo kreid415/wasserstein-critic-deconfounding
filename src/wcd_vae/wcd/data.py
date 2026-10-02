@@ -1,18 +1,32 @@
 import scanpy as sc
 
 
-def _assert_integer_counts(X, source, n_check=200_000):
-    """Raise unless X holds non-negative integer counts (checks the first n_check stored values)."""
+def _assert_integer_counts(X, source, batches=None):
+    """Raise unless EVERY stored value of X is a non-negative integer.
+
+    WHY every value: an earlier version checked only the first 200k stored values and passed the
+    immune file, whose last batch (smart-seq2, 3% of cells) holds non-integer expected counts.
+    When `batches` (per-cell labels) is given, the error names the offending batches."""
     import numpy as np
     import scipy.sparse as sp
 
-    v = X.data[:n_check] if sp.issparse(X) else np.asarray(X).ravel()[:n_check]
-    bad = np.mean((v < 0) | (np.abs(v - np.round(v)) > 1e-6)) if v.size else 0.0
-    if bad > 0:
+    if sp.issparse(X):
+        X = X.tocsr()
+        bad_val = (X.data < 0) | (np.abs(X.data - np.round(X.data)) > 1e-6)
+        bad_cell = np.add.reduceat(bad_val.astype(np.int64), X.indptr[:-1]) > 0 if X.nnz else np.zeros(X.shape[0], bool)
+        bad_cell &= np.diff(X.indptr) > 0
+    else:
+        A = np.asarray(X)
+        bad_cell = ((A < 0) | (np.abs(A - np.round(A)) > 1e-6)).any(axis=1)
+    if bad_cell.any():
+        where = ""
+        if batches is not None:
+            import pandas as pd
+            where = " Offending batches: " + str(pd.Series(np.asarray(batches)[bad_cell]).value_counts().to_dict())
         raise ValueError(
-            f"{source}: {bad:.1%} of sampled values are negative or non-integer; scVI's NB/ZINB "
-            "likelihood needs raw counts. Fix the counts layer before prepping this dataset."
-        )
+            f"{source}: {int(bad_cell.sum())} cells hold negative or non-integer values; scVI's NB/ZINB "
+            f"likelihood needs raw counts.{where} Fix the source or list the batch under the registry's "
+            "'round_count_batches' (only for quantifier expected counts, never for normalised data).")
 
 
 def select_reference_batch(adata, batch_key, celltype_key):
@@ -67,6 +81,7 @@ def prep_data(
     balance=False,
     modality="rna",
     cluster=True,
+    round_count_batches=None,
 ):
     """Preprocess an integration task for the adversarial VAE.
 
@@ -120,7 +135,23 @@ def prep_data(
     #   bug cannot recur silently (scVI only warns, and the sweep logs suppressed warnings).
     if "counts" in adata.layers:
         adata.X = adata.layers["counts"].copy()
-    _assert_integer_counts(adata.X, anndata_path)
+    if round_count_batches:
+        # Explicit, registry-recorded opt-in for batches whose source holds transcript-quantifier
+        # EXPECTED counts (fractional only from multi-mapping read assignment). Rounding these to
+        # integers is standard practice (e.g. tximport/DESeq2); normalised values must NOT be listed.
+        import numpy as np
+        import scipy.sparse as sp
+        rows = np.where(adata.obs[batch_key].astype(str).isin(round_count_batches).values)[0]
+        X = adata.X.tocsr().astype(np.float32) if sp.issparse(adata.X) else np.asarray(adata.X, dtype=np.float32)
+        if sp.issparse(X):
+            for i in rows:
+                X.data[X.indptr[i]:X.indptr[i + 1]] = np.rint(X.data[X.indptr[i]:X.indptr[i + 1]])
+            X.eliminate_zeros()
+        else:
+            X[rows] = np.rint(X[rows])
+        adata.X = X
+        print(f"[prep] rounded expected counts in {len(rows)} cells of batches {round_count_batches}")
+    _assert_integer_counts(adata.X, anndata_path, batches=adata.obs[batch_key].astype(str).values)
 
     # 4. Preprocessing (modality-dependent), from the counts above
     adata.raw = adata

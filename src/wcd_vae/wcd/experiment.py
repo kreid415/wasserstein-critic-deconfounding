@@ -84,6 +84,7 @@ def load_task(name, batch_count=None, balance=False, data_root=None, registry=No
         batch_count=bc,
         balance=balance,
         modality=entry.get("prep", "rna"),
+        round_count_batches=entry.get("round_count_batches"),
     )
     if reference_rule == "entropy":
         reference = select_reference_batch(adata, entry["batch_key"], entry["celltype_key"])

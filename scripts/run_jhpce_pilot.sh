@@ -49,7 +49,7 @@ run_one() {  # gpu_id model cond arm lam di seed ds dec tag
   time_ok || { echo "[wall-stop] $tag (releasing claim)"; rmdir "$claim" 2>/dev/null; return 1; }
   CUDA_VISIBLE_DEVICES="$gpu" \
   SCVI_DS="$ds" SCVI_MODEL="$model" ADV="$arm" DCOEF="$lam" DISC_ITER="$di" COND="$cond" \
-    SEED="$seed" MAXEP=239 BATCH=512 OUT="$out" WCD_SRC="$WCD_SRC" \
+    SEED="$seed" MAXEP="${FIT_MAXEP:-239}" BATCH="${FIT_BATCH:-512}" NLAT="${FIT_NLAT:-30}" OUT="$out" WCD_SRC="$WCD_SRC" \
     "$ES" scripts/scvi_adv_fit.py > "logs/wave/${tag}.log" 2>&1
   if [ -s "$out" ]; then echo "[ok] gpu$gpu $tag"; else echo "[FAIL] gpu$gpu $tag rc=$?"; rmdir "$claim" 2>/dev/null; fi
 }

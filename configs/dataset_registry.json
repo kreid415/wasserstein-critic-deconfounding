@@ -19,7 +19,11 @@
     "modality": "rna",
     "prep": "rna",
     "role": "harder real task; chemistry batch effect (original headline)",
-    "path": "$HOME/data_gsteino1/wcd_data/Immune_ALL_human.h5ad"
+    "path": "$HOME/data_gsteino1/wcd_data/Immune_ALL_human.h5ad",
+    "round_count_batches": [
+      "smart-seq2"
+    ],
+    "round_count_batches_note": "smart-seq2 (1,022 cells) stores 2-decimal transcript-quantifier expected counts (median library ~860k); the three 10X batches are integer. Rounded at prep."
   },
   "lung": {
     "file": "Lung_atlas_public.h5ad",
