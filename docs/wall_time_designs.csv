@@ -1,0 +1,9 @@
+design,uncond_seeds,barycenter,fits,gpu_lane_hours,critic_share,score_cpu_hours,local_wall_days_8lanes
+pilot,5,warm,5989,2215,0.74,779,23.0
+pilot,5,cold,5989,2376,0.75,779,24.6
+pilot,3,warm,5397,1965,0.73,677,20.4
+pilot,3,cold,5397,2099,0.75,677,21.8
+shared,5,warm,6829,2659,0.74,1020,27.6
+shared,5,cold,6829,2876,0.76,1020,29.8
+shared,3,warm,5853,2242,0.74,851,23.2
+shared,3,cold,5853,2416,0.76,851,25.0

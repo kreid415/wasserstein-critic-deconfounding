@@ -137,6 +137,7 @@ def main():
             reference_batch=ref_name, adv_input=r["adv_input"], zstd=bool(int(r["zstd"])),
             model_name=r["decoder"], adv_hidden=int(extra.get("adv_width", 128)),
             critic_lr=float(extra.get("adv_lr", 1e-4)), disc_lr=float(extra.get("adv_lr", 1e-3)),
+            bary_iter=int(extra.get("bary_iter", 10)), bary_warm_iter=extra.get("bary_warm_iter"),
             **common, **backbone)
     secs = time.time() - t0
     hist = {k: v.iloc[:, 0].astype(float).tolist() for k, v in getattr(model, "history_", {}).items()

@@ -69,15 +69,20 @@ def n_adv_steps(arm):
     return 1 if base == "discriminator" else 0
 
 
+BARY_WARM_ITER = None   # set by --bary-warm-iter; recorded in each barycenter row's extra
+
+
 def row(exp, task, arm, lam, seed, cond, bb, n_cells=None, **over):
     r = dict(experiment=exp, task=task, counts="scib", arm=arm, lam=lam, n_critic=n_adv_steps(arm),
              adv_input="mean", zstd=0, cond=int(cond), seed=seed, reference="auto", extra="{}", **bb)
     r.update(over)
+    if arm.startswith("barycenter") and BARY_WARM_ITER:
+        ex = json.loads(r["extra"]); ex["bary_warm_iter"] = int(BARY_WARM_ITER); r["extra"] = json.dumps(ex)
     r["max_epochs"] = scvi_epochs(n_cells or TASKS[task][0])
     return r
 
 
-def build(bb, design="shared", pilot_seeds=3):
+def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     R = []
     grid = LAMBDA_GRID if design == "shared" else FAMILY_GRID
     if design == "pilot":
@@ -90,7 +95,7 @@ def build(bb, design="shared", pilot_seeds=3):
             R.append(row("X1", t, "none", 0, s, True, bb))
             R.append(row("X1", t, "scvi_adv", 0, s, True, bb))
             R += [row("X1", t, a, lam, s, True, bb) for a, lam in itertools.product(ARMS, grid)]
-        for s in range(3):
+        for s in range(uncond_seeds):
             R.append(row("X1", t, "none", 0, s, False, bb))
             R += [row("X1", t, a, lam, s, False, bb) for a, lam in itertools.product(ARMS, grid)]
     # ---- X13: neural baselines, same backbone/epochs/batch/latent (scANVI: scIB protocol; sysVI cycle weight grid)
@@ -130,11 +135,16 @@ def build(bb, design="shared", pilot_seeds=3):
                                                   ("pooled", 10), ("pooled_sn", 1), ("pooled_sn", 5)],
                                                  ["matched_lo", "matched", "matched_hi"]):
         R.append(row("X6", t, arm, lam, s, True, bb, n_critic=k))
-    # ---- X12 (tier 2): 2^(5-2) fractional factorial, generators D = A+B, E = A+C (mod 2); resolution III
-    for t, s, run, arm, lam in itertools.product(["atac_small", "immune", "pancreas"], range(3), range(8),
+    # ---- X12 (tier 2): 5 two-level factors. 8 runs = 2^(5-2), generators D = AB, E = AC (resolution III:
+    #      main effects aliased with two-factor interactions). 16 runs = 2^(5-1), E = ABCD (resolution V).
+    for t, s, run, arm, lam in itertools.product(["atac_small", "immune", "pancreas"], range(3), range(x12_runs),
                                                  ["discriminator", "reference"], ["matched_lo", "matched_hi"]):
         A, B, C = run & 1, (run >> 1) & 1, (run >> 2) & 1
-        D, E = A ^ B, A ^ C
+        if x12_runs == 8:
+            D, E = A ^ B, A ^ C
+        else:
+            D = (run >> 3) & 1
+            E = A ^ B ^ C ^ D
         ex = json.dumps(dict(factorial_run=run, adv_width=[32, 128][B], adv_lr=[1e-4, 1e-3][C]))
         R.append(row("X12", t, arm, lam, s, True, bb, extra=ex, n_latent=[10, 30][A],
                      batch_size=[128, 512][D], decoder=["SCVI", "LinearSCVI"][E]))
@@ -167,11 +177,19 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--design", choices=["shared", "pilot"], default="shared")
     ap.add_argument("--pilot-seeds", type=int, default=3)
+    ap.add_argument("--uncond-seeds", type=int, default=5, help="seeds of the unconditioned X1 block (plan: 5)")
+    ap.add_argument("--x12-runs", type=int, choices=[8, 16], default=8, help="X12 fractional factorial size (plan: 8)")
+    ap.add_argument("--bary-warm-iter", type=int, default=None,
+                    help="barycenter: fixed-point iterations warm-started from the previous step (default: cold, 10)")
     a = ap.parse_args()
-    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds))
+    global BARY_WARM_ITER
+    BARY_WARM_ITER = a.bary_warm_iter
+    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs))
     fit = [r for r in R if not r["reuses_x1"]]
     with open(a.out, "w") as f:
-        f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}; lambda grid {LAMBDA_GRID}; 'g*' = per-family "
+        f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}, uncond_seeds={a.uncond_seeds}, "
+                f"x12_runs={a.x12_runs}, bary_warm_iter={a.bary_warm_iter}; "
+                f"lambda grid {LAMBDA_GRID}; 'g*' = per-family "
                 f"grid from A1; 'matched*' lambdas are "
                 f"resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted "
                 f"({len(R) - len(fit)} of {len(R)}).\n")

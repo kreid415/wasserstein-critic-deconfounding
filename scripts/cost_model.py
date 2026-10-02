@@ -31,7 +31,9 @@ def measure(bench_dir, out_csv):
     for f in glob.glob(os.path.join(bench_dir, "*.npz")):
         c = json.loads(str(np.load(f)["config"]))
         r = c["row"]
-        rows[r["tag"]] = dict(tag=r["tag"], task=r["task"], arm=r["arm"], n_critic=int(r["n_critic"]),
+        ex = json.loads(r.get("extra", "{}"))
+        arm = r["arm"] + (f"_warm{ex['bary_warm_iter']}" if ex.get("bary_warm_iter") else "")
+        rows[r["tag"]] = dict(tag=r["tag"], task=r["task"], arm=arm, n_critic=int(r["n_critic"]),
                               batch_size=int(r["batch_size"]), epochs=int(r["max_epochs"]), n=c["n_cells"],
                               K=c["n_batches"], seconds=c["fit_seconds"], gpu=c["gpu"])
     out = []
@@ -64,8 +66,8 @@ def step_ms(T, arm, task, n_critic, batch_size):
         s = m[(m.arm == a) & ((m.n_critic == nc) if nc is not None else True) & ((m.task == tk) if tk else True)]
         return float(s.ms_per_step.mean()) if len(s) else None
 
-    if arm == "barycenter":
-        pts = m[m.arm == "barycenter"][["K", "ms_per_step"]].drop_duplicates()
+    if arm.startswith("barycenter"):
+        pts = m[m.arm == arm][["K", "ms_per_step"]].drop_duplicates()
         slope, icpt = np.polyfit(pts.K, pts.ms_per_step, 1) if len(pts) > 1 else (0.0, float(pts.ms_per_step.iloc[0]))
         ms = icpt + slope * K
     elif arm in ("scanvi",):
@@ -89,20 +91,23 @@ def step_ms(T, arm, task, n_critic, batch_size):
     return ms
 
 
-def cost(manifest, T, speedup):
+def cost(manifest, T, speedup, score_s_per_cell=None):
     M = pd.read_csv(manifest, sep="\t", comment="#")
-    hrs = []
+    hrs, shrs = [], []
     for r in M.itertuples():
         n = TASK_N[r.task]
         ex = json.loads(r.extra)
         if "subsample" in ex:
             n = ex["subsample"]["n_cells"]
+        shrs.append(n * score_s_per_cell / 3600 if score_s_per_cell else np.nan)
+        arm = r.arm + (f"_warm{ex['bary_warm_iter']}" if ex.get("bary_warm_iter") else "")
         steps = int(r.max_epochs) * math.ceil(n * float(r.train_size) / int(r.batch_size))
-        ms = step_ms(T, r.arm, r.task, int(r.n_critic), int(r.batch_size))
+        ms = step_ms(T, arm, r.task, int(r.n_critic), int(r.batch_size))
         if r.arm == "scanvi":
             steps += min(10, max(2, round(int(r.max_epochs) / 3))) * math.ceil(n / int(r.batch_size))
         hrs.append(steps * ms / 3.6e6 + 5 / 3600)       # + ~5 s setup per fit
     M["lane_hours"] = hrs
+    M["score_cpu_hours"] = shrs
     return M
 
 
@@ -112,6 +117,8 @@ def main():
     ap.add_argument("--throughput", default="docs/throughput_rtx3080.csv")
     ap.add_argument("--manifest")
     ap.add_argument("--out")
+    ap.add_argument("--scoring", default="docs/scoring_time.csv",
+                    help="measured single-thread scIB-native scoring time per config (task, n_cells, seconds)")
     a = ap.parse_args()
     if a.measure:
         T, C = measure(a.measure, a.throughput)
@@ -121,10 +128,15 @@ def main():
         T = pd.read_csv(a.throughput)
         C = pd.read_csv(a.throughput.replace(".csv", "_concurrency.csv"))
         speedup = float(C.speedup.min())
-        M = cost(a.manifest, T, speedup)
-        g = M.groupby("experiment").agg(fits=("tag", "size"), lane_hours=("lane_hours", "sum"))
+        S = pd.read_csv(a.scoring) if os.path.exists(a.scoring) else None
+        rate = float((S.seconds.sum() / S.n_cells.sum())) if S is not None else None   # LS slope through 0 ~ ratio
+        M = cost(a.manifest, T, speedup, rate)
+        g = M.groupby("experiment").agg(fits=("tag", "size"), lane_hours=("lane_hours", "sum"),
+                                        score_cpu_hours=("score_cpu_hours", "sum"))
         g["local_wall_days_8lanes"] = g.lane_hours / speedup / 24
-        g.loc["TOTAL"] = [g.fits.sum(), g.lane_hours.sum(), g.lane_hours.sum() / speedup / 24]
+        g.loc["TOTAL"] = [g.fits.sum(), g.lane_hours.sum(), g.score_cpu_hours.sum(), g.lane_hours.sum() / speedup / 24]
+        if rate:
+            print(f"scoring: {1e3 * rate:.1f} ms per cell per config, single thread (from {a.scoring})")
         print(f"8-lane speed-up used: {speedup:.2f}x (minimum measured)")
         print(g.round(1).to_string())
         by_arm = M.groupby("arm").lane_hours.sum().sort_values(ascending=False)

@@ -2,6 +2,7 @@ tag,task,arm,n_critic,batch_size,epochs,n,K,seconds,gpu,seconds_1ep,ms_per_step,
 B3_atac_small_bary,atac_small,barycenter,5,128,3,11270,3,14.6,NVIDIA GeForce RTX 3080,5.8,49.44,1.4
 B3_atac_small_none,atac_small,none,0,128,3,11270,3,3.0,NVIDIA GeForce RTX 3080,1.6,7.87,0.9
 BENCH_immune_barycenter,immune,barycenter,5,128,3,33506,10,48.0,NVIDIA GeForce RTX 3080,17.0,59.16,1.5
+B4_immune_bary_warm3,immune,barycenter_warm3,5,128,3,33506,10,34.0,NVIDIA GeForce RTX 3080,11.9,42.18,0.8
 BENCH_immune_discriminator,immune,discriminator,1,128,3,33506,10,10.4,NVIDIA GeForce RTX 3080,4.2,11.83,1.1
 B3_disc_b512,immune,discriminator,1,512,3,33506,10,3.7,NVIDIA GeForce RTX 3080,2.1,12.12,1.3
 B3_disc_sn,immune,discriminator_sn,1,128,3,33506,10,12.5,NVIDIA GeForce RTX 3080,4.8,14.69,0.9
@@ -19,6 +20,7 @@ BENCH_immune_scvi_adv,immune,scvi_adv,0,128,3,33506,10,9.6,NVIDIA GeForce RTX 30
 BENCH_immune_sinkhorn,immune,sinkhorn,0,128,3,33506,10,16.7,NVIDIA GeForce RTX 3080,6.6,19.27,1.5
 B3_sysvi,immune,sysvi,0,128,3,33506,10,13.6,NVIDIA GeForce RTX 3080,5.3,15.84,1.1
 BENCH_immune_hum_mou_barycenter,immune_hum_mou,barycenter,5,128,3,97861,23,168.8,NVIDIA GeForce RTX 3080,58.6,72.03,3.5
+B4_immune_hum_mou_bary_warm3,immune_hum_mou,barycenter_warm3,5,128,3,97861,23,106.3,NVIDIA GeForce RTX 3080,35.7,46.14,0.4
 BENCH_immune_hum_mou_discriminator,immune_hum_mou,discriminator,1,128,3,97861,23,27.8,NVIDIA GeForce RTX 3080,10.7,11.18,2.1
 BENCH_immune_hum_mou_none,immune_hum_mou,none,0,128,3,97861,23,19.2,NVIDIA GeForce RTX 3080,7.1,7.91,1.0
 BENCH_immune_hum_mou_pooled,immune_hum_mou,pooled,5,128,3,97861,23,104.6,NVIDIA GeForce RTX 3080,37.0,44.18,3.2

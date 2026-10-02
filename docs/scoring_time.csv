@@ -1,0 +1,3 @@
+tag,task,n_cells,seconds,threads,note
+BENCH_immune_pooled,immune,33506,548.8,1,scib.metrics.metrics full scIB set incl. kBET + trajectory + cell cycle; overlapped with GPU fits for ~6 min
+BENCH_immune_hum_mou_pooled,immune_hum_mou,97861,1584.0,1,same; machine otherwise idle
