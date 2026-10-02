@@ -106,3 +106,31 @@
 - source: "Local + one cluster split" and "JHPCE (Recommended)" (user, ask_user answers, 2026-10-02; split-by-task stated in the question)
 - added: 2026-10-02
 - keywords: GPU, cluster, JHPCE, split, compute
+
+## SI-18 · active · method
+- rule: R1 lambda-grid families: divergence x decoder -- {discriminator}, {reference, pooled, barycenter}, {mmd}, {sinkhorn}, each with a separate 6-point grid for conditioned and unconditioned decoders (8 grids), fixed from A1 by docs/PREREG.md section 2
+- source: "Divergence × decoder (Recommended)" (user, ask_user answer to "R1 (A1 → X1 λ grid). Which arms should share one 6-point λ grid?", 2026-10-02)
+- added: 2026-10-02
+- keywords: lambda, grid, family, families, A1, X1, prereg
+- files: docs/PREREG.md
+
+## SI-19 · active · method
+- rule: R2 adversary input: posterior mean is the X1 default; switch to posterior sample only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 4 of 6 cells evaluable, no excess failures); masking => mean
+- source: "Posterior mean (Recommended)" (user, ask_user answer to "R2 (A2 → X1 adversary input) ... Which input is the default?", 2026-10-02)
+- added: 2026-10-02
+- keywords: adv_input, adversary input, posterior mean, posterior sample, A2, prereg
+- files: docs/PREREG.md
+
+## SI-20 · active · method
+- rule: R3 standardisation: per-dimension standardisation of the adversary input is off by default in X1 and the follow-ups; switch on only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 7 of 10 cells evaluable, no excess failures)
+- source: "Off (Recommended)" (user, ask_user answer to "R3 (A3 → X1 per-dimension standardisation of the adversary input) ... Which setting is the default?", 2026-10-02)
+- added: 2026-10-02
+- keywords: zstd, standardisation, standardization, A3, prereg
+- files: docs/PREREG.md
+
+## SI-21 · active · method
+- rule: R4 matched-lambda target: b* = b0 + 0.5*(b_common - b0) per task x decoder on unscaled batch scores (mean of the 5 raw scIB batch metrics; b0 = lambda=0, b_common = lowest of the 6 arms' best failure-free seed-mean batch score); also proposed for P1
+- source: "Midpoint of common range (Recommended)" (user, ask_user answer to "R4 (matched λ for the follow-ups ...) How should b* be defined?", 2026-10-02)
+- added: 2026-10-02
+- keywords: matched, b*, bstar, matched lambda, follow-up, P1, prereg
+- files: docs/PREREG.md
