@@ -14,7 +14,7 @@
 - source: "The datasets are the standard scIB datasets now, why would we deviates? ... why would we add new datasets when the standard in literature and open problems is scIB?" (user, 2026-10-02)
 - added: 2026-10-02
 - keywords: dataset, datasets, task, tasks
-- files: s, c, r, i, p, t, s, /, *, m, a, n, i, f, e, s, t, *, ., t, s, v
+- files: scripts/*manifest*.tsv
 - check: {"forbid_literal": ["hlca_subset", "bmmc", "ding_pbmc", "cellbench"]}
 
 ## SI-03 · active · data
