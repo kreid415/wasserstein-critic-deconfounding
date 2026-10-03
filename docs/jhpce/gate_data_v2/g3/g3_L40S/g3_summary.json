@@ -1,0 +1,38 @@
+{
+ "n_configs": 64,
+ "batch_metrics": [
+  "PCR_batch",
+  "ASW_label/batch",
+  "iLISI",
+  "graph_conn",
+  "kBET"
+ ],
+ "bio_metrics_used": [
+  "NMI_cluster/label",
+  "ARI_cluster/label",
+  "ASW_label",
+  "isolated_label_F1",
+  "isolated_label_silhouette",
+  "cLISI",
+  "cell_cycle_conservation",
+  "trajectory"
+ ],
+ "reported_not_in_means": [],
+ "groups": 14,
+ "flagged": [
+  {
+   "arm": "mmd",
+   "cond": 1
+  },
+  {
+   "arm": "none",
+   "cond": 1
+  }
+ ],
+ "null_sign_flip": {
+  "n_tests": 28,
+  "observed_flags": 2,
+  "expected_flags": 2.875,
+  "p_at_least_observed": 0.8407
+ }
+}

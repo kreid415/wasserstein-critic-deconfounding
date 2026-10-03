@@ -1,0 +1,33 @@
+{
+ "date": "2026-10-03; final for the gate configs, both pinned-GPU gate jobs finished and harvested",
+ "status_line": "Final for the gate configs. Both JHPCE gate jobs (A100 Slurm 36131135, L40S Slurm 36133219) finished; their latents were re-harvested from the job workdirs and md5-verified, and all 192 gate latents were scored in one local env with the current scorer. G4 fails (scores of identical latents differ between local and JHPCE CPUs), so every benchmark latent is scored locally and the split models that.",
+ "local_hw": "RTX 3080 10 GB (driver 580.173.02, CUDA 13.0), AMD Ryzen 5 3600 (6 cores / 12 threads, AVX2); envs scvi-api (fits), wcd-kbet (scoring)",
+ "jhpce_hw": "fit env wcd-fit (torch 2.13.0+cu126) on compute-128 (A100 80GB PCIe; 2x Intel Xeon Gold 5317) and compute-171 (L40S 46 GB; AMD EPYC 7443P), driver 555.42.06; each gate job 1 GPU, 10 CPUs, 64 GB, 8 fit lanes",
+ "base_commit": "878d8ea",
+ "jobs_line": "setup 36131132 (shared, done); G4 diagnosis 36132749 (failed on compute-053) and 36132943 (done); gate A100 36131135 and L40S 36133219 (done; re-harvested 2026-10-03)",
+ "tar_md5": {
+  "A100": {
+   "status": "OK",
+   "md5": "8d827557dfe577e3a2d6bfa1b0f1eeec"
+  },
+  "L40S": {
+   "status": "OK",
+   "md5": "e863e27f3b9f9531bd16ded5374b6b55"
+  }
+ },
+ "recommendation": "Rationale: the L40S is faster per GPU than both the local RTX 3080 and the A100 on these fits, its G3 agreement matches the A100's (same number of flagged groups, both consistent with the sign-flip null), and its observed queue wait was shorter. More than two L40S GPUs do not shorten the makespan: every latent is scored on the 12 local CPUs, which become the bottleneck in S3 and S4 once JHPCE latents join their backlog, and with SI-30 the pilot stages S1-S2 run on the local GPU only. JHPCE fits of the X1 adversarial rows can start only after the A1-A3 rules freeze (S3); before that only filler rows (X1 none/scvi_adv, X13) can run there. Every JHPCE submission still needs the user's go (SI-29).",
+ "g4_text": "Per metric. G4 = the 2 latents (Q_none_0, Q_barycenter_1) and the prepped file, md5-identical on both hosts, scored locally (wcd-kbet) and on JHPCE (wcd-score, compute-174 = AMD EPYC 9555, AVX-512); tolerance 1e-6 absolute. G4b = the same on JHPCE against the JHPCE-regenerated prepped file. local repeat = the same latents re-scored on the local machine (inside the G3 run); JHPCE repeat = a second job on compute-174; numba generic = both hosts with NUMBA_CPU_NAME=generic. The host verdict uses the deterministic metrics only: kBET is unseeded in scib 1.1.7 (R kBET samples test cells) and changes between runs on one machine (local repeat column; the lead measured up to 0.0047), so its cross-host difference is not a host difference; a fixed R seed is being added to score_scib_native.py on prereg-v2. Diagnosis of the deterministic metrics: (i) the scorer's kNN graph (pynndescent, numba) depends on the CPU vector width: AVX-512 EPYC vs local AVX2 differ in 251 of 33,506 rows, which moves ARI, NMI, isolated-label F1, graph connectivity and trajectory; an AVX-only Opteron (compute-053) builds the same graph as local; with NUMBA_CPU_NAME=generic the graph is identical on all three CPU types and those metrics agree to <=1e-16; (ii) graph iLISI / cLISI still differ across hosts AND between two runs on compute-174 (identical graph; ARI/NMI unchanged), but are identical between local runs (<=1.4e-17). The cause is not scib's LISI subsampling RNG (knn_graph.cpp draws a random number per row but skips nothing at subsample=100); unresolved. PCR and cell-cycle conservation agree to <=5.7e-7. G4 was measured with the scorer before the kBET seed was added (main 8cda6de) and was not re-run: every benchmark latent is scored locally.",
+ "split_text": "Model (scripts/gate_task_split.py): whole tasks per host (SI-17), pilot tasks forced local (SI-30); stage-gated S1 A1 -> S2 A2/A3 -> S3 X1 adversarial -> S4 X3/X6/X7/X8/X12, fillers (X1 none/scvi_adv, X13) in GPU gaps. ALL latents are scored on the local CPUs: 4 scoring processes while the local GPU fits (8 lanes), 12 otherwise, each at the docs/scoring_time.csv single-thread rate times the efficiency measured in the 192-latent run; JHPCE latents join the local backlog of their stage. JHPCE fit rate = G x that model's measured 8-lane factor; one queue wait per 3-day JHPCE job (base case: the wait observed for that model's gate job). Rule-freeze time and copying latents back are not modelled (re-harvest of the two 109 MB latent tars plus reports took 44 s).",
+ "caveats": [
+  "G3 and G5 use one task (immune, 3 epochs, 64 configs); per-GPU ratios may differ for larger tasks or full-length fits.",
+  "Queue waits come from one 2-h, 1-GPU, 10-CPU job per model, submitted on a Friday evening; multi-day jobs may wait longer (grid: 0.5-2 d per job).",
+  "Scoring efficiency was measured with 10 concurrent processes while the local GPU was idle; with 8 fit lanes running, the 4 scoring processes may be slower (efficiency 0.40 / 0.60 table).",
+  "X3 and X13 counts still change on missing-arms-v2 (robustness tables: both counts halved or +50%).",
+  "The gate jobs ran jhpce-setup 6675f8c (A100) and 2f29004 (L40S), whose src/ is identical; main 878d8ea adds the missing-arm code (adversarial.py, alignment.py, critic.py changed; discriminator_losses.py, sampling.py new), which no gate job ran.",
+  "No cross-host latent is bitwise identical to its local counterpart, and A100 and L40S differ from each other as much as from local: every fit of a task (and any refit) must stay on one GPU model (SI-17).",
+  "trajectory (now in BIO_METRICS) is the most host-sensitive metric for barycenter latents, whose local seed SD of trajectory is large (largest paired difference in the G3 sections).",
+  "Makespan differences below about 0.05 d (e.g. L40S with 2 vs 3 GPUs) are within the model's resolution.",
+  "fastscratch is purged after 30 days: the harvested latents are saved as artifacts and both envs are rebuildable from the recipes in the JHPCE host notes.",
+  "experiment-preflight skills are not available in this profile; the earlier docs/jhpce/PREFLIGHT_GATE.md stands in for them."
+ ]
+}

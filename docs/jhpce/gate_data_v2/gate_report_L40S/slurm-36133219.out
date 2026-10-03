@@ -1,0 +1,75 @@
+2f2900435b394223ffeda6f5ebd24026ddf1523f
+/fastscratch/myscratch/kreid/wcd/ref_local/bench_queue_manifest.tsv: OK
+/fastscratch/myscratch/kreid/wcd/ref_local/immune__scib.h5ad: OK
+NVIDIA L40S, 555.42.06, 46068 MiB, GPU-37f59eb3-b40e-27d6-67f3-e068a970556f
+git HEAD 2f2900435b394223ffeda6f5ebd24026ddf1523f; host compute-171.cm.cluster; cpus 1; SLURM_JOB_ID 36133219
+{
+ "cuda_available": true,
+ "cudnn": 91002,
+ "executable": "/fastscratch/myscratch/kreid/wcd/conda/envs/wcd-fit/bin/python",
+ "gpu": "NVIDIA L40S",
+ "gpu_capability": [
+  8,
+  9
+ ],
+ "host": "compute-171.cm.cluster",
+ "kind": "fit",
+ "machine": "x86_64",
+ "modules": {
+  "anndata": "0.12.19",
+  "h5py": "3.16.0",
+  "lightning": "2.6.5",
+  "numba": "0.67.0",
+  "numpy": "2.4.6",
+  "ot": "0.9.7.post1",
+  "pandas": "2.3.3",
+  "pynndescent": "0.6.0",
+  "pyro": "1.9.1",
+  "scanpy": "1.11.5",
+  "scipy": "1.17.1",
+  "scvi": "1.4.2",
+  "sklearn": "1.9.0",
+  "torch": "2.13.0+cu126"
+ },
+ "nvidia_smi": [
+  "NVIDIA L40S, 555.42.06, 46068 MiB"
+ ],
+ "python": "3.11.15",
+ "torch_cuda": "12.6"
+}
+......................s.....                                             [100%]
+27 passed, 1 skipped in 12.26s
+[fit] S_immune_barycenter_iter5 30s z(33506, 10) finite=True
+[fit] S_immune_barycenter_iter5_e1 12s z(33506, 10) finite=True
+QUEUE wall_s=353.7 fits=64 failed=0
+completion gate: 64/64 valid
+{
+ "fits": 64,
+ "makespan_s": 353.7,
+ "window_s": 314.6,
+ "model_lane_s_total": 1577.8,
+ "effective_factor_window": 4.62,
+ "effective_factor_makespan": 4.46,
+ "model_factor_min": 3.17,
+ "per_arm_factors": {
+  "barycenter_warm3": 3.57,
+  "discriminator": 3.56,
+  "none": 3.26,
+  "pooled": 3.17
+ },
+ "wall_scale_vs_model": 0.686
+}
+GATE GPU PART OK
+-rw-r----- 1 kreid users 62914560 Oct  3 04:10 /users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_latents_jhpce.tar.part00
+-rw-r----- 1 kreid users 46141440 Oct  3 04:10 /users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_latents_jhpce.tar.part01
+GATE JOB OK: /fastscratch/myscratch/kreid/wcd/gate/run_36133219
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/concurrency_calibration_jhpce.json
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/gate_completion.json
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/harvest_parts.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/nvidia_smi.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/precheck.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/pytest_tests_scvi.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/queue_summary.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/queue_times.tsv
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/single_lane_fits.txt
+/users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_report/versions_fit_gpu.json

@@ -15,6 +15,7 @@ Usage:
 """
 import argparse
 import ast
+import itertools
 import json
 import os
 import sys
@@ -71,6 +72,32 @@ def g4(a):
     sys.exit(1 if bad else 0)
 
 
+def sign_flip_null(P):
+    """Calibration of the flag rule under 'no systematic host effect': paired differences symmetric about 0. For every
+    (arm, cond) x {batch_mean, bio_mean} test, all 2^n sign assignments of the n paired differences are enumerated
+    (local seed SD fixed) and the fraction flagged is that test's null flag probability; the number of flags over all
+    tests is their convolution (tests treated as independent)."""
+    probs, obs = [], 0
+    for _, g in P.groupby(["arm", "cond"]):
+        for m in ("batch_mean", "bio_mean"):
+            d = g[f"d_{m}"].to_numpy(float)
+            n = len(d)
+            if n < 2:
+                continue
+            sd = float(g[f"{m}_local"].std(ddof=1))
+            def fl(x):
+                md, se = x.mean(), x.std(ddof=1) / np.sqrt(n)
+                return bool(abs(md) > 2 * se and abs(md) > 0.5 * sd)
+            signs = np.array(list(itertools.product([-1.0, 1.0], repeat=n)))
+            probs.append(float(np.mean([fl(d * sg) for sg in signs])))
+            obs += fl(d)
+    dist = np.array([1.0])
+    for p in probs:
+        dist = np.convolve(dist, [1 - p, p])
+    return dict(n_tests=len(probs), observed_flags=int(obs), expected_flags=round(float(sum(probs)), 3),
+                p_at_least_observed=round(float(dist[obs:].sum()), 4))
+
+
 def g3(a):
     BATCH, BIO = metric_lists()
     S = pd.read_csv(a.scores)
@@ -93,7 +120,7 @@ def g3(a):
     P["arm"] = M.loc[P.index, "arm"].values
     P["cond"] = M.loc[P.index, "cond"].astype(int).values
     P["seed"] = M.loc[P.index, "seed"].astype(int).values
-    extra = [m for m in ("trajectory",) if m in S and S[m].notna().any()]
+    extra = [m for m in ("trajectory",) if m not in used_bio and m in S and S[m].notna().any()]   # scorer before 2026-10-03 kept it out
     per_metric = BATCH + used_bio + extra + ["batch_mean", "bio_mean"]
     for m in per_metric:
         P[f"d_{m}"] = P[f"{m}_remote"] - P[f"{m}_local"]
@@ -119,7 +146,8 @@ def g3(a):
                             local_sd_over_all_latents=float(P[f"{m}_local"].std(ddof=1))) for m in per_metric])
     pm.to_csv(os.path.join(a.out_dir, "g3_per_metric_differences.csv"), index=False)
     summ = dict(n_configs=len(P), batch_metrics=BATCH, bio_metrics_used=used_bio, reported_not_in_means=extra,
-                groups=len(G), flagged=G[(G.batch_mean_flag) | (G.bio_mean_flag)][["arm", "cond"]].to_dict("records"))
+                groups=len(G), flagged=G[(G.batch_mean_flag) | (G.bio_mean_flag)][["arm", "cond"]].to_dict("records"),
+                null_sign_flip=sign_flip_null(P))
     json.dump(summ, open(os.path.join(a.out_dir, "g3_summary.json"), "w"), indent=1)
     print(G.round(5).to_string(index=False))
     print(json.dumps(summ, indent=1))

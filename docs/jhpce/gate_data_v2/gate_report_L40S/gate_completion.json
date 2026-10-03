@@ -1,0 +1,839 @@
+{
+ "expected": 64,
+ "valid": 64,
+ "problems": [],
+ "latents": [
+  {
+   "tag": "Q_sinkhorn_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.4
+  },
+  {
+   "tag": "Q_sinkhorn_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.7
+  },
+  {
+   "tag": "Q_sinkhorn_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.9
+  },
+  {
+   "tag": "Q_reference_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 59.2
+  },
+  {
+   "tag": "Q_reference_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 59.4
+  },
+  {
+   "tag": "Q_none_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 19.3
+  },
+  {
+   "tag": "Q_sinkhorn_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.7
+  },
+  {
+   "tag": "Q_pooled_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.1
+  },
+  {
+   "tag": "Q_mmd_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 15.2
+  },
+  {
+   "tag": "Q_sinkhorn_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 20.7
+  },
+  {
+   "tag": "Q_none_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.6
+  },
+  {
+   "tag": "Q_discriminator_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.1
+  },
+  {
+   "tag": "Q_discriminator_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.1
+  },
+  {
+   "tag": "Q_discriminator_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 11.4
+  },
+  {
+   "tag": "Q_pooled_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 45.5
+  },
+  {
+   "tag": "Q_pooled_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 46.9
+  },
+  {
+   "tag": "Q_mmd_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 15.1
+  },
+  {
+   "tag": "Q_barycenter_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 52.3
+  },
+  {
+   "tag": "Q_discriminator_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 15.0
+  },
+  {
+   "tag": "Q_barycenter_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.8
+  },
+  {
+   "tag": "Q_discriminator_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 15.7
+  },
+  {
+   "tag": "Q_pooled_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 45.8
+  },
+  {
+   "tag": "Q_pooled_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 45.8
+  },
+  {
+   "tag": "Q_mmd_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 17.0
+  },
+  {
+   "tag": "Q_mmd_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.5
+  },
+  {
+   "tag": "Q_mmd_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.4
+  },
+  {
+   "tag": "Q_pooled_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 45.6
+  },
+  {
+   "tag": "Q_sinkhorn_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 19.9
+  },
+  {
+   "tag": "Q_scvi_adv_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 13.7
+  },
+  {
+   "tag": "Q_mmd_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.5
+  },
+  {
+   "tag": "Q_scvi_adv_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 12.4
+  },
+  {
+   "tag": "Q_barycenter_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 53.6
+  },
+  {
+   "tag": "Q_reference_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 53.3
+  },
+  {
+   "tag": "Q_barycenter_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.8
+  },
+  {
+   "tag": "Q_sinkhorn_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 21.7
+  },
+  {
+   "tag": "Q_discriminator_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.1
+  },
+  {
+   "tag": "Q_pooled_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 47.3
+  },
+  {
+   "tag": "Q_barycenter_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.1
+  },
+  {
+   "tag": "Q_discriminator_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 15.3
+  },
+  {
+   "tag": "Q_reference_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 55.0
+  },
+  {
+   "tag": "Q_reference_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.2
+  },
+  {
+   "tag": "Q_barycenter_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.1
+  },
+  {
+   "tag": "Q_reference_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 53.3
+  },
+  {
+   "tag": "Q_discriminator_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.6
+  },
+  {
+   "tag": "Q_pooled_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 46.7
+  },
+  {
+   "tag": "Q_mmd_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.3
+  },
+  {
+   "tag": "Q_discriminator_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.3
+  },
+  {
+   "tag": "Q_barycenter_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 52.8
+  },
+  {
+   "tag": "Q_mmd_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.0
+  },
+  {
+   "tag": "Q_reference_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 55.4
+  },
+  {
+   "tag": "Q_sinkhorn_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 20.7
+  },
+  {
+   "tag": "Q_reference_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.0
+  },
+  {
+   "tag": "Q_mmd_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 16.0
+  },
+  {
+   "tag": "Q_barycenter_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.6
+  },
+  {
+   "tag": "Q_barycenter_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 56.5
+  },
+  {
+   "tag": "Q_sinkhorn_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 21.2
+  },
+  {
+   "tag": "Q_reference_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.6
+  },
+  {
+   "tag": "Q_reference_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 48.5
+  },
+  {
+   "tag": "Q_mmd_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.7
+  },
+  {
+   "tag": "Q_discriminator_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 14.7
+  },
+  {
+   "tag": "Q_sinkhorn_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 20.7
+  },
+  {
+   "tag": "Q_barycenter_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 44.3
+  },
+  {
+   "tag": "Q_pooled_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 33.6
+  },
+  {
+   "tag": "Q_pooled_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "2f2900435b394223ffeda6f5ebd24026ddf1523f",
+   "git_dirty": false,
+   "gpu": "NVIDIA L40S",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 30.0
+  }
+ ]
+}

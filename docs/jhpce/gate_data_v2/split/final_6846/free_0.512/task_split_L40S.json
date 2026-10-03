@@ -1,0 +1,922 @@
+{
+ "label": "L40S",
+ "manifest": "paper_manifest_stock_pilot_u5_b10.tsv",
+ "manifest_md5": "44d8a4d00ca27fba8af5675fd8f15c9b",
+ "fits": 6846,
+ "lane_hours_total": 2376.6,
+ "score_cpu_hours_total": 1671.2,
+ "scoring_s_per_cell_per_process": 0.03171,
+ "score_efficiency": 0.512,
+ "local_factor_window": 3.77,
+ "jhpce_factor_window": 4.62,
+ "per_gpu_speed_ratio": 1.225,
+ "local_makespan_s": 433.9,
+ "jhpce_makespan_s": 353.7,
+ "local_cpus": 12,
+ "local_lanes": 8,
+ "force_local": [],
+ "base_queue_wait_h": 7.8239,
+ "fits_per_experiment": {
+  "A1": 1098,
+  "A2": 108,
+  "A3": 180,
+  "X1": 3000,
+  "X12": 288,
+  "X13": 408,
+  "X3": 828,
+  "X6": 216,
+  "X7": 216,
+  "X8": 504
+ },
+ "fits_per_task": {
+  "atac_large": 426,
+  "atac_small": 1347,
+  "immune": 1104,
+  "immune_hum_mou": 801,
+  "lung": 594,
+  "pancreas": 909,
+  "sim1": 864,
+  "sim2": 801
+ },
+ "all_local": {
+  "wall_days": 26.27,
+  "stage_days": {
+   "S1_A1": {
+    "end": 4.1,
+    "local_fit": 4.09,
+    "jhpce_fit": 0.0,
+    "jhpce_incl_wait": 0.0
+   },
+   "S2_A23": {
+    "end": 1.07,
+    "local_fit": 1.06,
+    "jhpce_fit": 0.0,
+    "jhpce_incl_wait": 0.0
+   },
+   "S3_X1adv": {
+    "end": 14.5,
+    "local_fit": 14.46,
+    "jhpce_fit": 0.0,
+    "jhpce_incl_wait": 0.0
+   },
+   "S4_followup": {
+    "end": 6.6,
+    "local_fit": 6.58,
+    "jhpce_fit": 0.0,
+    "jhpce_incl_wait": 0.0
+   }
+  },
+  "local_gpu_busy_days": 26.89,
+  "jhpce_gpu_busy_days_per_gpu": 0.0,
+  "jhpce_gpu_days": 0.0,
+  "jhpce_span_days_incl_waits": 0.0,
+  "local_scoring_cpu_days": 76.3,
+  "jhpce_job_starts": 0,
+  "filler_scoring_left_h": 0.0,
+  "filler_fit_hours_in_gaps": {
+   "L": 1.7,
+   "J": 0.0
+  }
+ },
+ "base_case": {
+  "G1": {
+   "n_gpu": 1,
+   "local_tasks": [
+    "atac_small",
+    "lung",
+    "pancreas",
+    "sim1"
+   ],
+   "jhpce_tasks": [
+    "atac_large",
+    "immune",
+    "immune_hum_mou",
+    "sim2"
+   ],
+   "wall_days": 13.84,
+   "stage_days": {
+    "S1_A1": {
+     "end": 2.16,
+     "local_fit": 2.15,
+     "jhpce_fit": 1.58,
+     "jhpce_incl_wait": 1.91
+    },
+    "S2_A23": {
+     "end": 0.9,
+     "local_fit": 0.37,
+     "jhpce_fit": 0.56,
+     "jhpce_incl_wait": 0.89
+    },
+    "S3_X1adv": {
+     "end": 7.6,
+     "local_fit": 5.77,
+     "jhpce_fit": 6.59,
+     "jhpce_incl_wait": 7.56
+    },
+    "S4_followup": {
+     "end": 3.19,
+     "local_fit": 3.18,
+     "jhpce_fit": 2.78,
+     "jhpce_incl_wait": 3.1
+    }
+   },
+   "local_gpu_busy_days": 11.77,
+   "jhpce_gpu_busy_days_per_gpu": 11.83,
+   "jhpce_gpu_days": 11.83,
+   "jhpce_span_days_incl_waits": 13.46,
+   "local_scoring_cpu_days": 69.63,
+   "jhpce_job_starts": 6,
+   "filler_scoring_left_h": 0.0,
+   "filler_fit_hours_in_gaps": {
+    "L": 7.2,
+    "J": 7.7
+   }
+  },
+  "G2": {
+   "n_gpu": 2,
+   "local_tasks": [
+    "atac_large",
+    "atac_small"
+   ],
+   "jhpce_tasks": [
+    "immune",
+    "immune_hum_mou",
+    "lung",
+    "pancreas",
+    "sim1",
+    "sim2"
+   ],
+   "wall_days": 10.2,
+   "stage_days": {
+    "S1_A1": {
+     "end": 1.59,
+     "local_fit": 1.02,
+     "jhpce_fit": 1.25,
+     "jhpce_incl_wait": 1.58
+    },
+    "S2_A23": {
+     "end": 0.62,
+     "local_fit": 0.37,
+     "jhpce_fit": 0.28,
+     "jhpce_incl_wait": 0.61
+    },
+    "S3_X1adv": {
+     "end": 5.36,
+     "local_fit": 2.96,
+     "jhpce_fit": 4.44,
+     "jhpce_incl_wait": 5.09
+    },
+    "S4_followup": {
+     "end": 2.63,
+     "local_fit": 0.97,
+     "jhpce_fit": 2.29,
+     "jhpce_incl_wait": 2.62
+    }
+   },
+   "local_gpu_busy_days": 5.47,
+   "jhpce_gpu_busy_days_per_gpu": 8.48,
+   "jhpce_gpu_days": 16.97,
+   "jhpce_span_days_incl_waits": 9.9,
+   "local_scoring_cpu_days": 69.63,
+   "jhpce_job_starts": 10,
+   "filler_scoring_left_h": 0.0,
+   "filler_fit_hours_in_gaps": {
+    "L": 3.7,
+    "J": 5.3
+   }
+  },
+  "G3": {
+   "n_gpu": 3,
+   "local_tasks": [
+    "atac_small"
+   ],
+   "jhpce_tasks": [
+    "atac_large",
+    "immune",
+    "immune_hum_mou",
+    "lung",
+    "pancreas",
+    "sim1",
+    "sim2"
+   ],
+   "wall_days": 8.09,
+   "stage_days": {
+    "S1_A1": {
+     "end": 1.38,
+     "local_fit": 1.02,
+     "jhpce_fit": 0.84,
+     "jhpce_incl_wait": 1.16
+    },
+    "S2_A23": {
+     "end": 0.53,
+     "local_fit": 0.37,
+     "jhpce_fit": 0.19,
+     "jhpce_incl_wait": 0.51
+    },
+    "S3_X1adv": {
+     "end": 4.18,
+     "local_fit": 1.01,
+     "jhpce_fit": 3.49,
+     "jhpce_incl_wait": 4.14
+    },
+    "S4_followup": {
+     "end": 1.87,
+     "local_fit": 0.97,
+     "jhpce_fit": 1.53,
+     "jhpce_incl_wait": 1.85
+    }
+   },
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 6.21,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_span_days_incl_waits": 7.67,
+   "local_scoring_cpu_days": 69.63,
+   "jhpce_job_starts": 15,
+   "filler_scoring_left_h": 3.29,
+   "filler_fit_hours_in_gaps": {
+    "L": 1.4,
+    "J": 4.1
+   }
+  },
+  "G4": {
+   "n_gpu": 4,
+   "local_tasks": [],
+   "jhpce_tasks": [
+    "atac_large",
+    "atac_small",
+    "immune",
+    "immune_hum_mou",
+    "lung",
+    "pancreas",
+    "sim1",
+    "sim2"
+   ],
+   "wall_days": 7.12,
+   "stage_days": {
+    "S1_A1": {
+     "end": 1.17,
+     "local_fit": 0.0,
+     "jhpce_fit": 0.83,
+     "jhpce_incl_wait": 1.16
+    },
+    "S2_A23": {
+     "end": 0.55,
+     "local_fit": 0.0,
+     "jhpce_fit": 0.22,
+     "jhpce_incl_wait": 0.54
+    },
+    "S3_X1adv": {
+     "end": 3.71,
+     "local_fit": 0.0,
+     "jhpce_fit": 2.82,
+     "jhpce_incl_wait": 3.15
+    },
+    "S4_followup": {
+     "end": 1.68,
+     "local_fit": 0.0,
+     "jhpce_fit": 1.34,
+     "jhpce_incl_wait": 1.67
+    }
+   },
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_span_days_incl_waits": 6.52,
+   "local_scoring_cpu_days": 69.63,
+   "jhpce_job_starts": 16,
+   "filler_scoring_left_h": 0.0,
+   "filler_fit_hours_in_gaps": {
+    "L": 0.0,
+    "J": 3.4
+   }
+  }
+ },
+ "queue_wait_grid": [
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "SI-30",
+   "wall_days": 13.11,
+   "jhpce": "atac_small immune_hum_mou lung sim1 sim2",
+   "local": "atac_large immune pancreas",
+   "local_gpu_busy_days": 10.74,
+   "jhpce_gpu_busy_days_per_gpu": 12.67,
+   "jhpce_gpu_days": 12.67,
+   "jhpce_job_starts": 7
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "free",
+   "wall_days": 13.11,
+   "jhpce": "atac_small immune_hum_mou lung sim1 sim2",
+   "local": "atac_large immune pancreas",
+   "local_gpu_busy_days": 10.74,
+   "jhpce_gpu_busy_days_per_gpu": 12.67,
+   "jhpce_gpu_days": 12.67,
+   "jhpce_job_starts": 7
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "SI-30",
+   "wall_days": 9.33,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 9.32,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "free",
+   "wall_days": 9.33,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 9.32,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "SI-30",
+   "wall_days": 7.14,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 7.26,
+   "jhpce_gpu_days": 21.78,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "free",
+   "wall_days": 7.14,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 7.26,
+   "jhpce_gpu_days": 21.78,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "SI-30",
+   "wall_days": 5.96,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "free",
+   "wall_days": 5.96,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 1,
+   "constraint": "SI-30",
+   "wall_days": 13.84,
+   "jhpce": "atac_large immune immune_hum_mou sim2",
+   "local": "atac_small lung pancreas sim1",
+   "local_gpu_busy_days": 11.77,
+   "jhpce_gpu_busy_days_per_gpu": 11.83,
+   "jhpce_gpu_days": 11.83,
+   "jhpce_job_starts": 6
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 1,
+   "constraint": "free",
+   "wall_days": 13.84,
+   "jhpce": "atac_large immune immune_hum_mou sim2",
+   "local": "atac_small lung pancreas sim1",
+   "local_gpu_busy_days": 11.77,
+   "jhpce_gpu_busy_days_per_gpu": 11.83,
+   "jhpce_gpu_days": 11.83,
+   "jhpce_job_starts": 6
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 2,
+   "constraint": "SI-30",
+   "wall_days": 10.2,
+   "jhpce": "immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_large atac_small",
+   "local_gpu_busy_days": 5.47,
+   "jhpce_gpu_busy_days_per_gpu": 8.48,
+   "jhpce_gpu_days": 16.97,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 2,
+   "constraint": "free",
+   "wall_days": 10.2,
+   "jhpce": "immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_large atac_small",
+   "local_gpu_busy_days": 5.47,
+   "jhpce_gpu_busy_days_per_gpu": 8.48,
+   "jhpce_gpu_days": 16.97,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 3,
+   "constraint": "SI-30",
+   "wall_days": 8.09,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 6.21,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 3,
+   "constraint": "free",
+   "wall_days": 8.09,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 6.21,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 4,
+   "constraint": "SI-30",
+   "wall_days": 7.12,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.326,
+   "is_base_wait": true,
+   "gpus": 4,
+   "constraint": "free",
+   "wall_days": 7.12,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "SI-30",
+   "wall_days": 14.32,
+   "jhpce": "atac_large immune pancreas sim2",
+   "local": "atac_small immune_hum_mou lung sim1",
+   "local_gpu_busy_days": 12.4,
+   "jhpce_gpu_busy_days_per_gpu": 11.37,
+   "jhpce_gpu_days": 11.37,
+   "jhpce_job_starts": 6
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "free",
+   "wall_days": 14.32,
+   "jhpce": "atac_large immune pancreas sim2",
+   "local": "atac_small immune_hum_mou lung sim1",
+   "local_gpu_busy_days": 12.4,
+   "jhpce_gpu_busy_days_per_gpu": 11.37,
+   "jhpce_gpu_days": 11.37,
+   "jhpce_job_starts": 6
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "SI-30",
+   "wall_days": 10.75,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1",
+   "local": "atac_small sim2",
+   "local_gpu_busy_days": 6.56,
+   "jhpce_gpu_busy_days_per_gpu": 8.12,
+   "jhpce_gpu_days": 16.23,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "free",
+   "wall_days": 10.75,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1",
+   "local": "atac_small sim2",
+   "local_gpu_busy_days": 6.56,
+   "jhpce_gpu_busy_days_per_gpu": 8.12,
+   "jhpce_gpu_days": 16.23,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "SI-30",
+   "wall_days": 8.71,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 6.24,
+   "jhpce_gpu_days": 18.72,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "free",
+   "wall_days": 8.71,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 6.24,
+   "jhpce_gpu_days": 18.72,
+   "jhpce_job_starts": 15
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "SI-30",
+   "wall_days": 7.82,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 0.5,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "free",
+   "wall_days": 7.82,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "",
+   "local_gpu_busy_days": 0.0,
+   "jhpce_gpu_busy_days_per_gpu": 5.36,
+   "jhpce_gpu_days": 21.43,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "SI-30",
+   "wall_days": 15.93,
+   "jhpce": "atac_large immune_hum_mou sim1 sim2",
+   "local": "atac_small immune lung pancreas",
+   "local_gpu_busy_days": 14.81,
+   "jhpce_gpu_busy_days_per_gpu": 9.57,
+   "jhpce_gpu_days": 9.57,
+   "jhpce_job_starts": 4
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "free",
+   "wall_days": 15.93,
+   "jhpce": "atac_large immune_hum_mou sim1 sim2",
+   "local": "atac_small immune lung pancreas",
+   "local_gpu_busy_days": 14.81,
+   "jhpce_gpu_busy_days_per_gpu": 9.57,
+   "jhpce_gpu_days": 9.57,
+   "jhpce_job_starts": 4
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "SI-30",
+   "wall_days": 12.11,
+   "jhpce": "atac_large atac_small lung pancreas sim1 sim2",
+   "local": "immune immune_hum_mou",
+   "local_gpu_busy_days": 9.32,
+   "jhpce_gpu_busy_days_per_gpu": 6.91,
+   "jhpce_gpu_days": 13.83,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "free",
+   "wall_days": 12.11,
+   "jhpce": "atac_large atac_small lung pancreas sim1 sim2",
+   "local": "immune immune_hum_mou",
+   "local_gpu_busy_days": 9.32,
+   "jhpce_gpu_busy_days_per_gpu": 6.91,
+   "jhpce_gpu_days": 13.83,
+   "jhpce_job_starts": 10
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "SI-30",
+   "wall_days": 10.95,
+   "jhpce": "immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_large atac_small",
+   "local_gpu_busy_days": 5.47,
+   "jhpce_gpu_busy_days_per_gpu": 5.66,
+   "jhpce_gpu_days": 16.97,
+   "jhpce_job_starts": 12
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "free",
+   "wall_days": 10.95,
+   "jhpce": "immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_large atac_small",
+   "local_gpu_busy_days": 5.47,
+   "jhpce_gpu_busy_days_per_gpu": 5.66,
+   "jhpce_gpu_days": 16.97,
+   "jhpce_job_starts": 12
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "SI-30",
+   "wall_days": 9.22,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 4.66,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 1.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "free",
+   "wall_days": 9.22,
+   "jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small",
+   "local_gpu_busy_days": 3.43,
+   "jhpce_gpu_busy_days_per_gpu": 4.66,
+   "jhpce_gpu_days": 18.64,
+   "jhpce_job_starts": 16
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "SI-30",
+   "wall_days": 17.74,
+   "jhpce": "immune_hum_mou sim1 sim2",
+   "local": "atac_large atac_small immune lung pancreas",
+   "local_gpu_busy_days": 16.59,
+   "jhpce_gpu_busy_days_per_gpu": 7.9,
+   "jhpce_gpu_days": 7.9,
+   "jhpce_job_starts": 4
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 1,
+   "constraint": "free",
+   "wall_days": 17.74,
+   "jhpce": "immune_hum_mou sim1 sim2",
+   "local": "atac_large atac_small immune lung pancreas",
+   "local_gpu_busy_days": 16.59,
+   "jhpce_gpu_busy_days_per_gpu": 7.9,
+   "jhpce_gpu_days": 7.9,
+   "jhpce_job_starts": 4
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "SI-30",
+   "wall_days": 15.14,
+   "jhpce": "atac_large lung pancreas sim1 sim2",
+   "local": "atac_small immune immune_hum_mou",
+   "local_gpu_busy_days": 12.75,
+   "jhpce_gpu_busy_days_per_gpu": 5.51,
+   "jhpce_gpu_days": 11.03,
+   "jhpce_job_starts": 8
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 2,
+   "constraint": "free",
+   "wall_days": 15.14,
+   "jhpce": "atac_large lung pancreas sim1 sim2",
+   "local": "atac_small immune immune_hum_mou",
+   "local_gpu_busy_days": 12.75,
+   "jhpce_gpu_busy_days_per_gpu": 5.51,
+   "jhpce_gpu_days": 11.03,
+   "jhpce_job_starts": 8
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "SI-30",
+   "wall_days": 13.08,
+   "jhpce": "atac_large immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small immune",
+   "local_gpu_busy_days": 8.74,
+   "jhpce_gpu_busy_days_per_gpu": 4.77,
+   "jhpce_gpu_days": 14.3,
+   "jhpce_job_starts": 9
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 3,
+   "constraint": "free",
+   "wall_days": 13.08,
+   "jhpce": "atac_large immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small immune",
+   "local_gpu_busy_days": 8.74,
+   "jhpce_gpu_busy_days_per_gpu": 4.77,
+   "jhpce_gpu_days": 14.3,
+   "jhpce_job_starts": 9
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "SI-30",
+   "wall_days": 12.74,
+   "jhpce": "atac_large immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small immune",
+   "local_gpu_busy_days": 8.74,
+   "jhpce_gpu_busy_days_per_gpu": 3.58,
+   "jhpce_gpu_days": 14.3,
+   "jhpce_job_starts": 12
+  },
+  {
+   "label": "L40S",
+   "queue_wait_days": 2.0,
+   "is_base_wait": false,
+   "gpus": 4,
+   "constraint": "free",
+   "wall_days": 12.74,
+   "jhpce": "atac_large immune_hum_mou lung pancreas sim1 sim2",
+   "local": "atac_small immune",
+   "local_gpu_busy_days": 8.74,
+   "jhpce_gpu_busy_days_per_gpu": 3.58,
+   "jhpce_gpu_days": 14.3,
+   "jhpce_job_starts": 12
+  }
+ ],
+ "x3_x13_robustness": [
+  {
+   "gpus": 1,
+   "scenario": "x3_x13_half",
+   "fits": 6228,
+   "base_split_wall_days": 13.22,
+   "scenario_optimum_wall_days": 12.95,
+   "scenario_optimum_jhpce": "atac_large atac_small lung pancreas sim1"
+  },
+  {
+   "gpus": 1,
+   "scenario": "x3_x13_plus50pct",
+   "fits": 7464,
+   "base_split_wall_days": 15.01,
+   "scenario_optimum_wall_days": 15.0,
+   "scenario_optimum_jhpce": "immune lung pancreas sim2"
+  },
+  {
+   "gpus": 2,
+   "scenario": "x3_x13_half",
+   "fits": 6228,
+   "base_split_wall_days": 9.66,
+   "scenario_optimum_wall_days": 9.52,
+   "scenario_optimum_jhpce": "atac_large immune immune_hum_mou lung pancreas sim1"
+  },
+  {
+   "gpus": 2,
+   "scenario": "x3_x13_plus50pct",
+   "fits": 7464,
+   "base_split_wall_days": 10.74,
+   "scenario_optimum_wall_days": 10.74,
+   "scenario_optimum_jhpce": "immune immune_hum_mou lung pancreas sim1 sim2"
+  },
+  {
+   "gpus": 3,
+   "scenario": "x3_x13_half",
+   "fits": 6228,
+   "base_split_wall_days": 7.59,
+   "scenario_optimum_wall_days": 7.59,
+   "scenario_optimum_jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2"
+  },
+  {
+   "gpus": 3,
+   "scenario": "x3_x13_plus50pct",
+   "fits": 7464,
+   "base_split_wall_days": 8.72,
+   "scenario_optimum_wall_days": 8.72,
+   "scenario_optimum_jhpce": "atac_large immune immune_hum_mou lung pancreas sim1 sim2"
+  },
+  {
+   "gpus": 4,
+   "scenario": "x3_x13_half",
+   "fits": 6228,
+   "base_split_wall_days": 6.8,
+   "scenario_optimum_wall_days": 6.8,
+   "scenario_optimum_jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2"
+  },
+  {
+   "gpus": 4,
+   "scenario": "x3_x13_plus50pct",
+   "fits": 7464,
+   "base_split_wall_days": 7.44,
+   "scenario_optimum_wall_days": 7.44,
+   "scenario_optimum_jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2"
+  }
+ ]
+}

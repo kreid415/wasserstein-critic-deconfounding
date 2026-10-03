@@ -1,0 +1,2 @@
+-rw-r----- 1 kreid users 62914560 Oct  3 04:10 /users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_latents_jhpce.tar.part00
+-rw-r----- 1 kreid users 46141440 Oct  3 04:10 /users/kreid/.claude-science-scratch/.claude-science/jobs/a2b6ae1f-c052-4b5a-a4f1-92dba1260dd7/gate_latents_jhpce.tar.part01

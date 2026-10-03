@@ -1,0 +1,45 @@
+{
+ "n": 64,
+ "k": 15,
+ "bitwise_equal": 0,
+ "r_min_over_configs": 0.5230933345120549,
+ "r_median_over_configs": 0.9862108474487101,
+ "knn_overlap_mean_over_configs": 0.5135983107503134,
+ "knn_overlap_min_over_configs": 0.2443522553174556,
+ "by_arm": {
+  "barycenter": {
+   "r_min": 0.8935,
+   "knn": 0.356
+  },
+  "discriminator": {
+   "r_min": 0.8527,
+   "knn": 0.3639
+  },
+  "mmd": {
+   "r_min": 0.9744,
+   "knn": 0.7373
+  },
+  "none": {
+   "r_min": 0.9973,
+   "knn": 0.8282
+  },
+  "pooled": {
+   "r_min": 0.9629,
+   "knn": 0.5633
+  },
+  "reference": {
+   "r_min": 0.882,
+   "knn": 0.5502
+  },
+  "scvi_adv": {
+   "r_min": 0.9901,
+   "knn": 0.6997
+  },
+  "sinkhorn": {
+   "r_min": 0.5231,
+   "knn": 0.4107
+  }
+ },
+ "seed_reference_knn_overlap_mean": 0.15120272985932867,
+ "seed_reference_abs_r_median": 0.348546330875453
+}

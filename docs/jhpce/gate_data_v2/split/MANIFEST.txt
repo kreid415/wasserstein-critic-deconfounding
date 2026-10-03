@@ -1,0 +1,1 @@
+manifest_dor.tsv md5 cabda46269f31913d8deb2cbea8ab729; rebuild: python scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 --bary-iter 10 --out manifest_dor.tsv (main 878d8ea)
