@@ -7,6 +7,11 @@ a column, or still carries a lambda grid INDEX instead of a frozen value, is ref
 Env:  MANIFEST (tsv), TAG (row tag), PREPPED_DIR (prep_scib_task.py outputs), OUT_DIR, WCD_SRC
 Out:  OUT_DIR/latents/<tag>.npz   z (posterior mean), batch, celltype, config json, history json
       OUT_DIR/models/<tag>/       trained scvi-tools model (decoder needed for marker/DE analyses)
+      OUT_DIR/status/<tag>.json   only if the fit diverged (a training loss term became non-finite; NonFiniteLossError
+                                  of the training plan): status 'diverged', epoch, step, detail, row, provenance; the
+                                  process then exits with fit_outcome.EXIT_DIVERGED and writes no latent. A row with a
+                                  status file is refused (delete it to refit). Any other error exits non-zero (1) and
+                                  writes nothing: an infrastructure error, rerun by the caller (docs/PREREG.md sec. 1).
 """
 import hashlib
 import json
@@ -137,6 +142,9 @@ def main():
     r = load_row(os.environ["MANIFEST"], os.environ["TAG"])
     out_dir = os.environ["OUT_DIR"]
     npz = os.path.join(out_dir, "latents", f"{r['tag']}.npz")
+    status = os.path.join(out_dir, "status", f"{r['tag']}.json")
+    if os.path.exists(status):
+        raise FileExistsError(f"{status} exists: {r['tag']} already has a recorded outcome (delete it to refit)")
     if os.path.exists(npz):
         print(f"[skip] {r['tag']} exists", flush=True)
         return
@@ -241,5 +249,20 @@ def fit_baseline(a, arm, lam, r, common, backbone):
     return m.get_latent_representation(), m
 
 
+def record_divergence(manifest, out_dir, tag, exc):
+    """Write OUT_DIR/status/<tag>.json for a NonFiniteLossError (status 'diverged', docs/PREREG.md section 1) with
+    the epoch, step, loss terms, manifest row and provenance; returns fit_outcome.EXIT_DIVERGED."""
+    import fit_outcome
+    r = load_row(manifest, tag)
+    path = fit_outcome.write_status(out_dir, tag, "diverged", detail=str(exc), row=r, epoch=exc.epoch,
+                                    step=exc.step, terms=exc.terms, error=repr(exc.__cause__ or exc), **provenance())
+    print(f"[diverged] {tag}: {exc} -> {path}", flush=True)
+    return fit_outcome.EXIT_DIVERGED
+
+
 if __name__ == "__main__":
-    main()
+    from fit_outcome import NonFiniteLossError
+    try:
+        main()
+    except NonFiniteLossError as e:     # the fit diverged: an outcome, recorded; every other error propagates
+        sys.exit(record_divergence(os.environ["MANIFEST"], os.environ["OUT_DIR"], os.environ["TAG"], e))

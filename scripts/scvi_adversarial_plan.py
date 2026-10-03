@@ -51,6 +51,8 @@ import torch.nn.functional as F  # noqa: N812
 from scvi.train import AdversarialTrainingPlan
 from scvi import REGISTRY_KEYS
 
+from fit_outcome import NonFiniteLossError   # scripts/fit_outcome.py; scripts/ is on sys.path for every importer
+
 _CRITIC_FORMULATIONS = ("reference", "reference_fixed", "pooled", "barycenter")
 _CRITIC_FREE = ("mmd", "sinkhorn", "mmd_ref")
 _JS_ARMS = ("discriminator", "discriminator_ref")
@@ -131,8 +133,28 @@ def _load_wcd_module(src_root, modname, filename):
     return mod
 
 
+def _is_distribution_validation_error(e):
+    """True iff `e` is torch.distributions' argument-validation error: the ValueError that Distribution.__init__
+    raises for an invalid parameter ('Expected parameter loc ... but found invalid values'; torch 2.13
+    torch/distributions/distribution.py), e.g. a NaN encoder mean q_m after the encoder overflowed."""
+    tb = e.__traceback__
+    if tb is None:
+        return False
+    while tb.tb_next is not None:
+        tb = tb.tb_next
+    code = tb.tb_frame.f_code
+    return (code.co_name == "__init__" and str(e).startswith("Expected parameter ")
+            and code.co_filename.replace(os.sep, "/").endswith("torch/distributions/distribution.py"))
+
+
 class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
-    """AdversarialTrainingPlan with a swappable adversary on the latent (see module docstring)."""
+    """AdversarialTrainingPlan with a swappable adversary on the latent (see module docstring).
+
+    Non-finite-loss guard (docs/PREREG.md section 1, fit outcome 'diverged'): every training step checks that each
+    loss term it computes or back-propagates is finite, a forward pass that torch.distributions refuses for a
+    non-finite parameter counts as a non-finite loss, and the parameters must be finite after the last optimizer
+    step. Any of these raises NonFiniteLossError (scripts/fit_outcome.py). The guard only reads values: the
+    existing arms stay bit-identical (scripts/check_arm_bitidentity.py)."""
 
     def __init__(self, module, *, adversary="none", d_coef=0.0, n_critic=None, reference_batch=None,
                  adv_input=None, zstd=False, bary_support=None, bary_iter=10, bary_weights="equal",
@@ -156,6 +178,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         else:
             kwargs.setdefault("adversarial_classifier", False)
         super().__init__(module, **kwargs)
+        self._nf_step, self._nf_terms = -1, {}     # non-finite-loss guard: current step index, extra terms (scvi_adv)
         self.adversary, self.adversary_base, self.spectral_norm = adversary, base, sn
         self.r1 = bool(r1)
         self.r1_gamma = None if r1_gamma is None else float(r1_gamma)
@@ -276,9 +299,55 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
     def _log(self, name, value):
         self.log(name, value.detach() if torch.is_tensor(value) else value, on_step=False, on_epoch=True)
 
+    # ---- non-finite-loss guard (class docstring); reads values only --------------------------------------------
+    def _nf_check(self, batch_idx, **terms):
+        """Raise NonFiniteLossError if any loss term of this training step is non-finite (one host sync)."""
+        terms = {**self._nf_terms, **terms}
+        dev = next(iter(terms.values())).device
+        vals = torch.stack([v.detach().float().reshape(()).to(dev) for v in terms.values()])
+        if bool(torch.isfinite(vals).all()):
+            return
+        raise NonFiniteLossError(self.current_epoch, self._nf_step, dict(zip(terms, vals.tolist())),
+                                 detail=f"minibatch {batch_idx} of epoch {self.current_epoch}")
+
+    def _nonfinite_parameters(self):
+        return [n for n, p in self.named_parameters() if not bool(torch.isfinite(p).all())]
+
+    def forward(self, *args, **kwargs):
+        """The module's forward pass. A torch.distributions argument-validation error (a non-finite distribution
+        parameter, e.g. NaN q_m after the encoder overflowed) means the training loss is non-finite: it is raised
+        as NonFiniteLossError from the original error. Every other error propagates unchanged."""
+        try:
+            return super().forward(*args, **kwargs)
+        except ValueError as e:
+            if not _is_distribution_validation_error(e):
+                raise
+            bad = self._nonfinite_parameters()
+            raise NonFiniteLossError(
+                self.current_epoch, self._nf_step, {},
+                detail=f"forward pass refused a non-finite distribution parameter: {str(e).splitlines()[0]} "
+                       f"non-finite model parameters: {bad[:5] if bad else 'none'}") from e
+
+    def loss_adversarial_classifier(self, z, batch_index, predict_true_class=True):
+        """scvi-tools' classifier loss (scvi_adv), unchanged; a copy of its value is kept for the guard."""
+        loss = super().loss_adversarial_classifier(z, batch_index, predict_true_class)
+        self._nf_terms["classifier_loss" if predict_true_class else "fool_loss"] = loss.detach().clone()
+        return loss
+
+    def on_train_end(self):
+        """After the last optimizer step every parameter must be finite (the saved latent is computed from them)."""
+        super().on_train_end()
+        bad = self._nonfinite_parameters()
+        if bad:
+            raise NonFiniteLossError(self.current_epoch, self._nf_step, {},
+                                     detail=f"non-finite parameters after the last optimizer step: {bad[:5]}")
+
     def training_step(self, batch, batch_idx):
+        self._nf_step, self._nf_terms = self._nf_step + 1, {}
         if self.adversary_base in ("none", "scvi_adv"):
-            return super().training_step(batch, batch_idx)
+            train_loss = super().training_step(batch, batch_idx)
+            self._nf_check(batch_idx, train_loss=train_loss)
+            return train_loss
         if "kl_weight" in self.loss_kwargs:
             self.loss_kwargs.update({"kl_weight": self.kl_weight})
             self.log("kl_weight", self.kl_weight, on_step=True, on_epoch=False)
@@ -307,11 +376,13 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             self._log("adv_div", adv_term)
             self._log("adv_grad_norm", g.norm(dim=1).mean())
             self.log("train_loss", loss_vae, on_step=self.on_step, on_epoch=self.on_epoch, prog_bar=True)
+            self._nf_check(batch_idx, loss_vae=loss_vae, adv_term=adv_term, gen_loss=gen_loss)
             return loss_vae
 
         opt_g, opt_d = self.optimizers()
         target = None
         if self.adversary_base == "barycenter":
+            self._nf_check(batch_idx, loss_vae=loss_vae)     # before POT receives the latent
             warm = self.bary_warm_iter is not None and self._bary_prev is not None
             target = self._bary_fn(z_adv.detach(), batch_index, n_support=self.bary_support,
                                    n_iter=(self.bary_warm_iter if warm else self.bary_iter), weights=self.bary_weights,
@@ -363,6 +434,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.manual_backward(gen_loss)
         opt_g.step()
         self.log("train_loss", loss_vae, on_step=self.on_step, on_epoch=self.on_epoch, prog_bar=True)
+        self._nf_check(batch_idx, loss_vae=loss_vae, adv_term=adv_term, gen_loss=gen_loss, adv_loss=loss_d, adv_gp=gp)
         return loss_vae
 
 
@@ -480,7 +552,20 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
             strat_registry_key=(REGISTRY_KEYS.BATCH_KEY if slot == "batch" else REGISTRY_KEYS.LABELS_KEY))
     model.train(max_epochs=max_epochs, batch_size=batch_size, early_stopping=False, train_size=train_size,
                 enable_progress_bar=False, plan_kwargs=plan_kwargs, **train_kwargs)
-    return model.get_latent_representation(), model
+    return _posterior_mean(model), model
+
+
+def _posterior_mean(model):
+    """model.get_latent_representation() with torch.distributions argument validation off, so that a NaN posterior
+    mean is returned (then saved, and recorded as nonfinite_latent; docs/PREREG.md section 1) rather than raised.
+    Validation only checks values: the latent is the same array either way."""
+    from torch.distributions import Distribution
+    previous = Distribution._validate_args
+    Distribution.set_default_validate_args(False)
+    try:
+        return model.get_latent_representation()
+    finally:
+        Distribution.set_default_validate_args(previous)
 
 
 fit_adversarial_linearscvi = fit_adversarial_scvi   # old name, kept for imports
