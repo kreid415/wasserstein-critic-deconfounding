@@ -1,0 +1,15 @@
+metric,n,all_nan,max_abs_diff,status
+ARI_cluster/label,2,False,0.018314473426562616,exceeds tol
+ASW_label,2,False,0.0,ok
+ASW_label/batch,2,False,0.0,ok
+NMI_cluster/label,2,False,0.0026782004694267947,exceeds tol
+PCR_batch,2,False,1.2766318036039337e-07,ok
+cLISI,2,False,0.00016699488463145507,exceeds tol
+cell_cycle_conservation,2,False,5.686305213359333e-07,ok
+graph_conn,2,False,0.0002893766612364068,exceeds tol
+hvg_overlap,0,True,,NaN on both (not computed)
+iLISI,2,False,0.0028049177980667,exceeds tol
+isolated_label_F1,2,False,0.02188429131111458,exceeds tol
+isolated_label_silhouette,2,False,0.0,ok
+kBET,2,False,0.002517745825036194,exceeds tol
+trajectory,2,False,3.7282747350486645e-06,exceeds tol

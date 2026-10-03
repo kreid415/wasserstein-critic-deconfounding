@@ -1,0 +1,17 @@
+scenario,gpus,wall_days,local,jhpce,local_busy_days,jhpce_busy_days,jhpce_job_starts
+base,1,12.69,atac_large immune lung pancreas,atac_small immune_hum_mou sim1 sim2,12.37,11.69,6
+base,2,8.21,atac_large pancreas sim1,atac_small immune immune_hum_mou lung sim2,7.61,8.25,10
+base,3,6.09,immune_hum_mou sim1,atac_large atac_small immune lung pancreas sim2,5.94,6.08,15
+base,4,5.2,immune_hum_mou,atac_large atac_small immune lung pancreas sim1 sim2,3.44,5.2,16
+x6_plus54,1,12.74,atac_large immune lung pancreas,atac_small immune_hum_mou sim1 sim2,12.54,11.74,6
+x6_plus54,2,8.29,atac_large pancreas sim1,atac_small immune immune_hum_mou lung sim2,7.68,8.33,10
+x6_plus54,3,6.15,immune_hum_mou sim1,atac_large atac_small immune lung pancreas sim2,5.94,6.15,15
+x6_plus54,4,5.24,atac_large atac_small,immune immune_hum_mou lung pancreas sim1 sim2,5.16,4.82,16
+a23_uncond_plus144,1,13.03,atac_large immune lung pancreas,atac_small immune_hum_mou sim1 sim2,12.71,11.88,6
+a23_uncond_plus144,2,8.48,atac_large pancreas sim1,atac_small immune immune_hum_mou lung sim2,7.61,8.52,10
+a23_uncond_plus144,3,6.26,immune_hum_mou sim1,atac_large atac_small immune lung pancreas sim2,5.94,6.26,15
+a23_uncond_plus144,4,5.33,immune_hum_mou,atac_large atac_small immune lung pancreas sim1 sim2,3.44,5.33,16
+both,1,13.08,atac_large immune lung pancreas,atac_small immune_hum_mou sim1 sim2,12.88,11.93,6
+both,2,8.55,atac_large pancreas sim1,atac_small immune immune_hum_mou lung sim2,7.68,8.59,10
+both,3,6.33,immune_hum_mou sim1,atac_large atac_small immune lung pancreas sim2,5.94,6.33,15
+both,4,5.39,immune_hum_mou,atac_large atac_small immune lung pancreas sim1 sim2,3.44,5.39,20
