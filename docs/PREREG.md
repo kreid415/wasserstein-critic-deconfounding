@@ -1,10 +1,10 @@
 # Pre-registered decision rules for the Tier 1+2 rerun
 
-*Status: signed off by the user 2026-10-02 (§7); branch `prereg-rules`. The rules freeze when this file, `scripts/prereg_rules.py` and the three rule scripts are committed and tagged before the first A1 fit. Every rule is a deterministic function of scored results; nothing in this file is chosen after seeing A1, A2, A3 or X1 data.*
+*Status: signed off by the user 2026-10-02, revised with the user's answers of 2026-10-02/03 (v2, §7); branch `prereg-v2`. The rules freeze when this file, `scripts/prereg_rules.py` and the three rule scripts are committed and tagged before the first A1 fit. Every rule is a deterministic function of scored results; nothing in this file is chosen after seeing A1, A2, A3 or X1 data.*
 
 Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_grid.py` (R1 and the power report), `scripts/freeze_matched_lambda.py` (R4; stages `a1` and `x1`), `scripts/decide_a2_a3.py` (R2, R3). Tests: `tests/prereg/`. Governs `scripts/build_paper_manifest.py --design pilot` (design of record, CONSTRAINTS.md SI-16).
 
-**Disclosure (for Methods).** The X1 λ ranges come from 3 of the 8 tasks (atac_small, immune, sim1), fitted on seeds 100–102, which are disjoint from every X1 seed (0–4). No A1 fit is used as an X1 fit, so every λ chosen on A1 is evaluated on fresh seeds (SI-13).
+**Disclosure (for Methods).** The X1 λ ranges come from 3 of the 8 tasks (atac_small, immune, sim1), fitted on seeds 100–102, which are disjoint from every X1 seed (0–4). No A1 fit is used as an X1 fit, so every λ chosen on A1 is evaluated on fresh seeds (SI-13). Likewise the λ-matched follow-ups (X3, X6, X7, X8, X12) run on seeds 10–12, disjoint from X1 and A1, so no follow-up cell reuses an X1 fit from which its matched λ was chosen (SI-26).
 
 ## 0. Stage order
 
@@ -13,11 +13,11 @@ Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_g
 | A1 | 3 tasks × {conditioned, unconditioned} × seeds 100–102 × (λ=0 + 6 arms × A1 grid) | — | — | — |
 | R1 | — | A1 scored | X1 `lam` = g1…g6 | `freeze_a1_grid.py` |
 | R4-a1 | — | R1 frozen | A2/A3 `lam` = a1_matched_lo / a1_matched / a1_matched_hi | `freeze_matched_lambda.py --stage a1` |
-| A2, A3 | new halves only (posterior sample; standardisation on); the other halves are A1 fits | R4-a1 | — | — |
+| A2, A3 | both decoders (SI-27); new halves only (posterior sample; standardisation on); the other halves are A1 fits | R4-a1 | — | — |
 | R2, R3 | — | A2, A3 scored | X1 `adv_input` = A2, `zstd` = A3 | `decide_a2_a3.py` |
 | X1 | 8 tasks, both decoders, seeds 0–4 | R1, R2, R3 | — | — |
 | R4-x1 | — | X1 scored | follow-up `lam` = matched_lo / matched / matched_hi | `freeze_matched_lambda.py --stage x1` |
-| X3, X6, X7, X8, X12 | | R4-x1 | | |
+| X3, X6, X7, X8, X12 | seeds 10–12 (SI-26) | R4-x1 | | |
 
 Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress. A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
 
@@ -25,7 +25,7 @@ Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A
 
 - **Scores.** Raw `scib.metrics.metrics` values written by `scripts/score_scib_native.py`, one CSV row per fit, joined to the manifest by `tag`.
 - **Batch score B.** Unweighted mean of the 5 scIB batch metrics in `score_scib_native.BATCH_METRICS` (PCR_batch = `pcr_comparison`, ASW_label/batch, iLISI, graph_conn, kBET). scib 1.1.7 returns each on [0, 1] with 1 = best (checked in `scib/metrics/{pcr,silhouette,lisi,kbet}.py`), so B needs no rescaling and does not change when runs are added. The min–max scaled `scib_overall()` is not used by any rule.
-- **Bio score C.** Unweighted mean of the task's metrics in `score_scib_native.BIO_METRICS`: NMI, ARI, ASW_label, isolated_label_F1, isolated_label_silhouette, cLISI, plus cell_cycle_conservation on pancreas, lung, immune and immune_hum_mou (RNA, human; read from the prepped files' `uns`). The rule code reads both lists from `score_scib_native.py`, so there is one definition.
+- **Bio score C.** Unweighted mean of the task's metrics in `score_scib_native.BIO_METRICS`: NMI, ARI, ASW_label, isolated_label_F1, isolated_label_silhouette, cLISI, plus cell_cycle_conservation on pancreas, lung, immune and immune_hum_mou (RNA, human; read from the prepped files' `uns`), plus trajectory conservation on immune and immune_hum_mou (the tasks whose prepped files hold `obs['dpt_pseudotime']`). Trajectory joined `BIO_METRICS` on 2026-10-03 (SI-28) because scIB's bio score includes it: `group_bio` in scib-reproducibility `visualization/plotSingleTaskRNA.R` lines 45–46, bio score = `rowMeans` over the available scaled bio metrics, lines 142–143 (main @ 3afbffd367); scib-pipeline `scripts/metrics/metrics.py` computes it iff `dpt_pseudotime` is in `obs`. The two immune tasks therefore average 8 bio metrics, pancreas and lung 7, ATAC and simulations 6. The rule code reads both lists from `score_scib_native.py`, so there is one definition. Known-answer check: `experiments/metric_bio_trajectory/` (PREFLIGHT.md, `check_bio_trajectory.py`).
 - **Required values.** For every scored fit, all 5 batch metrics and the task's bio metrics must be finite. A NaN is a pipeline fault, not an outcome: the rule script stops.
 - **Fit outcome.** Each manifest row of a stage is exactly one of *scored* (one score row) or *failed* (one row in the failures table, status `diverged` = training loss became non-finite, or `nonfinite_latent` = the saved posterior mean has a non-finite value). A row that is neither is *missing* and the script stops; so does a row that is both, or a tag scored twice. Infrastructure errors (out of memory, killed job, I/O) are not failures: the fit is rerun.
 - **Pairing.** Seeds are paired across settings (same seed = same initialisation and minibatch order). Every difference is taken within a seed, over the seeds where both fits succeeded.
@@ -68,16 +68,16 @@ g1 < … < g6 are the six λ values; X1 rows of the family and decoder take them
 
 ## 3. R2 and R3 — A2/A3 → X1 adversary input and standardisation
 
-**Design.** atac_small and immune, conditioned decoder, seeds 100–102 (the A1 seeds, so the default halves are A1 fits and are not refitted). λ window per task × arm = (lo, matched, hi) from R4 applied to A1 (stage `a1`).
-- A2: arms discriminator, reference, pooled; input ∈ {posterior mean (A1 fits), posterior sample (new)} → 6 cells, 54 new fits.
-- A3: arms discriminator, reference, pooled, mmd, sinkhorn; per-dimension standardisation ∈ {off (A1 fits), on (new)} → 10 cells, 90 new fits.
+**Design.** atac_small and immune, both decoders (SI-27), seeds 100–102 (the A1 seeds, so the default halves are A1 fits of the same decoder and are not refitted). λ window per task × decoder × arm = (lo, matched, hi) from R4 applied to A1 (stage `a1`).
+- A2: arms discriminator, reference, pooled; input ∈ {posterior mean (A1 fits), posterior sample (new)} → 12 cells (2 tasks × 2 decoders × 3 arms), 108 new fits.
+- A3: arms discriminator, reference, pooled, mmd, sinkhorn; per-dimension standardisation ∈ {off (A1 fits), on (new)} → 20 cells (2 × 2 × 5), 180 new fits.
 
-**Endpoint per cell** (task, arm): D = bio@b*(alternative) − bio@b*(default). bio@b*(setting) is the seed-mean C linearly interpolated at B = b* (the stage-`a1` b* of the task, conditioned) along the setting's window in λ order: the first adjacent pair whose seed-mean B values bracket b*; an exact hit takes that point. A window point whose seeds all failed is skipped. If a setting's B stays below b* at every window point it is *unreached-low*; above at every point, *unreached-high*. A cell is evaluable when both settings bracket b*.
+**Endpoint per cell** (task, decoder, arm): D = bio@b*(alternative) − bio@b*(default). bio@b*(setting) is the seed-mean C linearly interpolated at B = b* (the stage-`a1` b* of that task and decoder) along the setting's window in λ order: the first adjacent pair whose seed-mean B values bracket b*; an exact hit takes that point. A window point whose seeds all failed is skipped. If a setting's B stays below b* at every window point it is *unreached-low*; above at every point, *unreached-high*. A cell is evaluable when both settings bracket b*.
 
-**Decision.** The alternative replaces the default for X1 only if all of:
-1. at least ⌈2/3⌉ of the cells are evaluable (A2: 4 of 6; A3: 7 of 10), with at least one per task;
+**Decision.** One pooled decision over the cells of both decoders (SI-27). The alternative replaces the default for X1 only if all of:
+1. at least ⌈2n/3⌉ of the n cells are evaluable (A2: 8 of 12; A3: 14 of 20), with at least one per task × decoder;
 2. the mean D over evaluable cells is > ROPE (strictly);
-3. the mean D is > 0 within each task;
+3. the mean D is > 0 within each task × decoder;
 4. the alternative has no more failed fits than the default over the windows.
 
 Otherwise X1 uses the default. Additionally for A2 (*masking ⇒ mean*): if in any cell the posterior-sample input is unreached-low while the posterior mean brackets b*, the sample input is disqualified and X1 uses the mean. This is the N1 failure mode: the adversary is satisfied on noisy samples while the scored means keep batch.
@@ -85,7 +85,7 @@ Otherwise X1 uses the default. Additionally for A2 (*masking ⇒ mean*): if in a
 - **R2 default** *(user sign-off 2026-10-02, §7)*: posterior mean. It is the scored embedding (`get_latent_representation`) and what DANN/WDGRL align. scvi-tools' own adversary trains on a sample (`AdversarialTrainingPlan`, `z = inference_outputs["z"]`, scvi-tools 1.4.2 `train/_trainingplans.py:689`); that convention is kept for the `scvi_adv` anchor arm, which is not governed by R2.
 - **R3 default** *(user sign-off 2026-10-02, §7)*: standardisation off, the conventional implementation; A3 measures the latent-scale route that scale-dependent losses (W1, MMD, Sinkhorn) could use.
 
-**Scope.** One decision for all six adversarial arms (barycenter inherits it without being tested), both decoder blocks of X1 (A2/A3 are conditioned only), and every downstream adversarial row: follow-up rows are built with the A1 defaults (mean, off) and `decide_a2_a3.py` sets them to the decision; a follow-up row with any other value stops the script. The two decisions are made independently from the A1 default; if both switch, the combination was not tested and is disclosed.
+**Scope.** One decision for all six adversarial arms (barycenter inherits it without being tested), both decoder blocks of X1 (A2/A3 test both), and every downstream adversarial row: follow-up rows are built with the A1 defaults (mean, off) and `decide_a2_a3.py` sets them to the decision; a follow-up row with any other value stops the script. The two decisions are made independently from the A1 default; if both switch, the combination was not tested and is disclosed.
 
 ## 4. R4 — matched λ (stage `a1` for A2/A3, stage `x1` for the follow-ups)
 
@@ -97,6 +97,7 @@ Per task t and decoder c, on the stage's own fits (A1: A1 grid, seeds 100–102;
 - **Edge.** If the matched point is the lowest or highest grid point, the next value of the λ sequence beyond it is fitted for that (t, c, a) on the stage's seeds and R4 is re-run. After 2 rounds at an edge the missing neighbour is set to the next λ-sequence value without a fit and flagged `edge_unresolved`. Only cells that a row of the stage takes a value from can ask for an extension (stage a1: the A2/A3 cells; stage x1: the base-arm cells of the follow-up rows); other edge cells get the next λ-sequence value without a fit, flagged `edge_not_extended`.
 - **Variant arms** inherit the matched λ of their base arm on the same task and decoder: discriminator_sn → discriminator; reference_sn, reference_fixed → reference; pooled_sn and pooled at other n_critic → pooled; barycenter_sn → barycenter; mmd_ref → mmd; discriminator_r1 (X6, R1 penalty) and discriminator_ref (X7, reference-anchored JS) → discriminator (added at the 2026-10-03 merge by the same rule, by analogy with discriminator_sn and mmd_ref). Subsampled tasks (X3, X8) and architecture variants (X12) inherit the full task's value. An arm without a mapping stops the script.
 - R4 extension points are used for matching only; frontier and P1 analyses use the six pre-registered points per family.
+- **Fresh seeds** *(user sign-off, §7; SI-26)*: the follow-ups X3, X6, X7, X8 and X12 run on seeds 10–12, disjoint from X1 (0–4) and A1/A2/A3 (100–102); X13 is not λ-matched and keeps seeds 0–4. No follow-up cell therefore reuses an X1 fit from which its matched λ was chosen. `freeze_matched_lambda.py --stage x1` stops if any resolved follow-up row equals an X1 row, and `prereg_rules.check_seed_separation` stops on any seed overlap between the three seed sets.
 
 ## 5. Power (reported by `freeze_a1_grid.py`; the design is fixed)
 
@@ -123,13 +124,18 @@ The user answered on 2026-10-02 (ask_user, recommended option first in each ques
 
 The thresholds stated with the questions (δ_min 0.01, k = 3, C = 0.10, ROPE 0.01) were not changed.
 
+v2: the user answered the open items of v1 on 2026-10-02/03 (ask_user; recorded in CONSTRAINTS.md):
+
+| Item | Question (abridged) | Answer |
+|---|---|---|
+| A2/A3 decoders | "... Should A2/A3 also run with the unconditioned decoder?" | "Add it, one pooled decision (Recommended)" (SI-27; §3) |
+| Follow-up seeds | "... Which seeds should the follow-ups use?" | "Fresh seeds for all follow-ups (Recommended)" (SI-26; §4) |
+| Trajectory | "... Our scorer computes it for immune and immune_hum_mou but leaves it out of the bio aggregate. Should it be included? ..." | "Include trajectory (Recommended)" (SI-28; §1) |
+
 ## 8. Limitations and open items
 
 - The λ ranges come from 3 of 8 tasks; X1 tasks whose matched λ falls on a grid edge are extended by R4 (disclosed per task).
-- A2/A3 are conditioned only; their decisions also govern the unconditioned block.
-- Follow-up cells identical to an X1 cell (X6 discriminator at 1 step and pooled at 5 steps, seeds 0–2) reuse X1 fits on the seeds from which the matched λ was chosen, so their batch scores are biased towards b* by selection. Fresh follow-up seeds would remove the bias.
-- Because X1 rows now hold the A2/A3 placeholders, the builder no longer recognises those 54 X6 rows as X1 fits; they are listed as fits until `freeze_matched_lambda.py --stage x1` removes them after resolution (recorded in `reuses_x1`). Giving follow-up adversarial rows the same placeholders (in `row()` or the follow-up blocks, outside this change) would restore the build-time count.
 - R1 is frozen before R4-a1 adds any cell-specific A1 point; re-running `freeze_a1_grid.py` after an R4-a1 extension stops on the uneven grid by design.
 - Extension rows (R1, R4) belong to a task and must run on that task's machine (SI-17).
-- `score_scib_native.BIO_METRICS` omits scIB's trajectory conservation, which the scorer computes for immune and immune_hum_mou; scIB counts it as a bio metric. Adding it changes C on those two tasks; until then C follows `BIO_METRICS` as committed.
 - The failures table (tag, status, detail) has to be written by the fit harvester; no runner writes it yet.
+- Resolved in v2 (2026-10-03): A2/A3 now cover both decoders (SI-27); follow-ups run on fresh seeds, so no follow-up cell reuses an X1 fit and the builder's fit count no longer includes rows that are deduplicated later (SI-26); trajectory is in `BIO_METRICS` (SI-28).

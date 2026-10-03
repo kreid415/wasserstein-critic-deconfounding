@@ -6,8 +6,13 @@ added raw scib.me.pcr with the wrong sign (code audit 2026-10-01, C1).
 What runs (scIB, Luecken et al. 2022, Supplementary Table 2, embedding outputs):
   batch: PCR (pcr_comparison vs unintegrated PCA), batch ASW, graph iLISI, graph connectivity, kBET
   bio:   NMI, ARI (optimal-resolution clustering), cell-type ASW, isolated-label F1 and ASW,
-         graph cLISI, cell-cycle conservation (where the organism's cell-cycle genes are present)
-  not applicable to embeddings: HVG conservation; trajectory needs pseudotime annotations we lack.
+         graph cLISI, cell-cycle conservation (where the organism's cell-cycle genes are present),
+         trajectory conservation (where the prepped file has obs dpt_pseudotime: immune, immune_hum_mou;
+         scib-pipeline scripts/metrics/metrics.py computes it iff 'dpt_pseudotime' is in obs)
+  not applicable to embeddings: HVG conservation.
+BIO_METRICS includes trajectory conservation, as scIB's bio score does (scib-reproducibility
+visualization/plotSingleTaskRNA.R: group_bio lines 45-46; bio score = rowMeans over the available scaled
+bio metrics, lines 142-143). Where it is not computed it is NaN and skipped (CONSTRAINTS.md SI-28).
 This script writes RAW metric values only. The scIB overall score (per-metric min-max scaling
 within a dataset across all runs, then 0.4*batch + 0.6*bio) is computed at analysis time by
 scib_overall() below, because the scaling depends on the full set of runs.
@@ -24,7 +29,7 @@ import os, json, time, numpy as np, pandas as pd, scanpy as sc, scib
 
 BATCH_METRICS = ["PCR_batch", "ASW_label/batch", "iLISI", "graph_conn", "kBET"]
 BIO_METRICS = ["NMI_cluster/label", "ARI_cluster/label", "ASW_label", "isolated_label_F1",
-               "isolated_label_silhouette", "cLISI", "cell_cycle_conservation"]
+               "isolated_label_silhouette", "cLISI", "cell_cycle_conservation", "trajectory"]
 
 
 def scib_overall(df):

@@ -1,0 +1,108 @@
+{
+ "BIO_METRICS": [
+  "NMI_cluster/label",
+  "ARI_cluster/label",
+  "ASW_label",
+  "isolated_label_F1",
+  "isolated_label_silhouette",
+  "cLISI",
+  "cell_cycle_conservation",
+  "trajectory"
+ ],
+ "C|atac_large": {
+  "expected": 0.35000000000000003,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI"
+  ]
+ },
+ "C|atac_small": {
+  "expected": 0.35000000000000003,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI"
+  ]
+ },
+ "C|immune": {
+  "expected": 0.45,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI",
+   "cell_cycle_conservation",
+   "trajectory"
+  ]
+ },
+ "C|immune_hum_mou": {
+  "expected": 0.45,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI",
+   "cell_cycle_conservation",
+   "trajectory"
+  ]
+ },
+ "C|lung": {
+  "expected": 0.4,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI",
+   "cell_cycle_conservation"
+  ]
+ },
+ "C|pancreas": {
+  "expected": 0.4,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI",
+   "cell_cycle_conservation"
+  ]
+ },
+ "C|sim1": {
+  "expected": 0.35000000000000003,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI"
+  ]
+ },
+ "C|sim2": {
+  "expected": 0.35000000000000003,
+  "metrics": [
+   "NMI_cluster/label",
+   "ARI_cluster/label",
+   "ASW_label",
+   "isolated_label_F1",
+   "isolated_label_silhouette",
+   "cLISI"
+  ]
+ },
+ "scib_overall_immune_max_abs_change": 0.14285714285714285,
+ "scib_overall_pancreas_max_abs_change": 1.1102230246251565e-16
+}

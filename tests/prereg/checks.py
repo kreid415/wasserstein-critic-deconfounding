@@ -38,12 +38,26 @@ def check_r4_tie(P):
     assert (c["matched"], c["lo"], c["hi"]) == (1.0, 0.3, 3.0), c
 
 
-def _cells(D, n_tasks=2, arms=("discriminator", "reference", "pooled")):
+def _cells(D, n_tasks=2, arms=("discriminator", "reference", "pooled"), conds=(1, 0)):
+    """Pilot cells task x decoder x arm (A2 shape by default: 2 x 2 x 3 = 12), every cell bracketed."""
     cells = []
     for i in range(n_tasks):
-        for a in arms:
-            cells.append(dict(task=f"t{i}", arm=a, mean=dict(status="bracketed", bio=0.70, n_fail=0),
-                              sample=dict(status="bracketed", bio=0.70 + D, n_fail=0)))
+        for c in conds:
+            for a in arms:
+                cells.append(dict(task=f"t{i}", cond=c, arm=a, group=f"t{i}|{c}",
+                                  mean=dict(status="bracketed", bio=0.70, n_fail=0),
+                                  sample=dict(status="bracketed", bio=0.70 + D, n_fail=0)))
+    return cells
+
+
+A3_ARMS = ("discriminator", "reference", "pooled", "mmd", "sinkhorn")
+
+
+def _unevaluable(cells, k):
+    """Make k cells unevaluable, spread over the task x decoder groups (each group keeps >= 1 evaluable)."""
+    order = sorted(range(len(cells)), key=lambda i: (i % 5, i))
+    for i in order[:k]:
+        cells[i]["sample"] = dict(status="unreached_high", bio=None, n_fail=0)
     return cells
 
 
@@ -60,8 +74,27 @@ def check_masking(P):
     cells = _cells(0.05)
     cells[0]["sample"] = dict(status="unreached_low", bio=None, n_fail=0)
     d = P.decide_binary(cells, "mean", "sample", masking_setting="sample", safe_setting="mean")
-    assert d["n_evaluable"] == 5 and d["coverage"] and d["beats_rope"], d
-    assert d["choice"] == "mean" and d["masked"] == ["t0|discriminator"], d
+    assert d["n_evaluable"] == 11 and d["coverage"] and d["beats_rope"], d
+    assert d["choice"] == "mean" and d["masked"] == ["t0|1|discriminator"], d
+
+
+def check_coverage_threshold(P):
+    """>= ceil(2n/3) evaluable cells: A2 (12 cells) needs 8, A3 (20 cells) needs 14."""
+    for arms, n, need in ((("discriminator", "reference", "pooled"), 12, 8), (A3_ARMS, 20, 14)):
+        ok = P.decide_binary(_unevaluable(_cells(0.05, arms=arms), n - need), "mean", "sample")
+        assert ok["n_cells"] == n and ok["n_evaluable"] == need and ok["coverage"] and ok["switch"], ok
+        short = P.decide_binary(_unevaluable(_cells(0.05, arms=arms), n - need + 1), "mean", "sample")
+        assert short["n_evaluable"] == need - 1 and not short["coverage"] and short["choice"] == "mean", short
+
+
+def check_group_sign(P):
+    """The sign criterion is checked within each task x decoder, not only within each task."""
+    cells = _cells(0.05)
+    for c in cells:
+        if c["group"] == "t0|0":
+            c["sample"]["bio"] = 0.70 - 0.005
+    d = P.decide_binary(cells, "mean", "sample")
+    assert d["beats_rope"] and d["coverage"] and not d["per_group_positive"] and d["choice"] == "mean", d
 
 
 def _block_points(db_means, dc_means, noise=(0.0, 0.0, 0.0), fail=()):

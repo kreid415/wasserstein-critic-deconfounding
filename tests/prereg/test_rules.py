@@ -15,12 +15,36 @@ from synth import P, BPM
 # ---- definitions -----------------------------------------------------------------------------
 def test_metric_lists_come_from_the_scorer():
     assert P.BATCH_METRICS == ["PCR_batch", "ASW_label/batch", "iLISI", "graph_conn", "kBET"]
-    assert "cell_cycle_conservation" in P.BIO_METRICS and len(P.BIO_METRICS) == 7
-    assert "cell_cycle_conservation" not in P.bio_metrics_for("atac_small")
-    assert "cell_cycle_conservation" not in P.bio_metrics_for("sim1")
-    assert "cell_cycle_conservation" in P.bio_metrics_for("immune")
+    assert P.BIO_METRICS[-2:] == ["cell_cycle_conservation", "trajectory"] and len(P.BIO_METRICS) == 8   # SI-28
+    core = ["NMI_cluster/label", "ARI_cluster/label", "ASW_label", "isolated_label_F1", "isolated_label_silhouette", "cLISI"]
+    want = {"immune": core + ["cell_cycle_conservation", "trajectory"],
+            "immune_hum_mou": core + ["cell_cycle_conservation", "trajectory"],
+            "pancreas": core + ["cell_cycle_conservation"], "lung": core + ["cell_cycle_conservation"],
+            "atac_small": core, "atac_large": core, "sim1": core, "sim2": core}
+    assert sorted(want) == sorted(BPM.TASKS)
+    for t, m in want.items():
+        assert P.bio_metrics_for(t) == m, t
     with pytest.raises(P.PreregError):
         P.bio_metrics_for("not_a_task")
+
+
+def test_trajectory_changes_bio_only_on_the_trajectory_tasks():
+    M = synth.pilot_rows()
+    X1 = M[(M.experiment == "X1") & (M.arm == "none") & (M.seed == "0")]
+    S, F = synth.scores(X1)
+    base = P.outcomes(X1, S, F, ["X1"]).set_index("tag").C
+    S2 = S.copy()
+    S2["trajectory"] = 0.0                        # a value on every row, including tasks without pseudotime
+    moved = P.outcomes(X1, S2, F, ["X1"]).set_index("tag").C
+    task = X1.set_index("tag").task
+    traj = task.isin(P.TRAJ_TASKS)
+    assert traj.any() and (~traj).any()
+    assert (moved[~traj] == base[~traj]).all()    # pancreas, lung, ATAC, simulations: unchanged
+    assert (moved[traj] < base[traj]).all()       # immune tasks: trajectory is one of their 8 bio metrics
+    S3 = S.copy()
+    S3.loc[S3.tag.isin(task.index[traj]), "trajectory"] = float("nan")
+    with pytest.raises(P.PreregError, match="non-finite"):
+        P.outcomes(X1, S3, F, ["X1"])
 
 
 def test_lambda_sequence_and_canonical_strings():
@@ -231,21 +255,28 @@ def test_decision_masking_forces_mean():
     checks.check_masking(P)
 
 
-def test_decision_needs_both_tasks_positive():
+def test_decision_sign_is_checked_per_task_and_decoder():
+    checks.check_group_sign(P)
+
+
+def test_decision_coverage_threshold_is_two_thirds_of_cells():
+    checks.check_coverage_threshold(P)
+
+
+def test_decision_needs_an_evaluable_cell_in_every_task_and_decoder():
     cells = checks._cells(0.05)
     for c in cells:
-        if c["task"] == "t1":
-            c["sample"]["bio"] = 0.70 - 0.005
+        if c["group"] == "t1|0":
+            c["sample"] = dict(status="unreached_high", bio=None, n_fail=0)
     d = P.decide_binary(cells, "mean", "sample")
-    assert d["beats_rope"] and not d["per_task_positive"] and d["choice"] == "mean"
+    assert d["n_evaluable"] == 9 >= d["need_evaluable"] and not d["coverage"] and d["choice"] == "mean"
 
 
-def test_decision_needs_coverage():
+def test_decision_refuses_cells_without_a_group():
     cells = checks._cells(0.05)
-    for c in cells[:3]:
-        c["sample"] = dict(status="unreached_high", bio=None, n_fail=0)
-    d = P.decide_binary(cells, "mean", "sample")
-    assert d["n_evaluable"] == 3 and not d["coverage"] and d["choice"] == "mean"
+    del cells[0]["group"]
+    with pytest.raises(P.PreregError, match="group"):
+        P.decide_binary(cells, "mean", "sample")
 
 
 def test_decision_refuses_more_failures():
@@ -258,9 +289,11 @@ def test_decision_refuses_more_failures():
 
 
 def test_decision_a3_has_no_masking_clause():
-    cells = [dict(task=c["task"], arm=c["arm"], off=c["mean"], on=c["sample"]) for c in checks._cells(0.05)]
+    cells = [dict(task=c["task"], cond=c["cond"], arm=c["arm"], group=c["group"], off=c["mean"], on=c["sample"])
+             for c in checks._cells(0.05, arms=checks.A3_ARMS)]
     cells[0]["on"] = dict(status="unreached_low", bio=None, n_fail=0)
     d = P.decide_binary(cells, "off", "on")
+    assert d["n_cells"] == 20 and d["need_evaluable"] == 14
     assert d["choice"] == "on" and d["masked"] == []
 
 
@@ -322,9 +355,12 @@ def test_out_of_range_metric_raises():
 def test_seed_separation_is_enforced():
     M = synth.pilot_rows()
     P.check_seed_separation(M)
-    M.loc[M.index[M.experiment == "A1"][0], "seed"] = "0"
-    with pytest.raises(P.PreregError, match="also X1 seeds"):
-        P.check_seed_separation(M)
+    for exp, seed, msg in (("A1", "0", "A1/A2/A3 seeds .* also X1 seeds"), ("X6", "4", "follow-up seeds .* also X1 seeds"),
+                           ("X12", "101", "follow-up seeds .* also A1/A2/A3 seeds")):
+        bad = M.copy()
+        bad.loc[bad.index[bad.experiment == exp][0], "seed"] = seed
+        with pytest.raises(P.PreregError, match=msg):
+            P.check_seed_separation(bad)
 
 
 # ---- power -------------------------------------------------------------------------------------

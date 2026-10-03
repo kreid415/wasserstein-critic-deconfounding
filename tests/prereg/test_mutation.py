@@ -21,6 +21,10 @@ MUTANTS = {
                         "        if False:\n            choice, reason = safe_setting", checks.check_masking),
     "noise_ignored": ('q["del_b"] = max(DELTA_MIN, K_NOISE * sig_b', 'q["del_b"] = max(DELTA_MIN, 0.0 * sig_b',
                       checks.check_noise_threshold),
+    # SI-27 thresholds: >= ceil(2n/3) evaluable cells (8 of 12, 14 of 20); sign per task x decoder
+    "coverage_floor": ("need = math.ceil(2 * n / 3)", "need = math.floor(2 * n / 3)", checks.check_coverage_threshold),
+    "coverage_half": ("need = math.ceil(2 * n / 3)", "need = math.ceil(n / 2)", checks.check_coverage_threshold),
+    "sign_per_task_only": ('    return c["group"]\n', '    return c["task"]\n', checks.check_group_sign),
 }
 
 

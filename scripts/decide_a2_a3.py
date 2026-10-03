@@ -3,10 +3,12 @@
 per-dimension standardisation (A3: off vs on) from the A2/A3 pilots, and resolve the 'A2' / 'A3'
 placeholders of X1. Follow-up adversarial rows (built with mean / 0) are set to the same decision.
 
-Defaults (user sign-off 2026-10-02, SI-19 / SI-20): posterior mean, standardisation off. The alternative
-replaces the default only if >= 2/3 of the cells are evaluable (>= 1 per task), the mean Dbio@b* > ROPE,
-the mean is > 0 within each task, and the alternative has no more failed fits. A2 only: if posterior
-samples miss b* in any cell where posterior means reach it, X1 uses means (masking).
+Defaults (user sign-off 2026-10-02, SI-19 / SI-20): posterior mean, standardisation off. Cells are
+task x arm x decoder (A2 12, A3 20; both decoders since SI-27) and ONE pooled decision covers both X1
+blocks. The alternative replaces the default only if >= 2/3 of the cells are evaluable (A2 8, A3 14) with
+>= 1 per task x decoder, the mean Dbio@b* > ROPE, the mean is > 0 within each task x decoder, and the
+alternative has no more failed fits. A2 only: if posterior samples miss b* in any cell where posterior
+means reach it, X1 uses means (masking).
 
 Usage (repo root):
   python scripts/decide_a2_a3.py --manifest scripts/paper_manifest.r4a1.tsv --scores <dir> --failures <csv> \
@@ -28,7 +30,8 @@ SETTINGS = {"A2": dict(column="adv_input", default=("mean", "mean"), alt=("sampl
 
 
 def cells_for(out, exp, r4a1):
-    """One cell per (task, arm) of the pilot: default half from A1 fits, alternative half from exp fits."""
+    """One cell per (task, decoder, arm) of the pilot: default half from A1 fits (same decoder and seeds),
+    alternative half from exp fits."""
     st = SETTINGS[exp]
     pil = out[out.experiment == exp]
     cells = []
@@ -45,7 +48,7 @@ def cells_for(out, exp, r4a1):
         P._require(len(d_pts) == 3, f"A1 {t} {arm}: default half lacks window points {window}")
         a_pts = P._cell_points(out, exp, t, c, arm, seeds, **{st["column"]: st["alt"][1]})
         bstar = r4a1["targets"][f"{t}|{c}"]["bstar"]
-        rec = dict(task=t, cond=c, arm=arm, window=window, bstar=bstar)
+        rec = dict(task=t, cond=c, arm=arm, group=f"{t}|{c}", window=window, bstar=bstar)
         for name, pts in ((st["default"][0], d_pts), (st["alt"][0], a_pts)):
             rec[name] = dict(P.bio_at_bstar(P.window_curve(pts), bstar), n_fail=sum(p["n_fail"] for p in pts),
                              curve=P.window_curve(pts))

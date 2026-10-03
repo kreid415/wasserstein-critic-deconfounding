@@ -3,8 +3,8 @@
 
   --stage a1  on A1 scores: resolves the A2/A3 window (a1_matched_lo / a1_matched / a1_matched_hi).
   --stage x1  on X1 scores: resolves the follow-ups' matched_lo / matched / matched_hi (variant arms take
-              their base arm's value, prereg_rules.BASE_ARM) and drops follow-up rows that are then
-              identical to an X1 row (the analysis reads the X1 fit; recorded in 'reuses_x1').
+              their base arm's value, prereg_rules.BASE_ARM). Follow-ups run on fresh seeds (SI-26), so no
+              follow-up row may equal an X1 row after resolution: the script stops if one does.
 
 b* = b0 + 0.5 (b_common - b0) on the unscaled batch score (mean of the 5 raw scIB batch metrics); the
 matched point is the failure-free grid point closest to b* (ties -> smaller lambda). A matched point on
@@ -66,17 +66,14 @@ def needed_cells(M, stage):
     return {f"{t}|{int(c)}|{P.BASE_ARM[a]}" for t, c, a in zip(rows.task, rows.cond, rows.arm)}
 
 
-def dedupe_against_x1(M):
-    """Follow-up rows whose settings equal an X1 row's (seed included) are not refitted."""
+def check_no_x1_reuse(M):
+    """SI-26: no follow-up row may equal an X1 row (seed included) once resolved, so no follow-up cell
+    reuses an X1 fit from which its matched lambda was chosen. Returns the number of rows compared."""
     x1 = {P.settings_key(r): r["tag"] for r in M[M.experiment == "X1"].to_dict("records")}
-    reuse, keep = {}, []
-    for r in M.to_dict("records"):
-        k = P.settings_key(r)
-        if r["experiment"] in P.FOLLOWUPS and k in x1:
-            reuse[r["tag"]] = x1[k]
-        else:
-            keep.append(r["tag"])
-    return M[M.tag.isin(set(keep))].copy(), reuse
+    fu = M[M.experiment.isin(P.FOLLOWUPS)].to_dict("records")
+    hits = [(r["tag"], x1[P.settings_key(r)]) for r in fu if P.settings_key(r) in x1]
+    P._require(not hits, f"{len(hits)} follow-up rows equal X1 rows (fresh seeds required, SI-26): {hits[:3]}")
+    return len(fu)
 
 
 def main(argv=None):
@@ -111,14 +108,14 @@ def main(argv=None):
         print(f"R4 {a.stage} extend: {len(E)} {exp} rows -> {a.extension_manifest}")
         return P.EXIT_EXTEND
     M2, n = resolve(M, r4, a.stage)
-    reuse = {}
-    if a.stage == "x1":
-        M2, reuse = dedupe_against_x1(M2)
-    P.write_manifest(M2, header, a.out_manifest, f"R4 {a.stage} frozen: {n} rows resolved, {len(reuse)} follow-up rows "
-                                                  f"reuse X1 fits (freeze_matched_lambda.py, record {os.path.basename(a.out_json)})")
-    P.write_record(a.out_json, dict(r4, resolved_rows=n, reuses_x1=reuse, out_manifest=a.out_manifest), inputs)
+    n_checked = check_no_x1_reuse(M2) if a.stage == "x1" else 0
+    P.write_manifest(M2, header, a.out_manifest, f"R4 {a.stage} frozen: {n} rows resolved"
+                                                  f" (freeze_matched_lambda.py, record {os.path.basename(a.out_json)})")
+    P.write_record(a.out_json, dict(r4, resolved_rows=n, followup_rows_checked_against_x1=n_checked,
+                                    out_manifest=a.out_manifest), inputs)
     flagged = sum(1 for c in r4["cells"].values() if c["flags"])
-    print(f"R4 {a.stage} frozen: {len(r4['cells'])} cells ({flagged} flagged), {n} rows resolved, {len(reuse)} reuse X1")
+    print(f"R4 {a.stage} frozen: {len(r4['cells'])} cells ({flagged} flagged), {n} rows resolved"
+          + (f", {n_checked} follow-up rows differ from every X1 row" if a.stage == "x1" else ""))
     return P.EXIT_FROZEN
 
 

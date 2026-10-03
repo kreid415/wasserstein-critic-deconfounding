@@ -260,10 +260,14 @@ def outcomes(M, S, F, experiments):
 
 
 def check_seed_separation(M):
-    """Hard requirement: A1/A2/A3 seeds are disjoint from X1 seeds."""
+    """Hard requirements: A1/A2/A3 seeds, X1 seeds and the lambda-matched follow-ups' seeds are pairwise
+    disjoint, so no lambda chosen on one stage is evaluated on the fits it was chosen from (SI-13, SI-26)."""
     pilot = set(M.seed[M.experiment.isin(["A1", "A2", "A3"])].astype(int))
     x1 = set(M.seed[M.experiment == "X1"].astype(int))
+    fu = set(M.seed[M.experiment.isin(FOLLOWUPS)].astype(int))
     _require(not (pilot & x1), f"A1/A2/A3 seeds {sorted(pilot & x1)} are also X1 seeds")
+    _require(not (fu & x1), f"follow-up seeds {sorted(fu & x1)} are also X1 seeds")
+    _require(not (fu & pilot), f"follow-up seeds {sorted(fu & pilot)} are also A1/A2/A3 seeds")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -536,32 +540,42 @@ def bio_at_bstar(curve, bstar):
     return dict(status="unreached_high", bio=None)
 
 
+def _group(c):
+    """Unit of the coverage and sign criteria (docs/PREREG.md section 3): task x decoder."""
+    return c["group"]
+
+
 def decide_binary(cells, default, alt, masking_setting=None, safe_setting=None):
-    """R2 / R3 decision (docs/PREREG.md section 3). cells: [{task, arm, <setting>: {status, bio, n_fail}}]."""
+    """R2 / R3 decision (docs/PREREG.md section 3), ONE pooled decision over all cells.
+    cells: [{task, cond, arm, group, <setting>: {status, bio, n_fail}}], group = 'task|decoder'."""
     n = len(cells)
     _require(n > 0, "no cells")
+    missing = [c.get("task") for c in cells if "group" not in c]
+    _require(not missing, f"cells without a task x decoder group: {missing[:3]}")
     need = math.ceil(2 * n / 3)
-    tasks = sorted({c["task"] for c in cells})
+    groups = sorted({_group(c) for c in cells})
     ev = [c for c in cells if c[default]["status"] == "bracketed" and c[alt]["status"] == "bracketed"]
-    D = {f"{c['task']}|{c['arm']}": c[alt]["bio"] - c[default]["bio"] for c in ev}
-    per_task = {t: [D[f"{c['task']}|{c['arm']}"] for c in ev if c["task"] == t] for t in tasks}
-    mean_D = _mean(list(D.values()))
-    coverage = len(ev) >= need and all(per_task[t] for t in tasks)
+    pairs = [(c, c[alt]["bio"] - c[default]["bio"]) for c in ev]
+    D = {f"{c['group']}|{c['arm']}": d for c, d in pairs}
+    per_group = {g: [d for c, d in pairs if _group(c) == g] for g in groups}
+    mean_D = _mean([d for _, d in pairs])
+    coverage = len(ev) >= need and all(per_group[g] for g in groups)
     beats_rope = bool(ev) and mean_D - ROPE > TIE_TOL
-    per_task_pos = coverage and all(_mean(per_task[t]) > TIE_TOL for t in tasks)
+    per_group_pos = coverage and all(_mean(per_group[g]) > TIE_TOL for g in groups)
     f_def, f_alt = sum(c[default]["n_fail"] for c in cells), sum(c[alt]["n_fail"] for c in cells)
-    switch = bool(coverage and beats_rope and per_task_pos and f_alt <= f_def)
+    switch = bool(coverage and beats_rope and per_group_pos and f_alt <= f_def)
     choice, reason = (alt, "all four criteria hold") if switch else (default, "criteria not met")
     masked = []
     if masking_setting is not None:
         other = alt if masking_setting == default else default
-        masked = [f"{c['task']}|{c['arm']}" for c in cells
+        masked = [f"{c['group']}|{c['arm']}" for c in cells
                   if c[masking_setting]["status"] == "unreached_low" and c[other]["status"] == "bracketed"]
         if masked:
             choice, reason = safe_setting, f"masking: {masking_setting} misses b* in {masked}"
     return dict(choice=choice, switch=(choice == alt), reason=reason, n_cells=n, n_evaluable=len(ev),
-                need_evaluable=need, D=D, mean_D=mean_D, per_task_mean_D={t: _mean(v) for t, v in per_task.items()},
-                coverage=coverage, beats_rope=beats_rope, per_task_positive=per_task_pos,
+                need_evaluable=need, groups=groups, D=D, mean_D=mean_D,
+                per_group_mean_D={g: _mean(v) for g, v in per_group.items()},
+                coverage=coverage, beats_rope=beats_rope, per_group_positive=per_group_pos,
                 failures={default: f_def, alt: f_alt}, masked=masked)
 
 

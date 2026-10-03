@@ -18,19 +18,21 @@ Design of record: --design pilot (SI-16), staged by the pre-registered rules of 
          resolves X1's lam g1..g6.
   R4-a1  scripts/freeze_matched_lambda.py --stage a1 resolves the A2/A3 window (a1_matched_lo /
          a1_matched / a1_matched_hi) from A1 scores (SI-21).
-  A2/A3  pilots, run BEFORE X1, on A1's tasks and seeds: posterior sample vs mean (A2), per-dimension
-         standardisation on vs off (A3). Their mean / off halves are A1 fits, so only the new halves
-         (sample; standardisation on) are rows of this manifest.
+  A2/A3  pilots, run BEFORE X1, on A1's tasks, seeds and both decoders (SI-27): posterior sample vs mean
+         (A2), per-dimension standardisation on vs off (A3). Their mean / off halves are A1 fits, so only
+         the new halves (sample; standardisation on) are rows of this manifest.
   R2/R3  scripts/decide_a2_a3.py resolves X1's adv_input ('A2') and zstd ('A3') placeholders and sets
          the follow-ups' adversarial rows (built with mean / 0) to the same decision (SI-19, SI-20).
   X1     8 tasks x both decoders x seeds 0-4. Then R4-x1 (freeze_matched_lambda.py --stage x1)
          resolves the follow-ups' 'matched*' lambdas: per task x arm x decoder, the grid point whose
-         seed-mean unscaled batch score is closest to b*; lo / hi = its grid neighbours.
+         seed-mean unscaled batch score is closest to b*; lo / hi = its grid neighbours. The follow-ups
+         (X3, X6, X7, X8, X12) run on FOLLOWUP_SEEDS 10-12, disjoint from X1 and A1 (SI-26); X13 is not
+         lambda-matched and keeps seeds 0-4.
 A row that holds a placeholder cannot be fitted: fit_paper_config.py refuses a non-numeric lambda and
 a non-integer zstd, and the training plan refuses an adv_input other than mean / sample.
 Rows identical to an X1 row (all settings equal, seed included) are not refitted; the analysis reads
-the X1 fit (column reuses_x1 in the summary). Follow-up rows that become identical to an X1 row only
-once the placeholders are resolved are deduplicated by freeze_matched_lambda.py --stage x1.
+the X1 fit (column reuses_x1 in the summary). In the pilot design no follow-up row can equal an X1 row
+(fresh seeds); freeze_matched_lambda.py --stage x1 stops if one does after resolution.
 
 --design shared (costing alternative without A1): X1 runs the 10-point LAMBDA_GRID for every arm and
 A2/A3 come after X1, with X1-matched lambdas and their mean / off halves taken from X1 rows.
@@ -59,6 +61,7 @@ A1_TASKS = ["atac_small", "immune", "sim1"]    # design 'pilot': A1 calibration 
 A1_SEED0 = 100                                  # A1/A2/A3 seeds 100, 101, ...: disjoint from the X1 seeds 0-4
 A1_MATCHED = ["a1_matched_lo", "a1_matched", "a1_matched_hi"]   # A2/A3 window, resolved from A1 (R4 stage a1)
 ADV_INPUT_PENDING, ZSTD_PENDING = "A2", "A3"    # X1 placeholders, resolved by decide_a2_a3.py (R2 / R3)
+FOLLOWUP_SEEDS = [10, 11, 12]                   # X3/X6/X7/X8/X12: fresh seeds, disjoint from X1 (0-4) and A1 (SI-26)
 CRITICS = ["reference", "pooled", "barycenter"]
 ARMS = ["discriminator"] + CRITICS + ["mmd", "sinkhorn"]
 N_CRITIC = 5
@@ -128,14 +131,15 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
         # ---- A2 / A3 pilots, scheduled BEFORE X1 (R2 / R3 set X1's adversary input and standardisation).
         #      lambda window a1_matched_lo / a1_matched / a1_matched_hi = R4 applied to A1 scores
         #      (freeze_matched_lambda.py --stage a1), so every window value is an A1 grid point. Same tasks,
-        #      seeds and decoder as A1: the posterior-mean (A2) and standardisation-off (A3) halves ARE A1
+        #      seeds and decoders as A1: the posterior-mean (A2) and standardisation-off (A3) halves ARE A1
         #      fits and are not emitted; only the new halves are rows.
         if not (set(a2_tasks) <= set(A1_TASKS) and set(a2_arms + a3_arms) <= set(ARMS)):
             raise ValueError("A2/A3 tasks and arms must be A1 tasks and arms (their default halves are A1 fits)")
-        for t, s, arm, lam in itertools.product(a2_tasks, a1_seeds, a2_arms, A1_MATCHED):
-            R.append(row("A2", t, arm, lam, s, True, bb, adv_input="sample", zstd=0))
-        for t, s, arm, lam in itertools.product(a2_tasks, a1_seeds, a3_arms, A1_MATCHED):
-            R.append(row("A3", t, arm, lam, s, True, bb, adv_input="mean", zstd=1))
+        #      Both decoders (SI-27): one pooled R2 / R3 decision over task x arm x decoder cells.
+        for t, cond, s, arm, lam in itertools.product(a2_tasks, [True, False], a1_seeds, a2_arms, A1_MATCHED):
+            R.append(row("A2", t, arm, lam, s, cond, bb, adv_input="sample", zstd=0))
+        for t, cond, s, arm, lam in itertools.product(a2_tasks, [True, False], a1_seeds, a3_arms, A1_MATCHED):
+            R.append(row("A3", t, arm, lam, s, cond, bb, adv_input="mean", zstd=1))
     # ---- X1/X2: core benchmark, both decoders; conditioned 5 seeds, unconditioned --uncond-seeds (plan 5).
     #      Pilot design: adversarial rows carry lam g1..g6 (R1 family grid) and the adv_input / zstd
     #      placeholders of R2 / R3, so none can be fitted before its rule has run. 'none' and 'scvi_adv'
@@ -162,16 +166,20 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
         for t, s, z, arm, lam in itertools.product(a2_tasks, range(3), [0, 1], a3_arms,
                                                    ["matched_lo", "matched", "matched_hi"]):
             R.append(row("A3", t, arm, lam, s, True, bb, zstd=z))
+    # ---- follow-ups (X7, X8, X3, X6, X12): lambda matched from X1, so FRESH seeds (SI-26): no follow-up cell
+    #      reuses an X1 fit from which its matched lambda was chosen
+    if set(FOLLOWUP_SEEDS) & (set(range(max(5, uncond_seeds))) | {A1_SEED0 + i for i in range(pilot_seeds)}):
+        raise ValueError(f"follow-up seeds {FOLLOWUP_SEEDS} overlap the X1 or A1 seeds")
     # ---- X7: every batch as reference (K >= 3): reference W1, fixed-reference W1, MMD to reference
     for t in ["pancreas", "sim1", "atac_small"]:
-        for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], range(3)):
+        for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], FOLLOWUP_SEEDS):
             R.append(row("X7", t, arm, "matched", s, True, bb, reference=str(ref)))
         # reference JS (docs/SPECS_missing_arms.md section 2, CONSTRAINTS.md SI-23): one adversary step
-        for ref, s in itertools.product(range(TASKS[t][1]), range(3)):
+        for ref, s in itertools.product(range(TASKS[t][1]), FOLLOWUP_SEEDS):
             R.append(row("X7", t, "discriminator_ref", "matched", s, True, bb, reference=str(ref), n_critic=1))
     # ---- X8: number of batches V at fixed total cells and equal cells per batch
     for t, n in X8_TOTAL.items():
-        for V, sub, s in itertools.product([2, 4, 8, 16], [0, 1], range(3)):
+        for V, sub, s in itertools.product([2, 4, 8, 16], [0, 1], FOLLOWUP_SEEDS):
             ex = json.dumps(dict(subsample=dict(kind="batches", n_batches=V, subset=sub, n_cells=n)))
             for arm in ["none", "discriminator", "mmd", "reference", "pooled"]:
                 R.append(row("X8", t, arm, 0 if arm == "none" else "matched", s, True, bb, n_cells=n, extra=ex))
@@ -183,7 +191,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     # ---- X3 (tier 2): composition-shift dose-response
     for t, (b, types) in X3_TARGETS.items():
         n = min(20000, TASKS[t][0])
-        for dose, s in itertools.product([0, 50, 80, 95, 100], range(3)):
+        for dose, s in itertools.product([0, 50, 80, 95, 100], FOLLOWUP_SEEDS):
             ex = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose, n_cells=n)))
             R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex))
             R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex)
@@ -196,17 +204,17 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
                 R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw)
                       for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
     # ---- X6 (tier 2): divergence x Lipschitz control x update budget (pooled = symmetric target)
-    for t, s, (arm, k), lam in itertools.product(["atac_small", "immune", "pancreas"], range(3),
+    for t, s, (arm, k), lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,
                                                  [("discriminator", 1), ("discriminator_sn", 1), ("pooled", 1), ("pooled", 5),
                                                   ("pooled", 10), ("pooled_sn", 1), ("pooled_sn", 5)],
                                                  ["matched_lo", "matched", "matched_hi"]):
         R.append(row("X6", t, arm, lam, s, True, bb, n_critic=k))
     # JS + R1 penalty, gamma 10, one adversary step (SPECS section 1, SI-22)
-    for t, s, lam in itertools.product(["atac_small", "immune", "pancreas"], range(3), ["matched_lo", "matched", "matched_hi"]):
+    for t, s, lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS, ["matched_lo", "matched", "matched_hi"]):
         R.append(row("X6", t, "discriminator_r1", lam, s, True, bb, n_critic=1, extra=json.dumps(dict(r1_gamma=10))))
     # ---- X12 (tier 2): 5 two-level factors. 8 runs = 2^(5-2), generators D = AB, E = AC (resolution III:
     #      main effects aliased with two-factor interactions). 16 runs = 2^(5-1), E = ABCD (resolution V).
-    for t, s, run, arm, lam in itertools.product(["atac_small", "immune", "pancreas"], range(3), range(x12_runs),
+    for t, s, run, arm, lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS, range(x12_runs),
                                                  ["discriminator", "reference"], ["matched_lo", "matched_hi"]):
         A, B, C = run & 1, (run >> 1) & 1, (run >> 2) & 1
         if x12_runs == 8:

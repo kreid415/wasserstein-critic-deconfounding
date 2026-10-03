@@ -92,25 +92,37 @@ def test_r2_r3_keep_the_defaults_when_the_pilots_show_no_difference(pipeline):
     tmp = pipeline["tmp"]
     rec = json.load(open(os.path.join(tmp, "r23.json")))
     assert rec["adv_input"] == "mean" and rec["zstd"] == "0"
-    assert rec["decisions"]["R2"]["n_cells"] == 6 and rec["decisions"]["R3"]["n_cells"] == 10
+    assert rec["decisions"]["R2"]["n_cells"] == 12 and rec["decisions"]["R3"]["n_cells"] == 20
+    assert rec["decisions"]["R2"]["need_evaluable"] == 8 and rec["decisions"]["R3"]["need_evaluable"] == 14
+    assert len(rec["decisions"]["R2"]["groups"]) == 4                            # task x decoder
     M3, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
     adv = M3[M3.experiment.isin(["X1"] + list(P.FOLLOWUPS)) & ~M3.arm.isin(P.NO_ADVERSARY)]
     assert set(adv.adv_input) == {"mean"} and set(adv.zstd) == {"0"}
 
 
-def test_r4_x1_resolves_followups_and_reuses_identical_x1_fits(pipeline):
+def test_r4_x1_resolves_followups_and_no_followup_equals_an_x1_row(pipeline):
     tmp = pipeline["tmp"]
     assert pipeline["code"] == P.EXIT_FROZEN
     rec = json.load(open(os.path.join(tmp, "r4x1.json")))
+    M3, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
     M4, _ = P.read_manifest(os.path.join(tmp, "m.r4x1.tsv"))
     assert not M4.lam.isin(["matched_lo", "matched", "matched_hi"]).any()
-    assert len(rec["reuses_x1"]) == 54                                    # X6 discriminator@1, pooled@5, seeds 0-2
-    assert not set(rec["reuses_x1"]) & set(M4.tag)
+    assert set(M4.tag) == set(M3.tag)                                       # nothing dropped, nothing reused
+    n_fu = int(M4.experiment.isin(P.FOLLOWUPS).sum())
+    assert n_fu > 0 and rec["followup_rows_checked_against_x1"] == n_fu and "reuses_x1" not in rec
     x6 = M4[(M4.experiment == "X6") & (M4.arm == "pooled_sn")]
     c = rec["cells"]
     for r in x6.to_dict("records"):
         cell = c[f"{r['task']}|{r['cond']}|pooled"]
         assert float(r["lam"]) in (cell["lo"], cell["matched"], cell["hi"])
+
+
+def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):
+    M4, _ = P.read_manifest(os.path.join(pipeline["tmp"], "m.r4x1.tsv"))
+    dup = M4[(M4.experiment == "X1") & (M4.arm == "pooled")].iloc[[0]].copy()
+    dup["experiment"], dup["tag"] = "X6", "X6_duplicate_of_an_x1_fit"
+    with pytest.raises(P.PreregError, match="equal X1 rows"):
+        freeze_matched_lambda.check_no_x1_reuse(pd.concat([M4, dup], ignore_index=True))
 
 
 def test_r2_switches_to_sample_when_it_wins_and_moves_the_followups(tmp_path):
@@ -141,7 +153,7 @@ def test_r2_masking_keeps_the_mean(tmp_path):
         return st, B, C + (0.03 if r["experiment"] == "A2" else 0.0)
     assert _decide(tmp, _pilots(tmp, sp, fp, masked), fp) == 0
     rec = json.load(open(os.path.join(tmp, "r23.json")))
-    assert rec["adv_input"] == "mean" and rec["decisions"]["R2"]["masked"] == ["immune|pooled"]
+    assert rec["adv_input"] == "mean" and rec["decisions"]["R2"]["masked"] == ["immune|0|pooled", "immune|1|pooled"]
 
 
 def test_r1_extension_round_then_freeze(tmp_path):

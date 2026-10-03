@@ -17,6 +17,19 @@ def test_a1_seeds_are_disjoint_from_x1(M):
     P.check_seed_separation(M)
 
 
+def test_followups_use_fresh_seeds_and_never_equal_an_x1_row(M):
+    for e in P.FOLLOWUPS:
+        assert set(M.seed[M.experiment == e].astype(int)) == set(BPM.FOLLOWUP_SEEDS) == {10, 11, 12}, e
+    assert set(M.seed[M.experiment == "X13"].astype(int)) == {0, 1, 2, 3, 4}      # not lambda-matched
+    wild = ("tag", "experiment", "lam", "adv_input", "zstd")                      # placeholders resolved later
+    key = lambda r: "|".join(f"{c}={r[c]}" for c in BPM.COLS if c not in wild)   # noqa: E731
+    x1 = {key(r) for r in M[M.experiment == "X1"].to_dict("records")}
+    fu = M[M.experiment.isin(P.FOLLOWUPS)].to_dict("records")
+    assert fu and not any(key(r) in x1 for r in fu)
+    R = BPM.finalize(BPM.build(BPM.BACKBONES["stock"], "pilot", 3, 5, 8))
+    assert not [r["tag"] for r in R if r["experiment"] in P.FOLLOWUPS and r["reuses_x1"]]
+
+
 def test_no_a1_fit_is_an_x1_fit(M):
     a1 = {P.settings_key(r) for r in M[M.experiment == "A1"].to_dict("records")}
     x1 = {P.settings_key(r) for r in M[M.experiment == "X1"].to_dict("records")}
@@ -35,10 +48,11 @@ def test_a1_design_is_complete(M):
 
 def test_a2_a3_emit_only_the_new_halves_and_reuse_a1(M):
     a2, a3 = M[M.experiment == "A2"], M[M.experiment == "A3"]
-    assert len(a2) == 2 * 3 * 3 * 3 and len(a3) == 2 * 3 * 5 * 3
+    assert len(a2) == 2 * 2 * 3 * 3 * 3 and len(a3) == 2 * 2 * 3 * 5 * 3      # tasks x decoders x seeds x arms x window
     assert set(a2.adv_input) == {"sample"} and set(a2.zstd) == {"0"}
     assert set(a3.adv_input) == {"mean"} and set(a3.zstd) == {"1"}
-    assert set(a2.lam) | set(a3.lam) == set(BPM.A1_MATCHED) and set(a2.cond) | set(a3.cond) == {"1"}
+    assert set(a2.lam) | set(a3.lam) == set(BPM.A1_MATCHED)
+    assert set(a2.cond) == set(a3.cond) == {"0", "1"}                          # both decoders (SI-27)
     a1 = {P.settings_key(r) for r in M[M.experiment == "A1"].to_dict("records")}
     # whatever A1 grid value R4-a1 picks, the default half of every A2/A3 row is an A1 fit
     for r in a2.to_dict("records") + a3.to_dict("records"):
