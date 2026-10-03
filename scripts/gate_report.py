@@ -80,7 +80,13 @@ def main():
     g1 = ("unexpected=0" in fit_diff and "unexpected=0" in score_diff)
     g1_status = (pf(g1 and pytest_last is not None and " failed" not in pytest_last and "passed" in pytest_last)
                  if pytest_last else ("PASS (CPU build checks); GPU tests PENDING" if g1 else "FAIL"))
-    g4_pass = bool((G4.status == "ok").all())
+    # kBET is excluded from the host verdict: scib 1.1.7's kBET wrapper sets no R seed, so it changes between runs on one
+    # machine (local repeat in the table below); it is reported separately (lead/user instruction 2026-10-03).
+    NONDET = {"kBET"}
+    det = G4[~G4.metric.isin(NONDET) & ~G4.all_nan]
+    detgen = G4gen[~G4gen.metric.isin(NONDET) & ~G4gen.all_nan]
+    g4_pass = bool((det.status == "ok").all())
+    kb = lambda D: float(D.loc[D.metric == "kBET", "max_abs_diff"].iloc[0])
     L = [f"# JHPCE cross-host gate ({meta['date']})", "",
          f"Status: {meta['status_line']}", "",
          f"Local: {meta['local_hw']}. JHPCE: {meta['jhpce_hw']}. Repo `jhpce-setup` @ {meta['commit']}. "
@@ -97,8 +103,11 @@ def main():
                  f"flagged (arm, cond) groups {len(g3['flagged'])} of {g3['groups']} |")
     else:
         L.append(f"| G3 latents + scores | PENDING | {meta['g3_pending']} |")
-    L.append(f"| G4 scoring equivalence | {pf(g4_pass)} | {int((G4.status == 'ok').sum())}/{len(G4)} metrics within 1e-6; "
-             f"{', '.join(f'{r.metric} {r.max_abs_diff:.2g}' for r in G4[G4.status != 'ok'].itertuples())} |")
+    L.append(f"| G4 scoring equivalence | {pf(g4_pass)} | deterministic metrics (all except kBET; hvg_overlap is NaN on both): "
+             f"{int((det.status == 'ok').sum())}/{len(det)} within 1e-6 at default settings, failing "
+             f"{', '.join(f'{r.metric} {r.max_abs_diff:.2g}' for r in det[det.status != 'ok'].itertuples())}; with NUMBA_CPU_NAME=generic on both hosts "
+             f"{int((detgen.status == 'ok').sum())}/{len(detgen)} (failing {', '.join(r.metric for r in detgen[detgen.status != 'ok'].itertuples())}). "
+             f"kBET reported separately (unseeded): cross-host {kb(G4):.2g} vs same-machine repeat {kb(G4rl):.2g} (local) / {kb(G4rj):.2g} (JHPCE) |")
     if g5_done:
         cal_j = j(f"{a.gate}/concurrency_calibration_jhpce.json")
         L.append(f"| G5 throughput | measured | makespan {cal_j['makespan_s']} s vs local {cal_l['makespan_s']} s; window {cal_j['window_s']} s vs "
