@@ -139,3 +139,17 @@ v2: the user answered the open items of v1 on 2026-10-02/03 (ask_user; recorded 
 - Extension rows (R1, R4) belong to a task and must run on that task's machine (SI-17).
 - The failures table (tag, status, detail) has to be written by the fit harvester; no runner writes it yet.
 - Resolved in v2 (2026-10-03): A2/A3 now cover both decoders (SI-27); follow-ups run on fresh seeds, so no follow-up cell reuses an X1 fit and the builder's fit count no longer includes rows that are deduplicated later (SI-26); trajectory is in `BIO_METRICS` (SI-28).
+
+## 9. Amendments after the freeze (tag prereg-tier12-v1)
+
+Each amendment is dated, states what changes and why, and is committed before the stage it affects. None changes a fit.
+
+- **2026-10-03, sensitivity analysis without trajectory (user decision, SI-38).** Every X1 comparison on immune and
+  immune_hum_mou is also reported with the bio score C recomputed without trajectory conservation (C over the
+  remaining 7 bio metrics). The primary analysis is unchanged (C with trajectory, as scIB; SI-28). Reason: on the
+  64 gate latents (immune, 3 epochs) trajectory had SD 0.121 for barycenter and 0.057 for the discriminator versus
+  <= 0.010 for the other arms, and one latent scored 0.50 locally and 0.87 / 0.89 on two other GPUs
+  (docs/jhpce/gate_data_v2/g3/scores_192_latents_wcd-kbet.csv). In scib 1.1.7 (metrics/trajectory.py) pseudotime is
+  computed on the largest connected component of the kNN graph only (other cells get 0) and the root cell is chosen by
+  a vote over diffusion components, so small latent changes can change the value. A1's rule R1 is unaffected: one
+  metric of 8 moving 0.39 in one seed shifts the 3-seed mean C by about 0.016, against the collapse bound 0.10.

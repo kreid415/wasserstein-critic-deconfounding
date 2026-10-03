@@ -248,3 +248,9 @@
 - source: "Tag now; time it during A1 (Recommended)" (user, ask_user answer to "Scanorama's signed-off grid (SI-35) goes up to knn 160 ... How should I handle this?", 2026-10-03)
 - added: 2026-10-03
 - keywords: Scanorama, knn, X13, tag, amendment, timing
+
+## SI-38 · active · method
+- rule: Pre-specified sensitivity analysis (PREREG sec 9, amendment 2026-10-03): every X1 comparison on immune and immune_hum_mou is also reported with the bio score C recomputed without trajectory conservation (7 bio metrics). The primary analysis keeps trajectory in C as scIB does (SI-28). No fit changes.
+- source: "Add it (Recommended)" (user, ask_user answer to "The primary bio score stays as you chose it ... Should the pre-registration also name a sensitivity analysis that recomputes the immune bio scores without trajectory? ...", 2026-10-03)
+- added: 2026-10-03
+- keywords: trajectory, sensitivity, bio score, immune, amendment, X1
