@@ -272,3 +272,10 @@
 - source: "Equal cell count per dose (Recommended)" (user, ask_user answer to "CR-04 ... How should X3 be handled?", 2026-10-03)
 - added: 2026-10-03
 - keywords: X3, composition, cell count, dose, subsample, amendment, CR-04
+
+## SI-42 · active · method
+- rule: X3 draw and oracle weights under SI-41 + SI-25: K0 = first N cells of one dose-independent permutation per task; dose d removes the first round(d x h0_t) cells of each declared type t of K0 in permutation order and refills with the next non-declared cells; oracle weights w[b, y] = n_K0(b, y) / n_Kd(b, y) per (batch, cell type) from the realised draws (doses 50/80/95, same arms, self-normalised); every X3 spec carries draw 'nested_v1' and all 828 X3 tags change. Agent-derived implementation of the user's SI-41 and SI-25 decisions.
+- source: NB-20261003-22 DECISION (lead, 2026-10-03)
+- added: 2026-10-03
+- keywords: X3, draw, nested, importance, IW, weights, SI-25, SI-41
+- notebook: NB-20261003-22
