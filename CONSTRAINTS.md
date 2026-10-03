@@ -166,3 +166,31 @@
 - keywords: importance, IW, iw, X3, composition, weights
 - files: docs/SPECS_missing_arms.md, scripts/build_paper_manifest.py
 - notebook: NB-20261002-04
+
+## SI-26 · active · method
+- rule: Fresh seeds for all lambda-matched follow-ups: X3, X6, X7, X8 and X12 use seeds 10-12, disjoint from X1 (0-4) and A1/A2/A3 (100-102), so no follow-up cell reuses an X1 fit that chose its matched lambda; X13 is not lambda-matched and keeps seeds 0-4
+- source: "Fresh seeds for all follow-ups (Recommended)" (user, ask_user answer to "The matched λ for the follow-ups is chosen from X1 seed-means (seeds 0–4), and the follow-ups run on seeds 0–2. ... These reuse the X1 fits that chose that λ, so they are biased toward the target batch score b*. Which seeds should the follow-ups use?", 2026-10-02/03)
+- added: 2026-10-03
+- keywords: seeds, follow-up, follow-ups, matched, reuse, X3, X6, X7, X8, X12
+- notebook: NB-20261002-21
+
+## SI-27 · active · method
+- rule: A2/A3 also run with the unconditioned decoder, one pooled decision: the same R2/R3 rule over task x arm x decoder cells (A2 12, A3 20; at least 8 and 14 evaluable), the sign criterion checked per task x decoder; the unconditioned default halves are A1 unconditioned fits
+- source: "Add it, one pooled decision (Recommended)" (user, ask_user answer to "A2 (posterior mean vs sample) and A3 (standardisation off vs on) run only with the conditioned decoder, but their decisions set both X1 blocks. Should A2/A3 also run with the unconditioned decoder?", 2026-10-02/03)
+- added: 2026-10-03
+- keywords: A2, A3, unconditioned, decoder, pooled decision, adv_input, zstd
+- notebook: NB-20261002-22
+
+## SI-28 · active · method
+- rule: Include trajectory conservation in the bio score (score_scib_native.BIO_METRICS), as scIB does: computed where the prepped file has obs dpt_pseudotime (immune, immune_hum_mou), NaN and skipped elsewhere
+- source: "Include trajectory (Recommended)" (user, ask_user answer to "scIB includes trajectory conservation in the bio score (scib-reproducibility plotSingleTaskRNA.R, group_bio; scIB computed it for its two immune tasks). Our scorer computes it for immune and immune_hum_mou but leaves it out of the bio aggregate. Should it be included? No Tier 1+2 results are scored yet.", 2026-10-02/03)
+- added: 2026-10-03
+- keywords: trajectory, bio score, BIO_METRICS, bio, metric, scIB
+- notebook: NB-20261002-23
+
+## SI-29 · active · process
+- rule: Every cluster job submission (JHPCE: setup, tests, benchmarks, experiments) needs the user's explicit go; show what will run, where and for how long first. Local runs do not need a go but are reported.
+- source: "only cluster jobs" (user, free-text answer to "Should every job submission need your explicit \"go\" from now on, recorded as a standing rule in CONSTRAINTS.md?", 2026-10-03; wording from the offered option "Every submission, incl. tests" restricted to cluster jobs)
+- added: 2026-10-03
+- keywords: cluster, JHPCE, job, submission, go, approval, launch, sbatch
+- notebook: NB-20261002-24
