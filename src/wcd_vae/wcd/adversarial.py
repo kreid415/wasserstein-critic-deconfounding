@@ -71,7 +71,7 @@ class Discriminator(nn.Module):
             self.loss = MultiClassCrossEntropy()
 
     def forward(self, x, batch_ids, generator=False, reference_batch=None, target_samples=None,
-                with_gp=True):
+                with_gp=True, weights=None):
         # Forward pass through layers
         h = F.relu(self.fc1(x))
         h = F.relu(self.fc2(h))
@@ -80,6 +80,20 @@ class Discriminator(nn.Module):
         if batch_ids is None:
             # If batch_ids is None, return the output directly
             return output
+
+        if weights is not None:
+            # Importance weights (X3, SI-25) are defined for the reference / pooled critic losses only; the
+            # weighted discriminator cross-entropy is computed by the caller from the logits.
+            if not isinstance(self.loss, ReferenceWassersteinLoss) or self.formulation == "barycenter":
+                raise NotImplementedError("weights are supported for the reference and pooled critic losses only")
+            loss = self.loss(output, batch_ids, reference_batch, weights=weights)
+            gp_loss = 0.0
+            if with_gp:   # the gradient penalty stays unweighted (docs/SPECS_missing_arms.md section 4)
+                gp_loss = multi_class_gradient_penalty(
+                    self, x, batch_ids, reference_batch=reference_batch, formulation=self.formulation,
+                    target_samples=None, num_domains=self.domain_number,
+                )
+            return loss, gp_loss
 
         if isinstance(self.loss, ReferenceWassersteinLoss):
             # Compute anchor scores once for the barycenter formulation.

@@ -27,11 +27,17 @@ TASK_N = {"pancreas": 16382, "lung": 32472, "immune": 33506, "immune_hum_mou": 9
 
 
 def arm_label(arm, ex):
-    """Barycenter variants carry the solver setting: _warm<k> (warm start) or _iter<k> (cold, k != 10)."""
+    """Barycenter variants carry the solver setting: _warm<k> (warm start) or _iter<k> (cold, k != 10).
+    Options of the missing arms (docs/SPECS_missing_arms.md) carry their own label: <arm>_stratified (X8 sampler)
+    and <arm>_iw (X3 importance weights), so they are measured and costed separately from the plain arm."""
     if ex.get("bary_warm_iter"):
         return f"{arm}_warm{int(ex['bary_warm_iter'])}"
     if arm.startswith("barycenter") and ex.get("bary_iter") and int(ex["bary_iter"]) != 10:
         return f"{arm}_iter{int(ex['bary_iter'])}"
+    if ex.get("sampler"):
+        return f"{arm}_{ex['sampler']}"
+    if ex.get("iw"):
+        return f"{arm}_iw"
     return arm
 
 

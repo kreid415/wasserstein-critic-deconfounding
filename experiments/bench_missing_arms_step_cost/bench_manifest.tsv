@@ -1,0 +1,73 @@
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+S_immune_discriminator_r1_rep0	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_r1_rep0_e1	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_ref_rep0	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_ref_rep0_e1	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_stratified_rep0	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_reference_stratified_rep0_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep0	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep0_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_discriminator_iw_rep0	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_iw_rep0_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep0	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep0_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep0	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep0_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep0	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep0_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_rep0	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_rep0_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_rep0	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_reference_rep0_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_pooled_rep0	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_pooled_rep0_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_mmd_rep0	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_mmd_rep0_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_discriminator_r1_rep1	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_r1_rep1_e1	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_ref_rep1	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_ref_rep1_e1	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_stratified_rep1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_reference_stratified_rep1_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep1_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_discriminator_iw_rep1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_iw_rep1_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep1_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep1_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep1_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_rep1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_rep1_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_rep1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_reference_rep1_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_pooled_rep1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_pooled_rep1_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_mmd_rep1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_mmd_rep1_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_discriminator_r1_rep2	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_r1_rep2_e1	BENCH	immune	scib	discriminator_r1	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""r1_gamma"": 10}"
+S_immune_discriminator_ref_rep2	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_ref_rep2_e1	BENCH	immune	scib	discriminator_ref	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_stratified_rep2	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_reference_stratified_rep2_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep2	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_pooled_stratified_rep2_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""sampler"": ""stratified""}"
+S_immune_discriminator_iw_rep2	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_iw_rep2_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep2	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_reference_iw_rep2_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep2	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_pooled_iw_rep2_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep2	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_mmd_iw_rep2_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""subsample"": {""kind"": ""composition"", ""batch"": ""10X"", ""types"": [""CD14+ Monocytes"", ""CD4+ T cells""], ""deplete_pct"": 50, ""n_cells"": 33506}, ""iw"": ""depletion_oracle""}"
+S_immune_discriminator_rep2	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_discriminator_rep2_e1	BENCH	immune	scib	discriminator	1.0	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_reference_rep2	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_reference_rep2_e1	BENCH	immune	scib	reference	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_pooled_rep2	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_pooled_rep2_e1	BENCH	immune	scib	pooled	1.0	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+S_immune_mmd_rep2	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	3	0.9	0	auto	{}
+S_immune_mmd_rep2_e1	BENCH	immune	scib	mmd	1.0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}

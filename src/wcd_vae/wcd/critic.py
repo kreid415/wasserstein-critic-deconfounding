@@ -53,7 +53,9 @@ class ReferenceWassersteinLoss(nn.Module):
         self.reduction = reduction
         self.formulation = formulation
 
-    def forward(self, output, batch_ids, reference_batch=None, target_output=None):
+    def forward(self, output, batch_ids, reference_batch=None, target_output=None, weights=None):
+        if weights is not None:
+            return self._forward_weighted(output, batch_ids, reference_batch, weights)
         n, num_domains = output.shape
         counts = torch.bincount(batch_ids, minlength=num_domains)
         own = output.gather(1, batch_ids[:, None]).squeeze(1)                  # C_{b_i}(z_i)
@@ -79,6 +81,46 @@ class ReferenceWassersteinLoss(nn.Module):
                 raise ValueError("formulation='barycenter' requires target_output (critic scores of the barycenter support).")
             tgt_mean = target_output.mean(0)
 
+        if not bool(active.any()):
+            return output.new_zeros((), requires_grad=True)
+        diff = (src_mean - tgt_mean)[active]
+        if self.reduction == "sum":
+            return -diff.sum()
+        return -diff.mean()
+
+    def _forward_weighted(self, output, batch_ids, reference_batch, weights):
+        """Importance-weighted version (X3, docs/SPECS_missing_arms.md section 4, CONSTRAINTS.md SI-25): every
+        per-head mean becomes a self-normalised weighted mean, sum_i w_i C_k(z_i) / sum_i w_i, on both sides
+        (Tachet des Combes et al. 2020, Sec. 3.5: the importance-weighted IPM). A batch whose weights sum to
+        zero in the minibatch is inactive. With all weights 1 the arithmetic is that of forward() above."""
+        n, num_domains = output.shape
+        w = weights.to(output.dtype)
+        if w.dim() != 1 or w.shape[0] != n:
+            raise ValueError(f"weights must have shape [{n}], got {tuple(w.shape)}")
+        if not bool(torch.isfinite(w).all()) or bool((w < 0).any()):
+            raise ValueError("critic weights must be finite and non-negative")
+        own = output.gather(1, batch_ids[:, None]).squeeze(1)
+        w_k = output.new_zeros(num_domains).index_add_(0, batch_ids, w)        # sum of weights of batch k
+        src_sum = output.new_zeros(num_domains).index_add_(0, batch_ids, own * w)
+        active = w_k > 0
+        src_mean = src_sum / torch.where(active, w_k, torch.ones_like(w_k))
+        if self.formulation == "reference":
+            r = _check_reference(reference_batch if reference_batch is not None else self.reference_class,
+                                 num_domains)
+            mask_ref = batch_ids == r
+            w_r = w[mask_ref]
+            if not bool(mask_ref.any()) or not float(w_r.sum()) > 0:
+                return output.new_zeros((), requires_grad=True)
+            tgt_mean = (output[mask_ref] * w_r[:, None]).sum(0) / w_r.sum()
+            active = active.clone()
+            active[r] = False
+        elif self.formulation == "pooled":
+            w_other = w.sum() - w_k                                              # weight of P_{-k}
+            ok = w_other > 0
+            tgt_mean = ((output * w[:, None]).sum(0) - src_sum) / torch.where(ok, w_other, torch.ones_like(w_other))
+            active = active & ok
+        else:
+            raise NotImplementedError("importance weights are not defined for the barycenter target (not in X3)")
         if not bool(active.any()):
             return output.new_zeros((), requires_grad=True)
         diff = (src_mean - tgt_mean)[active]

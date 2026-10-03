@@ -52,7 +52,8 @@ ADV_ARMS = tuple(a for arms in FAMILIES.values() for a in arms)
 FAMILY_OF = {a: f for f, arms in FAMILIES.items() for a in arms}
 # R4: variant arms inherit the matched lambda of their base arm (same task and decoder).
 BASE_ARM = dict({a: a for a in ADV_ARMS}, discriminator_sn="discriminator", reference_sn="reference",
-                reference_fixed="reference", pooled_sn="pooled", barycenter_sn="barycenter", mmd_ref="mmd")
+                reference_fixed="reference", pooled_sn="pooled", barycenter_sn="barycenter", mmd_ref="mmd",
+                discriminator_r1="discriminator", discriminator_ref="discriminator")   # SPECS_missing_arms.md (SI-22, SI-23)
 NO_ADVERSARY = ("none", "scvi_adv", "scanvi", "sysvi")
 FAILURE_STATUSES = ("diverged", "nonfinite_latent")
 CC_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou")   # uns modality rna, organism human (prepped, 2026-10-02)
