@@ -54,15 +54,20 @@ def g4(a):
         x, y = pd.to_numeric(A.loc[B.index, m], errors="raise").to_numpy(float), pd.to_numeric(B[m], errors="raise").to_numpy(float)
         nan_mismatch = bool((np.isnan(x) != np.isnan(y)).any())
         both = ~np.isnan(x) & ~np.isnan(y)
-        d = float(np.abs(x[both] - y[both]).max()) if both.any() else 0.0
+        if not both.any() and not nan_mismatch:          # not computed on either host (e.g. hvg_overlap for embeddings)
+            rows.append(dict(metric=m, n=0, all_nan=True, max_abs_diff=np.nan, status="NaN on both (not computed)"))
+            continue
+        d = float(np.abs(x[both] - y[both]).max()) if both.any() else np.nan
         ok = (not nan_mismatch) and d <= a.tol
         bad += not ok
-        rows.append(dict(metric=m, n=int(both.sum()), all_nan=bool(not both.any()), max_abs_diff=d,
+        rows.append(dict(metric=m, n=int(both.sum()), all_nan=False, max_abs_diff=d,
                          status="ok" if ok else ("NaN mismatch" if nan_mismatch else "exceeds tol")))
     R = pd.DataFrame(rows)
     R.to_csv(a.out, index=False)
     print(R.to_string(index=False))
-    print(f"G4 {'PASS' if bad == 0 else 'FAIL'}: {len(metrics) - bad}/{len(metrics)} metrics within {a.tol}")
+    n_comp = int((~R.all_nan).sum())
+    print(f"G4 {'PASS' if bad == 0 else 'FAIL'}: {n_comp - bad}/{n_comp} computed metrics within {a.tol} "
+          f"({int(R.all_nan.sum())} not computed on either host)")
     sys.exit(1 if bad else 0)
 
 

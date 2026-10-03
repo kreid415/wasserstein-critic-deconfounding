@@ -9,7 +9,7 @@ Local: RTX 3080 10 GB (driver 580.173.02, CUDA 13.0), AMD Ryzen 5 3600 (AVX2), e
 | G1 versions | PASS (CPU build checks); GPU tests PENDING | fit env vs local scvi-api: identical=90 differing=34 unexpected=0; score env vs local wcd-kbet: identical=152 differing=1 unexpected=0; tests/scvi on the JHPCE GPU: PENDING (GPU job) |
 | G2 prepped fingerprints | PASS | fingerprint_prepped.py --compare exit 0; 8/8 downloads size+md5 verified |
 | G3 latents + scores | PENDING | the 64 JHPCE latents come from the pending GPU job. The 64 local latents are already scored in local wcd-kbet (64/64, 0 failures). |
-| G4 scoring equivalence | FAIL | deterministic metrics (all except kBET; hvg_overlap is NaN on both): 5/12 within 1e-6 at default settings, failing ARI_cluster/label 0.018, NMI_cluster/label 0.0027, cLISI 0.00017, graph_conn 0.00029, iLISI 0.0028, isolated_label_F1 0.022, trajectory 3.7e-06; with NUMBA_CPU_NAME=generic on both hosts 10/12 (failing cLISI, iLISI). kBET reported separately (unseeded): cross-host 0.0025 vs same-machine repeat 0.002 (local) / 0.0029 (JHPCE) |
+| G4 scoring equivalence | FAIL | deterministic metrics (all computed metrics except kBET; hvg_overlap not computed on either host): 5/12 within 1e-6 at default settings, failing ARI_cluster/label 0.018, NMI_cluster/label 0.0027, cLISI 0.00017, graph_conn 0.00029, iLISI 0.0028, isolated_label_F1 0.022, trajectory 3.7e-06; with NUMBA_CPU_NAME=generic on both hosts 10/12 (failing cLISI, iLISI). kBET reported separately (unseeded): cross-host 0.0025 vs same-machine repeat 0.002 (local) / 0.0029 (JHPCE) |
 | G5 throughput | PENDING | needs the pending GPU job's queue_times.tsv (local reference: makespan 433.9 s, window 386.6 s, 8-lane factor 3.77) |
 
 ## G1 versions
@@ -102,7 +102,7 @@ Per metric. G4 = the 2 latents (Q_none_0, Q_barycenter_1) and the prepped file, 
 | cLISI | 0.000167 | exceeds tol | 0.0001147 | exceeds tol | 0 | ok | 0.0002724 | exceeds tol | 0.0001549 | exceeds tol |
 | cell_cycle_conservation | 5.686e-07 | ok | 5.686e-07 | ok | 0 | ok | 0 | ok | 5.686e-07 | ok |
 | graph_conn | 0.0002894 | exceeds tol | 0.0002894 | exceeds tol | 0 | ok | 0 | ok | 0 | ok |
-| hvg_overlap | 0 | ok | 0 | ok | 0 | ok | 0 | ok | 0 | ok |
+| hvg_overlap | nan | NaN on both (not computed) | nan | NaN on both (not computed) | nan | NaN on both (not computed) | nan | NaN on both (not computed) | nan | NaN on both (not computed) |
 | iLISI | 0.002805 | exceeds tol | 0.004603 | exceeds tol | 0 | ok | 0.001974 | exceeds tol | 0.00196 | exceeds tol |
 | isolated_label_F1 | 0.02188 | exceeds tol | 0.02188 | exceeds tol | 0 | ok | 0 | ok | 0 | ok |
 | isolated_label_silhouette | 0 | ok | 0 | ok | 0 | ok | 0 | ok | 0 | ok |

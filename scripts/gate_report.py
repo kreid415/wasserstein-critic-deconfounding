@@ -103,7 +103,8 @@ def main():
                  f"flagged (arm, cond) groups {len(g3['flagged'])} of {g3['groups']} |")
     else:
         L.append(f"| G3 latents + scores | PENDING | {meta['g3_pending']} |")
-    L.append(f"| G4 scoring equivalence | {pf(g4_pass)} | deterministic metrics (all except kBET; hvg_overlap is NaN on both): "
+    L.append(f"| G4 scoring equivalence | {pf(g4_pass)} | deterministic metrics (all computed metrics except kBET; "
+             f"{', '.join(G4[G4.all_nan].metric)} not computed on either host): "
              f"{int((det.status == 'ok').sum())}/{len(det)} within 1e-6 at default settings, failing "
              f"{', '.join(f'{r.metric} {r.max_abs_diff:.2g}' for r in det[det.status != 'ok'].itertuples())}; with NUMBA_CPU_NAME=generic on both hosts "
              f"{int((detgen.status == 'ok').sum())}/{len(detgen)} (failing {', '.join(r.metric for r in detgen[detgen.status != 'ok'].itertuples())}). "
