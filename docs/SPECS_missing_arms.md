@@ -329,7 +329,10 @@ package sources read in env wcd-kbet).
   scib 1.1.7 scib.integration.harmony calls harmonize with its defaults and does not forward kwargs.
 - Scanorama, Hie et al. 2019 (Nat. Biotechnol. 37:685), Methods: mutual nearest-neighbour matching among all
   dataset pairs with 20 nearest neighbours, chosen "to identify a robust set of matches without also being overly
-  permissive"; alignment-score cutoff alpha and Gaussian smoothing sigma. scanorama 1.7.4: correct(knn=20,
+  permissive"; dataset pairs are ordered by an alignment score (the fraction of cells involved in matches) and each
+  cell's translation is a Gaussian-kernel-weighted average of matching vectors. The paper names no parameter for
+  either; the package exposes them as the alignment-score cutoff alpha and the kernel width sigma (re-verified
+  against PMC6551256 on 2026-10-03, as were the two quotes and Harmony Eq. 2-4 and Methods 5.4). scanorama 1.7.4: correct(knn=20,
   alpha=0.10, sigma=15, dimred=100, seed=0); every dataset is translated by the kernel-weighted mean of its matched
   differences (no partial-strength parameter). scib 1.1.7 forwards kwargs to correct_scanpy.
 - PCA: no batch-correction parameter; scIB's unintegrated embedding.
