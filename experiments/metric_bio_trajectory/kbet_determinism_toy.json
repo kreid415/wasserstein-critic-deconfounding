@@ -1,0 +1,66 @@
+{
+ "source": "tests/scoring/test_kbet_determinism.py fixture (540 cells, 3 batches x 3 cell types, 8-d latent), scored by scripts/score_scib_native.py at 820d17e in wcd-kbet (R kBET 0.99.6, scib 1.1.7); rows 'unseeded*' come from the test's mutant without set.seed",
+ "pytest_run_utc": "2026-10-03T02:44",
+ "rows": [
+  {
+   "tag": "run1",
+   "scorer": "score_scib_native",
+   "kBET": 0.0209333333333333,
+   "kbet_seed": 0,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  },
+  {
+   "tag": "run2",
+   "scorer": "score_scib_native",
+   "kBET": 0.0209333333333333,
+   "kbet_seed": 0,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  },
+  {
+   "tag": "seed1",
+   "scorer": "score_scib_native",
+   "kBET": 0.0208,
+   "kbet_seed": 1,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  },
+  {
+   "tag": "seed2",
+   "scorer": "score_scib_native",
+   "kBET": 0.0228,
+   "kbet_seed": 2,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  },
+  {
+   "tag": "unseeded1",
+   "scorer": "mutant without set.seed",
+   "kBET": 0.0193333333333333,
+   "kbet_seed": 0,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  },
+  {
+   "tag": "unseeded2",
+   "scorer": "mutant without set.seed",
+   "kBET": 0.0210666666666666,
+   "kbet_seed": 0,
+   "kbet_r_calls": 3,
+   "iLISI": 0.1581122726190252,
+   "PCR_batch": 0.0,
+   "NMI_cluster/label": 0.5356603997343912
+  }
+ ]
+}
