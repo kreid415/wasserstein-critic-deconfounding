@@ -194,3 +194,9 @@
 - added: 2026-10-03
 - keywords: cluster, JHPCE, job, submission, go, approval, launch, sbatch
 - notebook: NB-20261002-24
+
+## SI-30 · active · process
+- rule: Task placement: atac_small, immune and sim1 (the A1/A2/A3 pilot tasks) run on the local RTX 3080 for every experiment (SI-17); the pilots start locally once the full design is merged and tagged and the preflight passes, with a report to the user before the first fit. The other five tasks are placed after the JHPCE GPU test, from a split recomputed with measured speed and local scoring.
+- source: "Local; start pilots once design is tagged (Recommended)" (user, ask_user answer to "The pilots (A1, A2/A3) use only atac_small, immune and sim1. ... Where should they go?", 2026-10-03)
+- added: 2026-10-03
+- keywords: placement, local, JHPCE, split, pilot, A1, tasks
