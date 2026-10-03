@@ -359,3 +359,12 @@ per single-thread fit); Scanorama knn 5 / 20: 0.401 / 0.434 (19.6 s / 115 s); kn
 (peak RSS 13.7 GB) and was stopped. So both knobs move batch mixing in the expected direction, and the top of the
 Scanorama grid is expensive: its cost on the 85-98k-cell tasks (atac_large, immune_hum_mou) is not yet measured.
 
+**Verification (2026-10-03, branch missing-arms-v2 = main 878d8ea + this work).** Test runs at commit 126812c, CPU only
+(CUDA_VISIBLE_DEVICES empty): wcd-gpu `243 passed, 1 skipped` (tests/ without scvi and x13, incl. prereg); scvi-api `60 passed, 1 skipped`
+(tests/scvi, incl. tests/scvi/test_x3_x13_design.py); wcd-kbet `17 passed` (tests/x13 and tests/scoring), including the
+bit-identity of two fresh-process Harmony fits on atac_small at 50 PCs. Mutation checks (fl_mutation_check) catch: a
+reference resolver that accepts 'auto', an index or the depleted batch on composition rows; a CPU_BASELINES with theta
+8 missing or Scanorama's default dimensions wrong; X3_TARGETS depleting both sim2 types or atac_small's reference; a
+Harmony comparator fed a theta-0 fit or a one-ulp perturbation; the PF-16 rule fed a 30% spread or a warm-up repeat.
+Manifest (stock, pilot, uncond 5, barycenter 10): 6,846 rows = main's 6,718 + 128 X13 CPU rows; 828 X3 rows, all with
+their fixed reference; output paths unique (fl_unique_outputs, 0 collisions).
