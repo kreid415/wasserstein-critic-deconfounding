@@ -1,0 +1,8 @@
+# stage-runner GPU end-to-end test (experiments/stage_runner_e2e/make_manifest.py): design rows A1 atac_small seed 100, max_epochs 2, plus discriminator lambda 1e39 (forced divergence)
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+E2E_none_l0_c1_s100	E2E	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	2	0.9	100	auto	{}
+E2E_discriminator_l1_c1_s100	E2E	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	2	0.9	100	auto	{}
+E2E_reference_l1_c0_s100	E2E	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	2	0.9	100	auto	{}
+E2E_barycenter_l1_c1_s100	E2E	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	2	0.9	100	auto	"{""bary_iter"": 10}"
+E2E_mmd_l1_c1_s100	E2E	atac_small	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	2	0.9	100	auto	{}
+E2E_discriminator_l1e39_c1_s100	E2E	atac_small	scib	discriminator	1e39	1	mean	0	1	SCVI	10	1	128	zinb	128	2	0.9	100	auto	{}
