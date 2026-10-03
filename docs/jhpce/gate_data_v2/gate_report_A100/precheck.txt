@@ -1,0 +1,8 @@
+/fastscratch/myscratch/kreid/wcd/ref_local/bench_queue_manifest.tsv: OK
+/fastscratch/myscratch/kreid/wcd/ref_local/immune__scib.h5ad: OK
+git HEAD 6675f8cc04f4b2804e9cbc78d4c77c64f66b4080; host compute-128.cm.cluster; cpus 1; SLURM_JOB_ID 36131135
+CPU(s):                             48
+Model name:                         Intel(R) Xeon(R) Gold 5317 CPU @ 3.00GHz
+Thread(s) per core:                 2
+Socket(s):                          2
+CPU(s) scaling MHz:                 100%

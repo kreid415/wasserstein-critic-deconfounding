@@ -1,0 +1,2 @@
+[fit] S_immune_barycenter_iter5 30s z(33506, 10) finite=True
+[fit] S_immune_barycenter_iter5_e1 12s z(33506, 10) finite=True

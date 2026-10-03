@@ -1,0 +1,41 @@
+label,queue_wait_days,is_base_wait,gpus,constraint,wall_days,jhpce,local,local_gpu_busy_days,jhpce_gpu_busy_days_per_gpu,jhpce_gpu_days,jhpce_job_starts
+L40S,0.0,False,1,SI-30,15.8,atac_large immune_hum_mou lung pancreas,atac_small immune sim1 sim2,14.62,9.65,9.65,5
+L40S,0.0,False,1,free,13.06,atac_large atac_small immune_hum_mou sim1 sim2,immune lung pancreas,11.12,12.35,12.35,7
+L40S,0.0,False,2,SI-30,13.68,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,6.1,12.21,8
+L40S,0.0,False,2,free,9.32,atac_large immune immune_hum_mou lung pancreas sim1 sim2,atac_small,3.44,9.31,18.62,10
+L40S,0.0,False,3,SI-30,13.68,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,4.07,12.21,9
+L40S,0.0,False,3,free,7.14,atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2,,0.0,7.26,21.77,15
+L40S,0.0,False,4,SI-30,13.68,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,3.05,12.21,12
+L40S,0.0,False,4,free,5.82,atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2,,0.0,5.36,21.42,16
+L40S,0.326,True,1,SI-30,15.99,atac_large immune_hum_mou lung pancreas,atac_small immune sim1 sim2,14.42,9.65,9.65,5
+L40S,0.326,True,1,free,13.85,atac_large immune immune_hum_mou sim2,atac_small lung pancreas sim1,11.78,11.81,11.81,6
+L40S,0.326,True,2,SI-30,13.77,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.46,6.1,12.21,8
+L40S,0.326,True,2,free,10.15,atac_large atac_small immune immune_hum_mou lung sim2,pancreas sim1,5.93,8.3,16.61,10
+L40S,0.326,True,3,SI-30,13.78,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,4.07,12.21,9
+L40S,0.326,True,3,free,7.95,atac_large immune immune_hum_mou lung pancreas sim1 sim2,atac_small,3.44,6.21,18.62,15
+L40S,0.326,True,4,SI-30,13.78,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,3.05,12.21,12
+L40S,0.326,True,4,free,7.12,atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2,,0.0,5.36,21.42,16
+L40S,0.5,False,1,SI-30,16.52,atac_large lung pancreas sim2,atac_small immune immune_hum_mou sim1,15.42,8.96,8.96,5
+L40S,0.5,False,1,free,14.31,atac_large atac_small lung pancreas sim1,immune immune_hum_mou sim2,12.43,11.28,11.28,6
+L40S,0.5,False,2,SI-30,13.8,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.29,6.1,12.21,8
+L40S,0.5,False,2,free,10.64,atac_large immune immune_hum_mou lung pancreas sim1,atac_small sim2,6.57,8.09,16.18,10
+L40S,0.5,False,3,SI-30,13.84,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,4.07,12.21,9
+L40S,0.5,False,3,free,8.71,atac_large immune immune_hum_mou lung pancreas sim1 sim2,atac_small,3.44,6.23,18.7,15
+L40S,0.5,False,4,SI-30,13.84,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,3.05,12.21,12
+L40S,0.5,False,4,free,7.82,atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2,,0.0,5.36,21.42,16
+L40S,1.0,False,1,SI-30,17.77,immune_hum_mou lung sim2,atac_large atac_small immune pancreas sim1,17.09,7.77,7.77,4
+L40S,1.0,False,1,free,15.87,lung pancreas sim1 sim2,atac_large atac_small immune immune_hum_mou,14.77,9.36,9.36,4
+L40S,1.0,False,2,SI-30,14.39,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.29,6.1,12.21,8
+L40S,1.0,False,2,free,12.11,atac_large atac_small lung pancreas sim1 sim2,immune immune_hum_mou,9.3,6.92,13.83,10
+L40S,1.0,False,3,SI-30,13.99,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,4.07,12.21,9
+L40S,1.0,False,3,free,10.94,immune immune_hum_mou lung pancreas sim1 sim2,atac_large atac_small,5.48,5.65,16.95,12
+L40S,1.0,False,4,SI-30,13.99,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.48,3.05,12.21,12
+L40S,1.0,False,4,free,9.22,atac_large immune immune_hum_mou lung pancreas sim1 sim2,atac_small,3.44,4.65,18.62,16
+L40S,2.0,False,1,SI-30,18.45,atac_large immune_hum_mou sim2,atac_small immune lung pancreas sim1,17.09,7.47,7.47,4
+L40S,2.0,False,1,free,17.72,immune_hum_mou sim1 sim2,atac_large atac_small immune lung pancreas,16.59,7.88,7.88,4
+L40S,2.0,False,2,SI-30,16.49,atac_large immune_hum_mou lung pancreas,atac_small immune sim1 sim2,14.42,4.82,9.65,8
+L40S,2.0,False,2,free,15.13,atac_large lung pancreas sim1 sim2,atac_small immune immune_hum_mou,12.73,5.52,11.03,8
+L40S,2.0,False,3,SI-30,14.93,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.29,4.07,12.21,9
+L40S,2.0,False,3,free,13.07,atac_large immune_hum_mou lung pancreas sim1 sim2,atac_small immune,8.75,4.76,14.28,9
+L40S,2.0,False,4,SI-30,14.61,atac_large immune_hum_mou lung pancreas sim2,atac_small immune sim1,11.29,3.05,12.21,12
+L40S,2.0,False,4,free,12.74,atac_large immune_hum_mou lung pancreas sim1 sim2,atac_small immune,8.75,3.57,14.28,12

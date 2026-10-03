@@ -1,0 +1,8 @@
+/fastscratch/myscratch/kreid/wcd/ref_local/bench_queue_manifest.tsv: OK
+/fastscratch/myscratch/kreid/wcd/ref_local/immune__scib.h5ad: OK
+git HEAD 2f2900435b394223ffeda6f5ebd24026ddf1523f; host compute-171.cm.cluster; cpus 1; SLURM_JOB_ID 36133219
+CPU(s):                             48
+Model name:                         AMD EPYC 7443P 24-Core Processor
+Thread(s) per core:                 2
+Socket(s):                          1
+CPU(s) scaling MHz:                 73%

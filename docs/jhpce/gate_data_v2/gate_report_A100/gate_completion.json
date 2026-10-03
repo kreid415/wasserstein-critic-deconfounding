@@ -1,0 +1,839 @@
+{
+ "expected": 64,
+ "valid": 64,
+ "problems": [],
+ "latents": [
+  {
+   "tag": "Q_sinkhorn_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 52.7
+  },
+  {
+   "tag": "Q_sinkhorn_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 52.9
+  },
+  {
+   "tag": "Q_sinkhorn_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 52.5
+  },
+  {
+   "tag": "Q_reference_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 123.8
+  },
+  {
+   "tag": "Q_reference_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 123.7
+  },
+  {
+   "tag": "Q_none_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 44.7
+  },
+  {
+   "tag": "Q_sinkhorn_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 53.0
+  },
+  {
+   "tag": "Q_pooled_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 105.1
+  },
+  {
+   "tag": "Q_mmd_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.1
+  },
+  {
+   "tag": "Q_sinkhorn_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 35.6
+  },
+  {
+   "tag": "Q_none_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.0
+  },
+  {
+   "tag": "Q_discriminator_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 29.0
+  },
+  {
+   "tag": "Q_discriminator_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.1
+  },
+  {
+   "tag": "Q_discriminator_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 20.6
+  },
+  {
+   "tag": "Q_pooled_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 90.2
+  },
+  {
+   "tag": "Q_pooled_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 90.7
+  },
+  {
+   "tag": "Q_mmd_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.4
+  },
+  {
+   "tag": "Q_barycenter_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 92.3
+  },
+  {
+   "tag": "Q_discriminator_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 22.0
+  },
+  {
+   "tag": "Q_barycenter_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 97.0
+  },
+  {
+   "tag": "Q_discriminator_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 25.2
+  },
+  {
+   "tag": "Q_pooled_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 91.7
+  },
+  {
+   "tag": "Q_pooled_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 92.1
+  },
+  {
+   "tag": "Q_mmd_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 29.9
+  },
+  {
+   "tag": "Q_mmd_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 27.1
+  },
+  {
+   "tag": "Q_mmd_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 24.9
+  },
+  {
+   "tag": "Q_pooled_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 89.0
+  },
+  {
+   "tag": "Q_sinkhorn_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 32.9
+  },
+  {
+   "tag": "Q_scvi_adv_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.1
+  },
+  {
+   "tag": "Q_mmd_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.4
+  },
+  {
+   "tag": "Q_scvi_adv_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 22.5
+  },
+  {
+   "tag": "Q_barycenter_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 94.5
+  },
+  {
+   "tag": "Q_reference_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 110.0
+  },
+  {
+   "tag": "Q_barycenter_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 96.9
+  },
+  {
+   "tag": "Q_sinkhorn_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 33.9
+  },
+  {
+   "tag": "Q_discriminator_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.3
+  },
+  {
+   "tag": "Q_pooled_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 93.7
+  },
+  {
+   "tag": "Q_barycenter_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 94.9
+  },
+  {
+   "tag": "Q_discriminator_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 24.9
+  },
+  {
+   "tag": "Q_reference_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 107.0
+  },
+  {
+   "tag": "Q_reference_4",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 104.9
+  },
+  {
+   "tag": "Q_barycenter_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 91.1
+  },
+  {
+   "tag": "Q_reference_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 107.1
+  },
+  {
+   "tag": "Q_discriminator_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 23.3
+  },
+  {
+   "tag": "Q_pooled_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 90.0
+  },
+  {
+   "tag": "Q_mmd_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.6
+  },
+  {
+   "tag": "Q_discriminator_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 25.5
+  },
+  {
+   "tag": "Q_barycenter_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 93.0
+  },
+  {
+   "tag": "Q_mmd_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 29.0
+  },
+  {
+   "tag": "Q_reference_7",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 112.5
+  },
+  {
+   "tag": "Q_sinkhorn_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 33.1
+  },
+  {
+   "tag": "Q_reference_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 108.5
+  },
+  {
+   "tag": "Q_mmd_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 26.8
+  },
+  {
+   "tag": "Q_barycenter_3",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 92.8
+  },
+  {
+   "tag": "Q_barycenter_0",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 91.9
+  },
+  {
+   "tag": "Q_sinkhorn_5",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 33.0
+  },
+  {
+   "tag": "Q_reference_1",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 105.8
+  },
+  {
+   "tag": "Q_reference_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 105.8
+  },
+  {
+   "tag": "Q_mmd_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 28.1
+  },
+  {
+   "tag": "Q_discriminator_2",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 25.2
+  },
+  {
+   "tag": "Q_sinkhorn_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 29.4
+  },
+  {
+   "tag": "Q_barycenter_6",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 65.2
+  },
+  {
+   "tag": "Q_pooled_8",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 56.4
+  },
+  {
+   "tag": "Q_pooled_9",
+   "shape": [
+    33506,
+    10
+   ],
+   "finite": true,
+   "git_sha": "6675f8cc04f4b2804e9cbc78d4c77c64f66b4080",
+   "git_dirty": false,
+   "gpu": "NVIDIA A100 80GB PCIe",
+   "torch": "2.13.0+cu126",
+   "fit_seconds": 54.1
+  }
+ ]
+}

@@ -120,8 +120,11 @@ def main():
     row("G3 latents vs local (64 configs)", lambda m: f"bitwise {per[m]['lat']['bitwise_equal']}/{per[m]['lat']['n']}; per-dim r median {per[m]['lat']['r_median_over_configs']:.4f} "
                                                       f"(min {per[m]['lat']['r_min_over_configs']:.3f}); 15-NN overlap mean {per[m]['lat']['knn_overlap_mean_over_configs']:.3f} "
                                                       f"(min {per[m]['lat']['knn_overlap_min_over_configs']:.3f}; two local seeds: {per[m]['lat']['seed_reference_knn_overlap_mean']:.3f})")
-    row("G3 scores (flag rule)", lambda m: f"{pf(len(per[m]['g3']['flagged']) == 0)}: {len(per[m]['g3']['flagged'])} of {per[m]['g3']['groups']} (arm, cond) groups flagged"
-                                           + (f" ({per[m]['flagged']})" if per[m]['flagged'] else ""))
+    row("G3 scores (flag rule)", lambda m: ("PASS" if not per[m]['g3']['flagged'] else "FLAGGED") + f": {len(per[m]['g3']['flagged'])} of {per[m]['g3']['groups']} (arm, cond) groups flagged"
+                                           + (f" ({per[m]['flagged']})" if per[m]['flagged'] else "")
+                                           + f"; sign-flip null: {per[m]['g3']['null_sign_flip']['expected_flags']} flags expected by chance over "
+                                           f"{per[m]['g3']['null_sign_flip']['n_tests']} tests, P(>= {per[m]['g3']['null_sign_flip']['observed_flags']}) = "
+                                           f"{per[m]['g3']['null_sign_flip']['p_at_least_observed']}")
     row("G4 scoring on JHPCE CPUs (shared)", lambda m: f"{pf(g4_pass)}: {int((det.status == 'ok').sum())}/{len(det)} deterministic metrics within 1e-6; all scoring stays local")
     row("G5 8-lane throughput", lambda m: f"makespan {per[m]['cal']['makespan_s']} s (local {cal_l['makespan_s']} s); window {per[m]['cal']['window_s']} s "
                                          f"(local {cal_l['window_s']} s); factor {per[m]['cal']['effective_factor_window']} vs {cal_l['effective_factor_window']} -> per-GPU ratio {per[m]['ratio']}")
@@ -170,7 +173,21 @@ def main():
     for m in models:
         G3 = pd.read_csv(f"{a.g3_dir}/g3_{m}/g3_group_differences.csv")
         PM = pd.read_csv(f"{a.g3_dir}/g3_{m}/g3_per_metric_differences.csv")
-        L += [f"#### {m} - local", "", md_table(G3), "", "Per metric over the 64 paired configs:", "", md_table(PM), ""]
+        PP = pd.read_csv(f"{a.g3_dir}/g3_{m}/g3_paired_scores.csv")
+        nf = per[m]["g3"]["null_sign_flip"]
+        two = G3[G3.n_seeds == 2]
+        dcols = [c for c in PP.columns if c.startswith("d_") and c not in ("d_batch_mean", "d_bio_mean")]
+        big = PP[dcols].abs().stack().idxmax()
+        cfg, met = PP.loc[big[0], "cfg"], big[1][2:]
+        grp = PP[(PP.arm == PP.loc[big[0], "arm"]) & (PP.cond == PP.loc[big[0], "cond"])]
+        L += [f"#### {m} - local", "", md_table(G3), "",
+              f"Calibration of the flag rule (sign flips of the paired differences, i.e. no systematic host effect): "
+              f"{nf['expected_flags']} flags expected over {nf['n_tests']} tests; P(>= {nf['observed_flags']} flags) = {nf['p_at_least_observed']}. "
+              + (f"Groups with only 2 seeds ({', '.join(f'{r.arm}/{r.cond}' for r in two.itertuples())}) estimate the SE from two differences, "
+                 "so each of their tests flags with probability up to 0.5 under that null. " if len(two) else "")
+              + f"Largest single-metric paired difference: {met} on {cfg} ({PP.loc[big[0], met + '_local']:.3f} local vs "
+              f"{PP.loc[big[0], met + '_remote']:.3f} {m}); local seed SD of {met} within that (arm, cond): {grp[met + '_local'].std(ddof=1):.3f}.", "",
+              "Per metric over the 64 paired configs:", "", md_table(PM), ""]
 
     g4c = lambda D, n: D[["metric", "max_abs_diff", "status"]].rename(columns={"max_abs_diff": f"max diff {n}", "status": f"status {n}"})
     W = g4c(G4, "default").merge(g4c(G4gen, "numba generic"), on="metric")

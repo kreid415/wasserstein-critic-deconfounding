@@ -1,0 +1,16 @@
+{
+ "fits": 64,
+ "makespan_s": 353.7,
+ "window_s": 314.6,
+ "model_lane_s_total": 1577.8,
+ "effective_factor_window": 4.62,
+ "effective_factor_makespan": 4.46,
+ "model_factor_min": 3.17,
+ "per_arm_factors": {
+  "barycenter_warm3": 3.57,
+  "discriminator": 3.56,
+  "none": 3.26,
+  "pooled": 3.17
+ },
+ "wall_scale_vs_model": 0.686
+}
