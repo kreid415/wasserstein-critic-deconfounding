@@ -285,21 +285,28 @@ Test runs at commit c3e3ad4 (code final; later commits change documentation only
 Bit-identity gate (`scripts/check_arm_bitidentity.py --base 8cda6de`, CPU; run on the code of fe4ec94, which differs from the final code only in SI id tokens in comments): 34 of 34 configurations of the existing arms
 identical, max|dz| = 0 (`docs/bitidentity_existing_arms.csv`); a 0.025% MMD bandwidth change and a 1e-4 fool-loss change are detected.
 
-**Step cost (immune, single lane, `docs/throughput_missing_arms_summary.csv`), PROVISIONAL.** The run failed PF-16: repeat 2 ran
-while other workloads kept 8-13 of 12 CPU cores busy. Same-session controls vs the existing CSV (ms/step): discriminator 12.71 vs 11.65; reference 47.03 vs 47.03; pooled 46.19 vs 34.96; mmd 11.65 vs 12.71.
+**Step cost (immune, single lane, RTX 3080; `docs/throughput_missing_arms_summary.csv`).** Four runs of
+`experiments/bench_missing_arms_step_cost` (3 interleaved repeats of a 3-epoch and a 1-epoch fit per arm, 4 existing
+arms as same-session controls): run1 (2026-10-02) failed PF-16 under CPU contention; run2 (2026-10-03 02:38-03:05 UTC,
+GPU idle, no other compute process) passed for 11 of 12 arms; run3 was stopped when other workloads took 11-12 of 12
+cores (15:09 UTC); run4 waited behind a quiet gate that never opened and was cancelled. Lead decision (NB-20261003-10):
+the run2 medians are the rows in `docs/throughput_rtx3080_stock_backbone.csv`, and mmd_iw (spread 0.304 > 0.25) stays
+marked provisional in `scripts/wall_time_report.py`. Same-session controls vs the existing CSV rows (ms/step):
+discriminator 12.08 vs 11.65; reference 46.61 vs 47.03; pooled 43.01 vs 34.96; mmd 12.71 vs 12.71.
 
-| arm | median ms/step (3 repeats) | range | PF-16 | control-ratio estimate |
-|---|---|---|---|---|
-| discriminator_r1 | 14.62 | 13.14-14.83 | pass | 12.04 |
-| discriminator_ref | 16.53 | 15.89-19.92 | pass | 16.18 |
-| reference_stratified | 46.4 | 42.8-47.46 | pass | 45.46 |
-| pooled_stratified | 30.51 | 21.19-36.23 | fail | 25.55 |
-| discriminator_iw | 13.08 | 12.38-28.27 | fail | 13.32 |
-| reference_iw | 50.23 | 41.82-65.42 | fail | 53.35 |
-| pooled_iw | 36.92 | 35.28-60.28 | fail | 30.92 |
-| mmd_iw | 12.38 | 11.21-28.5 | fail | 13.51 |
+| arm | run2 median ms/step | range | spread (max-min)/median | PF-16 | run1 median (superseded) |
+|---|---|---|---|---|---|
+| discriminator_r1 | 13.56 | 13.14-14.62 | 0.109 | pass | 14.62 |
+| discriminator_ref | 15.47 | 15.04-15.68 | 0.041 | pass | 16.53 |
+| reference_stratified | 45.97 | 43.43-47.03 | 0.078 | pass | 46.4 |
+| pooled_stratified | 41.74 | 33.26-43.64 | 0.249 | pass | 30.51 |
+| discriminator_iw | 13.08 | 12.38-13.79 | 0.108 | pass | 13.08 |
+| reference_iw | 46.03 | 44.63-48.13 | 0.076 | pass | 50.23 |
+| pooled_iw | 37.62 | 32.94-38.08 | 0.137 | pass | 36.92 |
+| mmd_iw | 13.08 | 11.68-15.65 | 0.304 | fail (provisional) | 12.38 |
 
-The 8 medians are appended to `docs/throughput_rtx3080_stock_backbone.csv`; re-measure on a quiet machine before relying on them.
+The pooled control ran 23% slower in run2 than its existing CSV row (43.01 vs 34.96), so comparisons between new
+arms and existing rows measured in another session carry session drift of that order.
 
 **X13 CPU baselines** (`scripts/run_cpu_baselines.py`, env wcd-kbet): on atac_small the 6 latents (PCA d10/d50, Harmony d10/d50,
 Scanorama d10/d100) were scored by `score_scib_native.py` unchanged. Two findings for the X13 design: Harmony through scib
@@ -345,4 +352,10 @@ score_scib_native.py).
 
 **Harmony reproducibility.** In a shared process two runs on atac_small gave d50 latents differing by up to 0.114
 (NB-20261002-10). The fresh-process runs with pinned threads are tested for bit identity on atac_small at 50 PCs.
+
+**Knob probes (exploratory, atac_small, 2026-10-03, NB-20261003-09; machine under external load).** kNN(30) batch
+entropy (normalised by log K) at 10 dimensions: PCA 0.282; Harmony theta 0 / 2 / 8: 0.558 / 0.706 / 0.731 (19.5-32.6 s
+per single-thread fit); Scanorama knn 5 / 20: 0.401 / 0.434 (19.6 s / 115 s); knn 160 had not finished after 16.6 min
+(peak RSS 13.7 GB) and was stopped. So both knobs move batch mixing in the expected direction, and the top of the
+Scanorama grid is expensive: its cost on the 85-98k-cell tasks (atac_large, immune_hum_mou) is not yet measured.
 

@@ -1,6 +1,8 @@
 # PREFLIGHT: bench_missing_arms_step_cost
 
-**Verdict: GO**  (checked 2026-10-03T15:48:26Z; plan_sha 8045c40943bb29d0)
+**Verdict: NO-GO**  (checked 2026-10-03T16:18:53Z; plan_sha 8045c40943bb29d0)
+
+Blocking, not satisfied: PF-16
 
 ## Plan
 
@@ -32,7 +34,7 @@
 | PF-13 | major | Estimator noise | pass | timing noise is estimated from 3 repeats per arm and reported with the medians; controls show session drift against the existing CSV [re-confirmed for run4: same manifest, same frozen worktree at e3051e4] |
 | PF-14 | major | Test vs control | n/a | timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4] |
 | PF-15 | major | Attribution | n/a | timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4] |
-| PF-16 | blocking | Timing confounds | pass | launch gated: the launcher waits (max 90 min) for 3 consecutive 20-s windows with < 2 busy cores of 12 and no GPU compute process, logs them to run4/quiet_gate.log, then runs the run2 protocol (single lane, OMP 1, 3 interleaved repeats, 4 controls, GPU snapshot per fit) with the 5-s sampler; post... |
+| PF-16 | blocking | Timing confounds | fail | [auto:quiet_gate] run4 cancelled before launch (lead decision 2026-10-03 ~16:18 UTC): the quiet gate never opened (88 x 20-s windows 15:49-16:18 UTC, 10.3-12.0 busy cores from other sub-agents' scoring and test suites, no GPU compute process); no fit ran. Lead decision: adopt run2 (11 of 12 arms ... |
 | PF-17 | blocking | Cost estimate | pass | per-step costs feed scripts/cost_model.py at production settings (same backbone, batch 128, n_critic as the manifest rows); this run is 72 short fits, single lane, no walltime request [re-confirmed for run4: same manifest, same frozen worktree at e3051e4] |
 | PF-18 | major | Co-scheduling | pass | single lane; one fit at a time; VRAM per fit below 1 GB (smoke: 477 MiB in use); other GPU users visible as utilisation in bench_log.csv [re-confirmed for run4: same manifest, same frozen worktree at e3051e4] |
 | PF-19 | blocking | Launch manifest | pass | [auto:pf_check_manifest] 72 rows carry all 9 intended flags |

@@ -25,10 +25,10 @@ TMP = os.environ.get("TMPDIR", "/tmp")
 
 
 THROUGHPUT = {"stock": "throughput_rtx3080_stock_backbone", "scib": "throughput_rtx3080"}
-# ms/step rows without a passing timing check: run1 of experiments/bench_missing_arms_step_cost (its NEW arms) failed
-# PF-16 under CPU contention (lab notebook NB-20261002-07, -08). Empty the list once a re-measurement passes PF-16.
-PROVISIONAL = {"stock": ["discriminator_r1", "discriminator_ref", "reference_stratified", "pooled_stratified",
-                         "discriminator_iw", "reference_iw", "pooled_iw", "mmd_iw"], "scib": []}
+# ms/step rows without a passing timing check. experiments/bench_missing_arms_step_cost: run1 failed PF-16 under CPU
+# contention (NB-20261002-07, -08); run2 (2026-10-03, NB-20261003-07) passed for 11 of 12 arms and its medians are
+# the rows in use (lead decision, NB-20261003-10); mmd_iw's repeats spread 30% (> 25%), so it stays provisional.
+PROVISIONAL = {"stock": ["mmd_iw"], "scib": []}
 
 
 def main():
@@ -95,9 +95,9 @@ def main():
         if missing:
             raise ValueError(f"provisional arms {missing} have no row in docs/{THROUGHPUT[bk]}.csv")
         h = D.iloc[0]
-        md += ["", f"Provisional: the ms/step of {len(PROVISIONAL[bk])} arms ({', '.join(PROVISIONAL[bk])}) are run1 medians of "
-               "experiments/bench_missing_arms_step_cost, whose timing check PF-16 failed under CPU contention "
-               "(lab notebook NB-20261002-07, -08). In the "
+        md += ["", f"Provisional: the ms/step of {len(PROVISIONAL[bk])} arm(s) ({', '.join(PROVISIONAL[bk])}) are run2 medians of "
+               "experiments/bench_missing_arms_step_cost whose repeats failed the timing check PF-16 (spread > 25%; lab "
+               "notebook NB-20261003-07, -10). In the "
                f"{h.design}/{h.uncond_seeds}/{h.barycenter_iter} design they carry {h.provisional_fits:,} fits and "
                f"{h.provisional_lane_hours:,} of {h.gpu_lane_hours:,} GPU lane-h ({h.provisional_lane_hours / h.gpu_lane_hours:.0%}); "
                "columns provisional_fits and provisional_lane_hours of docs/wall_time_designs.csv give every design."]

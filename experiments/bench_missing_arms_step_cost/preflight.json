@@ -245,10 +245,22 @@
       ]
     },
     "PF-16": {
-      "status": "pass",
-      "evidence": "launch gated: the launcher waits (max 90 min) for 3 consecutive 20-s windows with < 2 busy cores of 12 and no GPU compute process, logs them to run4/quiet_gate.log, then runs the run2 protocol (single lane, OMP 1, 3 interleaved repeats, 4 controls, GPU snapshot per fit) with the 5-s sampler; post-run: pf_check_timing_repeats per arm (25%) and no sampler window > 4 busy cores during any fit; otherwise nothing is adopted",
-      "at": "2026-10-03T15:48:26Z",
-      "history": []
+      "status": "fail",
+      "evidence": "[auto:quiet_gate] run4 cancelled before launch (lead decision 2026-10-03 ~16:18 UTC): the quiet gate never opened (88 x 20-s windows 15:49-16:18 UTC, 10.3-12.0 busy cores from other sub-agents' scoring and test suites, no GPU compute process); no fit ran. Lead decision: adopt run2 (11 of 12 arms pass) with mmd_iw provisional (spread 30%)",
+      "at": "2026-10-03T16:18:53Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "launch gated: the launcher waits (max 90 min) for 3 consecutive 20-s windows with < 2 busy cores of 12 and no GPU compute process, logs them to run4/quiet_gate.log, then runs the run2 protocol (single lane, OMP 1, 3 interleaved repeats, 4 controls, GPU snapshot per fit) with the 5-s sampler; post-run: pf_check_timing_repeats per arm (25%) and no sampler window > 4 busy cores during any fit; otherwise nothing is adopted",
+          "at": "2026-10-03T15:48:26Z"
+        }
+      ],
+      "auto": {
+        "check": "quiet_gate",
+        "ok": false,
+        "summary": "run4 cancelled before launch (lead decision 2026-10-03 ~16:18 UTC): the quiet gate never opened (88 x 20-s windows 15:49-16:18 UTC, 10.3-12.0 busy cores from other sub-agents' scoring and test suites, no GPU compute process); no fit ran. Lead decision: adopt run2 (11 of 12 arms pass) with mmd_iw provisional (spread 30%)",
+        "warnings": null
+      }
     },
     "PF-22": {
       "status": "pass",
@@ -510,16 +522,18 @@
     }
   },
   "verdict": {
-    "go": true,
-    "blocking": [],
+    "go": false,
+    "blocking": [
+      "PF-16"
+    ],
     "unanswered": [],
     "major_fail": [],
     "minor_fail": [],
     "plan_changed": false,
     "n_items": 46,
-    "n_pass": 15,
+    "n_pass": 14,
     "n_na": 31,
-    "at": "2026-10-03T15:48:26Z"
+    "at": "2026-10-03T16:18:53Z"
   },
   "path": "./wcd/experiments/bench_missing_arms_step_cost"
 }

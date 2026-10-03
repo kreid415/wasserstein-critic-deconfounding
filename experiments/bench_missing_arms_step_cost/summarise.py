@@ -4,10 +4,14 @@ measurement: ms per optimiser step = (t3 - t1) / (2 * steps_per_epoch) for each 
 
 Writes
   docs/throughput_missing_arms_repeats.csv   every repeat of every arm (new arms and same-session controls)
+  docs/throughput_missing_arms_summary.csv   per arm: median / min / max ms/step, relative spread (max - min) / median,
+                                              PF-16 (spread <= 25% and first repeat <= 1.5 x the median of the rest,
+                                              the rule of experiment-preflight pf_check_timing_repeats)
   docs/throughput_rtx3080_stock_backbone.csv  + one row per NEW arm label: the repeat with the median ms/step
-                                              (refuses if rows for these labels exist already)
+                                              (refuses if rows for these labels exist already; --replace swaps them
+                                              for this run's rows, and only if PF-16 passes for all 12 arms)
 Prints the controls' re-measured ms/step next to their existing rows in the stock-backbone CSV.
-Usage: python experiments/bench_missing_arms_step_cost/summarise.py --bench-dir <run_bench out-dir>
+Usage: python experiments/bench_missing_arms_step_cost/summarise.py --bench-dir <run_bench out-dir> [--replace]
 """
 import argparse
 import os
@@ -32,6 +36,14 @@ def main():
     ap.add_argument("--bench-dir", required=True)
     ap.add_argument("--stock-csv", default=os.path.join(ROOT, "docs", "throughput_rtx3080_stock_backbone.csv"))
     ap.add_argument("--repeats-csv", default=os.path.join(ROOT, "docs", "throughput_missing_arms_repeats.csv"))
+    ap.add_argument("--summary-csv", default=os.path.join(ROOT, "docs", "throughput_missing_arms_summary.csv"))
+    ap.add_argument("--report-only", action="store_true",
+                    help="write the repeats and summary CSVs only; leave the stock-backbone CSV unchanged")
+    ap.add_argument("--replace", action="store_true",
+                    help="replace existing rows of the NEW labels (only if PF-16 passes for every arm of this run)")
+    ap.add_argument("--provisional", nargs="*", default=[],
+                    help="NEW labels allowed to fail PF-16 under --replace (written, and to be listed as provisional "
+                         "in scripts/wall_time_report.py); every other failure still refuses")
     a = ap.parse_args()
     T, _ = cost_model.measure(os.path.join(a.bench_dir, "latents"), os.path.join(a.bench_dir, "measured.csv"))
     T = T.copy()
@@ -47,11 +59,39 @@ def main():
     if set(counts.index) != want or (counts != N_REPEATS).any():
         raise ValueError(f"expected {N_REPEATS} repeats of {sorted(want)}, got {counts.to_dict()}")
     T = T.sort_values(["label", "rep"])
-    T.to_csv(a.repeats_csv, index=False)
+    pf = []
+    for lab, g in T.groupby("label"):
+        ms = g.sort_values("rep").ms_per_step.tolist()
+        med = float(pd.Series(ms).median())
+        spread = (max(ms) - min(ms)) / med
+        warm = ms[0] > 1.5 * float(pd.Series(ms[1:]).median())
+        pf.append(dict(label=lab, median_ms=round(med, 2), min_ms=min(ms), max_ms=max(ms), rel_spread=round(spread, 3),
+                       warmup_suspected=warm, pf16_ok=(spread <= 0.25 and not warm)))
+    P = pd.DataFrame(pf)
+    if a.report_only:
+        if a.replace:
+            raise ValueError("--report-only and --replace exclude each other")
+        T.to_csv(a.repeats_csv, index=False)
+        P.to_csv(a.summary_csv, index=False)
+        print(P.to_string(index=False))
+        print(f"report only: repeats -> {a.repeats_csv}, summary -> {a.summary_csv}")
+        return
     S = pd.read_csv(a.stock_csv)
     clash = sorted(set(S.arm) & set(NEW))
-    if clash:
-        raise ValueError(f"{a.stock_csv} already has rows for {clash}; not appending twice")
+    if clash and not a.replace:
+        raise ValueError(f"{a.stock_csv} already has rows for {clash}; not appending twice (use --replace)")
+    unknown = sorted(set(a.provisional) - set(NEW))
+    if unknown:
+        raise ValueError(f"--provisional takes NEW labels only, got {unknown}")
+    failing = set(P.label[~P.pf16_ok])
+    if a.replace and failing - set(a.provisional):
+        raise ValueError(f"PF-16 fails for {sorted(failing - set(a.provisional))}: the existing rows stay (provisional)")
+    if set(a.provisional) - failing:
+        raise ValueError(f"--provisional names arms that pass PF-16: {sorted(set(a.provisional) - failing)}")
+    P["provisional"] = P.label.isin(a.provisional)
+    S = S[~S.arm.isin(NEW)] if a.replace else S
+    T.to_csv(a.repeats_csv, index=False)
+    P.to_csv(a.summary_csv, index=False)
     pick = []
     for lab in NEW:
         g = T[T.label == lab].sort_values("ms_per_step")
