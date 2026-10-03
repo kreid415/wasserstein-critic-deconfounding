@@ -1,15 +1,19 @@
 """Checks of scripts/run_cpu_baselines.py (X13). Run in env wcd-kbet (scib 1.1.7, harmony-pytorch 0.1.7, scanorama):
-    KMP_AFFINITY=disabled python -m pytest -q tests/x13
+    KMP_AFFINITY=disabled PREPPED_DIR=<prepped_scib> python -m pytest -q tests/x13
 
 1. The runner's Harmony statements reproduce scib.integration.harmony at the default setting within tolerance
    1e-4 (harmonize reruns on this toy differed by up to 5.7e-06 in a long-running process or with
    MKL_DYNAMIC/OMP_DYNAMIC=FALSE, and by 0 in a fresh process with default settings); a shuffled batch column or
    the uncorrected PCA differs by more than 100x the tolerance (theta 2.5 instead of 2 does not: max|dz| 1e-05 on
    this toy, so it is not used).
-2. Scanorama's output (concatenated by batch) is returned in the input cell order.
-3. Each method returns the declared number of dimensions at both settings.
-4. With PREPPED_DIR set: the runner on atac_small writes the npz format of fit_paper_config.py (z, obs_names,
-   batch, celltype, config, history) in the prepped cell order, and refuses to overwrite an existing output.
+2. The knobs reach the tools: theta 0 vs 2 changes Harmony's output far beyond the tolerance, knn 5 vs 20 changes
+   Scanorama's; the fresh-process Harmony equals the in-process statements on the toy within the tolerance.
+3. Scanorama's output (concatenated by batch) is returned in the input cell order.
+4. Each arm returns the declared number of dimensions; pca refuses a knob value, harmony a negative theta,
+   scanorama a non-integer knn; row selection refuses non-CPU tags and rows with the wrong knob or seed.
+5. With PREPPED_DIR set: two fresh-process Harmony fits on atac_small at 50 PCs (theta 2, 1 thread) are
+   bit-identical; the runner writes the npz format of fit_paper_config.py (z, obs_names, batch, celltype, config,
+   history) in the prepped cell order for one row of each arm, and refuses to overwrite an existing output.
 """
 import json
 import os
@@ -27,6 +31,7 @@ import scipy.sparse as sp  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
+import build_paper_manifest as bpm  # noqa: E402
 import run_cpu_baselines as rcb  # noqa: E402
 
 
@@ -66,43 +71,101 @@ def test_harmony_statements_reproduce_scib_harmony():
     assert float(np.abs(z_scib - np.asarray(b.obsm["X_pca"])).max()) > 100 * HARMONY_RERUN_TOL   # uncorrected PCA
 
 
+def test_knobs_reach_the_tools():
+    # on this toy theta changes Harmony's output at 50 PCs (max|dz| 1.8 for theta 0 vs 2) but hardly at 10 PCs
+    # (2.7e-05); on atac_small at 10 PCs theta 0 / 2 / 8 gave kNN batch entropy 0.56 / 0.71 / 0.73 (2026-10-03)
+    a = _toy()
+    z2, kw2 = rcb.embed(a, "harmony", 50, "2")
+    z0, kw0 = rcb.embed(a, "harmony", 50, "0")
+    assert kw2 == {"n_comps": 50, "theta": 2.0, "n_jobs": 1, "fresh_process": True} and kw0["theta"] == 0.0
+    assert float(np.abs(z2 - z0).max()) > 100 * HARMONY_RERUN_TOL
+    z_in = np.asarray(rcb.harmony_scib_statements(a.copy(), "batch", 50, theta=2.0).obsm["X_emb"])
+    assert float(np.abs(z2 - z_in).max()) <= HARMONY_RERUN_TOL           # fresh process = the same statements
+    s20, kws = rcb.embed(a, "scanorama", 10, "20")
+    s5, _ = rcb.embed(a, "scanorama", 10, "5")
+    assert kws == {"dimred": 10, "knn": 20} and float(np.abs(s20 - s5).max()) > 1e-3
+
+
 def test_scanorama_output_is_in_input_cell_order():
     a = _toy()
-    z, kw = rcb.embed(a, "scanorama", "primary")
-    out = scib.integration.scanorama(a.copy(), "batch", dimred=10)
-    assert kw == {"dimred": 10}
+    z, kw = rcb.embed(a, "scanorama", 10, "20")
+    out = scib.integration.scanorama(a.copy(), "batch", dimred=10, knn=20)
+    assert kw == {"dimred": 10, "knn": 20}
     assert not (out.obs_names == a.obs_names).all()          # scanorama returns cells grouped by batch
     assert np.array_equal(z, np.asarray(out.obsm["X_emb"])[out.obs_names.get_indexer(a.obs_names)])
 
 
-@pytest.mark.parametrize("method", rcb.METHODS)
-def test_declared_dimensions(method):
+@pytest.mark.parametrize("arm,dims,value", [("pca", 10, "0"), ("pca", 50, "0"), ("harmony", 10, "0.5"),
+                                            ("harmony", 50, "2"), ("scanorama", 10, "40"), ("scanorama", 100, "20")])
+def test_declared_dimensions(arm, dims, value):
     a = _toy()
-    for setting in rcb.SETTINGS:
-        z, _ = rcb.embed(a, method, setting)
-        dims = rcb.PRIMARY_DIMS if setting == "primary" else rcb.TOOL_DEFAULT_DIMS[method]
-        assert z.shape == (a.n_obs, dims) and np.isfinite(z).all()
+    z, _ = rcb.embed(a, arm, dims, value)
+    assert z.shape == (a.n_obs, dims) and np.isfinite(z).all()
+
+
+def test_invalid_knob_values_are_refused():
+    a = _toy(n=300)
+    for arm, value in [("pca", "1"), ("harmony", "-1"), ("scanorama", "2.5"), ("scanorama", "0"), ("bbknn", "1")]:
+        with pytest.raises(ValueError):
+            rcb.embed(a, arm, 10, value)
+
+
+def _manifest(tmp_path):
+    R = bpm.finalize(bpm.build(bpm.BACKBONES["stock"], "pilot", 3, 5, 8))
+    m = pd.DataFrame(R)[bpm.COLS]
+    p = tmp_path / "m.tsv"
+    m.to_csv(p, sep="\t", index=False)
+    return p, m
+
+
+def test_row_selection_refuses_wrong_rows(tmp_path):
+    p, m = _manifest(tmp_path)
+    cpu = rcb.select_rows(p)
+    assert len(cpu) == 16 * len(bpm.TASKS) and set(cpu.arm) == set(rcb.CPU_ARMS)
+    with pytest.raises(ValueError):
+        rcb.select_rows(p, tags=[m[m.arm == "sysvi"].tag.iloc[0]])
+    with pytest.raises(KeyError):
+        rcb.select_rows(p, tags=["no_such_tag"])
+    bad = m.copy()
+    i = bad.index[bad.arm == "harmony"][0]
+    bad.loc[i, "extra"] = json.dumps({"knob": "knn"})
+    pb = tmp_path / "bad.tsv"
+    bad.to_csv(pb, sep="\t", index=False)
+    with pytest.raises(ValueError):
+        rcb.select_rows(pb, tags=[bad.loc[i, "tag"]])
+
+
+@pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
+def test_fresh_process_harmony_is_bit_identical_on_atac_small_d50():
+    pre = ad.read_h5ad(os.path.join(os.environ["PREPPED_DIR"], "atac_small__scib.h5ad"))
+    x = pre[:, pre.var["highly_variable"].values].copy()
+    x.obs["batch"] = x.obs["batch"].astype(str).astype("category")
+    z1, _ = rcb.harmony_fresh_process(x, 2.0, 50, threads=1)
+    z2, _ = rcb.harmony_fresh_process(x, 2.0, 50, threads=1)
+    assert z1.shape == (x.n_obs, 50) and np.isfinite(z1).all()
+    assert np.array_equal(z1, z2), float(np.abs(z1 - z2).max())
 
 
 @pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
 def test_runner_on_atac_small_writes_the_fit_npz_format(tmp_path):
+    p, m = _manifest(tmp_path)
+    cpu = m[(m.task == "atac_small") & m.arm.isin(list(rcb.CPU_ARMS))]
+    pick = {("harmony", "2", "10"), ("scanorama", "20", "10"), ("pca", "0", "10")}
+    rows = cpu[[(r.arm, str(r.lam), str(r.n_latent)) in pick for r in cpu.itertuples()]]
+    assert len(rows) == 3
     env = dict(os.environ, KMP_AFFINITY="disabled")
-    cmd = [sys.executable, os.path.join(ROOT, "scripts", "run_cpu_baselines.py"), "--task", "atac_small",
-           "--prepped-dir", os.environ["PREPPED_DIR"], "--out-dir", str(tmp_path)]
+    cmd = [sys.executable, os.path.join(ROOT, "scripts", "run_cpu_baselines.py"), "--manifest", str(p),
+           "--prepped-dir", os.environ["PREPPED_DIR"], "--out-dir", str(tmp_path / "out"), "--tag", *rows.tag]
     subprocess.run(cmd, check=True, env=env)
     pre = ad.read_h5ad(os.path.join(os.environ["PREPPED_DIR"], "atac_small__scib.h5ad"), backed="r")
-    n_files = 0
-    for method in rcb.METHODS:
-        for setting in rcb.SETTINGS:
-            dims = rcb.PRIMARY_DIMS if setting == "primary" else rcb.TOOL_DEFAULT_DIMS[method]
-            d = np.load(tmp_path / "latents" / f"X13_atac_small_{method}_d{dims}.npz", allow_pickle=False)
-            assert set(d.files) == {"z", "obs_names", "batch", "celltype", "config", "history"}
-            assert d["z"].shape == (pre.n_obs, dims) and np.isfinite(d["z"]).all()
-            assert (d["obs_names"] == pre.obs_names.to_numpy()).all()
-            assert (d["batch"] == pre.obs["batch"].astype(str).to_numpy()).all()
-            cfg = json.loads(str(d["config"]))
-            assert (cfg["row"]["arm"], cfg["row"]["setting"], cfg["row"]["n_dims"]) == (method, setting, dims)
-            n_files += 1
-    assert n_files == len(rcb.METHODS) * len(rcb.SETTINGS)
+    for r in rows.itertuples():
+        d = np.load(tmp_path / "out" / "latents" / f"{r.tag}.npz", allow_pickle=False)
+        assert set(d.files) == {"z", "obs_names", "batch", "celltype", "config", "history"}
+        assert d["z"].shape == (pre.n_obs, 10) and np.isfinite(d["z"]).all()
+        assert (d["obs_names"] == pre.obs_names.to_numpy()).all()
+        assert (d["batch"] == pre.obs["batch"].astype(str).to_numpy()).all()
+        cfg = json.loads(str(d["config"]))
+        assert (cfg["row"]["tag"], cfg["row"]["arm"], cfg["knob"]) == (r.tag, r.arm, rcb.CPU_ARMS[r.arm])
+        assert cfg["knob_value"] == float(r.lam)
     r = subprocess.run(cmd, env=env, capture_output=True, text=True)
     assert r.returncode != 0 and "exists" in r.stderr

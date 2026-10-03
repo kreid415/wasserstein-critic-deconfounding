@@ -1,14 +1,14 @@
 task,dose,n,K,n_types,min_cells_present,n_shared,frac_cells_in_S,max_w,min_ess_frac,depleted_in_S
-atac_small,0,11270,3,7,1,6,0.88,3.12,0.489,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,0,11270,3,7,10,6,0.88,3.12,0.489,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,50,10476,3,7,1,6,0.871,4.93,0.335,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,50,10476,3,7,10,6,0.871,4.93,0.335,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,80,10000,3,7,1,6,0.865,10.71,0.166,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,80,10000,3,7,10,6,0.865,10.71,0.166,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,95,9761,3,7,1,6,0.862,38.25,0.048,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,95,9761,3,7,10,6,0.862,38.25,0.048,"Inhibitory Neurons,Excitatory Neurons"
-atac_small,100,9682,3,7,1,4,0.287,5.64,0.223,
-atac_small,100,9682,3,7,10,4,0.287,5.64,0.223,
+atac_small,0,11270,3,7,1,6,0.88,3.12,0.489,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,0,11270,3,7,10,6,0.88,3.12,0.489,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,50,9836,3,7,1,6,0.863,2.83,0.529,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,50,9836,3,7,10,6,0.863,2.83,0.529,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,80,8976,3,7,1,6,0.85,2.62,0.551,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,80,8976,3,7,10,6,0.85,2.62,0.551,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,95,8545,3,7,1,6,0.842,5.49,0.338,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,95,8545,3,7,10,6,0.842,5.49,0.338,"Excitatory Neurons,Inhibitory Neurons"
+atac_small,100,8402,3,7,1,4,0.33,5.59,0.243,
+atac_small,100,8402,3,7,10,4,0.33,5.59,0.243,
 immune_hum_mou,0,20000,23,19,1,0,0.0,,,
 immune_hum_mou,0,20000,23,19,10,0,0.0,,,
 immune_hum_mou,50,20000,23,19,1,0,0.0,,,
@@ -21,14 +21,14 @@ immune_hum_mou,100,20000,23,19,1,0,0.0,,,
 immune_hum_mou,100,20000,23,19,10,0,0.0,,,
 sim2,0,19318,16,4,1,0,0.0,,,
 sim2,0,19318,16,4,10,0,0.0,,,
-sim2,50,18353,16,4,1,0,0.0,,,
-sim2,50,18353,16,4,10,0,0.0,,,
-sim2,80,17774,16,4,1,0,0.0,,,
-sim2,80,17774,16,4,10,0,0.0,,,
-sim2,95,17484,16,4,1,0,0.0,,,
-sim2,95,17484,16,4,10,0,0.0,,,
-sim2,100,17388,15,4,1,0,0.0,,,
-sim2,100,17388,15,4,10,0,0.0,,,
+sim2,50,18595,16,4,1,0,0.0,,,
+sim2,50,18595,16,4,10,0,0.0,,,
+sim2,80,18161,16,4,1,0,0.0,,,
+sim2,80,18161,16,4,10,0,0.0,,,
+sim2,95,17944,16,4,1,0,0.0,,,
+sim2,95,17944,16,4,10,0,0.0,,,
+sim2,100,17872,16,4,1,0,0.0,,,
+sim2,100,17872,16,4,10,0,0.0,,,
 pancreas,0,16382,9,14,1,4,0.697,6.13,0.412,alpha
 pancreas,0,16382,9,14,10,4,0.697,6.13,0.412,alpha
 pancreas,50,15396,9,14,1,4,0.705,4.68,0.412,alpha

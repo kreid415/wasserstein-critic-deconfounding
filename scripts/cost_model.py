@@ -22,6 +22,7 @@ import pandas as pd
 
 TASK_K = {"pancreas": 9, "lung": 16, "immune": 10, "immune_hum_mou": 23, "sim1": 6, "sim2": 16,
           "atac_small": 3, "atac_large": 11}
+CPU_BASELINES = ("harmony", "scanorama", "pca")   # X13 CPU rows (scripts/run_cpu_baselines.py): no GPU lane time
 TASK_N = {"pancreas": 16382, "lung": 32472, "immune": 33506, "immune_hum_mou": 97861, "sim1": 12097,
           "sim2": 19318, "atac_small": 11270, "atac_large": 84813}
 
@@ -136,6 +137,9 @@ def cost(manifest, T, speedup, score_s_per_cell=None):
         if "subsample" in ex:
             n = ex["subsample"]["n_cells"]
         shrs.append(n * score_s_per_cell / 3600 if score_s_per_cell else np.nan)
+        if r.arm in CPU_BASELINES:
+            hrs.append(0.0)     # CPU methods: no GPU lane; their CPU time is not part of the GPU wall-time model
+            continue
         arm = arm_label(r.arm, ex)
         steps = int(r.max_epochs) * math.ceil(n * float(r.train_size) / int(r.batch_size))
         ms = step_ms(T, arm, r.task, int(r.n_critic), int(r.batch_size))

@@ -154,6 +154,26 @@ versions (IWDAN-O, ...) use the true weights (Sec. 4.1).
 present in every batch. On the X3 tasks no cell type is present in every batch of immune_hum_mou (23 batches)
 or sim2 (16 batches), at any dose (`docs/x3_shared_support_profile.csv`).
 
+**Depletion design (revised 2026-10-03, SI-31..SI-33).** Every X3 row names its reference batch: the repo rule
+(select_reference_batch, maximum cell-type entropy) applied to the dose-0 subsample, fixed for every dose (SI-31).
+The depleted batch is always a non-reference batch: the largest one, depleting its two most abundant cell types
+present in >= 3 batches; on sim2 only Group1 is depleted, because Batch3Sub1 holds only Group1 (1,446) and Group2
+(484) cells and depleting both removed the batch (SI-32). Only atac_small changed target (it had depleted its own
+reference); its new target was signed off with per-batch counts (SI-33).
+
+| task | reference (dose-0 rule) | depleted batch | depleted types |
+|---|---|---|---|
+| atac_small | Cusanovich et al. - WholeBrainA_62216 | Fang et al. - CEMBA180305_2B (3,750 cells) | Excitatory Neurons, Inhibitory Neurons (2,868) |
+| immune_hum_mou | Oetjen_A | MCA_BM_2 | Neutrophils, Monocyte progenitors |
+| sim2 | Batch4Sub2 | Batch3Sub1 | Group1 (1,446) |
+| pancreas | inDrop1 | inDrop3 | alpha, acinar |
+
+`scripts/fit_paper_config.py` (resolve_reference) refuses an X3 composition row whose reference is 'auto' or an
+index, names a batch absent from the fitted cells, or names the depleted batch. `scripts/x3_design_profile.py`
+re-derives every reference from the prepped files, checks that the reference and the depleted batch are present at
+every dose, and writes both profiles; it also reports the batch the automatic rule would pick at each dose (atac_small
+would switch to Fang at dose 80, pancreas to inDrop3 at doses 50-80): the fixed reference removes that confound.
+
 **Target (signed off, SI-25).** Each batch's own pre-depletion composition, i.e. the X3 base condition. The depletion is a
 known selection on true labels: a cell of a depleted type in the depleted batch b survives with probability
 kappa_d = (n_hit - drop) / n_hit, drop = round(n_hit d / 100) (`fit_paper_config.subsample`), every other cell
@@ -176,9 +196,10 @@ With w = 1 each arm reduces to its unweighted objective. The critics' gradient p
 interpolates; it enforces the Lipschitz constraint between the supports, which weighting does not move).
 
 **Doses.** w = 1 for every cell at dose 0 (identical to the unweighted rows) and at dose 100 (no depleted-type
-cell remains; Eq. 4 needs D_S(Y = y) > 0), so IW rows exist at doses 50, 80, 95 only. Effective sample size of
-batch b at dose 95: 0.19 (atac_small), 0.28 (immune_hum_mou), 0.18 (pancreas) of its cells; sim2 1.00 (see
-findings); about 0.7-1.0 depleted-type cells of batch b per minibatch at dose 95 (`docs/x3_iw_weight_profile.csv`).
+cell remains; Eq. 4 needs D_S(Y = y) > 0), so IW rows exist at doses 50, 80, 95 only. At dose 95 (revised design,
+`docs/x3_iw_weight_profile.csv`) the weight of a kept depleted-type cell is about 20, the effective-sample-size
+fraction of batch b is 0.235 (atac_small), 0.284 (immune_hum_mou), 0.227 (sim2) and 0.183 (pancreas), and a
+128-cell minibatch holds 2.14, 0.83, 0.51 and 0.87 depleted-type cells of batch b on average.
 
 **Implementation.** Cell types reach the minibatch through scvi's labels slot (setup_anndata(labels_key=
 'celltype'), conditioned models only; a test checks the labels slot changes no latent). IW with an
@@ -186,21 +207,25 @@ unconditioned model raises (its labels slot holds the batch). fit_paper_config.p
 weight table from the row's X3 subsample spec, using the same code that performs the depletion.
 
 **Manifest.** X3 block: IW rows for discriminator, reference, pooled, mmd x {matched_lo, matched_hi} x doses
-{50, 80, 95} x 3 seeds x 4 tasks = 288 fits, extra adds {"iw": "depletion_oracle"}.
+{50, 80, 95} x 3 seeds x 4 tasks = 288 fits, extra adds {"iw": "depletion_oracle"}. Since 2026-10-03 every X3 row
+(unweighted and IW) carries reference = the batch name above, and the seeds are the follow-up seeds 10-12 (SI-26).
 
-**Tests.** weights 1 at doses 0 and 100; sum of kept depleted-type weights = n_hit exactly when there is no final
+**Tests.** every X3_TARGETS entry re-derived from the prepped files (reference rule at dose 0, largest
+non-reference batch, type rule, sim2 Group1 only, reference and depleted batch present at every dose); every X3
+row carries its reference; resolve_reference refuses 'auto', an index, a missing name and the depleted batch on
+composition rows; weights 1 at doses 0 and 100; sum of kept depleted-type weights = n_hit exactly when there is no final
 subsample; for each arm, unit weights give the unweighted loss and integer weights equal duplicated cells;
 gradcheck of the weighted losses; zero-weight cells get no adversarial gradient; the labels slot changes no
 latent (adversary 'none'); existing arms bit-identical.
 
-**Findings on the X3 design (reported, not changed here).**
-1. The 'auto' reference (maximum cell-type entropy on the cells used) changes with dose: atac_small
-   WholeBrainA_62216 (doses 0-80) to CEMBA180305_2B (95, 100); pancreas inDrop1 (0) to inDrop3 (50, 80) to
-   inDrop1 (95, 100). The reference arm's dose-response then mixes reference identity with dose.
-2. sim2: the depleted batch Batch3Sub1 contains only the two depleted types (Group1 1446, Group2 484 cells), so
-   X3 on sim2 changes that batch's size, not its composition, and at dose 100 the batch disappears (K 16 to 15).
-3. docs/paper_experiment_matrix.csv describes X3 as composition-matched subsamples; at dose 0 the subsample
-   keeps the natural composition.
+**Findings on the first X3 design (2026-10-02) and their resolution (2026-10-03).**
+1. The 'auto' reference changed with dose (atac_small WholeBrainA_62216 to CEMBA180305_2B; pancreas inDrop1 to
+   inDrop3 to inDrop1), mixing reference identity with dose. Resolved: fixed reference (SI-31).
+2. sim2: the depleted batch Batch3Sub1 holds only the two depleted types, so X3 changed its size, not its
+   composition, and removed it at dose 100 (K 16 to 15). Resolved: only Group1 is depleted (SI-32); K = 16 at
+   every dose.
+3. docs/paper_experiment_matrix.csv described X3 as composition-matched subsamples; dose 0 keeps the natural
+   composition and matching is impossible on immune_hum_mou and sim2. Resolved: wording corrected.
 
 ## 5. Common points
 
@@ -230,6 +255,21 @@ R1-R4. Rule texts unchanged; correction logged in the notebook.
 Alternatives offered and not chosen: X6 gamma grid {1, 10} (54 fits); X7 minimax (saturating) generator loss;
 X8 sampler on all four X8 adversarial arms (288 fits); X3 pairwise full composition matching (3 arms, 360 fits).
 
+Decisions of 2026-10-03 (ask_user; X3 reference and sim2 asked by the lead, the others in this branch):
+
+| item | question (abridged) | answer (verbatim) | ledger | notebook |
+|---|---|---|---|---|
+| X3 | X3 reference batch | "Fix reference; deplete a non-reference batch (Recommended)" | SI-31 | NB-20261003-01 |
+| X3 | X3 on sim2 | "Deplete only Group1 (Recommended)" | SI-32 | NB-20261003-02 |
+| X3 | atac_small: depleted batch and types (per-batch counts shown) | "Fang: Excitatory + Inhibitory (Recommended)" | SI-33 | NB-20261003-03 |
+| X13 | Harmony's strength knob and its 6 values | "theta {0, 0.5, 1, 2, 4, 8} (Recommended)" | SI-34 | NB-20261003-04 |
+| X13 | Scanorama's strength knob and its 6 values | "knn {5, 10, 20, 40, 80, 160} (Recommended)" | SI-35 | NB-20261003-05 |
+| X13 | PCA (no strength knob) | "Once, as uncorrected anchor (Recommended)" | SI-36 | NB-20261003-06 |
+
+Alternatives offered and not chosen: atac_small Fang with Excitatory Neurons only, or 10x Genomics with both
+types; Harmony theta {0.5, 1, 2, 3, 4, 6} or ridge lambda {0.05 ... 2}; Scanorama alpha {0 ... 0.6} or sigma
+{1 ... 60}; PCA over 6 PC counts.
+
 ## 7. Implementation and verification (as built, branch missing-arms)
 
 | item | code | tests |
@@ -245,23 +285,91 @@ Test runs at commit c3e3ad4 (code final; later commits change documentation only
 Bit-identity gate (`scripts/check_arm_bitidentity.py --base 8cda6de`, CPU; run on the code of fe4ec94, which differs from the final code only in SI id tokens in comments): 34 of 34 configurations of the existing arms
 identical, max|dz| = 0 (`docs/bitidentity_existing_arms.csv`); a 0.025% MMD bandwidth change and a 1e-4 fool-loss change are detected.
 
-**Step cost (immune, single lane, `docs/throughput_missing_arms_summary.csv`), PROVISIONAL.** The run failed PF-16: repeat 2 ran
-while other workloads kept 8-13 of 12 CPU cores busy. Same-session controls vs the existing CSV (ms/step): discriminator 12.71 vs 11.65; reference 47.03 vs 47.03; pooled 46.19 vs 34.96; mmd 11.65 vs 12.71.
+**Step cost (immune, single lane, RTX 3080; `docs/throughput_missing_arms_summary.csv`).** Four runs of
+`experiments/bench_missing_arms_step_cost` (3 interleaved repeats of a 3-epoch and a 1-epoch fit per arm, 4 existing
+arms as same-session controls): run1 (2026-10-02) failed PF-16 under CPU contention; run2 (2026-10-03 02:38-03:05 UTC,
+GPU idle, no other compute process) passed for 11 of 12 arms; run3 was stopped when other workloads took 11-12 of 12
+cores (15:09 UTC); run4 waited behind a quiet gate that never opened and was cancelled. Lead decision (NB-20261003-10):
+the run2 medians are the rows in `docs/throughput_rtx3080_stock_backbone.csv`, and mmd_iw (spread 0.304 > 0.25) stays
+marked provisional in `scripts/wall_time_report.py`. Same-session controls vs the existing CSV rows (ms/step):
+discriminator 12.08 vs 11.65; reference 46.61 vs 47.03; pooled 43.01 vs 34.96; mmd 12.71 vs 12.71.
 
-| arm | median ms/step (3 repeats) | range | PF-16 | control-ratio estimate |
-|---|---|---|---|---|
-| discriminator_r1 | 14.62 | 13.14-14.83 | pass | 12.04 |
-| discriminator_ref | 16.53 | 15.89-19.92 | pass | 16.18 |
-| reference_stratified | 46.4 | 42.8-47.46 | pass | 45.46 |
-| pooled_stratified | 30.51 | 21.19-36.23 | fail | 25.55 |
-| discriminator_iw | 13.08 | 12.38-28.27 | fail | 13.32 |
-| reference_iw | 50.23 | 41.82-65.42 | fail | 53.35 |
-| pooled_iw | 36.92 | 35.28-60.28 | fail | 30.92 |
-| mmd_iw | 12.38 | 11.21-28.5 | fail | 13.51 |
+| arm | run2 median ms/step | range | spread (max-min)/median | PF-16 | run1 median (superseded) |
+|---|---|---|---|---|---|
+| discriminator_r1 | 13.56 | 13.14-14.62 | 0.109 | pass | 14.62 |
+| discriminator_ref | 15.47 | 15.04-15.68 | 0.041 | pass | 16.53 |
+| reference_stratified | 45.97 | 43.43-47.03 | 0.078 | pass | 46.4 |
+| pooled_stratified | 41.74 | 33.26-43.64 | 0.249 | pass | 30.51 |
+| discriminator_iw | 13.08 | 12.38-13.79 | 0.108 | pass | 13.08 |
+| reference_iw | 46.03 | 44.63-48.13 | 0.076 | pass | 50.23 |
+| pooled_iw | 37.62 | 32.94-38.08 | 0.137 | pass | 36.92 |
+| mmd_iw | 13.08 | 11.68-15.65 | 0.304 | fail (provisional) | 12.38 |
 
-The 8 medians are appended to `docs/throughput_rtx3080_stock_backbone.csv`; re-measure on a quiet machine before relying on them.
+The pooled control ran 23% slower in run2 than its existing CSV row (43.01 vs 34.96), so comparisons between new
+arms and existing rows measured in another session carry session drift of that order.
 
 **X13 CPU baselines** (`scripts/run_cpu_baselines.py`, env wcd-kbet): on atac_small the 6 latents (PCA d10/d50, Harmony d10/d50,
 Scanorama d10/d100) were scored by `score_scib_native.py` unchanged. Two findings for the X13 design: Harmony through scib
 (harmony-pytorch 0.1.7, multithreaded float32) is not reproducible run to run here (atac_small d50: max|dz| 0.114, NMI -0.024
 between two runs), and kBET varies by up to 0.0047 on identical latents.
+
+## 8. X13 CPU baselines: strength knobs, budget parity, Harmony reproducibility (2026-10-03)
+
+**Requirement.** The approved matrix gives each X13 method "its native strength knob x 6 configs (deterministic CPU
+methods once)" and PAPER_PLAN section 5 requires the same number of configurations per method family (best-of-k
+curves). The adversarial arms have 6 lambda values per family (A1, R1); sysVI 6 cycle weights.
+
+**Sources** (full texts read 2026-10-03: PMC author manuscripts PMC6884693 and PMC6551256, fetched by DOI
+10.1038/s41592-019-0619-0 and 10.1038/s41587-019-0113-3; every quote below was matched verbatim in them; installed
+package sources read in env wcd-kbet).
+- Harmony, Korsunsky et al. 2019 (Nat. Methods 16:1289), Methods Eq. 3-4: theta "decides the degree of penalty for
+  dependence between batch membership and cluster assignment"; theta = 0 reverts to soft k-means without the
+  diversity penalty (Eq. 2); larger theta favours batch-independent clusters and the solution degenerates as theta
+  grows without bound. Defaults (Methods 5.4): theta 2, K 100, sigma 0.1, ridge lambda 1; the paper's analyses
+  used theta 2-4. harmony-pytorch 0.1.7: harmonize(theta=2.0, ridge_lambda=1.0, n_jobs=-1, random_state=0);
+  scib 1.1.7 scib.integration.harmony calls harmonize with its defaults and does not forward kwargs.
+- Scanorama, Hie et al. 2019 (Nat. Biotechnol. 37:685), Methods: mutual nearest-neighbour matching among all
+  dataset pairs with 20 nearest neighbours, chosen "to identify a robust set of matches without also being overly
+  permissive"; alignment-score cutoff alpha and Gaussian smoothing sigma. scanorama 1.7.4: correct(knn=20,
+  alpha=0.10, sigma=15, dimred=100, seed=0); every dataset is translated by the kernel-weighted mean of its matched
+  differences (no partial-strength parameter). scib 1.1.7 forwards kwargs to correct_scanpy.
+- PCA: no batch-correction parameter; scIB's unintegrated embedding.
+
+**Signed off (SI-34..SI-36).** Harmony theta in {0, 0.5, 1, 2, 4, 8}; Scanorama knn in {5, 10, 20, 40, 80, 160};
+each at the backbone's 10 dimensions (SI-04), run once (Harmony random_state 0, Scanorama seed 0), plus the tool's
+default dimensions at the default knob value as sensitivity (Harmony on 50 PCs at theta 2, Scanorama dimred 100 at
+knn 20). PCA once at 10 PCs plus 50 PCs, shown as the uncorrected anchor and not as a best-of-k curve.
+
+**Manifest.** `build_paper_manifest.CPU_BASELINES`: per task 7 Harmony + 7 Scanorama + 2 PCA rows = 16, 128 rows
+over the 8 tasks; experiment X13, seed 0, knob value in 'lam', dimensions in 'n_latent', extra {"knob": ...};
+scVI-backbone fields 'na' / 0. `fit_paper_config.py` refuses these arms; `cost_model.cost` gives them 0 GPU
+lane-hours (they run on CPU; scoring time is counted as for every row).
+
+**Runner.** `scripts/run_cpu_baselines.py --manifest M --prepped-dir D --out-dir O [--task T | --tag ...]` runs the
+selected rows (refuses non-CPU tags and rows whose knob or seed differ from the design). Harmony: scib's two
+statements (sc.tl.pca(n_comps), harmonize(theta)) in a fresh Python process with OMP/MKL/OpenBLAS/NumExpr threads
+and harmonize(n_jobs) pinned (default 1). Scanorama: scib.integration.scanorama(dimred, knn), output re-ordered to
+the input cells. PCA: sc.tl.pca(n_comps). Output format unchanged (latents/<tag>.npz, scored by
+score_scib_native.py).
+
+**Harmony reproducibility.** In a shared process two runs on atac_small gave d50 latents differing by up to 0.114
+(NB-20261002-10). The fresh-process runs with pinned threads are tested for bit identity on atac_small at 50 PCs.
+
+**Knob probes (exploratory, atac_small, 2026-10-03, NB-20261003-09; machine under external load).** kNN(30) batch
+entropy (normalised by log K) at 10 dimensions: PCA 0.282; Harmony theta 0 / 2 / 8: 0.558 / 0.706 / 0.731 (19.5-32.6 s
+per single-thread fit); Scanorama knn 5 / 20: 0.401 / 0.434 (19.6 s / 115 s); knn 160 had not finished after 16.6 min
+(peak RSS 13.7 GB) and was stopped. So both knobs move batch mixing in the expected direction, and the top of the
+Scanorama grid is expensive: its cost on the 85-98k-cell tasks (atac_large, immune_hum_mou) is not yet measured.
+
+**Verification (2026-10-03, branch missing-arms-v2 = main 878d8ea + this work).** Test runs at commit 126812c, CPU only
+(CUDA_VISIBLE_DEVICES empty): wcd-gpu `243 passed, 1 skipped` (tests/ without scvi and x13, incl. prereg); scvi-api `60 passed, 1 skipped`
+(tests/scvi, incl. tests/scvi/test_x3_x13_design.py); wcd-kbet `17 passed` (tests/x13 and tests/scoring), including the
+bit-identity of two fresh-process Harmony fits on atac_small at 50 PCs. The test that the runner's Harmony statements
+reproduce scib.integration.harmony (tolerance 1e-4) has two negative controls, a shuffled batch column and the
+uncorrected PCA (theta 2.5 instead of 2 changes the toy output by only 1e-05, so it is not used as a control); the
+knob test compares theta 0 with theta 2 at 50 PCs. Mutation checks (fl_mutation_check) catch: a
+reference resolver that accepts 'auto', an index or the depleted batch on composition rows; a CPU_BASELINES with theta
+8 missing or Scanorama's default dimensions wrong; X3_TARGETS depleting both sim2 types or atac_small's reference; a
+Harmony comparator fed a theta-0 fit or a one-ulp perturbation; the PF-16 rule fed a 30% spread or a warm-up repeat.
+Manifest (stock, pilot, uncond 5, barycenter 10): 6,846 rows = main's 6,718 + 128 X13 CPU rows; 828 X3 rows, all with
+their fixed reference; output paths unique (fl_unique_outputs, 0 collisions).
