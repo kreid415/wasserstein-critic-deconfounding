@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-META_COLS = {"tag", "host", "prepped", "score_seconds"}
+META_COLS = {"tag", "host", "prepped", "score_seconds", "pins", "host_fit", "host_score"}
 
 
 def metric_lists():
@@ -42,7 +42,7 @@ def g4(a):
     A, B = A[A.tag.str.startswith(a.a_prefix)].copy(), B[B.tag.str.startswith(a.b_prefix)].copy()
     if len(A) == 0 or len(B) == 0:
         raise ValueError("no rows after prefix filtering")
-    key = lambda d: d.tag.str.replace(r"^G4b?_", "", regex=True)
+    key = lambda d: d.tag.str.replace(r"^[A-Za-z0-9]+_(?=Q_|S_)", "", regex=True)     # G4_/G4b_/L_/J_ prefix -> config tag
     A.index, B.index = key(A), key(B)
     if sorted(A.index) != sorted(B.index):
         raise ValueError(f"latent sets differ: {sorted(A.index)} vs {sorted(B.index)}")

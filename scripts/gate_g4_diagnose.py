@@ -35,7 +35,7 @@ def build():
 
 
 def compare(fa, fb):
-    a, b = np.load(fa), np.load(fb)
+    a, b = dict(np.load(fa)), dict(np.load(fb))          # materialise once: NpzFile re-reads a member on every access
     ma, mb = json.loads(str(a["meta"])), json.loads(str(b["meta"]))
     n = len(a["d_indptr"]) - 1
     same_rows = 0

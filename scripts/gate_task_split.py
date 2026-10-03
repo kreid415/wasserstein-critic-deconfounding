@@ -51,7 +51,17 @@ def stage_of(r):
     raise ValueError(f"unmapped experiment {r.experiment}")
 
 
+_COST_CACHE = {}
+
+
 def costs(manifest, scen):
+    key = (manifest, json.dumps(scen, sort_keys=True))
+    if key not in _COST_CACHE:
+        _COST_CACHE[key] = _costs(manifest, scen)
+    return _COST_CACHE[key]
+
+
+def _costs(manifest, scen):
     T = pd.read_csv("docs/throughput_rtx3080_stock_backbone.csv")
     S = pd.read_csv("docs/scoring_time.csv")
     rate = float(S.seconds.sum() / S.n_cells.sum())                    # s per cell per config, one thread
@@ -82,11 +92,14 @@ def stage_time(g, tasks, st, R, c_fit, c_idle):
     return d_fit + max(backlog, tail)
 
 
-def makespan(g, on_l, on_j, f_l, f_j, n_gpu, c_j):
+def makespan(g, on_l, on_j, f_l, f_j, n_gpu, c_j, qwait_h=0.0):
     R = {"L": f_l, "J": n_gpu * f_j}
     cpu = {"L": (LOCAL_CPUS - LOCAL_LANES, LOCAL_CPUS), "J": (c_j, c_j)}
     tasks = {"L": on_l, "J": on_j}
     D = {h: {st: stage_time(g, tasks[h], st, R[h], *cpu[h]) for st in STAGES} for h in "LJ"}
+    for st in STAGES:      # JHPCE queue wait: one per 3-day GPU job, jobs of a stage run back to back
+        if D["J"][st] > 0 and qwait_h > 0:
+            D["J"][st] += qwait_h * math.ceil(D["J"][st] / 72.0)
     fill_need = {h: stage_time(g, tasks[h], FILL, R[h], *cpu[h]) for h in "LJ"}   # hours if run alone
     fill_done = {h: 0.0 for h in "LJ"}
     for st in STAGES:                                                     # fillers into gate waits, in stage order
@@ -105,13 +118,15 @@ def makespan(g, on_l, on_j, f_l, f_j, n_gpu, c_j):
                 jhpce_job_starts=jobs, filler_hours_in_gaps={h: round(min(fill_done[h], fill_need[h]), 1) for h in "LJ"})
 
 
-def optimise(g, f_l, f_j, n_gpu, c_j):
+def optimise(g, f_l, f_j, n_gpu, c_j, qwait_h=0.0, force_local=()):
     tasks = sorted({t for t, _ in g.index})
     best = None
     for mask in itertools.product([0, 1], repeat=len(tasks)):
         on_j = [t for t, m in zip(tasks, mask) if m]
         on_l = [t for t, m in zip(tasks, mask) if not m]
-        r = makespan(g, on_l, on_j, f_l, f_j, n_gpu, c_j)
+        if set(force_local) & set(on_j):
+            continue
+        r = makespan(g, on_l, on_j, f_l, f_j, n_gpu, c_j, qwait_h)
         key = (round(r["wall_days"], 4), round(r["jhpce_gpu_days"], 4))
         if best is None or key < best[0]:
             best = (key, on_l, on_j, r)
@@ -132,6 +147,8 @@ def main():
     ap.add_argument("--jhpce-score-cpus", type=int, default=48)
     ap.add_argument("--expect-fits", type=int, default=6061)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--queue-wait-days", type=float, nargs="+", default=[0.0, 0.5, 1.0, 2.0],
+                    help="JHPCE queue wait per 3-day GPU job, for the sensitivity grid (base scenario)")
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)
     loc, jh = json.load(open(a.local_cal)), json.load(open(a.jhpce_cal))
@@ -172,6 +189,21 @@ def main():
             rob.append(dict(gpus=n, scenario=name, base_split_wall_days=round(r["wall_days"], 2),
                             scenario_optimum_wall_days=out["scenarios"][name][f"G{n}"]["wall_days"]))
     out["robustness"] = rob
+    # queue-wait sensitivity (base scenario): free assignment vs the 3 A1 tasks kept local
+    g, _, _ = costs(a.manifest, {})
+    a1_tasks = sorted({t for t, st in g.index if st == "S1_A1"})
+    qrows = []
+    for q in a.queue_wait_days:
+        for n in a.gpus:
+            for label, fl in (("free", ()), ("A1_tasks_local", tuple(a1_tasks))):
+                r = optimise(g, f_l, f_j, n, a.jhpce_score_cpus, qwait_h=24 * q, force_local=fl)
+                qrows.append(dict(queue_wait_days=q, gpus=n, constraint=label, wall_days=round(r["wall_days"], 2),
+                                  jhpce=" ".join(r["jhpce_tasks"]), local=" ".join(r["local_tasks"]),
+                                  local_busy_days=round(r["local_busy_days"], 2), jhpce_busy_days=round(r["jhpce_busy_days"], 2),
+                                  jhpce_job_starts=r["jhpce_job_starts"]))
+    out["queue_wait_sensitivity"] = qrows
+    out["a1_tasks"] = a1_tasks
+    pd.DataFrame(qrows).to_csv(os.path.join(a.out_dir, "task_split_queue_wait.csv"), index=False)
     pd.DataFrame(rows).to_csv(os.path.join(a.out_dir, "task_split_table.csv"), index=False)
     json.dump(out, open(os.path.join(a.out_dir, "task_split.json"), "w"), indent=1)
     print(pd.DataFrame(rows).to_string(index=False))

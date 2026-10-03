@@ -1,0 +1,4 @@
+{"pair": "local_vs_jhpce053", "target": "host", "cells": 33506, "knn_rows_identical": 33506, "knn_identical": true, "dist_identical": true, "conn_identical": true}
+{"pair": "local_vs_jhpce174", "target": "host", "cells": 33506, "knn_rows_identical": 33255, "knn_identical": false, "dist_identical": false, "conn_identical": false}
+{"pair": "local_vs_jhpce053", "target": "generic", "cells": 33506, "knn_rows_identical": 33506, "knn_identical": true, "dist_identical": true, "conn_identical": true}
+{"pair": "local_vs_jhpce174", "target": "generic", "cells": 33506, "knn_rows_identical": 33506, "knn_identical": true, "dist_identical": true, "conn_identical": true}
