@@ -254,3 +254,15 @@
 - source: "Add it (Recommended)" (user, ask_user answer to "The primary bio score stays as you chose it ... Should the pre-registration also name a sensitivity analysis that recomputes the immune bio scores without trajectory? ...", 2026-10-03)
 - added: 2026-10-03
 - keywords: trajectory, sensitivity, bio score, immune, amendment, X1
+
+## SI-39 · active · process
+- rule: JHPCE placement for the Tier 1+2 benchmark: 2 L40S GPUs; atac_large, immune_hum_mou, lung, pancreas and sim2 run on JHPCE L40S (every fit of these tasks on L40S, SI-17), atac_small, immune and sim1 locally (SI-30). Split recomputed on the tagged 6,846-row design: 13.8 d. Each JHPCE submission still needs the user's go (SI-29).
+- source: "2 L40S (Recommended)" (user, ask_user answer to "For the real X1 and follow-up fits of atac_large, immune_hum_mou, lung, pancreas and sim2: which JHPCE setup? ...", 2026-10-03)
+- added: 2026-10-03
+- keywords: JHPCE, L40S, placement, split, GPU, tasks
+
+## SI-40 · active · process
+- rule: Code check before any JHPCE launch: a RIGOR_REVIEWER review of tag prereg-tier12-v1 (fit, arms, CPU baselines, runner, scoring, decision rules, manifest builder, JHPCE scripts); the lead verifies every critical/high finding before reporting. A1 keeps running meanwhile; if the check changes any fit or scoring code, A1's fits up to that point are redone.
+- source: "Review sub-agent (Recommended)" and "Keep A1 running (Recommended)" (user, ask_user answers to "How should the check run?" and "What should A1 do meanwhile?", 2026-10-03; preceded by the free-text answer "I want to do a code check before launch")
+- added: 2026-10-03
+- keywords: code check, review, RIGOR_REVIEWER, launch, JHPCE, A1
