@@ -21,7 +21,7 @@ Two count modes (--counts):
            immune(_hum_mou) Villani  TPM (GEO GSE94820 matrix: every cell sums to 1e6) -> dropped
            lung 10x batches          normalised, not counts; HCA's processed h5ads for the same cells
                                      are log1p(CP10k) of non-integer values and GEO GSE130148 counts
-                                     cover only the Drop-seq cells -> dropped (lung 'valid' = Drop-seq only)
+                                     cover only the Drop-seq cells -> dropped (lung 'valid' = the 4 Drop-seq batches B1-B4, 9,701 of 32,472 cells)
 
 Output h5ad (all genes kept so the scorer sees the full unintegrated data):
   X                     scIB's normalised values (as distributed)
