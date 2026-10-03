@@ -2,14 +2,14 @@
 (docs/SPECS_missing_arms.md). Run in the scvi env: WCD_SRC=src python -m pytest -q <this file>
 
 1. `extra` keys: unknown keys and inconsistent options are refused before any data is read.
-2. X3 oracle weights: w = 1 / keep-fraction for kept depleted-type cells of the depleted batch, 1 elsewhere;
-   their sum restores the depleted count exactly; undefined (refused) at doses 0 and 100.
-3. subsample(): the cells selected for every X3 (current targets) and X8 design cell equal the base commit's function
-   (real prepped obs; needs PREPPED_DIR, otherwise skipped with that reason).
+2. X3 oracle weights and the X3 draw: superseded by SI-41 (equal cell count per dose, draw 'nested_v1', exact
+   (batch, cell type) oracle weights); tested in tests/scvi/test_x3_si41.py.
+3. subsample(): the cells selected for every X8 design cell equal the base commit's function (real prepped obs; needs
+   PREPPED_DIR, otherwise skipped with that reason). X3 cells changed by design (SI-41; test_x3_si41.py).
 4. End to end through main(): one row per new option (r1_gamma, discriminator_ref, sampler, iw) on a toy prepped
    file writes a finite latent whose config records the row and the keep fraction.
 5. Manifest: base rows unchanged except the signed-off changes (SI-26 follow-up seeds, SI-27 unconditioned A2/A3,
-   SI-31..SI-33 X3 reference and targets); added rows exactly X3 288 (IW), X6 27 (R1), X7 54 (reference JS),
+   SI-31..SI-33 X3 reference and targets, SI-41 X3 n_cells = X3_N and draw 'nested_v1'); added rows exactly X3 288 (IW), X6 27 (R1), X7 54 (reference JS),
    X8 144 (stratified), X13 128 CPU baselines (SI-34..SI-36); no duplicate tags; tags (= output files) unique.
 """
 import importlib.util
@@ -60,36 +60,11 @@ def test_extra_keys_are_consumed_or_refused():
             fpc.check_extra("t", arm, extra)
 
 
-def test_depletion_oracle_weights_known_answers():
-    a0 = _obs_adata({("b0", "t0"): 100, ("b0", "t1"): 60, ("b1", "t0"): 80, ("b1", "t1"): 40, ("b2", "t1"): 50})
-    for pct, kappa in [(50, 0.5), (80, 0.2), (95, 0.05)]:
-        spec = dict(kind="composition", batch="b0", types=["t0"], deplete_pct=pct, n_cells=10_000)
-        a, info = fpc.subsample(a0, spec, 0, return_info=True)
-        w, k = fpc.depletion_oracle_weights(a, spec, info)
-        assert info == dict(n_hit=100, n_drop=int(round(100 * pct / 100))) and abs(k - kappa) < 1e-12
-        n_kept = int(((a.obs.batch == "b0") & (a.obs.celltype == "t0")).sum())
-        assert abs(w["b0"]["t0"] * n_kept - 100) < 1e-9                  # depleted count restored exactly
-        assert w["b0"]["t1"] == w["b1"]["t0"] == w["b1"]["t1"] == w["b2"]["t1"] == 1.0
-    for pct in (0, 100):
-        spec = dict(kind="composition", batch="b0", types=["t0"], deplete_pct=pct, n_cells=10_000)
-        a, info = fpc.subsample(a0, spec, 0, return_info=True)
-        with pytest.raises(ValueError, match="keep fraction"):
-            fpc.depletion_oracle_weights(a, spec, info)
-
-
 @pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
 def test_subsample_cells_unchanged_from_base():
     import h5py
     old = _base_module("scripts/fit_paper_config.py", "fpc_base")
     n_checked = 0
-    for task, (b, types, _ref) in bpm.X3_TARGETS.items():
-        with h5py.File(os.path.join(os.environ["PREPPED_DIR"], f"{task}__scib.h5ad"), "r") as f:
-            obs = ad.io.read_elem(f["obs"])
-        a0 = ad.AnnData(obs=obs[["batch", "celltype"]].copy())
-        for pct in [0, 50, 80, 95, 100]:
-            spec = dict(kind="composition", batch=b, types=types, deplete_pct=pct, n_cells=min(20000, bpm.TASKS[task][0]))
-            assert list(old.subsample(a0, spec, 0).obs_names) == list(fpc.subsample(a0, spec, 0).obs_names)
-            n_checked += 1
     for task, n in bpm.X8_TOTAL.items():
         with h5py.File(os.path.join(os.environ["PREPPED_DIR"], f"{task}__scib.h5ad"), "r") as f:
             obs = ad.io.read_elem(f["obs"])
@@ -99,7 +74,7 @@ def test_subsample_cells_unchanged_from_base():
                 spec = dict(kind="batches", n_batches=V, subset=sub, n_cells=n)
                 assert list(old.subsample(a0, spec, 0).obs_names) == list(fpc.subsample(a0, spec, 0).obs_names)
                 n_checked += 1
-    assert n_checked == 4 * 5 + 3 * 4 * 2
+    assert n_checked == 3 * 4 * 2
 
 
 def _toy_prepped(path, n=600, g=60, k=3, seed=0):
@@ -121,7 +96,9 @@ def test_runner_end_to_end_new_options(tmp_path):
     base = dict(experiment="T", task="toy", counts="scib", lam="1.0", adv_input="mean", zstd="0", cond="1",
                 decoder="SCVI", n_latent="4", n_layers="1", n_hidden="128", likelihood="zinb", batch_size="128",
                 max_epochs="1", train_size="0.9", seed="0", reference="auto")
-    comp = dict(kind="composition", batch="b1", types=["t0"], deplete_pct=50, n_cells=600)
+    obs = ad.read_h5ad(tmp_path / "toy__scib.h5ad").obs.astype(str)
+    n100 = int(((obs.batch != "b1") | (obs.celltype != "t0")).sum())       # SI-41: the dose-100 size
+    comp = dict(kind="composition", batch="b1", types=["t0"], deplete_pct=50, n_cells=n100, draw="nested_v1")
     rows = [dict(base, tag="r1", arm="discriminator_r1", n_critic="1", extra=json.dumps({"r1_gamma": 10})),
             dict(base, tag="refjs", arm="discriminator_ref", n_critic="1", reference="0", extra="{}"),
             dict(base, tag="strat", arm="pooled", n_critic="5", extra=json.dumps({"sampler": "stratified"})),
@@ -139,9 +116,13 @@ def test_runner_end_to_end_new_options(tmp_path):
         assert np.isfinite(d["z"]).all() and d["z"].shape[1] == 4 and cfg["row"]["arm"] == r["arm"]
         assert json.loads(cfg["row"]["extra"]) == json.loads(r["extra"])
         if r["tag"] == "iw":
-            assert abs(cfg["iw_keep_fraction"] - 0.5) < 0.01, cfg["iw_keep_fraction"]
+            assert set(cfg["iw_keep_fraction"]) == {"t0"} and abs(cfg["iw_keep_fraction"]["t0"] - 0.5) < 0.02
+            assert cfg["subsample_info"]["draw"] == "nested_v1" and len(d["z"]) == n100
+            kd = pd.Series(list(zip(d["batch"], d["celltype"]))).value_counts()
+            k0 = cfg["subsample_info"]["k0_counts"]
+            assert all(abs(cfg["iw_weights"][b][c] * n - k0.get(b, {}).get(c, 0)) < 1e-9 for (b, c), n in kd.items())
         else:
-            assert cfg["iw_keep_fraction"] is None
+            assert cfg["iw_keep_fraction"] is None and cfg["iw_weights"] is None and cfg["subsample_info"] is None
 
 
 def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
@@ -169,6 +150,7 @@ def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
         b, types, ref = bpm.X3_TARGETS[r.task]
         ex = json.loads(r.extra)
         ex["subsample"]["batch"], ex["subsample"]["types"] = b, types
+        ex["subsample"]["n_cells"], ex["subsample"]["draw"] = bpm.X3_N[r.task], bpm.X3_DRAW   # SI-41
         return pd.Series({"reference": ref, "extra": json.dumps(ex)})
     o2.loc[x3, ["reference", "extra"]] = o2[x3].apply(_x3_new, axis=1).to_numpy()
     m = o2.merge(n, on=key, how="left", suffixes=("", "_new"), indicator=True, validate="one_to_one")

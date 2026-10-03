@@ -37,6 +37,12 @@ EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
               "r1_gamma",                 # X6 discriminator_r1 (docs/SPECS_missing_arms.md section 1, SI-22)
               "sampler",                  # X8 'stratified' (section 3, SI-24)
               "iw"}                       # X3 'depletion_oracle' (section 4, SI-25)
+# X3 (SI-41): every composition spec carries draw=X3_DRAW (x3_draw); X3_PERMUTATION_SEED seeds the ONE dose-independent
+# permutation of a task's cells that every dose of the task draws from. Both are written into each X3 latent's config
+# (subsample_info); a spec with another or no draw is refused.
+X3_DRAW = "nested_v1"
+X3_PERMUTATION_SEED = 40_000
+X3_SPEC_KEYS = {"kind", "batch", "types", "deplete_pct", "n_cells", "draw"}
 
 
 def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
@@ -77,24 +83,40 @@ def check_extra(tag, arm, extra):
             raise ValueError(f"{tag}: iw='depletion_oracle' needs an X3 composition subsample")
 
 
-def depletion_oracle_weights(a, spec, info):
-    """X3 oracle importance weights (SI-25): w = 1 / kappa for cells of the depleted types in the depleted batch,
-    1 for every other cell, kappa = (n_hit - n_drop) / n_hit the realised keep fraction of the depletion
-    (Tachet des Combes et al. 2020, Eq. 4 on the joint label (batch, cell type), target = pre-depletion).
-    Returns ({batch: {cell type: w}} over the pairs present in a, kappa). Defined only for 0 < kappa < 1."""
-    n_hit, n_drop = int(info["n_hit"]), int(info["n_drop"])
-    if n_hit == 0:
-        raise ValueError(f"no cells of {spec['types']} in batch {spec['batch']!r}: nothing was depleted")
-    kappa = (n_hit - n_drop) / n_hit
-    if not 0.0 < kappa < 1.0:
-        raise ValueError(f"importance weights are defined for 0 < keep fraction < 1 (doses 50/80/95), got {kappa} "
-                         f"at deplete_pct={spec['deplete_pct']}: all weights would be 1 or the types are absent")
-    pairs = a.obs[["batch", "celltype"]].astype(str).drop_duplicates()
-    types = set(map(str, spec["types"]))
+def group_counts(obs):
+    """{batch: {cell type: number of cells}} of an obs table (str labels, pairs with at least one cell)."""
     out = {}
-    for b, c in pairs.itertuples(index=False):
-        out.setdefault(b, {})[c] = (1.0 / kappa) if (b == str(spec["batch"]) and c in types) else 1.0
-    return out, kappa
+    for (b, c), n in obs[["batch", "celltype"]].astype(str).value_counts().items():
+        out.setdefault(b, {})[c] = int(n)
+    return out
+
+
+def depletion_oracle_weights(a, spec, info):
+    """X3 oracle importance weights (SI-25 target, exact under SI-41; lead decision 2026-10-03): the (batch, cell type)
+    table w[b, y] = n_K0(b, y) / n_Kd(b, y), with K0 the dose-0 cells and K_d the cells of this dose (`a`), both drawn
+    by subsample() (info['k0_counts'] is its record of K0). The losses use the weights self-normalised, so the
+    weighted (batch, type) counts of K_d equal those of K0 exactly: every batch's dose-0 composition and the dose-0
+    batch sizes are restored (Tachet des Combes et al. 2020, Eq. 4 on the joint label, target = dose 0). Pairs drawn
+    by the refill but absent from K0 get weight 0. Without refill this is SI-25's 1 / keep fraction for the depleted
+    pairs and 1 elsewhere. Defined for 0 < deplete_pct < 100 (doses 50/80/95): at dose 0 every weight is 1 and at
+    dose 100 the depleted pairs are empty, so K0 cannot be restored.
+    Returns ({batch: {cell type: w}} over the pairs present in a, {declared type: kept / K0 count})."""
+    pct = spec["deplete_pct"]
+    if not 0 < pct < 100:
+        raise ValueError(f"importance weights are defined for 0 < deplete_pct < 100 (doses 50/80/95), got {pct}: "
+                         f"at dose 0 every weight is 1 and at dose 100 the depleted pairs are empty")
+    k0, kd = info["k0_counts"], group_counts(a.obs)
+    lost = [(b, c) for b, row in k0.items() for c in row if kd.get(b, {}).get(c, 0) == 0]
+    if lost:
+        raise ValueError(f"(batch, cell type) pairs of K0 absent at deplete_pct={pct}: {lost[:5]}; their dose-0 counts "
+                         f"cannot be restored")
+    w = {b: {c: k0.get(b, {}).get(c, 0) / n for c, n in row.items()} for b, row in kd.items()}
+    for b, row in k0.items():            # the defining property, checked on the realised counts
+        for c, n0 in row.items():
+            if abs(w[b][c] * kd[b][c] - n0) > 1e-9 * n0:
+                raise AssertionError(f"weighted count of ({b}, {c}) is {w[b][c] * kd[b][c]}, K0 has {n0}")
+    keep = {t: v["kept"] / v["h0"] for t, v in info["per_type"].items()}
+    return w, keep
 
 
 def load_row(manifest, tag):
@@ -113,9 +135,10 @@ def load_row(manifest, tag):
 
 
 def subsample(adata, spec, seed, return_info=False):
-    """Deterministic subsamples for X3 (composition shift) and X8 (number of batches).
-    return_info=True also returns the realised selection {n_hit, n_drop} of an X3 depletion (the input of the
-    importance weights), computed by the same code that selects the cells."""
+    """Deterministic subsamples for X3 (composition shift; x3_draw) and X8 (number of batches).
+    return_info=True also returns the realised X3 selection (x3_draw's info: per declared type the dose-0, dropped
+    and kept counts, and the dose-0 (batch, cell type) counts that the importance weights restore), computed by the
+    same code that selects the cells."""
     import anndata as ad  # noqa: F401
     # The subsample depends on the design cell (task, V, subset, dose) only, never on the training
     # seed, so every arm and seed of one design cell sees the same cells.
@@ -134,20 +157,61 @@ def subsample(adata, spec, seed, return_info=False):
             raise ValueError("return_info is defined for composition subsamples only")
         return adata[np.sort(idx)].copy()
     if spec["kind"] == "composition":
-        # deplete the pre-declared cell types in the pre-declared batch, then subsample to n_cells
-        rng = np.random.default_rng(40_000 + spec["deplete_pct"])
-        b, types, pct = spec["batch"], spec["types"], spec["deplete_pct"]
-        keep = np.ones(adata.n_obs, dtype=bool)
-        hit = np.where((obs["batch"].astype(str).values == b) & obs["celltype"].astype(str).isin(types).values)[0]
-        drop = rng.choice(hit, int(round(len(hit) * pct / 100)), replace=False) if len(hit) else hit
-        keep[drop] = False
-        idx = np.where(keep)[0]
-        if len(idx) > spec["n_cells"]:
-            idx = np.sort(rng.choice(idx, spec["n_cells"], replace=False))
+        idx, info = x3_draw(obs, spec)
         if return_info:
-            return adata[idx].copy(), dict(n_hit=int(len(hit)), n_drop=int(len(drop)))
+            return adata[idx].copy(), info
         return adata[idx].copy()
     raise ValueError(spec)
+
+
+def x3_draw(obs, spec):
+    """X3 cells of one dose, draw 'nested_v1' (SI-41; code check CR-04; lead decision 2026-10-03). Every dose of a
+    task keeps the same number of cells N = spec['n_cells'] (the task's dose-100 size), drawn from ONE
+    dose-independent permutation of the task's cells (default_rng(X3_PERMUTATION_SEED), common random numbers):
+      K0   = the first N cells of the permutation (dose 0);
+      dose d removes, for EACH declared type t, the first round(d/100 * h0_t) cells of type t in the declared batch
+           among K0 (permutation order; h0_t = their number in K0), and refills the freed slots with the next
+           non-declared cells of the permutation (cells that are not of a declared type in the declared batch).
+    Every declared type keeps exactly h0_t - round(d/100 * h0_t) cells (none empties before dose 100), no K0 cell of
+    another kind is removed, the kept declared cells and the refill are nested across doses, and two doses share
+    the largest possible number of cells (N minus the difference of their declared-cell counts).
+    Returns (sorted row indices into obs, info) with info = {draw, permutation_seed, n_cells, n_hit (declared cells
+    of the whole task), per_type {t: {h0, dropped, kept}}, k0_counts {batch: {cell type: n}}}."""
+    unknown = sorted(set(spec) - X3_SPEC_KEYS)
+    if unknown:
+        raise KeyError(f"composition subsample has keys x3_draw does not consume: {unknown}")
+    if spec.get("draw") != X3_DRAW:
+        raise ValueError(f"composition subsample needs draw={X3_DRAW!r} (SI-41), got {spec.get('draw')!r}: the "
+                         f"pre-SI-41 X3 rows (one RNG draw per dose, unequal cell counts) are retired")
+    b, pct, n = str(spec["batch"]), spec["deplete_pct"], int(spec["n_cells"])
+    types = [str(t) for t in spec["types"]]
+    if not 0 <= pct <= 100:
+        raise ValueError(f"deplete_pct must be in [0, 100], got {pct}")
+    if len(set(types)) != len(types) or not types:
+        raise ValueError(f"declared types must be distinct and non-empty, got {types}")
+    bat, ct = obs["batch"].astype(str).values, obs["celltype"].astype(str).values
+    is_hit = (bat == b) & np.isin(ct, types)
+    n_nonhit = int((~is_hit).sum())
+    if not 0 < n <= n_nonhit:
+        raise ValueError(f"n_cells={n} must be in (0, {n_nonhit}], the cells left at dose 100 (SI-41)")
+    perm = np.random.default_rng(X3_PERMUTATION_SEED).permutation(len(obs))
+    k0 = perm[:n]
+    kept_decl, per_type = [], {}
+    for t in types:
+        h0 = k0[is_hit[k0] & (ct[k0] == t)]                 # declared cells of type t in K0, permutation order
+        if len(h0) == 0:
+            raise ValueError(f"declared type {t!r} of batch {b!r} has no cell among the dose-0 cells: nothing to deplete")
+        nd = int(round(len(h0) * pct / 100))
+        kept_decl.append(h0[nd:])
+        per_type[t] = dict(h0=int(len(h0)), dropped=nd, kept=int(len(h0) - nd))
+    kept_decl = np.concatenate(kept_decl)
+    fill = perm[~is_hit[perm]][:n - len(kept_decl)]        # K0's non-declared cells, then the next ones
+    idx = np.sort(np.concatenate([kept_decl, fill]))
+    if len(idx) != n or len(np.unique(idx)) != n:
+        raise AssertionError(f"selected {len(idx)} cells ({len(np.unique(idx))} distinct), expected {n}")
+    info = dict(draw=X3_DRAW, permutation_seed=X3_PERMUTATION_SEED, n_cells=n, n_hit=int(is_hit.sum()),
+                per_type=per_type, k0_counts=group_counts(obs.iloc[np.sort(k0)]))
+    return idx, info
 
 
 def provenance():
@@ -196,10 +260,11 @@ def main():
         raise ValueError(f"{r['tag']}: adversarial arm with lam={lam}")
 
     a = ad.read_h5ad(os.path.join(os.environ["PREPPED_DIR"], f"{r['task']}__{r['counts']}.h5ad"))
-    iw_weights, iw_kappa = None, None
-    if "subsample" in extra and "iw" in extra:
-        a, sel = subsample(a, extra["subsample"], seed, return_info=True)
-        iw_weights, iw_kappa = depletion_oracle_weights(a, extra["subsample"], sel)
+    iw_weights, iw_keep, sub_info = None, None, None
+    if "subsample" in extra and extra["subsample"].get("kind") == "composition":
+        a, sub_info = subsample(a, extra["subsample"], seed, return_info=True)
+        if "iw" in extra:
+            iw_weights, iw_keep = depletion_oracle_weights(a, extra["subsample"], sub_info)
     elif "subsample" in extra:
         a = subsample(a, extra["subsample"], seed)
     a = a[:, a.var["highly_variable"].values].copy()
@@ -233,7 +298,8 @@ def main():
     hist = {k: v.iloc[:, 0].astype(float).tolist() for k, v in getattr(model, "history_", {}).items()
             if hasattr(v, "iloc")}
     cfg = dict(row=r, reference_name=ref_name, n_cells=int(a.n_obs), n_batches=int(a.obs["batch"].nunique()),
-               fit_seconds=round(secs, 1), iw_keep_fraction=iw_kappa, **provenance())
+               fit_seconds=round(secs, 1), iw_keep_fraction=iw_keep, iw_weights=iw_weights, subsample_info=sub_info,
+               **provenance())
     os.makedirs(os.path.dirname(npz), exist_ok=True)
     tmp = npz + ".tmp.npz"
     np.savez_compressed(tmp, z=np.asarray(z, dtype=np.float32), obs_names=a.obs_names.to_numpy(dtype="U128"),

@@ -10,7 +10,9 @@ Decisions in force (CONSTRAINTS.md):
     barycenter, 10 cold fixed-point iterations per step (SI-14); critics use WGAN-GP Algorithm 1
     defaults (n_critic 5, lambda_GP 10, Adam 1e-4, betas (0, 0.9)).
   * X3 rows name their reference batch (the dose-0 automatic choice, fixed for every dose) and deplete a
-    non-reference batch (SI-31..SI-33, X3_TARGETS); X13 CPU baselines (harmony / scanorama knob x 6 values at
+    non-reference batch (SI-31..SI-33, X3_TARGETS); every dose of a task has the same cell count, the task's
+    dose-100 size (X3_N), drawn as nested subsamples of one dose-independent permutation (draw X3_DRAW,
+    scripts/fit_paper_config.py x3_draw; SI-41); X13 CPU baselines (harmony / scanorama knob x 6 values at
     the backbone's latent size, plus the tool default dimensions; PCA once; SI-34..SI-36, CPU_BASELINES) are rows
     for scripts/run_cpu_baselines.py, which fit_paper_config.py refuses.
 
@@ -84,6 +86,12 @@ X3_TARGETS = {
     "sim2": ("Batch3Sub1", ["Group1"], "Batch4Sub2"),
     "pancreas": ("inDrop3", ["alpha", "acinar"], "inDrop1"),
 }
+# X3 cell count per task (SI-41, code check CR-04): the dose-100 size = cells left after removing every declared
+# cell, capped at 20,000 (the cap X3 used before; it binds on immune_hum_mou only). Read from prepped_scib on
+# 2026-10-03 (cells - declared cells: atac_small 11,270 - 2,868; pancreas 16,382 - 1,973; sim2 19,318 - 1,446;
+# immune_hum_mou 97,861 - 10,873 > 20,000); tests/scvi/test_x3_x13_design.py re-derives every entry.
+X3_N = {"atac_small": 8402, "immune_hum_mou": 20000, "sim2": 17872, "pancreas": 14409}
+X3_DRAW = "nested_v1"   # = fit_paper_config.X3_DRAW; the fitter refuses composition specs without it
 # X13 CPU baselines (scripts/run_cpu_baselines.py; scripts/fit_paper_config.py refuses these arms): each method's
 # strength knob x 6 values at the backbone's 10 dimensions, run once (deterministic), plus the tool's default
 # dimensions at the default knob value as sensitivity. PCA has no knob: once, the uncorrected anchor (SI-36).
@@ -218,17 +226,19 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     for t, (b, types, ref) in X3_TARGETS.items():
         if ref == b or ref.isdigit():
             raise ValueError(f"X3 {t}: reference {ref!r} must be a batch name other than the depleted batch")
-        n = min(20000, TASKS[t][0])
+        n = X3_N[t]
         for dose, s in itertools.product([0, 50, 80, 95, 100], FOLLOWUP_SEEDS):
-            ex = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose, n_cells=n)))
+            ex = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose, n_cells=n,
+                                                draw=X3_DRAW)))
             R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex, reference=ref))
             R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex, reference=ref)
                   for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
-            # oracle importance-weighted control (SPECS section 4, SI-25): weights undo the induced depletion;
-            # at doses 0 and 100 every weight is 1 (= the unweighted rows above), so IW rows at 50 / 80 / 95 only
+            # oracle importance-weighted control (SPECS section 4, SI-25): weights restore the dose-0 composition
+            # (fit_paper_config.depletion_oracle_weights); at dose 0 every weight is 1 (= the unweighted rows above)
+            # and at dose 100 the depleted pairs are empty, so IW rows at 50 / 80 / 95 only
             if dose in (50, 80, 95):
                 ex_iw = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose,
-                                                       n_cells=n), iw="depletion_oracle"))
+                                                       n_cells=n, draw=X3_DRAW), iw="depletion_oracle"))
                 R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw, reference=ref)
                       for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
     # ---- X6 (tier 2): divergence x Lipschitz control x update budget (pooled = symmetric target)
