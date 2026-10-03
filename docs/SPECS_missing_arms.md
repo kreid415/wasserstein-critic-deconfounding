@@ -315,8 +315,7 @@ between two runs), and kBET varies by up to 0.0047 on identical latents.
 
 ## 8. X13 CPU baselines: strength knobs, budget parity, Harmony reproducibility (2026-10-03)
 
-**Requirement.** The approved matrix gives each X13 method "its native strength knob x 6 configs (deterministic CPU
-methods once)" and PAPER_PLAN section 5 requires the same number of configurations per method family (best-of-k
+**Requirement.** The approved matrix gives the X13 methods "each method's native strength knob x 6 configs (deterministic CPU methods once)" and PAPER_PLAN section 5 requires the same number of configurations per method family (best-of-k
 curves). The adversarial arms have 6 lambda values per family (A1, R1); sysVI 6 cycle weights.
 
 **Sources** (full texts read 2026-10-03: PMC author manuscripts PMC6884693 and PMC6551256, fetched by DOI
