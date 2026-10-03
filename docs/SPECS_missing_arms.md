@@ -241,8 +241,8 @@ X8 sampler on all four X8 adversarial arms (288 fits); X3 pairwise full composit
 | runner | `fit_paper_config.py`: every `extra` key consumed or refused; provenance git calls fail loudly | unknown / inconsistent keys refused; end-to-end rows for r1_gamma, discriminator_ref, sampler, iw; X3/X8 cells unchanged from 8cda6de on real obs |
 | manifest | `build_paper_manifest.py`: X3 +288 (IW, doses 50/80/95), X6 +27 (R1), X7 +54 (reference JS), X8 +144 (stratified critics); base rows unchanged | `test_manifest_adds_exactly_the_signed_off_rows`; fl_unique_outputs over 6,502 rows |
 
-Test runs on the final code (src/ and scripts/ unchanged since fe4ec94; X13 suite re-run after its negative-control fix): wcd-gpu `159 passed, 66 warnings in 81.65s (0:01:21)`; scvi-api `50 passed, 1 skipped, 132 warnings in 50.75s`; wcd-kbet (X13) `6 passed, 4 warnings in 121.97s (0:02:01)`.
-Bit-identity gate (`scripts/check_arm_bitidentity.py --base 8cda6de`, CPU): 34 of 34 configurations of the existing arms
+Test runs at commit c3e3ad4 (code final; later commits change documentation only): wcd-gpu `159 passed`; scvi-api `50 passed, 1 skipped`; wcd-kbet (X13) `6 passed`.
+Bit-identity gate (`scripts/check_arm_bitidentity.py --base 8cda6de`, CPU; run on the code of fe4ec94, which differs from the final code only in SI id tokens in comments): 34 of 34 configurations of the existing arms
 identical, max|dz| = 0 (`docs/bitidentity_existing_arms.csv`); a 0.025% MMD bandwidth change and a 1e-4 fool-loss change are detected.
 
 **Step cost (immune, single lane, `docs/throughput_missing_arms_summary.csv`), PROVISIONAL.** The run failed PF-16: repeat 2 ran
