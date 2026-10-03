@@ -27,13 +27,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from tests.scvi._require import import_or_skip, needs_env  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import build_paper_manifest as bpm  # noqa: E402
 import fit_paper_config as fpc  # noqa: E402
 
-ad = pytest.importorskip("anndata")
-NEEDS_DATA = pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
+ad = import_or_skip("anndata")
+NEEDS_DATA = needs_env("PREPPED_DIR")     # skip, or FAIL under WCD_REQUIRE_DATA=1 (tests/scvi/_require.py)
 TAGGED = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10.tsv")
 V2 = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v2.tsv")
 DOSES = [0, 50, 80, 95, 100]

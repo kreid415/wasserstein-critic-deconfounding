@@ -22,6 +22,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from tests.scvi._require import import_or_skip, needs_env  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import fit_paper_config as fpc  # noqa: E402
@@ -29,7 +31,7 @@ import build_paper_manifest as bpm  # noqa: E402
 
 BASE = "8cda6de"            # code before the missing arms: existing-arm bit identity is checked against it
 MANIFEST_BASE = "2e4f24d"   # prereg-rules tip: the manifest the missing-arm rows are added to (merged 2026-10-03)
-ad = pytest.importorskip("anndata")
+ad = import_or_skip("anndata")
 
 
 def _base_module(path, name):
@@ -60,7 +62,7 @@ def test_extra_keys_are_consumed_or_refused():
             fpc.check_extra("t", arm, extra)
 
 
-@pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
+@needs_env("PREPPED_DIR")
 def test_subsample_cells_unchanged_from_base():
     import h5py
     old = _base_module("scripts/fit_paper_config.py", "fpc_base")

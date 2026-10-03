@@ -28,7 +28,8 @@ Output h5ad (all genes kept so the scorer sees the full unintegrated data):
   layers['counts']      counts per the mode
   var['highly_variable'] training features (scIB HVGs for RNA; all features for ATAC)
   obs batch, celltype   standardised copies of the scIB keys (originals kept)
-  obsm['X_pca']         50-PC PCA of X on the training features (PCR reference for scoring)
+  obsm['X_pca']         50-PC PCA of X on the training features. Not the PCR reference: no uns['pca'] is written,
+                        so scib.metrics.pcr recomputes the all-feature PCA of the scored cells (code check CR-01)
   uns                   task, mode, keys, count_status, repairs, hvg settings, source md5
 
 Usage: python scripts/prep_scib_task.py --task immune --counts scib --raw-dir DIR --out-dir DIR
@@ -173,7 +174,7 @@ def main():
     Xs = sub.X.toarray() if sp.issparse(sub.X) else np.asarray(sub.X)
     a.obsm["X_pca"] = sc.pp.pca(Xs.astype(np.float32), n_comps=50, random_state=0)
 
-    sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     a.uns.update(dict(
         task=args.task, counts_mode=args.counts, batch_key="batch", celltype_key="celltype",
         scib_batch_key=t["batch"], scib_label_key=t["label"], modality=t["modality"], organism=t["organism"],
