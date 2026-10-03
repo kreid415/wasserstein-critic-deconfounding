@@ -266,3 +266,9 @@
 - source: "Review sub-agent (Recommended)" and "Keep A1 running (Recommended)" (user, ask_user answers to "How should the check run?" and "What should A1 do meanwhile?", 2026-10-03; preceded by the free-text answer "I want to do a code check before launch")
 - added: 2026-10-03
 - keywords: code check, review, RIGOR_REVIEWER, launch, JHPCE, A1
+
+## SI-41 · active · method
+- rule: X3 composition shift: every dose of a task uses the same cell count, the task's dose-100 size (atac_small 8,402, pancreas 14,409, sim2 17,872, immune_hum_mou 20,000), drawn as nested subsamples from one dose-independent permutation, so the dose effect is not confounded with cell count or training steps. Dated PREREG amendment; X3 rows rebuilt and re-tagged before any X3 fit; A1, A2, A3 and X1 rows unchanged.
+- source: "Equal cell count per dose (Recommended)" (user, ask_user answer to "CR-04 ... How should X3 be handled?", 2026-10-03)
+- added: 2026-10-03
+- keywords: X3, composition, cell count, dose, subsample, amendment, CR-04
