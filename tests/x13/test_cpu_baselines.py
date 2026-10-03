@@ -1,9 +1,11 @@
 """Checks of scripts/run_cpu_baselines.py (X13). Run in env wcd-kbet (scib 1.1.7, harmony-pytorch 0.1.7, scanorama):
     KMP_AFFINITY=disabled python -m pytest -q tests/x13
 
-1. The runner's Harmony statements reproduce scib.integration.harmony at the default setting to harmonize's own
-   rerun noise (<= 5.7e-06 measured; tolerance 1e-4); a shuffled batch column or the uncorrected PCA differs by
-   more than 100x that (theta 2.5 instead of 2 does not: max|dz| 1e-05 on this toy, so it is not used).
+1. The runner's Harmony statements reproduce scib.integration.harmony at the default setting within tolerance
+   1e-4 (harmonize reruns on this toy differed by up to 5.7e-06 in a long-running process or with
+   MKL_DYNAMIC/OMP_DYNAMIC=FALSE, and by 0 in a fresh process with default settings); a shuffled batch column or
+   the uncorrected PCA differs by more than 100x the tolerance (theta 2.5 instead of 2 does not: max|dz| 1e-05 on
+   this toy, so it is not used).
 2. Scanorama's output (concatenated by batch) is returned in the input cell order.
 3. Each method returns the declared number of dimensions at both settings.
 4. With PREPPED_DIR set: the runner on atac_small writes the npz format of fit_paper_config.py (z, obs_names,
@@ -42,7 +44,7 @@ def _toy(n=900, g=200, k=3, seed=0):
     return a
 
 
-HARMONY_RERUN_TOL = 1e-4   # harmonize reruns on identical input differ by <= 5.7e-06 (measured 2026-10-02)
+HARMONY_RERUN_TOL = 1e-4   # largest harmonize rerun difference seen on this toy: 5.7e-06 (2026-10-02; 0 in a fresh process)
 
 
 def test_harmony_statements_reproduce_scib_harmony():

@@ -17,10 +17,12 @@ is scib's function with dimred=10 (its kwargs reach scanorama.correct); scib's H
 argument, so the runner runs its two statements with sc.tl.pca(n_comps=10) (a test checks that these statements
 reproduce scib.integration.harmony exactly at the default setting).
 Training features: var["highly_variable"] of the prepped file, subset before the method (scIB pipeline).
-Deterministic CPU methods: one run per task and setting (PCA random_state 0, harmonize random_state 0,
-scanorama seed 0). Measured 2026-10-02 on the local machine: PCA reruns are identical at any thread count;
-harmonize reruns on identical input differ by up to 5.7e-06 (multithreaded float32 torch arithmetic), so Harmony
-latents are reproducible to that level, not bit for bit.
+One run per task and setting (PCA random_state 0, harmonize random_state 0, scanorama seed 0). Measured
+2026-10-02 on the local machine (NB-20261002-10): PCA reruns are identical at any thread count. Harmony is not
+reproducible run to run: two runs of this script on atac_small with the same recorded settings gave identical d10
+latents but d50 latents differing by max|dz| 0.114 (NMI 0.024 apart). On a toy input, harmonize reruns differed by
+up to 5.7e-06 inside a long-running process and with MKL_DYNAMIC=FALSE OMP_DYNAMIC=FALSE, and by 0 in a fresh
+process with default settings (4 calls). Whether X13 repeats Harmony or pins its threads is an open decision.
 
 Output: OUT_DIR/latents/X13_<task>_<method>_d<dims>.npz with z, obs_names, batch, celltype, config, history:
 the format of scripts/fit_paper_config.py, scored unchanged by scripts/score_scib_native.py.
