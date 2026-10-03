@@ -153,12 +153,25 @@ def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
     rd = lambda p: pd.read_csv(p, sep="\t", comment="#", dtype=str, keep_default_na=False)  # noqa: E731
     o, n = rd(tmp_path / "old.tsv"), rd(tmp_path / "new.tsv")
     assert not n.tag.duplicated().any()
-    m = o.merge(n, on="tag", how="left", suffixes=("", "_new"), indicator=True)
+    # Signed-off changes since MANIFEST_BASE (CONSTRAINTS.md): SI-26 moves the follow-ups X3/X6/X7/X8/X12 from
+    # seeds 0-2 to bpm.FOLLOWUP_SEEDS (field seed and hence tag change, nothing else); SI-27 adds A2/A3 on the
+    # unconditioned decoder, one row per conditioned row. Every other base row must be unchanged, tag included.
+    key = [c for c in o.columns if c != "tag"]
+    fu = o.experiment.isin(["X3", "X6", "X7", "X8", "X12"])
+    assert set(o.seed[fu]) == {"0", "1", "2"}
+    o2 = o.copy()
+    o2.loc[fu, "seed"] = o2.seed[fu].map(lambda s: str(bpm.FOLLOWUP_SEEDS[int(s)]))
+    m = o2.merge(n, on=key, how="left", suffixes=("", "_new"), indicator=True, validate="one_to_one")
     assert (m["_merge"] == "both").all()
-    for c in o.columns:
-        if c != "tag":
-            assert (m[c] == m[c + "_new"]).all(), c
-    add = n[~n.tag.isin(o.tag)].copy()
+    assert (m.tag == m.tag_new)[~fu.to_numpy()].all() and (m.tag != m.tag_new)[fu.to_numpy()].all()
+    add = n.merge(o2[key], on=key, how="left", indicator=True)
+    add = add[add["_merge"] == "left_only"].drop(columns="_merge")
+    a23 = o[o.experiment.isin(["A2", "A3"])].assign(cond="0")
+    assert len(a23) == 144 and set(o.cond[o.experiment.isin(["A2", "A3"])]) == {"1"}
+    mirror = add[add.experiment.isin(["A2", "A3"])]
+    assert sorted(map(tuple, mirror[key].to_numpy())) == sorted(map(tuple, a23[key].to_numpy()))
+    add = add[~add.experiment.isin(["A2", "A3"])].copy()
+    assert set(add.seed) == {str(s) for s in bpm.FOLLOWUP_SEEDS}
     add["opt"] = add.extra.map(lambda s: ",".join(sorted(set(json.loads(s)) - {"subsample"})))
     got = add.groupby(["experiment", "arm", "opt"]).size().to_dict()
     exp = {("X3", a, "iw"): 72 for a in ["discriminator", "reference", "pooled", "mmd"]}
