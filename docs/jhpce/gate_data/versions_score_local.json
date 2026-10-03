@@ -1,0 +1,35 @@
+{
+ "R": "R version 4.5.2 (2025-10-31)",
+ "executable": "/home/kendall/.claude-science/conda/envs/wcd-kbet/bin/python",
+ "host": "localhost",
+ "kbet": "kBET version=0.99.6 objects=21 md5=3b541efa166047024303705943926906 lib=/home/kendall/experiment_data/wasserstein-critic-deconfounding/Rlib_kbet R=R version 4.5.2 (2025-10-31)",
+ "kind": "score",
+ "machine": "x86_64",
+ "modules": {
+  "anndata": "0.11.4",
+  "anndata2ri": "1.3.2",
+  "h5py": "3.16.0",
+  "igraph": "0.11.9",
+  "leidenalg": "0.10.2",
+  "llvmlite": "0.48.0",
+  "numba": "0.66.0",
+  "numpy": "1.26.4",
+  "pandas": "1.5.3",
+  "pynndescent": "0.5.13",
+  "rpy2": "3.6.5 (dist metadata)",
+  "scanpy": "1.11.5",
+  "scib": "1.1.7",
+  "scipy": "1.14.1",
+  "sklearn": "1.9.0",
+  "torch": "2.4.1+cu121",
+  "umap": "0.5.12"
+ },
+ "python": "3.11.15",
+ "runtime_threadpools": [
+  "mkl 2025.3-Product libmkl_rt.so.2 intel",
+  "openblas 0.3.27.dev libscipy_openblas-c128ec02.so Zen",
+  "openblas 0.3.34 libopenblasp-r0.3.34.so Zen",
+  "openmp None libgomp-a34b3233.so.1",
+  "openmp None libomp.so"
+ ]
+}

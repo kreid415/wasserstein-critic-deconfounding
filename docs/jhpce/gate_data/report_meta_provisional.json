@@ -1,0 +1,184 @@
+{
+ "date": "2026-10-02/03 (provisional: G3 local half and G1/G2/G4 complete; GPU part pending)",
+ "status_line": "PROVISIONAL. G1 (CPU build checks), G2 and G4 are final. The JHPCE half of G3, the GPU rows of G1, and G5 wait on the pinned-GPU gate job, which is still queued (A100 36131135, L40S copy 36133219; the user chose to keep both queued). The split below uses a PLACEHOLDER per-GPU speed ratio of 1.0 until G5 is measured.",
+ "local_hw": "RTX 3080 10 GB (driver 580.173.02, CUDA 13.0), AMD Ryzen 5 3600 (AVX2), envs scvi-api (fits) / wcd-kbet (scoring)",
+ "jhpce_hw": "fit env wcd-fit on one pinned GPU model (A100 job queued, L40S copy queued); scoring env wcd-score on 'shared' nodes (G4 ran on compute-174, AMD EPYC 9555, AVX-512)",
+ "commit": "6675f8c (setup and A100 gate job), 2f29004 (diagnosis jobs, L40S copy); fit code identical to main 8cda6de and to the local calibration commit fe56044 (docstring-only diff), confirmed by 8 local refits that reproduce the calibration latents bitwise",
+ "jobs_line": "setup 695f3107 (Slurm 36131132, COMPLETED), G4 diagnosis ed9b0733 (36132749, FAILED: AVX2-pinned scoring on a pre-AVX2 Opteron) and 3fba33c9 (36132943, COMPLETED), gate A100 8749bada (36131135, PENDING), gate L40S copy a2b6ae1f (36133219, PENDING)",
+ "g3_pending": "the 64 JHPCE latents come from the pending GPU job. The 64 local latents are already scored in local wcd-kbet (64/64, 0 failures).",
+ "g5_pending": "needs the pending GPU job's queue_times.tsv",
+ "g4_text": "Per metric. G4 = the 2 latents (Q_none_0, Q_barycenter_1) and the prepped file, md5-identical on both hosts, scored locally (wcd-kbet) and on JHPCE (wcd-score, compute-174 = AMD EPYC 9555, AVX-512); tolerance 1e-6 absolute. G4b = the same on JHPCE against the JHPCE-regenerated prepped file. local repeat = the same latents re-scored on the local machine (inside the G3 run); JHPCE repeat = a second job on compute-174; numba generic = both hosts with NUMBA_CPU_NAME=generic. The host verdict uses the deterministic metrics only: kBET is unseeded in scib 1.1.7 (R kBET samples test cells) and changes between runs on one machine (local repeat column; the lead measured up to 0.0047), so its cross-host difference is not a host difference; a fixed R seed is being added to score_scib_native.py on prereg-v2. Diagnosis of the deterministic metrics: (i) the scorer's kNN graph (pynndescent, numba) depends on the CPU vector width: AVX-512 EPYC vs local AVX2 differ in 251 of 33,506 rows, which moves ARI, NMI, isolated-label F1, graph connectivity and trajectory; an AVX-only Opteron (compute-053) builds the same graph as local; with NUMBA_CPU_NAME=generic the graph is identical on all three CPU types and those metrics agree to <=1e-16; (ii) graph iLISI / cLISI still differ across hosts AND between two runs on compute-174 (identical graph; ARI/NMI unchanged), but are identical between local runs (<=1.4e-17). The cause is not scib's LISI subsampling RNG (knn_graph.cpp draws a random number per row but skips nothing at subsample=100); unresolved. PCR and cell-cycle conservation agree to <=5.7e-7.",
+ "split_text": "Stage-gated model (docs/PREREG.md sec 0 on prereg-rules @ 2e4f24d; scripts/gate_task_split.py): S1 A1 -> S2 A2+A3 -> S3 X1 adversarial rows -> S4 X3/X6/X7/X8/X12, every gate global and including the scoring of the stage's last latents; fillers (X1 none/scvi_adv rows, X13) run in a host's gate waits; whole tasks per host (SI-17); JHPCE fits of a task may spread over G GPUs of the one pinned model. Fit cost: cost_model.py on the 6,061-fit design of record; local 8-lane factor 3.77 (mixed-arm queue); scoring 16.24 ms per cell per latent, 4 local CPUs while the GPU fits (12 when idle), 48 JHPCE CPUs. PROVISIONAL: the JHPCE factor is a placeholder (ratio 1.0) until G5; see the ratio sweep at the end of this section.",
+ "ratio_source": "PLACEHOLDER until G5",
+ "ratio_sweep": [
+  {
+   "ratio": 0.75,
+   "jhpce_gpus": 1,
+   "wall_days": 14.24,
+   "jhpce": "immune lung pancreas",
+   "local_busy_days": 13.76,
+   "jhpce_busy_days": 13.73
+  },
+  {
+   "ratio": 0.75,
+   "jhpce_gpus": 2,
+   "wall_days": 9.92,
+   "jhpce": "atac_small immune_hum_mou lung sim1 sim2",
+   "local_busy_days": 10.06,
+   "jhpce_busy_days": 9.35
+  },
+  {
+   "ratio": 0.75,
+   "jhpce_gpus": 3,
+   "wall_days": 7.78,
+   "jhpce": "atac_small immune immune_hum_mou lung sim2",
+   "local_busy_days": 7.61,
+   "jhpce_busy_days": 7.34
+  },
+  {
+   "ratio": 0.75,
+   "jhpce_gpus": 4,
+   "wall_days": 6.09,
+   "jhpce": "atac_large atac_small immune lung pancreas sim2",
+   "local_busy_days": 5.94,
+   "jhpce_busy_days": 6.08
+  },
+  {
+   "ratio": 1.0,
+   "jhpce_gpus": 1,
+   "wall_days": 12.69,
+   "jhpce": "atac_small immune_hum_mou sim1 sim2",
+   "local_busy_days": 12.37,
+   "jhpce_busy_days": 11.69
+  },
+  {
+   "ratio": 1.0,
+   "jhpce_gpus": 2,
+   "wall_days": 8.21,
+   "jhpce": "atac_small immune immune_hum_mou lung sim2",
+   "local_busy_days": 7.61,
+   "jhpce_busy_days": 8.25
+  },
+  {
+   "ratio": 1.0,
+   "jhpce_gpus": 3,
+   "wall_days": 6.09,
+   "jhpce": "atac_large atac_small immune lung pancreas sim2",
+   "local_busy_days": 5.94,
+   "jhpce_busy_days": 6.08
+  },
+  {
+   "ratio": 1.0,
+   "jhpce_gpus": 4,
+   "wall_days": 5.2,
+   "jhpce": "atac_large atac_small immune lung pancreas sim1 sim2",
+   "local_busy_days": 3.44,
+   "jhpce_busy_days": 5.2
+  },
+  {
+   "ratio": 1.25,
+   "jhpce_gpus": 1,
+   "wall_days": 10.89,
+   "jhpce": "atac_large atac_small pancreas sim1 sim2",
+   "local_busy_days": 10.7,
+   "jhpce_busy_days": 10.71
+  },
+  {
+   "ratio": 1.25,
+   "jhpce_gpus": 2,
+   "wall_days": 7.29,
+   "jhpce": "atac_large atac_small immune lung pancreas sim2",
+   "local_busy_days": 5.94,
+   "jhpce_busy_days": 7.29
+  },
+  {
+   "ratio": 1.25,
+   "jhpce_gpus": 3,
+   "wall_days": 5.27,
+   "jhpce": "immune immune_hum_mou lung pancreas sim1 sim2",
+   "local_busy_days": 5.11,
+   "jhpce_busy_days": 5.1
+  },
+  {
+   "ratio": 1.25,
+   "jhpce_gpus": 4,
+   "wall_days": 4.3,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1",
+   "local_busy_days": 2.76,
+   "jhpce_busy_days": 4.3
+  },
+  {
+   "ratio": 1.5,
+   "jhpce_gpus": 1,
+   "wall_days": 9.92,
+   "jhpce": "atac_small immune_hum_mou lung sim1 sim2",
+   "local_busy_days": 10.06,
+   "jhpce_busy_days": 9.35
+  },
+  {
+   "ratio": 1.5,
+   "jhpce_gpus": 2,
+   "wall_days": 6.09,
+   "jhpce": "atac_large atac_small immune lung pancreas sim2",
+   "local_busy_days": 5.94,
+   "jhpce_busy_days": 6.08
+  },
+  {
+   "ratio": 1.5,
+   "jhpce_gpus": 3,
+   "wall_days": 4.7,
+   "jhpce": "atac_large atac_small immune lung pancreas sim1 sim2",
+   "local_busy_days": 3.44,
+   "jhpce_busy_days": 4.63
+  },
+  {
+   "ratio": 1.5,
+   "jhpce_gpus": 4,
+   "wall_days": 3.59,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1",
+   "local_busy_days": 2.76,
+   "jhpce_busy_days": 3.59
+  },
+  {
+   "ratio": 2.0,
+   "jhpce_gpus": 1,
+   "wall_days": 8.21,
+   "jhpce": "atac_small immune immune_hum_mou lung sim2",
+   "local_busy_days": 7.61,
+   "jhpce_busy_days": 8.25
+  },
+  {
+   "ratio": 2.0,
+   "jhpce_gpus": 2,
+   "wall_days": 5.2,
+   "jhpce": "atac_large atac_small immune lung pancreas sim1 sim2",
+   "local_busy_days": 3.44,
+   "jhpce_busy_days": 5.2
+  },
+  {
+   "ratio": 2.0,
+   "jhpce_gpus": 3,
+   "wall_days": 3.59,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1",
+   "local_busy_days": 2.76,
+   "jhpce_busy_days": 3.59
+  },
+  {
+   "ratio": 2.0,
+   "jhpce_gpus": 4,
+   "wall_days": 3.05,
+   "jhpce": "atac_large atac_small immune immune_hum_mou lung pancreas sim1 sim2",
+   "local_busy_days": 0.0,
+   "jhpce_busy_days": 3.05
+  }
+ ],
+ "caveats": [
+  "G4 FAILED at the specified 1e-6 tolerance, so all 128 G3 latents are scored in local wcd-kbet, as the task specifies; G3 paired differences therefore include kBET's run-to-run noise (local repeat: up to 2.0e-3 in kBET, i.e. ~4e-4 in the 5-metric batch mean).",
+  "Gate fits read a staged copy of the LOCAL immune__scib.h5ad (md5 3888d256...), so G3 compares hosts on identical input bytes; the JHPCE-regenerated file passes the fingerprint check (G2) and differs in bytes only (uns prep_code_sha, X_pca at BLAS precision).",
+  "GPU choice: A100 (gpu:tesa100:1) chosen at 17:10 EDT 2026-10-02 because no A100 or L40S was free and the A100 queue looked shorter; an L40S copy was queued at 20:13 as a hedge. The user decided to keep both queued; whichever runs defines that model's measurement, and the JHPCE tasks of the benchmark must then use that one model.",
+  "JHPCE GPU access for this account is slow: priority 1 (fairshare), the 2-h single-GPU gate job has been pending since 17:17 EDT, squeue's start estimate was 2026-10-04 11:05 EDT. The split's makespans exclude queue waits; the queue-wait table shows the effect of 0.5-2 days per 3-day GPU job.",
+  "Gate GPU job requests 10 CPUs for 8 lanes (local: 12 logical CPUs); JHPCE GPU nodes have 24 CPUs per 4 GPUs, so benchmark jobs may get fewer CPUs per GPU than the gate.",
+  "Diagnosis job 36132749 failed because I pinned AVX2 code paths (OPENBLAS_CORETYPE=Haswell, MKL_CBWR=AVX2) and Slurm placed it on compute-053 (Opteron, no AVX2); its kNN graphs were harvested and the scoring check was redone on compute-174 (36132943).",
+  "Split model limits: rule-freeze and sign-off time not modelled; per-stage gates assumed global; X6 +54 fits scaled proportionally per task; +144 A2/A3 fits modelled as a copy of the existing A2/A3 rows (unconditioned decoder at the same cost); local scoring assumes 4 free CPUs while fitting."
+ ]
+}
