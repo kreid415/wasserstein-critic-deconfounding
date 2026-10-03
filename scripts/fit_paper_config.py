@@ -25,12 +25,35 @@ REQUIRED = ["tag", "experiment", "task", "counts", "arm", "lam", "n_critic", "ad
 ADVERSARIAL = {"discriminator", "discriminator_sn", "reference", "reference_fixed", "pooled", "pooled_sn",
                "barycenter", "barycenter_sn", "reference_sn", "mmd", "mmd_ref", "sinkhorn",
                "discriminator_r1", "discriminator_ref"}
+CPU_BASELINES = ("harmony", "scanorama", "pca")   # X13 CPU rows: scripts/run_cpu_baselines.py (SI-34..SI-36)
 # every key of a row's `extra` must be consumed here; anything else is refused (fail-loud R4)
 EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
               "factorial_run",            # X12 run label: provenance only (the factors it encodes are row columns)
               "r1_gamma",                 # X6 discriminator_r1 (docs/SPECS_missing_arms.md section 1, SI-22)
               "sampler",                  # X8 'stratified' (section 3, SI-24)
               "iw"}                       # X3 'depletion_oracle' (section 4, SI-25)
+
+
+def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
+    """Reference batch of a row. 'auto' = the repo rule on the cells actually used (select()); a non-negative
+    integer = index into the sorted batch names (X7 sweeps every reference); any other value = a batch name that
+    must be among the fitted cells. An X3 composition row must name its reference (the dose-0 automatic choice,
+    fixed for every dose) and the reference must not be the depleted batch (SI-31)."""
+    names = sorted(map(str, batches))
+    comp = bool(subsample_spec) and subsample_spec.get("kind") == "composition"
+    if comp and (value == "auto" or value.isdigit()):
+        raise ValueError(f"{tag}: an X3 composition row must name its reference batch (SI-31), got {value!r}")
+    if value == "auto":
+        return str(select())
+    if value.isdigit():
+        if int(value) >= len(names):
+            raise IndexError(f"{tag}: reference index {value} but only {len(names)} batches")
+        return names[int(value)]
+    if value not in names:
+        raise ValueError(f"{tag}: reference {value!r} is not a batch of the fitted cells ({names})")
+    if comp and value == str(subsample_spec["batch"]):
+        raise ValueError(f"{tag}: reference {value!r} is the depleted batch; X3 depletes a non-reference batch (SI-31)")
+    return value
 
 
 def check_extra(tag, arm, extra):
@@ -150,6 +173,9 @@ def main():
 
     seed = int(r["seed"])
     arm = r["arm"]
+    if arm in CPU_BASELINES:
+        raise ValueError(f"{r['tag']}: {arm} is an X13 CPU baseline; run it with scripts/run_cpu_baselines.py "
+                         f"--manifest <manifest> --tag {r['tag']}")
     extra = json.loads(r["extra"])
     check_extra(r["tag"], arm, extra)
     if arm in ("scanvi", "sysvi") and {"r1_gamma", "sampler", "iw"} & set(extra):
@@ -171,12 +197,10 @@ def main():
     a = a[:, a.var["highly_variable"].values].copy()
     a.obs["batch"] = a.obs["batch"].astype(str).astype("category")
 
-    # reference batch: 'auto' = repo rule (max cell-type entropy, ties by size) on the cells actually used
-    ref_name = None
-    if r["reference"] == "auto":
-        ref_name = str(select_reference_batch(a, "batch", "celltype"))
-    else:
-        ref_name = sorted(a.obs["batch"].cat.categories)[int(r["reference"])]
+    # reference batch: 'auto' = repo rule (max cell-type entropy, ties by size) on the cells actually used;
+    # an index (X7) or a batch name (X3, fixed at the dose-0 choice, SI-31)
+    ref_name = resolve_reference(r["tag"], r["reference"], a.obs["batch"].cat.categories, extra.get("subsample"),
+                                 select=lambda: select_reference_batch(a, "batch", "celltype"))
 
     common = dict(n_latent=int(r["n_latent"]), max_epochs=int(r["max_epochs"]), batch_size=int(r["batch_size"]),
                   seed=seed, conditioned=bool(int(r["cond"])))

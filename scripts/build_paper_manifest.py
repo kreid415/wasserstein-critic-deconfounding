@@ -9,6 +9,10 @@ Decisions in force (CONSTRAINTS.md):
   * backbone of record: scvi-tools defaults ('stock', SI-10); barycenter target = free-support W2
     barycenter, 10 cold fixed-point iterations per step (SI-14); critics use WGAN-GP Algorithm 1
     defaults (n_critic 5, lambda_GP 10, Adam 1e-4, betas (0, 0.9)).
+  * X3 rows name their reference batch (the dose-0 automatic choice, fixed for every dose) and deplete a
+    non-reference batch (SI-31..SI-33, X3_TARGETS); X13 CPU baselines (harmony / scanorama knob x 6 values at
+    the backbone's latent size, plus the tool default dimensions; PCA once; SI-34..SI-36, CPU_BASELINES) are rows
+    for scripts/run_cpu_baselines.py, which fit_paper_config.py refuses.
 
 Design of record: --design pilot (SI-16), staged by the pre-registered rules of docs/PREREG.md:
   A1     atac_small, immune, sim1 x both decoders x seeds A1_SEED0.. (100-102) x (lambda=0 + 6 arms x
@@ -68,13 +72,25 @@ N_CRITIC = 5
 COLS = ["tag", "experiment", "task", "counts", "arm", "lam", "n_critic", "adv_input", "zstd", "cond", "decoder",
         "n_latent", "n_layers", "n_hidden", "likelihood", "batch_size", "max_epochs", "train_size", "seed",
         "reference", "extra"]
-# X3: depletion target = largest batch; types = its two most abundant types present in >= 3 batches
-# (read from prepped_scib/<task>__scib.h5ad on 2026-10-02)
+# X3: (depleted batch, depleted types, reference). Reference = the repo rule (select_reference_batch, max cell-type
+# entropy) on the dose-0 subsample, fixed for every dose (SI-31); depleted batch = the largest NON-reference batch;
+# types = its two most abundant types present in >= 3 batches, except sim2, where only Group1 is depleted so that
+# Batch3Sub1 (Group1 and Group2 only) stays at every dose (SI-32); atac_small target signed off as SI-33.
+# Read from prepped_scib/<task>__scib.h5ad (2026-10-02/03); tests/scvi/test_x3_x13_design.py re-derives every entry.
 X3_TARGETS = {
-    "atac_small": ("Cusanovich et al. - WholeBrainA_62216", ["Inhibitory Neurons", "Excitatory Neurons"]),
-    "immune_hum_mou": ("MCA_BM_2", ["Neutrophils", "Monocyte progenitors"]),
-    "sim2": ("Batch3Sub1", ["Group1", "Group2"]),
-    "pancreas": ("inDrop3", ["alpha", "acinar"]),
+    "atac_small": ("Fang et al. - CEMBA180305_2B", ["Excitatory Neurons", "Inhibitory Neurons"],
+                   "Cusanovich et al. - WholeBrainA_62216"),
+    "immune_hum_mou": ("MCA_BM_2", ["Neutrophils", "Monocyte progenitors"], "Oetjen_A"),
+    "sim2": ("Batch3Sub1", ["Group1"], "Batch4Sub2"),
+    "pancreas": ("inDrop3", ["alpha", "acinar"], "inDrop1"),
+}
+# X13 CPU baselines (scripts/run_cpu_baselines.py; scripts/fit_paper_config.py refuses these arms): each method's
+# strength knob x 6 values at the backbone's 10 dimensions, run once (deterministic), plus the tool's default
+# dimensions at the default knob value as sensitivity. PCA has no knob: once, the uncorrected anchor (SI-36).
+CPU_BASELINES = {   # arm: (knob, values (SI-34 / SI-35), default value, tool-default dimensions)
+    "harmony": ("theta", [0, 0.5, 1, 2, 4, 8], 2, 50),
+    "scanorama": ("knn", [5, 10, 20, 40, 80, 160], 20, 100),
+    "pca": (None, [0], 0, 50),
 }
 # X8: total cells fixed per task, equal cells per batch; the largest N for which V = 2 still has
 # >= 3 eligible batches and V = 16 has >= 16 (batch sizes in prepped_scib, 2026-10-02)
@@ -110,6 +126,14 @@ def row(exp, task, arm, lam, seed, cond, bb, n_cells=None, **over):
         r["extra"] = json.dumps(ex)
     r["max_epochs"] = scvi_epochs(n_cells or TASKS[task][0])
     return r
+
+
+def cpu_row(task, arm, knob, value, dims):
+    """X13 CPU baseline row: knob value in 'lam', dimensions in 'n_latent', seed 0 (run once); the scVI-backbone
+    fields do not apply ('na' / 0) and scripts/fit_paper_config.py refuses the arm."""
+    return dict(experiment="X13", task=task, counts="scib", arm=arm, lam=value, n_critic=0, adv_input="na", zstd=0,
+                cond=0, decoder="na", n_latent=dims, n_layers=0, n_hidden=0, likelihood="na", batch_size=0,
+                max_epochs=0, train_size=0, seed=0, reference="auto", extra=json.dumps({"knob": knob} if knob else {}))
 
 
 def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
@@ -157,6 +181,8 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     for t, s in itertools.product(TASKS, range(5)):
         R.append(row("X13", t, "scanvi", 0, s, True, bb))
         R += [row("X13", t, "sysvi", w, s, True, bb) for w in [1, 2, 5, 10, 20, 50]]
+    for t, (arm, (knob, values, default, tool_dims)) in itertools.product(TASKS, CPU_BASELINES.items()):
+        R += [cpu_row(t, arm, knob, v, bb["n_latent"]) for v in values] + [cpu_row(t, arm, knob, default, tool_dims)]
     if design == "shared":
         # ---- A2 (no-A1 design): adversary input, posterior mean vs sample (mean half = X1 rows)
         for t, s, inp, arm, lam in itertools.product(a2_tasks, range(3), ["mean", "sample"], a2_arms,
@@ -189,19 +215,21 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
             for arm in ["reference", "pooled"]:
                 R.append(row("X8", t, arm, "matched", s, True, bb, n_cells=n, extra=ex_s))
     # ---- X3 (tier 2): composition-shift dose-response
-    for t, (b, types) in X3_TARGETS.items():
+    for t, (b, types, ref) in X3_TARGETS.items():
+        if ref == b or ref.isdigit():
+            raise ValueError(f"X3 {t}: reference {ref!r} must be a batch name other than the depleted batch")
         n = min(20000, TASKS[t][0])
         for dose, s in itertools.product([0, 50, 80, 95, 100], FOLLOWUP_SEEDS):
             ex = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose, n_cells=n)))
-            R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex))
-            R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex)
+            R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex, reference=ref))
+            R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex, reference=ref)
                   for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
             # oracle importance-weighted control (SPECS section 4, SI-25): weights undo the induced depletion;
             # at doses 0 and 100 every weight is 1 (= the unweighted rows above), so IW rows at 50 / 80 / 95 only
             if dose in (50, 80, 95):
                 ex_iw = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose,
                                                        n_cells=n), iw="depletion_oracle"))
-                R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw)
+                R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw, reference=ref)
                       for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
     # ---- X6 (tier 2): divergence x Lipschitz control x update budget (pooled = symmetric target)
     for t, s, (arm, k), lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,

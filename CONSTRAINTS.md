@@ -200,3 +200,45 @@
 - source: "Local; start pilots once design is tagged (Recommended)" (user, ask_user answer to "The pilots (A1, A2/A3) use only atac_small, immune and sim1. ... Where should they go?", 2026-10-03)
 - added: 2026-10-03
 - keywords: placement, local, JHPCE, split, pilot, A1, tasks
+
+## SI-31 · active · method
+- rule: X3 reference batch is fixed at each task's dose-0 automatic choice (select_reference_batch on the dose-0 subsample) for every dose, and the depleted batch is always a non-reference batch
+- source: "Fix reference; deplete a non-reference batch (Recommended)" (user, ask_user relayed by the lead, 2026-10-03)
+- added: 2026-10-03
+- keywords: X3, reference, depletion, composition
+- notebook: NB-20261003-01
+
+## SI-32 · active · method
+- rule: X3 on sim2 depletes only Group1 in Batch3Sub1 (which holds only Group1 and Group2), so the batch stays at every dose
+- source: "Deplete only Group1 (Recommended)" (user, ask_user relayed by the lead, 2026-10-03)
+- added: 2026-10-03
+- keywords: X3, sim2, Group1, Batch3Sub1
+- notebook: NB-20261003-02
+
+## SI-33 · active · method
+- rule: X3 on atac_small depletes Excitatory and Inhibitory Neurons in 'Fang et al. - CEMBA180305_2B' (largest non-reference batch; its two most abundant types present in all 3 batches)
+- source: "Fang: Excitatory + Inhibitory (Recommended)" (user, ask_user, 2026-10-03)
+- added: 2026-10-03
+- keywords: X3, atac_small, Fang, Excitatory, Inhibitory
+- notebook: NB-20261003-03
+
+## SI-34 · active · method
+- rule: X13 Harmony strength knob is theta in {0, 0.5, 1, 2, 4, 8} at 10 PCs, each run once (harmonize random_state 0, fresh process, pinned threads), plus the 50-PC tool default at theta 2 as sensitivity
+- source: "theta {0, 0.5, 1, 2, 4, 8} (Recommended)" (user, ask_user, 2026-10-03)
+- added: 2026-10-03
+- keywords: X13, Harmony, theta, baseline, budget
+- notebook: NB-20261003-04
+
+## SI-35 · active · method
+- rule: X13 Scanorama strength knob is knn in {5, 10, 20, 40, 80, 160} at dimred 10, each run once (seed 0), plus the dimred-100 tool default at knn 20 as sensitivity
+- source: "knn {5, 10, 20, 40, 80, 160} (Recommended)" (user, ask_user, 2026-10-03)
+- added: 2026-10-03
+- keywords: X13, Scanorama, knn, baseline, budget
+- notebook: NB-20261003-05
+
+## SI-36 · active · method
+- rule: X13 PCA runs once at 10 PCs (plus the 50-PC tool default as sensitivity) and is shown as the uncorrected anchor, not as a best-of-k budget curve
+- source: "Once, as uncorrected anchor (Recommended)" (user, ask_user, 2026-10-03)
+- added: 2026-10-03
+- keywords: X13, PCA, baseline, budget
+- notebook: NB-20261003-06

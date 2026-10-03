@@ -4,12 +4,13 @@
 1. `extra` keys: unknown keys and inconsistent options are refused before any data is read.
 2. X3 oracle weights: w = 1 / keep-fraction for kept depleted-type cells of the depleted batch, 1 elsewhere;
    their sum restores the depleted count exactly; undefined (refused) at doses 0 and 100.
-3. subsample(): the cells selected for every X3 and X8 design cell are unchanged from the base commit
+3. subsample(): the cells selected for every X3 (current targets) and X8 design cell equal the base commit's function
    (real prepped obs; needs PREPPED_DIR, otherwise skipped with that reason).
 4. End to end through main(): one row per new option (r1_gamma, discriminator_ref, sampler, iw) on a toy prepped
    file writes a finite latent whose config records the row and the keep fraction.
-5. Manifest: base rows unchanged; added rows exactly X3 288 (IW), X6 27 (R1), X7 54 (reference JS),
-   X8 144 (stratified); no duplicate tags; tags (= output files) unique.
+5. Manifest: base rows unchanged except the signed-off changes (SI-26 follow-up seeds, SI-27 unconditioned A2/A3,
+   SI-31..SI-33 X3 reference and targets); added rows exactly X3 288 (IW), X6 27 (R1), X7 54 (reference JS),
+   X8 144 (stratified), X13 128 CPU baselines (SI-34..SI-36); no duplicate tags; tags (= output files) unique.
 """
 import importlib.util
 import json
@@ -81,7 +82,7 @@ def test_subsample_cells_unchanged_from_base():
     import h5py
     old = _base_module("scripts/fit_paper_config.py", "fpc_base")
     n_checked = 0
-    for task, (b, types) in bpm.X3_TARGETS.items():
+    for task, (b, types, _ref) in bpm.X3_TARGETS.items():
         with h5py.File(os.path.join(os.environ["PREPPED_DIR"], f"{task}__scib.h5ad"), "r") as f:
             obs = ad.io.read_elem(f["obs"])
         a0 = ad.AnnData(obs=obs[["batch", "celltype"]].copy())
@@ -124,7 +125,8 @@ def test_runner_end_to_end_new_options(tmp_path):
     rows = [dict(base, tag="r1", arm="discriminator_r1", n_critic="1", extra=json.dumps({"r1_gamma": 10})),
             dict(base, tag="refjs", arm="discriminator_ref", n_critic="1", reference="0", extra="{}"),
             dict(base, tag="strat", arm="pooled", n_critic="5", extra=json.dumps({"sampler": "stratified"})),
-            dict(base, tag="iw", arm="pooled", n_critic="5", extra=json.dumps({"subsample": comp, "iw": "depletion_oracle"}))]
+            dict(base, tag="iw", arm="pooled", n_critic="5", reference="b0",      # X3 rows name a non-depleted reference (SI-31)
+                 extra=json.dumps({"subsample": comp, "iw": "depletion_oracle"}))]
     man = tmp_path / "m.tsv"
     pd.DataFrame(rows)[fpc.REQUIRED].to_csv(man, sep="\t", index=False)
     env = dict(os.environ, MANIFEST=str(man), PREPPED_DIR=str(tmp_path), OUT_DIR=str(tmp_path / "out"),
@@ -161,6 +163,14 @@ def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
     assert set(o.seed[fu]) == {"0", "1", "2"}
     o2 = o.copy()
     o2.loc[fu, "seed"] = o2.seed[fu].map(lambda s: str(bpm.FOLLOWUP_SEEDS[int(s)]))
+    # SI-31..SI-33 (2026-10-03): every X3 row names the fixed reference; atac_small and sim2 changed target
+    x3 = (o2.experiment == "X3").to_numpy()
+    def _x3_new(r):
+        b, types, ref = bpm.X3_TARGETS[r.task]
+        ex = json.loads(r.extra)
+        ex["subsample"]["batch"], ex["subsample"]["types"] = b, types
+        return pd.Series({"reference": ref, "extra": json.dumps(ex)})
+    o2.loc[x3, ["reference", "extra"]] = o2[x3].apply(_x3_new, axis=1).to_numpy()
     m = o2.merge(n, on=key, how="left", suffixes=("", "_new"), indicator=True, validate="one_to_one")
     assert (m["_merge"] == "both").all()
     assert (m.tag == m.tag_new)[~fu.to_numpy()].all() and (m.tag != m.tag_new)[fu.to_numpy()].all()
@@ -171,6 +181,11 @@ def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
     mirror = add[add.experiment.isin(["A2", "A3"])]
     assert sorted(map(tuple, mirror[key].to_numpy())) == sorted(map(tuple, a23[key].to_numpy()))
     add = add[~add.experiment.isin(["A2", "A3"])].copy()
+    # SI-34..SI-36: X13 CPU baselines, 16 rows per task (harmony 6 + 1, scanorama 6 + 1, pca 2), seed 0
+    cpu = add[add.arm.isin(list(bpm.CPU_BASELINES))]
+    assert len(cpu) == 16 * len(bpm.TASKS) and set(cpu.experiment) == {"X13"} and set(cpu.seed) == {"0"}
+    assert cpu.groupby("arm").size().to_dict() == {"harmony": 7 * 8, "scanorama": 7 * 8, "pca": 2 * 8}
+    add = add[~add.arm.isin(list(bpm.CPU_BASELINES))].copy()
     assert set(add.seed) == {str(s) for s in bpm.FOLLOWUP_SEEDS}
     add["opt"] = add.extra.map(lambda s: ",".join(sorted(set(json.loads(s)) - {"subsample"})))
     got = add.groupby(["experiment", "arm", "opt"]).size().to_dict()

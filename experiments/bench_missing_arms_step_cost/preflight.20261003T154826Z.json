@@ -1,18 +1,18 @@
 {
   "experiment_id": "bench_missing_arms_step_cost",
-  "created_at": "2026-10-03T15:48:26Z",
+  "created_at": "2026-10-03T15:03:19Z",
   "pf_version": "1.0",
   "plan": {
-    "question": "Single-lane ms per optimiser step of each new arm (discriminator_r1, discriminator_ref, reference/pooled with the stratified sampler, discriminator/reference/pooled/mmd with X3 importance weights) on immune, stock backbone, batch 128, local RTX 3080, re-measuring 4 existing arms as same-session controls; run4 (2026-10-03): re-measurement started by an automatic quiet gate (>= 60 s with < 2 busy CPU cores and no GPU compute process), with a 5-s host-load sampler, after run1 (contention), run2 (mmd_iw spread 30%) and run3 (external load, stopped) failed PF-16",
+    "question": "Single-lane ms per optimiser step of each new arm (discriminator_r1, discriminator_ref, reference/pooled with the stratified sampler, discriminator/reference/pooled/mmd with X3 importance weights) on immune, stock backbone, batch 128, local RTX 3080, re-measuring 4 existing arms as same-session controls; run3 (2026-10-03 ~15:10 UTC): re-measurement on an idle host with a 5-s host-load sampler, after run1 (contention) and run2 (mmd_iw spread 30%) failed PF-16",
     "primary_outcome": "ms per optimiser step = (t_3epoch - t_1epoch) / (2 x steps_per_epoch) per repeat (cost_model.measure), median of 3 repeats",
     "unit_of_analysis": "arm (one 3-epoch + 1-epoch fit pair per repeat)",
     "split_unit": "none: timing benchmark, no evaluation split",
-    "selection_rule": "none: every arm is reported; the median repeat is appended to docs/throughput_rtx3080_stock_backbone.csv and all repeats are kept; run4 replaces the 8 provisional rows only if PF-16 passes for all 12 arms, otherwise the rows stay provisional; runs 1-4 are all reported",
+    "selection_rule": "none: every arm is reported; the median repeat is appended to docs/throughput_rtx3080_stock_backbone.csv and all repeats are kept; run3 replaces the 8 provisional rows only if PF-16 passes for all 12 arms, otherwise the rows stay provisional; run2 and run3 are both reported",
     "n_comparisons": 1,
     "multiple_comparison_correction": "none: one descriptive comparison per arm (new arm vs its same-session control), no hypothesis test",
     "data_filters": "immune__scib.h5ad as distributed, var highly_variable; IW arms: X3-style depletion (largest batch, its two most abundant types present in >= 3 batches) at 50 percent"
   },
-  "plan_sha": "8045c40943bb29d0",
+  "plan_sha": "9806e187f3838943",
   "extra_items": [
     {
       "id": "SC-01",
@@ -216,310 +216,324 @@
   "answers": {
     "PF-01": {
       "status": "pass",
-      "evidence": "[auto:pf_check_plan] plan complete (sha 8045c40943bb29d0)",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "[auto:pf_check_plan] plan complete (sha 9806e187f3838943)",
+      "at": "2026-10-03T15:03:19Z",
       "history": [
         {
           "status": "pass",
-          "evidence": "[auto:pf_check_plan] plan complete (sha 8045c40943bb29d0)",
-          "at": "2026-10-03T15:48:26Z"
+          "evidence": "[auto:pf_check_plan] plan complete (sha 9806e187f3838943)",
+          "at": "2026-10-03T15:03:19Z"
         }
       ],
       "auto": {
         "check": "pf_check_plan",
         "ok": true,
-        "summary": "plan complete (sha 8045c40943bb29d0)",
+        "summary": "plan complete (sha 9806e187f3838943)",
         "warnings": null
       }
     },
     "PF-02": {
       "status": "pass",
-      "evidence": "plan declares n_comparisons=1; correction: none: one descriptive comparison per arm (new arm vs its same-session control), no hypothesis test [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "plan declares n_comparisons=1; correction: none: one descriptive comparison per arm (new arm vs its same-session control), no hypothesis test [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": [
         {
           "status": "pass",
           "evidence": "plan declares n_comparisons=1; correction: none: one descriptive comparison per arm (new arm vs its same-session control), no hypothesis test",
-          "at": "2026-10-03T15:48:26Z"
+          "at": "2026-10-03T15:03:19Z"
         }
       ]
     },
     "PF-16": {
-      "status": "pass",
-      "evidence": "launch gated: the launcher waits (max 90 min) for 3 consecutive 20-s windows with < 2 busy cores of 12 and no GPU compute process, logs them to run4/quiet_gate.log, then runs the run2 protocol (single lane, OMP 1, 3 interleaved repeats, 4 controls, GPU snapshot per fit) with the 5-s sampler; post-run: pf_check_timing_repeats per arm (25%) and no sampler window > 4 busy cores during any fit; otherwise nothing is adopted",
-      "at": "2026-10-03T15:48:26Z",
-      "history": []
+      "status": "fail",
+      "evidence": "[auto:host_load_sampler] run3 stopped after 20 of 72 fits: an external workload kept 11.4-12.0 of 12 CPU cores busy from 15:09:22 UTC (host_load.csv in run3; the bench's own fits used 1.3-1.6 cores before), load1 16.5 at 15:12:49; fits from mmd_iw_rep0_e1 on ran 1.3-1.5x slower; no other GPU compute apps; nothing adopted",
+      "at": "2026-10-03T15:13:13Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "pre-launch 2026-10-03T15:03:18.912Z: CPU busy cores 0.2 of 12 (last 10 min max 1.5), load1 0.35; GPU 0 %, 123 MiB, compute apps []; same protocol as run2 plus a 5-s /proc/stat + loadavg sampler (host_load.csv in the run3 dir) for the whole run; post-run pf_check_timing_repeats per arm (max spread 25%) and the sampler decide adoption",
+          "at": "2026-10-03T15:03:20Z"
+        }
+      ],
+      "auto": {
+        "check": "host_load_sampler",
+        "ok": false,
+        "summary": "run3 stopped after 20 of 72 fits: an external workload kept 11.4-12.0 of 12 CPU cores busy from 15:09:22 UTC (host_load.csv in run3; the bench's own fits used 1.3-1.6 cores before), load1 16.5 at 15:12:49; fits from mmd_iw_rep0_e1 on ran 1.3-1.5x slower; no other GPU compute apps; nothing adopted",
+        "warnings": null
+      }
     },
     "PF-22": {
       "status": "pass",
-      "evidence": "every fit writes latents/<tag>.npz (config with fit_seconds, git sha) to /home/kendall/experiment_data/wasserstein-critic-deconfounding/bench_missing_arms_step_cost/run4 plus bench_log.csv; completion gate on all 72 after the run",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "every fit writes latents/<tag>.npz (config with fit_seconds, git sha) to /home/kendall/experiment_data/wasserstein-critic-deconfounding/bench_missing_arms_step_cost/run3 plus bench_log.csv; completion gate on all 72 after the run",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-19": {
       "status": "pass",
-      "evidence": "fresh output directory run4 (does not exist before launch); run_bench.py refuses an existing latent (FileExistsError), so no stale timing is read",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "fresh output directory run3 (does not exist before launch); run_bench.py refuses an existing latent (FileExistsError), so no stale timing is read",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-19": {
       "status": "pass",
       "evidence": "[auto:pf_check_manifest] 72 rows carry all 9 intended flags",
-      "at": "2026-10-03T15:48:26Z",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-20": {
       "status": "pass",
       "evidence": "72 rows = 12 arms x 3 repeats x {3, 1} epochs (pf_check_manifest expected_rows=72): 72 rows carry all 9 intended flags",
-      "at": "2026-10-03T15:48:26Z",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-12": {
       "status": "n/a",
       "evidence": "no metric adopted in this run; loss known-answer tests in tests/wcd_vae/test_missing_arms.py (159 passed at c3e3ad4; training-path files unchanged between f97f3f2 and main e3051e4, git diff empty)",
-      "at": "2026-10-03T15:48:26Z",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-11": {
       "status": "pass",
       "evidence": "PASS SC-11 scpf_check_obs_keys () (immune__scib.h5ad obs: batch, celltype)",
-      "at": "2026-10-03T15:48:26Z",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-03": {
       "status": "n/a",
-      "evidence": "no classifier, probe or held-out evaluation: the run measures fit wall time only [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no classifier, probe or held-out evaluation: the run measures fit wall time only [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-04": {
       "status": "n/a",
-      "evidence": "no merging of sources: one scIB file (immune__scib.h5ad) as distributed (SI-15) [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no merging of sources: one scIB file (immune__scib.h5ad) as distributed (SI-15) [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-05": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-06": {
       "status": "n/a",
-      "evidence": "no best-of selection: every arm is reported; the appended row is the median of 3 repeats, declared in the plan before the run [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no best-of selection: every arm is reported; the appended row is the median of 3 repeats, declared in the plan before the run [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-07": {
       "status": "pass",
-      "evidence": "all 12 arms share task, backbone, batch 128, seed, lambda, conditioning and adversary input (pf_check_manifest: 72 rows carry all 9 intended flags); n_critic follows the manifest design (critics 5, JS 1, MMD 0) [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "all 12 arms share task, backbone, batch 128, seed, lambda, conditioning and adversary input (pf_check_manifest: 72 rows carry all 9 intended flags); n_critic follows the manifest design (critics 5, JS 1, MMD 0) [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-08": {
       "status": "n/a",
-      "evidence": "no pooled means across datasets: one task (immune) [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no pooled means across datasets: one task (immune) [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-09": {
       "status": "n/a",
-      "evidence": "no perturbation knob with an identity level in this run; the IW identity (weights 1 at dose 0) is tested in tests/scvi/test_runner_and_manifest_missing_arms.py [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no perturbation knob with an identity level in this run; the IW identity (weights 1 at dose 0) is tested in tests/scvi/test_runner_and_manifest_missing_arms.py [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-10": {
       "status": "pass",
-      "evidence": "n differs only for IW arms (30344 vs 33506 cells after 50% depletion of 6325 cells); ms/step is per 128-cell step and steps_per_epoch uses each fit's own n_cells (cost_model.measure) [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "n differs only for IW arms (30344 vs 33506 cells after 50% depletion of 6325 cells); ms/step is per 128-cell step and steps_per_epoch uses each fit's own n_cells (cost_model.measure) [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-11": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-13": {
       "status": "pass",
-      "evidence": "timing noise is estimated from 3 repeats per arm and reported with the medians; controls show session drift against the existing CSV [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing noise is estimated from 3 repeats per arm and reported with the medians; controls show session drift against the existing CSV [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-14": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-15": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-17": {
       "status": "pass",
-      "evidence": "per-step costs feed scripts/cost_model.py at production settings (same backbone, batch 128, n_critic as the manifest rows); this run is 72 short fits, single lane, no walltime request [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "per-step costs feed scripts/cost_model.py at production settings (same backbone, batch 128, n_critic as the manifest rows); this run is 72 short fits, single lane, no walltime request [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-18": {
       "status": "pass",
-      "evidence": "single lane; one fit at a time; VRAM per fit below 1 GB (smoke: 477 MiB in use); other GPU users visible as utilisation in bench_log.csv [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "single lane; one fit at a time; VRAM per fit below 1 GB (smoke: 477 MiB in use); other GPU users visible as utilisation in bench_log.csv [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-21": {
       "status": "n/a",
-      "evidence": "the repeats are timing replicates of identical work (same seed by design), not statistical replicates [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "the repeats are timing replicates of identical work (same seed by design), not statistical replicates [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-23": {
       "status": "n/a",
-      "evidence": "input is the scIB immune file as distributed; no reference-building inclusion filters [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "input is the scIB immune file as distributed; no reference-building inclusion filters [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "PF-24": {
       "status": "pass",
-      "evidence": "stratified quota ceil(128/10) = 13 cells per batch vs smallest immune batch 1022 cells; IW keep fraction 0.5 lies in (0, 1); HVG set as distributed [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "stratified quota ceil(128/10) = 13 cells per batch vs smallest immune batch 1022 cells; IW keep fraction 0.5 lies in (0, 1); HVG set as distributed [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-01": {
       "status": "n/a",
-      "evidence": "no donor-level labels, probes or cohort pooling in a timing benchmark [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no donor-level labels, probes or cohort pooling in a timing benchmark [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-02": {
       "status": "n/a",
-      "evidence": "no donor-level labels, probes or cohort pooling in a timing benchmark [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no donor-level labels, probes or cohort pooling in a timing benchmark [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-03": {
       "status": "n/a",
-      "evidence": "no evaluation split; scvi-tools' internal 90/10 training split is part of the backbone and identical for all arms [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no evaluation split; scvi-tools' internal 90/10 training split is part of the backbone and identical for all arms [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-04": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-05": {
       "status": "n/a",
-      "evidence": "no gene panel is built: the scIB highly_variable set as distributed is used by every arm [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no gene panel is built: the scIB highly_variable set as distributed is used by every arm [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-06": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-07": {
       "status": "n/a",
-      "evidence": "no perturbation axis in this run [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no perturbation axis in this run [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-08": {
       "status": "n/a",
-      "evidence": "no severity axis: one depletion level (50%) for the IW arms; n_cells recorded per fit [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no severity axis: one depletion level (50%) for the IW arms; n_cells recorded per fit [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-09": {
       "status": "n/a",
-      "evidence": "the depletion removes whole cells; no count-level thinning, so no cell or gene can become empty [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "the depletion removes whole cells; no count-level thinning, so no cell or gene can become empty [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-10": {
       "status": "n/a",
-      "evidence": "HVG set as distributed, identical for all arms; not a result comparison [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "HVG set as distributed, identical for all arms; not a result comparison [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-12": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-13": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-14": {
       "status": "n/a",
-      "evidence": "no block-structured scoring: nothing is scored [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no block-structured scoring: nothing is scored [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-15": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-16": {
       "status": "n/a",
-      "evidence": "no kNN-derived metric in this run [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "no kNN-derived metric in this run [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-17": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-18": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-20": {
       "status": "pass",
-      "evidence": "scpf_scan_fallbacks on scratch/testlogs/bench_smoke.log (2 smoke fits): no refit/fallback/swallowed-error lines [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "scpf_scan_fallbacks on scratch/testlogs/bench_smoke.log (2 smoke fits): no refit/fallback/swallowed-error lines [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-21": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     },
     "SC-22": {
       "status": "n/a",
-      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run4: same manifest, same frozen worktree at e3051e4]",
-      "at": "2026-10-03T15:48:26Z",
+      "evidence": "timing benchmark: no factors, metrics, splits, foundation models, block latents or pooled scores [re-confirmed for run3: same manifest, same frozen worktree at e3051e4]",
+      "at": "2026-10-03T15:03:20Z",
       "history": []
     }
   },
   "verdict": {
-    "go": true,
-    "blocking": [],
+    "go": false,
+    "blocking": [
+      "PF-16"
+    ],
     "unanswered": [],
     "major_fail": [],
     "minor_fail": [],
     "plan_changed": false,
     "n_items": 46,
-    "n_pass": 15,
+    "n_pass": 14,
     "n_na": 31,
-    "at": "2026-10-03T15:48:26Z"
+    "at": "2026-10-03T15:13:13Z"
   },
   "path": "./wcd/experiments/bench_missing_arms_step_cost"
 }

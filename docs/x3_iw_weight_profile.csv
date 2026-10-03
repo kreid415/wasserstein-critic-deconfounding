@@ -1,21 +1,21 @@
-task,depleted_batch,dose,n_cells,K,n_hit_full,drop,keep_fraction,w_depleted,n_hit_kept,sum_w_hit,ess_frac_batch_b,exp_hit_cells_per_minibatch,auto_reference
-atac_small,Cusanovich et al. - WholeBrainA_62216,0,11270,3,1588,0,1.0,1.0,1588,1588.0,1.0,18.04,Cusanovich et al. - WholeBrainA_62216
-atac_small,Cusanovich et al. - WholeBrainA_62216,50,10476,3,1588,794,0.5,2.0,794,1588.0,0.892,9.7,Cusanovich et al. - WholeBrainA_62216
-atac_small,Cusanovich et al. - WholeBrainA_62216,80,10000,3,1588,1270,0.2003,4.994,318,1588.0,0.565,4.07,Cusanovich et al. - WholeBrainA_62216
-atac_small,Cusanovich et al. - WholeBrainA_62216,95,9761,3,1588,1509,0.0497,20.101,79,1588.0,0.186,1.04,Fang et al. - CEMBA180305_2B
-atac_small,Cusanovich et al. - WholeBrainA_62216,100,9682,3,1588,1588,0.0,,0,0.0,,0.0,Fang et al. - CEMBA180305_2B
-immune_hum_mou,MCA_BM_2,0,20000,23,10873,0,1.0,1.0,2226,2226.0,1.0,14.25,Oetjen_A
-immune_hum_mou,MCA_BM_2,50,20000,23,10873,5436,0.5,2.0,1218,2435.8,0.936,7.8,Oetjen_A
-immune_hum_mou,MCA_BM_2,80,20000,23,10873,8698,0.2,4.999,515,2574.5,0.705,3.3,Oetjen_A
-immune_hum_mou,MCA_BM_2,95,20000,23,10873,10329,0.05,19.987,129,2578.3,0.284,0.83,Oetjen_A
-immune_hum_mou,MCA_BM_2,100,20000,23,10873,10873,0.0,,0,0.0,,0.0,Oetjen_A
-sim2,Batch3Sub1,0,19318,16,1930,0,1.0,1.0,1930,1930.0,1.0,12.79,Batch4Sub2
-sim2,Batch3Sub1,50,18353,16,1930,965,0.5,2.0,965,1930.0,1.0,6.73,Batch4Sub2
-sim2,Batch3Sub1,80,17774,16,1930,1544,0.2,5.0,386,1930.0,1.0,2.78,Batch4Sub2
-sim2,Batch3Sub1,95,17484,16,1930,1834,0.0497,20.104,96,1930.0,1.0,0.7,Batch4Sub2
-sim2,Batch3Sub1,100,17388,15,1930,1930,0.0,,0,0.0,,0.0,Batch4Sub2
-pancreas,inDrop3,0,16382,9,1973,0,1.0,1.0,1973,1973.0,1.0,15.42,inDrop1
-pancreas,inDrop3,50,15396,9,1973,986,0.5003,1.999,987,1973.0,0.89,8.21,inDrop3
-pancreas,inDrop3,80,14804,9,1973,1578,0.2002,4.995,395,1973.0,0.558,3.42,inDrop3
-pancreas,inDrop3,95,14508,9,1973,1874,0.0502,19.929,99,1973.0,0.183,0.87,inDrop1
-pancreas,inDrop3,100,14409,9,1973,1973,0.0,,0,0.0,,0.0,inDrop1
+task,depleted_batch,depleted_types,reference,dose,n_cells,K,n_hit_full,drop,keep_fraction,w_depleted,n_hit_kept,n_batch_b,sum_w_hit,ess_frac_batch_b,exp_hit_cells_per_minibatch,reference_present,depleted_batch_present,auto_reference_at_dose
+atac_small,Fang et al. - CEMBA180305_2B,"Excitatory Neurons,Inhibitory Neurons",Cusanovich et al. - WholeBrainA_62216,0,11270,3,2868,0,,1.0,2868,3750,2868.0,1.0,32.57,True,True,Cusanovich et al. - WholeBrainA_62216
+atac_small,Fang et al. - CEMBA180305_2B,"Excitatory Neurons,Inhibitory Neurons",Cusanovich et al. - WholeBrainA_62216,50,9836,3,2868,1434,0.5,2.0,1434,2316,2868.0,0.917,18.66,True,True,Cusanovich et al. - WholeBrainA_62216
+atac_small,Fang et al. - CEMBA180305_2B,"Excitatory Neurons,Inhibitory Neurons",Cusanovich et al. - WholeBrainA_62216,80,8976,3,2868,2294,0.2001,4.997,574,1456,2868.0,0.635,8.19,True,True,Fang et al. - CEMBA180305_2B
+atac_small,Fang et al. - CEMBA180305_2B,"Excitatory Neurons,Inhibitory Neurons",Cusanovich et al. - WholeBrainA_62216,95,8545,3,2868,2725,0.0499,20.056,143,1025,2868.0,0.235,2.14,True,True,Cusanovich et al. - WholeBrainA_62216
+atac_small,Fang et al. - CEMBA180305_2B,"Excitatory Neurons,Inhibitory Neurons",Cusanovich et al. - WholeBrainA_62216,100,8402,3,2868,2868,,,0,882,0.0,1.0,0.0,True,True,Cusanovich et al. - WholeBrainA_62216
+immune_hum_mou,MCA_BM_2,"Neutrophils,Monocyte progenitors",Oetjen_A,0,20000,23,10873,0,,1.0,2226,2632,2226.0,1.0,14.25,True,True,Oetjen_A
+immune_hum_mou,MCA_BM_2,"Neutrophils,Monocyte progenitors",Oetjen_A,50,20000,23,10873,5436,0.5,2.0,1218,1700,2435.8,0.936,7.8,True,True,Oetjen_A
+immune_hum_mou,MCA_BM_2,"Neutrophils,Monocyte progenitors",Oetjen_A,80,20000,23,10873,8698,0.2,4.999,515,986,2574.5,0.705,3.3,True,True,Oetjen_A
+immune_hum_mou,MCA_BM_2,"Neutrophils,Monocyte progenitors",Oetjen_A,95,20000,23,10873,10329,0.05,19.987,129,648,2578.3,0.284,0.83,True,True,Oetjen_A
+immune_hum_mou,MCA_BM_2,"Neutrophils,Monocyte progenitors",Oetjen_A,100,20000,23,10873,10873,,,0,472,0.0,1.0,0.0,True,True,Oetjen_A
+sim2,Batch3Sub1,Group1,Batch4Sub2,0,19318,16,1446,0,,1.0,1446,1930,1446.0,1.0,9.58,True,True,Batch4Sub2
+sim2,Batch3Sub1,Group1,Batch4Sub2,50,18595,16,1446,723,0.5,2.0,723,1207,1446.0,0.914,4.98,True,True,Batch4Sub2
+sim2,Batch3Sub1,Group1,Batch4Sub2,80,18161,16,1446,1157,0.1999,5.003,289,773,1446.0,0.624,2.04,True,True,Batch4Sub2
+sim2,Batch3Sub1,Group1,Batch4Sub2,95,17944,16,1446,1374,0.0498,20.083,72,556,1446.0,0.227,0.51,True,True,Batch4Sub2
+sim2,Batch3Sub1,Group1,Batch4Sub2,100,17872,16,1446,1446,,,0,484,0.0,1.0,0.0,True,True,Batch4Sub2
+pancreas,inDrop3,"alpha,acinar",inDrop1,0,16382,9,1973,0,,1.0,1973,3605,1973.0,1.0,15.42,True,True,inDrop1
+pancreas,inDrop3,"alpha,acinar",inDrop1,50,15396,9,1973,986,0.5003,1.999,987,2619,1973.0,0.89,8.21,True,True,inDrop3
+pancreas,inDrop3,"alpha,acinar",inDrop1,80,14804,9,1973,1578,0.2002,4.995,395,2027,1973.0,0.558,3.42,True,True,inDrop3
+pancreas,inDrop3,"alpha,acinar",inDrop1,95,14508,9,1973,1874,0.0502,19.929,99,1731,1973.0,0.183,0.87,True,True,inDrop1
+pancreas,inDrop3,"alpha,acinar",inDrop1,100,14409,9,1973,1973,,,0,1632,0.0,1.0,0.0,True,True,inDrop1
