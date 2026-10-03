@@ -1,0 +1,23 @@
+{
+ "cudnn": 91002,
+ "gpu_contains": "L40S",
+ "modules": {
+  "anndata": "0.12.19",
+  "h5py": "3.16.0",
+  "lightning": "2.6.5",
+  "numba": "0.67.0",
+  "numpy": "2.4.6",
+  "ot": "0.9.7.post1",
+  "pandas": "2.3.3",
+  "pynndescent": "0.6.0",
+  "pyro": "1.9.1",
+  "scanpy": "1.11.5",
+  "scipy": "1.17.1",
+  "scvi": "1.4.2",
+  "sklearn": "1.9.0",
+  "torch": "2.13.0+cu126"
+ },
+ "python": "3.11.15",
+ "source": "docs/jhpce/gate_data_v2/gate_report_L40S/versions_fit_gpu.json (gate job 36133219, compute-171, 2026-10-03); identical modules on the A100 gate node; = local scvi-api except the declared torch cu126 build",
+ "torch_cuda": "12.6"
+}
