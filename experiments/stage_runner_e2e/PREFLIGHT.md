@@ -1,10 +1,10 @@
 # PREFLIGHT: stage_runner_e2e
 
-**Verdict: GO**  (checked 2026-10-03T16:15:40Z; plan_sha b57a4ab8b28afb55)
+**Verdict: GO**  (checked 2026-10-03T16:18:44Z; plan_sha 1289be6e0638665f)
 
 ## Plan
 
-- **question**: Does scripts/run_stage.py, on the local RTX 3080 with the production settings (8 fit lanes x 1 thread, 4 scorers while fitting and 12 after, KBET_SEED 0, clean committed checkout, --expect-device 'RTX 3080'), fit, score and classify a 6-row atac_small stage that includes one forced divergence, and pass its completion gate?
+- **question**: Does scripts/run_stage.py, on the local RTX 3080 (4 fit lanes x 1 thread, 2 scorers while and after fitting, the lead's limits of 2026-10-03; KBET_SEED 0, clean committed checkout, --expect-device 'RTX 3080'), fit, score and classify a 6-row atac_small stage that includes one forced divergence, and pass its completion gate? Functional check only: the CPU is shared with other agents' scoring, so no timing from this run is a throughput measurement.
 - **primary_outcome**: runner exit status 0 with ledger states 5 scored + 1 diverged (the lambda=1e39 row)
 - **unit_of_analysis**: manifest row (one fit)
 - **split_unit**: none: no model is evaluated on held-out data (engineering test of the runner)
@@ -17,7 +17,7 @@
 
 | id | severity | area | status | evidence |
 |---|---|---|---|---|
-| PF-01 | blocking | Pre-declaration | pass | [auto:pf_check_plan] plan complete (sha b57a4ab8b28afb55) |
+| PF-01 | blocking | Pre-declaration | pass | [auto:pf_check_plan] plan complete (sha 1289be6e0638665f) |
 | PF-02 | major | Multiple comparisons | n/a | one primary outcome and no contrast between models, metrics or settings |
 | PF-03 | blocking | Unit of analysis | n/a | no classifier, probe or resampling scheme is evaluated on held-out data |
 | PF-04 | blocking | ID integrity | n/a | one prepped scIB file (atac_small); no merge of sources and no re-keyed units |
@@ -34,7 +34,7 @@
 | PF-15 | major | Attribution | n/a | no mechanism or advantage is attributed to a method |
 | PF-16 | blocking | Timing confounds | n/a | no runtime, speed-up or memory number from this run is reported as a benchmark (the guard cost is a separate record, experiments/stage_runner_guard_cost) |
 | PF-17 | blocking | Cost estimate | n/a | under one GPU-hour: 6 fits x 2 epochs on 11,270 cells; the CPU pilot of the same pipeline on a 1,200-cell subsample took 126 s (tests/stage/test_run_stage_e2e.py at 757f62f) |
-| PF-18 | major | Co-scheduling | pass | 6 concurrent fits on the RTX 3080 (10 GiB) on atac_small (11,270 cells); the 8-lane calibration on immune (33,506 cells) ran 64 fits with no failure (docs/concurrency_calibration_stock.json: fits 64, effective factor 3.77); scorers run on CPU with CUDA hidden |
+| PF-18 | major | Co-scheduling | pass | 4 concurrent fits (lead's limit) on the RTX 3080 (10 GiB) on atac_small (11,270 cells); the 8-lane calibration on immune (33,506 cells) ran 64 fits with no failure (docs/concurrency_calibration_stock.json: fits 64, effective factor 3.77); 2 scorers on CPU with CUDA hidden |
 | PF-19 | blocking | Launch manifest | pass | [auto:pf_check_manifest] 6 rows carry all 15 intended flags |
 | PF-20 | major | Count reconciliation | pass | 6 rows = 5 design rows (A1 atac_small seed 100: none l0 c1, discriminator l1 c1, reference l1 c0, barycenter l1 c1, mmd l1 c1) + 1 forced divergence (discriminator l1e39 c1); experiments/stage_runner_e2e/make_manifest.py PICK + 1 |
 | PF-21 | major | Replicates vary | n/a | no aggregation over seeds, folds or resamples |

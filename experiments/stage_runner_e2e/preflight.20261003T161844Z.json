@@ -1,9 +1,9 @@
 {
   "experiment_id": "stage_runner_e2e",
-  "created_at": "2026-10-03T16:18:44Z",
+  "created_at": "2026-10-03T16:14:15Z",
   "pf_version": "1.0",
   "plan": {
-    "question": "Does scripts/run_stage.py, on the local RTX 3080 (4 fit lanes x 1 thread, 2 scorers while and after fitting, the lead's limits of 2026-10-03; KBET_SEED 0, clean committed checkout, --expect-device 'RTX 3080'), fit, score and classify a 6-row atac_small stage that includes one forced divergence, and pass its completion gate? Functional check only: the CPU is shared with other agents' scoring, so no timing from this run is a throughput measurement.",
+    "question": "Does scripts/run_stage.py, on the local RTX 3080 with the production settings (8 fit lanes x 1 thread, 4 scorers while fitting and 12 after, KBET_SEED 0, clean committed checkout, --expect-device 'RTX 3080'), fit, score and classify a 6-row atac_small stage that includes one forced divergence, and pass its completion gate?",
     "primary_outcome": "runner exit status 0 with ledger states 5 scored + 1 diverged (the lambda=1e39 row)",
     "unit_of_analysis": "manifest row (one fit)",
     "split_unit": "none: no model is evaluated on held-out data (engineering test of the runner)",
@@ -12,7 +12,7 @@
     "multiple_comparison_correction": "none needed: one primary outcome, no contrast between settings",
     "data_filters": "atac_small as prepped (prepped_scib/atac_small__scib.h5ad: 11,270 cells x 3,429 features, all highly_variable); no filtering"
   },
-  "plan_sha": "1289be6e0638665f",
+  "plan_sha": "b57a4ab8b28afb55",
   "extra_items": [
     {
       "id": "SC-01",
@@ -216,296 +216,302 @@
   "answers": {
     "PF-01": {
       "status": "pass",
-      "evidence": "[auto:pf_check_plan] plan complete (sha 1289be6e0638665f)",
-      "at": "2026-10-03T16:18:44Z",
+      "evidence": "[auto:pf_check_plan] plan complete (sha b57a4ab8b28afb55)",
+      "at": "2026-10-03T16:14:15Z",
       "history": [
         {
           "status": "pass",
-          "evidence": "[auto:pf_check_plan] plan complete (sha 1289be6e0638665f)",
-          "at": "2026-10-03T16:18:44Z"
+          "evidence": "[auto:pf_check_plan] plan complete (sha b57a4ab8b28afb55)",
+          "at": "2026-10-03T16:14:15Z"
         }
       ],
       "auto": {
         "check": "pf_check_plan",
         "ok": true,
-        "summary": "plan complete (sha 1289be6e0638665f)",
+        "summary": "plan complete (sha b57a4ab8b28afb55)",
         "warnings": null
       }
     },
     "PF-02": {
       "status": "n/a",
       "evidence": "one primary outcome and no contrast between models, metrics or settings",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": [
         {
           "status": "pass",
           "evidence": "plan declares n_comparisons=1; correction: none needed: one primary outcome, no contrast between settings",
-          "at": "2026-10-03T16:18:44Z"
+          "at": "2026-10-03T16:14:15Z"
         }
       ]
     },
     "PF-03": {
       "status": "n/a",
       "evidence": "no classifier, probe or resampling scheme is evaluated on held-out data",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-04": {
       "status": "n/a",
       "evidence": "one prepped scIB file (atac_small); no merge of sources and no re-keyed units",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-05": {
       "status": "n/a",
       "evidence": "no factors or labels are compared with each other",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-06": {
       "status": "n/a",
       "evidence": "no best-of selection precedes any reported number",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-07": {
       "status": "n/a",
       "evidence": "arms are not compared: the rows only exercise the training-step branches of the plan",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-08": {
       "status": "n/a",
       "evidence": "nothing is averaged or ranked across datasets",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-09": {
       "status": "n/a",
       "evidence": "no perturbation or identity knob is part of this test",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-10": {
       "status": "n/a",
       "evidence": "no conditions are created by filtering, subsampling or perturbing",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-11": {
       "status": "n/a",
       "evidence": "no metric is interpreted; scores are only checked for presence, finiteness and range by the runner",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-12": {
       "status": "n/a",
       "evidence": "no new or rewritten metric: scripts/score_scib_native.py is unchanged from main 878d8ea",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-13": {
       "status": "n/a",
       "evidence": "no effect is claimed from any metric",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-14": {
       "status": "n/a",
       "evidence": "no new experimental design or discovery filter; engineering test",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-15": {
       "status": "n/a",
       "evidence": "no mechanism or advantage is attributed to a method",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-16": {
       "status": "n/a",
       "evidence": "no runtime, speed-up or memory number from this run is reported as a benchmark (the guard cost is a separate record, experiments/stage_runner_guard_cost)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-17": {
       "status": "n/a",
       "evidence": "under one GPU-hour: 6 fits x 2 epochs on 11,270 cells; the CPU pilot of the same pipeline on a 1,200-cell subsample took 126 s (tests/stage/test_run_stage_e2e.py at 757f62f)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-21": {
       "status": "n/a",
       "evidence": "no aggregation over seeds, folds or resamples",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-23": {
       "status": "n/a",
       "evidence": "inputs are the single prepped scIB file used by every stage (scripts/prep_scib_task.py output)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-18": {
       "status": "pass",
-      "evidence": "4 concurrent fits (lead's limit) on the RTX 3080 (10 GiB) on atac_small (11,270 cells); the 8-lane calibration on immune (33,506 cells) ran 64 fits with no failure (docs/concurrency_calibration_stock.json: fits 64, effective factor 3.77); 2 scorers on CPU with CUDA hidden",
-      "at": "2026-10-03T16:18:44Z",
+      "evidence": "6 concurrent fits on the RTX 3080 (10 GiB) on atac_small (11,270 cells); the 8-lane calibration on immune (33,506 cells) ran 64 fits with no failure (docs/concurrency_calibration_stock.json: fits 64, effective factor 3.77); scorers run on CPU with CUDA hidden",
+      "at": "2026-10-03T16:15:04Z",
       "history": []
     },
     "PF-19": {
       "status": "pass",
       "evidence": "[auto:pf_check_manifest] 6 rows carry all 15 intended flags",
-      "at": "2026-10-03T16:18:44Z",
-      "history": []
+      "at": "2026-10-03T16:15:19Z",
+      "history": [],
+      "auto": {
+        "check": "pf_check_manifest",
+        "ok": true,
+        "summary": "6 rows carry all 15 intended flags",
+        "warnings": []
+      }
     },
     "PF-20": {
       "status": "pass",
       "evidence": "6 rows = 5 design rows (A1 atac_small seed 100: none l0 c1, discriminator l1 c1, reference l1 c0, barycenter l1 c1, mmd l1 c1) + 1 forced divergence (discriminator l1e39 c1); experiments/stage_runner_e2e/make_manifest.py PICK + 1",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "PF-22": {
       "status": "pass",
       "evidence": "the runner keeps latents/, models/, scores/, status/, attempts/, logs/, failures.csv and ledger/ in OUT_DIR; ledger csv/json, failures.csv, scores and runner log are saved as artifacts after the run",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "PF-24": {
       "status": "pass",
       "evidence": "n_latent 10 < 3,429 features; scanpy neighbours k=15 < smallest batch 3,618 cells and kBET k=15 < 11,270 cells (scpf_check_knn_validity PASS, both kinds)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-11": {
       "status": "pass",
       "evidence": "PASS SC-11 scpf_check_obs_keys (); obs batch and celltype read by name in fit_paper_config.py, uns batch_key/celltype_key = batch/celltype in the prepped file",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-16": {
       "status": "pass",
       "evidence": "PASS SC-16 scpf_check_knn_validity (kind=knn, k=15, n_min=3618, max_valid_k_at_n_min=3617, n_invalid_conditions=0); PASS SC-16 scpf_check_knn_validity (kind=kbet, k=15, n_min=11270, max_valid_k_at_n_min=11270, n_invalid_conditions=0)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-17": {
       "status": "pass",
       "evidence": "the scorer writes NaN for metrics it does not compute (atac_small: cell_cycle_conservation and trajectory NaN in the CPU e2e score rows) and the runner requires finiteness only for the task's metrics (prereg_rules.bio_metrics_for); a NaN required metric stops the stage (tests/stage test_nan_metric_is_a_pipeline_fault)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-20": {
       "status": "pass",
       "evidence": "fl_lint clean on run_stage.py, fit_outcome.py, fit_paper_config.py, scvi_adversarial_plan.py (9 files, 0 findings); the runner never substitutes a method or file: contract breaks are infrastructure errors; the run logs are scanned with scpf_scan_fallbacks after the run",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-01": {
       "status": "n/a",
       "evidence": "no donor-level label and no split",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-02": {
       "status": "n/a",
       "evidence": "no pooled cohorts",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-03": {
       "status": "n/a",
       "evidence": "no train/test assignment is evaluated",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-04": {
       "status": "n/a",
       "evidence": "no custom split function",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-05": {
       "status": "n/a",
       "evidence": "no gene panel is built (prepped features as distributed)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-06": {
       "status": "n/a",
       "evidence": "no foundation model",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-07": {
       "status": "n/a",
       "evidence": "no perturbation axis",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-08": {
       "status": "n/a",
       "evidence": "no perturbation or filtering axis",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-09": {
       "status": "n/a",
       "evidence": "no dropout or thinning",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-10": {
       "status": "n/a",
       "evidence": "no HVG selection (all 3,429 prepped features are highly_variable)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-12": {
       "status": "n/a",
       "evidence": "no disentanglement or integration claim",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-13": {
       "status": "n/a",
       "evidence": "no covariates are scored against each other",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-14": {
       "status": "n/a",
       "evidence": "no block-structured latent",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-15": {
       "status": "n/a",
       "evidence": "no block-aware metric",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-18": {
       "status": "n/a",
       "evidence": "no pooling across datasets",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-19": {
       "status": "n/a",
       "evidence": "a fresh OUT_DIR is used; the runner refuses stale latents and scores by value (row, device, kBET seed, latent SHA-256)",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-21": {
       "status": "n/a",
       "evidence": "no continuous factor is binned",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     },
     "SC-22": {
       "status": "n/a",
       "evidence": "no field-standard claim is made",
-      "at": "2026-10-03T16:18:44Z",
+      "at": "2026-10-03T16:15:19Z",
       "history": []
     }
   },
@@ -519,7 +525,7 @@
     "n_items": 46,
     "n_pass": 10,
     "n_na": 36,
-    "at": "2026-10-03T16:18:44Z"
+    "at": "2026-10-03T16:15:40Z"
   },
   "path": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/a3526fbe-bbcd-4324-92b0-9a0a26791f2e/wcd/experiments/stage_runner_e2e"
 }
