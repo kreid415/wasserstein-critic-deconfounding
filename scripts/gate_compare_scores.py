@@ -93,7 +93,7 @@ def g3(a):
     P["arm"] = M.loc[P.index, "arm"].values
     P["cond"] = M.loc[P.index, "cond"].astype(int).values
     P["seed"] = M.loc[P.index, "seed"].astype(int).values
-    extra = [m for m in ("trajectory",) if m in S and S[m].notna().any()]
+    extra = [m for m in ("trajectory",) if m not in used_bio and m in S and S[m].notna().any()]   # scorer before 2026-10-03 kept it out
     per_metric = BATCH + used_bio + extra + ["batch_mean", "bio_mean"]
     for m in per_metric:
         P[f"d_{m}"] = P[f"{m}_remote"] - P[f"{m}_local"]
