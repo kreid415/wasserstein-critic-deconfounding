@@ -242,3 +242,9 @@
 - added: 2026-10-03
 - keywords: X13, PCA, baseline, budget
 - notebook: NB-20261003-06
+
+## SI-37 · active · process
+- rule: Pre-registration tag goes ahead with the signed-off Scanorama grid (SI-35); knn 80 and 160 are timed on immune_hum_mou locally while A1 runs. If either is infeasible, the X13 grid is amended before any X13 fit, with a dated note in PREREG.md (X13's grid is not chosen from results).
+- source: "Tag now; time it during A1 (Recommended)" (user, ask_user answer to "Scanorama's signed-off grid (SI-35) goes up to knn 160 ... How should I handle this?", 2026-10-03)
+- added: 2026-10-03
+- keywords: Scanorama, knn, X13, tag, amendment, timing
