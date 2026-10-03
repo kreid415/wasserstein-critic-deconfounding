@@ -319,7 +319,9 @@ between two runs), and kBET varies by up to 0.0047 on identical latents.
 methods once)" and PAPER_PLAN section 5 requires the same number of configurations per method family (best-of-k
 curves). The adversarial arms have 6 lambda values per family (A1, R1); sysVI 6 cycle weights.
 
-**Sources.**
+**Sources** (full texts read 2026-10-03: PMC author manuscripts PMC6884693 and PMC6551256, fetched by DOI
+10.1038/s41592-019-0619-0 and 10.1038/s41587-019-0113-3; every quote below was matched verbatim in them; installed
+package sources read in env wcd-kbet).
 - Harmony, Korsunsky et al. 2019 (Nat. Methods 16:1289), Methods Eq. 3-4: theta "decides the degree of penalty for
   dependence between batch membership and cluster assignment"; theta = 0 reverts to soft k-means without the
   diversity penalty (Eq. 2); larger theta favours batch-independent clusters and the solution degenerates as theta
@@ -362,7 +364,10 @@ Scanorama grid is expensive: its cost on the 85-98k-cell tasks (atac_large, immu
 **Verification (2026-10-03, branch missing-arms-v2 = main 878d8ea + this work).** Test runs at commit 126812c, CPU only
 (CUDA_VISIBLE_DEVICES empty): wcd-gpu `243 passed, 1 skipped` (tests/ without scvi and x13, incl. prereg); scvi-api `60 passed, 1 skipped`
 (tests/scvi, incl. tests/scvi/test_x3_x13_design.py); wcd-kbet `17 passed` (tests/x13 and tests/scoring), including the
-bit-identity of two fresh-process Harmony fits on atac_small at 50 PCs. Mutation checks (fl_mutation_check) catch: a
+bit-identity of two fresh-process Harmony fits on atac_small at 50 PCs. The test that the runner's Harmony statements
+reproduce scib.integration.harmony (tolerance 1e-4) has two negative controls, a shuffled batch column and the
+uncorrected PCA (theta 2.5 instead of 2 changes the toy output by only 1e-05, so it is not used as a control); the
+knob test compares theta 0 with theta 2 at 50 PCs. Mutation checks (fl_mutation_check) catch: a
 reference resolver that accepts 'auto', an index or the depleted batch on composition rows; a CPU_BASELINES with theta
 8 missing or Scanorama's default dimensions wrong; X3_TARGETS depleting both sim2 types or atac_small's reference; a
 Harmony comparator fed a theta-0 fit or a one-ulp perturbation; the PF-16 rule fed a 30% spread or a warm-up repeat.
