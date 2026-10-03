@@ -203,9 +203,10 @@ def read_scores(paths):
             _require(os.path.isfile(p), f"score path {p} does not exist")
             files.append(p)
     S = pd.concat([pd.read_csv(f, dtype={"tag": str}) for f in files], ignore_index=True)
-    need = ["tag"] + BATCH_METRICS + BIO_METRICS
+    need = ["tag", "kbet_seed"] + BATCH_METRICS + BIO_METRICS
     missing = [c for c in need if c not in S.columns]
-    _require(not missing, f"score files lack columns {missing}")
+    _require(not missing, f"score files lack columns {missing} (kbet_seed: written by score_scib_native.py since "
+                          f"2026-10-03; earlier, unseeded score files are not valid inputs)")
     for c in BATCH_METRICS + BIO_METRICS:
         S[c] = pd.to_numeric(S[c], errors="raise")
     return S, files
@@ -236,6 +237,12 @@ def outcomes(M, S, F, experiments):
     missing = sorted(tags - set(s.tag) - set(f.tag))
     _require(not missing, f"{len(missing)} of {len(tags)} rows of {experiments} are neither scored nor failed, "
                           f"e.g. {missing[:5]}")
+    _require("kbet_seed" in s.columns, "scores lack kbet_seed (unseeded kBET, pre-2026-10-03 scorer output)")
+    ks = s.kbet_seed                     # score_scib_native.py seeds R's kBET; one rule never mixes kBET seeds
+    if len(ks):
+        _require(ks.notna().all() and ks.nunique() == 1,
+                 f"scores of {experiments} mix kBET seeds {sorted(ks.dropna().unique().tolist())} "
+                 f"({int(ks.isna().sum())} rows without one); measurement-SD re-scores belong in their own directory")
     rows = rows.merge(s[["tag"] + BATCH_METRICS + BIO_METRICS], on="tag", how="left", validate="one_to_one")
     rows["status"] = np.where(rows.tag.isin(set(f.tag)), "failed", "ok")
     B, C = [], []

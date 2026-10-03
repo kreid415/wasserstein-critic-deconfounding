@@ -18,7 +18,11 @@ within a dataset across all runs, then 0.4*batch + 0.6*bio) is computed at analy
 scib_overall() below, because the scaling depends on the full set of runs.
 
 Env: PREPPED (prep_scib_task.py output: X = scIB's normalised values, obsm X_pca, obs batch/celltype,
-     uns organism / modality), NPZ (latent: z, batch, celltype, obs_names), TAG, META (json), OUT_CSV.
+     uns organism / modality), NPZ (latent: z, batch, celltype, obs_names), TAG, META (json), OUT_CSV,
+     KBET_SEED (optional integer, default KBET_SEED_DEFAULT = 0).
+kBET is deterministic: R's RNG is set with set.seed(KBET_SEED) immediately before every R kBET call (see
+seed_kbet); the seed and the number of seeded R calls are written as kbet_seed / kbet_r_calls. The
+measurement-SD re-scoring (PAPER_PLAN section 5) varies KBET_SEED explicitly.
 Per-task settings follow scIB (code review N13): cell-cycle conservation only for RNA tasks with a
 real organism (scIB did not compute it for ATAC, and simulations have no cell-cycle genes);
 trajectory conservation for the immune tasks (obs dpt_pseudotime, scIB's trajectory label); the
@@ -30,6 +34,35 @@ import os, json, time, numpy as np, pandas as pd, scanpy as sc, scib
 BATCH_METRICS = ["PCR_batch", "ASW_label/batch", "iLISI", "graph_conn", "kBET"]
 BIO_METRICS = ["NMI_cluster/label", "ARI_cluster/label", "ASW_label", "isolated_label_F1",
                "isolated_label_silhouette", "cLISI", "cell_cycle_conservation", "trajectory"]
+KBET_SEED_DEFAULT = 0   # R seed set before every R kBET call; env KBET_SEED overrides (measurement-SD re-scoring)
+
+
+def kbet_seed():
+    """The R seed for kBET: env KBET_SEED (an integer) or KBET_SEED_DEFAULT."""
+    v = os.environ.get("KBET_SEED", str(KBET_SEED_DEFAULT))
+    try:
+        return int(v)
+    except ValueError:
+        raise ValueError(f"KBET_SEED={v!r} is not an integer") from None
+
+
+def seed_kbet(seed):
+    """Make kBET deterministic. scib 1.1.7's wrapper (scib/metrics/kbet.py) sets no seed and R's kBET samples
+    test cells (testSize, n_repeat), so kBET differs on identical latents. scib.metrics.kbet.kBET calls the
+    module-level kBET_single once per cell type; it is wrapped so that R's RNG is set with set.seed(seed)
+    immediately before every R kBET call. Returns the wrapper (its .calls counts the seeded R calls)."""
+    import rpy2.robjects as ro
+    import scib.metrics.kbet as kbet_mod
+    base = getattr(kbet_mod.kBET_single, "__wrapped__", kbet_mod.kBET_single)
+
+    def seeded(*args, **kwargs):
+        ro.r(f"set.seed({int(seed)})")
+        seeded.calls += 1
+        return base(*args, **kwargs)
+
+    seeded.__wrapped__, seeded.seed, seeded.calls = base, int(seed), 0
+    kbet_mod.kBET_single = seeded
+    return seeded
 
 
 def scib_overall(df):
@@ -62,6 +95,7 @@ def main():
     integ = pre.copy()
     integ.obsm["X_emb"] = d["z"].astype(np.float32)
     sc.pp.neighbors(integ, use_rep="X_emb")          # scIB pipeline: kNN graph on the embedding
+    kb = seed_kbet(kbet_seed())
     org = str(pre.uns["organism"])
     cell_cycle = pre.uns.get("modality") == "rna" and org in ("human", "mouse")
     trajectory = "dpt_pseudotime" in pre.obs and pre.obs["dpt_pseudotime"].notna().any()
@@ -74,6 +108,9 @@ def main():
     )
     row = dict(tag=os.environ["TAG"], **json.loads(os.environ.get("META", "{}")))
     row.update({k: float(v) for k, v in res.iloc[:, 0].items()})
+    if np.isfinite(row["kBET"]) and kb.calls == 0:
+        raise RuntimeError("kBET is finite but no seeded R kBET call ran: the seed wrapper was bypassed")
+    row["kbet_seed"], row["kbet_r_calls"] = kb.seed, kb.calls
     row["score_seconds"] = round(time.time() - t0, 1)
     tmp = os.environ["OUT_CSV"] + ".tmp"
     pd.DataFrame([row]).to_csv(tmp, index=False)

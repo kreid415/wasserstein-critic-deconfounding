@@ -345,6 +345,21 @@ def test_failure_rows_become_failed_outcomes(tmp_path):
         P.read_failures(str(bad))
 
 
+def test_scores_with_mixed_kbet_seeds_raise(tmp_path):
+    M, S, F = _small()
+    assert len(P.outcomes(M, S, F, ["A1"])) == len(S) and set(S.kbet_seed) == {0}
+    legacy = tmp_path / "legacy.csv"
+    S.drop(columns="kbet_seed").to_csv(legacy, index=False)
+    with pytest.raises(P.PreregError, match="kbet_seed"):
+        P.read_scores([str(legacy)])
+    S.loc[S.index[0], "kbet_seed"] = 1
+    with pytest.raises(P.PreregError, match="mix kBET seeds"):
+        P.outcomes(M, S, F, ["A1"])
+    S.loc[S.index[0], "kbet_seed"] = np.nan
+    with pytest.raises(P.PreregError, match="without one"):
+        P.outcomes(M, S, F, ["A1"])
+
+
 def test_out_of_range_metric_raises():
     M, S, F = _small()
     S.loc[S.index[0], "iLISI"] = 3.2          # unscaled LISI would be > 1

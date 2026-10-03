@@ -73,11 +73,11 @@ def scores(M, fn=world):
             continue
         _, B, C = res
         bio = P.bio_metrics_for(r["task"])
-        row = {"tag": r["tag"], "score_seconds": 1.0}
+        row = {"tag": r["tag"], "kbet_seed": 0, "score_seconds": 1.0}
         for m in ALL_METRICS:
             row[m] = B if m in P.BATCH_METRICS else (C if m in bio else float("nan"))
         S.append(row)
-    return (pd.DataFrame(S, columns=["tag"] + ALL_METRICS + ["score_seconds"]),
+    return (pd.DataFrame(S, columns=["tag"] + ALL_METRICS + ["kbet_seed", "score_seconds"]),
             pd.DataFrame(F, columns=["tag", "status", "detail"]))
 
 
