@@ -34,7 +34,7 @@ explicit go (CONSTRAINTS.md SI-29), and the fixes of the code check land first (
 4. **Inputs**: manifest and tags-file SHA-256 against the values in the command (computed from the files as committed at the
    expected SHA); every tag present once; the tags' experiments and tasks equal the job's; `fingerprint_prepped.py --compare
    docs/prepped_fingerprints_scib.json` must exit 0.
-5. **Node witness and tests**: `nvidia-smi` must list exactly one GPU whose name contains L40S; `env_versions.py --kind fit`
+5. **Node witness and tests** (the first step on the node once the commit is confirmed): `nvidia-smi` must list exactly one GPU whose name contains L40S; `env_versions.py --kind fit`
    must equal `expected_fit_versions.json` (torch 2.13.0+cu126, scvi 1.4.2, ..., CUDA available, GPU L40S);
    `WCD_SRC=src pytest -q tests/scvi` must pass at that commit. Any failure aborts the job (exit 2) before any fit.
 6. **Runner**: `$FIT_PY scripts/run_stage.py --no-score --manifest M --experiments X1 X13 --tasks <job tasks> --tags-file

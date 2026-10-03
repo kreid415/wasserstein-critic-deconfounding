@@ -7,11 +7,11 @@
 # Steps (any failure before the runner aborts the job; nothing is fitted):
 #   1. environment: inside Slurm, scratch-first (OUT, logs, TMPDIR, caches on fastscratch, nothing in $HOME), verified env
 #   2. repository: HEAD == --expected-sha, clean tree
-#   3. concurrency: one of 2 slots (<= 2 production GPU jobs at once), tasks disjoint from the other live job
-#   4. inputs: manifest + tags-file SHA-256, tags in the manifest, tags' experiments/tasks == the job's; prepped files
-#      against docs/prepped_fingerprints_scib.json
-#   5. node witness + tests: nvidia-smi = exactly one L40S; env_versions.py --kind fit == expected_fit_versions.json;
+#   3. node witness + tests: nvidia-smi = exactly one L40S; env_versions.py --kind fit == expected_fit_versions.json;
 #      WCD_SRC=src pytest -q tests/scvi at this commit
+#   4. concurrency: one of 2 slots (<= 2 production GPU jobs at once), tasks disjoint from the other live job
+#   5. inputs: manifest + tags-file SHA-256, tags in the manifest, tags' experiments/tasks == the job's; prepped files
+#      against docs/prepped_fingerprints_scib.json
 #   6. claims of earlier jobs on these tags: cleared only if their Slurm job is terminal (sacct); otherwise abort
 #   7. runner --dry-run (logged), then the run in the background with a stop guard (SIGTERM at Slurm end - margin, so
 #      the runner stops lanes, releases claims and writes its views while the job is still alive)
@@ -71,7 +71,21 @@ DIRTY=$(git -C "$REPO" status --porcelain --untracked-files=no)
 [ -z "$DIRTY" ] || { echo "FATAL: repo $REPO has uncommitted changes:" >&2; echo "$DIRTY" >&2; exit 3; }
 log "repo $REPO at $HEAD_SHA (clean)"
 
-# ---- 3. concurrency ---------------------------------------------------------------------------------------------
+# ---- 3. node witness + tests: first step on the node once the commit is confirmed --------------------------------
+nvidia-smi --query-gpu=name,driver_version,memory.total,uuid --format=csv,noheader > "$LOGS/nvidia_smi.txt" 2>&1 \
+  || { cat "$LOGS/nvidia_smi.txt"; echo "FATAL: nvidia-smi failed" >&2; exit 2; }
+NGPU=$(awk 'NF' "$LOGS/nvidia_smi.txt" | wc -l)
+[ "$NGPU" = 1 ] && grep -q "L40S" "$LOGS/nvidia_smi.txt" \
+  || { cat "$LOGS/nvidia_smi.txt"; echo "FATAL: need exactly one visible L40S, got $NGPU GPU(s)" >&2; exit 2; }
+"$FIT_PY" "$REPO/cluster/jhpce/env_versions.py" --kind fit --out "$LOGS/versions_fit.json" > /dev/null 2>"$LOGS/versions_fit.err" \
+  || { cat "$LOGS/versions_fit.err"; echo "FATAL: env_versions.py failed" >&2; exit 2; }
+"$FIT_PY" "$H" versions --got "$LOGS/versions_fit.json" --expected "$REPO/cluster/jhpce/expected_fit_versions.json" \
+  > "$LOGS/versions_check.json" || { cat "$LOGS/versions_check.json"; echo "FATAL: fit env differs from cluster/jhpce/expected_fit_versions.json" >&2; exit 2; }
+( cd "$REPO" && WCD_SRC=src "$FIT_PY" -m pytest -q -p no:cacheprovider tests/scvi ) > "$LOGS/pytest_tests_scvi.txt" 2>&1 \
+  || { tail -30 "$LOGS/pytest_tests_scvi.txt"; echo "FATAL: tests/scvi failed on this node at $HEAD_SHA" >&2; exit 2; }
+log "node: $(cat "$LOGS/nvidia_smi.txt"); tests: $(grep -E 'passed|failed' "$LOGS/pytest_tests_scvi.txt" | tail -1)"
+
+# ---- 4. concurrency ---------------------------------------------------------------------------------------------
 SLOT_HELD=0
 release_slot() {
   if [ "$SLOT_HELD" = 1 ]; then
@@ -86,7 +100,7 @@ trap release_slot EXIT
 SLOT_HELD=1
 log "slot: $(tr -d '\n ' < "$LOGS/slot.json" | cut -c1-200)"
 
-# ---- 4. inputs --------------------------------------------------------------------------------------------------
+# ---- 5. inputs --------------------------------------------------------------------------------------------------
 MANIFEST="$REPO/$MANIFEST_REL"; TAGS="$REPO/$TAGS_REL"
 # shellcheck disable=SC2086
 "$FIT_PY" "$H" inputs --manifest "$MANIFEST" --manifest-sha256 "$MANIFEST_SHA" --tags "$TAGS" --tags-sha256 "$TAGS_SHA" \
@@ -94,20 +108,6 @@ MANIFEST="$REPO/$MANIFEST_REL"; TAGS="$REPO/$TAGS_REL"
 "$FIT_PY" "$REPO/scripts/fingerprint_prepped.py" --dir "$PREPPED_DIR" --compare "$REPO/docs/prepped_fingerprints_scib.json" \
   > "$LOGS/prepped_fingerprints.txt" 2>&1 || { tail -20 "$LOGS/prepped_fingerprints.txt"; echo "FATAL: prepped files differ from the reference fingerprints" >&2; exit 8; }
 log "inputs OK: $(grep -o '"n_tags": [0-9]*' "$LOGS/inputs.json"); prepped fingerprints OK"
-
-# ---- 5. node witness + tests -----------------------------------------------------------------------------------
-nvidia-smi --query-gpu=name,driver_version,memory.total,uuid --format=csv,noheader > "$LOGS/nvidia_smi.txt" 2>&1 \
-  || { cat "$LOGS/nvidia_smi.txt"; echo "FATAL: nvidia-smi failed" >&2; exit 2; }
-NGPU=$(awk 'NF' "$LOGS/nvidia_smi.txt" | wc -l)
-[ "$NGPU" = 1 ] && grep -q "L40S" "$LOGS/nvidia_smi.txt" \
-  || { cat "$LOGS/nvidia_smi.txt"; echo "FATAL: need exactly one visible L40S, got $NGPU GPU(s)" >&2; exit 2; }
-"$FIT_PY" "$REPO/cluster/jhpce/env_versions.py" --kind fit --out "$LOGS/versions_fit.json" > /dev/null 2>"$LOGS/versions_fit.err" \
-  || { cat "$LOGS/versions_fit.err"; echo "FATAL: env_versions.py failed" >&2; exit 2; }
-"$FIT_PY" "$H" versions --got "$LOGS/versions_fit.json" --expected "$REPO/cluster/jhpce/expected_fit_versions.json" \
-  > "$LOGS/versions_check.json" || { cat "$LOGS/versions_check.json"; echo "FATAL: fit env differs from cluster/jhpce/expected_fit_versions.json" >&2; exit 2; }
-( cd "$REPO" && WCD_SRC=src "$FIT_PY" -m pytest -q -p no:cacheprovider tests/scvi ) > "$LOGS/pytest_tests_scvi.txt" 2>&1 \
-  || { tail -30 "$LOGS/pytest_tests_scvi.txt"; echo "FATAL: tests/scvi failed on this node at $HEAD_SHA" >&2; exit 2; }
-log "node: $(cat "$LOGS/nvidia_smi.txt"); tests: $(grep -E 'passed|failed' "$LOGS/pytest_tests_scvi.txt" | tail -1)"
 
 # ---- 6. claims of earlier jobs ----------------------------------------------------------------------------------
 "$FIT_PY" "$H" claims --out-dir "$OUT" --tags "$TAGS" --job "$SLURM_JOB_ID" > "$LOGS/claims.json" \
