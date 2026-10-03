@@ -24,6 +24,8 @@ import prereg_rules as pr  # noqa: E402
 
 NEED = ("STAGE_E2E_FIT_PY", "STAGE_E2E_SCORE_PY", "R_HOME", "R_LIBS", "PREPPED_DIR")
 pytestmark = pytest.mark.skipif(not all(os.environ.get(k) for k in NEED), reason=f"opt-in: needs {NEED}")
+with open(os.path.join(ROOT, "scripts", "score_scib_native.py")) as _f:
+    SCORER_HAS_PROVENANCE = "scorer_git_sha" in _f.read()   # CR-05 / shared interface (a)
 
 SUBSAMPLE = r'''
 import sys, numpy as np, scanpy as sc
@@ -48,6 +50,8 @@ def _row(tag, **over):
     return r
 
 
+@pytest.mark.xfail(not SCORER_HAS_PROVENANCE, strict=True, reason="score_scib_native.py does not write the CR-05 "
+                   "scorer provenance columns yet (shared interface (a)): the runner refuses its score rows")
 def test_real_fitter_and_scorer(tmp_path):
     prepped = tmp_path / "prepped"
     prepped.mkdir()

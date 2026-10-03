@@ -1,8 +1,11 @@
-"""scripts/run_stage.py: classification, claims, retry bound, completion gate, failures table, resume.
-CPU only, no fits: the fit and scoring interpreters are tests/stage/fake_env.py, which emulates the contracts of
-scripts/fit_paper_config.py and scripts/score_scib_native.py. Run in any env with numpy, pandas, scipy, pytest:
+"""scripts/run_stage.py: classification, claims, retry bound, completion gate, failures table, resume, the
+--tags-file filter, X13 CPU-baseline lanes and the scorer-provenance gate (CR-02, CR-05).
+CPU only, no fits: the fit, CPU-baseline and scoring interpreters are tests/stage/fake_env.py, which emulates the
+contracts of scripts/fit_paper_config.py, scripts/run_cpu_baselines.py and scripts/score_scib_native.py. Run in any
+env with numpy, pandas, scipy, pytest:
     CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=1 python -m pytest -q tests/stage
 """
+import hashlib
 import json
 import os
 import signal
@@ -34,11 +37,23 @@ def _row(tag, task="atac_small", **over):
     return r
 
 
+def _cpu_row(tag, arm="harmony", **over):
+    """An X13 CPU-baseline row as the builder writes it (cpu_row): knob in lam, backbone fields 'na' / 0, seed 0."""
+    knob = rs.RCB.CPU_ARMS[arm]
+    r = _row(tag, experiment="X13", arm=arm, lam={"harmony": "2", "scanorama": "20", "pca": "0"}[arm], n_critic="0",
+             adv_input="na", zstd="0", cond="0", decoder="na", n_layers="0", n_hidden="0", likelihood="na",
+             batch_size="0", max_epochs="0", train_size="0", seed="0", extra=json.dumps({"knob": knob}) if knob else "{}")
+    r.update(over)
+    return r
+
+
 class Stage:
     """A temporary stage: manifest, prepped dir (empty files: the fake fitter reads nothing), fake interpreters."""
 
-    def __init__(self, tmp, rows, plan=None, score_plan=None):
+    def __init__(self, tmp, rows, plan=None, score_plan=None, experiments=("T1",)):
         self.tmp, self.out = tmp, str(tmp / "out")
+        self.experiments = list(experiments)
+        self.key = "+".join(sorted(self.experiments)) + "__all"
         self.manifest = tmp / "manifest.tsv"
         with open(self.manifest, "w") as f:
             f.write("# test manifest\n")
@@ -54,12 +69,13 @@ class Stage:
         self.fakepy.chmod(self.fakepy.stat().st_mode | stat.S_IEXEC)
         self.set_plan(plan or {}, score_plan or {})
 
-    def set_plan(self, plan, score_plan=None):
+    def set_plan(self, plan, score_plan=None, score_prov=None):
         (self.tmp / "plan.json").write_text(json.dumps(plan))
         (self.tmp / "score_plan.json").write_text(json.dumps(score_plan or {}))
+        (self.tmp / "score_prov.json").write_text(json.dumps(score_prov or {}))
 
     def args(self, *extra, lanes=2):
-        return ["--manifest", str(self.manifest), "--experiments", "T1", "--out-dir", self.out,
+        return ["--manifest", str(self.manifest), "--experiments", *self.experiments, "--out-dir", self.out,
                 "--prepped-dir", str(self.tmp / "prepped"), "--fit-python", str(self.fakepy),
                 "--score-python", str(self.fakepy), "--r-home", str(self.tmp / "rhome"),
                 "--r-libs", str(self.tmp / "rlibs"), "--expect-device", "cpu", "--fit-lanes", str(lanes),
@@ -68,7 +84,8 @@ class Stage:
 
     def env(self, **kw):
         return dict(os.environ, FAKE_PLAN=str(self.tmp / "plan.json"), FAKE_SCORE_PLAN=str(self.tmp / "score_plan.json"),
-                    FAKE_STATE=str(self.tmp / "state"), CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", **kw)
+                    FAKE_SCORE_PROV=str(self.tmp / "score_prov.json"), FAKE_STATE=str(self.tmp / "state"),
+                    CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", **kw)
 
     def run(self, *extra, lanes=2, **env):
         p = subprocess.run([sys.executable, RUNNER, *self.args(*extra, lanes=lanes)], env=self.env(**env),
@@ -79,13 +96,19 @@ class Stage:
         return subprocess.Popen([sys.executable, RUNNER, *self.args(*extra, lanes=lanes)], env=self.env(**env),
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
-    def ledger(self):
-        return pd.read_csv(os.path.join(self.out, "ledger", "T1__all.csv"), dtype=str, keep_default_na=False) \
-            .set_index("tag")
+    def ledger(self, key=None):
+        return pd.read_csv(os.path.join(self.out, "ledger", f"{key or self.key}.csv"), dtype=str,
+                           keep_default_na=False).set_index("tag")
 
-    def summary(self):
-        with open(os.path.join(self.out, "ledger", "T1__all.json")) as f:
+    def summary(self, key=None):
+        with open(os.path.join(self.out, "ledger", f"{key or self.key}.json")) as f:
             return json.load(f)
+
+    def tags_file(self, text, name="tags.txt"):
+        """(path, sha256) of a --tags-file holding `text`."""
+        p = self.tmp / name
+        p.write_text(text)
+        return str(p), hashlib.sha256(text.encode()).hexdigest()
 
     def attempts(self, tag):
         p = os.path.join(self.out, "attempts", f"{tag}.jsonl")
@@ -393,3 +416,200 @@ def test_sigterm_stops_children_and_releases_claims(tmp_path):
     rc, log = st.run()                                      # no flag needed: the claims were released
     assert rc == 0, log
     assert st.ledger().state.tolist() == ["scored"] * 3
+
+
+# ---- unchanged stage semantics (no --tags-file, no CPU rows) ------------------------------------------------------
+LEDGER_COLS_C9568FD = ["tag", "experiment", "task", "arm", "lam", "cond", "seed", "state", "detail", "fit_attempts",
+                       "score_attempts", "fit_host", "fit_started", "fit_ended", "fit_wall_s", "fit_seconds",
+                       "score_started", "score_ended", "score_wall_s", "fit_log", "score_log", "device", "git_sha",
+                       "claimed_by"]
+
+
+def test_unfiltered_gpu_stage_is_unchanged(tmp_path):
+    """An A1-style stage (every row on the GPU lanes, no tags filter): the stage key, ledger files and columns, states
+    and gate of c9568fd; the new summary fields are present and neutral."""
+    st = Stage(tmp_path, [_row("ok1"), _row("nan"), _row("div")], plan={"nan": "nan", "div": "diverge"})
+    rc, log = st.run()
+    assert rc == 0, log
+    assert sorted(os.listdir(os.path.join(st.out, "ledger"))) == ["T1__all.csv", "T1__all.done", "T1__all.json"]
+    led = pd.read_csv(os.path.join(st.out, "ledger", "T1__all.csv"), dtype=str, keep_default_na=False)
+    assert list(led.columns) == LEDGER_COLS_C9568FD == rs.LEDGER_COLS
+    assert dict(zip(led.tag, led.state)) == {"ok1": "scored", "nan": "nonfinite_latent", "div": "diverged"}
+    assert dict(zip(led.tag, led.device)) == {"ok1": "cpu", "nan": "cpu", "div": ""}
+    s = st.summary()
+    assert s["stage"] == "T1__all" and s["tags_file"] is None and s["row_kinds"] == {"gpu": 3} and s["cpu_lanes"] == 0
+    g = s["gate"]
+    assert g["ok"] and g["counts"] == {"diverged": 1, "nonfinite_latent": 1, "scored": 1} and g["n_final"] == 3
+    assert g["mixed_scorer_provenance"] == {} and g["scorer_provenance"]["cpu_simd"] == "avx2"
+    assert {a["lane"] for t in st.tags for a in st.attempts(t) if a["event"] == "start"} == {"gpu", "score"}
+    assert "CPU-baseline" not in log and "[env] cpu" not in log
+
+
+# ---- --tags-file (CR-02) ------------------------------------------------------------------------------------------
+def test_tags_file_restricts_the_stage(tmp_path):
+    rows = [_row("ok1"), _row("ok2"), _row("ph", lam="g1", adv_input="A2"), _row("ok3", task="immune")]
+    st = Stage(tmp_path, rows)
+    rc, log = st.run()
+    assert rc == rs.EXIT_PREFLIGHT and "ph: placeholder(s)" in log, log        # unfiltered: the placeholder blocks
+    path, sha = st.tags_file("# the rows to run\nok1\n\n   ok3   # immune\n")
+    rc, log = st.run("--tags-file", path)
+    assert rc == 0, log                                     # a placeholder outside the filter is not this stage's
+    key = f"T1__all__tags-{sha[:12]}"
+    assert st.ledger(key).state.to_dict() == {"ok1": "scored", "ok3": "scored"}
+    s = st.summary(key)
+    assert s["stage"] == key and s["tags_file"] == dict(path=path, sha256=sha, n_tags=2) and s["gate"]["n_rows"] == 2
+    assert sorted(os.listdir(os.path.join(st.out, "latents"))) == ["ok1.npz", "ok3.npz"]      # nothing else ran
+    assert os.path.exists(os.path.join(st.out, "ledger", f"{key}.done"))
+    assert not os.path.exists(os.path.join(st.out, "ledger", "T1__all.done"))   # the full stage is not complete
+    path2, _ = st.tags_file("ok2\nph\n", "tags2.txt")
+    rc, log = st.run("--tags-file", path2)                  # a placeholder inside the filter is refused
+    assert rc == rs.EXIT_PREFLIGHT and "ph: placeholder(s) [\"lam='g1'\", \"adv_input='A2'\"]" in log, log
+    assert not os.path.exists(os.path.join(st.out, "latents", "ok2.npz"))
+
+
+@pytest.mark.parametrize("text, extra, msg", [
+    ("ok1\nnope\n", (), "1 tags are not in the manifest, e.g. ['nope']"),
+    ("ok1\nother\n", (), "1 tags are outside --experiments ['T1'] / --tasks [], e.g. ['other']"),
+    ("ok1\nimm\n", ("--tasks", "atac_small"), "outside --experiments ['T1'] / --tasks ['atac_small'], e.g. ['imm']"),
+    ("ok1\nok1\n", (), "1 tags listed more than once, e.g. ['ok1']"),
+    ("# no tags\n\n", (), "no tags"),
+    ("ok1 imm\n", (), ":1: one tag per line, got ['ok1', 'imm']"),
+])
+def test_tags_file_is_checked(tmp_path, text, extra, msg):
+    st = Stage(tmp_path, [_row("ok1"), _row("imm", task="immune"), _row("other", experiment="T2")])
+    path, _ = st.tags_file(text)
+    rc, log = st.run("--tags-file", path, *extra)
+    assert rc == rs.EXIT_PREFLIGHT and msg in log, log
+    assert not os.path.isdir(os.path.join(st.out, "latents"))
+
+
+def test_missing_tags_file_is_refused(tmp_path):
+    st = Stage(tmp_path, [_row("ok1")])
+    rc, log = st.run("--tags-file", str(tmp_path / "absent.txt"))
+    assert rc == rs.EXIT_PREFLIGHT and "is not a file" in log, log
+
+
+# ---- X13 CPU baselines (CR-02) ------------------------------------------------------------------------------------
+def _cpu_stage(tmp_path, **kw):
+    rows = [_row("g1"), _cpu_row("h1"), _cpu_row("s1", arm="scanorama"), _cpu_row("p1", arm="pca")]
+    return Stage(tmp_path, rows, experiments=("T1", "X13"), **kw)
+
+
+def test_cpu_rows_need_cpu_lanes(tmp_path):
+    st = _cpu_stage(tmp_path)
+    assert [rs.row_kind(r) for r in rs.load_manifest(st.manifest).to_dict("records")] == ["gpu", "cpu", "cpu", "cpu"]
+    rc, log = st.run()
+    assert rc == rs.EXIT_PREFLIGHT and "3 X13 CPU-baseline rows need a fit" in log and "--cpu-lanes N" in log, log
+    assert not os.path.isdir(os.path.join(st.out, "latents"))           # refused before any work
+    rc, log = st.run("--dry-run")                                        # a dry run refuses it too
+    assert rc == rs.EXIT_PREFLIGHT and "3 X13 CPU-baseline rows need a fit" in log, log
+    rc, log = st.run("--cpu-lanes", "1")
+    assert rc == rs.EXIT_PREFLIGHT and "--cpu-lanes needs --cpu-python" in log, log
+    rc, log = st.run("--dry-run", "--cpu-lanes", "2", "--cpu-python", str(st.fakepy))
+    assert rc == 0 and "to run: 1 fits + 3 CPU-baseline fits, up to 4 scores" in log, log
+
+
+def test_cpu_rows_run_on_cpu_lanes(tmp_path):
+    st = _cpu_stage(tmp_path)
+    rc, log = st.run("--cpu-lanes", "2", "--cpu-python", str(st.fakepy), "--cpu-threads", "3",
+                     "--expect-device", "FakeGPU", FAKE_DEVICE="FakeGPU 10GB")
+    assert rc == 0, log
+    led = st.ledger()
+    assert led.state.to_dict() == {t: "scored" for t in ("g1", "h1", "s1", "p1")}
+    assert led.device.to_dict() == {"g1": "FakeGPU 10GB", "h1": "cpu: fake cpu", "s1": "cpu: fake cpu",
+                                    "p1": "cpu: fake cpu"}             # each kind gated on its own device
+    for t in ("h1", "s1", "p1"):
+        flog = open(led.loc[t, "fit_log"]).read()
+        assert f"fake cpu fit {t}: ok threads=3 --threads=3 cuda=''" in flog, flog
+        assert [a["lane"] for a in st.attempts(t) if a["event"] == "start"] == ["cpu", "score"]
+        assert not os.path.exists(os.path.join(st.out, "models", t))   # CPU baselines save no model
+    assert [a["lane"] for a in st.attempts("g1") if a["event"] == "start"] == ["gpu", "score"]
+    assert "[env] cpu" in log and "[env] fit" in log
+    s = st.summary()
+    assert s["gate"]["ok"] and s["row_kinds"] == {"cpu": 3, "gpu": 1} and s["cpu_lanes"] == 2
+    S, _ = pr.read_scores(os.path.join(st.out, "scores"))
+    assert sorted(S.tag) == ["g1", "h1", "p1", "s1"]                    # scored like every other latent
+    rc, log = st.run("--expect-device", "FakeGPU")          # complete: a rerun needs neither lanes nor fit envs
+    assert rc == 0 and "[env]" not in log.replace("[env] score", ""), log
+
+
+@pytest.mark.parametrize("behaviour, msg", [
+    ("wrong_device", "CPU baseline recorded device 'cuda' and cpu_model 'fake cpu', expected device 'cpu'"),
+    ("no_device", "CPU baseline recorded device None and cpu_model None, expected device 'cpu'"),
+    ("no_latent", "run_cpu_baselines.py exited 0 without a latent"),
+    ("diverge", "run_cpu_baselines.py exit 23 with a status record"),
+    ("crash", "run_cpu_baselines.py exit 1"),
+])
+def test_cpu_baseline_contract_violations_are_infrastructure(tmp_path, behaviour, msg):
+    st = Stage(tmp_path, [_cpu_row("h1")], plan={"h1": behaviour}, experiments=("X13",))
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy), "--max-attempts", "1")
+    assert rc == rs.EXIT_INFRA, log
+    detail = st.ledger().loc["h1", "detail"]
+    assert msg in detail, detail
+    assert len(pr.read_failures(os.path.join(st.out, "failures.csv"))) == 0     # never an outcome of the row
+    if behaviour in ("wrong_device", "no_device", "diverge"):          # the offending output is moved aside
+        moved = {"diverge": ["h1.fit.a1.h1.json"]}.get(behaviour, ["h1.fit.a1.h1.npz"])
+        assert sorted(os.listdir(os.path.join(st.out, "quarantine"))) == moved
+    assert not os.path.exists(os.path.join(st.out, "latents", "h1.npz"))
+
+
+def test_cpu_env_probe_must_pass(tmp_path):
+    st = Stage(tmp_path, [_cpu_row("h1")], experiments=("X13",))
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy), FAKE_CPU_ENV_BROKEN="1")
+    assert rc == rs.EXIT_PREFLIGHT and "CPU-baseline env probe failed" in log, log
+
+
+@pytest.mark.parametrize("over, msg", [
+    (dict(max_epochs="400"), "scVI-backbone fields set on a CPU row (they would be ignored): {'max_epochs': '400'}"),
+    (dict(seed="1"), "expected extra knob 'theta' and seed 0, got {'knob': 'theta'} and seed 1"),
+    (dict(extra="{}"), "expected extra knob 'theta' and seed 0, got {} and seed 0"),
+    (dict(experiment="T1"), "not X13 CPU rows"),
+])
+def test_cpu_rows_follow_the_cpu_runner_contract(tmp_path, over, msg):
+    st = Stage(tmp_path, [_cpu_row("h1", **over)], experiments=(over.get("experiment", "X13"),))
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy))
+    assert rc == rs.EXIT_PREFLIGHT and "refused by run_cpu_baselines.select_rows" in log and msg in log, log
+
+
+# ---- scorer provenance (CR-05) ------------------------------------------------------------------------------------
+@pytest.mark.parametrize("column, value", [("scorer_git_sha", "0123abc"), ("scorer_dirty", 1),
+                                           ("cpu_simd", "avx512f"), ("numba_cpu_name", "generic"),
+                                           ("scorer_versions", json.dumps({"scib": "1.1.6"}))])
+def test_mixed_scorer_provenance_fails_the_gate(tmp_path, column, value):
+    st = Stage(tmp_path, [_row("ok1"), _row("ok2"), _row("ok3")])
+    st.set_plan({}, {}, score_prov={"ok2": {column: value}})
+    rc, log = st.run()
+    assert rc == rs.EXIT_GATE and "[gate] mixed_scorer_provenance (1)" in log, log
+    g = st.summary()["gate"]
+    assert not g["ok"] and list(g["mixed_scorer_provenance"]) == [column]
+    assert g["mixed_scorer_provenance"][column][str(value)] == dict(n=1, tags=["ok2"])
+    assert sorted(g["scorer_provenance"]) == sorted(set(rs.SCORER_PROVENANCE) - {column})
+    assert st.ledger().state.tolist() == ["scored"] * 3    # every row is scored, yet the stage is not complete
+    assert not os.path.exists(os.path.join(st.out, "ledger", "T1__all.done"))
+    rc, log = st.run()                                      # a rerun refuses before any work
+    assert rc == rs.EXIT_PREFLIGHT and "existing score rows disagree on scorer provenance" in log, log
+    rc, log = st.run("--report-only")                       # the report still rebuilds the failing gate
+    assert rc == rs.EXIT_GATE and "mixed_scorer_provenance" in log, log
+
+
+def test_other_scorer_fields_may_differ(tmp_path):
+    """Only SCORER_PROVENANCE is gated: two scoring hosts of one CPU class (same SIMD level and numba target)."""
+    st = Stage(tmp_path, [_row("ok1"), _row("ok2")])
+    st.set_plan({}, {}, score_prov={"ok2": {"score_host": "node2", "cpu_model": "other cpu", "kbet_labels_skipped": 2}})
+    rc, log = st.run()
+    assert rc == 0, log
+
+
+def test_scores_without_provenance_are_refused(tmp_path):
+    st = Stage(tmp_path, [_row("ok1")], score_plan={"ok1": "old_scorer"})
+    rc, log = st.run("--max-attempts", "1")
+    assert rc == rs.EXIT_INFRA, log
+    detail = st.ledger().loc["ok1", "detail"]
+    assert f"no scorer provenance {list(rs.SCORER_PROVENANCE)} (written by a scorer older than CR-05" in detail, detail
+    assert os.listdir(os.path.join(st.out, "scores")) == []          # quarantined: never read by read_scores
+    q = os.path.join(st.out, "quarantine")
+    (old,) = [f for f in os.listdir(q) if f.endswith(".csv")]
+    os.replace(os.path.join(q, old), os.path.join(st.out, "scores", "ok1.csv"))   # an old score file in place
+    rc, log = st.run()
+    assert rc == rs.EXIT_PREFLIGHT and "written by a scorer older than CR-05" in log, log
+
