@@ -315,3 +315,10 @@
 - added: 2026-10-04
 - keywords: JHPCE, filler, jobA, jobB, submit, go, SI-29
 - notebook: NB-20261004-14
+
+## SI-48 · active · process
+- rule: JHPCE fit env repair: one shared CPU job at b698a00 deletes the purge-damaged wcd-fit env and rebuilds it with cluster/jhpce/build_envs.sh (fresh conda package cache, conda md5 and pip versions equal to the local env, all files re-dated); when it passes, the two filler jobs of SI-47 are resubmitted unchanged at prereg-tier12-v2 (c88cce3).
+- source: "Rebuild, then resubmit both (Recommended)" (user, ask_user answer to "Both filler jobs landed on L40S nodes at once ... Go?", 2026-10-04)
+- added: 2026-10-04
+- keywords: JHPCE, env, rebuild, purge, fastscratch, filler, resubmit
+- notebook: NB-20261004-16
