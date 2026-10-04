@@ -34,6 +34,11 @@ MUTANTS = {
                                    "    missing = []\n", checks.check_provenance_missing),
     "provenance_check_not_called": ("    check_provenance(s, experiments)\n", "    pass\n",
                                     checks.check_provenance_mix),
+    # SI-45 (code check CR-11): the unresolved window neighbour is marked and turned into default-half rows
+    "si45_not_marked": ('                        cell.setdefault("edge_unresolved", []).append(nbr)\n',
+                        '                        pass\n', checks.check_si45_flagged),
+    "si45_not_emitted": ('        for nbr in cell.get("edge_unresolved", []):\n', '        for nbr in []:\n',
+                         checks.check_si45_flagged),
 }
 
 

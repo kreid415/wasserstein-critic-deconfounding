@@ -9,6 +9,10 @@
 b* = b0 + 0.5 (b_common - b0) on the unscaled batch score (mean of the 5 raw scIB batch metrics); the
 matched point is the failure-free grid point closest to b* (ties -> smaller lambda). A matched point on
 a grid edge needs one more grid point beyond it (exit 3, extension manifest), up to 2 per edge.
+SI-45 (code check CR-11): if stage a1 freezes with a window neighbour of an A2/A3 cell still without an A1 fit
+(edge_unresolved), the A1 rows of the default half at that lambda (posterior mean, standardisation off, A1 seeds,
+same decoder) are written to --extension-manifest and listed in the record (n_default_half_extension_rows); the
+stage is frozen (exit 0) and decide_a2_a3.py refuses the cell until those rows are fitted and scored.
 
 Usage (repo root):
   python scripts/freeze_matched_lambda.py --stage a1 --manifest scripts/paper_manifest.r1.tsv \
@@ -109,13 +113,29 @@ def main(argv=None):
         return P.EXIT_EXTEND
     M2, n = resolve(M, r4, a.stage)
     n_checked = check_no_x1_reuse(M2) if a.stage == "x1" else 0
+    si45 = {}
+    if a.stage == "a1":
+        # SI-45 (CR-11): a window neighbour without an A1 fit -> A1 rows for the default half at that lambda, written
+        # to --extension-manifest; decide_a2_a3.py needs them fitted and scored (it refuses the cell otherwise)
+        specs = P.default_half_extensions(r4)
+        si45 = dict(n_default_half_extension_rows=0)
+        if specs:
+            E = P.extension_rows(M, specs)
+            P.write_manifest(E, header[:1], a.extension_manifest,
+                             f"SI-45 default-half extension: {len(E)} A1 rows at R4-a1 edge_unresolved window lambdas "
+                             f"(freeze_matched_lambda.py); fit and score them before decide_a2_a3.py")
+            si45 = dict(n_default_half_extension_rows=len(E), default_half_extension_manifest=a.extension_manifest,
+                        default_half_extensions=specs)
     P.write_manifest(M2, header, a.out_manifest, f"R4 {a.stage} frozen: {n} rows resolved"
                                                   f" (freeze_matched_lambda.py, record {os.path.basename(a.out_json)})")
     P.write_record(a.out_json, dict(r4, resolved_rows=n, followup_rows_checked_against_x1=n_checked,
-                                    out_manifest=a.out_manifest), inputs)
+                                    out_manifest=a.out_manifest, **si45), inputs)
     flagged = sum(1 for c in r4["cells"].values() if c["flags"])
     print(f"R4 {a.stage} frozen: {len(r4['cells'])} cells ({flagged} flagged), {n} rows resolved"
           + (f", {n_checked} follow-up rows differ from every X1 row" if a.stage == "x1" else ""))
+    if si45.get("n_default_half_extension_rows"):
+        print(f"SI-45: {si45['n_default_half_extension_rows']} A1 default-half rows -> {a.extension_manifest} "
+              f"(fit and score them, then pass the file to decide_a2_a3.py with --manifest)")
     return P.EXIT_FROZEN
 
 

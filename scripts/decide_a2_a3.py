@@ -9,6 +9,9 @@ blocks. The alternative replaces the default only if >= 2/3 of the cells are eva
 >= 1 per task x decoder, the mean Dbio@b* > ROPE, the mean is > 0 within each task x decoder, and the
 alternative has no more failed fits. A2 only: if posterior samples miss b* in any cell where posterior
 means reach it, X1 uses means (masking).
+SI-45 (code check CR-11): where R4 stage a1 left a window neighbour without an A1 fit (edge_unresolved), the
+default half is read from the A1 extension rows freeze_matched_lambda.py wrote for it (pass that manifest with
+--manifest and its scores with --scores); without them the cell is refused.
 
 Usage (repo root):
   python scripts/decide_a2_a3.py --manifest scripts/paper_manifest.r4a1.tsv --scores <dir> --failures <csv> \
@@ -45,7 +48,15 @@ def cells_for(out, exp, r4a1):
         seeds = sorted(P._zero_ref(out, "A1", t, c))
         d_pts = [p for p in P._cell_points(out, "A1", t, c, arm, seeds, adv_input="mean", zstd="0")
                  if any(math.isclose(p["lam"], w) for w in window)]
-        P._require(len(d_pts) == 3, f"A1 {t} {arm}: default half lacks window points {window}")
+        if len(d_pts) != 3:
+            have = [p["lam"] for p in d_pts]
+            absent = [w for w in window if not any(math.isclose(w, h) for h in have)]
+            si45 = [cell[n] for n in cell.get("edge_unresolved", [])]
+            if absent and all(any(math.isclose(w, v) for v in si45) for w in absent):
+                raise P.PreregError(f"A1 {t} cond={c} {arm}: default half lacks window points {absent}: the SI-45 "
+                                    f"default-half rows (R4-a1 record: {r4a1.get('default_half_extension_manifest')}) "
+                                    f"must be fitted, scored and passed with --manifest / --scores")
+            raise P.PreregError(f"A1 {t} {arm}: default half lacks window points {window}")
         a_pts = P._cell_points(out, exp, t, c, arm, seeds, **{st["column"]: st["alt"][1]})
         bstar = r4a1["targets"][f"{t}|{c}"]["bstar"]
         rec = dict(task=t, cond=c, arm=arm, group=f"{t}|{c}", window=window, bstar=bstar)

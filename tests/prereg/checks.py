@@ -174,3 +174,45 @@ def check_provenance_missing(P):
     _refused(P, M, S2, F, "lack scorer provenance values")
     _refused(P, M, S.drop(columns=["cpu_simd"]), F, r"lack the scorer provenance columns \['cpu_simd'\]")
 
+
+# ---- SI-45 (code check CR-11): an R4-a1 window neighbour without an A1 fit -> default-half A1 rows --------------------
+SI45_CELL = ("immune", 1, "pooled")
+SI45_LOW_EXT = [0.03, 0.01]     # the two R4-a1 extension rounds below the A1 grid (R4_MAX_ROUNDS x R4_EXT_POINTS)
+
+
+def si45_b(arm, lam):
+    """Seed-mean batch score of the edge world (b0 = 0.40): the discriminator tops out at 0.47 (sets b_common, so
+    b* = 0.435), the other arms reach 0.60 inside the grid; pooled is already at b* at lambda 0.01 and rises."""
+    import math
+    x = math.log10(float(lam))
+    if arm == "none":
+        return 0.40
+    if arm == SI45_CELL[2]:
+        return min(0.435 + 0.05 * (x + 2), 0.75)
+    top = 0.47 if arm == "discriminator" else 0.60
+    return 0.40 + (top - 0.40) / (1 + math.exp(-(x - 0.5) / 0.3))
+
+
+def si45_out(P, include_new_point):
+    """outcomes()-shaped frame of the edge cell: A1 'none', every adversarial arm on the A1 grid, pooled also at the two
+    R4 extension points (and, if include_new_point, the SI-45 point 0.003); A2 rows at the window."""
+    t, c, arm = SI45_CELL
+    rec = [dict(experiment="A1", task=t, cond=c, arm="none", lam=0, seed=s, B=0.40, C=0.70, adv_input="mean")
+           for s in SEEDS]
+    for a in P.ADV_ARMS:
+        lams = GRID + (SI45_LOW_EXT if a == arm else []) + ([0.003] if (a == arm and include_new_point) else [])
+        rec += [dict(experiment="A1", task=t, cond=c, arm=a, lam=lam, seed=s, B=si45_b(a, lam), C=0.70,
+                     adv_input="mean") for lam in lams for s in SEEDS]
+    rec += [dict(experiment="A2", task=t, cond=c, arm=arm, lam=lam, seed=s, B=si45_b(arm, lam), C=0.71,
+                 adv_input="sample") for lam in (0.003, 0.01, 0.03) for s in SEEDS]
+    return out_frame(rec)
+
+
+def check_si45_flagged(P):
+    """The edge cell gets edge_unresolved ['lo'] (lo = 0.003 without an A1 fit) and exactly one default-half spec."""
+    t, c, arm = SI45_CELL
+    r4 = P.r4_stage(si45_out(P, False), "a1", r1_record(P), need={f"{t}|{c}|{arm}"})
+    cell = r4["cells"][f"{t}|{c}|{arm}"]
+    assert (cell["matched"], cell["lo"], cell["hi"]) == (0.01, 0.003, 0.03), cell
+    assert cell.get("edge_unresolved") == ["lo"], cell
+    assert P.default_half_extensions(r4) == [dict(experiment="A1", task=t, cond=c, arm=arm, lam=0.003)]

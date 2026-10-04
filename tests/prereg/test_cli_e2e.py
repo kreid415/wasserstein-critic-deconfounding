@@ -86,6 +86,10 @@ def test_r4_a1_resolves_the_pilot_windows(pipeline):
         c = rec["cells"][f"{r['task']}|{r['cond']}|{r['arm']}"]
         assert float(r["lam"]) in (c["lo"], c["matched"], c["hi"])
     assert not M2.lam.isin(BPM.A1_MATCHED).any()
+    # SI-45 does not occur here: no window neighbour lacks an A1 fit, so no default-half rows and no extension manifest
+    assert rec["n_default_half_extension_rows"] == 0 and "default_half_extension_manifest" not in rec
+    assert not any("edge_unresolved" in c for c in rec["cells"].values())
+    assert not os.path.exists(os.path.join(tmp, "a1_ext.tsv"))
 
 
 def test_r2_r3_keep_the_defaults_when_the_pilots_show_no_difference(pipeline):
