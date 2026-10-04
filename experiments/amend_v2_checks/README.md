@@ -12,8 +12,9 @@ each `results/<suite>.txt` starts with the HEAD, the dirty count and the exact c
 | other | wcd-gpu | `PYTHONPATH=src pytest tests --ignore=tests/{stage,scvi,x13,scoring,jhpce}` | 311 passed | 269 |
 | jhpce | wcd-gpu | `PYTHONPATH=src pytest tests/jhpce` | 36 passed | 36 |
 
-New tests: tests/scvi/test_kl_warmup.py (6), tests/prereg: test_manifest_v3.py (8), test_provenance_rule.py (8),
-test_si45_edge_extension.py (6), test_rules_unchanged.py (9), 6 new mutants x 2 in test_mutation.py (12) = 42 in 'other'.
+New tests (pytest --collect-only): scvi +6 = tests/scvi/test_kl_warmup.py (6); other +42 = tests/prereg/test_manifest_v3.py
+(8) + test_provenance_rule.py (7) + test_si45_edge_extension.py (6) + test_rules_unchanged.py (9) + test_mutation.py (28
+collected, 16 at eb444fe: 6 new mutants x 2 = 12).
 
 Mutation checks of the new verifiers (`results/mutation_results.txt`; each mutant applied to a copy at 54aeefc, then reverted):
 
