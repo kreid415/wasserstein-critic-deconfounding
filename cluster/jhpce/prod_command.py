@@ -98,7 +98,7 @@ def main():
     ])
     rt = int(wall_s(a.walltime) + a.queue_allowance_h * 3600)
     plan = dict(job=a.job, tasks=j["tasks"].split(), n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
-                expected_sha=a.expected_sha,
+                expected_sha=a.expected_sha, job_args=args,    # prod_fit_job.sh arguments (cluster/jhpce/local_rehearsal.sh)
                 submit=dict(command=command, inputs=[{"src": a.bundle, "dst": "wcd.bundle"}],
                             outputs=["job_summary.json", "harvest.json", "slurm-*.out"], run_timeout_s=rt,
                             intent=(f"JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), {a.cpus} CPU {a.mem}, wall {a.walltime}: "

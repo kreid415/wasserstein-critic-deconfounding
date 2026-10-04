@@ -10,11 +10,17 @@ exits non-zero on refusal, so the job script can stop before any fit. Needs nump
             job is terminal (or the claim has no owner record for > 60 s, the runner's stale rule)  (exit 7)
   versions  env_versions.py --kind fit record against expected_fit_versions.json (modules, CUDA, GPU name) (exit 2)
   deadline  epoch seconds at which the stop guard fires: Slurm end time (squeue %L) - margin (exit 9 if unknown)
-  summary   job summary from the runner's ledger JSON/CSV and the job facts
-  pack      harvest of this job's tags: per-file SHA-256 manifest, one tar, parts <= --part-mb MiB, SHA256SUMS
+  stagekey  the stage key of one runner invocation, read from its '[stage] <key>: N rows ...' line (never rebuilt):
+            the key must carry this job's tags-file hash (__tags-<sha256[:12]>), N = the number of tags, out = OUT;
+            names the runner's views OUT/ledger/<key>.{csv,json,done}                       (exit 11 on violation)
+  summary   job summary from the runner's ledger JSON/CSV of that key, checked against the job's facts (stage,
+            tags-file hash, manifest hash, runner commit, row kinds); --mode dry-run records the plan only (exit 11)
+  pack      harvest of this job's tags + the key's ledger files and the run's manifest snapshot: per-file SHA-256
+            manifest (stage key and ledger files recorded), one tar, parts <= --part-mb MiB, SHA256SUMS
 Slurm states are read with sacct (fallback squeue); a state that cannot be read counts as live (fail safe).
 """
 import argparse
+import ast
 import glob
 import hashlib
 import io
@@ -28,7 +34,7 @@ import sys
 import tarfile
 import time
 
-EXIT_REFUSED_CONC, EXIT_REFUSED_INPUTS, EXIT_ENV = 7, 8, 9
+EXIT_REFUSED_CONC, EXIT_REFUSED_INPUTS, EXIT_ENV, EXIT_RUNNER_OUTPUT = 7, 8, 9, 11
 LIVE = {"PENDING", "RUNNING", "REQUEUED", "REQUEUE_FED", "REQUEUE_HOLD", "RESIZING", "SUSPENDED", "COMPLETING",
         "CONFIGURING", "STAGE_OUT", "SIGNALING", "STOPPED", "UNKNOWN"}
 
@@ -243,43 +249,149 @@ def cmd_deadline(a):
     out(dict(ok=True, now=now, time_left_s=left, source=src, margin_s=a.margin_s, deadline=now + left - a.margin_s))
 
 
-# ---- summary -----------------------------------------------------------------------------------------------------
-def stage_key_from_log(log):
-    """The runner prints '[stage] <key>: N rows ...' before work; the key names ledger/<key>.json."""
+# ---- stage key (read from the runner's own output) ---------------------------------------------------------------
+# scripts/run_stage.py prints this line once per invocation, after its preflight and before any work:
+#   [HH:MM:SS] [stage] <key>: <N> rows {<state>: <n>, ...}; to run: <n> fits[ + <n> CPU-baseline fits] (no scoring); out <OUT>
+# A --tags-file run gets its own key <experiments>__<tasks>__tags-<sha256[:12]> with its own ledger/<key>.{csv,json,done}.
+STAGE_LINE = re.compile(r"^\[\d{2}:\d{2}:\d{2}\] \[stage\] (?P<key>\S+): (?P<n_rows>\d+) rows (?P<states>\{[^}]*\}); "
+                        r"to run: (?P<n_fits>\d+) fits(?: \+ (?P<n_cpu>\d+) CPU-baseline fits)?.*; out (?P<out>.+)$")
+
+
+def stage_lines(log):
+    with open(log) as f:
+        return [m.groupdict() for m in (STAGE_LINE.match(line.rstrip("\n")) for line in f) if m]
+
+
+def cmd_stagekey(a):
+    tags = read_tags(a.tags)
+    tsha = sha256(a.tags)
+    rec, problems = dict(log=os.path.abspath(a.log), stage_key=None), []
+    if a.tags_sha256 and tsha != a.tags_sha256:
+        problems.append(f"tags file {a.tags} sha256 {tsha} != {a.tags_sha256}")
     try:
-        with open(log) as f:
-            for line in f:
-                m = re.search(r"\[stage\] (\S+): \d+ rows", line)
-                if m:
-                    return m.group(1)
+        lines = stage_lines(a.log)
     except OSError as e:
-        print(f"[summary] runner log {log} unreadable ({e!r}); using the default stage key", file=sys.stderr)
-    return None
+        lines = []
+        problems.append(f"runner log {a.log} unreadable: {e!r}")
+    keys = sorted({x["key"] for x in lines})
+    rec["n_stage_lines"] = len(lines)
+    if not lines and not problems and a.allow_missing:
+        rec["why"] = "the runner printed no stage line: refused in its preflight before planning (exit 4)"
+        out(dict(rec, ok=True, problems=[]))
+        return
+    if not lines:
+        problems.append("the runner printed no '[stage] <key>: N rows ...' line")
+    elif len(keys) != 1:
+        problems.append(f"the log names {len(keys)} stage keys: {keys}")
+    else:
+        x = lines[-1]
+        key, out_dir = x["key"], os.path.realpath(x["out"])
+        if not key.endswith(f"__tags-{tsha[:12]}"):
+            problems.append(f"stage key {key} does not carry this tags file's hash (__tags-{tsha[:12]})")
+        if int(x["n_rows"]) != len(tags):
+            problems.append(f"the runner selected {x['n_rows']} rows, the tags file lists {len(tags)}")
+        if out_dir != os.path.realpath(a.out_dir):
+            problems.append(f"the runner's out {x['out']} != {a.out_dir}")
+        if a.expect_key_json:
+            want = json.load(open(a.expect_key_json)).get("stage_key")
+            if want != key:
+                problems.append(f"stage key {key} != the dry run's {want}")
+        led = os.path.join(out_dir, "ledger")
+        rec.update(stage_key=key, n_rows=int(x["n_rows"]), states=ast.literal_eval(x["states"]),
+                   n_fits=int(x["n_fits"]), n_cpu_fits=int(x["n_cpu"] or 0), out_dir=out_dir,
+                   ledger={ext: os.path.join(led, f"{key}.{ext}") for ext in ("csv", "json", "done")})
+    out(dict(rec, ok=not problems, problems=problems), 0 if not problems else EXIT_RUNNER_OUTPUT)
+
+
+def load_stage(path):
+    """The stagekey record a summary / pack works from ({} if the file is absent: no runner output to name a key)."""
+    if not path or not os.path.isfile(path):
+        return {}
+    with open(path) as f:
+        return json.load(f)
+
+
+# ---- summary -----------------------------------------------------------------------------------------------------
+LEDGER_REQUIRED = ("stage", "out_dir", "tags_file", "manifest_sha256", "runner_git", "runner_id", "row_kinds", "counts",
+                   "stop_reason", "infrastructure_errors", "updated_at", "manifest_snapshot")
+
+
+def read_ledger(st, tags_sha, n_tags, manifest_sha, head_sha):
+    """(ledger JSON of the stage key or None, problems): the runner's ledger/<key>.json, checked against the job."""
+    p = st["ledger"]["json"]
+    if not os.path.isfile(p):
+        return None, [f"ledger {p} missing"]
+    with open(p) as f:
+        L = json.load(f)
+    missing = [k for k in LEDGER_REQUIRED if k not in L]
+    if missing:
+        return L, [f"ledger {p} lacks {missing}"]
+    tf, rg = L["tags_file"] or {}, L["runner_git"] or {}
+    checks = [("stage", L["stage"], st["stage_key"]),
+              ("out_dir", os.path.realpath(L["out_dir"]), os.path.realpath(st["out_dir"])),
+              ("tags_file.sha256", tf.get("sha256"), tags_sha), ("tags_file.n_tags", tf.get("n_tags"), n_tags),
+              ("manifest_sha256", L["manifest_sha256"], manifest_sha),
+              ("runner_git.git_sha", rg.get("git_sha"), head_sha), ("runner_git.git_dirty", rg.get("git_dirty"), False),
+              ("row_kinds", sorted(L["row_kinds"]), ["gpu"])]
+    return L, [f"ledger {k} = {got!r}, expected {want!r}" for k, got, want in checks if got != want]
 
 
 def cmd_summary(a):
-    key = stage_key_from_log(a.runner_log) or a.default_key
-    led = os.path.join(a.out_dir, "ledger", f"{key}.json")
-    rec = dict(stage_key=key, runner_exit=a.rc, stopped_by=a.stopped_by or None, ledger=led if os.path.isfile(led) else None,
-               done_marker=os.path.isfile(os.path.join(a.out_dir, "ledger", f"{key}.done")))
-    if os.path.isfile(led):
-        L = json.load(open(led))
-        rec.update({k: L.get(k) for k in ("counts", "gate", "stop_reason", "git_shas", "devices") if k in L})
-    csvp = os.path.join(a.out_dir, "ledger", f"{key}.csv")
-    if os.path.isfile(csvp):
-        import pandas as pd
-        C = pd.read_csv(csvp, dtype=str, keep_default_na=False)
-        rec["state_by_task"] = {f"{t}/{s}": int(n) for (t, s), n in C.groupby(["task", "state"]).size().items()}
+    st = load_stage(a.stage_key_json)
+    rec = dict(mode=a.mode, runner_exit=a.rc, stopped_by=a.stopped_by or None, stage_key=st.get("stage_key"),
+               stage_key_from=st.get("log"), problems=list(st.get("problems", [])),
+               views_rebuilt_by_report_only=a.report_only_rc is not None, report_only_exit=a.report_only_rc)
+    for extra in a.also_stage_json or []:             # e.g. the run's own record when the views were rebuilt
+        x = load_stage(extra)
+        rec.setdefault("other_stage_records", []).append({k: x.get(k) for k in ("log", "stage_key", "ok", "why")})
+        rec["problems"] += [f"{os.path.basename(x.get('log') or extra)}: {p_}" for p_ in x.get("problems", [])]
+    if a.mode == "dry-run":
+        rec.update(planned={k: st.get(k) for k in ("n_rows", "states", "n_fits", "n_cpu_fits", "out_dir", "ledger")})
+        if not st.get("stage_key"):
+            rec["problems"].append("no stage key: the dry run's output names no stage")
+    elif st.get("stage_key") and st.get("ok"):       # only a key that passed stagekey's checks names a ledger
+        tags = read_tags(a.tags)
+        L, probs = read_ledger(st, a.tags_sha256, len(tags), a.manifest_sha256, a.head_sha)
+        rec["problems"] += probs
+        rec["ledger"] = st["ledger"]
+        if L is not None and not probs:
+            final = "gate" in L
+            rec.update(views_final=final, ledger_runner_id=L["runner_id"], ledger_updated_at=L["updated_at"],
+                       counts=L["counts"], stop_reason=L["stop_reason"], infrastructure_errors=L["infrastructure_errors"],
+                       manifest_snapshot=L["manifest_snapshot"], gate=L["gate"] if final else None,
+                       latent_git_shas=L["latent_git_shas"] if final else None,
+                       devices=L["devices"] if final else None)
+            if final:
+                rec["latent_git_shas_match_head"] = L["latent_git_shas"] == [a.head_sha]
+            dp = st["ledger"]["done"]
+            rec["done_marker"] = None
+            if os.path.isfile(dp):
+                with open(dp) as f:
+                    D = json.load(f)
+                rec["done_marker"] = dict(path=dp, runner_id=D.get("runner_id"),
+                                          valid=bool(final and D.get("runner_id") == L["runner_id"]
+                                                     and (D.get("gate") or {}).get("ok") and L["gate"].get("ok")))
+            if not os.path.isfile(st["ledger"]["csv"]):
+                rec["problems"].append(f"ledger {st['ledger']['csv']} missing")
+            else:
+                import pandas as pd
+                C = pd.read_csv(st["ledger"]["csv"], dtype=str, keep_default_na=False)
+                if sorted(C["tag"]) != sorted(tags):
+                    rec["problems"].append(f"ledger CSV tags differ from the tags file ({len(C)} rows, {len(tags)} tags)")
+                rec["state_by_task"] = {f"{t}/{s_}": int(n) for (t, s_), n in C.groupby(["task", "state"]).size().items()}
+    elif a.rc != 4 and not rec["problems"]:
+        rec["problems"].append("no stage key: the runner's output names no stage")
     for kv in a.fact or []:
         k, v = kv.split("=", 1)
         rec[k] = v
     with open(a.out, "w") as f:
         json.dump(rec, f, indent=1, sort_keys=True)
-    out(rec)
+    out(rec, 0 if not rec["problems"] else EXIT_RUNNER_OUTPUT)
 
 
 # ---- pack --------------------------------------------------------------------------------------------------------
-def harvest_files(out_dir, tags, key):
+def harvest_files(out_dir, tags):
+    """Per-tag files of the runner layout for these tags (the source of truth; the views are added by the caller)."""
     rel = []
     for t in tags:
         for p in (f"latents/{t}.npz", f"status/{t}.json", f"attempts/{t}.jsonl"):
@@ -294,27 +406,46 @@ def harvest_files(out_dir, tags, key):
                 rel.append(os.path.relpath(q, out_dir))
             for dp, _, fns in os.walk(q):
                 rel += [os.path.relpath(os.path.join(dp, fn), out_dir) for fn in fns]
-    for p in [f"ledger/{key}.csv", f"ledger/{key}.json", f"ledger/{key}.done", "failures.csv"] + \
-            [os.path.relpath(p, out_dir) for p in glob.glob(os.path.join(out_dir, "manifests", "*.tsv"))]:
-        if os.path.isfile(os.path.join(out_dir, p)):
-            rel.append(p)
     return sorted(set(rel))
+
+
+def inside(out_dir, path):
+    """path relative to out_dir; refuses a path outside it (the runner writes its views and snapshots inside OUT)."""
+    rel = os.path.relpath(os.path.realpath(path), os.path.realpath(out_dir))
+    if rel.startswith(".."):
+        raise SystemExit(f"[pack] {path} is outside {out_dir}")
+    return rel
 
 
 def cmd_pack(a):
     tags = read_tags(a.tags)
-    key = stage_key_from_log(a.runner_log) or a.default_key
+    st = load_stage(a.stage_key_json)
+    L, ledger_rel, snap_rel = None, [], None
+    if st.get("stage_key") and st.get("ok"):         # an unchecked key never names the harvested ledger
+        for ext in ("csv", "json", "done"):
+            if os.path.isfile(st["ledger"][ext]):
+                ledger_rel.append(inside(a.out_dir, st["ledger"][ext]))
+        if os.path.isfile(st["ledger"]["json"]):
+            with open(st["ledger"]["json"]) as f:
+                L = json.load(f)
+            if L.get("manifest_snapshot"):
+                snap_rel = inside(a.out_dir, L["manifest_snapshot"])
+    rel = harvest_files(a.out_dir, tags) + ledger_rel + ([snap_rel] if snap_rel else []) + \
+        (["failures.csv"] if os.path.isfile(os.path.join(a.out_dir, "failures.csv")) else [])
+    rel = sorted(set(rel))
     os.makedirs(a.dest, exist_ok=True)
-    rel = harvest_files(a.out_dir, tags, key)
     job_files = sorted(os.path.relpath(os.path.join(dp, fn), a.job_dir) for dp, _, fns in os.walk(a.job_dir)
                        for fn in fns if not os.path.relpath(dp, a.job_dir).split(os.sep)[0] in ("repo",))
     entries = [(os.path.join(a.out_dir, r), f"out/{r}") for r in rel] + \
               [(os.path.join(a.job_dir, r), f"job/{r}") for r in job_files]
     files = [dict(path=arc, bytes=os.path.getsize(src), sha256=sha256(src)) for src, arc in entries]
     base = f"{a.stage}__job{a.job}"
-    man = dict(stage=a.stage, slurm_job_id=str(a.job), stage_key=key, tags_file=os.path.basename(a.tags),
-               tags_sha256=sha256(a.tags), n_tags=len(tags), created=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-               host=socket.gethostname(), n_files=len(files), total_bytes=sum(f["bytes"] for f in files), files=files,
+    man = dict(stage=a.stage, slurm_job_id=str(a.job), stage_key=st.get("stage_key") if st.get("ok") else None,
+               ledger_files=[f"out/{r}" for r in ledger_rel], ledger_runner_id=(L or {}).get("runner_id"),
+               ledger_final=bool(L and "gate" in L), manifest_snapshot=f"out/{snap_rel}" if snap_rel else None,
+               tags_file=os.path.basename(a.tags), tags_sha256=sha256(a.tags), n_tags=len(tags),
+               created=time.strftime("%Y-%m-%dT%H:%M:%S%z"), host=socket.gethostname(), n_files=len(files),
+               total_bytes=sum(f["bytes"] for f in files), files=files,
                n_latents=sum(f["path"].startswith("out/latents/") for f in files))
     man_bytes = json.dumps(man, indent=1, sort_keys=True).encode()
     tar_path = os.path.join(a.dest, f"{base}.tar")
@@ -346,7 +477,8 @@ def cmd_pack(a):
     with open(os.path.join(a.dest, f"{base}.SHA256SUMS"), "w") as f:
         f.write("\n".join(sums) + "\n")
     rec = dict(ok=True, dest=a.dest, base=base, tar_sha256=tar_sha, parts=parts, n_files=len(files),
-               total_bytes=man["total_bytes"], n_latents=man["n_latents"], stage_key=key)
+               total_bytes=man["total_bytes"], n_latents=man["n_latents"], stage_key=man["stage_key"],
+               ledger_files=man["ledger_files"])
     with open(os.path.join(a.dest, f"{base}.harvest.json"), "w") as f:
         json.dump(rec, f, indent=1, sort_keys=True)
     out(rec)
@@ -377,18 +509,35 @@ def main():
     p.add_argument("--margin-s", type=int, required=True)
     p.add_argument("--min-run-s", type=int, default=1800)
     p.add_argument("--time-left-s", type=int, default=None)
-    p = sub.add_parser("summary")
-    for k in ("out-dir", "runner-log", "default-key", "out"):
+    p = sub.add_parser("stagekey")
+    for k in ("log", "out-dir", "tags"):
         p.add_argument(f"--{k}", required=True)
+    p.add_argument("--tags-sha256", default=None)
+    p.add_argument("--expect-key-json", default=None, help="stagekey record of the dry run: the key must match")
+    p.add_argument("--allow-missing", action="store_true", help="the runner refused in its preflight (exit 4)")
+    p = sub.add_parser("summary")
+    p.add_argument("--mode", choices=["run", "dry-run"], required=True)
+    p.add_argument("--stage-key-json", default=None)
+    p.add_argument("--out", required=True)
+    for k in ("tags", "tags-sha256", "manifest-sha256", "head-sha"):
+        p.add_argument(f"--{k}", default=None)
     p.add_argument("--rc", type=int, required=True)
     p.add_argument("--stopped-by", default="")
+    p.add_argument("--report-only-rc", type=int, default=None)
+    p.add_argument("--also-stage-json", action="append", help="other stagekey records whose problems count too")
     p.add_argument("--fact", action="append")
     p = sub.add_parser("pack")
-    for k in ("out-dir", "tags", "runner-log", "default-key", "job-dir", "dest", "stage", "job"):
+    for k in ("out-dir", "tags", "job-dir", "dest", "stage", "job"):
         p.add_argument(f"--{k}", required=True)
+    p.add_argument("--stage-key-json", default=None)
     p.add_argument("--part-mb", type=int, default=250)
     a = ap.parse_args()
-    dict(inputs=cmd_inputs, slot=cmd_slot, claims=cmd_claims, versions=cmd_versions, deadline=cmd_deadline, summary=cmd_summary, pack=cmd_pack)[a.cmd](a)
+    if a.cmd == "summary" and a.mode == "run":
+        miss = [k for k in ("tags", "tags_sha256", "manifest_sha256", "head_sha") if getattr(a, k) is None]
+        if miss:
+            ap.error(f"summary --mode run needs {miss}")
+    dict(inputs=cmd_inputs, slot=cmd_slot, claims=cmd_claims, versions=cmd_versions, deadline=cmd_deadline,
+         stagekey=cmd_stagekey, summary=cmd_summary, pack=cmd_pack)[a.cmd](a)
 
 
 if __name__ == "__main__":

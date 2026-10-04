@@ -28,9 +28,12 @@ shows one approval card). Locally, after checksum checks and an all-or-nothing m
 Local scoring afterwards: about 110 process-hours, roughly 9 h on 12 free cores or ~28 h alongside the A1 fits.
 
 **Before the go.**
-1. The fix-runner branch (`--tags-file`) and the code-check fixes (SI-40) are merged.
-2. The commit to fit is fixed; the plan is printed with `cluster/jhpce/prod_command.py --expected-sha <it>`.
-3. The runner invocation is dry-run locally against the tags files.
+1. fix-runner (`--tags-file`, fda7578), fix-score-fit and this branch are merged into main, and the reviewer has
+   re-checked the merged code (SI-40).
+2. The commit to fit is fixed; the plan is printed with `cluster/jhpce/prod_command.py --expected-sha <it>`, and
+   `cluster/jhpce/local_rehearsal.sh` passes for both jobs at that commit (the runner's dry run already passes at
+   c8da1f8: jobA 100 rows, jobB 150 rows, each under its own stage key `...__tags-<hash>`).
+3. If the manifest is rebuilt for SI-41/SI-42 (X3 re-tag), the tags files are regenerated (`make_tags.py --check`).
 4. fastscratch purges files after 30 days: the env (built Oct 2) must be used before ~Nov 1 or rebuilt.
 
 **Not in these jobs.** The 80 X13 CPU baselines of these tasks (harmony, scanorama, pca). The proposal is to run them on

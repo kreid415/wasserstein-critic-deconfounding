@@ -12,6 +12,7 @@
 | `env_versions.py`, `kbet_fingerprint.R`, `compare_freeze.py` | both hosts | version records and checks |
 | `prod_fit_job.sh` (+ `prod_helpers.py`) | `gpu` job, 1 L40S | production fits (`run_stage.py --no-score --tags-file`): node witness, `tests/scvi`, stop guard, <= 2 concurrent jobs, harvest parts + SHA-256 (docs/jhpce/PRODUCTION_JOB.md) |
 | `prod_command.py` | local | prints the submission plan of a production job (submits nothing; each submission needs the user's go) |
+| `local_rehearsal.sh` | local | the job's full dry-run path at one commit (bundle clone, every check, the runner's dry run); stubs only the GPU node and Slurm |
 | `harvest_local.py` | local | verifies a harvest (every part, the tar, every file) and merges it all-or-nothing into the durable OUT_DIR |
 | `make_tags.py`, `tags/` | local | tags files of a production job, derived read-only from the tagged manifest |
 

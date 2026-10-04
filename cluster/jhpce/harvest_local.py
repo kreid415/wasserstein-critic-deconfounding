@@ -5,11 +5,15 @@ Input (--parts-dir): the files written by `prod_helpers.py pack` on fastscratch 
 (c.download caps at 256 MiB per file): <base>.tar.partNNN, <base>.SHA256SUMS, <base>.harvest_manifest.json.
 Checks, before anything is written to --dest: every part's SHA-256, the reassembled tar's SHA-256, the manifest's
 SHA-256, safe member names, and every extracted file's size and SHA-256 against the manifest (no missing or extra
-files). Merge of the tar's out/ tree into --dest (the runner layout: latents/, models/, status/, attempts/, logs/,
-manifests/, quarantine/): new files are copied, identical files skipped, an attempts/<tag>.jsonl that grew (the old
-content is a prefix) is replaced; any other difference is a conflict and nothing is merged. The runner's views
-(ledger/, failures.csv) and the job's witness files (job/) are kept under --dest/_harvests/<base>/, not merged: the
-local scoring run (scripts/run_stage.py on --dest) rebuilds the views from the per-tag files.
+files). The runner's views are those the pack recorded from the runner's own output: out/ledger/ must hold exactly
+the manifest's ledger_files, all named <stage_key>.{csv,json,done} (a --tags-file run's own key, read from the
+runner's '[stage]' line, never rebuilt), the ledger JSON must name that stage, the job's tags-file hash and the
+recorded runner id, and a .done marker must come from the run that wrote the ledger. Merge of the tar's out/ tree
+into --dest (the runner layout: latents/, models/, status/, attempts/, logs/, manifests/, quarantine/): new files are
+copied, identical files skipped, an attempts/<tag>.jsonl that grew (the old content is a prefix) is replaced; any
+other difference is a conflict and nothing is merged. The views (ledger/, failures.csv) and the job's witness files
+(job/) are kept under --dest/_harvests/<base>/, not merged: the local scoring run (scripts/run_stage.py on --dest)
+rebuilds its own views from the per-tag files.
 Refuses a --dest inside a 'tier12' directory (the local A1 tree is off limits).
 
 Usage: python cluster/jhpce/harvest_local.py --parts-dir DIR --dest OUT_DIR [--verify-only]
@@ -108,6 +112,45 @@ def extract(tar_path, staging, man):
     return sorted(seen)
 
 
+def check_views(staging, names, man):
+    """The ledger files in the tar are exactly those the pack recorded for the runner's stage key, and agree with it."""
+    for k in ("stage_key", "ledger_files", "ledger_runner_id", "ledger_final", "tags_sha256"):
+        if k not in man:
+            fail(f"harvest manifest lacks {k!r}: packed by a prod_helpers.py older than the runner's stage keys; repack")
+    key, in_tar = man["stage_key"], sorted(n for n in names if n.startswith("out/ledger/"))
+    if in_tar != sorted(man["ledger_files"]):
+        fail(f"ledger files in the tar {in_tar} != those recorded by the pack {sorted(man['ledger_files'])}")
+    if key is None:
+        if in_tar:
+            fail(f"ledger files {in_tar} but no stage key recorded")
+        return dict(stage_key=None)
+    named = {f"out/ledger/{key}.{ext}" for ext in ("csv", "json", "done")}
+    other = sorted(set(in_tar) - named)
+    if other:
+        fail(f"ledger files {other} are not named after the recorded stage key {key}")
+    info = dict(stage_key=key, final=None, gate_ok=None, counts=None)
+    jp = f"out/ledger/{key}.json"
+    if jp in in_tar:
+        with open(os.path.join(staging, jp)) as f:
+            L = json.load(f)
+        if L.get("stage") != key:
+            fail(f"{jp} names stage {L.get('stage')!r}, the pack recorded {key!r}")
+        if (L.get("tags_file") or {}).get("sha256") != man["tags_sha256"]:
+            fail(f"{jp} was written for tags file {(L.get('tags_file') or {}).get('sha256')}, the job's is {man['tags_sha256']}")
+        if L.get("runner_id") != man["ledger_runner_id"]:
+            fail(f"{jp} runner id {L.get('runner_id')} != recorded {man['ledger_runner_id']}")
+        info.update(final="gate" in L, gate_ok=(L.get("gate") or {}).get("ok"), counts=L.get("counts"))
+        dp = f"out/ledger/{key}.done"
+        if dp in in_tar:
+            with open(os.path.join(staging, dp)) as f:
+                D = json.load(f)
+            if D.get("runner_id") != L.get("runner_id") or not (D.get("gate") or {}).get("ok"):
+                fail(f"{dp} was not written by the passing run that wrote {jp}")
+    elif f"out/ledger/{key}.done" in in_tar:
+        fail(f"a .done marker without the ledger JSON of {key}")
+    return info
+
+
 def plan_merge(staging, names, dest):
     """(copy, replace, skip, conflicts) for the out/ tree; views and job files go to _harvests/."""
     copy, replace, skip, conflicts = [], [], [], []
@@ -141,8 +184,10 @@ def main():
     base, tar_path, man, sums = verify(a.parts_dir)
     staging = os.path.join(a.parts_dir, f"{base}.extracted")
     names = extract(tar_path, staging, man)
+    views = check_views(staging, names, man)
     copy, replace, skip, conflicts = plan_merge(staging, names, dest)
-    rec = dict(base=base, slurm_job_id=man.get("slurm_job_id"), stage=man.get("stage"), stage_key=man.get("stage_key"),
+    rec = dict(base=base, slurm_job_id=man.get("slurm_job_id"), stage=man.get("stage"), stage_key=man["stage_key"],
+               ledger_files=man["ledger_files"], ledger=views,
                tar_sha256=sums[f"{base}.tar"], n_files=len(names), n_latents=man.get("n_latents"), copy=len(copy),
                replace=len(replace), skip=len(skip), conflicts=conflicts, dest=dest, verified_at=time.strftime("%Y-%m-%dT%H:%M:%S%z"))
     if conflicts:

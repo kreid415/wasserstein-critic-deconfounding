@@ -14,24 +14,36 @@
 #      against docs/prepped_fingerprints_scib.json
 #   6. claims of earlier jobs on these tags: cleared only if their Slurm job is terminal (sacct); otherwise abort
 #   7. runner --dry-run (logged), then the run in the background with a stop guard (SIGTERM at Slurm end - margin, so
-#      the runner stops lanes, releases claims and writes its views while the job is still alive)
-#   8. job summary from the ledger; harvest of this job's tags packed on fastscratch (parts <= 250 MiB + SHA-256)
-# Resume-safe: rerun the same command; fitted rows are kept (runner preflight), interrupted rows rerun.
+#      the runner stops lanes, releases claims and writes its views while the job is still alive). The stage key is
+#      the runner's: a --tags-file run gets its own key <experiments>__<tasks>__tags-<sha256[:12]> with its own
+#      ledger/<key>.{csv,json,done}; the job reads it from the runner's '[stage] <key>: N rows' line (dry run and
+#      run must agree) and never rebuilds it. After an interrupted or killed run the views are rebuilt from the
+#      per-tag files with the runner's own --report-only (starts nothing, writes no .done).
+#   8. job summary from the key's ledger (checked against the job's facts); harvest of this job's tags plus the key's
+#      ledger files packed on fastscratch (parts <= 250 MiB + SHA-256)
+# --dry-run: steps 1-6 and the runner's dry run, then the plan in job_summary.json; nothing is fitted or packed.
+# Resume-safe: rerun the same command at the same commit; the key is the same (same tags file), fitted rows are kept
+# (runner preflight), interrupted rows rerun. (Latents fitted at another commit fail the runner's mixed-SHA gate.)
 # Exit: 0 gate passed | 2 node witness/tests | 3 repository | 7 concurrency/claims | 8 inputs | 9 environment |
-#       10 harvest pack failed | runner codes 4 preflight refused, 5 infrastructure stop, 6 incomplete, 128+n signal.
+#       10 harvest pack failed | 11 runner output breaks the stage-key/ledger contract |
+#       runner codes 4 preflight refused, 5 infrastructure stop, 6 incomplete, 128+n signal.
 set -euo pipefail
 
-usage() { echo "usage: $0 --expected-sha SHA --stage NAME --tags-file REL --tags-sha256 HEX --manifest REL --manifest-sha256 HEX --experiments 'X1 X13' --tasks 'a b' [--fit-lanes 8] [--fit-timeout-s 7200] [--max-attempts 2] [--guard-margin-s 2700] [--time-left-s N] [--min-run-s 1800] [--slots 2]" >&2; exit 9; }
+usage() { echo "usage: $0 --expected-sha SHA --stage NAME --tags-file REL --tags-sha256 HEX --manifest REL --manifest-sha256 HEX --experiments 'X1 X13' --tasks 'a b' [--fit-lanes 8] [--fit-timeout-s 7200] [--max-attempts 2] [--guard-margin-s 2700] [--time-left-s N] [--min-run-s 1800] [--slots 2] [--poll-s 10] [--stop-wait-s 240] [--dry-run]" >&2; exit 9; }
 EXPECTED_SHA= STAGE= TAGS_REL= TAGS_SHA= MANIFEST_REL= MANIFEST_SHA= EXPERIMENTS= TASKS=
 FIT_LANES=8 FIT_TIMEOUT_S=7200 MAX_ATTEMPTS=2 GUARD_MARGIN_S=2700 TIME_LEFT_S= MIN_RUN_S=1800 SLOTS=2 STOP_WAIT_S=240
+POLL_S=10 DRY_RUN=0
 while [ $# -gt 0 ]; do
   case "$1" in
+    --dry-run) DRY_RUN=1; shift; continue;;
     --expected-sha) EXPECTED_SHA=$2;; --stage) STAGE=$2;; --tags-file) TAGS_REL=$2;; --tags-sha256) TAGS_SHA=$2;;
     --manifest) MANIFEST_REL=$2;; --manifest-sha256) MANIFEST_SHA=$2;; --experiments) EXPERIMENTS=$2;; --tasks) TASKS=$2;;
     --fit-lanes) FIT_LANES=$2;; --fit-timeout-s) FIT_TIMEOUT_S=$2;; --max-attempts) MAX_ATTEMPTS=$2;;
     --guard-margin-s) GUARD_MARGIN_S=$2;; --time-left-s) TIME_LEFT_S=$2;; --min-run-s) MIN_RUN_S=$2;; --slots) SLOTS=$2;;
+    --poll-s) POLL_S=$2;; --stop-wait-s) STOP_WAIT_S=$2;;
     *) echo "unknown argument $1" >&2; usage;;
   esac
+  [ $# -ge 2 ] || { echo "FATAL: $1 needs a value" >&2; usage; }
   shift 2
 done
 for v in EXPECTED_SHA STAGE TAGS_REL TAGS_SHA MANIFEST_REL MANIFEST_SHA EXPERIMENTS TASKS; do
@@ -39,6 +51,9 @@ for v in EXPECTED_SHA STAGE TAGS_REL TAGS_SHA MANIFEST_REL MANIFEST_SHA EXPERIME
 done
 [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "FATAL: --expected-sha must be a full 40-hex commit id" >&2; exit 9; }
 [[ "$STAGE" =~ ^[A-Za-z0-9_.-]+$ ]] || { echo "FATAL: bad --stage $STAGE" >&2; exit 9; }
+for v in POLL_S STOP_WAIT_S FIT_LANES MAX_ATTEMPTS GUARD_MARGIN_S MIN_RUN_S SLOTS; do
+  [[ "${!v}" =~ ^[0-9]+$ ]] || { echo "FATAL: --${v,,} must be a non-negative integer, got '${!v}'" >&2; exit 9; }
+done
 
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)
 H="$REPO/cluster/jhpce/prod_helpers.py"
@@ -119,12 +134,26 @@ CLEAR_FLAGS=$("$FIT_PY" -c 'import json,sys; print(" ".join(json.load(open(sys.a
 RUN=("$FIT_PY" "$REPO/scripts/run_stage.py" --no-score --manifest "$MANIFEST" --experiments $EXPERIMENTS --tasks $TASKS
      --tags-file "$TAGS" --out-dir "$OUT" --prepped-dir "$PREPPED_DIR" --fit-python "$FIT_PY" --wcd-src "$REPO/src"
      --expect-device L40S --fit-lanes "$FIT_LANES" --fit-threads 1 --fit-timeout-s "$FIT_TIMEOUT_S" --max-attempts "$MAX_ATTEMPTS")
-DEFAULT_KEY="$(tr ' ' '\n' <<< "$EXPERIMENTS" | sort | paste -sd+)__$(tr ' ' '\n' <<< "$TASKS" | sort | paste -sd+)"
+KEYARGS=(--out-dir "$OUT" --tags "$TAGS" --tags-sha256 "$TAGS_SHA")
 if [ -z "$CLEAR_FLAGS" ]; then
   "${RUN[@]}" --dry-run > "$LOGS/dryrun.log" 2>&1 || { cat "$LOGS/dryrun.log"; echo "FATAL: runner dry run refused" >&2; exit 4; }
+  "$FIT_PY" "$H" stagekey --log "$LOGS/dryrun.log" "${KEYARGS[@]}" > "$LOGS/stage_key.dryrun.json" \
+    || { cat "$LOGS/stage_key.dryrun.json"; echo "FATAL: the runner's dry-run output breaks the stage-key contract" >&2; exit 11; }
   log "dry run: $(grep '\[stage\]' "$LOGS/dryrun.log" | tail -1)"
+elif [ "$DRY_RUN" = 1 ]; then
+  echo "FATAL: claims of ended jobs on these tags ($CLEAR_FLAGS, see $LOGS/claims.json): the runner's dry run refuses them and only a real run clears them" >&2
+  exit 7
 else
   log "dry run skipped: claims of ended jobs present, the run clears them ($CLEAR_FLAGS); see $LOGS/claims.json"
+fi
+FACTS=(--fact slurm_job_id="$SLURM_JOB_ID" --fact host="$(hostname)" --fact git_sha="$HEAD_SHA" --fact stage="$STAGE"
+       --fact tasks="$TASKS" --fact tags_sha256="$TAGS_SHA" --fact manifest_sha256="$MANIFEST_SHA"
+       --fact gpu="$(head -1 "$LOGS/nvidia_smi.txt")")
+if [ "$DRY_RUN" = 1 ]; then
+  "$FIT_PY" "$H" summary --mode dry-run --stage-key-json "$LOGS/stage_key.dryrun.json" --rc 0 "${FACTS[@]}" \
+    --out "$LOGS/job_summary.json" > /dev/null || { cat "$LOGS/job_summary.json"; exit 11; }
+  log "dry run only: nothing fitted or packed; plan in $LOGS/job_summary.json"
+  exit 0
 fi
 DEADLINE_ARGS=(--margin-s "$GUARD_MARGIN_S" --min-run-s "$MIN_RUN_S"); [ -n "$TIME_LEFT_S" ] && DEADLINE_ARGS+=(--time-left-s "$TIME_LEFT_S")
 "$FIT_PY" "$H" deadline "${DEADLINE_ARGS[@]}" > "$LOGS/deadline.json" || { cat "$LOGS/deadline.json"; echo "FATAL: stop guard cannot be set" >&2; exit 9; }
@@ -151,20 +180,52 @@ while kill -0 "$RUNNER" 2>/dev/null; do
   if [ -n "$TERM_AT" ] && [ $((NOW - TERM_AT)) -gt "$STOP_WAIT_S" ]; then
     log "runner still alive ${STOP_WAIT_S}s after SIGTERM: SIGKILL"; kill -KILL "$RUNNER" 2>/dev/null || log "runner already exited"
   fi
-  sleep 10 & wait "$!" || WAKE_RC=$?        # >128: a trapped signal woke the loop (handled above)
+  sleep "$POLL_S" & wait "$!" || WAKE_RC=$?        # >128: a trapped signal woke the loop (handled above)
 done
 RC=0; wait "$RUNNER" || RC=$?
 log "runner exit $RC${STOPPED_BY:+ (stopped by $STOPPED_BY)}: $(grep -E '\[gate\]|STOPPED|interrupted' "$LOGS/run_stage.log" | tail -2 | tr '\n' ' ')"
 
 # ---- 8. summary + harvest -------------------------------------------------------------------------------------
-"$FIT_PY" "$H" summary --out-dir "$OUT" --runner-log "$LOGS/run_stage.log" --default-key "$DEFAULT_KEY" --rc "$RC" \
-  --stopped-by "$STOPPED_BY" --out "$LOGS/job_summary.json" --fact slurm_job_id="$SLURM_JOB_ID" --fact host="$(hostname)" \
-  --fact git_sha="$HEAD_SHA" --fact stage="$STAGE" --fact tasks="$TASKS" --fact tags_sha256="$TAGS_SHA" \
-  --fact manifest_sha256="$MANIFEST_SHA" --fact gpu="$(head -1 "$LOGS/nvidia_smi.txt")" > /dev/null || log "WARNING: summary failed"
-if ! "$FIT_PY" "$H" pack --out-dir "$OUT" --tags "$TAGS" --runner-log "$LOGS/run_stage.log" --default-key "$DEFAULT_KEY" \
+# The key whose ledger is harvested comes from a runner invocation's own '[stage]' line: the run's, or after an
+# interrupted / killed / crashed run the --report-only pass's, which rebuilds the views from the per-tag files (it
+# must name the dry run's key). A run refused in its preflight (exit 4) prints none and wrote no ledger, so no ledger
+# is attributed to this job; a run stopped before it planned (128+n, 1) may print none either.
+EXPECT=(); [ -s "$LOGS/stage_key.dryrun.json" ] && EXPECT=(--expect-key-json "$LOGS/stage_key.dryrun.json")
+MISSING=(); case "$RC" in 0|5|6) ;; *) MISSING=(--allow-missing);; esac
+KEY_RC=0
+"$FIT_PY" "$H" stagekey --log "$LOGS/run_stage.log" "${KEYARGS[@]}" "${EXPECT[@]}" "${MISSING[@]}" > "$LOGS/stage_key.run.json" || KEY_RC=$?
+[ "$KEY_RC" = 0 ] || log "WARNING: the run's output breaks the stage-key contract: $(tr -d '\n' < "$LOGS/stage_key.run.json" | cut -c1-400)"
+cp "$LOGS/stage_key.run.json" "$LOGS/stage_key.json"
+REPORT_ARGS=()
+case "$RC" in
+  0|4|5|6) ;;                                       # the runner wrote final views itself (or ran nothing)
+  *) REPORT_RC=0
+     "${RUN[@]}" --report-only > "$LOGS/report_only.log" 2>&1 || REPORT_RC=$?
+     REPORT_ARGS=(--report-only-rc "$REPORT_RC" --also-stage-json "$LOGS/stage_key.run.json")
+     REXP=("${EXPECT[@]}")
+     if [ ${#REXP[@]} -eq 0 ] && [ "$KEY_RC" = 0 ] && grep -q '"stage_key": "' "$LOGS/stage_key.run.json"; then
+       REXP=(--expect-key-json "$LOGS/stage_key.run.json")
+     fi
+     if "$FIT_PY" "$H" stagekey --log "$LOGS/report_only.log" "${KEYARGS[@]}" "${REXP[@]}" > "$LOGS/stage_key.report_only.json"; then
+       cp "$LOGS/stage_key.report_only.json" "$LOGS/stage_key.json"
+     else
+       KEY_RC=11; log "WARNING: the --report-only output breaks the stage-key contract"
+     fi
+     log "views rebuilt by run_stage.py --report-only (exit $REPORT_RC): $(grep -E '\[gate\]' "$LOGS/report_only.log" | tail -1)";;
+esac
+SUM_RC=0
+"$FIT_PY" "$H" summary --mode run --stage-key-json "$LOGS/stage_key.json" --tags "$TAGS" --tags-sha256 "$TAGS_SHA" \
+  --manifest-sha256 "$MANIFEST_SHA" --head-sha "$HEAD_SHA" --rc "$RC" --stopped-by "$STOPPED_BY" "${REPORT_ARGS[@]}" \
+  "${FACTS[@]}" --out "$LOGS/job_summary.json" > /dev/null || SUM_RC=$?
+[ "$SUM_RC" = 0 ] || log "WARNING: summary found problems (exit $SUM_RC): $(grep -A3 '"problems"' "$LOGS/job_summary.json" | tr -d '\n' | cut -c1-400)"
+if ! "$FIT_PY" "$H" pack --out-dir "$OUT" --tags "$TAGS" --stage-key-json "$LOGS/stage_key.json" \
      --job-dir "$JOBDIR" --dest "$HARVEST" --stage "$STAGE" --job "$SLURM_JOB_ID" > "$JOBDIR/harvest.json"; then
   echo "FATAL: harvest pack failed (runner exit $RC)" >&2; exit 10
 fi
 log "harvest: $HARVEST ($(grep -c '"name"' "$JOBDIR/harvest.json") parts; $(grep -o '"n_latents": [0-9]*' "$JOBDIR/harvest.json"))"
 ls -l "$HARVEST"
+if [ "$RC" = 0 ] && { [ "$KEY_RC" != 0 ] || [ "$SUM_RC" != 0 ]; }; then
+  echo "FATAL: the runner's gate passed but its output breaks the stage-key/ledger contract (see $LOGS/stage_key.json, $LOGS/job_summary.json)" >&2
+  exit 11
+fi
 exit "$RC"
