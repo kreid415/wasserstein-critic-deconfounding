@@ -1,0 +1,6 @@
+FAILED tests/scvi/test_kl_warmup.py::test_kl_warmup_epochs - assert 239 is None
+FAILED tests/scvi/test_kl_warmup.py::test_stock_and_no_key_are_byte_identical_to_the_previous_fitter[none]
+FAILED tests/scvi/test_kl_warmup.py::test_stock_and_no_key_are_byte_identical_to_the_previous_fitter[discriminator]
+FAILED tests/scvi/test_kl_warmup.py::test_complete_sets_the_warmup_to_max_epochs_and_changes_the_fit[none]
+FAILED tests/scvi/test_kl_warmup.py::test_complete_sets_the_warmup_to_max_epochs_and_changes_the_fit[discriminator]
+5 failed, 1 passed in 78.13s (0:01:18)

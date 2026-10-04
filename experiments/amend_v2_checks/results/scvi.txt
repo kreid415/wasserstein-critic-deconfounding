@@ -1,0 +1,32 @@
+HEAD 54aeefc dirty=0 suite=scvi
+env WCD_SRC=<workspace>/wcd_suite/src PREPPED_DIR=/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib WCD_REQUIRE_DATA=1 nice -n 19 /home/kendall/.claude-science/conda/envs/scvi-api/bin/python -m pytest -q -p no:cacheprovider -rs tests/scvi
+......................s................................................. [ 64%]
+.......................................                                  [100%]
+=============================== warnings summary ===============================
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_baseline_guard.py: 20 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+tests/scvi/test_nonfinite_guard.py: 10 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_baseline_guard.py: 20 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+tests/scvi/test_nonfinite_guard.py: 10 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=11` in the `DataLoader` to improve performance.
+
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_baseline_guard.py: 20 warnings
+tests/scvi/test_missing_arms_plan.py: 15 warnings
+tests/scvi/test_nonfinite_guard.py: 10 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py:321: The number of training batches (5) is smaller than the logging interval Trainer(log_every_n_steps=10). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[True]
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[False]
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py:321: The number of training batches (6) is smaller than the logging interval Trainer(log_every_n_steps=10). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/scvi/test_adversarial_plan_v2.py:65: scvi-tools disables its classifier without batch conditioning
+110 passed, 1 skipped, 222 warnings in 235.63s (0:03:55)
+rc=0 seconds=239

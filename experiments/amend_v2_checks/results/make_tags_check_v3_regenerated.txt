@@ -1,0 +1,22 @@
+{
+ "manifest": "manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv",
+ "manifest_sha256": "6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24",
+ "selection": "fillers_x1_x13",
+ "rows": 250,
+ "per_job": {
+  "jobA": 100,
+  "jobB": 150
+ },
+ "tags_sha256": {
+  "fillers_x1_x13.tags": "1251c972ba10697172c1820de3bc72fc135e31937fecc4b8f4b6c444921946cb",
+  "fillers_x1_x13_jobA.tags": "d5da370a4d0cbbe7504c81ac47c5e8003b83730b4c2c92bc9be1050b28cf82d1",
+  "fillers_x1_x13_jobB.tags": "91daef08ab8285d05340be0bfb527ee205a1be4d249d787b54f9c9553a7a8286"
+ }
+}
+arm             none  scanvi  scvi_adv  sysvi
+task                                         
+atac_large        10       5         5     30
+immune_hum_mou    10       5         5     30
+lung              10       5         5     30
+pancreas          10       5         5     30
+sim2              10       5         5     30

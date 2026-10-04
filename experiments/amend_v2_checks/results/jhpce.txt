@@ -1,0 +1,5 @@
+HEAD 54aeefc dirty=0 suite=jhpce
+env PYTHONPATH=<workspace>/wcd_suite/src nice -n 19 /home/kendall/.claude-science/conda/envs/wcd-gpu/bin/python -m pytest -q -p no:cacheprovider -rs tests/jhpce
+....................................                                     [100%]
+36 passed in 201.89s (0:03:21)
+rc=0 seconds=203

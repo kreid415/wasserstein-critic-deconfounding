@@ -1,0 +1,75 @@
+HEAD 54aeefc dirty=0 suite=x13_scoring
+env R_HOME=/home/kendall/.claude-science/conda/envs/wcd-kbet/lib/R R_LIBS=/home/kendall/experiment_data/wasserstein-critic-deconfounding/Rlib_kbet PREPPED_DIR=/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib PYTHONPATH=<workspace>/wcd_suite/src nice -n 19 /home/kendall/.claude-science/conda/envs/wcd-kbet/bin/python -m pytest -q -p no:cacheprovider -rs tests/x13 tests/scoring
+.............................                                            [100%]
+=============================== warnings summary ===============================
+tests/x13/test_cpu_baselines.py::test_knobs_reach_the_tools
+tests/x13/test_cpu_baselines.py::test_knobs_reach_the_tools
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama-10-40]
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama-100-20]
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/utils.py:72: FutureWarning: Use anndata.concat instead of AnnData.concatenate, AnnData.concatenate is deprecated and will be removed in the future. See the tutorial for concat at: https://anndata.readthedocs.io/en/latest/concatenation.html
+    return anndata.AnnData.concatenate(*adata_list, **kwargs)
+
+tests/x13/test_cpu_baselines.py: 12 warnings
+tests/scoring/test_kbet_determinism.py: 42 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 63 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/algorithms.py:522: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    common = np.find_common_type([values.dtype, comps_array.dtype], [])
+
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_scorer_provenance_and_subset.py::test_full_data_pcr_uses_the_all_feature_reference_and_rows_carry_provenance
+tests/scoring/test_scorer_provenance_and_subset.py::test_subsample_pcr_reference_is_the_all_feature_pca_of_the_subset
+tests/scoring/test_scorer_provenance_and_subset.py::test_meta_may_not_set_scorer_columns
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/clustering.py:96: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    cluster_function(adata, resolution=res, key_added=resolution_key, **kwargs)
+
+tests/scoring/test_kbet_determinism.py: 6 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 18 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+    mask_var_param, mask_var = _handle_mask_var(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:186: UserWarning: iso_threshold is equal to number of batches in data, no isolated labels will be found
+    isolated_labels = get_isolated_labels(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:212: FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    scores = pd.Series(scores)
+
+tests/scoring/test_kbet_determinism.py: 18 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 21 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/kbet.py:229: DeprecationWarning: The global conversion available with activate() is deprecated and will be removed in the next major release. Use a local converter.
+    anndata2ri.activate()
+
+tests/scoring/test_kbet_determinism.py: 6 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 7 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/lisi.py:172: UserWarning: 'batch_key' is deprecated and will be ignore
+    warnings.warn("'batch_key' is deprecated and will be ignore", stacklevel=1)
+
+tests/scoring/test_kbet_determinism.py: 30 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 49 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/dtypes/cast.py:1641: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    return np.find_common_type(types, [])
+
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/trajectory.py:120: ImplicitModificationWarning: Trying to modify attribute `.obs` of view, initializing view as actual.
+    n_components, adata_post.obs["neighborhood"] = connected_components(
+
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scanpy/tools/_dpt.py:25: ImplicitModificationWarning: Setting element `.obsm['X_diffmap']` of view, initializing view as actual.
+    adata.obsm["X_diffmap"] = dpt.eigen_basis
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+29 passed, 314 warnings in 294.48s (0:04:54)
+rc=0 seconds=298

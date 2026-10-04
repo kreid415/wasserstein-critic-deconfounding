@@ -1,0 +1,55 @@
+HEAD 54aeefc dirty=0 suite=other
+env PYTHONPATH=<workspace>/wcd_suite/src nice -n 19 /home/kendall/.claude-science/conda/envs/wcd-gpu/bin/python -m pytest -q -p no:cacheprovider -rs tests --ignore=tests/stage --ignore=tests/scvi --ignore=tests/x13 --ignore=tests/scoring --ignore=tests/jhpce
+........................................................................ [ 23%]
+........................................................................ [ 46%]
+........................................................................ [ 69%]
+........................................................................ [ 92%]
+.......................                                                  [100%]
+=============================== warnings summary ===============================
+tests/prereg/test_cli_e2e.py: 132 warnings
+tests/prereg/test_manifest_design.py: 7 warnings
+tests/prereg/test_manifest_v3.py: 8 warnings
+tests/prereg/test_mutation.py: 84 warnings
+tests/prereg/test_provenance_rule.py: 44 warnings
+tests/prereg/test_rules.py: 73 warnings
+tests/prereg/test_rules_unchanged.py: 2 warnings
+tests/prereg/test_si45_edge_extension.py: 32 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/pandas/core/algorithms.py:522: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    common = np.find_common_type([values.dtype, comps_array.dtype], [])
+
+tests/wcd_vae/test_adversarial_engages.py::test_discriminator_head_learns_batch_from_separable_latent
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/pkg_resources/_vendor/pyparsing.py:87: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wcd_vae/test_adversarial_engages.py: 4 warnings
+tests/wcd_vae/test_metrics.py: 8 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/anndata/_core/aligned_df.py:68: ImplicitModificationWarning: Transforming to str index.
+    warnings.warn("Transforming to str index.", ImplicitModificationWarning)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+  <workspace>/wcd_suite/tests/wcd_vae/test_backbones.py:28: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+tests/wcd_vae/test_formulations.py: 5 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/scanpy/preprocessing/_simple.py:590: FutureWarning: Use sc.pp.normalize_total instead
+    normalize_per_cell(
+
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[reference]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[pooled]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[barycenter]
+tests/wcd_vae/test_formulations.py::test_barycenter_has_no_learnable_anchors
+tests/wcd_vae/test_formulations.py::test_reference_only_has_no_anchors
+  <workspace>/wcd_suite/tests/wcd_vae/test_formulations.py:25: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_metrics.py::test_resolution_cache_uses_igraph_with_matched_iterations
+  <workspace>/wcd_suite/src/wcd_vae/wcd/experiment.py:278: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    sc.tl.leiden(adata, **kwargs)  # scanpy/scib default -- keeps parity
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+311 passed, 448 warnings in 165.77s (0:02:45)
+rc=0 seconds=169

@@ -1,0 +1,5 @@
+kl_stock_becomes_complete rc=1 5 failed, 1 passed in 78.13s (0:01:18)
+kl_complete_ignored rc=1 3 failed, 3 passed in 83.66s (0:01:23)
+kl_not_forwarded rc=1 2 passed, 4 errors in 37.07s
+rules_note_changed rc=1 5 failed, 4 passed, 2 warnings in 16.56s
+rules_tie_rule_changed rc=0 9 passed, 2 warnings in 14.54s

@@ -1,0 +1,36 @@
+{
+ "sha256": {
+  "tagged": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+  "v2": "f8443d0b291f65685b128f42337f00201f7d79159ca3232847f5d73381c7d0ee",
+  "v3": "6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24"
+ },
+ "rows": {
+  "tagged": 6846,
+  "v2": 6846,
+  "v3": 6930
+ },
+ "removed": {
+  "('X13', 'scanorama', '160')": 8
+ },
+ "added": {
+  "('X13', 'scanorama', '2')": 8,
+  "('X15', 'discriminator', 'matched_hi')": 12,
+  "('X15', 'discriminator', 'matched_lo')": 12,
+  "('X15', 'mmd', 'matched_hi')": 12,
+  "('X15', 'mmd', 'matched_lo')": 12,
+  "('X15', 'none', '0')": 12,
+  "('X15', 'pooled', 'matched_hi')": 12,
+  "('X15', 'pooled', 'matched_lo')": 12
+ },
+ "common_rows": 6838,
+ "x15_stock_equal_rows": 12,
+ "total_gpu_lane_hours": {
+  "v2": 2351.0,
+  "v3": 2375.1
+ },
+ "total_score_cpu_hours": {
+  "v2": 849.8,
+  "v3": 872.2
+ },
+ "violations": []
+}

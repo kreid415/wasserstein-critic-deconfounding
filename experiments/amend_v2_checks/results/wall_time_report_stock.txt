@@ -1,0 +1,13 @@
+design  uncond_seeds  barycenter_iter  fits  gpu_lane_hours  critic_share  score_cpu_hours  local_wall_days_8lanes  local_wall_days_8lanes_conservative  provisional_fits  provisional_lane_hours
+ pilot             5               10  6930            2375          0.74              872                    26.2                                 31.2                72                      11
+ pilot             5                5  6930            2268          0.73              872                    25.1                                 29.8                72                      11
+ pilot             5                3  6930            2225          0.72              872                    24.6                                 29.2                72                      11
+ pilot             3               10  6338            2123          0.74              770                    23.5                                 27.9                72                      11
+ pilot             3                5  6338            2033          0.73              770                    22.5                                 26.7                72                      11
+ pilot             3                3  6338            1997          0.72              770                    22.1                                 26.3                72                      11
+shared             5               10  7608            2792          0.75             1097                    30.9                                 36.7                72                      11
+shared             5                5  7608            2646          0.73             1097                    29.2                                 34.8                72                      11
+shared             5                3  7608            2588          0.73             1097                    28.6                                 34.0                72                      11
+shared             3               10  6632            2373          0.75              928                    26.2                                 31.2                72                      11
+shared             3                5  6632            2256          0.73              928                    24.9                                 29.7                72                      11
+shared             3                3  6632            2210          0.73              928                    24.4                                 29.0                72                      11

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<workspace>/wcd/scripts/wall_time_report.py", line 109, in <module>
+    main()
+  File "<workspace>/wcd/scripts/wall_time_report.py", line 54, in main
+    M = CM.cost(m, T, speed, rate)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>/wcd/scripts/cost_model.py", line 145, in cost
+    ms = step_ms(T, arm, r.task, int(r.n_critic), int(r.batch_size))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>/wcd/scripts/cost_model.py", line 118, in step_ms
+    raise KeyError(f"no measurement for arm {arm} n_critic {n_critic}")
+KeyError: 'no measurement for arm discriminator_ref n_critic 1'

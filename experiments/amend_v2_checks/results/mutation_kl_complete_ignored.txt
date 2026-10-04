@@ -1,0 +1,4 @@
+FAILED tests/scvi/test_kl_warmup.py::test_kl_warmup_epochs - AssertionError: ...
+FAILED tests/scvi/test_kl_warmup.py::test_complete_sets_the_warmup_to_max_epochs_and_changes_the_fit[none]
+FAILED tests/scvi/test_kl_warmup.py::test_complete_sets_the_warmup_to_max_epochs_and_changes_the_fit[discriminator]
+3 failed, 3 passed in 83.66s (0:01:23)
