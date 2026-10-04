@@ -1,0 +1,200 @@
+{
+  "experiment_id": "jhpce_envbuild_wcd_fit_home",
+  "created_at": "2026-10-04T22:55:58Z",
+  "pf_version": "1.0",
+  "plan": {
+    "question": "Infrastructure job, not an experiment: rebuild the JHPCE fit env wcd-fit in $HOME/envs (user go SI-48, placement SI-49) so the tagged filler jobs (prereg-tier12-v2) can start; it fits nothing and writes no data or metric",
+    "primary_outcome": "build_envs.sh fit exits 0 (conda md5 and pip versions equal cluster/envspec), env_intact.py finds 0 missing files, imports succeed through the tag's path $SCRATCH/conda/envs/wcd-fit",
+    "unit_of_analysis": "one software environment build; nothing is analysed",
+    "split_unit": "no data are split; the job reads no data",
+    "selection_rule": "nothing is selected; the env spec is the committed cluster/envspec/scvi-api.explicit.txt",
+    "n_comparisons": 1,
+    "multiple_comparison_correction": "none needed: a single pass/fail check of the built env against its committed spec",
+    "data_filters": "the job reads no data, so no filter applies"
+  },
+  "plan_sha": "5d96eb021c2505da",
+  "extra_items": [],
+  "answers": {
+    "PF-01": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_plan] plan complete (sha 5d96eb021c2505da)",
+      "at": "2026-10-04T22:55:58Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "[auto:pf_check_plan] plan complete (sha 5d96eb021c2505da)",
+          "at": "2026-10-04T22:55:58Z"
+        }
+      ],
+      "auto": {
+        "check": "pf_check_plan",
+        "ok": true,
+        "summary": "plan complete (sha 5d96eb021c2505da)",
+        "warnings": null
+      }
+    },
+    "PF-02": {
+      "status": "n/a",
+      "evidence": "one pass/fail check of the built env; no model, metric or dataset contrast is tested",
+      "at": "2026-10-04T22:56:13Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "plan declares n_comparisons=1; correction: none needed: a single pass/fail check of the built env against its committed spec",
+          "at": "2026-10-04T22:55:58Z"
+        }
+      ]
+    },
+    "PF-03": {
+      "status": "n/a",
+      "evidence": "no train/test split: the job builds a software environment and reads no data",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-04": {
+      "status": "n/a",
+      "evidence": "no unit identifiers are used: no data are read",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-05": {
+      "status": "n/a",
+      "evidence": "no experimental factors: a single env build",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-06": {
+      "status": "n/a",
+      "evidence": "nothing is selected from or reported on data",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-07": {
+      "status": "n/a",
+      "evidence": "no arms: a single env build",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-08": {
+      "status": "n/a",
+      "evidence": "no results are aggregated over units",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-09": {
+      "status": "n/a",
+      "evidence": "no data transformation, so no identity baseline",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-10": {
+      "status": "n/a",
+      "evidence": "no conditions or per-condition counts",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-11": {
+      "status": "n/a",
+      "evidence": "no metric is computed",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-12": {
+      "status": "n/a",
+      "evidence": "no metric is computed",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-13": {
+      "status": "n/a",
+      "evidence": "no estimator is computed",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-14": {
+      "status": "n/a",
+      "evidence": "no test/control design",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-15": {
+      "status": "n/a",
+      "evidence": "the job makes no causal claim; the purge diagnosis it responds to rests on file-date evidence (notebook NB-20261004-15)",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-18": {
+      "status": "n/a",
+      "evidence": "one process on one node, nothing co-scheduled; 32 GB requested vs 16 GB that sufficed for the August 2026 HOME build of scvi-api",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "n/a",
+      "evidence": "no manifest: the command is a fixed script pinned to one commit",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-20": {
+      "status": "n/a",
+      "evidence": "no grid or row count",
+      "at": "2026-10-04T22:56:13Z",
+      "history": []
+    },
+    "PF-21": {
+      "status": "n/a",
+      "evidence": "no replicate outputs: a single environment build",
+      "at": "2026-10-04T22:56:26Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "n/a",
+      "evidence": "no items are filtered by inclusion criteria",
+      "at": "2026-10-04T22:56:26Z",
+      "history": []
+    },
+    "PF-16": {
+      "status": "pass",
+      "evidence": "runtime used only to size the walltime: two independent builds agree within 2x after size scaling (Slurm 35203494, Aug 2026, scvi-api 3,810 MiB into HOME, 4 CPUs, shared: 4:55; Slurm 36131132, Oct 2, wcd-fit 5.5 GB on fastscratch: env files written 17:20:07-17:20:22 after a 17:16:57 start, ~3.5 min); the requested 3 h is 23x the size-scaled estimate, beyond any plausible contention or warm-up effect; no speed or benchmark claim is made",
+      "at": "2026-10-04T22:56:26Z",
+      "history": []
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "[auto:pf_estimate_cost] estimate 0.13 h (x2 safety = 0.26 h); cpu-hours 0.1; recommended walltime 960s",
+      "at": "2026-10-04T22:56:26Z",
+      "history": [],
+      "auto": {
+        "check": "pf_estimate_cost",
+        "ok": true,
+        "summary": "estimate 0.13 h (x2 safety = 0.26 h); cpu-hours 0.1; recommended walltime 960s",
+        "warnings": []
+      }
+    },
+    "PF-22": {
+      "status": "pass",
+      "evidence": "build_envs.sh runs under set -euo pipefail: conda md5 and pip versions are compared line for line with cluster/envspec; .verified and .intact_baseline.json are written only after both pass; home_room exits 3 before any write when HOME lacks room; compat_link exits 3 if its target is missing; the job command (set -euo pipefail) then checks env_intact, the link and imports; the harness harvests slurm-*.out and report/*; a killed or failed build leaves no .verified, so the next run rebuilds instead of reusing it. Difference from the August pilot, disclosed: the package cache is on fastscratch (fresh per build), so files are extracted there and copied once into HOME, the same NFS write volume as August's extract-into-HOME-cache plus hardlink",
+      "at": "2026-10-04T22:56:26Z",
+      "history": []
+    },
+    "PF-24": {
+      "status": "pass",
+      "evidence": "checked against the actual target: HOME 42,408 MiB after SI-50 (du, 18:50 EDT) + 6,000 MiB build + 5,000 MiB headroom = 53,408 <= cap 95,367 MiB; shared is an allowed partition (JHPCE notes), limit 90 d; dispatch tested for fit/score/all/unknown with stubs at cfa7d5b; the tag job's HOME guard checks only WCD_SCRATCH, TMPDIR and REPO (prod_fit_job.sh l.71-75), so FIT_ENV through the link into HOME passes; tests/jhpce 40 passed at ec4da68 (cfa7d5b only moves the dispatch's unknown-target arm)",
+      "at": "2026-10-04T22:56:26Z",
+      "history": []
+    }
+  },
+  "verdict": {
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
+    "major_fail": [],
+    "minor_fail": [],
+    "plan_changed": false,
+    "n_items": 24,
+    "n_pass": 5,
+    "n_na": 19,
+    "at": "2026-10-04T22:56:26Z"
+  },
+  "path": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/a0b87862-8454-468c-a2f9-6326cd1433fc/scratch/wt_int/experiments/jhpce_envbuild_wcd_fit_home"
+}
