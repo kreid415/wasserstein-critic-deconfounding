@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+raise SystemExit('RETIRED (code check CR-10, 2026-10-03): the rejected pre-revision pipeline (scvi_final_manifest.tsv, score_final_config.py with the raw-PCR sign error C1, and their drivers) must not be run. Current path: scripts/build_paper_manifest.py -> scripts/run_stage.py (scripts/fit_paper_config.py, scripts/score_scib_native.py; X13 CPU rows: scripts/run_cpu_baselines.py). See legacy/README.md.')  # retired; kept for provenance only
 """Score ONE final-sweep latent npz through full_metric_suite -> one CSV row.
 
 Identical scoring path for adversarial AND baseline configs (both write z+batch+celltype npz;
