@@ -201,7 +201,7 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   window neighbour without an A1 fit (edge_unresolved, section 4), the default setting (mean / off) is fitted at that
   lambda on A1's seeds (100-102, same decoder) as A1 extension rows; R2 and R3 then apply as written on 3-point windows.
 - **2026-10-04, X15: KL warm-up sensitivity (user decision SI-44; PAPER_PLAN N8).** With the stock 400-epoch KL warm-up
-  the last epoch trains at KL weight 0.23 on atac_large, 0.20 on immune_hum_mou, 0.59 on immune and 0.61 on lung (399/400
+  the last epoch trains at KL weight 0.23 on atac_large, 0.20 on immune_hum_mou, 0.595 on immune and 0.61 on lung (399/400
   = 0.998 on the four 400-epoch tasks),
   while the adversary acts at full lambda from the first step. X15 fits immune (local) and atac_large (JHPCE L40S) x
   {lambda=0, discriminator, pooled critic, MMD at the matched lo / hi lambda} x seeds 10-12 x {stock warm-up, a warm-up
