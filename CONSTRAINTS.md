@@ -308,3 +308,10 @@
 - added: 2026-10-04
 - keywords: X13, Scanorama, knn, baseline, SI-35, SI-37
 - notebook: NB-20261004-05
+
+## SI-47 · active · process
+- rule: JHPCE filler jobs jobA (atac_large, immune_hum_mou; 100 fits) and jobB (lung, pancreas, sim2; 150 fits) are submitted together at tag prereg-tier12-v2 (c88cce3): 1 L40S, 10 CPUs, 96 GB, 24-h wall each; fit only; latents harvested to jhpce_tier12/fillers_x1_x13 and scored locally from the worktree pinned at the tag.
+- source: "Submit both now (Recommended)" (user, ask_user answer to "The two JHPCE filler jobs passed preflight at the tag ... Submit?", 2026-10-04)
+- added: 2026-10-04
+- keywords: JHPCE, filler, jobA, jobB, submit, go, SI-29
+- notebook: NB-20261004-14
