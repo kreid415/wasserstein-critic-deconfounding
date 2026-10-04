@@ -41,7 +41,10 @@ Row kinds: X13 CPU baselines (arms of run_cpu_baselines.CPU_ARMS: harmony, scano
 scripts/run_cpu_baselines.py --tag on --cpu-lanes CPU lanes (default 0: a selected CPU row that needs a fit is
 refused) with --cpu-python; their latents must record device 'cpu' (no model directory). Every other row is fitted
 by scripts/fit_paper_config.py on the --fit-lanes GPU lanes and must record a GPU name containing --expect-device.
-Both kinds are scored and gated alike.
+Both kinds are scored and gated alike. A CPU baseline's failure outcome is nonfinite_latent only (lead decision
+2026-10-03): it exits 0 with its non-finite latent saved, and either the runner records it (as for GPU rows) or
+run_cpu_baselines.py has recorded it with fit_outcome.write_status (validated against that latent); a non-zero exit
+with a status record, or any other record, is a broken contract (infrastructure).
 Scorer provenance (CR-05): every score row must carry scorer_git_sha, scorer_dirty, cpu_simd, numba_cpu_name and
 scorer_versions; the completion gate (and the preflight, for existing rows) refuses a stage whose rows disagree on
 any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba targets or package versions.
@@ -481,6 +484,8 @@ class Outputs:
                 raise InvalidOutput(f"{tag}: both a divergence record and a latent")
             if st["status"] == "nonfinite_latent" and (lat is None or lat["finite"]):
                 raise InvalidOutput(f"{tag}: nonfinite_latent record but the latent is missing or finite")
+            if st["status"] == "nonfinite_latent" and st.get("latent_sha256", lat["sha256"]) != lat["sha256"]:
+                raise InvalidOutput(f"{tag}: nonfinite_latent record of another latent (latent_sha256 differs)")
             return st["status"], dict(status=st, latent=lat)
         if lat is None:
             if has_score:
@@ -863,7 +868,8 @@ class Stage:
             if job.timed_out:
                 outcome, detail = "infrastructure", f"fit timed out after {self.a.fit_timeout_s} s"
             elif cpu and rc != 0 and os.path.exists(self.files.status_path(tag)):
-                raise InvalidOutput(f"{fitter} exit {rc} with a status record (CPU baselines record no outcome)")
+                raise InvalidOutput(f"{fitter} exit {rc} with a status record (a CPU baseline's only outcome record "
+                                    f"is nonfinite_latent, with exit 0 and its non-finite latent saved)")
             elif rc == 0:
                 lat = self.files.latent(r)
                 if lat is None:
@@ -871,8 +877,14 @@ class Stage:
                 if not cpu and not os.path.isfile(self.files.model_path(tag)):
                     raise InvalidOutput(f"fitter exited 0 without {self.files.model_path(tag)}")
                 if os.path.exists(self.files.status_path(tag)):
-                    raise InvalidOutput(f"{fitter} exited 0 and wrote a status record")
-                if lat["finite"]:
+                    if not cpu:
+                        raise InvalidOutput(f"{fitter} exited 0 and wrote a status record")
+                    st, info = self.files.state(r, self.score)   # schema, row, status, latent: as in the preflight
+                    if st != "nonfinite_latent":
+                        raise InvalidOutput(f"{fitter} exited 0 with a {st} record: a CPU baseline records only "
+                                            f"nonfinite_latent")
+                    outcome, detail = "nonfinite_latent", info["status"]["detail"]
+                elif lat["finite"]:
                     outcome, detail = "fitted", f"fit {lat['fit_seconds']} s on {lat['device']}"
                 else:
                     self.record_nonfinite(tag, lat)
@@ -929,8 +941,9 @@ class Stage:
             self.infra(job, detail)
 
     def record_nonfinite(self, tag, lat):
+        what = "embedding" if row_kind(self.rows[tag]) == "cpu" else "posterior-mean"
         fit_outcome.write_status(self.out, tag, "nonfinite_latent", row=self.rows[tag],
-                                 detail=f"{lat['n_nonfinite']} of {lat['shape'][0] * lat['shape'][1]} posterior-mean "
+                                 detail=f"{lat['n_nonfinite']} of {lat['shape'][0] * lat['shape'][1]} {what} "
                                         f"values are non-finite ({lat['n_cells_nonfinite']} cells)",
                                  latent_sha256=lat["sha256"], device=lat["device"], git_sha=lat["git_sha"])
 

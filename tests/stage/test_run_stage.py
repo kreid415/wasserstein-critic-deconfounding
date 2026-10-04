@@ -553,6 +553,56 @@ def test_cpu_baseline_contract_violations_are_infrastructure(tmp_path, behaviour
     assert not os.path.exists(os.path.join(st.out, "latents", "h1.npz"))
 
 
+@pytest.mark.parametrize("behaviour, detail", [
+    ("nan", "1 of 300 embedding values are non-finite (1 cells)"),             # recorded by the runner, as for GPU rows
+    ("nan_record", "fake: the saved embedding has non-finite values"),         # recorded by run_cpu_baselines.py
+])
+def test_cpu_nonfinite_latent_is_an_outcome(tmp_path, behaviour, detail):
+    """Lead decision 2026-10-03: X13 CPU baselines have the nonfinite_latent outcome of every manifest fit."""
+    st = Stage(tmp_path, [_cpu_row("h1"), _cpu_row("p1", arm="pca")], plan={"h1": behaviour}, experiments=("X13",))
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy))
+    assert rc == 0, log
+    assert st.ledger().state.to_dict() == {"h1": "nonfinite_latent", "p1": "scored"}
+    F = pr.read_failures(os.path.join(st.out, "failures.csv"))
+    assert dict(zip(F.tag, F.status)) == {"h1": "nonfinite_latent"} and F.detail.tolist() == [detail]
+    rec = fit_outcome.read_status(os.path.join(st.out, "status", "h1.json"), tag="h1")
+    with open(os.path.join(st.out, "latents", "h1.npz"), "rb") as f:
+        assert rec["latent_sha256"] == hashlib.sha256(f.read()).hexdigest()   # the record names the kept latent
+    assert not os.path.exists(os.path.join(st.out, "scores", "h1.csv"))        # a non-finite latent is never scored
+    assert not os.path.isdir(os.path.join(st.out, "quarantine"))
+    g = st.summary()["gate"]
+    assert g["ok"] and g["counts"] == {"nonfinite_latent": 1, "scored": 1}
+    st.set_plan({"h1": "crash", "p1": "crash"})              # final: a rerun starts nothing
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy))
+    assert rc == 0 and "[fit] start" not in log, log
+
+
+@pytest.mark.parametrize("behaviour, msg, moved", [
+    ("nan_record_no_latent", "run_cpu_baselines.py exited 0 without a latent", ["h1.fit.a1.h1.json"]),
+    ("finite_record", "nonfinite_latent record but the latent is missing or finite",
+     ["h1.fit.a1.h1.json", "h1.fit.a1.h1.npz"]),
+    ("nan_record_other_sha", "nonfinite_latent record of another latent (latent_sha256 differs)",
+     ["h1.fit.a1.h1.json", "h1.fit.a1.h1.npz"]),
+    ("nan_record_exit23", "run_cpu_baselines.py exit 23 with a status record", ["h1.fit.a1.h1.json", "h1.fit.a1.h1.npz"]),
+])
+def test_cpu_nonfinite_records_outside_the_contract_are_infrastructure(tmp_path, behaviour, msg, moved):
+    st = Stage(tmp_path, [_cpu_row("h1")], plan={"h1": behaviour}, experiments=("X13",))
+    rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy), "--max-attempts", "1")
+    assert rc == rs.EXIT_INFRA, log
+    detail = st.ledger().loc["h1", "detail"]
+    assert msg in detail, detail
+    assert len(pr.read_failures(os.path.join(st.out, "failures.csv"))) == 0     # never an outcome
+    assert sorted(os.listdir(os.path.join(st.out, "quarantine"))) == moved      # record and latent moved aside
+
+
+def test_gpu_fitter_record_of_its_own_nonfinite_latent_is_refused(tmp_path):
+    """The GPU contract is unchanged: fit_paper_config.py writes no nonfinite_latent record (the runner does)."""
+    st = Stage(tmp_path, [_row("g1")], plan={"g1": "nan_record"})
+    rc, log = st.run("--max-attempts", "1")
+    assert rc == rs.EXIT_INFRA and "fitter exited 0 and wrote a status record" in st.ledger().loc["g1", "detail"], log
+    assert len(pr.read_failures(os.path.join(st.out, "failures.csv"))) == 0
+
+
 def test_cpu_env_probe_must_pass(tmp_path):
     st = Stage(tmp_path, [_cpu_row("h1")], experiments=("X13",))
     rc, log = st.run("--cpu-lanes", "1", "--cpu-python", str(st.fakepy), FAKE_CPU_ENV_BROKEN="1")

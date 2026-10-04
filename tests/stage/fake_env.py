@@ -7,11 +7,16 @@ Env: FAKE_PLAN (json {tag: behaviour or [behaviour of attempt 1, 2, ...]}, fits 
      (same, scorer), FAKE_SCORE_PROV (json {tag: {provenance column: value}}, overrides of the scorer provenance),
      FAKE_STATE (dir for attempt counters), FAKE_DEVICE (default 'cpu'), FAKE_SLEEP (s, default 60),
      FAKE_CPU_ENV_BROKEN (the CPU-baseline probe fails).
-Fit behaviours: ok, nan, diverge, crash, sleep, no_latent, wrong_device, diverge_no_status.
+Fit behaviours: ok, nan, diverge, crash, sleep, no_latent, wrong_device, diverge_no_status, nan_record (a non-finite
+     latent plus a nonfinite_latent record of the fitter's own: not the fitter's contract).
 CPU-baseline behaviours: ok, crash, sleep, no_latent, wrong_device (records a GPU), no_device (a latent written before
-     the device/cpu_model fields, shared interface (b)), diverge (exit 23 with a divergence record).
+     the device/cpu_model fields, shared interface (b)), diverge (exit 23 with a divergence record), nan (a non-finite
+     latent, exit 0, no record), nan_record (the same plus its own nonfinite_latent record; lead decision 2026-10-03),
+     nan_record_other_sha (the record names another latent), nan_record_no_latent (a record, no latent),
+     finite_record (a finite latent with a nonfinite_latent record), nan_record_exit23 (latent and record, exit 23).
 Score behaviours: ok, nan, crash, old_scorer (no provenance columns: a scorer older than CR-05).
 """
+import hashlib
 import json
 import os
 import sys
@@ -51,6 +56,15 @@ def behaviour(plan_var, tag, kind):
     return b
 
 
+def own_nonfinite_record(out, tag, row, npz, sha=None):
+    """A nonfinite_latent record written by the fitting program itself (fit_outcome.write_status)."""
+    if sha is None:
+        with open(npz, "rb") as f:
+            sha = hashlib.sha256(f.read()).hexdigest()
+    fit_outcome.write_status(out, tag, "nonfinite_latent", detail="fake: the saved embedding has non-finite values",
+                             row=row, latent_sha256=sha, device="cpu", git_sha="fake")
+
+
 def load_row(manifest, tag):
     import pandas as pd
     m = pd.read_csv(manifest, sep="\t", comment="#", dtype=str, keep_default_na=False)
@@ -78,7 +92,7 @@ def fit():
         sys.exit(fit_outcome.EXIT_DIVERGED)
     n, k = 30, int(row["n_latent"])
     z = np.random.default_rng(0).normal(size=(n, k)).astype(np.float32)
-    if b == "nan":
+    if b in ("nan", "nan_record"):
         z[3, 1] = np.nan
     device = "NVIDIA A100-SXM4-80GB" if b == "wrong_device" else os.environ.get("FAKE_DEVICE", "cpu")
     cfg = dict(row=row, reference_name="b0", n_cells=n, n_batches=3, fit_seconds=0.1, iw_keep_fraction=None,
@@ -93,6 +107,8 @@ def fit():
     with open(os.path.join(out, "models", tag, "model.pt"), "w") as f:
         f.write("fake")
     os.replace(tmp, npz)
+    if b == "nan_record":
+        own_nonfinite_record(out, tag, row, npz)
 
 
 def cpu_fit():
@@ -122,8 +138,13 @@ def cpu_fit():
     if b == "diverge":
         fit_outcome.write_status(a.out_dir, tag, "diverged", detail="fake divergence of a CPU baseline", row=row)
         sys.exit(fit_outcome.EXIT_DIVERGED)
+    if b == "nan_record_no_latent":
+        own_nonfinite_record(a.out_dir, tag, row, None, sha="0" * 64)
+        sys.exit(0)
     n, k = 30, int(row["n_latent"])
     z = np.random.default_rng(1).normal(size=(n, k)).astype(np.float32)
+    if b.startswith("nan"):
+        z[3, 1] = np.nan
     cfg = dict(row=row, tool_kwargs={}, knob=None, knob_value=float(row["lam"]), features="highly_variable", n_cells=n,
                n_hvg=10, n_batches=3, fit_seconds=0.1, git_sha="fake", git_dirty=False, versions={}, threads={},
                cpu_count=1, device="cpu", cpu_model="fake cpu")
@@ -138,6 +159,12 @@ def cpu_fit():
                         batch=np.array([f"b{i % 3}" for i in range(n)]), celltype=np.array(["t"] * n),
                         config=json.dumps(cfg), history=json.dumps({}))
     os.replace(tmp, npz)
+    if b in ("nan_record", "finite_record", "nan_record_exit23"):
+        own_nonfinite_record(a.out_dir, tag, row, npz)
+    if b == "nan_record_other_sha":
+        own_nonfinite_record(a.out_dir, tag, row, npz, sha="0" * 64)
+    if b == "nan_record_exit23":
+        sys.exit(fit_outcome.EXIT_DIVERGED)
 
 
 def score():
