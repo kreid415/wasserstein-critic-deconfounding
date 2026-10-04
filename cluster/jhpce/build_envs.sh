@@ -20,7 +20,12 @@
 # Fail-loud verification: `conda list --explicit --md5` must equal the local spec line for line; `pip list
 # --format=freeze` must equal the local freeze except the declared differences; `pip check` must equal the
 # local result (wcd-fit clean; wcd-score: only scib's pandas>=2 metadata pin, as locally).
-# Idempotent: an env carrying .verified is reused; delete the env directory to rebuild.
+# Idempotent: an env carrying .verified is reused only if cluster/jhpce/env_intact.py finds nothing missing beyond the
+# gaps recorded at build time; otherwise it is deleted and rebuilt. Purge safety (2026-10-04): /fastscratch deletes files
+# by modification time after 30 days and conda keeps the package's file dates, so on 2026-10-03 the purge removed most
+# of both envs' standard library (built 2026-10-02) while .verified survived. Each build therefore uses a fresh conda
+# package cache and, after verification, re-dates every file of the env (and the R library), so the purge clock starts
+# at the build; .verified records the date until which the env is safe.
 # Usage (repo root, inside a 'shared' batch job): bash cluster/jhpce/build_envs.sh OUT_DIR [fit|score|all]
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
@@ -31,6 +36,14 @@ WHAT=${2:-all}
 SPEC=cluster/envspec
 module load conda/3-24.3.0
 conda --version
+export CONDA_PKGS_DIRS="$SCRATCH/conda/pkgs_build_${SLURM_JOB_ID:-$$}"   # fresh cache: purged unpacked packages are never linked
+mkdir -p "$CONDA_PKGS_DIRS"
+intact() { python3 "$REPO/cluster/jhpce/env_intact.py" "$1"; }        # $1 env prefix
+redate() { local d; for d in "$@"; do [ ! -e "$d" ] || find "$d" -xdev -exec touch -h -c {} +; done; }
+mark_verified() {  # $1 env prefix: record benign layering gaps, then the build date and purge horizon
+  python3 "$REPO/cluster/jhpce/env_intact.py" "$1" --write-baseline
+  echo "built $(date -Is); all files re-dated; safe from the 30-day purge until about $(date -I -d '+29 days')" > "$1/.verified"
+}
 
 TORCH_FIT="torch==2.13.0+cu126";  TORCH_FIT_INDEX=https://download.pytorch.org/whl/cu126
 TORCH_SCORE="torch==2.4.1+cu121"; TORCH_SCORE_INDEX=https://download.pytorch.org/whl/cu121
@@ -47,7 +60,8 @@ same_explicit() {  # $1 env prefix, $2 reference explicit spec, $3 out file; com
 }
 
 build_fit() {
-  if [ -f "$FIT_ENV/.verified" ]; then echo "[fit] reusing verified env $FIT_ENV"; return 0; fi
+  if [ -f "$FIT_ENV/.verified" ] && intact "$FIT_ENV"; then echo "[fit] reusing verified, complete env $FIT_ENV"; return 0; fi
+  if [ -e "$FIT_ENV" ]; then echo "[fit] $FIT_ENV is unverified or incomplete: deleting and rebuilding"; fi
   rm -rf "$FIT_ENV"
   conda create -y -q -p "$FIT_ENV" --file "$SPEC/scvi-api.explicit.txt"
   # phase 1: torch and its own pinned CUDA 12.6 runtime wheels (exact versions come from torch's metadata)
@@ -61,12 +75,16 @@ build_fit() {
       --allow '^(torch|triton|nvidia-.*|cuda-bindings|cuda-pathfinder|cuda-toolkit)$' | tee "$OUT/wcd-fit_freeze_diff.txt"
   same_explicit "$FIT_ENV" "$SPEC/scvi-api.explicit.txt" "$OUT/wcd-fit.explicit.txt"
   (cd "$TMPDIR" && OMP_NUM_THREADS=1 "$FIT_PY" "$REPO/cluster/jhpce/env_versions.py" --kind fit --out "$OUT/versions_fit_buildnode.json")
-  date -Is > "$FIT_ENV/.verified"
+  redate "$FIT_ENV"
+  mark_verified "$FIT_ENV"
 }
 
 build_score() {
-  if [ -f "$SCORE_ENV/.verified" ]; then echo "[score] reusing verified env $SCORE_ENV"; return 0; fi
-  rm -rf "$SCORE_ENV"
+  if [ -f "$SCORE_ENV/.verified" ] && intact "$SCORE_ENV" && [ -f "$WCD_R_LIBS/.verified" ]; then
+    echo "[score] reusing verified, complete env $SCORE_ENV"; return 0
+  fi
+  if [ -e "$SCORE_ENV" ]; then echo "[score] $SCORE_ENV or its R library is unverified or incomplete: deleting and rebuilding"; fi
+  rm -rf "$SCORE_ENV" "$WCD_R_LIBS"
   conda create -y -q -p "$SCORE_ENV" --file "$SPEC/wcd-kbet.explicit.txt"
   "$SCORE_PY" -m pip install -q --no-deps --force-reinstall -r "$SPEC/score-pip.txt"
   "$SCORE_PY" -m pip install -q --no-deps --force-reinstall --index-url "$TORCH_SCORE_INDEX" "$TORCH_SCORE"
@@ -93,7 +111,9 @@ build_score() {
       | tee "$OUT/wcd-score_freeze_diff.txt"
   same_explicit "$SCORE_ENV" "$SPEC/wcd-kbet.explicit.txt" "$OUT/wcd-score.explicit.txt"
   (cd "$TMPDIR" && PATH="$SCORE_ENV/bin:$PATH" OMP_NUM_THREADS=1 "$SCORE_PY" "$REPO/cluster/jhpce/env_versions.py" --kind score --out "$OUT/versions_score_buildnode.json")
-  date -Is > "$SCORE_ENV/.verified"
+  redate "$SCORE_ENV" "$WCD_R_LIBS"
+  date -Is > "$WCD_R_LIBS/.verified"
+  mark_verified "$SCORE_ENV"
 }
 
 case "$WHAT" in

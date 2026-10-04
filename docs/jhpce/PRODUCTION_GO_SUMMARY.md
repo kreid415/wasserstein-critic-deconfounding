@@ -37,7 +37,10 @@ Local scoring afterwards: about 110 process-hours, roughly 9 h on 12 free cores 
    the plan is printed with `cluster/jhpce/prod_command.py --expected-sha $(git rev-parse prereg-tier12-v2^{commit})`.
 3. Done: the tags files were regenerated for manifest v3 (same 250 tags; only their headers, hence hashes and stage
    keys, changed).
-4. fastscratch purges files after 30 days: the env (built Oct 2) must be used before ~Nov 1 or rebuilt.
+4. fastscratch purges files by modification time after 30 days, and conda keeps package file dates: the Oct 2 envs lost
+   most of their standard library on Oct 3, and the first submission (2026-10-04 18:01, Slurm 36155495/36155496) failed
+   at its first python call, before any fit. `build_envs.sh` now rebuilds an incomplete env from a fresh package cache
+   and re-dates every file; `.verified` records the date until which the env is safe.
 5. Preflight: experiments/jhpce_fillers_x1_x13_prod/PREFLIGHT.md (GO, 2026-10-04). The user's go is still required (SI-29).
 
 **Not in these jobs.** The 80 X13 CPU baselines of these tasks (harmony, scanorama, pca). The proposal is to run them on
