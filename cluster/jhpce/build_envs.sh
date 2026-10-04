@@ -134,13 +134,13 @@ case "$WHAT" in
   fit) build_fit ;;
   score) build_score ;;
   all) build_fit; build_score ;;
+  *) echo "unknown target $WHAT"; exit 2 ;;
 esac
 case "$WHAT" in
   fit|all) compat_link "$SCRATCH/conda/envs/wcd-fit" "$FIT_ENV" ;;
 esac
 case "$WHAT" in
   score|all) compat_link "$SCRATCH/conda/envs/wcd-score" "$SCORE_ENV"; compat_link "$SCRATCH/Rlib_kbet" "$WCD_R_LIBS" ;;
-  *) echo "unknown target $WHAT"; exit 2 ;;
 esac
 for d in "$FIT_ENV" "$SCORE_ENV" "$WCD_R_LIBS"; do if [ -e "$d" ]; then du -sh "$d"; fi; done
 rm -rf "$CONDA_PKGS_DIRS"                 # this build's own package cache
