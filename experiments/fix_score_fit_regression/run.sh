@@ -8,6 +8,7 @@
 #   (iii) X3 pancreas dose-50 cells (manifest v2 row in OUT/iii/tag.txt), uncorrected HVG-PCA latent, patched
 #         scorer; its PCR_batch must equal the all-feature-reference value recomputed on the subset
 # Environment as scripts/run_stage.py scores (thread_env(1), CUDA hidden), nice -n 19, one process at a time.
+# STAGES (env, default "i ii iii") selects the stages to run.
 set -euo pipefail
 REPO=$(realpath "$1"); TAGREPO=$(realpath "$2"); OUT=$(realpath "$3")
 KBET=/home/kendall/.claude-science/conda/envs/wcd-kbet; SCVI=/home/kendall/.claude-science/conda/envs/scvi-api/bin/python
@@ -23,13 +24,17 @@ score() {  # score SCORER PREPPED NPZ TAG META OUT_CSV
   PREPPED="$2" NPZ="$3" TAG="$4" META="$5" OUT_CSV="$6" nice -n 19 "$KBET/bin/python" "$1" > "$6.log" 2>&1
 }
 fail=0
+STAGES=" ${STAGES:-i ii iii} "
 # ---- (i)
+if [[ "$STAGES" == *" i "* ]]; then
 mkdir -p "$OUT/i"
 for t in A1_atac_small_none_l0_c1_s100_8d38e2a3 A1_atac_small_discriminator_l3_c1_s100_c2822374; do
   score "$REPO/scripts/score_scib_native.py" "$P/atac_small__scib.h5ad" "$OUT/A1/latents/$t.npz" "$t" "$(meta "$OUT/A1/scores/$t.csv")" "$OUT/i/$t.csv"
   "$KBET/bin/python" "$REPO/scripts/compare_score_rows.py" "$OUT/A1/scores/$t.csv" "$OUT/i/$t.csv" --out "$OUT/i/$t.compare.csv" || fail=1
 done
+fi
 # ---- (ii)
+if [[ "$STAGES" == *" ii "* ]]; then
 mkdir -p "$OUT/ii/scores_tagged" "$OUT/ii/scores_patched"
 t=REG_immune_none_e3
 if [ ! -f "$OUT/ii/fit/latents/$t.npz" ]; then
@@ -41,7 +46,9 @@ M=$(printf '{"latent_sha256": "%s", "experiment": "REG", "task": "immune", "arm"
 score "$TAGREPO/scripts/score_scib_native.py" "$P/immune__scib.h5ad" "$OUT/ii/fit/latents/$t.npz" "$t" "$M" "$OUT/ii/scores_tagged/$t.csv"
 score "$REPO/scripts/score_scib_native.py" "$P/immune__scib.h5ad" "$OUT/ii/fit/latents/$t.npz" "$t" "$M" "$OUT/ii/scores_patched/$t.csv"
 "$KBET/bin/python" "$REPO/scripts/compare_score_rows.py" "$OUT/ii/scores_tagged/$t.csv" "$OUT/ii/scores_patched/$t.csv" --out "$OUT/ii/$t.compare.csv" || fail=1
+fi
 # ---- (iii)
+if [[ "$STAGES" == *" iii "* ]]; then
 t=$(cat "$OUT/iii/tag.txt")
 nice -n 19 "$KBET/bin/python" "$REPO/scripts/regress_pcr_reference.py" make-latent --prepped "$P/pancreas__scib.h5ad" \
   --manifest "$REPO/manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv" --tag "$t" --out "$OUT/iii/$t.npz"
@@ -50,5 +57,6 @@ M=$(printf '{"latent_sha256": "%s", "experiment": "X3", "task": "pancreas", "arm
 score "$REPO/scripts/score_scib_native.py" "$P/pancreas__scib.h5ad" "$OUT/iii/$t.npz" "$t" "$M" "$OUT/iii/$t.csv"
 nice -n 19 "$KBET/bin/python" "$REPO/scripts/regress_pcr_reference.py" check --prepped "$P/pancreas__scib.h5ad" \
   --npz "$OUT/iii/$t.npz" --score "$OUT/iii/$t.csv" --out "$OUT/iii/$t.pcr_reference.csv" || fail=1
+fi
 echo "[regress] done, fail=$fail"
 exit $fail
