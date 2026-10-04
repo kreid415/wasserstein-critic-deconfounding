@@ -2,8 +2,9 @@
 (scripts/fit_paper_config.py x3_draw) and the exact oracle importance weights (depletion_oracle_weights).
 Run in the scvi env: WCD_SRC=src PREPPED_DIR=<prepped_scib> python -m pytest -q tests/scvi/test_x3_si41.py
 
-1. manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv is the builder's output; every non-X3 row (and the header) is
-   byte-identical, in order, to the tagged manifest manifests/paper_manifest_stock_pilot_u5_b10.tsv.
+1. manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv is the builder's output at eb444fe (the builder now writes v3:
+   SI-44 / SI-46, tests/prereg/test_manifest_v3.py); every non-X3 row (and the header) is byte-identical, in order, to
+   the tagged manifest manifests/paper_manifest_stock_pilot_u5_b10.tsv.
 2. X3: 828 rows at the same positions, every field but tag / extra unchanged, one n_cells per task (= X3_N) at every
    dose, draw 'nested_v1' in every spec, all 828 tags new and unique.
 3. subsample() on the real prepped obs: exactly N cells at every dose, dose 0 = the first N cells of the permutation,
@@ -71,9 +72,15 @@ def _read_obs(task):
 
 
 # ---- 1, 2: manifest ----------------------------------------------------------------------------------------------
+V2_BUILDER = "eb444fe"    # the builder that wrote v2 (since SI-44 / SI-46 it writes v3)
+
+
 def test_v2_manifest_is_the_builder_output(tmp_path):
+    src = tmp_path / "bpm_v2.py"
+    src.write_text(subprocess.run(["git", "-C", ROOT, "show", f"{V2_BUILDER}:scripts/build_paper_manifest.py"],
+                                  check=True, capture_output=True, text=True).stdout)
     out = tmp_path / "v2.tsv"
-    subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "build_paper_manifest.py"), "--backbone", "stock",
+    subprocess.run([sys.executable, str(src), "--backbone", "stock",
                     "--design", "pilot", "--uncond-seeds", "5", "--bary-iter", "10", "--out", str(out)], check=True)
     assert out.read_bytes() == open(V2, "rb").read()
 

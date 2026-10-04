@@ -61,7 +61,7 @@ TRAJ_TASKS = ("immune", "immune_hum_mou")                     # obs dpt_pseudoti
 REAL_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou", "atac_small", "atac_large")
 TASK_FAMILY = {"pancreas": "pancreas", "lung": "lung", "immune": "immune", "immune_hum_mou": "immune",
                "atac_small": "atac", "atac_large": "atac"}
-FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12")
+FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivity (SI-44)
 
 
 class PreregError(RuntimeError):

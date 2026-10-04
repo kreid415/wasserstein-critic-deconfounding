@@ -115,6 +115,12 @@ def test_r4_x1_resolves_followups_and_no_followup_equals_an_x1_row(pipeline):
     for r in x6.to_dict("records"):
         cell = c[f"{r['task']}|{r['cond']}|pooled"]
         assert float(r["lam"]) in (cell["lo"], cell["matched"], cell["hi"])
+    x15 = M4[M4.experiment == "X15"]                       # SI-44: resolved like the other follow-ups
+    assert len(x15) == 84
+    for r in x15[x15.arm != "none"].to_dict("records"):
+        cell = c[f"{r['task']}|{r['cond']}|{r['arm']}"]
+        assert float(r["lam"]) == {"matched_lo": cell["lo"], "matched_hi": cell["hi"]}[
+            M3.set_index("tag").at[r["tag"], "lam"]]
 
 
 def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):

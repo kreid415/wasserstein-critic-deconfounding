@@ -71,7 +71,9 @@ run through one path:
 1. `scripts/prep_scib_task.py`: prepped scIB task files (`<task>__scib.h5ad`).
 2. `scripts/build_paper_manifest.py`: the manifest, one row per fit, every setting a column
    (`manifests/paper_manifest_stock_pilot_u5_b10.tsv`, tag prereg-tier12-v1; X3 rebuilt under SI-41 in
-   `manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv`).
+   `manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv`; X15 KL warm-up sensitivity (SI-44) and Scanorama knn 2-80
+   (SI-46) in `manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv`, the manifest in use; report:
+   `scripts/manifest_v3_report.py`).
 3. `scripts/run_stage.py`: fits each row with `scripts/fit_paper_config.py` (scVI arms and neural baselines) and scores
    it with `scripts/score_scib_native.py` (scib.metrics.metrics, seeded kBET). X13 CPU baselines are fitted with
    `scripts/run_cpu_baselines.py`.

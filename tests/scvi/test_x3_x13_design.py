@@ -107,7 +107,7 @@ def test_x13_cpu_rows_are_the_signed_off_configurations():
     cpu = R[R.arm.isin(list(bpm.CPU_BASELINES))]
     assert set(cpu.experiment) == {"X13"} and set(cpu.seed) == {0} and not cpu.tag.duplicated().any()
     expect = {"harmony": ({(v, 10) for v in [0, 0.5, 1, 2, 4, 8]} | {(2, 50)}, "theta"),
-              "scanorama": ({(v, 10) for v in [5, 10, 20, 40, 80, 160]} | {(20, 100)}, "knn"),
+              "scanorama": ({(v, 10) for v in [2, 5, 10, 20, 40, 80]} | {(20, 100)}, "knn"),   # SI-46
               "pca": ({(0, 10), (0, 50)}, None)}
     for t in bpm.TASKS:
         for arm, (cfgs, knob) in expect.items():
