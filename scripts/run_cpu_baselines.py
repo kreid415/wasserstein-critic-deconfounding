@@ -135,7 +135,9 @@ def provenance(root):
     vers = {p: md.version(p) for p in ("scib", "scanpy", "anndata", "harmony-pytorch", "scanorama", "numpy",
                                         "scikit-learn", "torch")}
     threads = {k: os.environ.get(k) for k in THREAD_VARS}
-    return dict(git_sha=sha, git_dirty=dirty, versions=vers, threads=threads, cpu_count=os.cpu_count())
+    from host_info import cpu_info      # scripts/host_info.py (device fields pinned by the lead 2026-10-03, CR-02)
+    return dict(git_sha=sha, git_dirty=dirty, versions=vers, threads=threads, cpu_count=os.cpu_count(),
+                device="cpu", cpu_model=cpu_info()[0])
 
 
 def select_rows(manifest, task=None, tags=None):

@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 """Fit ONE manifest row and write its latent + provenance (replaces scvi_adv_fit.py; code review N9).
 
-Every setting comes from the manifest row; nothing has a default here, and a row that is missing
-a column, or still carries a lambda grid INDEX instead of a frozen value, is refused.
+Every design setting of a row comes from its manifest columns; a row that is missing a column, or still carries a
+lambda grid INDEX instead of a frozen value, is refused. Settings that are code defaults rather than columns
+(adversary width 128, critic Adam lr 1e-4 betas (0, 0.9), discriminator Adam lr 1e-3, lambda_GP 10, 10 barycenter
+iterations, scvi-tools' generator optimiser and KL warm-up; code check CR-09) are recorded as RESOLVED values in each
+latent's config under 'plan', read from the trained training plan(s) and their optimizers (resolved_plan).
+scANVI and sysVI fits (X13) run under the same non-finite-loss guard as the adversarial plan (guarded_plan_class;
+code check CR-06), so their divergences are recorded as 'diverged' too.
 
 Env:  MANIFEST (tsv), TAG (row tag), PREPPED_DIR (prep_scib_task.py outputs), OUT_DIR, WCD_SRC
 Out:  OUT_DIR/latents/<tag>.npz   z (posterior mean), batch, celltype, config json, history json
@@ -281,7 +286,7 @@ def main():
                     train_size=float(r["train_size"]))
     t0 = time.time()
     if arm in ("scanvi", "sysvi"):
-        z, model = fit_baseline(a, arm, lam, r, common, backbone)
+        z, model, plan_rec = fit_baseline(a, arm, lam, r, common, backbone)
     else:
         from scvi_adversarial_plan import fit_adversarial_scvi
         n_critic = int(r["n_critic"])
@@ -294,12 +299,13 @@ def main():
             r1_gamma=(None if "r1_gamma" not in extra else float(extra["r1_gamma"])),
             sampler=extra.get("sampler"), iw_weights=iw_weights,
             **common, **backbone)
+        plan_rec = {"fit": resolved_plan(model)}
     secs = time.time() - t0
     hist = {k: v.iloc[:, 0].astype(float).tolist() for k, v in getattr(model, "history_", {}).items()
             if hasattr(v, "iloc")}
     cfg = dict(row=r, reference_name=ref_name, n_cells=int(a.n_obs), n_batches=int(a.obs["batch"].nunique()),
                fit_seconds=round(secs, 1), iw_keep_fraction=iw_keep, iw_weights=iw_weights, subsample_info=sub_info,
-               **provenance())
+               plan=plan_rec, **provenance())
     os.makedirs(os.path.dirname(npz), exist_ok=True)
     tmp = npz + ".tmp.npz"
     np.savez_compressed(tmp, z=np.asarray(z, dtype=np.float32), obs_names=a.obs_names.to_numpy(dtype="U128"),
@@ -312,31 +318,129 @@ def main():
 
 
 def fit_baseline(a, arm, lam, r, common, backbone):
+    """X13 neural baselines. Returns (posterior-mean latent, model, {phase: resolved_plan}). Every training phase runs
+    under guarded_plan_class (one step counter over the whole fit); the latent is read with torch.distributions
+    validation off (scvi_adversarial_plan._posterior_mean), so a NaN latent is saved and recorded as nonfinite_latent."""
     import scvi
+    from scvi.train import SemiSupervisedTrainingPlan, TrainingPlan
+    from scvi_adversarial_plan import _posterior_mean
     scvi.settings.seed = common["seed"]
+    counter = {"step": -1}
     if arm == "scanvi":
         # scIB's scANVI protocol (scib 1.1.7 integration.scanvi): scVI with the same backbone, then
-        # SCANVI.from_scvi_model trained min(10, max(2, round(epochs / 3))) epochs on all cells.
+        # SCANVI.from_scvi_model trained min(10, max(2, round(epochs / 3))) epochs, at the backbone's train_size.
         s = a.copy(); s.X = s.layers["counts"].copy()
         scvi.model.SCVI.setup_anndata(s, batch_key="batch", labels_key="celltype")
         vae = scvi.model.SCVI(s, n_latent=common["n_latent"], n_layers=backbone["n_layers"],
                               n_hidden=backbone["n_hidden"], gene_likelihood=backbone["gene_likelihood"])
+        vae._training_plan_cls = guarded_plan_class(vae._training_plan_cls, TrainingPlan, counter, "scvi pretraining")
         vae.train(max_epochs=common["max_epochs"], batch_size=common["batch_size"], train_size=backbone["train_size"],
                   early_stopping=False, enable_progress_bar=False)
+        pre_plan = resolved_plan(vae)
         m = scvi.model.SCANVI.from_scvi_model(vae, unlabeled_category="UnknownUnknown")
+        m._training_plan_cls = guarded_plan_class(m._training_plan_cls, SemiSupervisedTrainingPlan, counter, "scanvi")
         m.train(max_epochs=int(min(10, max(2, round(common["max_epochs"] / 3.0)))), batch_size=common["batch_size"],
                 train_size=backbone["train_size"], early_stopping=False, enable_progress_bar=False)
-        return m.get_latent_representation(), m
+        return _posterior_mean(m), m, {"scvi_pretraining": pre_plan, "scanvi": resolved_plan(m)}
     # sysVI (scvi-tools 1.4.2 scvi.external.SysVI): Gaussian likelihood on scIB's normalised X,
     # VampPrior (default), strength knob = z_distance_cycle_weight (= lam; scvi-tools default 2.0).
     from scvi.external import SysVI
     s = a.copy()
     SysVI.setup_anndata(s, batch_key="batch")
     m = SysVI(s, n_latent=common["n_latent"], n_hidden=backbone["n_hidden"], n_layers=backbone["n_layers"])
+    m._training_plan_cls = guarded_plan_class(m._training_plan_cls, TrainingPlan, counter, "sysvi")
     m.train(max_epochs=common["max_epochs"], batch_size=common["batch_size"], train_size=backbone["train_size"],
             early_stopping=False, enable_progress_bar=False,
             plan_kwargs=dict(z_distance_cycle_weight=lam))   # TrainingPlan forwards extra kwargs to SysVAE.loss
-    return m.get_latent_representation(), m
+    return _posterior_mean(m), m, {"fit": resolved_plan(m)}
+
+
+def guarded_plan_class(base, expected, counter, phase):
+    """scvi-tools training plan `base` (must be `expected`) under the non-finite-loss guard of
+    WassersteinAdversarialTrainingPlan (docs/PREREG.md section 1; code check CR-06): every training step checks that
+    its loss is finite, a forward pass that torch.distributions refuses for a non-finite parameter counts as a
+    non-finite loss, and every parameter must be finite after the last optimizer step; each raises
+    NonFiniteLossError (epoch of this phase, step = 0-based minibatch index over the whole fit, counted in
+    counter['step'] across phases). The guard only reads values: losses, gradients and latents are those of the
+    stock plan (tests/scvi/test_baseline_guard.py checks bit identity against the tagged fitter)."""
+    import torch
+    from fit_outcome import NonFiniteLossError
+    from scvi_adversarial_plan import _is_distribution_validation_error
+    if base is not expected:
+        raise TypeError(f"{phase}: training plan {base.__name__}, expected {expected.__name__} (scvi-tools changed?)")
+
+    class Guarded(base):
+        def _nonfinite_parameters(self):
+            return [n for n, p in self.named_parameters() if not bool(torch.isfinite(p).all())]
+
+        def forward(self, *args, **kwargs):
+            try:
+                return super().forward(*args, **kwargs)
+            except ValueError as e:
+                if not _is_distribution_validation_error(e):
+                    raise
+                bad = self._nonfinite_parameters()
+                raise NonFiniteLossError(
+                    self.current_epoch, counter["step"], {},
+                    detail=f"{phase}: forward pass refused a non-finite distribution parameter: "
+                           f"{str(e).splitlines()[0]} non-finite model parameters: {bad[:5] if bad else 'none'}") from e
+
+        def training_step(self, batch, batch_idx):
+            counter["step"] += 1
+            loss = super().training_step(batch, batch_idx)
+            value = loss.detach().float().reshape(())
+            if not bool(torch.isfinite(value)):
+                raise NonFiniteLossError(self.current_epoch, counter["step"], {"train_loss": float(value)},
+                                         detail=f"{phase}: minibatch {batch_idx} of epoch {self.current_epoch}")
+            return loss
+
+        def on_train_end(self):
+            super().on_train_end()
+            bad = self._nonfinite_parameters()
+            if bad:
+                raise NonFiniteLossError(self.current_epoch, counter["step"], {},
+                                         detail=f"{phase}: non-finite parameters after the last optimizer step: {bad[:5]}")
+
+    Guarded.__name__ = Guarded.__qualname__ = f"Guarded{base.__name__}"
+    return Guarded
+
+
+PLAN_FIELDS = ("optimizer_name", "lr", "eps", "weight_decay", "n_epochs_kl_warmup", "n_steps_kl_warmup",
+               "max_kl_weight", "min_kl_weight")
+ADVERSARY_FIELDS = ("adversary", "d_coef", "adv_steps", "adv_hidden", "critic_lr", "critic_betas", "disc_lr",
+                    "bary_iter", "bary_warm_iter", "bary_weights", "adv_input", "zstd", "spectral_norm", "r1_gamma")
+
+
+def _plain(v):
+    if isinstance(v, (tuple, list)):
+        return [_plain(x) for x in v]
+    if isinstance(v, np.generic):
+        return v.item()
+    return v
+
+
+def resolved_plan(model):
+    """The settings the trained plan actually used (code check CR-09): scvi-tools' generator optimiser and KL warm-up,
+    the adversary settings of WassersteinAdversarialTrainingPlan, lambda_GP where the gradient penalty applies (the
+    default of wcd critic.multi_class_gradient_penalty, which the head calls without lambda_gp), and every optimizer's
+    param groups (lr, betas, eps, weight_decay, amsgrad), read from model.trainer after training."""
+    import inspect
+    plan = model.trainer.lightning_module
+    rec = {"plan_class": type(plan).__name__}
+    rec.update({k: _plain(getattr(plan, k)) for k in PLAN_FIELDS})
+    if hasattr(plan, "adversary_base"):
+        rec.update({k: _plain(getattr(plan, k)) for k in ADVERSARY_FIELDS})
+        gp = bool(plan.is_critic and not plan.spectral_norm)
+        rec["gradient_penalty"] = gp
+        rec["lambda_gp"] = None
+        if gp:
+            fn = sys.modules[type(plan._wcd_head).__module__].multi_class_gradient_penalty
+            rec["lambda_gp"] = float(inspect.signature(fn).parameters["lambda_gp"].default)
+    rec["optimizers"] = [dict(cls=type(o).__name__,
+                              param_groups=[{k: _plain(g[k]) for k in ("lr", "betas", "eps", "weight_decay", "amsgrad")
+                                             if k in g} for g in o.param_groups])
+                         for o in model.trainer.optimizers]
+    return rec
 
 
 def record_divergence(manifest, out_dir, tag, exc):

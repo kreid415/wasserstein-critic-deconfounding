@@ -142,28 +142,11 @@ def kbet_label_flags(obs, label_key, batch_key, seeded, nn):
     return tested - nn.calls + nn.neighbors_errors, int(len(n) - tested) + seeded.nan_returns
 
 
-def cpu_info(path="/proc/cpuinfo"):
-    """(model name, highest of avx512f / avx2 / sse4_2 in the CPU flags or 'none') of the first CPU."""
-    model = flags = None
-    with open(path) as f:
-        for line in f:
-            key, _, value = line.partition(":")
-            key = key.strip()
-            if key == "model name" and model is None:
-                model = value.strip()
-            elif key == "flags" and flags is None:
-                flags = set(value.split())
-            if model is not None and flags is not None:
-                break
-    if model is None or flags is None:
-        raise RuntimeError(f"{path} has no 'model name' or 'flags' line")
-    return model, next((x for x in ("avx512f", "avx2", "sse4_2") if x in flags), "none")
-
-
 def scorer_provenance():
     """The pinned provenance columns of every score row (code check CR-05)."""
     import importlib.metadata as md
     import rpy2.robjects as ro
+    from host_info import cpu_info
     here = os.path.dirname(os.path.abspath(__file__))
     sha = subprocess.run(["git", "-C", here, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     dirty = subprocess.run(["git", "-C", here, "status", "--porcelain", "--untracked-files=no"], capture_output=True,

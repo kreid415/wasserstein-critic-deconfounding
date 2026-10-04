@@ -167,5 +167,7 @@ def test_runner_on_atac_small_writes_the_fit_npz_format(tmp_path):
         cfg = json.loads(str(d["config"]))
         assert (cfg["row"]["tag"], cfg["row"]["arm"], cfg["knob"]) == (r.tag, r.arm, rcb.CPU_ARMS[r.arm])
         assert cfg["knob_value"] == float(r.lam)
+        import host_info                                   # CR-02: CPU latents record the device and CPU model
+        assert cfg["device"] == "cpu" and cfg["cpu_model"] == host_info.cpu_info()[0] and "gpu" not in cfg
     r = subprocess.run(cmd, env=env, capture_output=True, text=True)
     assert r.returncode != 0 and "exists" in r.stderr
