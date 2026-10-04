@@ -1,0 +1,6 @@
+FAILED tests/prereg/test_rules_unchanged.py::test_resolved_manifests_are_byte_identical[m.r4a1.tsv]
+FAILED tests/prereg/test_rules_unchanged.py::test_resolved_manifests_are_byte_identical[m.x1.tsv]
+FAILED tests/prereg/test_rules_unchanged.py::test_resolved_manifests_are_byte_identical[m.r4x1.tsv]
+FAILED tests/prereg/test_rules_unchanged.py::test_decision_records_are_the_same[r23.json]
+FAILED tests/prereg/test_rules_unchanged.py::test_decision_records_are_the_same[r4x1.json]
+5 failed, 4 passed, 2 warnings in 16.56s

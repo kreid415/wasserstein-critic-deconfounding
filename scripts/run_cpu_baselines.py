@@ -5,7 +5,7 @@ Rows: the X13 block of scripts/build_paper_manifest.py (CPU_BASELINES; CONSTRAIN
 {harmony, scanorama, pca}; the knob value is the row's 'lam', the embedding size its 'n_latent', seed 0 (each
 configuration runs once). scripts/fit_paper_config.py refuses these arms.
   harmony    theta in {0, 0.5, 1, 2, 4, 8} at 10 PCs, plus theta 2 at 50 PCs (tool default)        (SI-34)
-  scanorama  knn in {5, 10, 20, 40, 80, 160} at dimred 10, plus knn 20 at dimred 100 (tool default) (SI-35)
+  scanorama  knn in {2, 5, 10, 20, 40, 80} at dimred 10, plus knn 20 at dimred 100 (tool default) (SI-46)
   pca        10 PCs, plus 50 PCs (tool default); no strength knob: the uncorrected anchor            (SI-36)
 Knob sources: Korsunsky et al. 2019 (Harmony, Methods Eq. 3-4 and 5.4: theta = weight of the penalty on batch-
 cluster dependence, theta 0 = no penalty, default 2); Hie et al. 2019 (Scanorama, Methods: knn nearest

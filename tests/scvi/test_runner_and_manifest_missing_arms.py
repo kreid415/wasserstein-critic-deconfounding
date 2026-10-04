@@ -176,6 +176,9 @@ def test_manifest_adds_exactly_the_signed_off_rows(tmp_path):
     exp = {("X3", a, "iw"): 72 for a in ["discriminator", "reference", "pooled", "mmd"]}
     exp.update({("X6", "discriminator_r1", "r1_gamma"): 27, ("X7", "discriminator_ref", ""): 54,
                 ("X8", "reference", "sampler"): 72, ("X8", "pooled", "sampler"): 72})
+    # SI-44 (2026-10-04): X15 KL warm-up sensitivity, 2 tasks x 3 seeds x 2 settings x (none + 3 arms x 2 lambdas)
+    exp.update({("X15", "none", "kl_warmup"): 12, ("X15", "discriminator", "kl_warmup"): 24,
+                ("X15", "pooled", "kl_warmup"): 24, ("X15", "mmd", "kl_warmup"): 24})
     assert got == exp, got
     assert set(add[add.experiment == "X3"].extra.map(lambda s: json.loads(s)["subsample"]["deplete_pct"])) == {50, 80, 95}
     assert (add[add.arm.isin(["discriminator_r1", "discriminator_ref"])].n_critic == "1").all()

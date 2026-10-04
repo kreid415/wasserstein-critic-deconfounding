@@ -11,8 +11,13 @@
 Every rule is a deterministic function of the manifest (scripts/build_paper_manifest.py), the raw
 scIB metrics written by scripts/score_scib_native.py (one CSV row per fit, joined by tag) and a
 failures table (tag, status in {diverged, nonfinite_latent}, detail). A row that is neither scored
-nor failed, a tag scored twice, a NaN in a required metric or an incomplete design raises
-PreregError: nothing is imputed, dropped or defaulted.
+nor failed, a tag scored twice, a NaN in a required metric, score rows without scorer provenance or
+mixing it (PROVENANCE_COLS; code check CR-05) or an incomplete design raises PreregError: nothing is
+imputed, dropped or defaulted.
+
+SI-45 (code check CR-11): when R4 stage a1 leaves a window neighbour of an A2/A3 cell without an A1 fit
+(edge_unresolved), default_half_extensions() returns the A1 rows that fit the default half there, so
+R2 / R3 compare 3-point windows on both halves.
 """
 import ast
 import glob
@@ -61,7 +66,12 @@ TRAJ_TASKS = ("immune", "immune_hum_mou")                     # obs dpt_pseudoti
 REAL_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou", "atac_small", "atac_large")
 TASK_FAMILY = {"pancreas": "pancreas", "lung": "lung", "immune": "immune", "immune_hum_mou": "immune",
                "atac_small": "atac", "atac_large": "atac"}
-FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12")
+FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivity (SI-44)
+# scorer provenance written by score_scib_native.py on every score row (code check CR-05). One rule input never mixes
+# values of any of them, and a row without them is refused (lead decision 2026-10-04: A1 restarts at the new tag, so
+# every rule input row carries them). numba_cpu_name is '' when NUMBA_CPU_NAME is unset; the others are never empty.
+PROVENANCE_COLS = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
+PROVENANCE_MAY_BE_EMPTY = ("numba_cpu_name",)
 
 
 class PreregError(RuntimeError):
@@ -192,6 +202,40 @@ def write_manifest(M, header, path, note):
     os.replace(tmp, path)
 
 
+def _read_score_file(path):
+    """One score CSV. The provenance columns are read as the literal strings written (an empty numba_cpu_name stays
+    ''); a file without one of them leaves it absent, so after concatenation its rows hold NaN there (refused by
+    outcomes)."""
+    df = pd.read_csv(path, dtype={"tag": str})
+    prov = [c for c in PROVENANCE_COLS if c in df.columns]
+    if prov:
+        raw = pd.read_csv(path, dtype=str, keep_default_na=False, usecols=prov)
+        _require(len(raw) == len(df), f"{path}: provenance columns read {len(raw)} rows, metrics {len(df)}")
+        for c in prov:
+            df[c] = raw[c].to_numpy()
+    return df
+
+
+def check_provenance(s, experiments):
+    """Code check CR-05, rule side: every score row of one rule input carries the scorer provenance columns, with a
+    value (numba_cpu_name may be ''), and all rows share one value per column."""
+    missing = [c for c in PROVENANCE_COLS if c not in s.columns]
+    _require(not missing, f"scores of {experiments} lack the scorer provenance columns {missing} (written by "
+                          f"score_scib_native.py since code check CR-05); rescore with the current scorer")
+    if not len(s):
+        return
+    lacking = s[list(PROVENANCE_COLS)].isna().any(axis=1)
+    for c in PROVENANCE_COLS:
+        if c not in PROVENANCE_MAY_BE_EMPTY:
+            lacking |= s[c].astype(str).str.strip().eq("")
+    bad = sorted(s.tag[lacking])
+    _require(not bad, f"{len(bad)} score rows of {experiments} lack scorer provenance values, e.g. {bad[:5]}")
+    mixed = {c: sorted(s[c].astype(str).unique()) for c in PROVENANCE_COLS if s[c].astype(str).nunique() > 1}
+    _require(not mixed, f"scores of {experiments} mix scorer provenance: "
+                        + "; ".join(f"{c} {v[:3]}{' ...' if len(v) > 3 else ''}" for c, v in mixed.items())
+                        + " (one rule input is scored by one scorer commit on one CPU type)")
+
+
 def read_scores(paths):
     files = []
     for p in ([paths] if isinstance(paths, str) else paths):
@@ -202,7 +246,7 @@ def read_scores(paths):
         else:
             _require(os.path.isfile(p), f"score path {p} does not exist")
             files.append(p)
-    S = pd.concat([pd.read_csv(f, dtype={"tag": str}) for f in files], ignore_index=True)
+    S = pd.concat([_read_score_file(f) for f in files], ignore_index=True)
     need = ["tag", "kbet_seed"] + BATCH_METRICS + BIO_METRICS
     missing = [c for c in need if c not in S.columns]
     _require(not missing, f"score files lack columns {missing} (kbet_seed: written by score_scib_native.py since "
@@ -243,6 +287,7 @@ def outcomes(M, S, F, experiments):
         _require(ks.notna().all() and ks.nunique() == 1,
                  f"scores of {experiments} mix kBET seeds {sorted(ks.dropna().unique().tolist())} "
                  f"({int(ks.isna().sum())} rows without one); measurement-SD re-scores belong in their own directory")
+    check_provenance(s, experiments)
     rows = rows.merge(s[["tag"] + BATCH_METRICS + BIO_METRICS], on="tag", how="left", validate="one_to_one")
     rows["status"] = np.where(rows.tag.isin(set(f.tag)), "failed", "ok")
     B, C = [], []
@@ -516,6 +561,8 @@ def r4_stage(out, stage, r1_record, need=None):
                     cell[nbr] = lam_step(grid[i], d)
                     why = "edge_unresolved" if needed else "edge_not_extended (no row uses this cell)"
                     cell["flags"].append(f"{why}_{side}: {nbr} = {fmt_lam(cell[nbr])} has no {exp} fit")
+                    if needed:     # SI-45: at stage a1 the default half is fitted at this lambda (default_half_extensions)
+                        cell.setdefault("edge_unresolved", []).append(nbr)
             cells[f"{t}|{c}|{a}"] = cell
     return dict(rule="R4", stage=stage, status=("extend" if extensions else "frozen"),
                 targets=targets, cells=cells, extensions=extensions)
@@ -665,6 +712,23 @@ def extension_rows(M, specs):
     clash = sorted(set(r["tag"] for r in out) & set(M.tag))
     _require(not clash, f"extension tags already in the manifest: {clash[:3]}")
     return pd.DataFrame([{c: str(r[c]) for c in BPM.COLS} for r in out], columns=BPM.COLS)
+
+
+def default_half_extensions(r4):
+    """SI-45 (code check CR-11, user decision 2026-10-04): every R4 stage-a1 cell used by A2/A3 rows whose window
+    neighbour is edge_unresolved (lo or hi = the next lambda, without an A1 fit) gets A1 extension rows for the default
+    half at that lambda: extension_rows() copies the cell's A1 rows (posterior mean, standardisation off, A1 seeds,
+    same decoder), so R2 / R3 then compare 3-point windows on both halves as written. Returns the extension specs
+    (experiment A1, task, cond, arm, lam), one per cell and side; [] when the case does not occur."""
+    _require(r4.get("rule") == "R4" and r4.get("stage") == "a1", "default_half_extensions needs an R4 stage-a1 record")
+    specs = []
+    for key in sorted(r4["cells"]):
+        cell = r4["cells"][key]
+        for nbr in cell.get("edge_unresolved", []):
+            _require(nbr in ("lo", "hi") and cell[nbr] is not None, f"{key}: bad edge_unresolved entry {nbr!r}")
+            specs.append(dict(experiment="A1", task=cell["task"], cond=int(cell["cond"]), arm=cell["arm"],
+                              lam=float(cell[nbr])))
+    return specs
 
 
 def settings_key(r):

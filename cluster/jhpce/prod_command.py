@@ -20,7 +20,7 @@ import shlex
 import subprocess
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10.tsv"
+MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv"   # SI-44 / SI-46 (2026-10-04); tags: make_tags.py --check
 JOBS = {
     "jobA": dict(stage="fillers_x1_x13", tags="cluster/jhpce/tags/fillers_x1_x13_jobA.tags", experiments="X1 X13",
                  tasks="atac_large immune_hum_mou"),

@@ -1,0 +1,5 @@
+HEAD 54aeefc dirty=0 suite=stage
+env PYTHONPATH=<workspace>/wcd_suite/src WCD_SRC=<workspace>/wcd_suite/src STAGE_E2E_FIT_PY=/home/kendall/.claude-science/conda/envs/scvi-api/bin/python STAGE_E2E_SCORE_PY=/home/kendall/.claude-science/conda/envs/wcd-kbet/bin/python R_HOME=/home/kendall/.claude-science/conda/envs/wcd-kbet/lib/R R_LIBS=/home/kendall/experiment_data/wasserstein-critic-deconfounding/Rlib_kbet PREPPED_DIR=/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib nice -n 19 /home/kendall/.claude-science/conda/envs/wcd-gpu/bin/python -m pytest -q -p no:cacheprovider -rs tests/stage
+..............................................................           [100%]
+62 passed in 296.23s (0:04:56)
+rc=0 seconds=297

@@ -86,6 +86,10 @@ def test_r4_a1_resolves_the_pilot_windows(pipeline):
         c = rec["cells"][f"{r['task']}|{r['cond']}|{r['arm']}"]
         assert float(r["lam"]) in (c["lo"], c["matched"], c["hi"])
     assert not M2.lam.isin(BPM.A1_MATCHED).any()
+    # SI-45 does not occur here: no window neighbour lacks an A1 fit, so no default-half rows and no extension manifest
+    assert rec["n_default_half_extension_rows"] == 0 and "default_half_extension_manifest" not in rec
+    assert not any("edge_unresolved" in c for c in rec["cells"].values())
+    assert not os.path.exists(os.path.join(tmp, "a1_ext.tsv"))
 
 
 def test_r2_r3_keep_the_defaults_when_the_pilots_show_no_difference(pipeline):
@@ -115,6 +119,12 @@ def test_r4_x1_resolves_followups_and_no_followup_equals_an_x1_row(pipeline):
     for r in x6.to_dict("records"):
         cell = c[f"{r['task']}|{r['cond']}|pooled"]
         assert float(r["lam"]) in (cell["lo"], cell["matched"], cell["hi"])
+    x15 = M4[M4.experiment == "X15"]                       # SI-44: resolved like the other follow-ups
+    assert len(x15) == 84
+    for r in x15[x15.arm != "none"].to_dict("records"):
+        cell = c[f"{r['task']}|{r['cond']}|{r['arm']}"]
+        assert float(r["lam"]) == {"matched_lo": cell["lo"], "matched_hi": cell["hi"]}[
+            M3.set_index("tag").at[r["tag"], "lam"]]
 
 
 def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):

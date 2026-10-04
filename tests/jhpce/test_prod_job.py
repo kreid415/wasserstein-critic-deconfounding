@@ -568,10 +568,19 @@ def test_harvest_local_refuses_a_manifest_without_stage_key_fields(sim):
         hl.check_views(str(sim.tmp), ["out/ledger/x.csv"], dict(files=[], tags_sha256="0"))
 
 
+def _prod_manifest():
+    """MANIFEST of cluster/jhpce/prod_command.py: the manifest the production jobs submit."""
+    spec = importlib.util.spec_from_file_location("prod_command", os.path.join(ROOT, "cluster", "jhpce", "prod_command.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.MANIFEST
+
+
 def test_make_tags_committed_files_match_manifest():
-    r = subprocess.run([sys.executable, "cluster/jhpce/make_tags.py", "--manifest",
-                        "manifests/paper_manifest_stock_pilot_u5_b10.tsv", "--out-dir", "cluster/jhpce/tags", "--check"],
-                       capture_output=True, text=True, cwd=ROOT)
+    man = _prod_manifest()
+    assert man == "manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv"      # SI-44 / SI-46 (2026-10-04)
+    r = subprocess.run([sys.executable, "cluster/jhpce/make_tags.py", "--manifest", man, "--out-dir", "cluster/jhpce/tags",
+                        "--check"], capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stderr
     rec = json.loads(r.stdout[: r.stdout.index("\n}") + 2])
     assert rec["rows"] == 250 and rec["per_job"] == {"jobA": 100, "jobB": 150}

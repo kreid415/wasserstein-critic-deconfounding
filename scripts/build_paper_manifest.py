@@ -13,7 +13,7 @@ Decisions in force (CONSTRAINTS.md):
     non-reference batch (SI-31..SI-33, X3_TARGETS); every dose of a task has the same cell count, the task's
     dose-100 size (X3_N), drawn as nested subsamples of one dose-independent permutation (draw X3_DRAW,
     scripts/fit_paper_config.py x3_draw; SI-41); X13 CPU baselines (harmony / scanorama knob x 6 values at
-    the backbone's latent size, plus the tool default dimensions; PCA once; SI-34..SI-36, CPU_BASELINES) are rows
+    the backbone's latent size, plus the tool default dimensions; PCA once; SI-34, SI-36, SI-46, CPU_BASELINES) are rows
     for scripts/run_cpu_baselines.py, which fit_paper_config.py refuses.
 
 Design of record: --design pilot (SI-16), staged by the pre-registered rules of docs/PREREG.md:
@@ -32,7 +32,7 @@ Design of record: --design pilot (SI-16), staged by the pre-registered rules of 
   X1     8 tasks x both decoders x seeds 0-4. Then R4-x1 (freeze_matched_lambda.py --stage x1)
          resolves the follow-ups' 'matched*' lambdas: per task x arm x decoder, the grid point whose
          seed-mean unscaled batch score is closest to b*; lo / hi = its grid neighbours. The follow-ups
-         (X3, X6, X7, X8, X12) run on FOLLOWUP_SEEDS 10-12, disjoint from X1 and A1 (SI-26); X13 is not
+         (X3, X6, X7, X8, X12, X15) run on FOLLOWUP_SEEDS 10-12, disjoint from X1 and A1 (SI-26); X13 is not
          lambda-matched and keeps seeds 0-4.
 A row that holds a placeholder cannot be fitted: fit_paper_config.py refuses a non-numeric lambda and
 a non-integer zstd, and the training plan refuses an adv_input other than mean / sample.
@@ -67,7 +67,7 @@ A1_TASKS = ["atac_small", "immune", "sim1"]    # design 'pilot': A1 calibration 
 A1_SEED0 = 100                                  # A1/A2/A3 seeds 100, 101, ...: disjoint from the X1 seeds 0-4
 A1_MATCHED = ["a1_matched_lo", "a1_matched", "a1_matched_hi"]   # A2/A3 window, resolved from A1 (R4 stage a1)
 ADV_INPUT_PENDING, ZSTD_PENDING = "A2", "A3"    # X1 placeholders, resolved by decide_a2_a3.py (R2 / R3)
-FOLLOWUP_SEEDS = [10, 11, 12]                   # X3/X6/X7/X8/X12: fresh seeds, disjoint from X1 (0-4) and A1 (SI-26)
+FOLLOWUP_SEEDS = [10, 11, 12]                   # X3/X6/X7/X8/X12/X15: fresh seeds, disjoint from X1 (0-4) and A1 (SI-26)
 CRITICS = ["reference", "pooled", "barycenter"]
 ARMS = ["discriminator"] + CRITICS + ["mmd", "sinkhorn"]
 N_CRITIC = 5
@@ -95,11 +95,17 @@ X3_DRAW = "nested_v1"   # = fit_paper_config.X3_DRAW; the fitter refuses composi
 # X13 CPU baselines (scripts/run_cpu_baselines.py; scripts/fit_paper_config.py refuses these arms): each method's
 # strength knob x 6 values at the backbone's 10 dimensions, run once (deterministic), plus the tool's default
 # dimensions at the default knob value as sensitivity. PCA has no knob: once, the uncorrected anchor (SI-36).
-CPU_BASELINES = {   # arm: (knob, values (SI-34 / SI-35), default value, tool-default dimensions)
+CPU_BASELINES = {   # arm: (knob, values (SI-34 / SI-46), default value, tool-default dimensions)
     "harmony": ("theta", [0, 0.5, 1, 2, 4, 8], 2, 50),
-    "scanorama": ("knn", [5, 10, 20, 40, 80, 160], 20, 100),
+    # SI-46 (2026-10-04) replaces SI-35's knn 160 by knn 2: on immune_hum_mou knn 160 did not finish within 8 h
+    "scanorama": ("knn", [2, 5, 10, 20, 40, 80], 20, 100),
     "pca": (None, [0], 0, 50),
 }
+# X15 KL warm-up sensitivity (SI-44; PAPER_PLAN N8): extra {"kl_warmup": "stock"} keeps scvi-tools' 400-epoch warm-up,
+# "complete" sets its length to the row's max_epochs (scripts/fit_paper_config.py KL_WARMUP)
+X15_TASKS = ["immune", "atac_large"]
+X15_ARMS = ["discriminator", "pooled", "mmd"]
+X15_KL_WARMUP = ["stock", "complete"]
 # X8: total cells fixed per task, equal cells per batch; the largest N for which V = 2 still has
 # >= 3 eligible batches and V = 16 has >= 16 (batch sizes in prepped_scib, 2026-10-02)
 X8_TOTAL = {"immune_hum_mou": 16000, "lung": 6000, "sim2": 3000}
@@ -200,7 +206,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
         for t, s, z, arm, lam in itertools.product(a2_tasks, range(3), [0, 1], a3_arms,
                                                    ["matched_lo", "matched", "matched_hi"]):
             R.append(row("A3", t, arm, lam, s, True, bb, zstd=z))
-    # ---- follow-ups (X7, X8, X3, X6, X12): lambda matched from X1, so FRESH seeds (SI-26): no follow-up cell
+    # ---- follow-ups (X7, X8, X3, X6, X12, X15): lambda matched from X1, so FRESH seeds (SI-26): no follow-up cell
     #      reuses an X1 fit from which its matched lambda was chosen
     if set(FOLLOWUP_SEEDS) & (set(range(max(5, uncond_seeds))) | {A1_SEED0 + i for i in range(pilot_seeds)}):
         raise ValueError(f"follow-up seeds {FOLLOWUP_SEEDS} overlap the X1 or A1 seeds")
@@ -263,6 +269,14 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
         ex = json.dumps(dict(factorial_run=run, adv_width=[32, 128][B], adv_lr=[1e-4, 1e-3][C]))
         R.append(row("X12", t, arm, lam, s, True, bb, extra=ex, n_latent=[10, 30][A],
                      batch_size=[128, 512][D], decoder=["SCVI", "LinearSCVI"][E]))
+    # ---- X15 (SI-44, PAPER_PLAN N8): KL warm-up sensitivity, conditioned decoder: lambda=0 and discriminator / pooled
+    #      critic / MMD at the matched lo / hi lambda x FOLLOWUP_SEEDS x {stock 400-epoch warm-up, warm-up that
+    #      completes (length = the row's max_epochs)}. Appended last, so every earlier row keeps its position.
+    for t, kl, s in itertools.product(X15_TASKS, X15_KL_WARMUP, FOLLOWUP_SEEDS):
+        ex = json.dumps(dict(kl_warmup=kl))
+        R.append(row("X15", t, "none", 0, s, True, bb, extra=ex))
+        R += [row("X15", t, a, lam, s, True, bb, extra=ex)
+              for a, lam in itertools.product(X15_ARMS, ["matched_lo", "matched_hi"])]
     return R
 
 

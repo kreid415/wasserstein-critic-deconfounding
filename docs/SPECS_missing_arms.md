@@ -263,7 +263,7 @@ Decisions of 2026-10-03 (ask_user; X3 reference and sim2 asked by the lead, the 
 | X3 | X3 on sim2 | "Deplete only Group1 (Recommended)" | SI-32 | NB-20261003-02 |
 | X3 | atac_small: depleted batch and types (per-batch counts shown) | "Fang: Excitatory + Inhibitory (Recommended)" | SI-33 | NB-20261003-03 |
 | X13 | Harmony's strength knob and its 6 values | "theta {0, 0.5, 1, 2, 4, 8} (Recommended)" | SI-34 | NB-20261003-04 |
-| X13 | Scanorama's strength knob and its 6 values | "knn {5, 10, 20, 40, 80, 160} (Recommended)" | SI-35 | NB-20261003-05 |
+| X13 | Scanorama's strength knob and its 6 values | "knn {5, 10, 20, 40, 80, 160} (Recommended)" | SI-35 (retired 2026-10-04: knn 160 replaced by knn 2, "Use knn 2-80 (Recommended)", SI-46) | NB-20261003-05, NB-20261004-05 |
 | X13 | PCA (no strength knob) | "Once, as uncorrected anchor (Recommended)" | SI-36 | NB-20261003-06 |
 
 Alternatives offered and not chosen: atac_small Fang with Excitatory Neurons only, or 10x Genomics with both

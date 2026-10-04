@@ -6,6 +6,7 @@ builder's tags and every scIB metric column that score_scib_native.py writes; ba
 the task's bio metrics = C, metrics scIB does not compute for the task = NaN.
 """
 import hashlib
+import json
 import math
 import os
 import sys
@@ -21,6 +22,9 @@ import prereg_rules as P  # noqa: E402
 ALL_METRICS = ["NMI_cluster/label", "ARI_cluster/label", "ASW_label", "ASW_label/batch", "PCR_batch",
                "cell_cycle_conservation", "isolated_label_F1", "isolated_label_silhouette", "graph_conn",
                "kBET", "iLISI", "cLISI", "hvg_overlap", "trajectory"]
+# scorer provenance as score_scib_native.py writes it (code check CR-05); one rule input shares one value per column
+PROVENANCE = {"scorer_git_sha": "0123456789abcdef0123456789abcdef01234567", "scorer_dirty": 0, "cpu_simd": "avx2",
+              "numba_cpu_name": "", "scorer_versions": json.dumps({"scib": "1.1.7", "R_kBET": "0.99.6"})}
 CENTER = {"discriminator": 1.0, "reference": 1.5, "pooled": 1.5, "barycenter": 1.5, "mmd": 1.0, "sinkhorn": 0.8}
 
 
@@ -73,11 +77,11 @@ def scores(M, fn=world):
             continue
         _, B, C = res
         bio = P.bio_metrics_for(r["task"])
-        row = {"tag": r["tag"], "kbet_seed": 0, "score_seconds": 1.0}
+        row = {"tag": r["tag"], "kbet_seed": 0, "score_seconds": 1.0, **PROVENANCE}
         for m in ALL_METRICS:
             row[m] = B if m in P.BATCH_METRICS else (C if m in bio else float("nan"))
         S.append(row)
-    return (pd.DataFrame(S, columns=["tag"] + ALL_METRICS + ["kbet_seed", "score_seconds"]),
+    return (pd.DataFrame(S, columns=["tag"] + ALL_METRICS + ["kbet_seed", "score_seconds"] + list(PROVENANCE)),
             pd.DataFrame(F, columns=["tag", "status", "detail"]))
 
 
