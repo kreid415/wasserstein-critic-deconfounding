@@ -1,4 +1,5 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.' >&2; exit 1
 # Immune adversarial sweep on the scvi-native plan: 2 backbones (cond/uncond) x 3 adversaries
 # (reference, barycenter, discriminator) x lambda{0,50} x seed 0 = 12 configs. Fits in scvi-env
 # (CPU), writes latent npz to durable storage. Scoring is a separate wcd-kbet pass.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+raise SystemExit('RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.')
 """Generate FINAL_RESULTS.md from the analysis CSVs — every number computed, none hand-typed.
 
 Reads the outputs of analyze_final.py (scvi_final_full_curve.csv, scvi_final_frontier_dominance.csv,

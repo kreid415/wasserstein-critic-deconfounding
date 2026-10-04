@@ -1,6 +1,7 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.' >&2; exit 1
 # Finer-λ + nonlinear-decoder sweep on the scvi-native adversary plan (immune, single seed).
-# Reads scripts/scvi_xo_jobs.tsv: model<TAB>cond<TAB>flag<TAB>arm<TAB>lam<TAB>disc_iter<TAB>tag
+# Reads scripts/scvi_xf_jobs.tsv: model<TAB>cond<TAB>flag<TAB>arm<TAB>lam<TAB>disc_iter<TAB>tag
 # LinearSCVI = linear decoder; SCVI = nonlinear decoder. λ ∈ {0,10,20,35,50}, both conditionings.
 # Latents -> durable EMB dir; scored later through full_metric_suite in wcd-kbet.
 set -u
@@ -25,6 +26,6 @@ run_one() {
 export -f run_one; export ES EMB WCD_SRC
 
 # feed the job rows to xargs, NWORK parallel
-awk -F'\t' 'NF>=7{print}' scripts/scvi_xo_jobs.tsv \
+awk -F'\t' 'NF>=7{print}' scripts/scvi_xf_jobs.tsv \
   | xargs -P "$NWORK" -I {} bash -c 'IFS=$'"'"'\t'"'"' read -r m c f a l d t <<< "{}"; run_one "$m" "$c" "$f" "$a" "$l" "$d" "$t"'
 echo "XF SWEEP DONE: $(ls $EMB/immune_XF_*.npz 2>/dev/null | wc -l) npz written"

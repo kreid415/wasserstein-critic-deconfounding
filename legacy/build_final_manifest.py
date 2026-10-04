@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+raise SystemExit('RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.')
 """Build the ONE committed manifest for the reproducible final benchmark.
 
 REPRODUCIBILITY CONTRACT: this file + the raw datasets (figshare IDs, recorded md5s) + the

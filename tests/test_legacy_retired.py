@@ -10,7 +10,8 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RETIRED = ["score_final_config.py", "scvi_final_manifest.tsv", "run_jhpce_pilot.sh", "score_parallel.sh",
-           "score_baselines_parallel.sh", "run_final_baselines.py", "scvi_adv_fit.py"]
+           "score_baselines_parallel.sh", "run_final_baselines.py", "scvi_adv_fit.py",
+           'jhpce_gate_then_drain.sh', 'run_final_sweep.sh', 'run_scvi_adv_sweep.sh', 'run_scvi_xf_sweep.sh', 'run_scvi_xk_sweep.sh', 'run_scvi_xo_sweep.sh', 'run_scvi_xop_probe.sh', 'build_final_manifest.py', 'build_unified_manifest.py', 'build_final_report.py', 'analyze_final.py']
 
 
 def retirement_violation(path):

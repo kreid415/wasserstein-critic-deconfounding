@@ -1,4 +1,5 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.' >&2; exit 1
 # Reproducible final benchmark sweep driver.
 # Reads scripts/scvi_final_manifest.tsv (model cond adv lam di seed dataset dec tag).
 # Front-loads cheap arms (none + discriminator, then critic-free, then critics) so the

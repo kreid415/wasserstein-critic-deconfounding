@@ -1,4 +1,5 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.' >&2; exit 1
 # KL x formulation sweep on the scvi-native adversary plan (immune, single seed, unconditioned).
 # Reads scripts/scvi_xk_jobs.tsv: model<TAB>cond<TAB>flag<TAB>arm<TAB>lam<TAB>disc_iter<TAB>max_kl<TAB>tag
 # Tests whether looser/tighter KL (scvi max_kl_weight) changes the critic-vs-discriminator crossover

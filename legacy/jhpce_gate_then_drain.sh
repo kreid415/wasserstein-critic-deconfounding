@@ -1,4 +1,5 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.' >&2; exit 1
 # JHPCE combined: hold the GPU node through GATE -> full-sweep DRAIN, never releasing.
 #
 # WHY: the GPU queue is long, so once a node is allocated we must NOT release it between the

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+raise SystemExit('RETIRED (code check CR-10, 2026-10-03; retired at the integration merge 2026-10-04): driver of the pre-revision sweeps; it references files already retired to legacy/. Current pipeline: legacy/README.md. git history keeps the runnable version.')
 """Final analysis: selection-free frontier-dominance + pre-registered-lambda baseline table.
 
 PRIMARY (selection-free): per (dataset, decoder) the scIB lambda-response CURVE per formulation,
