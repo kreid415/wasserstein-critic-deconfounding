@@ -329,3 +329,10 @@
 - added: 2026-10-04
 - keywords: storage, home, scratch, environments, conda, JHPCE, fastscratch
 - notebook: NB-20261004-17
+
+## SI-50 · active · process
+- rule: JHPCE HOME space for SI-49: the cluster copy of the superseded sweep's latents, /users/kreid/wcd_repo/durable/embeddings_final (6,305 npz, 51,590,355,673 bytes), is deleted. The local copy (experiment_data/wasserstein-critic-deconfounding/embeddings_final_cluster; every file md5-matched 2026-09-30, names and sizes equal on 2026-10-04, name+size digest 206aec95b6d6dffc7b2d07ef17a75eb4) becomes the only copy. This frees room in HOME for $HOME/envs/wcd-fit.
+- source: "Delete the cluster copy (Recommended)" (user, ask_user answer to "The JHPCE fit environment doesn't fit in `$HOME` ... What should I do with the cluster copy?", 2026-10-04)
+- added: 2026-10-04
+- keywords: JHPCE, HOME, latents, delete, embeddings_final, space, SI-49
+- notebook: NB-20261004-18
