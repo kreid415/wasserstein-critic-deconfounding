@@ -120,6 +120,9 @@ def main(argv=None):
         specs = P.default_half_extensions(r4)
         si45 = dict(n_default_half_extension_rows=0)
         if specs:
+            P._require(not os.path.exists(a.extension_manifest),
+                       f"--extension-manifest {a.extension_manifest} exists: the SI-45 default-half rows would replace it "
+                       f"(an earlier round's extension rows?); pass a new path (re-review RR-08)")
             E = P.extension_rows(M, specs)
             P.write_manifest(E, header[:1], a.extension_manifest,
                              f"SI-45 default-half extension: {len(E)} A1 rows at R4-a1 edge_unresolved window lambdas "

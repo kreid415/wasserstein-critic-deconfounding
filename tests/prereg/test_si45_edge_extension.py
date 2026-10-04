@@ -141,3 +141,18 @@ def test_cli_freezes_writes_the_rows_and_r2_r3_use_them(tmp_path):
         c = cells[f"{TASK}|{COND}|{ARM}"]
         default, alt = ("mean", "sample") if rule == "R2" else ("off", "on")
         assert c["window"] == [0.003, 0.01, 0.03] and len(c[default]["curve"]) == 3 and len(c[alt]["curve"]) == 3
+
+
+def test_cli_refuses_to_overwrite_an_existing_extension_manifest(tmp_path):
+    """RR-08: the SI-45 rows never replace an existing file (e.g. an earlier R4 round's extension manifest)."""
+    tmp = str(tmp_path)
+    man, ext, sp, fp, r1 = _setup(tmp)
+    si45 = os.path.join(tmp, "a1_si45.tsv")
+    with open(si45, "w") as f:
+        f.write("earlier round\n")
+    with pytest.raises(P.PreregError, match="exists"):
+        freeze_matched_lambda.main(["--stage", "a1", "--manifest", man, "--manifest", ext, "--scores", sp,
+                                    "--failures", fp, "--r1-record", r1, "--out-json", os.path.join(tmp, "r4a1.json"),
+                                    "--out-manifest", os.path.join(tmp, "m.r4a1.tsv"), "--extension-manifest", si45])
+    assert open(si45).read() == "earlier round\n"
+    assert not os.path.exists(os.path.join(tmp, "m.r4a1.tsv")) and not os.path.exists(os.path.join(tmp, "r4a1.json"))

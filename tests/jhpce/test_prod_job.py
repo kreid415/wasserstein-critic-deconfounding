@@ -537,6 +537,8 @@ def test_harvest_local_refuses_tier12_and_conflicts(sim, tmp_path):
     assert sim.run().returncode == 0
     r = sim.harvest_local(tmp_path / "proj" / "tier12" / "A1")
     assert r.returncode == 1 and "tier12" in r.stderr
+    r = sim.harvest_local(tmp_path / "proj" / "tier12_v2" / "A1")          # the restarted A1 tree (RR-07)
+    assert r.returncode == 1 and "tier12" in r.stderr and not (tmp_path / "proj" / "tier12_v2").exists()
     dest = tmp_path / "durable" / "out"
     write(dest / "latents" / f"{TAGS[0]}.npz", "different bytes")
     r = sim.harvest_local(dest)

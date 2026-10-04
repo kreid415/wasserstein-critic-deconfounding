@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# A1 lambda pilot (docs/PREREG.md sec 0) on the local RTX 3080. Preflight: experiments/A1_lambda_pilot/PREFLIGHT.md (GO).
-# Run from a clean checkout of tag prereg-tier12-v2 or later (A1 restarts at the post-fix tag, SI-43); the runner refuses a
+# A1 lambda pilot (docs/PREREG.md sec 0) on the local RTX 3080. Preflight of the restart: experiments/A1_lambda_pilot_v2/
+# PREFLIGHT.md (GO); experiments/A1_lambda_pilot/PREFLIGHT.md is the record of the discarded v1 launch.
+# Run from a worktree pinned at tag prereg-tier12-v2, never a later commit (PREREG sec 9: every stage shares one HEAD, the
+# scorer provenance; A1 restarts at the post-fix tag, SI-43); the runner refuses a
 # dirty tree and mixed commits. Outputs go to tier12_v2/A1, a NEW directory: tier12/A1 holds the 202 discarded v1 fits.
 # Resume after an interruption: rerun this script (valid outputs are skipped); a reaped sandbox leaves "foreign" claims,
 # clear them with --clear-foreign-claims only after checking that no runner is alive (ledger mtimes).

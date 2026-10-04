@@ -179,8 +179,8 @@ def main():
     ap.add_argument("--verify-only", action="store_true")
     a = ap.parse_args()
     dest = os.path.realpath(a.dest)
-    if "tier12" in dest.split(os.sep):
-        fail(f"--dest {dest} is inside a 'tier12' directory (the local A1 tree is off limits)")
+    if any(c.startswith("tier12") for c in dest.split(os.sep)):     # tier12/ (v1 A1) and tier12_v2/ (A1 restart), RR-07
+        fail(f"--dest {dest} is inside a 'tier12*' directory (the local A1 trees are off limits)")
     base, tar_path, man, sums = verify(a.parts_dir)
     staging = os.path.join(a.parts_dir, f"{base}.extracted")
     names = extract(tar_path, staging, man)

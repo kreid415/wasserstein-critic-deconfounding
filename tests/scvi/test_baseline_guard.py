@@ -35,7 +35,8 @@ import fit_paper_config as fpc  # noqa: E402
 import scvi_adversarial_plan as plan  # noqa: E402
 from scvi.train import SemiSupervisedTrainingPlan, TrainingPlan  # noqa: E402
 
-TAG = "prereg-tier12-v1"
+TAG = "129142b1dd18eecfdcc14363d39cac05d5909add"   # commit of tag prereg-tier12-v1, pinned by SHA: the JHPCE bundle clone
+                                                  # carries the history but no tags (re-review RR-01)
 
 
 def _toy(n=600, g=60, k=3, seed=0):

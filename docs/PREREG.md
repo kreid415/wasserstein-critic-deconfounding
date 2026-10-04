@@ -175,13 +175,14 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   nothing is refilled. Every X3 row carries draw nested_v1, so all 828 X3 tags change (docs/x3_si41_tag_map.csv).
 - **2026-10-04, subsets are scored with the all-feature PCR reference (code check CR-01, CR-14).** For X3 and X8
   subsets the tagged scorer built an HVG-only PCA as the PCR reference; full-data scoring, like scib-pipeline, lets
-  scib recompute the PCA of all features. Subsets now use the full-data convention (X3 pancreas dose 0: PCR_batch
-  0.573 with the all-feature reference, 0.000 with the HVG one). Full-data scoring (A1, A2, A3, X1) is unchanged.
+  scib recompute the PCA of all features. Subsets now use the full-data convention (X3 pancreas, uncorrected 10-PC HVG embedding:
+  PCR_batch 0.573 at dose 50 and 0.560 at dose 0 with the all-feature reference, 0.000 with the HVG one). Full-data scoring (A1, A2, A3, X1) is unchanged.
 - **2026-10-04, scorer provenance and scib fallback flags (code check CR-05, CR-08).** Every score row records the
   scorer's git SHA and cleanliness, host, CPU model and SIMD level, NUMBA_CPU_NAME and package versions, and flags
   trajectory's root-cell fallback (value 0) and kBET labels forced to 1 or skipped. The stage runner refuses a stage
   with mixed scorer provenance, and prereg_rules.py refuses a rule input with mixed or missing provenance. The flags
-  are reported with every R1 and R4 input; the values remain scib's own.
+  are recorded in every score row and their counts per rule cell are reported with the results; the rule scripts do
+  not read them, so no decision depends on them. The values remain scib's own.
 - **2026-10-04, pairing wording (code check CR-07).** Section 1's "same seed = same initialisation and minibatch order"
   holds for the scVI module initialisation and the train/validation split in every arm. The minibatch order is shared
   only within an arm and with the arms that have no adversary head (MMD, Sinkhorn): building the adversary head draws
@@ -215,3 +216,12 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   stock --design pilot --uncond-seeds 5 --bary-iter 10). Against the tagged manifest (6,846 rows): the 828 X3 rows are
   re-tagged (SI-41, SI-42), the 8 Scanorama knn-160 rows become knn 2 (SI-46) and 84 X15 rows are added (SI-44); the A1,
   A2, A3 and X1 rows and all other rows are byte-identical.
+- **2026-10-04, re-review of the fixes (RIGOR_REVIEWER, integrate-fixes 080f417).** (a) Section 8's "no runner writes
+  it yet" is superseded: scripts/run_stage.py writes OUT/failures.csv (tag, status, detail). (b) Every stage is fitted
+  and scored from one worktree pinned at the tag prereg-tier12-v2. prereg_rules.py refuses rule inputs whose rows
+  differ in scorer provenance, and scorer_git_sha is the checkout's HEAD, so a stage scored from any later commit would
+  force rescoring of the stages it is combined with. Record and notebook commits go through a separate worktree.
+  (c) Input guards added before the tag, with no change to any fit, score or decision rule: the JHPCE harvest refuses
+  destinations under any tier12* directory; freeze_matched_lambda.py refuses to overwrite an existing
+  --extension-manifest when it writes SI-45 rows; and the scANVI/sysVI guard test names the v1 fitter by commit
+  (129142b) instead of by tag, because the JHPCE bundle clone carries no tags.
