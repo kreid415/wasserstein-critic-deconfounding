@@ -115,14 +115,14 @@
 - files: docs/PREREG.md
 
 ## SI-19 · active · method
-- rule: R2 adversary input: posterior mean is the X1 default; switch to posterior sample only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 4 of 6 cells evaluable, no excess failures); masking => mean
+- rule: R2 adversary input: posterior mean is the X1 default; switch to posterior sample only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 4 of 6 cells evaluable, no excess failures); masking => mean [cell counts superseded by SI-27: A2 12 / A3 20 cells, at least 8 / 14 evaluable, sign checked per task x decoder]
 - source: "Posterior mean (Recommended)" (user, ask_user answer to "R2 (A2 → X1 adversary input) ... Which input is the default?", 2026-10-02)
 - added: 2026-10-02
 - keywords: adv_input, adversary input, posterior mean, posterior sample, A2, prereg
 - files: docs/PREREG.md
 
 ## SI-20 · active · method
-- rule: R3 standardisation: per-dimension standardisation of the adversary input is off by default in X1 and the follow-ups; switch on only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 7 of 10 cells evaluable, no excess failures)
+- rule: R3 standardisation: per-dimension standardisation of the adversary input is off by default in X1 and the follow-ups; switch on only if the PREREG.md section 3 criteria hold (mean dbio@b* > 0.01, positive in each task, >= 7 of 10 cells evaluable, no excess failures) [cell counts superseded by SI-27: A2 12 / A3 20 cells, at least 8 / 14 evaluable, sign checked per task x decoder]
 - source: "Off (Recommended)" (user, ask_user answer to "R3 (A3 → X1 per-dimension standardisation of the adversary input) ... Which setting is the default?", 2026-10-02)
 - added: 2026-10-02
 - keywords: zstd, standardisation, standardization, A3, prereg
@@ -229,12 +229,13 @@
 - keywords: X13, Harmony, theta, baseline, budget
 - notebook: NB-20261003-04
 
-## SI-35 · active · method
+## SI-35 · retired · method
 - rule: X13 Scanorama strength knob is knn in {5, 10, 20, 40, 80, 160} at dimred 10, each run once (seed 0), plus the dimred-100 tool default at knn 20 as sensitivity
 - source: "knn {5, 10, 20, 40, 80, 160} (Recommended)" (user, ask_user, 2026-10-03)
 - added: 2026-10-03
 - keywords: X13, Scanorama, knn, baseline, budget
 - notebook: NB-20261003-05
+- retired: 2026-10-04 · replaced by SI-46: "Use knn 2-80 (Recommended)" (user, 2026-10-04) after knn 160 timed out at 8 h on immune_hum_mou
 
 ## SI-36 · active · method
 - rule: X13 PCA runs once at 10 PCs (plus the 50-PC tool default as sensitivity) and is shown as the uncorrected anchor, not as a best-of-k budget curve
@@ -279,3 +280,31 @@
 - added: 2026-10-03
 - keywords: X3, draw, nested, importance, IW, weights, SI-25, SI-41
 - notebook: NB-20261003-22
+
+## SI-43 · active · process
+- rule: A1 restarts from zero at the post-fix tag (prereg-tier12-v2) once the re-review passes; A1 was paused on 2026-10-04 at 09:27 EDT. The 202 A1 fits made at prereg-tier12-v1 (tier12/A1) stay on disk, unused, and are disclosed; no A1 metric value was used for any decision (two A1 rows were rescored only to test scorer identity).
+- source: "Restart at the new tag (Recommended)" (user, ask_user answer to "... Your rule (SI-40) said A1's fits are redone if the check changes fit or scoring code ... What should happen to A1?", 2026-10-04)
+- added: 2026-10-04
+- keywords: A1, restart, tag, prereg-tier12-v2, SI-40
+- notebook: NB-20261004-02
+
+## SI-44 · active · method
+- rule: KL warm-up sensitivity (PAPER_PLAN N8): immune (local) and atac_large (JHPCE L40S) x {lambda=0, discriminator, pooled critic, MMD at the matched lo/hi lambda} x seeds 10-12 x {stock 400-epoch KL warm-up, warm-up that completes (length = the task's epoch count)}; 84 fits, conditioned decoder, run after X1 with the follow-ups; dated PREREG amendment before the new tag.
+- source: "Add it as planned (Recommended)" (user, ask_user answer to "The approved paper plan (PAPER_PLAN N8) promises a warm-up-complete sensitivity on 2 datasets ... Should it be added?", 2026-10-04)
+- added: 2026-10-04
+- keywords: N8, KL, warm-up, sensitivity, kl_weight, follow-up
+- notebook: NB-20261004-03
+
+## SI-45 · active · method
+- rule: A2/A3 edge case (code check CR-11): if an R4 stage-a1 window neighbour is edge_unresolved, the default setting is fitted at that lambda on A1's seeds (100-102, same decoder) as A1 extension rows, then R2/R3 are applied as written.
+- source: "Fit the missing point (Recommended)" (user, ask_user answer to "An undefined case in the A2/A3 rule (CR-11) ... Which handling should the amendment pre-register?", 2026-10-04)
+- added: 2026-10-04
+- keywords: CR-11, edge_unresolved, R2, R3, A2, A3, extension
+- notebook: NB-20261004-04
+
+## SI-46 · active · method
+- rule: X13 Scanorama strength knob is knn in {2, 5, 10, 20, 40, 80} at dimred 10, each run once (seed 0), plus the dimred-100 tool default at knn 20 as sensitivity (replaces SI-35's knn 160: on immune_hum_mou knn 160 did not finish within 8 h and reached 43.9 GB; knn 80 took 2.1 h and 23.2 GB).
+- source: "Use knn 2-80 (Recommended)" (user, ask_user answer to "The SI-37 timing finished ... knn 160 did not finish within the 8-hour limit ... What should replace 160?", 2026-10-04)
+- added: 2026-10-04
+- keywords: X13, Scanorama, knn, baseline, SI-35, SI-37
+- notebook: NB-20261004-05
