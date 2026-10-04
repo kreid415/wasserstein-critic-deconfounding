@@ -1,4 +1,4 @@
-# JHPCE first production jobs: summary for the user's go (DRAFT, nothing submitted)
+# JHPCE first production jobs: summary for the user's go (tag prereg-tier12-v2; nothing submitted)
 
 **What runs.** The 250 fits that docs/PREREG.md sec 0 allows before the lambda grid is frozen, for the five JHPCE tasks
 of SI-39: X1 `none` (10 per task) and `scvi_adv` (5), X13 `scanvi` (5) and `sysvi` (30), 50 per task. Fit only; every
@@ -27,15 +27,20 @@ shows one approval card). Locally, after checksum checks and an all-or-nothing m
 `/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/fillers_x1_x13/`.
 Local scoring afterwards: about 110 process-hours, roughly 9 h on 12 free cores or ~28 h alongside the A1 fits.
 
-**Before the go.**
-1. fix-runner (`--tags-file`, fda7578), fix-score-fit and this branch are merged into main, and the reviewer has
-   re-checked the merged code (SI-40).
-2. The commit to fit is fixed; the plan is printed with `cluster/jhpce/prod_command.py --expected-sha <it>`, and
-   `cluster/jhpce/local_rehearsal.sh` passes for both jobs at that commit (it passes at 0a87280: jobA 100 rows,
-   jobB 150 rows, each under its own stage key `...__tags-<hash>`, tests/scvi 72 passed, fingerprints 8/8).
-3. If the manifest is rebuilt for SI-41/SI-42 (X3 re-tag), the tags files are regenerated (`make_tags.py --check`).
+**Prerequisites (state on 2026-10-04).**
+1. Done: fix-runner, jhpce-production, fix-score-fit and amend-v2 are merged (integrate-fixes); the reviewer re-checked
+   the merged code at 080f417 (SI-40): A1 GO, these jobs NO-GO only for RR-01 (the on-node test named the v1 tag, which a
+   bundle clone lacks). RR-01 is fixed in 32cbbce (the test pins commit 129142b).
+2. Done at 32cbbce: `cluster/jhpce/local_rehearsal.sh` exits 0 for both jobs (jobA 100 rows, stage key
+   `X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c`; jobB 150 rows, `X1+X13__lung+pancreas+sim2__tags-91daef08ab82`;
+   tests/scvi pass in the bundle clone; fingerprints 8/8). It is repeated at the tag commit right before submission, and
+   the plan is printed with `cluster/jhpce/prod_command.py --expected-sha $(git rev-parse prereg-tier12-v2^{commit})`.
+3. Done: the tags files were regenerated for manifest v3 (same 250 tags; only their headers, hence hashes and stage
+   keys, changed).
 4. fastscratch purges files after 30 days: the env (built Oct 2) must be used before ~Nov 1 or rebuilt.
+5. Preflight: experiments/jhpce_fillers_x1_x13_prod/PREFLIGHT.md (GO, 2026-10-04). The user's go is still required (SI-29).
 
 **Not in these jobs.** The 80 X13 CPU baselines of these tasks (harmony, scanorama, pca). The proposal is to run them on
-JHPCE (SI-17), preferably as a CPU phase in the same L40S jobs. That needs runner support for CPU rows, harmony-pytorch
-added to the JHPCE scoring env (a short env job, its own go), and the pending Scanorama knn 80/160 timing.
+JHPCE (SI-17), preferably as a CPU phase in the same L40S jobs. The runner now supports CPU rows (CR-02) and the Scanorama
+grid is settled (knn 2-80, SI-46); harmony-pytorch still has to be added to the JHPCE scoring env (a short env job, its
+own go).
