@@ -1,0 +1,54 @@
+{
+ "job": "jobB",
+ "tasks": [
+  "lung",
+  "pancreas",
+  "sim2"
+ ],
+ "n_tags": 150,
+ "tags_sha256": "8d5d4b07c0f34f92a485a1e10d5ea26a9553b74f0bbfc87986946870fa83fce1",
+ "manifest_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "expected_sha": "0a872805e855a52deffad3297a6fec8c199eeece",
+ "job_args": [
+  "--expected-sha",
+  "0a872805e855a52deffad3297a6fec8c199eeece",
+  "--stage",
+  "fillers_x1_x13",
+  "--tags-file",
+  "cluster/jhpce/tags/fillers_x1_x13_jobB.tags",
+  "--tags-sha256",
+  "8d5d4b07c0f34f92a485a1e10d5ea26a9553b74f0bbfc87986946870fa83fce1",
+  "--manifest",
+  "manifests/paper_manifest_stock_pilot_u5_b10.tsv",
+  "--manifest-sha256",
+  "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+  "--experiments",
+  "X1 X13",
+  "--tasks",
+  "lung pancreas sim2",
+  "--fit-lanes",
+  "8",
+  "--fit-timeout-s",
+  "7200",
+  "--max-attempts",
+  "2",
+  "--guard-margin-s",
+  "2700"
+ ],
+ "submit": {
+  "command": "#SBATCH --partition=gpu\n#SBATCH --account=jhpce\n#SBATCH --gres=gpu:l40s:1\n#SBATCH --cpus-per-task=10\n#SBATCH --mem=96G\n#SBATCH --time=1-00:00:00\n#SBATCH --signal=B:TERM@300\n#SBATCH --no-requeue\nset -euo pipefail\nSCR=\"/fastscratch/myscratch/$USER/wcd\"\nJOBDIR=\"$SCR/prod/job_${SLURM_JOB_ID}\"\nmkdir -p \"$JOBDIR\"\ngit clone -q --no-checkout \"$PWD/wcd.bundle\" \"$JOBDIR/repo\"\ngit -C \"$JOBDIR/repo\" -c advice.detachedHead=false checkout -q 0a872805e855a52deffad3297a6fec8c199eeece\nrc=0\nbash \"$JOBDIR/repo/cluster/jhpce/prod_fit_job.sh\" --expected-sha 0a872805e855a52deffad3297a6fec8c199eeece --stage fillers_x1_x13 --tags-file cluster/jhpce/tags/fillers_x1_x13_jobB.tags --tags-sha256 8d5d4b07c0f34f92a485a1e10d5ea26a9553b74f0bbfc87986946870fa83fce1 --manifest manifests/paper_manifest_stock_pilot_u5_b10.tsv --manifest-sha256 c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb --experiments 'X1 X13' --tasks 'lung pancreas sim2' --fit-lanes 8 --fit-timeout-s 7200 --max-attempts 2 --guard-margin-s 2700 || rc=$?\nfor f in \"$JOBDIR/logs/job_summary.json\" \"$JOBDIR/harvest.json\"; do [ ! -f \"$f\" ] || cp \"$f\" .; done   # KB-sized; the harvest stays on fastscratch\nls -l .\nexit \"$rc\"",
+  "inputs": [
+   {
+    "src": "<work>/harness/wcd.bundle",
+    "dst": "wcd.bundle"
+   }
+  ],
+  "outputs": [
+   "job_summary.json",
+   "harvest.json",
+   "slurm-*.out"
+  ],
+  "run_timeout_s": 518400,
+  "intent": "JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), 10 CPU 96G, wall 1-00:00:00: production fits jobB (150 rows: X1 none/scvi_adv + X13 scanvi/sysvi; lung pancreas sim2) at 0a872805e8, fit only, harvest on fastscratch"
+ }
+}

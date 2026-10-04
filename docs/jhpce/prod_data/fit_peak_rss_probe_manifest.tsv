@@ -1,0 +1,8 @@
+# MEMORY PROBE ONLY (max_epochs=1): 6 rows copied from manifests/paper_manifest_stock_pilot_u5_b10.tsv (sha256 c0244ea4...) to measure per-fit peak RSS; not a design manifest
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+X1_immune_none_l0_c1_s0_c7efda46	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_immune_hum_mou_none_l0_c1_s0_c66698bb	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X13_immune_hum_mou_sysvi_l1_c1_s0_90c0328b	X13	immune_hum_mou	scib	sysvi	1	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X13_immune_hum_mou_scanvi_l0_c1_s0_92b1607d	X13	immune_hum_mou	scib	scanvi	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_atac_large_none_l0_c1_s0_2561dc45	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X13_atac_large_sysvi_l1_c1_s0_264b2d96	X13	atac_large	scib	sysvi	1	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}

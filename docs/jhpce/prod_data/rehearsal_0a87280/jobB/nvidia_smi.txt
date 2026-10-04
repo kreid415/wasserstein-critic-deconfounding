@@ -1,0 +1,1 @@
+NVIDIA L40S, 555.42.06, 46068 MiB, GPU-rehearsal

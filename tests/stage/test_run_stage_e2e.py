@@ -21,9 +21,12 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import fit_paper_config as fpc  # noqa: E402
 import prereg_rules as pr  # noqa: E402
+import run_stage as rs  # noqa: E402
 
 NEED = ("STAGE_E2E_FIT_PY", "STAGE_E2E_SCORE_PY", "R_HOME", "R_LIBS", "PREPPED_DIR")
 pytestmark = pytest.mark.skipif(not all(os.environ.get(k) for k in NEED), reason=f"opt-in: needs {NEED}")
+with open(os.path.join(ROOT, "scripts", "score_scib_native.py")) as _f:
+    SCORER_HAS_PROVENANCE = "scorer_git_sha" in _f.read()   # CR-05 / shared interface (a)
 
 SUBSAMPLE = r'''
 import sys, numpy as np, scanpy as sc
@@ -67,8 +70,13 @@ def test_real_fitter_and_scorer(tmp_path):
            "--score-workers-during", "1", "--score-workers-after", "1", "--allow-dirty", "--view-interval-s", "5"]
     p = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=3600)
     (tmp_path / "runner.log").write_text(p.stdout + p.stderr)
-    assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-3000:]
     led = pd.read_csv(out / "ledger" / "E2E__all.csv", dtype=str, keep_default_na=False).set_index("tag")
+    if not SCORER_HAS_PROVENANCE:       # until shared interface (a) lands: its score rows are refused, for that reason
+        refused = led.detail.str.contains("no scorer provenance", regex=False)
+        assert p.returncode == rs.EXIT_INFRA and refused.any(), p.stdout[-3000:] + p.stderr[-3000:]
+        pytest.xfail("score_scib_native.py lacks the CR-05 scorer provenance columns: the runner refused its score "
+                     f"rows ({int(refused.sum())} row(s), exit {p.returncode}) as designed")
+    assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-3000:]
     assert led.state.to_dict() == {"none": "scored", "disc": "scored", "div": "diverged"}, led.state.to_dict()
     F = pr.read_failures(str(out / "failures.csv"))
     assert F.tag.tolist() == ["div"] and F.status.tolist() == ["diverged"]

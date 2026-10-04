@@ -1,0 +1,19 @@
+{
+ "ledger": {
+  "csv": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.csv",
+  "done": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.done",
+  "json": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.json"
+ },
+ "log": "<work>/scratch/prod/job_990001/logs/dryrun.log",
+ "n_cpu_fits": 0,
+ "n_fits": 150,
+ "n_rows": 150,
+ "n_stage_lines": 1,
+ "ok": true,
+ "out_dir": "<work>/scratch/tier12/fillers_x1_x13",
+ "problems": [],
+ "stage_key": "X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3",
+ "states": {
+  "needs_fit": 150
+ }
+}

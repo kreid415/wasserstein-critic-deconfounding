@@ -1,0 +1,32 @@
+{
+ "git_sha": "0a872805e855a52deffad3297a6fec8c199eeece",
+ "gpu": "NVIDIA L40S, 555.42.06, 46068 MiB, GPU-rehearsal",
+ "host": "localhost",
+ "manifest_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "mode": "dry-run",
+ "planned": {
+  "ledger": {
+   "csv": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.csv",
+   "done": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.done",
+   "json": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3.json"
+  },
+  "n_cpu_fits": 0,
+  "n_fits": 150,
+  "n_rows": 150,
+  "out_dir": "<work>/scratch/tier12/fillers_x1_x13",
+  "states": {
+   "needs_fit": 150
+  }
+ },
+ "problems": [],
+ "report_only_exit": null,
+ "runner_exit": 0,
+ "slurm_job_id": "990001",
+ "stage": "fillers_x1_x13",
+ "stage_key": "X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3",
+ "stage_key_from": "<work>/scratch/prod/job_990001/logs/dryrun.log",
+ "stopped_by": null,
+ "tags_sha256": "8d5d4b07c0f34f92a485a1e10d5ea26a9553b74f0bbfc87986946870fa83fce1",
+ "tasks": "lung pancreas sim2",
+ "views_rebuilt_by_report_only": false
+}

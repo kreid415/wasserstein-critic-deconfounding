@@ -33,8 +33,23 @@ Views (atomic rewrites):
     ledger/<stage>.done          written only when the completion gate passes (removed at the start of every run)
 Scores are written by scripts/score_scib_native.py to OUT/scores/<tag>.csv (prereg_rules.read_scores(OUT/scores));
 every row carries the kBET seed of the run and the SHA-256 of the latent it scores.
+Row selection: --experiments x --tasks, optionally restricted to the tags listed in --tags-file (one per line,
+'#' comments; every tag must be a row of that selection). The placeholder preflight applies to the selected rows
+only. The tags file's path and SHA-256 go into the ledger JSON, and its hash into the stage key (own ledger and
+.done marker; an unfiltered run keeps the key experiments__tasks).
+Row kinds: X13 CPU baselines (arms of run_cpu_baselines.CPU_ARMS: harmony, scanorama, pca) are fitted by
+scripts/run_cpu_baselines.py --tag on --cpu-lanes CPU lanes (default 0: a selected CPU row that needs a fit is
+refused) with --cpu-python; their latents must record device 'cpu' (no model directory). Every other row is fitted
+by scripts/fit_paper_config.py on the --fit-lanes GPU lanes and must record a GPU name containing --expect-device.
+Both kinds are scored and gated alike. A CPU baseline's failure outcome is nonfinite_latent only (lead decision
+2026-10-03): it exits 0 with its non-finite latent saved, and either the runner records it (as for GPU rows) or
+run_cpu_baselines.py has recorded it with fit_outcome.write_status (validated against that latent); a non-zero exit
+with a status record, or any other record, is a broken contract (infrastructure).
+Scorer provenance (CR-05): every score row must carry scorer_git_sha, scorer_dirty, cpu_simd, numba_cpu_name and
+scorer_versions; the completion gate (and the preflight, for existing rows) refuses a stage whose rows disagree on
+any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba targets or package versions.
 Completion gate: exit 0 only if every selected row is final (scored, diverged or nonfinite_latent; with --no-score
-also fitted), none is both scored and failed and none is missing. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
+also fitted), none is both scored and failed, none is missing and the score rows share one scorer provenance. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
 EXIT_GATE, or 128 + signal after SIGINT / SIGTERM (running work is stopped and its claims released).
 The runner itself needs numpy, pandas and scipy (prereg_rules); fits and scores run in --fit-python / --score-python.
 """
@@ -64,9 +79,14 @@ if HERE not in sys.path:
 import fit_outcome  # noqa: E402  (statuses, EXIT_DIVERGED, status records)
 import fit_paper_config as FPC  # noqa: E402  (REQUIRED: the fitter's row contract)
 import prereg_rules as PR  # noqa: E402  (BATCH_METRICS, bio_metrics_for, read_failures, read_scores)
+import run_cpu_baselines as RCB  # noqa: E402  (CPU_ARMS, select_rows: the CPU runner's own row contract)
 
 FIT_SCRIPT = os.path.join(HERE, "fit_paper_config.py")
 SCORE_SCRIPT = os.path.join(HERE, "score_scib_native.py")
+CPU_SCRIPT = os.path.join(HERE, "run_cpu_baselines.py")
+CPU_DEVICE = "cpu"                      # cfg["device"] of a CPU-baseline latent (shared interface (b), 2026-10-03)
+# score-row columns that must be present and identical over a stage (CR-05; shared interface (a), 2026-10-03)
+SCORER_PROVENANCE = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
 EXIT_PREFLIGHT, EXIT_INFRA, EXIT_GATE = 4, 5, 6
 FINAL = {True: ("scored", "diverged", "nonfinite_latent"), False: ("fitted", "scored", "diverged", "nonfinite_latent")}
 NO_ADV_INPUT = ("none", "scvi_adv", "scanvi", "sysvi")      # arms that never read adv_input
@@ -77,6 +97,7 @@ FAILURE_COLS = ["tag", "status", "detail", "experiment", "task", "arm", "lam", "
                 "host", "recorded_at"]
 ENV_PROBE = ("import json, torch, scvi; print(json.dumps(dict(torch=torch.__version__, scvi=scvi.__version__, "
              "device=(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu'))))")
+CPU_PROBE = "import scib, scanpy, harmony, scanorama; print('CPU baseline stack OK')"
 SCORE_PROBE = ("import scib, rpy2.robjects; from rpy2.robjects.packages import importr; importr('kBET'); "
                "print('kBET stack OK')")
 
@@ -257,7 +278,32 @@ def load_manifest(path):
     return m
 
 
-def select_rows(m, experiments, tasks):
+def read_tags_file(path):
+    """(tags, sha256 of the file) of a --tags-file: one tag per line, '#' starts a comment, blank lines are ignored.
+    Refuses an empty list, a tag listed twice and a line holding more than one token."""
+    with open(path, "rb") as f:
+        data = f.read()
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise StageError(f"{path}: not UTF-8 text ({e})") from e
+    tags = []
+    for n, line in enumerate(text.splitlines(), 1):
+        tok = line.split("#", 1)[0].split()
+        if len(tok) > 1:
+            raise StageError(f"{path}:{n}: one tag per line, got {tok}")
+        tags += tok
+    if not tags:
+        raise StageError(f"{path}: no tags")
+    dup = sorted(t for t, k in collections.Counter(tags).items() if k > 1)
+    if dup:
+        raise StageError(f"{path}: {len(dup)} tags listed more than once, e.g. {dup[:5]}")
+    return tags, hashlib.sha256(data).hexdigest()
+
+
+def select_rows(m, experiments, tasks, tags=None):
+    """Rows of `experiments` x `tasks`; with `tags` (a --tags-file), only those rows, each of which must exist in the
+    manifest and belong to that selection."""
     unknown = sorted(set(experiments) - set(m.experiment))
     if unknown:
         raise StageError(f"experiments {unknown} have no manifest rows")
@@ -267,16 +313,34 @@ def select_rows(m, experiments, tasks):
         if unknown:
             raise StageError(f"tasks {unknown} have no rows in experiments {sorted(experiments)}")
         sel = sel[sel.task.isin(tasks)]
+    if tags is not None:
+        absent = sorted(set(tags) - set(m.tag))
+        if absent:
+            raise StageError(f"--tags-file: {len(absent)} tags are not in the manifest, e.g. {absent[:5]}")
+        outside = sorted(set(tags) - set(sel.tag))
+        if outside:
+            raise StageError(f"--tags-file: {len(outside)} tags are outside --experiments {sorted(experiments)} / "
+                             f"--tasks {sorted(tasks or [])}, e.g. {outside[:5]}")
+        sel = sel[sel.tag.isin(set(tags))]
     return sel.reset_index(drop=True)
 
 
+def row_kind(row):
+    """'cpu' for an X13 CPU baseline (run_cpu_baselines.CPU_ARMS: fitted by run_cpu_baselines.py on a CPU lane),
+    'gpu' for every row fitted by fit_paper_config.py."""
+    return "cpu" if row["arm"] in RCB.CPU_ARMS else "gpu"
+
+
 def unfittable(row):
-    """Placeholders that fit_paper_config.py / the training plan refuse (docs/PREREG.md section 0)."""
+    """Placeholders that the row's fitter refuses (docs/PREREG.md section 0). A CPU row needs a numeric knob ('lam');
+    its scVI-backbone fields are checked by run_cpu_baselines.select_rows in the preflight."""
     out = []
     try:
         float(row["lam"])
     except ValueError:
         out.append(f"lam={row['lam']!r}")
+    if row_kind(row) == "cpu":
+        return out
     if row["arm"] not in NO_ADV_INPUT and row["adv_input"] not in ("mean", "sample"):
         out.append(f"adv_input={row['adv_input']!r}")
     if not row["zstd"].lstrip("-").isdigit():
@@ -285,6 +349,19 @@ def unfittable(row):
 
 
 # ---- outputs: one reading of the per-tag files for the preflight, the post-run checks, the ledger and the gate ----
+def scorer_provenance(prov):
+    """prov: {tag: {column: value}} over SCORER_PROVENANCE. Returns ({column: value} for the columns every row
+    shares, {column: {value: dict(n, tags)}} for the columns whose rows disagree (tags: the first three))."""
+    by = {c: collections.defaultdict(list) for c in SCORER_PROVENANCE}
+    for tag in sorted(prov):
+        for c in SCORER_PROVENANCE:
+            by[c][prov[tag][c]].append(tag)
+    common = {c: v for c, vals in by.items() if len(vals) == 1 for v in vals}
+    mixed = {c: {v: dict(n=len(ts), tags=ts[:3]) for v, ts in sorted(vals.items())}
+             for c, vals in by.items() if len(vals) > 1}
+    return common, mixed
+
+
 class Outputs:
     def __init__(self, out_dir, kbet_seed, expect_device, allow_dirty):
         self.out, self.kbet_seed = out_dir, int(kbet_seed)
@@ -323,13 +400,20 @@ class Outputs:
         diff = [c for c in FPC.REQUIRED if str(cfg.get("row", {}).get(c)) != row[c]]
         if diff:
             raise InvalidOutput(f"{p}: fitted with other settings than the manifest row ({diff})")
-        if self.expect_device not in str(cfg.get("gpu")):
-            raise InvalidOutput(f"{p}: fitted on {cfg.get('gpu')!r}, expected {self.expect_device!r} (SI-17)")
+        if row_kind(row) == "cpu":                       # shared interface (b): device 'cpu' and the CPU model
+            if cfg.get("device") != CPU_DEVICE or not cfg.get("cpu_model"):
+                raise InvalidOutput(f"{p}: CPU baseline recorded device {cfg.get('device')!r} and cpu_model "
+                                    f"{cfg.get('cpu_model')!r}, expected device 'cpu' and a CPU model")
+            device = f"cpu: {cfg['cpu_model']}"
+        else:
+            if self.expect_device not in str(cfg.get("gpu")):
+                raise InvalidOutput(f"{p}: fitted on {cfg.get('gpu')!r}, expected {self.expect_device!r} (SI-17)")
+            device = cfg.get("gpu")
         if cfg.get("git_dirty") is not False and not self.allow_dirty:
             raise InvalidOutput(f"{p}: fitted from a dirty or unknown checkout (git_dirty={cfg.get('git_dirty')})")
         bad = ~np.isfinite(z)
         return dict(finite=not bool(bad.any()), n_nonfinite=int(bad.sum()), n_cells_nonfinite=int(bad.any(1).sum()),
-                    shape=list(z.shape), sha256=sha256_file(p), git_sha=cfg.get("git_sha"), device=cfg.get("gpu"),
+                    shape=list(z.shape), sha256=sha256_file(p), git_sha=cfg.get("git_sha"), device=device,
                     fit_seconds=cfg.get("fit_seconds"))
 
     def status(self, row):
@@ -346,17 +430,20 @@ class Outputs:
         return rec
 
     def score(self, row, latent_sha):
-        """None if there is no score; else dict(score_seconds). InvalidOutput unless the file holds exactly one row
-        of this tag, with this run's kBET seed, the SHA-256 of the current latent and finite, in-range required
-        metrics (docs/PREREG.md section 1, 'Required values'; ranges as prereg_rules.outcomes)."""
+        """None if there is no score; else dict(score_seconds, provenance). InvalidOutput unless the file holds exactly
+        one row of this tag, with this run's kBET seed, the SHA-256 of the current latent, the scorer provenance
+        columns (SCORER_PROVENANCE, CR-05) and finite, in-range required metrics (docs/PREREG.md section 1,
+        'Required values'; ranges as prereg_rules.outcomes)."""
         p = self.score_path(row["tag"])
         if not os.path.exists(p):
             return None
-        s = pd.read_csv(p, dtype={"tag": str, "latent_sha256": str})
+        s = pd.read_csv(p, dtype=str, keep_default_na=False)        # values as written ('' stays '')
         batch, bio = PR.BATCH_METRICS, PR.bio_metrics_for(row["task"])
         missing = [c for c in ["tag", "kbet_seed", "latent_sha256"] + batch + bio if c not in s.columns]
-        if len(s) != 1 or missing:
-            raise InvalidOutput(f"{p}: {len(s)} rows, missing columns {missing}")
+        no_prov = [c for c in SCORER_PROVENANCE if c not in s.columns]
+        if len(s) != 1 or missing or no_prov:
+            raise InvalidOutput(f"{p}: {len(s)} rows, missing columns {missing}" + (
+                f", no scorer provenance {no_prov} (written by a scorer older than CR-05: rescore)" if no_prov else ""))
         r = s.iloc[0]
         problems = []
         if r["tag"] != row["tag"]:
@@ -365,7 +452,10 @@ class Outputs:
             problems.append(f"kbet_seed {r['kbet_seed']} (this run {self.kbet_seed})")
         if r["latent_sha256"] != latent_sha:
             problems.append("scores a different latent (latent_sha256 differs)")
-        vals = {m: float(pd.to_numeric(r[m], errors="raise")) for m in batch + bio}
+        try:
+            vals = {m: (float("nan") if r[m] == "" else float(r[m])) for m in batch + bio}
+        except ValueError as e:
+            raise InvalidOutput(f"{p}: non-numeric metric ({e})") from e
         nonfinite = [m for m, v in vals.items() if not np.isfinite(v)]
         out_b = [m for m in batch if np.isfinite(vals[m]) and not -1e-6 <= vals[m] <= 1 + 1e-6]
         out_c = [m for m in bio if np.isfinite(vals[m]) and not -1 - 1e-6 <= vals[m] <= 1 + 1e-6]
@@ -375,7 +465,9 @@ class Outputs:
             problems.append(f"metrics outside the scIB range {out_b + out_c}")
         if problems:
             raise InvalidOutput(f"{p}: " + "; ".join(problems))
-        return dict(score_seconds=float(r["score_seconds"]) if "score_seconds" in s.columns else None)
+        secs = r["score_seconds"] if "score_seconds" in s.columns else ""
+        return dict(score_seconds=float(secs) if secs != "" else None,
+                    provenance={c: r[c] for c in SCORER_PROVENANCE})
 
     def state(self, row, score_mode):
         """(state, info) from the files alone: scored | fitted | diverged | nonfinite_latent | needs_fit |
@@ -385,10 +477,15 @@ class Outputs:
         if st is not None:
             if has_score:
                 raise InvalidOutput(f"{tag}: both a failure record ({st['status']}) and a score")
+            if st["status"] == "diverged" and row_kind(row) == "cpu":
+                raise InvalidOutput(f"{tag}: a divergence record for a CPU baseline (run_cpu_baselines.py has no "
+                                    f"divergence outcome)")
             if st["status"] == "diverged" and lat is not None:
                 raise InvalidOutput(f"{tag}: both a divergence record and a latent")
             if st["status"] == "nonfinite_latent" and (lat is None or lat["finite"]):
                 raise InvalidOutput(f"{tag}: nonfinite_latent record but the latent is missing or finite")
+            if st["status"] == "nonfinite_latent" and st.get("latent_sha256", lat["sha256"]) != lat["sha256"]:
+                raise InvalidOutput(f"{tag}: nonfinite_latent record of another latent (latent_sha256 differs)")
             return st["status"], dict(status=st, latent=lat)
         if lat is None:
             if has_score:
@@ -404,29 +501,32 @@ class Outputs:
 
 
 class Job:
-    def __init__(self, kind, tag, attempt, popen, log, fh):
+    def __init__(self, kind, tag, attempt, popen, log, fh, lane):
         self.kind, self.tag, self.attempt, self.popen, self.log, self.fh = kind, tag, attempt, popen, log, fh
+        self.lane = lane                                 # 'gpu' or 'cpu' (fits), 'score' (scores)
         self.start, self.timed_out = time.time(), False
 
 
 class Stage:
-    def __init__(self, a, rows):
+    def __init__(self, a, rows, tags_file=None):
         self.a, self.score = a, not a.no_score
         self.rows = {r["tag"]: r for r in rows.to_dict("records")}
         self.order = list(self.rows)
         self.out = os.path.abspath(a.out_dir)
-        self.key = "+".join(sorted(a.experiments)) + "__" + ("+".join(sorted(a.tasks)) if a.tasks else "all")
+        self.tags_file = tags_file                       # dict(path, sha256, n_tags) of --tags-file, or None
+        self.key = "+".join(sorted(a.experiments)) + "__" + ("+".join(sorted(a.tasks)) if a.tasks else "all") + (
+            f"__tags-{tags_file['sha256'][:12]}" if tags_file else "")     # own ledger and .done per tag list
         self.runner_id = uuid.uuid4().hex
         self.claims = Claims(self.out, self.runner_id, self.key)
         self.files = Outputs(self.out, a.kbet_seed, a.expect_device, a.allow_dirty)
-        self.fit_q, self.score_q = collections.deque(), collections.deque()
+        self.fit_q, self.cpu_q, self.score_q = collections.deque(), collections.deque(), collections.deque()
         self.running, self.tries = [], collections.Counter()
         self.mem = {}               # tag -> (state, detail) known to this run (ledger between gate evaluations)
         self.stop_reason, self.signal, self.infra_errors = None, None, []
         self.started = time.time()
         self.head = self.git_state()
         self.manifest_sha, self.snapshot = sha256_file(a.manifest), None   # rows were read from these bytes
-        self.n_need_fit = 0
+        self.n_need_fit = self.n_need_cpu = 0      # GPU / CPU fits needed (their env is probed only then)
 
     # ---- small helpers ----------------------------------------------------------------------------------------
     def git_state(self):
@@ -490,13 +590,24 @@ class Stage:
 
     # ---- preflight ----------------------------------------------------------------------------------------------
     def preflight(self, launching):
-        """Refuse before any work: placeholders, missing inputs, dirty checkout, uncleared stale / foreign claims
-        (not in --report-only), missing R paths, invalid or contradictory outputs. Queues the remaining work."""
+        """Refuse before any work: placeholders, CPU-baseline rows that break run_cpu_baselines' row contract,
+        missing inputs, dirty checkout, uncleared stale / foreign claims (not in --report-only), missing R paths,
+        invalid or contradictory outputs; and (not in --report-only) CPU rows that need a fit without --cpu-lanes
+        and existing score rows that disagree on the scorer provenance. Queues the remaining work by lane."""
         problems, a = [], self.a
         for tag, r in self.rows.items():
             why = unfittable(r)
             if why:
                 problems.append(f"{tag}: placeholder(s) {why}: resolve the rule first (docs/PREREG.md section 0)")
+        if set(RCB.CPU_ARMS) != set(FPC.CPU_BASELINES):
+            problems.append(f"CPU arms disagree: run_cpu_baselines.CPU_ARMS {sorted(RCB.CPU_ARMS)}, "
+                            f"fit_paper_config.CPU_BASELINES {sorted(FPC.CPU_BASELINES)}")
+        cpu_tags = sorted(t for t, r in self.rows.items() if row_kind(r) == "cpu")
+        if cpu_tags:
+            try:                                         # the CPU runner's own row contract (X13, knob, seed 0, ...)
+                RCB.select_rows(a.manifest, tags=cpu_tags)
+            except (KeyError, ValueError) as e:
+                problems.append(f"CPU-baseline rows refused by run_cpu_baselines.select_rows: {e}")
         for t in sorted({(r["task"], r["counts"]) for r in self.rows.values()}):
             p = os.path.join(a.prepped_dir, f"{t[0]}__{t[1]}.h5ad")
             if not os.path.isfile(p):
@@ -527,7 +638,7 @@ class Stage:
             for v, name in ((a.r_home, "--r-home / R_HOME"), (a.r_libs, "--r-libs / R_LIBS")):
                 if not v or not os.path.isdir(v):
                     problems.append(f"scoring needs {name} (an existing directory), got {v!r}")
-        states = collections.Counter()
+        states, scored, cpu_need = collections.Counter(), {}, []
         for tag in self.order:
             r = self.rows[tag]
             try:
@@ -536,24 +647,44 @@ class Stage:
                 problems.append(f"invalid output: {e}")
                 continue
             states[st] += 1
+            if st == "scored":
+                scored[tag] = info["score"]["provenance"]
             if tag in self.mem:
                 continue
             self.mem[tag] = (st, "")
-            self.n_need_fit += st == "needs_fit"
-            if st in ("needs_fit", "nonfinite_unrecorded"):    # the latter is recorded once claimed (recheck)
+            if st == "needs_fit":
+                self.queue_fit(tag)
+                if row_kind(r) == "cpu":
+                    self.n_need_cpu += 1
+                    cpu_need.append(tag)
+                else:
+                    self.n_need_fit += 1
+            elif st == "nonfinite_unrecorded":           # recorded once claimed (recheck), on any lane
                 self.fit_q.append(tag)
             elif st == "needs_score":
                 self.score_q.append(tag)
+        if not a.report_only:
+            if cpu_need and not a.cpu_lanes:
+                problems.append(f"{len(cpu_need)} X13 CPU-baseline rows need a fit (arms {sorted(RCB.CPU_ARMS)}, "
+                                f"e.g. {cpu_need[:3]}): give --cpu-lanes N and --cpu-python, or leave them out of "
+                                f"the stage (--tags-file)")
+            mixed = scorer_provenance(scored)[1]
+            if mixed:
+                problems.append(f"existing score rows disagree on scorer provenance {mixed}: a stage is scored by "
+                                f"one scorer build on one CPU class (CR-05); rescore the disagreeing rows")
         if problems:
             raise StageError("preflight refused:\n  " + "\n  ".join(problems))
         return states
 
     def check_envs(self):
-        """The fit env must see the expected device (only if a fit is needed: scoring harvested latents runs on
-        another host than the fits); the scoring env must import scib, rpy2 and R's kBET."""
+        """The fit env must see the expected device (only if a GPU-row fit is needed: scoring harvested latents runs
+        on another host than the fits); the CPU-baseline env must import scib, scanpy, harmony and scanorama (only if
+        a CPU-row fit is needed); the scoring env must import scib, rpy2 and R's kBET."""
         a = self.a
         if self.n_need_fit:
             self.check_fit_env()
+        if self.n_need_cpu:
+            self.check_cpu_env()
         if self.score:
             env = dict(os.environ, R_HOME=a.r_home, R_LIBS=a.r_libs, CUDA_VISIBLE_DEVICES="", **thread_env(1))
             p = subprocess.run([a.score_python, "-c", SCORE_PROBE], env=env, capture_output=True, text=True,
@@ -574,6 +705,14 @@ class Stage:
         self.fit_env = probe
         self.say(f"[env] fit {a.fit_python}: torch {probe['torch']}, scvi {probe['scvi']}, device {probe['device']}")
 
+    def check_cpu_env(self):
+        a = self.a
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES="", **thread_env(a.cpu_threads))
+        p = subprocess.run([a.cpu_python, "-c", CPU_PROBE], env=env, capture_output=True, text=True, timeout=600)
+        if p.returncode != 0:
+            raise StageError(f"CPU-baseline env probe failed (exit {p.returncode}): {p.stderr.strip()[-500:]}")
+        self.say(f"[env] cpu {a.cpu_python}: {p.stdout.strip().splitlines()[-1]}")
+
     # ---- launching ----------------------------------------------------------------------------------------------
     def claim(self, tag, purpose):
         """Hold the claim of `tag`; False (and the reason in the ledger) if another runner holds it."""
@@ -587,10 +726,15 @@ class Stage:
         self.say(f"[claim] {tag} skipped: {self.mem[tag][1]}")
         return False
 
-    def recheck(self, tag, kind):
-        """After claiming: the files may have moved on since the preflight (another runner, a resumed run)."""
+    def queue_fit(self, tag):
+        """Queue a fit on the lanes of its row kind: GPU (fit_paper_config.py) or CPU (run_cpu_baselines.py)."""
+        (self.cpu_q if row_kind(self.rows[tag]) == "cpu" else self.fit_q).append(tag)
+
+    def recheck(self, tag, kind, lane=None):
+        """After claiming: the files may have moved on since the preflight (another runner, a resumed run). True iff
+        the row still needs `kind` (a fit: on `lane`, the lane of its row kind)."""
         st, info = self.files.state(self.rows[tag], self.score)
-        if st == f"needs_{kind}":
+        if st == f"needs_{kind}" and (kind == "score" or row_kind(self.rows[tag]) == lane):
             return True
         if st in FINAL[self.score]:
             self.finish(tag, st, "already final when claimed")
@@ -600,13 +744,31 @@ class Stage:
         elif st == "needs_score":
             self.score_q.append(tag)                     # claim kept
         elif st == "needs_fit":
-            if not self.n_need_fit:
-                self.check_fit_env()
-                self.n_need_fit = 1
-            self.fit_q.append(tag)                       # the latent is gone: refit; claim kept
+            self.refit(tag)                              # the latent is gone (or the lane differs); claim kept
         else:
             raise StageError(f"{tag}: unexpected state {st!r} on recheck")
         return False
+
+    def refit(self, tag):
+        """Queue a claimed row for a fit on its own lanes (probing their env once); without CPU lanes a CPU row
+        stops the stage instead of waiting forever."""
+        if row_kind(self.rows[tag]) == "cpu":
+            if not self.a.cpu_lanes:
+                why = f"{tag} needs a CPU-baseline fit (its latent is gone) and --cpu-lanes is 0"
+                self.mem[tag] = ("pending", why)
+                if self.stop_reason is None:
+                    self.stop_reason = why
+                    self.say(f"[STOP] {why}. No new work is started; running work finishes.")
+                return
+            if not self.n_need_cpu:
+                self.check_cpu_env()
+                self.n_need_cpu = 1
+            self.cpu_q.append(tag)
+        else:
+            if not self.n_need_fit:
+                self.check_fit_env()
+                self.n_need_fit = 1
+            self.fit_q.append(tag)
 
     def next_attempt(self, tag, kind):
         return 1 + sum(1 for rec in self.attempts(tag) if rec["kind"] == kind and rec["event"] == "start")
@@ -619,7 +781,12 @@ class Stage:
             raise StageError(f"{log} exists although {n - 1} {kind} attempts are recorded: attempts/{tag}.jsonl and "
                              f"logs/ disagree")
         os.makedirs(os.path.dirname(log), exist_ok=True)
-        if kind == "fit":
+        lane = "score" if kind == "score" else row_kind(r)
+        if lane == "cpu":                                # X13 CPU baseline: one tag per run_cpu_baselines.py call
+            env = dict(os.environ, CUDA_VISIBLE_DEVICES="", **thread_env(a.cpu_threads))
+            cmd = [a.cpu_python, CPU_SCRIPT, "--manifest", self.manifest_snapshot(), "--prepped-dir", a.prepped_dir,
+                   "--out-dir", self.out, "--tag", tag, "--threads", str(a.cpu_threads)]
+        elif kind == "fit":
             env = dict(os.environ, MANIFEST=self.manifest_snapshot(), TAG=tag, PREPPED_DIR=a.prepped_dir,
                        OUT_DIR=self.out, WCD_SRC=a.wcd_src, **thread_env(a.fit_threads))
             cmd = [a.fit_python, FIT_SCRIPT]
@@ -636,10 +803,10 @@ class Stage:
         fh = open(log, "w")
         popen = subprocess.Popen(cmd, env=env, stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                                  start_new_session=True, preexec_fn=child_setup(os.getpid()))
-        job = Job(kind, tag, n, popen, log, fh)
+        job = Job(kind, tag, n, popen, log, fh, lane)
         self.running.append(job)
         self.tries[(kind, tag)] += 1
-        self.append_attempt(tag, dict(event="start", kind=kind, attempt=n, runner_id=self.runner_id,
+        self.append_attempt(tag, dict(event="start", kind=kind, lane=lane, attempt=n, runner_id=self.runner_id,
                                       host=socket.gethostname(), pid=popen.pid, start=now_iso(job.start), log=log,
                                       git_sha=self.head["git_sha"], slurm_job_id=os.environ.get("SLURM_JOB_ID", "")))
         self.mem[tag] = ("fitting" if kind == "fit" else "scoring", f"attempt {n}")
@@ -647,15 +814,23 @@ class Stage:
 
     def fill(self):
         a = self.a
-        n_fit = sum(j.kind == "fit" for j in self.running)
+        if self.cpu_q and not a.cpu_lanes:               # refused by the preflight, stopped by refit(): never
+            raise StageError(f"CPU-baseline fits queued without CPU lanes: {list(self.cpu_q)[:5]}")
+        n_fit = sum(j.lane == "gpu" for j in self.running)
+        n_cpu = sum(j.lane == "cpu" for j in self.running)
         while n_fit < a.fit_lanes and self.fit_q and self.stop_reason is None:
             tag = self.fit_q.popleft()
-            if self.claim(tag, "fit") and self.recheck(tag, "fit"):
+            if self.claim(tag, "fit") and self.recheck(tag, "fit", "gpu"):
                 self.launch(tag, "fit")
                 n_fit += 1
+        while n_cpu < a.cpu_lanes and self.cpu_q and self.stop_reason is None:
+            tag = self.cpu_q.popleft()
+            if self.claim(tag, "fit") and self.recheck(tag, "fit", "cpu"):
+                self.launch(tag, "fit")
+                n_cpu += 1
         if not self.score:
             return
-        cap = a.score_workers_during if (self.fit_q or n_fit) else a.score_workers_after
+        cap = a.score_workers_during if (self.fit_q or self.cpu_q or n_fit or n_cpu) else a.score_workers_after
         n_score = sum(j.kind == "score" for j in self.running)
         while n_score < cap and self.score_q and self.stop_reason is None:
             tag = self.score_q.popleft()
@@ -687,23 +862,34 @@ class Stage:
 
     def fit_done(self, job, rc):
         tag, r = job.tag, self.rows[job.tag]
+        cpu = job.lane == "cpu"                          # run_cpu_baselines.py: no model dir, no divergence outcome
+        fitter = "run_cpu_baselines.py" if cpu else "fitter"
         try:
             if job.timed_out:
                 outcome, detail = "infrastructure", f"fit timed out after {self.a.fit_timeout_s} s"
+            elif cpu and rc != 0 and os.path.exists(self.files.status_path(tag)):
+                raise InvalidOutput(f"{fitter} exit {rc} with a status record (a CPU baseline's only outcome record "
+                                    f"is nonfinite_latent, with exit 0 and its non-finite latent saved)")
             elif rc == 0:
                 lat = self.files.latent(r)
                 if lat is None:
-                    raise InvalidOutput("fitter exited 0 without a latent")
-                if not os.path.isfile(self.files.model_path(tag)):
+                    raise InvalidOutput(f"{fitter} exited 0 without a latent")
+                if not cpu and not os.path.isfile(self.files.model_path(tag)):
                     raise InvalidOutput(f"fitter exited 0 without {self.files.model_path(tag)}")
                 if os.path.exists(self.files.status_path(tag)):
-                    raise InvalidOutput("fitter exited 0 and wrote a status record")
-                if lat["finite"]:
+                    if not cpu:
+                        raise InvalidOutput(f"{fitter} exited 0 and wrote a status record")
+                    st, info = self.files.state(r, self.score)   # schema, row, status, latent: as in the preflight
+                    if st != "nonfinite_latent":
+                        raise InvalidOutput(f"{fitter} exited 0 with a {st} record: a CPU baseline records only "
+                                            f"nonfinite_latent")
+                    outcome, detail = "nonfinite_latent", info["status"]["detail"]
+                elif lat["finite"]:
                     outcome, detail = "fitted", f"fit {lat['fit_seconds']} s on {lat['device']}"
                 else:
                     self.record_nonfinite(tag, lat)
                     outcome, detail = "nonfinite_latent", self.files.status(r)["detail"]
-            elif rc == fit_outcome.EXIT_DIVERGED:
+            elif rc == fit_outcome.EXIT_DIVERGED and not cpu:
                 st = self.files.status(r)
                 if st is None or st["status"] != "diverged":
                     raise InvalidOutput(f"fitter exit {rc} (EXIT_DIVERGED) without a divergence record")
@@ -712,11 +898,11 @@ class Stage:
                 outcome, detail = "diverged", st["detail"]
             else:
                 sig = f" ({signal.Signals(-rc).name})" if rc < 0 else ""
-                outcome, detail = "infrastructure", f"fitter exit {rc}{sig}"
+                outcome, detail = "infrastructure", f"{fitter} exit {rc}{sig}"
         except InvalidOutput as e:
             moved = self.quarantine(tag, "fit", job.attempt, [self.files.latent_path(tag), self.files.status_path(tag),
                                                                os.path.join(self.out, "models", tag)])
-            outcome, detail = "infrastructure", f"fitter contract broken: {e}; moved aside {moved}"
+            outcome, detail = "infrastructure", f"{fitter} contract broken: {e}; moved aside {moved}"
         self.end_record(job, rc, outcome, detail)
         if outcome == "fitted":
             self.say(f"[fit] {tag} fitted: {detail}")
@@ -755,8 +941,9 @@ class Stage:
             self.infra(job, detail)
 
     def record_nonfinite(self, tag, lat):
+        what = "embedding" if row_kind(self.rows[tag]) == "cpu" else "posterior-mean"
         fit_outcome.write_status(self.out, tag, "nonfinite_latent", row=self.rows[tag],
-                                 detail=f"{lat['n_nonfinite']} of {lat['shape'][0] * lat['shape'][1]} posterior-mean "
+                                 detail=f"{lat['n_nonfinite']} of {lat['shape'][0] * lat['shape'][1]} {what} "
                                         f"values are non-finite ({lat['n_cells_nonfinite']} cells)",
                                  latent_sha256=lat["sha256"], device=lat["device"], git_sha=lat["git_sha"])
 
@@ -770,7 +957,10 @@ class Stage:
         key = (job.kind, job.tag)
         self.say(f"[INFRA] {job.kind} {job.tag} attempt {job.attempt}: {detail}; log {job.log}")
         if self.tries[key] < self.a.max_attempts and self.stop_reason is None:
-            (self.fit_q if job.kind == "fit" else self.score_q).append(job.tag)      # retried later; claim kept
+            if job.kind == "fit":                                                     # retried later; claim kept
+                self.queue_fit(job.tag)
+            else:
+                self.score_q.append(job.tag)
             self.mem[job.tag] = (f"queued_{job.kind}", f"retry after: {detail}")
             return
         self.infra_errors.append(dict(tag=job.tag, kind=job.kind, attempts=self.tries[key], detail=detail,
@@ -800,7 +990,7 @@ class Stage:
                 if self.signal is not None:
                     return self.interrupt(signal.Signals(self.signal).name)
                 self.fill()
-                if not self.running and (self.stop_reason is not None or not (self.fit_q or self.score_q)):
+                if not self.running and (self.stop_reason is not None or not (self.fit_q or self.cpu_q or self.score_q)):
                     self.release_queued()
                     return None
                 if time.time() - last_view > self.a.view_interval_s:
@@ -889,13 +1079,16 @@ class Stage:
             S, _ = PR.read_scores(os.path.join(self.out, "scores"))
             n = S.tag.value_counts()
             dup = sorted(t for t in scored if n.get(t, 0) != 1)
+        common, mixed = scorer_provenance({t: info["score"]["provenance"] for t, (st, info) in states.items()
+                                           if st == "scored"})
         n_final = sum(counts[s] for s in final)
         if n_final + len(not_final) != len(self.order):
             raise StageError(f"gate count mismatch: {n_final} final + {len(not_final)} not final != {len(self.order)}")
-        ok = not not_final and not absent and not dup
+        ok = not not_final and not absent and not dup and not mixed
         return dict(ok=ok, n_rows=len(self.order), counts=dict(sorted(counts.items())), n_final=n_final,
                     not_final=dict(sorted(not_final.items())), missing=missing, both=both,
-                    failures_without_row=absent, scored_not_once=dup)
+                    failures_without_row=absent, scored_not_once=dup, scorer_provenance=common,
+                    mixed_scorer_provenance=mixed)
 
     def ledger_rows(self, states):
         out = []
@@ -941,7 +1134,9 @@ class Stage:
         os.replace(tmp, os.path.join(d, f"{self.key}.csv"))
         summary = dict(stage=self.key, experiments=sorted(self.a.experiments), tasks=sorted(self.a.tasks or []),
                        manifest=os.path.abspath(self.a.manifest), manifest_sha256=self.manifest_sha,
-                       manifest_snapshot=self.snapshot,
+                       manifest_snapshot=self.snapshot, tags_file=self.tags_file,
+                       row_kinds=dict(sorted(collections.Counter(row_kind(r) for r in self.rows.values()).items())),
+                       cpu_lanes=self.a.cpu_lanes,
                        out_dir=self.out, score=self.score, kbet_seed=int(self.a.kbet_seed),
                        expect_device=self.a.expect_device, runner_id=self.runner_id, host=socket.gethostname(),
                        runner_git=self.head, started_at=now_iso(self.started), updated_at=now_iso(),
@@ -966,6 +1161,8 @@ def build_parser():
     ap.add_argument("--manifest", required=True, help="builder / resolved / extension manifest (TSV)")
     ap.add_argument("--experiments", nargs="+", required=True, help="experiment ids of the stage, e.g. A1")
     ap.add_argument("--tasks", nargs="+", default=None, help="task filter (default: every task of the stage)")
+    ap.add_argument("--tags-file", default=None,
+                    help="only these rows of the stage: one tag per line, '#' comments (path and SHA-256 recorded)")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--prepped-dir", required=True)
     ap.add_argument("--fit-python", required=True, help="python of the fit env (scvi-tools)")
@@ -973,10 +1170,15 @@ def build_parser():
     ap.add_argument("--r-home", default=os.environ.get("R_HOME"))
     ap.add_argument("--r-libs", default=os.environ.get("R_LIBS"))
     ap.add_argument("--expect-device", required=True,
-                    help="substring of torch.cuda.get_device_name(0) every fit must run on ('cpu' without CUDA)")
+                    help="substring of torch.cuda.get_device_name(0) every GPU-row fit must run on ('cpu' without "
+                         "CUDA); CPU-baseline rows must record device 'cpu'")
     ap.add_argument("--wcd-src", default=os.path.join(REPO, "src"))
     ap.add_argument("--fit-lanes", type=int, default=8)
     ap.add_argument("--fit-threads", type=int, default=1)
+    ap.add_argument("--cpu-lanes", type=int, default=0,
+                    help="concurrent X13 CPU-baseline fits (run_cpu_baselines.py); 0 = refuse a CPU row that needs one")
+    ap.add_argument("--cpu-python", default=None, help="python of the CPU-baseline env (scib, harmony, scanorama)")
+    ap.add_argument("--cpu-threads", type=int, default=1, help="threads of each CPU-baseline fit (--threads)")
     ap.add_argument("--score-workers-during", type=int, default=4, help="scorers while fits are queued or running")
     ap.add_argument("--score-workers-after", type=int, default=12, help="scorers once every fit has finished")
     ap.add_argument("--no-score", action="store_true", help="fit only (JHPCE jobs); latents are scored elsewhere")
@@ -998,17 +1200,24 @@ def build_parser():
 
 
 def validate_args(a):
-    positive = dict(fit_lanes=a.fit_lanes, fit_threads=a.fit_threads, max_attempts=a.max_attempts)
+    positive = dict(fit_lanes=a.fit_lanes, fit_threads=a.fit_threads, max_attempts=a.max_attempts,
+                    cpu_threads=a.cpu_threads)
     if not a.no_score:
         positive.update(score_workers_during=a.score_workers_during, score_workers_after=a.score_workers_after)
     bad = [k for k, v in positive.items() if v < 1]
     if bad:
         raise StageError(f"{bad} must be >= 1")
+    if a.cpu_lanes < 0:
+        raise StageError(f"--cpu-lanes must be >= 0, got {a.cpu_lanes}")
     if a.dry_run and a.report_only:
         raise StageError("--dry-run and --report-only are exclusive")
     if not a.no_score and not a.score_python and not a.report_only:
         raise StageError("scoring needs --score-python (or --no-score)")
-    for p in [a.fit_python] + ([a.score_python] if a.score_python else []):
+    if a.cpu_lanes and not a.cpu_python and not a.report_only:
+        raise StageError("--cpu-lanes needs --cpu-python (the CPU-baseline env)")
+    if a.tags_file is not None and not os.path.isfile(a.tags_file):
+        raise StageError(f"--tags-file {a.tags_file} is not a file")
+    for p in [a.fit_python] + [x for x in (a.score_python, a.cpu_python) if x]:
         if not (os.path.isfile(p) and os.access(p, os.X_OK)):
             raise StageError(f"{p} is not an executable file")
     a.prepped_dir, a.wcd_src = os.path.abspath(a.prepped_dir), os.path.abspath(a.wcd_src)
@@ -1022,15 +1231,21 @@ def main(argv=None):
     launching = not (a.dry_run or a.report_only)
     try:                                                 # ---- preflight: refuse before any work
         validate_args(a)
-        rows = select_rows(load_manifest(a.manifest), a.experiments, a.tasks)
-        stage = Stage(a, rows)
+        tags, tags_file = None, None
+        if a.tags_file is not None:
+            tags, sha = read_tags_file(a.tags_file)
+            tags_file = dict(path=os.path.abspath(a.tags_file), sha256=sha, n_tags=len(tags))
+        rows = select_rows(load_manifest(a.manifest), a.experiments, a.tasks, tags)
+        stage = Stage(a, rows, tags_file)
         done = os.path.join(stage.out, "ledger", f"{stage.key}.done")
         if launching and os.path.exists(done):
             os.remove(done)                              # a marker is valid only for the run that wrote it
         states = stage.preflight(launching)
-        n_fit, n_score = len(stage.fit_q), len(stage.score_q)
+        n_fit, n_cpu, n_score = len(stage.fit_q), len(stage.cpu_q), len(stage.score_q)
         stage.say(f"[stage] {stage.key}: {len(rows)} rows {dict(sorted(states.items()))}; to run: {n_fit} fits"
-                  + (f", up to {n_fit + n_score} scores" if stage.score else " (no scoring)") + f"; out {stage.out}")
+                  + (f" + {n_cpu} CPU-baseline fits" if n_cpu else "")
+                  + (f", up to {n_fit + n_cpu + n_score} scores" if stage.score else " (no scoring)")
+                  + f"; out {stage.out}")
         if a.dry_run:
             return 0
         if launching:
@@ -1049,7 +1264,8 @@ def main(argv=None):
         stage.say(f"[stage] STOPPED: {stage.stop_reason}")
         return EXIT_INFRA
     if not g["ok"]:
-        for k in ("not_final", "both", "failures_without_row", "scored_not_once", "mixed_git_sha"):
+        for k in ("not_final", "both", "failures_without_row", "scored_not_once", "mixed_git_sha",
+                  "mixed_scorer_provenance"):
             if g.get(k):
                 items = list(g[k].items()) if isinstance(g[k], dict) else g[k]
                 stage.say(f"[gate] {k} ({len(items)}): {items[:50]}")
