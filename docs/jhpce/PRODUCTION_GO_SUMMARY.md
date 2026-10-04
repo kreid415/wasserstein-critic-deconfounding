@@ -31,8 +31,8 @@ Local scoring afterwards: about 110 process-hours, roughly 9 h on 12 free cores 
 1. fix-runner (`--tags-file`, fda7578), fix-score-fit and this branch are merged into main, and the reviewer has
    re-checked the merged code (SI-40).
 2. The commit to fit is fixed; the plan is printed with `cluster/jhpce/prod_command.py --expected-sha <it>`, and
-   `cluster/jhpce/local_rehearsal.sh` passes for both jobs at that commit (the runner's dry run already passes at
-   c8da1f8: jobA 100 rows, jobB 150 rows, each under its own stage key `...__tags-<hash>`).
+   `cluster/jhpce/local_rehearsal.sh` passes for both jobs at that commit (it passes at 0a87280: jobA 100 rows,
+   jobB 150 rows, each under its own stage key `...__tags-<hash>`, tests/scvi 72 passed, fingerprints 8/8).
 3. If the manifest is rebuilt for SI-41/SI-42 (X3 re-tag), the tags files are regenerated (`make_tags.py --check`).
 4. fastscratch purges files after 30 days: the env (built Oct 2) must be used before ~Nov 1 or rebuilt.
 

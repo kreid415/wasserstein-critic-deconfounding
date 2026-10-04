@@ -1,0 +1,17 @@
+{
+ "counts": {
+  "atac_large/none": 10,
+  "atac_large/scanvi": 5,
+  "atac_large/scvi_adv": 5,
+  "atac_large/sysvi": 30,
+  "immune_hum_mou/none": 10,
+  "immune_hum_mou/scanvi": 5,
+  "immune_hum_mou/scvi_adv": 5,
+  "immune_hum_mou/sysvi": 30
+ },
+ "manifest_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "n_tags": 100,
+ "ok": true,
+ "problems": [],
+ "tags_sha256": "74dc397a93372e6954d5375475a22c846521b90be13a300f242c87b177dd0035"
+}

@@ -1,0 +1,32 @@
+{
+ "git_sha": "0a872805e855a52deffad3297a6fec8c199eeece",
+ "gpu": "NVIDIA L40S, 555.42.06, 46068 MiB, GPU-rehearsal",
+ "host": "localhost",
+ "manifest_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "mode": "dry-run",
+ "planned": {
+  "ledger": {
+   "csv": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-74dc397a9337.csv",
+   "done": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-74dc397a9337.done",
+   "json": "<work>/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-74dc397a9337.json"
+  },
+  "n_cpu_fits": 0,
+  "n_fits": 100,
+  "n_rows": 100,
+  "out_dir": "<work>/scratch/tier12/fillers_x1_x13",
+  "states": {
+   "needs_fit": 100
+  }
+ },
+ "problems": [],
+ "report_only_exit": null,
+ "runner_exit": 0,
+ "slurm_job_id": "990001",
+ "stage": "fillers_x1_x13",
+ "stage_key": "X1+X13__atac_large+immune_hum_mou__tags-74dc397a9337",
+ "stage_key_from": "<work>/scratch/prod/job_990001/logs/dryrun.log",
+ "stopped_by": null,
+ "tags_sha256": "74dc397a93372e6954d5375475a22c846521b90be13a300f242c87b177dd0035",
+ "tasks": "atac_large immune_hum_mou",
+ "views_rebuilt_by_report_only": false
+}

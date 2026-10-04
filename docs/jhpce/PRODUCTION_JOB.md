@@ -92,6 +92,26 @@ cleared once Slurm shows its job ended (tested). A resume
 at another commit would fail the runner's mixed-commit gate (latents of one stage come from one commit).
 The harness's own run clock counts from submission (queue time included), so the plan sets `run_timeout_s` = wall + 120 h.
 
+## Local rehearsal (cluster/jhpce/local_rehearsal.sh)
+
+The job's full dry-run path, run on the local machine at one commit: the plan from `prod_command.py` (the job's exact
+arguments), a git bundle of the commit cloned and checked out as the submit command does, and `prod_fit_job.sh
+--dry-run` with every check real except what needs the GPU node or Slurm: nvidia-smi (one L40S), the env_versions.py
+record (the job gets the L40S node's record; the real local record is kept and compared), sacct / squeue /
+SLURM_JOB_ID, and the JHPCE storage roots (WCD_SCRATCH, HOME). tests/scvi runs for real on the CPU, the prepped
+fingerprints are compared on the local prepped scIB files, and the runner's dry run uses the real manifest, tags file
+and prepped directory. Evidence (local paths replaced): `docs/jhpce/prod_data/rehearsal_0a87280/{jobA,jobB}/`.
+
+At 0a87280 (2026-10-03/04; fix-runner fda7578 underneath):
+
+| job | exit | stage key read from the runner | runner dry run | tests/scvi at the commit | prepped fingerprints | wall (loaded machine, nice 19) |
+|---|---|---|---|---|---|---|
+| jobA | 0 | `X1+X13__atac_large+immune_hum_mou__tags-74dc397a9337` | 100 rows, all needs_fit; 100 GPU fits, 0 CPU | 72 passed, 1 skipped (21 min, CPU) | 8/8 OK | 51 min |
+| jobB | 0 | `X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3` | 150 rows, all needs_fit; 150 GPU fits, 0 CPU | 72 passed, 1 skipped (39 min, CPU) | 8/8 OK | 75 min |
+
+Local record vs the L40S record: only the declared CUDA build differs (torch 2.13.0+cu130 vs +cu126, torch CUDA 13.0 vs
+12.6, cuDNN 9.20.0 vs 9.10.2); every other module is identical. Rerun both rehearsals at the commit that is submitted.
+
 ## First job: the 250 pre-freeze rows of the JHPCE tasks
 
 Derived with `make_tags.py` from `manifests/paper_manifest_stock_pilot_u5_b10.tsv` (sha256 c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb):
@@ -123,5 +143,7 @@ tasks' fits on JHPCE L40S, so they should not run locally (the local CPUs are al
   `--cpu-python` and a CPU count sized for them;
   (2) harmony-pytorch 0.1.7 is not in the JHPCE wcd-score env (it was added to local wcd-kbet after the env was built;
   cluster/envspec has harmonypy and scanorama but not harmony-pytorch): an env update job on `shared`, which needs a go;
-  (3) sizing from the Scanorama timing: knn 20 on immune_hum_mou took 1,843 s and 10.46 GB peak at 2 threads under load;
-  knn 80 / 160 are still running, so the memory cap and wall time of the CPU phase are not fixed yet.
+  (3) sizing from the Scanorama timing (immune_hum_mou, 2 threads, nice 19 on the loaded local machine): knn 20 took
+  1,843 s at 10.46 GB peak (process tree), knn 80 7,457 s at 21.56 GB (24 GB cap); knn 160 is being rerun (main
+  513f281), so the memory and wall time per CPU lane are not fixed yet; at least ~2 h and ~24 GB per Scanorama row
+  of the largest task.

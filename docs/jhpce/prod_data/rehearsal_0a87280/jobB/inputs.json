@@ -1,0 +1,21 @@
+{
+ "counts": {
+  "lung/none": 10,
+  "lung/scanvi": 5,
+  "lung/scvi_adv": 5,
+  "lung/sysvi": 30,
+  "pancreas/none": 10,
+  "pancreas/scanvi": 5,
+  "pancreas/scvi_adv": 5,
+  "pancreas/sysvi": 30,
+  "sim2/none": 10,
+  "sim2/scanvi": 5,
+  "sim2/scvi_adv": 5,
+  "sim2/sysvi": 30
+ },
+ "manifest_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "n_tags": 150,
+ "ok": true,
+ "problems": [],
+ "tags_sha256": "8d5d4b07c0f34f92a485a1e10d5ea26a9553b74f0bbfc87986946870fa83fce1"
+}

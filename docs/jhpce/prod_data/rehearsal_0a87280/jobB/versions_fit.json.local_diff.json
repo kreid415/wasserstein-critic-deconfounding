@@ -1,0 +1,19 @@
+{
+ "local_record_exit": 0,
+ "modules": {
+  "torch": [
+   "2.13.0+cu130",
+   "2.13.0+cu126"
+  ]
+ },
+ "torch_cuda": [
+  "13.0",
+  "12.6"
+ ],
+ "cudnn": [
+  92000,
+  91002
+ ],
+ "local_gpu": null,
+ "local_cuda_available": false
+}

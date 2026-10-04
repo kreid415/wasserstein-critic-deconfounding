@@ -1,0 +1,6 @@
+{
+ "gpu": "NVIDIA L40S (rehearsal stub)",
+ "ok": true,
+ "problems": [],
+ "torch": "2.13.0+cu126"
+}

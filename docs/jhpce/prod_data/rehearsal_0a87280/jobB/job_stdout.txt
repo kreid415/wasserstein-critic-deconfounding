@@ -1,0 +1,7 @@
+[2026-10-03T22:46:54-04:00] job 990001 on localhost cpus=10 stage=fillers_x1_x13 tasks='lung pancreas sim2' out=<work>/scratch/tier12/fillers_x1_x13
+[2026-10-03T22:46:56-04:00] repo <work>/scratch/prod/job_990001/repo at 0a872805e855a52deffad3297a6fec8c199eeece (clean)
+[2026-10-03T23:38:56-04:00] node: NVIDIA L40S, 555.42.06, 46068 MiB, GPU-rehearsal; tests: 72 passed, 1 skipped in 2342.20s (0:39:02)
+[2026-10-03T23:38:57-04:00] slot: {"held_by_others":[],"ok":true,"owner":{"acquired_at":"2026-10-03T23:38:57-0400","host":"localhost","slurm_job_id":"990001","tasks":["lung","pancreas","sim2"]},"slot":"slot1"}
+[2026-10-04T00:00:30-04:00] inputs OK: "n_tags": 150; prepped fingerprints OK
+[2026-10-04T00:00:35-04:00] dry run: [00:00:34] [stage] X1+X13__lung+pancreas+sim2__tags-8d5d4b07c0f3: 150 rows {'needs_fit': 150}; to run: 150 fits (no scoring); out <work>/scratch/tier12/fillers_x1_x13
+[2026-10-04T00:00:35-04:00] dry run only: nothing fitted or packed; plan in <work>/scratch/prod/job_990001/logs/job_summary.json

@@ -1,0 +1,15 @@
+{
+ "held_by_others": [],
+ "ok": true,
+ "owner": {
+  "acquired_at": "2026-10-03T23:38:57-0400",
+  "host": "localhost",
+  "slurm_job_id": "990001",
+  "tasks": [
+   "lung",
+   "pancreas",
+   "sim2"
+  ]
+ },
+ "slot": "slot1"
+}

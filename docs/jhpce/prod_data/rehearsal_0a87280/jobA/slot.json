@@ -1,0 +1,14 @@
+{
+ "held_by_others": [],
+ "ok": true,
+ "owner": {
+  "acquired_at": "2026-10-03T22:21:01-0400",
+  "host": "localhost",
+  "slurm_job_id": "990001",
+  "tasks": [
+   "atac_large",
+   "immune_hum_mou"
+  ]
+ },
+ "slot": "slot1"
+}
