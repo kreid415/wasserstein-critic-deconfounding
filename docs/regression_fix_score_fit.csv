@@ -1,0 +1,5 @@
+stage,tag,reference,candidate,columns_compared,columns_identical,result
+i,A1_atac_small_discriminator_l3_c1_s100_c2822374,"tier12 A1 score row (tagged scorer 129142b, run_stage)",patched scorer 5750bb4,15,15,identical
+i,A1_atac_small_none_l0_c1_s100_8d38e2a3,"tier12 A1 score row (tagged scorer 129142b, run_stage)",patched scorer 5750bb4,15,15,identical
+ii,REG_immune_none_e3,"tagged scorer 129142b, same env",patched scorer 5750bb4,15,15,identical
+iii,X3_pancreas_none_l0_c1_s10_31994c65,"all-feature PCA of the 14,409 subset cells (scib pcr_comparison, recompute)",patched scorer 5750bb4,1,1,PCR_batch 0.573082 = all-feature 0.573082; HVG reference 0.000000; pcr_before all 0.484262 vs HVG 0.188167

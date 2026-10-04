@@ -1,4 +1,5 @@
 #!/bin/bash
+echo 'RETIRED (code check CR-10, 2026-10-03): the rejected pre-revision pipeline (scvi_final_manifest.tsv, score_final_config.py with the raw-PCR sign error C1, and their drivers) must not be run. Current path: scripts/build_paper_manifest.py -> scripts/run_stage.py (scripts/fit_paper_config.py, scripts/score_scib_native.py; X13 CPU rows: scripts/run_cpu_baselines.py). See legacy/README.md.' >&2; exit 1   # retired; kept for provenance only
 # PARALLEL CPU SCORER for BASELINE latents (tag <dataset>_XZB_<method>_s<seed>).
 #
 # The adversarial scorer (score_parallel.sh) iterates the manifest, which contains only the

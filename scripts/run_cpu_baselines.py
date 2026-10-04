@@ -30,6 +30,11 @@ harmonize(n_jobs)); tests/x13 checks that two such fits on atac_small at 50 PCs 
 
 Output: OUT_DIR/latents/<tag>.npz with z, obs_names, batch, celltype, config, history: the format of
 scripts/fit_paper_config.py, scored unchanged by scripts/score_scib_native.py.
+A latent with a non-finite value is a fit outcome, not an error (docs/PREREG.md section 1; lead decision
+2026-10-03): the latent is saved and OUT_DIR/status/<tag>.json is written with scripts/fit_outcome.write_status,
+status 'nonfinite_latent' and the fields scripts/run_stage.py records for GPU rows (detail, row, latent_sha256,
+device, git_sha); the process continues and exits 0. A row with a status record is refused (or skipped with
+--skip-existing). Any other failure (wrong latent shape, a tool error) raises: an infrastructure error.
 Usage (env wcd-kbet):
   python scripts/run_cpu_baselines.py --manifest M --prepped-dir D --out-dir O [--task T | --tag TAG ...]
 """
@@ -43,6 +48,8 @@ import tempfile
 import time
 
 import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # scripts/ (host_info, fit_outcome), also under PYTHONSAFEPATH=1
 
 CPU_ARMS = {"harmony": "theta", "scanorama": "knn", "pca": None}   # arm: knob (manifest 'lam')
 # scVI-backbone columns do not apply to CPU rows: they must hold these placeholders (cpu_row in the builder), so a
@@ -135,7 +142,28 @@ def provenance(root):
     vers = {p: md.version(p) for p in ("scib", "scanpy", "anndata", "harmony-pytorch", "scanorama", "numpy",
                                         "scikit-learn", "torch")}
     threads = {k: os.environ.get(k) for k in THREAD_VARS}
-    return dict(git_sha=sha, git_dirty=dirty, versions=vers, threads=threads, cpu_count=os.cpu_count())
+    from host_info import cpu_info      # scripts/host_info.py (device fields pinned by the lead 2026-10-03, CR-02)
+    return dict(git_sha=sha, git_dirty=dirty, versions=vers, threads=threads, cpu_count=os.cpu_count(),
+                device="cpu", cpu_model=cpu_info()[0])
+
+
+def record_nonfinite(out_dir, row, npz, prov):
+    """Write the nonfinite_latent record of a saved CPU latent with run_stage.record_nonfinite's fields and detail."""
+    import hashlib
+    import fit_outcome
+    z = np.load(npz, allow_pickle=False)["z"]
+    bad = ~np.isfinite(z)
+    if not bad.any():
+        raise AssertionError(f"{npz}: record_nonfinite called on a finite latent")
+    h = hashlib.sha256()
+    with open(npz, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return fit_outcome.write_status(
+        out_dir, row["tag"], "nonfinite_latent", row=row,
+        detail=f"{int(bad.sum())} of {z.shape[0] * z.shape[1]} posterior-mean values are non-finite "
+               f"({int(bad.any(1).sum())} cells)",
+        latent_sha256=h.hexdigest(), device=prov["device"], git_sha=prov["git_sha"])
 
 
 def select_rows(manifest, task=None, tags=None):
@@ -204,7 +232,13 @@ def main():
         del adata
         for r in rows_t.itertuples():
             npz = os.path.join(a.out_dir, "latents", f"{r.tag}.npz")
+            status = os.path.join(a.out_dir, "status", f"{r.tag}.json")
             expected.append(npz)
+            if os.path.exists(status):
+                if a.skip_existing:
+                    print(f"[skip] {r.tag} has a recorded outcome ({status})", flush=True)
+                    continue
+                raise FileExistsError(f"{status} exists: {r.tag} already has a recorded outcome (delete it to refit)")
             if os.path.exists(npz):
                 if a.skip_existing:
                     print(f"[skip] {r.tag} exists", flush=True)
@@ -214,8 +248,8 @@ def main():
             t0 = time.time()
             z, kw = embed(x, r.arm, dims, r.lam, threads=a.threads)
             secs = time.time() - t0
-            if z.shape != (x.n_obs, dims) or not np.isfinite(z).all():
-                raise ValueError(f"{r.tag}: latent shape {z.shape} (expected {(x.n_obs, dims)}) or non-finite values")
+            if z.shape != (x.n_obs, dims):
+                raise ValueError(f"{r.tag}: latent shape {z.shape}, expected {(x.n_obs, dims)}")
             cfg = dict(row=r._asdict(), tool_kwargs=kw, knob=CPU_ARMS[r.arm], knob_value=float(r.lam),
                        features="highly_variable", n_cells=int(x.n_obs), n_hvg=int(hvg.sum()),
                        n_batches=int(x.obs["batch"].nunique()), fit_seconds=round(secs, 1), **prov)
@@ -226,6 +260,10 @@ def main():
                                 celltype=x.obs["celltype"].astype(str).to_numpy(dtype="U64"),
                                 config=json.dumps(cfg), history=json.dumps({}))
             os.replace(tmp, npz)
+            if not np.isfinite(z.astype(np.float32)).all():       # the saved values, as the runner reads them
+                path = record_nonfinite(a.out_dir, cfg["row"], npz, prov)
+                print(f"[x13] {r.tag} non-finite latent: outcome nonfinite_latent recorded in {path}", flush=True)
+                continue
             print(f"[x13] {r.tag} {secs:.1f}s z{z.shape}", flush=True)
     missing = [p for p in expected if not os.path.exists(p)]
     if missing:

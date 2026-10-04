@@ -4,8 +4,11 @@ Run in the scvi env: WCD_SRC=src PREPPED_DIR=<prepped_scib> python -m pytest -q 
 1. X3_TARGETS re-derived from the prepped files (needs PREPPED_DIR): reference = select_reference_batch on the
    dose-0 subsample; depleted batch = the largest non-reference batch; types = its two most abundant types present
    in >= 3 batches, except sim2 (Group1 only; Batch3Sub1 holds only Group1 and Group2); the reference and the
-   depleted batch are present at every dose; scripts/x3_design_profile.py reproduces the committed profiles.
-2. Every X3 row of the manifest names its task's reference and carries its task's depletion spec.
+   depleted batch are present at every dose (SI-41 draw); X3_N = the dose-100 size capped at 20,000;
+   scripts/x3_design_profile.py reproduces the committed profiles (x3_dose_cells, x3_iw_weight_profile,
+   x3_shared_support_profile).
+2. Every X3 row of the manifest names its task's reference and carries its task's depletion spec, n_cells = X3_N
+   and draw 'nested_v1' (SI-41).
 3. resolve_reference: 'auto', an index and a name resolve as documented; on composition rows 'auto', an index,
    a missing name and the depleted batch are refused.
 4. X13 CPU rows: exactly the signed-off knob values and dimensions per task, seed 0, knob named in extra; the
@@ -20,6 +23,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from tests.scvi._require import import_or_skip, needs_env  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import build_paper_manifest as bpm  # noqa: E402
@@ -27,7 +32,7 @@ import cost_model  # noqa: E402
 import fit_paper_config as fpc  # noqa: E402
 import x3_design_profile as x3p  # noqa: E402
 
-NEEDS_DATA = pytest.mark.skipif(not os.environ.get("PREPPED_DIR"), reason="needs PREPPED_DIR (prepped scIB h5ad files)")
+NEEDS_DATA = needs_env("PREPPED_DIR")     # skip, or FAIL under WCD_REQUIRE_DATA=1 (tests/scvi/_require.py)
 
 
 def _rows():
@@ -56,6 +61,9 @@ def test_x3_targets_follow_the_signed_off_rules(task):
         a, _, _ = x3p._cells(task, a0, b, types, dose)
         present = set(a.obs["batch"].astype(str))
         assert ref in present and b in present, (task, dose)
+        assert a.n_obs == bpm.X3_N[task], (task, dose)
+    n_decl = int(((obs.batch == b) & obs.celltype.isin(types)).sum())
+    assert bpm.X3_N[task] == min(20000, a0.n_obs - n_decl)
 
 
 @NEEDS_DATA
@@ -63,7 +71,7 @@ def test_x3_profile_script_reproduces_the_committed_profiles(tmp_path):
     subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "x3_design_profile.py"), "--prepped-dir",
                     os.environ["PREPPED_DIR"], "--out-dir", str(tmp_path)], check=True,
                    env=dict(os.environ, KMP_AFFINITY="disabled"))
-    for f in ("x3_iw_weight_profile.csv", "x3_shared_support_profile.csv"):
+    for f in ("x3_dose_cells.csv", "x3_iw_weight_profile.csv", "x3_shared_support_profile.csv"):
         assert (tmp_path / f).read_text() == open(os.path.join(ROOT, "docs", f)).read(), f
 
 
@@ -75,6 +83,7 @@ def test_every_x3_row_names_its_reference_and_target():
         b, types, ref = bpm.X3_TARGETS[r.task]
         spec = json.loads(r.extra)["subsample"]
         assert (r.reference, spec["batch"], spec["types"]) == (ref, b, types)
+        assert (spec["n_cells"], spec["draw"]) == (bpm.X3_N[r.task], "nested_v1") and bpm.X3_DRAW == fpc.X3_DRAW
     assert set(R[R.experiment != "X3"].reference) <= {"auto"} | {str(i) for i in range(16)}
 
 

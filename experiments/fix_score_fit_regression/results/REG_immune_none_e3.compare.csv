@@ -1,0 +1,16 @@
+tag,column,reference,candidate,identical
+REG_immune_none_e3,PCR_batch,0.7679470909707076,0.7679470909707076,True
+REG_immune_none_e3,ASW_label/batch,0.8395795134221786,0.8395795134221786,True
+REG_immune_none_e3,iLISI,0.0971815713216846,0.0971815713216846,True
+REG_immune_none_e3,graph_conn,0.9323815732151468,0.9323815732151468,True
+REG_immune_none_e3,kBET,0.140382451039857,0.140382451039857,True
+REG_immune_none_e3,NMI_cluster/label,0.7160293664375705,0.7160293664375705,True
+REG_immune_none_e3,ARI_cluster/label,0.4875094600628212,0.4875094600628212,True
+REG_immune_none_e3,ASW_label,0.6170729100704193,0.6170729100704193,True
+REG_immune_none_e3,isolated_label_F1,0.8094484484021467,0.8094484484021467,True
+REG_immune_none_e3,isolated_label_silhouette,0.6620038952678442,0.6620038952678442,True
+REG_immune_none_e3,cLISI,0.9990852353092152,0.9990852353092152,True
+REG_immune_none_e3,cell_cycle_conservation,0.6434868463393507,0.6434868463393507,True
+REG_immune_none_e3,trajectory,0.8710693669665664,0.8710693669665664,True
+REG_immune_none_e3,kbet_seed,0.0,0.0,True
+REG_immune_none_e3,kbet_r_calls,16.0,16.0,True

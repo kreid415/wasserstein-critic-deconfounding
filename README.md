@@ -65,7 +65,23 @@ curl 'https://figshare.com/ndownloader/articles/12420968/versions/8' \
 ```
 
 ## Usage
-### 1. Reproducing Paper Experiments
+### Revision pipeline (current, 2026-10)
+The revision experiments (docs/PAPER_PLAN.md, pre-registered rules in docs/PREREG.md, constraints in CONSTRAINTS.md)
+run through one path:
+1. `scripts/prep_scib_task.py`: prepped scIB task files (`<task>__scib.h5ad`).
+2. `scripts/build_paper_manifest.py`: the manifest, one row per fit, every setting a column
+   (`manifests/paper_manifest_stock_pilot_u5_b10.tsv`, tag prereg-tier12-v1; X3 rebuilt under SI-41 in
+   `manifests/paper_manifest_stock_pilot_u5_b10_v2.tsv`).
+3. `scripts/run_stage.py`: fits each row with `scripts/fit_paper_config.py` (scVI arms and neural baselines) and scores
+   it with `scripts/score_scib_native.py` (scib.metrics.metrics, seeded kBET). X13 CPU baselines are fitted with
+   `scripts/run_cpu_baselines.py`.
+4. `scripts/prereg_rules.py`, `scripts/freeze_a1_grid.py`, `scripts/freeze_matched_lambda.py`, `scripts/decide_a2_a3.py`:
+   the pre-registered decision rules R1-R4.
+
+The rejected pre-revision pipeline (`scvi_final_manifest.tsv`, `score_final_config.py` and its drivers) is retired in
+`legacy/` (see legacy/README.md); its files refuse to run.
+
+### 1. Reproducing Paper Experiments (original submission)
 To execute the experiments, run the following scripts in the `scripts` directory:
 ```bash
 ./scripts/binary_experiments.sh
