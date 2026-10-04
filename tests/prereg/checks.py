@@ -125,3 +125,52 @@ def check_noise_threshold(P):
                               [0, 0, 0, 0, -0.05, -0.2, -0.2, -0.2, -0.2, -0.2], noise)
     b = P.r1_block(pts, zero)
     assert not b["low_edge"] and b["floor"] == 1, {k: b[k] for k in ("floor", "low_edge", "sigma_b")}
+
+
+# ---- code check CR-05, rule side: scorer provenance of one rule input (prereg_rules.check_provenance) -----------------
+def _prov_input():
+    """A1 rows of one task x decoder (manifest frame) with uniform synthetic scores (synth.PROVENANCE)."""
+    import synth
+    M = synth.pilot_rows()
+    M = M[(M.experiment == "A1") & (M.task == "immune") & (M.cond == "1")].reset_index(drop=True)
+    S, F = synth.scores(M)
+    return M, S, F
+
+
+def _refused(P, M, S, F, pattern):
+    import re
+    try:
+        P.outcomes(M, S, F, ["A1"])
+    except P.PreregError as e:
+        assert re.search(pattern, str(e)), f"refused for another reason: {e}"
+        return
+    except Exception as e:      # a crash is not the pre-registered refusal: report it as a failed check
+        raise AssertionError(f"{type(e).__name__} instead of PreregError ({pattern}): {e}") from e
+    raise AssertionError(f"accepted a rule input that must be refused ({pattern})")
+
+
+def check_provenance_mix(P):
+    """Uniform provenance passes; one row with another scorer commit, CPU type, NUMBA_CPU_NAME, dirty flag or
+    package versions is refused for mixing."""
+    M, S, F = _prov_input()
+    assert len(P.outcomes(M, S, F, ["A1"])) == len(M)
+    for col, other in (("scorer_git_sha", "f" * 40), ("cpu_simd", "avx512f"), ("numba_cpu_name", "skylake-avx512"),
+                       ("scorer_dirty", 1), ("scorer_versions", '{"scib": "1.1.6"}')):
+        S2 = S.copy()
+        S2[col] = S2[col].astype(object)
+        S2.loc[3, col] = other
+        _refused(P, M, S2, F, f"mix scorer provenance: {col}")
+
+
+def check_provenance_missing(P):
+    """Rows without the columns (a score file written before CR-05, concatenated with current ones) and rows with an
+    empty value (other than numba_cpu_name) are refused; a score table without a column is refused."""
+    import pandas as pd
+    M, S, F = _prov_input()
+    old = S.iloc[:5].drop(columns=["scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions"])
+    _refused(P, M, pd.concat([old, S.iloc[5:]], ignore_index=True), F, "lack scorer provenance values")
+    S2 = S.copy()
+    S2.loc[2, "scorer_git_sha"] = ""
+    _refused(P, M, S2, F, "lack scorer provenance values")
+    _refused(P, M, S.drop(columns=["cpu_simd"]), F, r"lack the scorer provenance columns \['cpu_simd'\]")
+

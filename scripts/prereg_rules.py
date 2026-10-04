@@ -11,8 +11,9 @@
 Every rule is a deterministic function of the manifest (scripts/build_paper_manifest.py), the raw
 scIB metrics written by scripts/score_scib_native.py (one CSV row per fit, joined by tag) and a
 failures table (tag, status in {diverged, nonfinite_latent}, detail). A row that is neither scored
-nor failed, a tag scored twice, a NaN in a required metric or an incomplete design raises
-PreregError: nothing is imputed, dropped or defaulted.
+nor failed, a tag scored twice, a NaN in a required metric, score rows without scorer provenance or
+mixing it (PROVENANCE_COLS; code check CR-05) or an incomplete design raises PreregError: nothing is
+imputed, dropped or defaulted.
 """
 import ast
 import glob
@@ -62,6 +63,11 @@ REAL_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou", "atac_small", "ata
 TASK_FAMILY = {"pancreas": "pancreas", "lung": "lung", "immune": "immune", "immune_hum_mou": "immune",
                "atac_small": "atac", "atac_large": "atac"}
 FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivity (SI-44)
+# scorer provenance written by score_scib_native.py on every score row (code check CR-05). One rule input never mixes
+# values of any of them, and a row without them is refused (lead decision 2026-10-04: A1 restarts at the new tag, so
+# every rule input row carries them). numba_cpu_name is '' when NUMBA_CPU_NAME is unset; the others are never empty.
+PROVENANCE_COLS = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
+PROVENANCE_MAY_BE_EMPTY = ("numba_cpu_name",)
 
 
 class PreregError(RuntimeError):
@@ -192,6 +198,40 @@ def write_manifest(M, header, path, note):
     os.replace(tmp, path)
 
 
+def _read_score_file(path):
+    """One score CSV. The provenance columns are read as the literal strings written (an empty numba_cpu_name stays
+    ''); a file without one of them leaves it absent, so after concatenation its rows hold NaN there (refused by
+    outcomes)."""
+    df = pd.read_csv(path, dtype={"tag": str})
+    prov = [c for c in PROVENANCE_COLS if c in df.columns]
+    if prov:
+        raw = pd.read_csv(path, dtype=str, keep_default_na=False, usecols=prov)
+        _require(len(raw) == len(df), f"{path}: provenance columns read {len(raw)} rows, metrics {len(df)}")
+        for c in prov:
+            df[c] = raw[c].to_numpy()
+    return df
+
+
+def check_provenance(s, experiments):
+    """Code check CR-05, rule side: every score row of one rule input carries the scorer provenance columns, with a
+    value (numba_cpu_name may be ''), and all rows share one value per column."""
+    missing = [c for c in PROVENANCE_COLS if c not in s.columns]
+    _require(not missing, f"scores of {experiments} lack the scorer provenance columns {missing} (written by "
+                          f"score_scib_native.py since code check CR-05); rescore with the current scorer")
+    if not len(s):
+        return
+    lacking = s[list(PROVENANCE_COLS)].isna().any(axis=1)
+    for c in PROVENANCE_COLS:
+        if c not in PROVENANCE_MAY_BE_EMPTY:
+            lacking |= s[c].astype(str).str.strip().eq("")
+    bad = sorted(s.tag[lacking])
+    _require(not bad, f"{len(bad)} score rows of {experiments} lack scorer provenance values, e.g. {bad[:5]}")
+    mixed = {c: sorted(s[c].astype(str).unique()) for c in PROVENANCE_COLS if s[c].astype(str).nunique() > 1}
+    _require(not mixed, f"scores of {experiments} mix scorer provenance: "
+                        + "; ".join(f"{c} {v[:3]}{' ...' if len(v) > 3 else ''}" for c, v in mixed.items())
+                        + " (one rule input is scored by one scorer commit on one CPU type)")
+
+
 def read_scores(paths):
     files = []
     for p in ([paths] if isinstance(paths, str) else paths):
@@ -202,7 +242,7 @@ def read_scores(paths):
         else:
             _require(os.path.isfile(p), f"score path {p} does not exist")
             files.append(p)
-    S = pd.concat([pd.read_csv(f, dtype={"tag": str}) for f in files], ignore_index=True)
+    S = pd.concat([_read_score_file(f) for f in files], ignore_index=True)
     need = ["tag", "kbet_seed"] + BATCH_METRICS + BIO_METRICS
     missing = [c for c in need if c not in S.columns]
     _require(not missing, f"score files lack columns {missing} (kbet_seed: written by score_scib_native.py since "
@@ -243,6 +283,7 @@ def outcomes(M, S, F, experiments):
         _require(ks.notna().all() and ks.nunique() == 1,
                  f"scores of {experiments} mix kBET seeds {sorted(ks.dropna().unique().tolist())} "
                  f"({int(ks.isna().sum())} rows without one); measurement-SD re-scores belong in their own directory")
+    check_provenance(s, experiments)
     rows = rows.merge(s[["tag"] + BATCH_METRICS + BIO_METRICS], on="tag", how="left", validate="one_to_one")
     rows["status"] = np.where(rows.tag.isin(set(f.tag)), "failed", "ok")
     B, C = [], []

@@ -25,6 +25,15 @@ MUTANTS = {
     "coverage_floor": ("need = math.ceil(2 * n / 3)", "need = math.floor(2 * n / 3)", checks.check_coverage_threshold),
     "coverage_half": ("need = math.ceil(2 * n / 3)", "need = math.ceil(n / 2)", checks.check_coverage_threshold),
     "sign_per_task_only": ('    return c["group"]\n', '    return c["task"]\n', checks.check_group_sign),
+    # code check CR-05, rule side (lead decision 2026-10-04): mixed or missing scorer provenance is refused
+    "provenance_mix_ignored": ("if s[c].astype(str).nunique() > 1}", "if s[c].astype(str).nunique() > 99}",
+                               checks.check_provenance_mix),
+    "provenance_row_values_ignored": ('    bad = sorted(s.tag[lacking])\n', '    bad = []\n',
+                                      checks.check_provenance_missing),
+    "provenance_columns_ignored": ("    missing = [c for c in PROVENANCE_COLS if c not in s.columns]\n",
+                                   "    missing = []\n", checks.check_provenance_missing),
+    "provenance_check_not_called": ("    check_provenance(s, experiments)\n", "    pass\n",
+                                    checks.check_provenance_mix),
 }
 
 
