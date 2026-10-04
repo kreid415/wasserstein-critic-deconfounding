@@ -142,7 +142,9 @@ v2: the user answered the open items of v1 on 2026-10-02/03 (ask_user; recorded 
 
 ## 9. Amendments after the freeze (tag prereg-tier12-v1)
 
-Each amendment is dated, states what changes and why, and is committed before the stage it affects. None changes a fit.
+Each amendment is dated, states what changes and why, and is committed before the stage it affects. The 2026-10-03
+amendment changes no fit. Those of 2026-10-04 change only stages that had not started, and A1 restarts from zero at
+the tag prereg-tier12-v2, which freezes this file again before the restarted A1's first fit (section 6).
 
 - **2026-10-03, sensitivity analysis without trajectory (user decision, SI-38).** Every X1 comparison on immune and
   immune_hum_mou is also reported with the bio score C recomputed without trajectory conservation (C over the
@@ -153,3 +155,54 @@ Each amendment is dated, states what changes and why, and is committed before th
   computed on the largest connected component of the kNN graph only (other cells get 0) and the root cell is chosen by
   a vote over diffusion components, so small latent changes can change the value. A1's rule R1 is unaffected: one
   metric of 8 moving 0.39 in one seed shifts the 3-seed mean C by about 0.016, against the collapse bound 0.10.
+
+- **2026-10-04, A1 restarts at prereg-tier12-v2 (user decision SI-43, under SI-40).** A code check of prereg-tier12-v1
+  (2026-10-03; 14 findings: 0 critical, 3 high, 3 medium, 8 low) led to fixes in the fitting driver, the scorer, the stage
+  runner and the CPU baselines. A1's training code (scripts/scvi_adversarial_plan.py, src/wcd_vae/wcd/) is unchanged; the
+  fixed driver gives bit-identical latents for all 7 A1 arms x 2 decoders (14/14; atac_small, 1 epoch, CPU), and the fixed
+  scorer gives identical values on two A1 rows and one immune fit (15/15 columns each). A1 nevertheless restarts from
+  zero, so that every fit and score of the run comes from one tagged commit. The 202 A1 fits made at prereg-tier12-v1
+  (2026-10-03 17:07 to 2026-10-04 09:27 EDT) stay on disk unused; no A1 metric value informed any decision (two A1 rows
+  were rescored only to test scorer identity).
+- **2026-10-04, X3 uses equal cell counts per dose (user decision SI-41; implementation SI-42; code check CR-04).** At
+  prereg-tier12-v1 each depletion dose removed cells (up to 25% fewer cells and steps at dose 100) and drew its cells with
+  a different seed. Now every dose of a task has the task's dose-100 size (atac_small 8,402, pancreas 14,409, sim2
+  17,872, immune_hum_mou 20,000 cells), drawn from one dose-independent permutation: K0 = its first N cells; dose d
+  removes the first round(d x h0_t) cells of each declared type t of K0 in permutation order and refills with the next
+  non-declared cells, so doses are exactly nominal, nested and maximally overlapping. The oracle importance weights
+  (SI-25) become w[b, y] = n_K0(b, y) / n_Kd(b, y) per batch and cell type from the realised draws (doses 50/80/95,
+  same arms, self-normalised); they restore each batch's dose-0 composition exactly and equal SI-25's formula when
+  nothing is refilled. Every X3 row carries draw nested_v1, so all 828 X3 tags change (docs/x3_si41_tag_map.csv).
+- **2026-10-04, subsets are scored with the all-feature PCR reference (code check CR-01, CR-14).** For X3 and X8
+  subsets the tagged scorer built an HVG-only PCA as the PCR reference; full-data scoring, like scib-pipeline, lets
+  scib recompute the PCA of all features. Subsets now use the full-data convention (X3 pancreas dose 0: PCR_batch
+  0.573 with the all-feature reference, 0.000 with the HVG one). Full-data scoring (A1, A2, A3, X1) is unchanged.
+- **2026-10-04, scorer provenance and scib fallback flags (code check CR-05, CR-08).** Every score row records the
+  scorer's git SHA and cleanliness, host, CPU model and SIMD level, NUMBA_CPU_NAME and package versions, and flags
+  trajectory's root-cell fallback (value 0) and kBET labels forced to 1 or skipped. The stage runner refuses a stage
+  with mixed scorer provenance, and prereg_rules.py refuses a rule input with mixed or missing provenance. The flags
+  are reported with every R1 and R4 input; the values remain scib's own.
+- **2026-10-04, pairing wording (code check CR-07).** Section 1's "same seed = same initialisation and minibatch order"
+  holds for the scVI module initialisation and the train/validation split in every arm. The minibatch order is shared
+  only within an arm and with the arms that have no adversary head (MMD, Sinkhorn): building the adversary head draws
+  from torch's generator before the first epoch's sampler permutation. Differences against lambda=0 remain unbiased;
+  they are less tightly paired than stated, which the empirical paired SD already reflects.
+- **2026-10-04, declared differences between arms (code check CR-12).** Within a task every arm has the same epochs,
+  batch size, latent size and backbone. Declared differences: each critic takes 5 Adam steps (lr 1e-4, betas 0 / 0.9)
+  per generator step on the same minibatch (WGAN-GP draws fresh data for each critic step); the discriminator takes 1
+  Adam step (lr 1e-3, eps 0.01, weight decay 1e-6); scANVI adds min(10, max(2, round(E/3))) epochs after its scVI
+  pretraining at train_size 0.9; scvi-tools' SysVI trains without KL warm-up. These are design choices or tool
+  defaults and are stated in Methods.
+- **2026-10-04, X13 Scanorama grid knn {2, 5, 10, 20, 40, 80} (user decision SI-46, under SI-37).** On immune_hum_mou
+  (97,861 cells; 2 threads, beside A1) knn 20 took 1,843 s and 10.5 GB, knn 80 7,457 s and 23.2 GB, and knn 160 did not
+  finish within 8 h (43.9 GB at the limit; tier12/x13_scanorama_timing/scanorama_timing.csv). knn 160 is replaced by 2,
+  keeping 6 values; the dimred-100 tool default at knn 20 stays as the sensitivity run.
+- **2026-10-04, edge_unresolved window points in A2/A3 (user decision SI-45; code check CR-11).** If R4 stage a1 sets a
+  window neighbour without an A1 fit (edge_unresolved, section 4), the default setting (mean / off) is fitted at that
+  lambda on A1's seeds (100-102, same decoder) as A1 extension rows; R2 and R3 then apply as written on 3-point windows.
+- **2026-10-04, X15: KL warm-up sensitivity (user decision SI-44; PAPER_PLAN N8).** With the stock 400-epoch KL warm-up
+  the final KL weight is 0.23 on atac_large, 0.20 on immune_hum_mou, 0.59 on immune and 0.61 on lung (1.0 elsewhere),
+  while the adversary acts at full lambda from the first step. X15 fits immune (local) and atac_large (JHPCE L40S) x
+  {lambda=0, discriminator, pooled critic, MMD at the matched lo / hi lambda} x seeds 10-12 x {stock warm-up, a warm-up
+  that completes (length = the task's epoch count)}: 84 fits, conditioned decoder, after X1 with the follow-ups. It is
+  reported as a sensitivity analysis of the X1 comparison.
