@@ -158,9 +158,9 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
 
 - **2026-10-04, A1 restarts at prereg-tier12-v2 (user decision SI-43, under SI-40).** A code check of prereg-tier12-v1
   (2026-10-03; 14 findings: 0 critical, 3 high, 3 medium, 8 low) led to fixes in the fitting driver, the scorer, the stage
-  runner and the CPU baselines. A1's training code (scripts/scvi_adversarial_plan.py, src/wcd_vae/wcd/) is unchanged; the
-  fixed driver gives bit-identical latents for all 7 A1 arms x 2 decoders (14/14; atac_small, 1 epoch, CPU), and the fixed
-  scorer gives identical values on two A1 rows and one immune fit (15/15 columns each). A1 nevertheless restarts from
+  runner and the CPU baselines. A1's training code (scripts/scvi_adversarial_plan.py, src/wcd_vae/wcd/) is unchanged
+  apart from an optional KL warm-up argument used only by X15; the final code gives latents bit-identical to the tag for
+  all 7 A1 arms x 2 decoders (14/14; atac_small, 1 epoch, CPU), and the fixed scorer gives identical values on two A1 rows and one immune fit (15/15 columns each). A1 nevertheless restarts from
   zero, so that every fit and score of the run comes from one tagged commit. The 202 A1 fits made at prereg-tier12-v1
   (2026-10-03 17:07 to 2026-10-04 09:27 EDT) stay on disk unused; no A1 metric value informed any decision (two A1 rows
   were rescored only to test scorer identity).
@@ -204,5 +204,13 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   the final KL weight is 0.23 on atac_large, 0.20 on immune_hum_mou, 0.59 on immune and 0.61 on lung (1.0 elsewhere),
   while the adversary acts at full lambda from the first step. X15 fits immune (local) and atac_large (JHPCE L40S) x
   {lambda=0, discriminator, pooled critic, MMD at the matched lo / hi lambda} x seeds 10-12 x {stock warm-up, a warm-up
-  that completes (length = the task's epoch count)}: 84 fits, conditioned decoder, after X1 with the follow-ups. It is
-  reported as a sensitivity analysis of the X1 comparison.
+  that completes (length = the task's epoch count E, so the last epoch trains at KL weight (E-1)/E: immune 0.996,
+  atac_large 0.989, the same end point as the 400-epoch tasks under the stock warm-up)}: 84 fits, conditioned decoder,
+  after X1 with the follow-ups. It is reported as a sensitivity analysis of the X1 comparison. Its 12 stock-warm-up rows
+  for the discriminator and the pooled critic on immune have the same settings as X6 rows; they are fitted separately
+  (docs/x15_stock_equal_followups.csv).
+- **2026-10-04, manifest of record.** manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv, 6,930 rows, sha256
+  6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24 (= python3 scripts/build_paper_manifest.py --backbone
+  stock --design pilot --uncond-seeds 5 --bary-iter 10). Against the tagged manifest (6,846 rows): the 828 X3 rows are
+  re-tagged (SI-41, SI-42), the 8 Scanorama knn-160 rows become knn 2 (SI-46) and 84 X15 rows are added (SI-44); the A1,
+  A2, A3 and X1 rows and all other rows are byte-identical.
