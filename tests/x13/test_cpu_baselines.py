@@ -171,3 +171,91 @@ def test_runner_on_atac_small_writes_the_fit_npz_format(tmp_path):
         assert cfg["device"] == "cpu" and cfg["cpu_model"] == host_info.cpu_info()[0] and "gpu" not in cfg
     r = subprocess.run(cmd, env=env, capture_output=True, text=True)
     assert r.returncode != 0 and "exists" in r.stderr
+
+
+# ---- non-finite CPU latents are a recorded outcome (lead decision 2026-10-03, PREREG sec 1) --------------------
+def _cpu_toy_run(tmp_path, monkeypatch, fake_embed, extra_args=()):
+    """Toy prepped task 'toy' with a pca and a scanorama X13 row; runs rcb.main in-process with embed replaced for
+    scanorama by fake_embed. Returns (rows, out_dir)."""
+    a = _toy(n=300, g=60)
+    a.var["highly_variable"] = True
+    a.write_h5ad(tmp_path / "toy__scib.h5ad")
+    rows = [bpm.cpu_row("toy", "pca", None, 0, 10), bpm.cpu_row("toy", "scanorama", "knn", 20, 10)]
+    for i, r in enumerate(rows):
+        r["tag"] = f"X13_toy_{r['arm']}_{i}"
+    man = tmp_path / "m.tsv"
+    pd.DataFrame(rows)[bpm.COLS].to_csv(man, sep="\t", index=False)
+    real = rcb.embed
+
+    def embed(x, arm, dims, lam, threads=1):
+        return fake_embed(x, dims) if arm == "scanorama" else real(x, arm, dims, lam, threads=threads)
+
+    monkeypatch.setattr(rcb, "embed", embed)
+    out = tmp_path / "out"
+    monkeypatch.setattr(sys, "argv", ["run_cpu_baselines.py", "--manifest", str(man), "--prepped-dir", str(tmp_path),
+                                      "--out-dir", str(out), *extra_args])
+    rcb.main()
+    return rows, out
+
+
+def _nan_latent(x, dims):
+    z = np.ones((x.n_obs, dims))
+    z[:7, 0] = np.nan
+    z[3, 1] = np.inf
+    return z, {"note": "test"}
+
+
+def nonfinite_contract_violations(rows, out):
+    """The PREREG sec 1 contract for a non-finite CPU latent, as run_stage.py records it for GPU rows."""
+    import hashlib
+    import fit_outcome
+    bad = []
+    pca, scan = rows
+    if (out / "status" / f"{pca['tag']}.json").exists():
+        bad.append("finite row has a status record")
+    p = out / "latents" / f"{scan['tag']}.npz"
+    st_path = out / "status" / f"{scan['tag']}.json"
+    if not p.exists() or not st_path.exists():
+        return bad + [f"latent {p.exists()} / status {st_path.exists()} for the non-finite row"]
+    st = fit_outcome.read_status(str(st_path), scan["tag"])
+    z = np.load(p)["z"]
+    head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    want = dict(status="nonfinite_latent", detail="8 of 3000 posterior-mean values are non-finite (7 cells)",
+                latent_sha256=hashlib.sha256(p.read_bytes()).hexdigest(), device="cpu", git_sha=head)
+    bad += [f"{k}: {st.get(k)!r} != {v!r}" for k, v in want.items() if st.get(k) != v]
+    if st["row"] != {k: str(v) for k, v in scan.items()}:
+        bad.append(f"row {st['row']}")
+    if np.isfinite(z).all():
+        bad.append("saved latent is finite")
+    return bad
+
+
+def test_nonfinite_cpu_latent_is_recorded_not_an_error(tmp_path, monkeypatch):
+    rows, out = _cpu_toy_run(tmp_path, monkeypatch, _nan_latent)       # returns normally: exit 0
+    assert nonfinite_contract_violations(rows, out) == []
+    assert np.isfinite(np.load(out / "latents" / f"{rows[0]['tag']}.npz")["z"]).all()
+    with pytest.raises(FileExistsError, match="recorded outcome"):     # no silent refit over a recorded outcome
+        _cpu_toy_run(tmp_path, monkeypatch, _nan_latent, ["--tag", rows[1]["tag"]])
+    before = (out / "status" / f"{rows[1]['tag']}.json").read_bytes()
+    _cpu_toy_run(tmp_path, monkeypatch, _nan_latent, ["--skip-existing"])
+    assert (out / "status" / f"{rows[1]['tag']}.json").read_bytes() == before
+
+
+def test_checker_detects_the_old_behaviour(tmp_path, monkeypatch):
+    """Mutation check (fail-loud R11): the tagged runner raised on a non-finite latent and wrote no record."""
+    src = open(rcb.__file__).read()
+    old = "            if not np.isfinite(z.astype(np.float32)).all():       # the saved values, as the runner reads them\n"
+    assert src.count(old) == 1
+    import types
+    mod = types.ModuleType("rcb_mutant")
+    mod.__file__ = rcb.__file__
+    exec(compile(src.replace(old, "            if False:\n"), rcb.__file__ + "<mutant>", "exec"), mod.__dict__)
+    monkeypatch.setattr(sys.modules[__name__], "rcb", mod)
+    rows, out = _cpu_toy_run(tmp_path, monkeypatch, _nan_latent)
+    assert nonfinite_contract_violations(rows, out)
+
+
+def test_wrong_latent_shape_stays_an_infrastructure_error(tmp_path, monkeypatch):
+    with pytest.raises(ValueError, match="latent shape"):
+        _cpu_toy_run(tmp_path, monkeypatch, lambda x, dims: (np.ones((x.n_obs, dims + 1)), {}))
+    assert not (tmp_path / "out" / "status").exists()
