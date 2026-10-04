@@ -5,7 +5,7 @@
 | script | runs where | what |
 |---|---|---|
 | `env.sh` | sourced by every job | fastscratch layout and cache redirects (nothing in `$HOME`) |
-| `build_envs.sh` | `shared` job | `wcd-fit` (= local scvi-api, torch 2.13.0+cu126) and `wcd-score` (= local wcd-kbet + R kBET afc5f431), verified against `cluster/envspec/`; reuses an env only if `env_intact.py` finds no file missing beyond its build-time baseline, builds from a fresh conda package cache and re-dates every file, because /fastscratch purges by modification time after 30 days (2026-10-03 the purge removed most of both envs' standard library) |
+| `build_envs.sh` | `shared` job | `wcd-fit` (= local scvi-api, torch 2.13.0+cu126) and `wcd-score` (= local wcd-kbet + R kBET afc5f431), verified against `cluster/envspec/`; envs live in `$HOME/envs` (SI-49); reuses an env only if `env_intact.py` finds no file missing beyond its build-time baseline, builds from a fresh conda package cache on fastscratch, refuses to start without room in `$HOME`, and links the tag's fastscratch env paths to the `$HOME` envs (2026-10-03 the fastscratch purge removed most of the then-fastscratch envs' standard library) |
 | `stage_scib.sh` | `shared` job | serial figshare download + md5, `scripts/prep_scib_task.py --counts scib`, fingerprint comparison |
 | `setup_job.sh` | `shared` job | the three steps above + JHPCE side of the scoring-equivalence check (G4) |
 | `gate_gpu.sh`, `gate_job.sh` | `gpu` job, one pinned GPU model | GPU witness, `tests/scvi`, the 64-fit 8-lane calibration queue replayed |

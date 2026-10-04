@@ -6,7 +6,7 @@ Why: /fastscratch is purged by file modification time (files older than 30 days 
 package files with the dates stored in the package, often years old. On 2026-10-03 the purge deleted most of the
 standard library of wcd-fit and wcd-score (built 2026-10-02) while their .verified markers, written at build time,
 survived; the next job died at its first python call. cluster/jhpce/build_envs.sh therefore reuses an env only if
-this check passes, and re-dates every file after a build.
+this check passes, and since 2026-10-04 the envs live in $HOME (CONSTRAINTS.md SI-49).
 
 Layering leaves benign gaps that are not damage: a pip dist installed over a conda package leaves conda-meta entries
 for files pip removed, and some RECORDs list files outside site-packages that were never written (seen locally:

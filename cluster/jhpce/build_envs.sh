@@ -21,11 +21,12 @@
 # --format=freeze` must equal the local freeze except the declared differences; `pip check` must equal the
 # local result (wcd-fit clean; wcd-score: only scib's pandas>=2 metadata pin, as locally).
 # Idempotent: an env carrying .verified is reused only if cluster/jhpce/env_intact.py finds nothing missing beyond the
-# gaps recorded at build time; otherwise it is deleted and rebuilt. Purge safety (2026-10-04): /fastscratch deletes files
-# by modification time after 30 days and conda keeps the package's file dates, so on 2026-10-03 the purge removed most
-# of both envs' standard library (built 2026-10-02) while .verified survived. Each build therefore uses a fresh conda
-# package cache and, after verification, re-dates every file of the env (and the R library), so the purge clock starts
-# at the build; .verified records the date until which the env is safe.
+# gaps recorded at build time; otherwise it is deleted and rebuilt. Envs live in $HOME (CONSTRAINTS.md SI-49): on
+# 2026-10-03 the fastscratch purge (by modification time; conda keeps the packages' file dates) removed most of the
+# then-fastscratch envs' standard library while .verified survived. A build starts only if $HOME keeps headroom for the
+# job workdirs of all agent sessions (they live in HOME), and uses a fresh conda package cache on fastscratch (a
+# purge-damaged cache links incomplete packages), deleted after a successful build. prereg-tier12-v2 (c88cce3), which
+# every production job checks out, still expects the envs under $SCRATCH; those paths become symlinks to the $HOME envs.
 # Usage (repo root, inside a 'shared' batch job): bash cluster/jhpce/build_envs.sh OUT_DIR [fit|score|all]
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
@@ -39,10 +40,23 @@ conda --version
 export CONDA_PKGS_DIRS="$SCRATCH/conda/pkgs_build_${SLURM_JOB_ID:-$$}"   # fresh cache: purged unpacked packages are never linked
 mkdir -p "$CONDA_PKGS_DIRS"
 intact() { python3 "$REPO/cluster/jhpce/env_intact.py" "$1"; }        # $1 env prefix
-redate() { local d; for d in "$@"; do [ ! -e "$d" ] || find "$d" -xdev -exec touch -h -c {} +; done; }
-mark_verified() {  # $1 env prefix: record benign layering gaps, then the build date and purge horizon
+mark_verified() {  # $1 env prefix: record benign layering gaps, then the build date
   python3 "$REPO/cluster/jhpce/env_intact.py" "$1" --write-baseline
-  echo "built $(date -Is); all files re-dated; safe from the 30-day purge until about $(date -I -d '+29 days')" > "$1/.verified"
+  echo "built $(date -Is) at $1" > "$1/.verified"
+}
+HOME_CAP_MB=${HOME_CAP_MB:-95367}          # JHPCE HOME cap, 100 GB (decimal) in MiB
+HOME_HEADROOM_MB=${HOME_HEADROOM_MB:-5000} # kept free for the job workdirs of all agent sessions (they live in HOME)
+home_room() {  # $1 = MiB the build adds; refuse unless HOME stays below the cap minus the headroom
+  local used; used=$( (du -s --block-size=1M "$HOME" 2>/dev/null || true) | cut -f1)
+  echo "[home] $HOME uses ${used:-?} MiB; build adds ~$1 MiB; cap $HOME_CAP_MB MiB, headroom $HOME_HEADROOM_MB MiB"
+  [ -n "$used" ] && [ $(( used + $1 + HOME_HEADROOM_MB )) -le "$HOME_CAP_MB" ] || {
+    echo "FATAL: not enough room in \$HOME for this env (SI-49: environments live in \$HOME); free space first" >&2; exit 3; }
+}
+compat_link() {  # $1 = path prereg-tier12-v2's env.sh expects (under $SCRATCH), $2 = real location in $HOME
+  mkdir -p "$(dirname "$1")"
+  if [ -e "$1" ] && [ ! -L "$1" ]; then rm -rf "$1"; fi    # a pre-SI-49 env directory left on fastscratch
+  local tgt; tgt=$(readlink -f "$2"); [ -n "$tgt" ] && [ -d "$tgt" ] || { echo "FATAL: link target $2 missing" >&2; exit 3; }
+  ln -sfn "$tgt" "$1"; echo "[link] $1 -> $(readlink "$1")"
 }
 
 TORCH_FIT="torch==2.13.0+cu126";  TORCH_FIT_INDEX=https://download.pytorch.org/whl/cu126
@@ -63,6 +77,7 @@ build_fit() {
   if [ -f "$FIT_ENV/.verified" ] && intact "$FIT_ENV"; then echo "[fit] reusing verified, complete env $FIT_ENV"; return 0; fi
   if [ -e "$FIT_ENV" ]; then echo "[fit] $FIT_ENV is unverified or incomplete: deleting and rebuilding"; fi
   rm -rf "$FIT_ENV"
+  home_room 6000                         # wcd-fit was 5.5 GiB (2026-10-02 build)
   conda create -y -q -p "$FIT_ENV" --file "$SPEC/scvi-api.explicit.txt"
   # phase 1: torch and its own pinned CUDA 12.6 runtime wheels (exact versions come from torch's metadata)
   "$FIT_PY" -m pip install -q --index-url "$TORCH_FIT_INDEX" --extra-index-url https://pypi.org/simple "$TORCH_FIT"
@@ -75,7 +90,6 @@ build_fit() {
       --allow '^(torch|triton|nvidia-.*|cuda-bindings|cuda-pathfinder|cuda-toolkit)$' | tee "$OUT/wcd-fit_freeze_diff.txt"
   same_explicit "$FIT_ENV" "$SPEC/scvi-api.explicit.txt" "$OUT/wcd-fit.explicit.txt"
   (cd "$TMPDIR" && OMP_NUM_THREADS=1 "$FIT_PY" "$REPO/cluster/jhpce/env_versions.py" --kind fit --out "$OUT/versions_fit_buildnode.json")
-  redate "$FIT_ENV"
   mark_verified "$FIT_ENV"
 }
 
@@ -85,6 +99,7 @@ build_score() {
   fi
   if [ -e "$SCORE_ENV" ]; then echo "[score] $SCORE_ENV or its R library is unverified or incomplete: deleting and rebuilding"; fi
   rm -rf "$SCORE_ENV" "$WCD_R_LIBS"
+  home_room 7500                         # wcd-score was 6.2 GiB + the R library
   conda create -y -q -p "$SCORE_ENV" --file "$SPEC/wcd-kbet.explicit.txt"
   "$SCORE_PY" -m pip install -q --no-deps --force-reinstall -r "$SPEC/score-pip.txt"
   "$SCORE_PY" -m pip install -q --no-deps --force-reinstall --index-url "$TORCH_SCORE_INDEX" "$TORCH_SCORE"
@@ -111,7 +126,6 @@ build_score() {
       | tee "$OUT/wcd-score_freeze_diff.txt"
   same_explicit "$SCORE_ENV" "$SPEC/wcd-kbet.explicit.txt" "$OUT/wcd-score.explicit.txt"
   (cd "$TMPDIR" && PATH="$SCORE_ENV/bin:$PATH" OMP_NUM_THREADS=1 "$SCORE_PY" "$REPO/cluster/jhpce/env_versions.py" --kind score --out "$OUT/versions_score_buildnode.json")
-  redate "$SCORE_ENV" "$WCD_R_LIBS"
   date -Is > "$WCD_R_LIBS/.verified"
   mark_verified "$SCORE_ENV"
 }
@@ -120,7 +134,14 @@ case "$WHAT" in
   fit) build_fit ;;
   score) build_score ;;
   all) build_fit; build_score ;;
+esac
+case "$WHAT" in
+  fit|all) compat_link "$SCRATCH/conda/envs/wcd-fit" "$FIT_ENV" ;;
+esac
+case "$WHAT" in
+  score|all) compat_link "$SCRATCH/conda/envs/wcd-score" "$SCORE_ENV"; compat_link "$SCRATCH/Rlib_kbet" "$WCD_R_LIBS" ;;
   *) echo "unknown target $WHAT"; exit 2 ;;
 esac
 for d in "$FIT_ENV" "$SCORE_ENV" "$WCD_R_LIBS"; do if [ -e "$d" ]; then du -sh "$d"; fi; done
+rm -rf "$CONDA_PKGS_DIRS"                 # this build's own package cache
 echo "BUILD OK ($WHAT)"

@@ -322,3 +322,10 @@
 - added: 2026-10-04
 - keywords: JHPCE, env, rebuild, purge, fastscratch, filler, resubmit
 - notebook: NB-20261004-16
+
+## SI-49 · active · process
+- rule: Cluster storage (user rule, all projects): software environments (conda envs, venvs, the R kBET library) live in $HOME; data lives on scratch (job dirs, inputs/outputs/logs/checkpoints, TMPDIR, caches). JHPCE: FIT_ENV, SCORE_ENV, WCD_R_LIBS = $HOME/envs/{wcd-fit, wcd-score, Rlib_kbet} (cluster/jhpce/env.sh); prereg-tier12-v2's fastscratch env paths become symlinks to them (build_envs.sh compat_link), so the tagged jobs run unchanged. The SI-48 rebuild therefore targets $HOME/envs/wcd-fit, and build_envs.sh refuses to build unless HOME keeps 5,000 MiB free under its 100 GB cap (HOME also holds every agent session's job workdirs).
+- source: "store environments in home. Store data on scratch." (user, 2026-10-04, message after the SI-48 go; the fastscratch rebuild job 9d66854c was cancelled at 18:17 EDT)
+- added: 2026-10-04
+- keywords: storage, home, scratch, environments, conda, JHPCE, fastscratch
+- notebook: NB-20261004-17

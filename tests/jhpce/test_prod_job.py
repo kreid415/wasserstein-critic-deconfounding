@@ -131,7 +131,8 @@ class Sim:
         git(tmp, "clone", "-q", str(template), str(self.repo))
         self.head = git(self.repo, "rev-parse", "HEAD")
         self.scratch, home, fakebin = tmp / "scratch", tmp / "home", tmp / "bin"
-        fitenv = self.scratch / "conda/envs/wcd-fit"
+        self.home = home
+        fitenv = home / "envs/wcd-fit"                       # environments live in $HOME (SI-49)
         fake_env = self.repo / "tests/stage/fake_env.py"
         write(tmp / "dispatch.py", f"FAKE_ENV = {str(fake_env)!r}\n" + DISPATCH)
         write(fitenv / "bin/python", "\n".join([
@@ -144,7 +145,7 @@ class Sim:
         write(fitenv / ".verified", "ok\n")
         for task in TASKS:                                   # the runner checks existence; the fake fitter reads nothing
             write(self.scratch / "prepped_scib" / f"{task}__scib.h5ad", "")
-        os.makedirs(home)
+        os.makedirs(home, exist_ok=True)                     # the fake env above already lives in it
         write(fakebin / "nvidia-smi", "#!/bin/sh\nprintf '%b' \"${FAKE_GPUS:-NVIDIA L40S, 555.42.06, 46068 MiB, GPU-x\\n}\"\n", 0o755)
         write(fakebin / "sacct", FAKE_SLURM, 0o755)
         write(fakebin / "squeue", FAKE_SLURM, 0o755)
@@ -322,7 +323,7 @@ def test_prepped_fingerprint_mismatch_aborts(sim):
 
 def test_environment_refusals(sim):
     assert sim.run(extra_env={"SLURM_JOB_ID": ""}).returncode == 9
-    os.remove(sim.scratch / "conda/envs/wcd-fit/.verified")
+    os.remove(sim.home / "envs/wcd-fit/.verified")
     assert sim.run().returncode == 9
     assert not sim.runner_started()
 
