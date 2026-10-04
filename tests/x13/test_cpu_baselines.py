@@ -259,3 +259,22 @@ def test_wrong_latent_shape_stays_an_infrastructure_error(tmp_path, monkeypatch)
     with pytest.raises(ValueError, match="latent shape"):
         _cpu_toy_run(tmp_path, monkeypatch, lambda x, dims: (np.ones((x.n_obs, dims + 1)), {}))
     assert not (tmp_path / "out" / "status").exists()
+
+
+def test_runner_runs_as_a_script_under_safe_path(tmp_path):
+    """The runner is started as a script; with PYTHONSAFEPATH=1 the script directory is not on sys.path, so it must add
+    it itself (it imports scripts/host_info.py and scripts/fit_outcome.py). One pca row on a toy task, exit 0."""
+    a = _toy(n=300, g=60)
+    a.var["highly_variable"] = True
+    a.write_h5ad(tmp_path / "toy__scib.h5ad")
+    r = bpm.cpu_row("toy", "pca", None, 0, 10)
+    r["tag"] = "X13_toy_pca_script"
+    man = tmp_path / "m.tsv"
+    pd.DataFrame([r])[bpm.COLS].to_csv(man, sep="\t", index=False)
+    env = dict(os.environ, PYTHONSAFEPATH="1", KMP_AFFINITY="disabled", OMP_NUM_THREADS="1")
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "run_cpu_baselines.py"), "--manifest", str(man),
+                        "--prepped-dir", str(tmp_path), "--out-dir", str(tmp_path / "out")], env=env,
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert p.returncode == 0, p.stderr[-2000:]
+    cfg = json.loads(str(np.load(tmp_path / "out" / "latents" / "X13_toy_pca_script.npz")["config"]))
+    assert cfg["device"] == "cpu" and cfg["cpu_model"]

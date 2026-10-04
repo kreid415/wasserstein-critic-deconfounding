@@ -49,6 +49,8 @@ import time
 
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # scripts/ (host_info, fit_outcome), also under PYTHONSAFEPATH=1
+
 CPU_ARMS = {"harmony": "theta", "scanorama": "knn", "pca": None}   # arm: knob (manifest 'lam')
 # scVI-backbone columns do not apply to CPU rows: they must hold these placeholders (cpu_row in the builder), so a
 # row that sets one of them is refused instead of being silently ignored
@@ -148,7 +150,6 @@ def provenance(root):
 def record_nonfinite(out_dir, row, npz, prov):
     """Write the nonfinite_latent record of a saved CPU latent with run_stage.record_nonfinite's fields and detail."""
     import hashlib
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import fit_outcome
     z = np.load(npz, allow_pickle=False)["z"]
     bad = ~np.isfinite(z)

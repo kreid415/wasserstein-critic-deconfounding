@@ -428,7 +428,13 @@ def resolved_plan(model):
     plan = model.trainer.lightning_module
     rec = {"plan_class": type(plan).__name__}
     rec.update({k: _plain(getattr(plan, k)) for k in PLAN_FIELDS})
-    if hasattr(plan, "adversary_base"):
+    if hasattr(plan, "adversary_base") and plan.adversary_base in ("none", "scvi_adv"):
+        # no wcd adversary: WassersteinAdversarialTrainingPlan returns before setting the adversary fields; scvi_adv
+        # is scvi-tools' own classifier (AdversarialTrainingPlan), whose optimizer is in 'optimizers' below
+        rec.update(adversary=plan.adversary, d_coef=_plain(plan.d_coef),
+                   adversarial_classifier=plan.adversarial_classifier is not False,
+                   scale_adversarial_loss=_plain(plan.scale_adversarial_loss))
+    elif hasattr(plan, "adversary_base"):
         rec.update({k: _plain(getattr(plan, k)) for k in ADVERSARY_FIELDS})
         gp = bool(plan.is_critic and not plan.spectral_norm)
         rec["gradient_penalty"] = gp

@@ -20,7 +20,8 @@ test -z "$(git -C "$REPO" status --porcelain --untracked-files=no)"     # patche
 test -z "$(git -C "$TAGREPO" status --porcelain --untracked-files=no)"
 echo "[regress] patched $(git -C "$REPO" rev-parse --short HEAD), tagged $(git -C "$TAGREPO" rev-parse --short HEAD)"
 meta() { "$KBET/bin/python" -c "import json,sys,pandas as pd; r=pd.read_csv(sys.argv[1]).iloc[0]; print(json.dumps({k: (str(r[k]) if k in ('latent_sha256','experiment','task','arm','lam') else int(r[k])) for k in ['latent_sha256','experiment','task','arm','lam','cond','seed']}))" "$1"; }
-score() {  # score SCORER PREPPED NPZ TAG META OUT_CSV
+score() {  # score SCORER PREPPED NPZ TAG META OUT_CSV  (an existing OUT_CSV from an earlier run is kept: resume)
+  if [ -s "$6" ]; then echo "[regress] keep existing $6"; return 0; fi
   PREPPED="$2" NPZ="$3" TAG="$4" META="$5" OUT_CSV="$6" nice -n 19 "$KBET/bin/python" "$1" > "$6.log" 2>&1
 }
 fail=0

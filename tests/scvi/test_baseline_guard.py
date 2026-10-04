@@ -251,3 +251,29 @@ def test_the_head_uses_the_default_gradient_penalty_weight():
     lambda_gp (static check of the head's calls)."""
     src = open(os.path.join(ROOT, "src", "wcd_vae", "wcd", "adversarial.py")).read()
     assert src.count("multi_class_gradient_penalty(") == 2 and "lambda_gp" not in src
+
+
+def test_fitter_writes_the_plan_record_for_every_plan_kind(tmp_path):
+    """fit_paper_config.py as a script (PYTHONSAFEPATH=1, as run_stage starts it) for arms without a wcd adversary
+    (none, scvi_adv), a JS and a critic-free arm: exit 0 and cfg['plan'] with the fields of that plan kind. The stage
+    e2e test found resolved_plan reading adv_steps on 'none', which the plan never sets."""
+    _toy().write_h5ad(tmp_path / "toy__scib.h5ad")
+    base = dict(arm="none", lam="0", n_critic="0", decoder="SCVI", likelihood="zinb")
+    rows = [_row("none", **base), _row("scvi_adv", **dict(base, arm="scvi_adv")),
+            _row("disc", arm="discriminator", lam="1.0", n_critic="1"), _row("mmd", arm="mmd", lam="1.0", n_critic="0")]
+    man = tmp_path / "m.tsv"
+    pd.DataFrame(rows)[fpc.REQUIRED].to_csv(man, sep="\t", index=False)
+    out = tmp_path / "out"
+    env = dict(os.environ, MANIFEST=str(man), PREPPED_DIR=str(tmp_path), OUT_DIR=str(out), WCD_SRC=os.path.join(ROOT, "src"),
+               CUDA_VISIBLE_DEVICES="", KMP_AFFINITY="disabled", OMP_NUM_THREADS="1", PYTHONSAFEPATH="1")
+    for r in rows:
+        p = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "fit_paper_config.py")],
+                           env=dict(env, TAG=r["tag"]), capture_output=True, text=True)
+        assert p.returncode == 0, (r["tag"], p.stderr[-2000:])
+    plans = {r["tag"]: json.loads(str(np.load(out / "latents" / f"{r['tag']}.npz")["config"]))["plan"]["fit"] for r in rows}
+    assert plans["none"]["adversary"] == "none" and plans["none"]["adversarial_classifier"] is False
+    assert "adv_steps" not in plans["none"] and len(plans["none"]["optimizers"]) == 1
+    assert plans["scvi_adv"]["adversarial_classifier"] is True and len(plans["scvi_adv"]["optimizers"]) == 2
+    assert plans["disc"]["adv_steps"] == 1 and plans["disc"]["lambda_gp"] is None
+    assert plans["mmd"]["adv_steps"] == 0 and plans["mmd"]["gradient_penalty"] is False
+    assert all(p["n_epochs_kl_warmup"] == 400 for p in plans.values())

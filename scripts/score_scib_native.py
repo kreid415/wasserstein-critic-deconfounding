@@ -45,7 +45,8 @@ found, '' if trajectory is not computed), kbet_labels_forced_one (labels whose k
 (labels with cells that scib left NaN and dropped from its mean: < 10 cells or a single batch, or an R error
 reading the kBET summary).
 """
-import importlib, os, json, socket, subprocess, time, numpy as np, pandas as pd, scanpy as sc, scib
+import importlib, os, json, socket, subprocess, sys, time, numpy as np, pandas as pd, scanpy as sc, scib
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # scripts/ (host_info) also under PYTHONSAFEPATH=1
 
 BATCH_METRICS = ["PCR_batch", "ASW_label/batch", "iLISI", "graph_conn", "kBET"]
 BIO_METRICS = ["NMI_cluster/label", "ARI_cluster/label", "ASW_label", "isolated_label_F1",

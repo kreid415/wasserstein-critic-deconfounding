@@ -218,3 +218,19 @@ def test_trajectory_root_flag_natural_fallback(monkeypatch, tmp_path):
     pre, npz = _write(tmp_path, a, z, "traj_sep")
     r = _score(monkeypatch, tmp_path, pre, npz, "traj_sep")
     assert int(r["traj_root_fallback"]) == 1 and r["trajectory"] == 0.0
+
+
+def test_scorer_runs_as_a_script_under_safe_path(tmp_path, toy):
+    """run_stage.py starts the scorer as a script; with PYTHONSAFEPATH=1 (set in this sandbox) the script directory is
+    not on sys.path, so the scorer must add it itself (it imports scripts/host_info.py). Found by the stage e2e test."""
+    a, z = toy
+    pre, npz = _write(tmp_path, a, z, "script")
+    out = tmp_path / "script.csv"
+    env = dict(os.environ, PREPPED=pre, NPZ=npz, TAG="script", OUT_CSV=str(out), META="{}", PYTHONSAFEPATH="1",
+               KMP_AFFINITY="disabled", OMP_NUM_THREADS="1")
+    env.pop("KBET_SEED", None)
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "score_scib_native.py")], env=env,
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert p.returncode == 0, p.stderr[-2000:]
+    r = pd.read_csv(out).iloc[0]
+    assert r["cpu_model"] and r["scorer_git_sha"] and int(r["kbet_labels_skipped"]) == 2
