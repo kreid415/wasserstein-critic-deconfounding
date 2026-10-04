@@ -52,12 +52,14 @@ def main():
     ap.add_argument("--rss-cap-gb", type=float, default=24.0)
     ap.add_argument("--timeout-h", type=float, default=6.0)
     ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--knn", type=int, nargs="+", choices=sorted(TAGS), default=sorted(TAGS),
+                    help="knn values to time (default all); rows already in scanorama_timing.csv are not skipped")
     a = ap.parse_args()
     os.makedirs(a.out_dir, exist_ok=True)
     res_csv = os.path.join(a.out_dir, "scanorama_timing.csv")
     env = dict(os.environ, OMP_NUM_THREADS=str(a.threads), MKL_NUM_THREADS=str(a.threads), OPENBLAS_NUM_THREADS=str(a.threads),
                NUMBA_NUM_THREADS=str(a.threads), KMP_AFFINITY="disabled")
-    for knn in (20, 80, 160):
+    for knn in a.knn:
         log = os.path.join(a.out_dir, f"knn{knn}.log")
         cmd = ["/usr/bin/time", "-v", "nice", "-n", "19", sys.executable, "scripts/run_cpu_baselines.py", "--manifest", a.manifest,
                "--prepped-dir", a.prepped_dir, "--out-dir", os.path.join(a.out_dir, f"knn{knn}"), "--tag", TAGS[knn]]
