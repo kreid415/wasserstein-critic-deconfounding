@@ -6,6 +6,9 @@ lambda grid INDEX instead of a frozen value, is refused. Settings that are code 
 (adversary width 128, critic Adam lr 1e-4 betas (0, 0.9), discriminator Adam lr 1e-3, lambda_GP 10, 10 barycenter
 iterations, scvi-tools' generator optimiser and KL warm-up; code check CR-09) are recorded as RESOLVED values in each
 latent's config under 'plan', read from the trained training plan(s) and their optimizers (resolved_plan).
+X15 rows (SI-44) carry extra {"kl_warmup": "stock" | "complete"}: 'complete' sets scvi-tools' KL warm-up length
+(n_epochs_kl_warmup) to the row's max_epochs; 'stock' and rows without the key keep scvi-tools' default (400 epochs)
+and train exactly as before (kl_warmup_epochs; the resolved plan records the length used).
 scANVI and sysVI fits (X13) run under the same non-finite-loss guard as the adversarial plan (guarded_plan_class;
 code check CR-06), so their divergences are recorded as 'diverged' too.
 
@@ -41,7 +44,9 @@ EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
               "factorial_run",            # X12 run label: provenance only (the factors it encodes are row columns)
               "r1_gamma",                 # X6 discriminator_r1 (docs/SPECS_missing_arms.md section 1, SI-22)
               "sampler",                  # X8 'stratified' (section 3, SI-24)
-              "iw"}                       # X3 'depletion_oracle' (section 4, SI-25)
+              "iw",                       # X3 'depletion_oracle' (section 4, SI-25)
+              "kl_warmup"}                # X15 'stock' | 'complete' (SI-44; kl_warmup_epochs)
+KL_WARMUP = ("stock", "complete")
 # X3 (SI-41): every composition spec carries draw=X3_DRAW (x3_draw); X3_PERMUTATION_SEED seeds the ONE dose-independent
 # permutation of a task's cells that every dose of the task draws from. Both are written into each X3 latent's config
 # (subsample_info); a spec with another or no draw is refused.
@@ -81,11 +86,26 @@ def check_extra(tag, arm, extra):
         raise ValueError(f"{tag}: r1_gamma must be given for *_r1 arms and only for them (arm {arm!r})")
     if "sampler" in extra and extra["sampler"] != "stratified":
         raise ValueError(f"{tag}: sampler must be 'stratified', got {extra['sampler']!r}")
+    if "kl_warmup" in extra and extra["kl_warmup"] not in KL_WARMUP:
+        raise ValueError(f"{tag}: kl_warmup must be one of {KL_WARMUP}, got {extra['kl_warmup']!r}")
     if "iw" in extra:
         if extra["iw"] != "depletion_oracle":
             raise ValueError(f"{tag}: iw must be 'depletion_oracle', got {extra['iw']!r}")
         if extra.get("subsample", {}).get("kind") != "composition":
             raise ValueError(f"{tag}: iw='depletion_oracle' needs an X3 composition subsample")
+
+
+def kl_warmup_epochs(extra, max_epochs):
+    """n_epochs_kl_warmup to pass to the training plan (SI-44): the row's max_epochs for kl_warmup 'complete'; None
+    for 'stock' and for rows without the key, so that the plan keeps scvi-tools' default (400 epochs) and the fit is
+    unchanged. scvi-tools' KL weight at 0-based epoch e is e / n_epochs_kl_warmup while e < n_epochs_kl_warmup
+    (scvi.train._trainingplans._compute_kl_weight), so 'complete' ends at (max_epochs - 1) / max_epochs."""
+    setting = extra.get("kl_warmup", "stock")
+    if setting not in KL_WARMUP:
+        raise ValueError(f"kl_warmup must be one of {KL_WARMUP}, got {setting!r}")
+    if int(max_epochs) < 1:
+        raise ValueError(f"max_epochs must be positive, got {max_epochs!r}")
+    return int(max_epochs) if setting == "complete" else None
 
 
 def group_counts(obs):
@@ -257,6 +277,10 @@ def main():
     check_extra(r["tag"], arm, extra)
     if arm in ("scanvi", "sysvi") and {"r1_gamma", "sampler", "iw"} & set(extra):
         raise ValueError(f"{r['tag']}: r1_gamma / sampler / iw are adversary options, not defined for {arm}")
+    if arm in ("scanvi", "sysvi") and "kl_warmup" in extra:
+        raise ValueError(f"{r['tag']}: kl_warmup applies to the scVI-backbone arms of fit_adversarial_scvi (X15), "
+                         f"not to {arm}")
+    kl_epochs = kl_warmup_epochs(extra, int(r["max_epochs"]))
     try:
         lam = float(r["lam"])
     except ValueError:
@@ -297,9 +321,10 @@ def main():
             critic_lr=float(extra.get("adv_lr", 1e-4)), disc_lr=float(extra.get("adv_lr", 1e-3)),
             bary_iter=int(extra.get("bary_iter", 10)), bary_warm_iter=extra.get("bary_warm_iter"),
             r1_gamma=(None if "r1_gamma" not in extra else float(extra["r1_gamma"])),
-            sampler=extra.get("sampler"), iw_weights=iw_weights,
+            sampler=extra.get("sampler"), iw_weights=iw_weights, n_epochs_kl_warmup=kl_epochs,
             **common, **backbone)
         plan_rec = {"fit": resolved_plan(model)}
+        check_kl_warmup(r["tag"], plan_rec["fit"], kl_epochs)
     secs = time.time() - t0
     hist = {k: v.iloc[:, 0].astype(float).tolist() for k, v in getattr(model, "history_", {}).items()
             if hasattr(v, "iloc")}
@@ -315,6 +340,18 @@ def main():
     model.save(os.path.join(out_dir, "models", r["tag"]), overwrite=True, save_anndata=False)
     os.replace(tmp, npz)
     print(f"[fit] {r['tag']} {secs:.0f}s z{np.asarray(z).shape} finite={bool(np.isfinite(z).all())}", flush=True)
+
+
+def check_kl_warmup(tag, rec, kl_epochs):
+    """The trained plan used the intended KL warm-up length (fail-loud R12): kl_epochs, or scvi-tools' default for the
+    adversarial plan's base class when kl_epochs is None."""
+    import inspect
+    from scvi.train import AdversarialTrainingPlan
+    want = kl_epochs if kl_epochs is not None else \
+        inspect.signature(AdversarialTrainingPlan.__init__).parameters["n_epochs_kl_warmup"].default
+    if rec["n_epochs_kl_warmup"] != want:
+        raise RuntimeError(f"{tag}: the training plan used n_epochs_kl_warmup={rec['n_epochs_kl_warmup']}, "
+                           f"expected {want}")
 
 
 def fit_baseline(a, arm, lam, r, common, backbone):

@@ -499,12 +499,13 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
                          bary_support=None, bary_iter=10, bary_weights="equal", wcd_src_root=None,
                          critic_lr=1e-4, critic_betas=(0.0, 0.9), adv_hidden=128, disc_lr=1e-3,
                          bary_warm_iter=None, r1_gamma=None, sampler=None, iw_weights=None,
-                         iw_label_key="celltype"):
+                         iw_label_key="celltype", n_epochs_kl_warmup=None):
     """Fit one scvi model + adversary. Every design setting is a required keyword; the backbone
     settings default to scvi-tools' own defaults (n_layers=1, n_hidden=128, zinb, train_size=0.9).
     Options (off unless given; docs/SPECS_missing_arms.md): r1_gamma (discriminator_r1), sampler='stratified'
     (training minibatches stratified by batch), iw_weights {batch: {cell type: w}} (X3 importance weights,
-    conditioned models only; cell types from obs[iw_label_key] enter through scvi's labels slot).
+    conditioned models only; cell types from obs[iw_label_key] enter through scvi's labels slot),
+    n_epochs_kl_warmup (X15, SI-44: KL warm-up length in epochs; None = not passed, scvi-tools' default 400).
     Returns (posterior-mean latent [n, n_latent], trained model)."""
     import scvi
     if model_name == "SCVI":
@@ -545,6 +546,10 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
                        critic_lr=critic_lr, critic_betas=critic_betas, adv_hidden=adv_hidden, disc_lr=disc_lr,
                        bary_warm_iter=bary_warm_iter, r1_gamma=r1_gamma,
                        iw_table=(None if iw_weights is None else _build_iw_table(model, iw_weights, iw_label_key, a, batch_key)))
+    if n_epochs_kl_warmup is not None:
+        if int(n_epochs_kl_warmup) != n_epochs_kl_warmup or int(n_epochs_kl_warmup) < 1:
+            raise ValueError(f"n_epochs_kl_warmup must be a positive integer, got {n_epochs_kl_warmup!r}")
+        plan_kwargs["n_epochs_kl_warmup"] = int(n_epochs_kl_warmup)
     train_kwargs = {}
     if sampler == "stratified":
         model._data_splitter_cls = _make_stratified_splitter(wcd_src_root or os.environ.get("WCD_SRC"))
