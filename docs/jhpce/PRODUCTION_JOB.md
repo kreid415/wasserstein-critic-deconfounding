@@ -114,14 +114,16 @@ Local record vs the L40S record: only the declared CUDA build differs (torch 2.1
 
 ## First job: the 250 pre-freeze rows of the JHPCE tasks
 
-Derived with `make_tags.py` from `manifests/paper_manifest_stock_pilot_u5_b10.tsv` (sha256 c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb):
+Derived with `make_tags.py` from `manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv` (sha256 6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24;
+2026-10-04, SI-44 / SI-46: the same 250 tags in the same order as from the tagged manifest c0244ea4..., only the two
+header lines naming the manifest changed, so the tags files' SHA-256 and the runner keys `__tags-<sha12>` changed):
 X1 arms none and scvi_adv, X13 arms scanvi and sysvi, tasks of SI-39. Per task: X1 none 10 (5 seeds x cond 0/1), X1
 scvi_adv 5 (cond 1), X13 scanvi 5, X13 sysvi 30 = 50; total 250. No row holds a placeholder.
 
 | job | tasks | rows | tags file (sha256) | predicted lane-h | predicted wall on 1 L40S |
 |---|---|---|---|---|---|
-| jobA | atac_large, immune_hum_mou | 100 | fillers_x1_x13_jobA.tags (74dc397a...) | 18.0 | 3.9 h |
-| jobB | lung, pancreas, sim2 | 150 | fillers_x1_x13_jobB.tags (8d5d4b07...) | 25.0 | 5.4 h |
+| jobA | atac_large, immune_hum_mou | 100 | fillers_x1_x13_jobA.tags (d5da370a...; was 74dc397a...) | 18.0 | 3.9 h |
+| jobB | lung, pancreas, sim2 | 150 | fillers_x1_x13_jobB.tags (91daef08...; was 8d5d4b07...) | 25.0 | 5.4 h |
 
 Lane-hours: scripts/cost_model.py (local per-step throughput); wall = lane-h / 4.62 (L40S 8-lane factor, gate G5, measured
 on 3-epoch immune fits only). The 24 h wall request is >= 4x the estimate (first full-length fits of these tasks on an L40S).
