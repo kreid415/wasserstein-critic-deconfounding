@@ -1,0 +1,537 @@
+{
+  "experiment_id": "fillers_x1_x13_local_scoring",
+  "created_at": "2026-10-06T13:07:59Z",
+  "pf_version": "1.0",
+  "plan": {
+    "question": "Score the 250 JHPCE filler latents (X1 none c0/c1 + stock scVI-adversarial, X13 scANVI + sysVI; atac_large, immune_hum_mou, lung, pancreas, sim2; seeds 0-4; fitted on L40S at c88cce3; harvested and verified 2026-10-06) with the tagged scorer, locally beside A1, as planned at the SI-48 go (local scoring within A1's spare scoring capacity)",
+    "primary_outcome": "per-latent PREREG batch score B (mean of the 5 raw scIB batch metrics) and bio score C, written by scripts/score_scib_native.py at c88cce3 to OUT/scores/<tag>.csv; the run is complete when the runner's gate finds all 250 rows final",
+    "unit_of_analysis": "one latent = task x arm x knob value x decoder condition x seed",
+    "split_unit": "seed (0-4, disjoint from A1's 100-102 and follow-ups' 10-12); scIB metrics use all cells of each task, no cell-level split",
+    "selection_rule": "nothing is selected: every harvested filler latent is scored; the X1/X13 analysis rules of PREREG apply later and are not run here",
+    "n_comparisons": 1,
+    "multiple_comparison_correction": "none needed: this step only computes per-latent scores; inference happens later in the pre-registered X1/X13 analyses",
+    "data_filters": "scIB task files as distributed (SI-15), prepped by scripts/prep_scib_task.py, fingerprints verified (docs/prepped_fingerprints_scib.json); the runner accepts a latent only if it was fitted on an L40S at c88cce3 and records its own manifest row (SI-17, SI-19)"
+  },
+  "plan_sha": "7ee4d33faa8f59d8",
+  "extra_items": [
+    {
+      "id": "SC-01",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Are any evaluated labels constant within a donor/patient (donor-level), and if so is the train/test split grouped by donor rather than by cell?",
+      "applies_if": "A probe, classifier or held-out metric uses labels such as response, treatment time, disease, genotype or any per-sample/per-patient annotation.",
+      "how_to_check": "Run scpf_check_donor_split(adata, label_cols, donor_col, split_col=...) on the realized split; a label with one value per donor is donor-level and needs a donor-grouped split.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-02",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Is the grouping key unique across cohorts (composite cohort.patient), with the sample-to-patient mapping verified rather than assumed?",
+      "applies_if": "Data from more than one cohort/study/assay is pooled, or the grouping column is a sample/batch id that is assumed to equal one patient.",
+      "how_to_check": "Run scpf_check_donor_split(..., cohort_col=..., sample_col=...) and inspect id collisions and sample-to-donor nesting; check prior notes/memory for recorded collisions before writing guidance.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-03",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "On the realized train/test assignment, does any donor/group appear on both sides?",
+      "applies_if": "Any train/test, held-out or cross-validation split exists for data with repeated cells per donor/sample.",
+      "how_to_check": "Run scpf_check_split_leakage(adata, group_col, split_col) on the saved split labels, not on the splitting code.",
+      "auto": "scpf_check_split_leakage"
+    },
+    {
+      "id": "SC-04",
+      "area": "splits",
+      "severity": "major",
+      "question": "Are guarantees claimed for a custom grouped-split function (no straddling, target fraction, optimality) verified empirically over many seeds?",
+      "applies_if": "A custom grouped/stratified split function is written or its docstring states a guarantee.",
+      "how_to_check": "Run scpf_check_split_fn(split_fn, group_ids, n_seeds=10, check_optimal=True) and compare reported side stability and optimality gap with the docstring.",
+      "auto": "scpf_check_split_fn"
+    },
+    {
+      "id": "SC-05",
+      "area": "gene panel",
+      "severity": "blocking",
+      "question": "Does every feature in the gene panel / program gene set belong to the intended species (ENSG vs ENSMUSG, symbol case)?",
+      "applies_if": "A gene panel, feature set or program gene set is built from a reference or dataset that may combine species, or a dataset's species is assumed from its name.",
+      "how_to_check": "Run scpf_check_species(adata_or_var_names, expected='human') on the final panel, the program gene set and each model input.",
+      "auto": "scpf_check_species"
+    },
+    {
+      "id": "SC-06",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Does each model's required gene vocabulary cover the dataset's genes, and are models with incompatible species/ID types excluded or reported on the compatible subset?",
+      "applies_if": "A foundation model with a fixed gene vocabulary (token dictionary, species-specific ID list) is evaluated.",
+      "how_to_check": "Run scpf_check_vocab_coverage(var_names, vocab, min_frac=...) per model x dataset; list which datasets each model is excluded from and why.",
+      "auto": "scpf_check_vocab_coverage"
+    },
+    {
+      "id": "SC-07",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Is the zero-intensity perturbation exactly the raw input (a true no-op), for every dataset and every perturbation type, including default dispersion/shape parameters?",
+      "applies_if": "A perturbation axis (noise, dropout, variance shift, batch effect, etc.) includes a level that is meant to be the unperturbed baseline.",
+      "how_to_check": "Run scpf_check_noop_perturbation(raw, perturbed_at_zero) per dataset; any nonzero difference or changed shape blocks the run.",
+      "auto": "scpf_check_noop_perturbation"
+    },
+    {
+      "id": "SC-08",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Are cell counts (and per-cell QC statistics) reported along each perturbation axis, and does the retained sample size stay within a stated ratio?",
+      "applies_if": "A perturbation or filtering step varies in severity and downstream metrics are compared across its levels.",
+      "how_to_check": "Tabulate n_cells (and median genes/cell) per dataset x level and run scpf_check_cell_counts(table, axis_col, max_ratio=...).",
+      "auto": "scpf_check_cell_counts"
+    },
+    {
+      "id": "SC-09",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Can the perturbation generator produce empty cells or genes, and is that guarded before the model runners see the data?",
+      "applies_if": "Dropout, thinning, subsampling or count-level noise is applied before model fitting.",
+      "how_to_check": "Run scpf_check_empty_cells(perturbed, min_genes=1) over the full perturbation grid, not one setting.",
+      "auto": "scpf_check_empty_cells"
+    },
+    {
+      "id": "SC-10",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Do the number of genes reaching each model match the declared panel size, and is HVG selection a real ranking (n_top_genes < n_vars) applied exactly once?",
+      "applies_if": "HVG selection or a fixed gene-panel size is configured and results are compared across models or datasets.",
+      "how_to_check": "Record n_genes at model input per model x dataset and run scpf_check_gene_counts(n_genes_by_model, expected_n, hvg_n, n_vars_input, n_hvg_stages).",
+      "auto": "scpf_check_gene_counts"
+    },
+    {
+      "id": "SC-11",
+      "area": "inputs",
+      "severity": "blocking",
+      "question": "Are batch key, condition and donor columns resolved by explicit name and validated by expected values, never by column position or a heuristic first match?",
+      "applies_if": "A script, smoke test or loader selects obs/metadata columns (batch_key, condition, donor, label).",
+      "how_to_check": "Run scpf_check_obs_keys(adata, required={role: column}, expected_values=..., used={role: resolved column}) in the loader and the smoke test.",
+      "auto": "scpf_check_obs_keys"
+    },
+    {
+      "id": "SC-12",
+      "area": "claims",
+      "severity": "major",
+      "question": "Does the claimed finding (e.g. batch demoted below biology) go beyond what the model's batch/covariate conditioning mechanism does by construction?",
+      "applies_if": "A claim of disentanglement, invariance or integration is made for a model whose decoder or encoder is explicitly conditioned on the covariate in question.",
+      "how_to_check": "List each model's conditioning inputs from its source; label such results as conditioning/integration effects, and require an unconditioned comparison or ablation before claiming disentanglement.",
+      "auto": null
+    },
+    {
+      "id": "SC-13",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are factor pairs deterministically nested (one factor fully determines the other) and excluded from collision/overlap counts and dependence metrics?",
+      "applies_if": "Several covariates (batch, response, time, cancer type, donor) are scored against each other or against latent dimensions.",
+      "how_to_check": "Run scpf_check_nesting(adata, factors, pairs=...) and drop or separately report nested pairs.",
+      "auto": "scpf_check_nesting"
+    },
+    {
+      "id": "SC-14",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Is each model scored in its native concept basis (block metrics for block-structured latents, per-dimension only for one-dimension-per-factor), and are block-sensitive probes and reproducibility scores valid for residual blocks?",
+      "applies_if": "Models with multi-dimensional concept blocks (shared/private/residual subspaces) are compared with per-dimension disentanglement metrics (MIG, DCI, SAP, completeness).",
+      "how_to_check": "Build layouts from each model's source (None if no block structure) and run scpf_check_block_scoring(layouts, bases); fail on silent fallback to per-dimension.",
+      "auto": "scpf_check_block_scoring"
+    },
+    {
+      "id": "SC-15",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Is block-to-factor pairing an explicit name map, with unowned/shared blocks not credited to any factor?",
+      "applies_if": "A block-aware metric pairs latent blocks with annotated factors.",
+      "how_to_check": "Run scpf_check_block_pairing(blocks, factors, pairing, shared_blocks).",
+      "auto": "scpf_check_block_pairing"
+    },
+    {
+      "id": "SC-16",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Are kNN-based metric parameters valid for the smallest sample at every condition (trustworthiness k < n/2; kNN k < n; kBET k <= n)?",
+      "applies_if": "A kNN-derived metric (trustworthiness, kNN purity/NMI, kBET, LISI) is computed on subsampled, filtered or perturbed data of varying size.",
+      "how_to_check": "Run scpf_check_knn_validity(n_cells_by_condition, k, kind) before computing; ensure invalid cells are NaN with a status string.",
+      "auto": "scpf_check_knn_validity"
+    },
+    {
+      "id": "SC-17",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are non-computable metric cells reported as NaN with a status string (never a placeholder value), and are NaN columns traced to their true cause?",
+      "applies_if": "Any metric can be undefined for some dataset/model/condition.",
+      "how_to_check": "Scan result tables for constants such as 1.0000/0.0 on infeasible cells; confirm each NaN has a status and the cause is read from the code path, not guessed.",
+      "auto": null
+    },
+    {
+      "id": "SC-18",
+      "area": "aggregation",
+      "severity": "major",
+      "question": "Do all pooled models cover the same datasets; if not, is pooling restricted to the common subset (or coverage shown) and rank stability checked?",
+      "applies_if": "Metrics are averaged across datasets per model and some models run on a subset (species restriction, memory, failed fits).",
+      "how_to_check": "Run scpf_check_pool_coverage(table, model_col, dataset_col, value_col); report coverage next to every pooled figure.",
+      "auto": "scpf_check_pool_coverage"
+    },
+    {
+      "id": "SC-19",
+      "area": "inputs",
+      "severity": "major",
+      "question": "Do results loaders reject retired/stale perturbation types and result files by their value, not only by a missing field?",
+      "applies_if": "Result JSON/CSV files from earlier code versions can exist in the same directory as current outputs.",
+      "how_to_check": "Run scpf_check_allowed_values(pert_types_in_files, allowed, name='perturbation type') over every loaded file; confirm baseline slices contain only current-run files.",
+      "auto": "scpf_check_allowed_values"
+    },
+    {
+      "id": "SC-20",
+      "area": "runners",
+      "severity": "blocking",
+      "question": "Did any runner catch an exception and continue with a different method (e.g. refit on all cells instead of held-out projection, retry-then-ignore)?",
+      "applies_if": "Model runners wrap fits/projections in try/except, retry-then-ignore, or version-sensitive library calls.",
+      "how_to_check": "Run scpf_scan_fallbacks(log_text_or_path) on all runner logs and grep runner code for broad excepts around projection/transform; confirm every expected cell of the result grid exists.",
+      "auto": "scpf_scan_fallbacks"
+    },
+    {
+      "id": "SC-21",
+      "area": "metrics",
+      "severity": "minor",
+      "question": "Are continuous factors (program scores, pseudotime, dose) kept as ordered axes, not binned into unordered classes for classifier-based metrics?",
+      "applies_if": "A classifier- or MI-based disentanglement metric is applied to a continuous factor.",
+      "how_to_check": "Confirm the metric variant used for continuous factors is regression/ordered; document any binning and its justification.",
+      "auto": null
+    },
+    {
+      "id": "SC-22",
+      "area": "claims",
+      "severity": "minor",
+      "question": "Is every statement that a metric is standard in single-cell benchmarking backed by a cited single-cell source?",
+      "applies_if": "A metric suite is justified by field convention in a plan, README or manuscript.",
+      "how_to_check": "Find a single-cell benchmark paper using the metric (open the full text); otherwise word it as borrowed from general ML disentanglement.",
+      "auto": null
+    }
+  ],
+  "answers": {
+    "PF-01": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_plan] plan complete (sha 7ee4d33faa8f59d8)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "[auto:pf_check_plan] plan complete (sha 7ee4d33faa8f59d8)",
+          "at": "2026-10-06T13:07:59Z"
+        }
+      ],
+      "auto": {
+        "check": "pf_check_plan",
+        "ok": true,
+        "summary": "plan complete (sha 7ee4d33faa8f59d8)",
+        "warnings": null
+      }
+    },
+    "PF-02": {
+      "status": "pass",
+      "evidence": "plan declares n_comparisons=1; this step computes per-latent B/C and tests no contrast",
+      "at": "2026-10-06T13:07:59Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "plan declares n_comparisons=1; correction: none needed: this step only computes per-latent scores; inference happens later in the pre-registered X1/X13 analyses",
+          "at": "2026-10-06T13:07:59Z"
+        }
+      ]
+    },
+    "PF-03": {
+      "status": "n/a",
+      "evidence": "no held-out evaluation: scIB metrics are computed on all cells of each task (scIB convention)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-04": {
+      "status": "n/a",
+      "evidence": "no unit-level evaluation; batch and cell type are the scIB keys of the files as distributed",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-05": {
+      "status": "pass",
+      "evidence": "scpf_check_nesting(batch, celltype) on the 5 prepped tasks (atac_large, immune_hum_mou, lung, pancreas, sim2): no deterministic nesting; immune_hum_mou has 1 of 19 cell types in a single batch (kBET skips it as NaN, scib kbet.py)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-06": {
+      "status": "pass",
+      "evidence": "nothing is selected; the 250 rows (seeds 0-4) are disjoint from A1's seeds 100-102 and the follow-up seeds 10-12",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-07": {
+      "status": "pass",
+      "evidence": "arms as fitted (filler preflight experiments/jhpce_fillers_x1_x13_prod, pf_check_matched_arms on 8 fields); scoring applies one scorer with identical settings to every arm",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-08": {
+      "status": "pass",
+      "evidence": "no pooled mean is computed here; coverage counted from the 250 harvested latents: every task has 10 none (c0+c1), 5 scvi_adv, 5 scanvi, 30 sysvi",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-09": {
+      "status": "pass",
+      "evidence": "lambda=0 'none' = stock scVI: tests/scvi incl. test_none_is_bit_identical_to_stock_scvi passed on both L40S nodes before fitting (110 passed, 1 skipped; Slurm 36155707/36155708 logs)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-10": {
+      "status": "n/a",
+      "evidence": "no condition is created by filtering or subsampling: every latent is scored on its full prepped task",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-11": {
+      "status": "pass",
+      "evidence": "all 250 latents are 10-dimensional unstructured posterior means scored by the same scIB functions; no metric assumes a latent structure some arms lack",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-12": {
+      "status": "pass",
+      "evidence": "scorer = scripts/score_scib_native.py at c88cce3, the commit A1 is scored with; metrics from scib 1.1.7; B/C aggregation and seeded kBET are tested (A1 preflight PF-12: tests/prereg known answers, tests/scoring same latent twice identical)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-13": {
+      "status": "n/a",
+      "evidence": "no claim or effect estimate is made by this scoring step",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-14": {
+      "status": "n/a",
+      "evidence": "no test-vs-control claim is made by this scoring step",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-15": {
+      "status": "n/a",
+      "evidence": "no causal explanation is offered by this scoring step",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "pass",
+      "evidence": "the runner reads the 250 rows from manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv via the two tagged tags files (sha256 d5da370a..., 91daef08...); these rows passed pf_check_manifest (7 intended flags) in experiments/jhpce_fillers_x1_x13_prod",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-20": {
+      "status": "pass",
+      "evidence": "independent counts agree: dry runs plan 100 + 150 needs_score rows and 0 fits; 250 latents on disk; harvest n_latents 100 + 150; filler record: 5 tasks x 50 rows",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-21": {
+      "status": "pass",
+      "evidence": "pf_check_replicates_differ on harvested X1_immune_hum_mou_none_l0_c1 seeds 0/1/2: 3 of 3 replicates distinct",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-22": {
+      "status": "pass",
+      "evidence": "the runner writes OUT/scores/<tag>.csv, status/<tag>.json and attempts/<tag>.jsonl per tag and rebuilds ledger/ and failures.csv; its gate exits 0 only if every row is final; a killed run resumes from the per-tag files; the downloaded parts stay in jhpce_tier12/_parts until the scores are checked",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "pass",
+      "evidence": "inclusion = all harvested filler latents: harvest_local.py verified every part's SHA-256, the reassembled tars (d527c45d..., 267ba98a...), the manifests and every extracted file's size and SHA-256; merged with 0 conflicts",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-24": {
+      "status": "pass",
+      "evidence": "parameters valid for these inputs: features 3,580 (atac_large, all) and 2,000 HVGs of 8,135-19,093 (others); LISI k=90 and graph k=15 are far below n (16,382-97,861 cells); kBET sets k0 = min(70, max(10, quarter of the mean batch size)) per cell type and skips cell types under 10 cells or in one batch (scib kbet.py)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-01": {
+      "status": "n/a",
+      "evidence": "no donor-level labels, probes or classifiers; scIB metrics use all cells",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-02": {
+      "status": "n/a",
+      "evidence": "no donor or patient grouping key is used by the scorer",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-03": {
+      "status": "n/a",
+      "evidence": "no train/test assignment exists (scIB metrics on all cells)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-04": {
+      "status": "n/a",
+      "evidence": "no custom grouped-split function is used",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-05": {
+      "status": "n/a",
+      "evidence": "no gene panel built from a reference; features are the scIB files' own HVGs (atac_large: all 3,580)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-06": {
+      "status": "n/a",
+      "evidence": "no foundation model with a fixed gene vocabulary is used",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-07": {
+      "status": "n/a",
+      "evidence": "no perturbation axis in the filler rows",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-08": {
+      "status": "n/a",
+      "evidence": "no perturbation or filtering axis in the filler rows",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-09": {
+      "status": "pass",
+      "evidence": "no perturbation generator; scpf_check_empty_cells on layers['counts'] restricted to the training features: 0 empty cells in atac_large, immune_hum_mou, lung, pancreas, sim2",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-10": {
+      "status": "pass",
+      "evidence": "features as fitted: var.highly_variable of the prepped file = 3,580 of 3,580 (atac_large), 2,000 of 8,135 / 15,148 / 19,093 / 10,000 (immune_hum_mou, lung, pancreas, sim2); one HVG selection (scIB prep), same mask for every arm",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-11": {
+      "status": "pass",
+      "evidence": "scpf_check_obs_keys: 'batch' and 'celltype' present by name in all 5 files; batches 11/23/16/9/16 and cell types 7/19/17/14/4",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-12": {
+      "status": "n/a",
+      "evidence": "no integration or disentanglement claim is made by this scoring step",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-13": {
+      "status": "pass",
+      "evidence": "same check as PF-05: scpf_check_nesting(batch, celltype) finds no deterministic nesting in the 5 tasks",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-14": {
+      "status": "n/a",
+      "evidence": "every latent is an unstructured 10-dimensional posterior mean; no block-structured models",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-15": {
+      "status": "n/a",
+      "evidence": "no block-aware metric is used; latents are unstructured",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-16": {
+      "status": "n/a",
+      "evidence": "applies to metrics on subsampled, filtered or perturbed data of varying size; here every metric runs on the full fixed-size task, identically for all arms. Facts: LISI (k=90) and graph metrics (k=15) build kNN on all cells (16,382-97,861); kBET builds kNN within a cell type with k0 = min(70, max(10, quarter of mean batch size)) and skips cell types under 10 cells or in one batch (NaN). scpf_check_knn_validity against the smallest cell type flags lung (46 cells) and pancreas (7 cells); pancreas's 7-cell type is skipped by kBET, as in scIB's own benchmark of these tasks",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-17": {
+      "status": "pass",
+      "evidence": "metrics outside a task's set are NaN, never a placeholder (cell_cycle only on human RNA tasks, trajectory only with dpt_pseudotime); kBET-skipped cell types are NaN and left out of the mean (scib kbet.py); prereg_rules requires finite values for the task's metrics by name and stops otherwise",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-18": {
+      "status": "n/a",
+      "evidence": "no pooled model means are computed in this scoring step",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-19": {
+      "status": "pass",
+      "evidence": "the runner rejects latents by value: the --expect-device dry run refused all 250 L40S latents when 'RTX 3080' was expected (SI-17), and the git SHA, manifest row and latent SHA-256 are checked per tag; with L40S every row is needs_score",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-20": {
+      "status": "pass",
+      "evidence": "scorer and runner are the tagged files A1 uses (scpf_scan_fallbacks: no refit/fallback patterns, A1 preflight SC-20); a refit cannot run here because the local fit env sees an RTX 3080 and the runner requires L40S before any fit",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-21": {
+      "status": "pass",
+      "evidence": "trajectory conservation, where defined, uses continuous DPT pseudotime (scib trajectory_conservation, Spearman); nothing is binned",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "SC-22": {
+      "status": "pass",
+      "evidence": "the metric suite and bio/batch grouping follow scIB (Luecken et al. 2022, Nat. Methods) and scib-reproducibility plotSingleTaskRNA.R (PREREG sec 1)",
+      "at": "2026-10-06T13:07:59Z",
+      "history": []
+    },
+    "PF-16": {
+      "status": "pass",
+      "evidence": "timings and peak memory are used only to plan, and were measured at the production setting on purpose: two scorers at once, nice 19, beside the running A1, each a fresh process as in production (scratch/score_probe/probe.py at c88cce3): immune_hum_mou 3,016 s / 19.36 GB, atac_large 2,489 s / 24.79 GB, all required metrics finite; no speed or memory claim is reported",
+      "at": "2026-10-06T14:01:51Z",
+      "history": []
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "[auto:pf_estimate_cost] estimate 107.38 h (x1.5 safety = 161.08 h); cpu-hours 214.8; recommended walltime 289980s",
+      "at": "2026-10-06T14:01:51Z",
+      "history": [],
+      "auto": {
+        "check": "pf_estimate_cost",
+        "ok": true,
+        "summary": "estimate 107.38 h (x1.5 safety = 161.08 h); cpu-hours 214.8; recommended walltime 289980s",
+        "warnings": []
+      }
+    },
+    "PF-18": {
+      "status": "pass",
+      "evidence": "one scorer per pass, sized from peak RSS measured at the production setting (probe/probe.json): atac_large 24.79 GB, immune_hum_mou 19.36 GB, the two largest tasks (pass A). Pass B's tasks have at most 38% of atac_large's cells (32,472 vs 84,813) and dense X of at most 2.0 GB (lung), so its peak is expected below the measured 24.79 GB maximum; A1 uses 28 GB (free -g 10:05). Worst case 24.8 + 24.8 + 28 = 78 GB < 94 GB; memory is read at each hourly check, including when A1 ends its fits and runs up to 8 scorers on its small tasks",
+      "at": "2026-10-06T14:04:30Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "scorers sized from measured peak RSS: 24.79 GB (atac_large) and 19.36 GB (immune_hum_mou), the two largest tasks; one scorer per pass: pass A (large tasks) <= 24.8 GB, pass B (lung/pancreas/sim2, <= 32,472 cells) <= 9.5 GB at atac_large's 0.29 MB per cell; A1 uses 29 GB (free -g 08:58, A1 alone); total <= ~64 GB of 94 GB. Not 2 large-task scorers: 2 x 24.8 GB + A1 would leave < 15 GB",
+          "at": "2026-10-06T14:01:51Z"
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
+    "major_fail": [],
+    "minor_fail": [],
+    "plan_changed": false,
+    "n_items": 46,
+    "n_pass": 27,
+    "n_na": 19,
+    "at": "2026-10-06T14:04:30Z"
+  },
+  "path": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/a0b87862-8454-468c-a2f9-6326cd1433fc/scratch/wt_int/experiments/fillers_x1_x13_local_scoring"
+}

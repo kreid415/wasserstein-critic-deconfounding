@@ -1,0 +1,14 @@
+{
+ "immune_hum_mou": {
+  "tag": "X1_immune_hum_mou_none_l0_c1_s0_c66698bb",
+  "returncode": 0,
+  "wall_s": 3016.3,
+  "peak_rss_gb": 19.36
+ },
+ "atac_large": {
+  "tag": "X1_atac_large_none_l0_c1_s0_2561dc45",
+  "returncode": 0,
+  "wall_s": 2488.5,
+  "peak_rss_gb": 24.79
+ }
+}
