@@ -1,0 +1,27 @@
+{
+ "checked_at": "2026-10-10T08:10:32-04:00",
+ "verifier": "experiments/A2A3_pilot/switch_compare.py:check",
+ "good_input": "tier12_v2/checks/A2A3_switch_check_20261010T080855",
+ "ok": true,
+ "good_passed": true,
+ "caught": {
+  "dead A2 switch (sample latent = mean latent)": "SwitchCheckFailed: A2 switch live: sample vs mean (reference)",
+  "dead A3 switch on the critic-free path": "SwitchCheckFailed: A3 switch live: zstd 1 vs 0 (mmd, critic-free)",
+  "non-deterministic default half (1 ulp)": "SwitchCheckFailed: determinism (default half fitted twice)",
+  "seeds identical": "SwitchCheckFailed: seeds differ (A2 reference, 100 vs 101)",
+  "NaN in a latent": "SwitchCheckFailed: all latents present and finite",
+  "missing latent": "SwitchCheckFailed: A3 switch live: zstd 1 vs 0 (reference); all latents present and finite",
+  "a fit exited non-zero": "SwitchCheckFailed: every fit exited 0"
+ },
+ "missed": [],
+ "wrong_reason": {},
+ "mutants": {
+  "dead A2 switch (sample latent = mean latent)": "A2 switch live",
+  "dead A3 switch on the critic-free path": "critic-free",
+  "non-deterministic default half (1 ulp)": "determinism",
+  "seeds identical": "seeds differ",
+  "NaN in a latent": "finite",
+  "missing latent": "zstd 1 vs 0 \\(reference\\)",
+  "a fit exited non-zero": "every fit exited 0"
+ }
+}

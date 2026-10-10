@@ -8,17 +8,20 @@
 #   Z_ref   A3 new half (zstd 1), reference, seed 100
 #   D_mmd   A1 default half, mmd, seed 100;  Z_mmd A3 new half, mmd, seed 100 (critic-free code path)
 # PASS = D_ref bit-identical across the two runs, every new half differs from its default half, the two seeds
-# differ, all latents finite. Writes switch_check.csv in OUT.
+# differ, all latents finite, every fit exit 0. Verdict and switch_check.csv by switch_compare.py; the script's exit
+# code is the verdict (0 PASS, 1 FAIL, 2 refused before any fit).
 # Usage: check_switches.sh OUT_DIR
-set -uo pipefail
-OUT=${1:?usage: check_switches.sh OUT_DIR}; mkdir -p "$OUT"
+set -euo pipefail
+OUT=${1:?usage: check_switches.sh OUT_DIR}
+[ ! -e "$OUT" ] || { echo "OUT_DIR $OUT exists; the check needs a fresh directory" >&2; exit 2; }
+mkdir -p "$OUT"
 D=/home/kendall/experiment_data/wasserstein-critic-deconfounding
 REPO=$D/code/wcd_prereg-tier12-v2; E=/home/kendall/.claude-science/conda/envs/scvi-api/bin/python
 MAN=$D/tier12_v2/manifests/paper_manifest_stock_pilot_u5_b10_v3.r4a1.tsv
 MAN_SHA=ca28d991767d85f8fb7f25b8335267676846d70e8c7887ea9cb3e87900c33459
 [ "$(git -C "$REPO" rev-parse HEAD)" = c88cce3c569e9de47f2d65c6794ca3890637786a ] && [ -z "$(git -C "$REPO" status --porcelain)" ] || { echo "checkout not clean at c88cce3" >&2; exit 2; }
 [ "$(sha256sum "$MAN" | cut -d' ' -f1)" = "$MAN_SHA" ] || { echo "resolved manifest differs from the committed one" >&2; exit 2; }
-"$E" - "$MAN" "$OUT" <<'PY'
+"$E" - "$MAN" "$OUT" <<'PY' || { echo "row selection failed" >&2; exit 2; }
 import sys, json, pandas as pd
 src, out = sys.argv[1], sys.argv[2]
 head = open(src).readline()
@@ -45,41 +48,17 @@ with open(f"{out}/manifest.tsv", "w") as f:
 json.dump({k: r["tag"] for k, r in rows.items()}, open(f"{out}/roles.json", "w"), indent=1)
 PY
 [ -s "$OUT/roles.json" ] || { echo "row selection failed" >&2; exit 2; }
-run() {  # run <out subdir> <tag>
+: > "$OUT/fit_rc.tsv"
+run() {  # run <out subdir> <tag>; appends "<subdir>\t<tag>\t<exit code>" to fit_rc.tsv (the verdict requires 7 zeros)
   mkdir -p "$OUT/$1"
   ( cd "$REPO" && MANIFEST=$OUT/manifest.tsv PREPPED_DIR=$D/prepped_scib OUT_DIR=$OUT/$1 WCD_SRC=$REPO/src TAG=$2 CUDA_VISIBLE_DEVICES= \
       OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1 KMP_AFFINITY=disabled PYTHONWARNINGS=ignore \
-      nice -n 19 "$E" scripts/fit_paper_config.py > "$OUT/$1/$2.log" 2>&1 ); echo "$1 $2 exit $?"
+      nice -n 19 "$E" scripts/fit_paper_config.py > "$OUT/$1/$2.log" 2>&1 ) && rc=0 || rc=$?   # keep going: the verdict judges rc
+  printf '%s\t%s\t%s\n' "$1" "$2" "$rc" >> "$OUT/fit_rc.tsv"; echo "$1 $2 exit $rc"
 }
 tag() { "$E" -c "import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])" "$OUT/roles.json" "$1"; }
 for r in D_ref S_ref S_ref101 Z_ref D_mmd Z_mmd; do run run1 "$(tag $r)" & done
 run run2 "$(tag D_ref)" &
 wait
-"$E" - "$OUT" <<'PY'
-import sys, os, json, csv, numpy as np
-out = sys.argv[1]; roles = json.load(open(f"{out}/roles.json"))
-def z(run, role):
-    p = f"{out}/{run}/latents/{roles[role]}.npz"
-    return np.load(p, allow_pickle=False)["z"] if os.path.exists(p) else None
-Z = {r: z("run1", r) for r in roles}; Z["D_ref_repeat"] = z("run2", "D_ref")
-rows = []
-def cmp(name, a, b, want_equal):
-    za, zb = Z[a], Z[b]
-    if za is None or zb is None:
-        rows.append(dict(check=name, a=a, b=b, want="equal" if want_equal else "differ", equal="missing", max_abs_diff="", ok=False)); return
-    eq = za.shape == zb.shape and np.array_equal(za, zb)
-    mad = float(np.max(np.abs(za - zb))) if za.shape == zb.shape else float("nan")
-    rows.append(dict(check=name, a=a, b=b, want="equal" if want_equal else "differ", equal=eq, max_abs_diff=mad, ok=(eq == want_equal)))
-cmp("determinism (default half fitted twice)", "D_ref", "D_ref_repeat", True)
-cmp("A2 switch live: sample vs mean (reference)", "S_ref", "D_ref", False)
-cmp("A3 switch live: zstd 1 vs 0 (reference)", "Z_ref", "D_ref", False)
-cmp("A3 switch live: zstd 1 vs 0 (mmd, critic-free)", "Z_mmd", "D_mmd", False)
-cmp("seeds differ (A2 reference, 100 vs 101)", "S_ref", "S_ref101", False)
-fin = all(v is not None and bool(np.isfinite(v).all()) for v in Z.values())
-rows.append(dict(check="all latents present and finite", a="all", b="", want="True", equal=fin, max_abs_diff="", ok=fin))
-with open(f"{out}/switch_check.csv", "w", newline="") as f:
-    w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
-for r in rows:
-    print(f"{'PASS' if r['ok'] else 'FAIL'} | {r['check']} | equal={r['equal']} max|dz|={r['max_abs_diff']}")
-print("SWITCH CHECK", "PASS" if all(r["ok"] for r in rows) else "FAIL")
-PY
+# verdict: exit 0 = PASS, 1 = FAIL (any non-zero fit, missing or non-finite latent, or a failed comparison)
+"$E" "$(dirname "${BASH_SOURCE[0]}")/switch_compare.py" "$OUT"
