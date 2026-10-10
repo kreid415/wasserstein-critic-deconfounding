@@ -1,0 +1,8 @@
+{
+ "D_ref": "A1_atac_small_reference_l100_c1_s100_697aa0ae",
+ "S_ref": "A2_atac_small_reference_la1_matched_c1_s100_dbd06353",
+ "S_ref101": "A2_atac_small_reference_la1_matched_c1_s101_3f4bf74e",
+ "Z_ref": "A3_atac_small_reference_la1_matched_c1_s100_1c44a38a",
+ "D_mmd": "A1_atac_small_mmd_l30_c1_s100_e88830bf",
+ "Z_mmd": "A3_atac_small_mmd_la1_matched_c1_s100_2db2b6af"
+}
