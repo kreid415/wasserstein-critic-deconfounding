@@ -56,9 +56,13 @@ def main(argv=None):
     ap.add_argument("--fit-timeout-s", type=int, default=28800)
     ap.add_argument("--guard-margin-s", type=int, default=2700)
     ap.add_argument("--queue-allowance-h", type=float, default=120)
+    ap.add_argument("--after-slurm-job", default=None,
+                    help="Slurm job id this job waits for (afterany: it starts once that job has ended, however it ended)")
     a = ap.parse_args(argv)
     if a.expected_sha != TAG_SHA:
         raise SystemExit(f"--expected-sha must be prereg-tier12-v2 ({TAG_SHA}): PREREG sec 7 pins every stage to the tag")
+    if a.after_slurm_job is not None and not re.fullmatch(r"[0-9]+", a.after_slurm_job):
+        raise SystemExit(f"--after-slurm-job {a.after_slurm_job!r}: a numeric Slurm job id")
     if not WALL_RE.match(a.walltime) or wall_s(a.walltime) > 3 * 86400:
         raise SystemExit(f"--walltime {a.walltime}: D-HH:MM:SS up to the gpu partition limit of 3 days")
     if a.cpus < a.fit_lanes + 2:
@@ -86,6 +90,7 @@ def main(argv=None):
         f"#SBATCH --time={a.walltime}",
         "#SBATCH --signal=B:TERM@300",
         "#SBATCH --no-requeue",
+        *([f"#SBATCH --dependency=afterany:{a.after_slurm_job}"] if a.after_slurm_job else []),
         "set -euo pipefail",
         'SCR="/fastscratch/myscratch/$USER/wcd"',
         'JOBDIR="$SCR/prod/job_${SLURM_JOB_ID}"',
@@ -101,7 +106,7 @@ def main(argv=None):
         'exit "$rc"',
     ])
     rt = int(wall_s(a.walltime) + a.queue_allowance_h * 3600)
-    plan = dict(job=f"x1_{a.task}", tasks=[a.task], n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
+    plan = dict(job=f"x1_{a.task}", tasks=[a.task], after_slurm_job=a.after_slurm_job, n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
                 expected_sha=a.expected_sha, job_args=args, inputs_dir="../x1_inputs",
                 submit=dict(command=command,
                             inputs=[{"src": a.bundle, "dst": "wcd.bundle"},
@@ -110,7 +115,8 @@ def main(argv=None):
                             outputs=["job_summary.json", "harvest.json", "slurm-*.out"], run_timeout_s=rt,
                             intent=(f"JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), {a.cpus} CPU {a.mem}, wall {a.walltime}: "
                                     f"X1 fits {a.task} ({n_tags} rows: X1 adversarial arms) at prereg-tier12-v2 "
-                                    f"{a.expected_sha[:10]}, fit only, harvest on fastscratch")))
+                                    f"{a.expected_sha[:10]}, fit only, harvest on fastscratch"
+                                    + (f"; starts after Slurm job {a.after_slurm_job} ends" if a.after_slurm_job else ""))))
     print(json.dumps(plan, indent=1))
 
 
