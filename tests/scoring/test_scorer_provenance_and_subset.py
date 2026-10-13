@@ -7,12 +7,14 @@ so an HVG-only and an all-feature PCR reference give different PCR_batch values.
 1. Full data: PCR_batch equals pcr_comparison with the all-feature PCA of the cells (scIB's own convention).
 2. Subsample (X3/X8 path): PCR_batch equals the all-feature PCA reference of the SUBSET's cells and differs from the
    HVG reference the tagged scorer used; a mutant with the tagged HVG sc.pp.pca line fails this check.
-3. Subset refusals: an unknown cell name, a repeated cell name, a prepped file with uns['pca'] (CR-14, CR-01).
+3. Subset refusals: an unknown cell name, a repeated cell name, a prepped file with uns['pca'] (CR-14, CR-01); a
+   full-length latent whose cells or cell types are not the prepped file's in order (final review I050).
 4. Provenance columns (pinned 2026-10-03) and diagnostic flags on every row: git SHA = HEAD, versions JSON keys,
    CPU fields; kBET labels skipped = 2 by construction (one label of 5 cells, one single-batch label), forced = 0;
    traj_root_fallback '' without trajectory, 0 with a root cell, 1 when get_root raises RootCellError (scib then
    reports 0; forced by a stub, and naturally on separated types whose start type is not in the largest kNN
-   component); kbet_label_flags known answers; META may not set scorer columns.
+   component); kbet_label_flags known answers; META may not set scorer columns; kBET with zero R calls is recorded
+   (as 0) when scib forced every label, and refused when finite and non-zero (final review I051).
 """
 import importlib
 import json
@@ -175,6 +177,59 @@ def test_meta_may_not_set_scorer_columns(monkeypatch, tmp_path, toy):
     pre, npz = _write(tmp_path, a, z, "meta")
     with pytest.raises(ValueError, match="scorer columns"):
         _score(monkeypatch, tmp_path, pre, npz, "meta", meta={"cpu_model": "x"})
+
+
+def test_full_length_latent_must_list_the_prepped_cells_in_order(monkeypatch, tmp_path, toy):
+    """Final review I050: a full-length latent was checked by its batch labels only, so cells permuted within a batch
+    or wrong cell types reached scib."""
+    a, z = toy
+    pre, npz = _write(tmp_path, a, z, "full")
+    d = dict(np.load(npz, allow_pickle=True))
+    names, cts = d["obs_names"].copy(), d["celltype"].copy()
+    names[[0, 1]], cts[[0, 60]] = names[[1, 0]], cts[[60, 0]]       # cells 0, 1, 60 are all in batch b0
+    for name, change in (("permuted", {"obs_names": names}), ("celltype", {"celltype": cts})):
+        p = str(tmp_path / f"{name}.npz")
+        np.savez(p, **{**d, **change})
+        with pytest.raises(ValueError, match="same order"):
+            _score(monkeypatch, tmp_path, pre, p, name)
+
+
+def _islands():
+    """Six labels, each split over 8 far-apart islands of <= 10 cells (2 batches): fewer than 75% of a label's cells
+    are in components of >= 3 k0 cells, so scib 1.1.7 sets every label's rejection to 1 without an R call. Island i
+    has 8 cells of label i mod 6 so that clusters carry some label information: with NMI 0 at every resolution scib's
+    cluster_optimal_resolution keeps no clustering and its NMI fails on None labels. Islands keep >= 50 cells so the
+    50-neighbour kBET graph does not join them."""
+    rng = np.random.default_rng(0)
+    rows, z = [], []
+    for i in range(8):
+        centre = rng.normal(0, 1, 4) * 1000.0
+        for lab in "ABCDEF":
+            for j in range(8 if lab == "ABCDEF"[i % 6] else 10):
+                rows.append((f"b{j % 2}", lab))
+                z.append(centre + rng.normal(0, 1, 4))
+    obs = pd.DataFrame(rows, columns=["batch", "celltype"], index=[f"c{k}" for k in range(len(rows))]).astype("category")
+    X = rng.random((len(obs), 30)).astype(np.float32)
+    a = ad.AnnData(X, obs=obs)
+    a.obsm["X_pca"] = X[:, :10].copy()
+    a.uns.update(batch_key="batch", celltype_key="celltype", organism="human", modality="atac")
+    return a, np.asarray(z, np.float32)
+
+
+def test_kbet_without_r_calls_is_recorded_only_when_scib_forced_every_label(monkeypatch, tmp_path, toy):
+    """Final review I051: a legitimate zero-R-call kBET (every label forced to rejection 1, kBET 0) was refused as a
+    bypassed seed wrapper. A finite non-zero kBET without a seeded call is still refused."""
+    a, z = _islands()
+    pre, npz = _write(tmp_path, a, z, "islands")
+    r = _score(monkeypatch, tmp_path, pre, npz, "islands")
+    assert r["kBET"] == 0.0 and r["kbet_r_calls"] == 0 and int(r["kbet_labels_forced_one"]) == 6, r
+    a, z = toy
+    z = z.copy()
+    z[:, 6:] = 0.0                                    # drop the two batch columns: mixed batches, kBET > 0
+    pre, npz = _write(tmp_path, a, z, "bypass")
+    monkeypatch.setattr(SN, "seed_kbet", lambda seed: types.SimpleNamespace(calls=0, seed=seed, nan_returns=0))
+    with pytest.raises(RuntimeError, match="bypassed"):
+        _score(monkeypatch, tmp_path, pre, npz, "bypass")
 
 
 def test_kbet_label_flags_known_answers():

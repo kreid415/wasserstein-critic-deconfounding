@@ -197,6 +197,10 @@ def main():
         if len(np.unique(idx)) != len(idx):
             raise ValueError(f"the latent lists {len(idx) - len(np.unique(idx))} cells more than once (CR-14)")
         pre = pre[idx].copy()
+    if not ((d["obs_names"].astype(str) == np.asarray(pre.obs_names, dtype=str)).all()
+            and (d["celltype"].astype(str) == pre.obs[ck].astype(str).values).all()):
+        raise ValueError(f"the latent's cells or cell types are not those of {os.environ['PREPPED']} in the same order "
+                         f"(final review I050)")
     assert (d["batch"].astype(str) == pre.obs[bk].astype(str).values).all(), "cell order mismatch"
     integ = pre.copy()
     integ.obsm["X_emb"] = d["z"].astype(np.float32)
@@ -219,8 +223,10 @@ def main():
     if clash:
         raise ValueError(f"META sets scorer columns {clash}")
     row.update({k: float(v) for k, v in res.iloc[:, 0].items()})
-    if np.isfinite(row["kBET"]) and kb.calls == 0:
-        raise RuntimeError("kBET is finite but no seeded R kBET call ran: the seed wrapper was bypassed")
+    # with no R call scib has set every tested label to rejection 1, i.e. kBET 0 (final review I051); a finite
+    # non-zero kBET without a seeded call means the seed wrapper was bypassed
+    if np.isfinite(row["kBET"]) and kb.calls == 0 and row["kBET"] != 0.0:
+        raise RuntimeError("kBET is finite and non-zero but no seeded R kBET call ran: the seed wrapper was bypassed")
     row["kbet_seed"], row["kbet_r_calls"] = kb.seed, kb.calls
     if trajectory:
         if root.calls != 1:
