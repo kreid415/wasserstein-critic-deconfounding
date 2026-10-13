@@ -56,10 +56,18 @@ def test_extra_keys_are_consumed_or_refused():
     fpc.check_extra("t", "pooled", {"subsample": {"kind": "composition"}, "iw": "depletion_oracle"})
     bad = [("pooled", {"lambda_typo": 1}, KeyError), ("discriminator_r1", {}, ValueError),
            ("discriminator", {"r1_gamma": 10}, ValueError), ("pooled", {"sampler": "balanced"}, ValueError),
-           ("pooled", {"iw": "estimated"}, ValueError), ("pooled", {"iw": "depletion_oracle"}, ValueError)]
+           ("pooled", {"iw": "estimated"}, ValueError), ("pooled", {"iw": "depletion_oracle"}, ValueError),
+           ("none", {"adv_width": 64}, ValueError), ("mmd", {"sampler": "stratified"}, ValueError),
+           ("discriminator", {"bary_iter": 5}, ValueError)]                  # final review I042
     for arm, extra, exc in bad:
         with pytest.raises(exc):
             fpc.check_extra("t", arm, extra)
+    row = dict(n_critic="0", adv_input="mean", zstd="0", likelihood="zinb", decoder="SCVI", cond="1")
+    fpc.check_extra("t", "sysvi", {}, row)
+    for arm, col, val in [("none", "zstd", "1"), ("scanvi", "decoder", "LinearSCVI"), ("sysvi", "likelihood", "nb"),
+                          ("sysvi", "cond", "0"), ("sinkhorn", "n_critic", "5")]:
+        with pytest.raises(ValueError, match="does not read"):
+            fpc.check_extra("t", arm, {}, {**row, col: val})
 
 
 @needs_env("PREPPED_DIR")

@@ -47,6 +47,18 @@ EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
               "iw",                       # X3 'depletion_oracle' (section 4, SI-25)
               "kl_warmup"}                # X15 'stock' | 'complete' (SI-44; kl_warmup_epochs)
 KL_WARMUP = ("stock", "complete")
+# Final review I042: an extra key or row setting that the arm's fit does not read was accepted and silently ignored.
+# Extra keys apply only to these arms (sampler: critics reference and pooled only, SI-24); the row settings below are
+# not read by the arm's fit and must keep these values (sysVI ignores likelihood: it is Gaussian; scANVI and sysVI
+# are always batch-conditioned).
+_NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1", "reference",
+                 "reference_fixed", "reference_sn", "pooled", "pooled_sn", "barycenter", "barycenter_sn"}
+EXTRA_ARMS = {"adv_width": _NETWORK_ARMS, "adv_lr": _NETWORK_ARMS, "bary_iter": {"barycenter", "barycenter_sn"},
+              "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler": {"reference", "pooled"}}
+_NO_ADV = {"n_critic": "0", "adv_input": "mean", "zstd": "0"}
+UNREAD_SETTINGS = {"none": _NO_ADV, "scvi_adv": _NO_ADV, "scanvi": {**_NO_ADV, "decoder": "SCVI", "cond": "1"},
+                   "sysvi": {**_NO_ADV, "likelihood": "zinb", "decoder": "SCVI", "cond": "1"},
+                   "mmd": {"n_critic": "0"}, "mmd_ref": {"n_critic": "0"}, "sinkhorn": {"n_critic": "0"}}
 # X3 (SI-41): every composition spec carries draw=X3_DRAW (x3_draw); X3_PERMUTATION_SEED seeds the ONE dose-independent
 # permutation of a task's cells that every dose of the task draws from. Both are written into each X3 latent's config
 # (subsample_info); a spec with another or no draw is refused.
@@ -77,11 +89,19 @@ def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
     return value
 
 
-def check_extra(tag, arm, extra):
-    """Refuse unknown or inconsistent `extra` keys before any data is read."""
+def check_extra(tag, arm, extra, row=None):
+    """Refuse unknown, inapplicable or inconsistent `extra` keys, and (given the row) changed settings that the arm's
+    fit does not read, before any data is read."""
     unknown = sorted(set(extra) - EXTRA_KEYS)
     if unknown:
         raise KeyError(f"{tag}: extra has keys the runner does not consume: {unknown}")
+    wrong = sorted(k for k in extra if arm not in EXTRA_ARMS.get(k, {arm}))
+    if wrong:
+        raise ValueError(f"{tag}: extra keys {wrong} do not apply to arm {arm!r}")
+    unread = {c: row[c] for c, v in UNREAD_SETTINGS.get(arm, {}).items() if row is not None and row[c] != v}
+    if unread:
+        raise ValueError(f"{tag}: arm {arm!r} does not read {sorted(unread)}; they must stay "
+                         f"{ {c: UNREAD_SETTINGS[arm][c] for c in unread} }, got {unread}")
     if arm.endswith("_r1") != ("r1_gamma" in extra):
         raise ValueError(f"{tag}: r1_gamma must be given for *_r1 arms and only for them (arm {arm!r})")
     if "sampler" in extra and extra["sampler"] != "stratified":
@@ -274,7 +294,7 @@ def main():
         raise ValueError(f"{r['tag']}: {arm} is an X13 CPU baseline; run it with scripts/run_cpu_baselines.py "
                          f"--manifest <manifest> --tag {r['tag']}")
     extra = json.loads(r["extra"])
-    check_extra(r["tag"], arm, extra)
+    check_extra(r["tag"], arm, extra, r)  # pragma: no cover  # run by the subprocess tests of tests/scvi/test_nonfinite_guard.py section 6, which coverage does not see
     if arm in ("scanvi", "sysvi") and {"r1_gamma", "sampler", "iw"} & set(extra):
         raise ValueError(f"{r['tag']}: r1_gamma / sampler / iw are adversary options, not defined for {arm}")
     if arm in ("scanvi", "sysvi") and "kl_warmup" in extra:
