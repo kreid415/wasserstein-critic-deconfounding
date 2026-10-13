@@ -27,6 +27,9 @@ Not changed: `_sqdist` (the MMD losses use it; SI-52 requires MMD fits to stay b
 | `summarize.py` | `results/summary.md` | the tables below |
 | `pilot_fit.py` (GPU, see below) | `results/pilot_steps_<tag>.csv` (copied from the run folder) | per-step iterations and loss time in one real fit |
 | `r4a1_sinkhorn_sensitivity.py results/r4a1_sinkhorn_sensitivity.csv --search <dirs>` (env `wcd-gpu`) | `results/r4a1_sinkhorn_sensitivity.csv` | how far the refitted Sinkhorn arm's best batch score may fall before R4-a1 moves a non-Sinkhorn cell (NB-20261013-09) |
+| `bench_gpu.py results/bench_gpu_si58.csv` (GPU) | `results/bench_gpu_si58.csv` | SI-58: ms per call for the tagged code and the branch with the solve in float64 and in float32, and the two dtypes' GPU agreement |
+| `SINKHORN_DTYPE=float64` (and `=float32`) `validate_sinkhorn.py results/validation_12mb_si58_<dtype>.csv 12 6` | `results/validation_12mb_si58_<dtype>.csv` | SI-58: both dtypes at the committed code against the reference; the float64 run is also the regression check of 772d59b |
+| `si58_summary.py` | `results/si58_summary.md` | SI-58 decision table (below) |
 | `f1_nonfinite_probe.py > results/f1_nonfinite_probe.txt` | `results/f1_nonfinite_probe.txt` | NaN, +inf and -inf latents give a NaN marginal error at the first iteration (float64 and float32); latents up to s = 30,000 never give an infinite one (review F1) |
 
 Inputs: `sinkhorn_reference.py` is the final review's reference, copied unchanged from
@@ -62,3 +65,20 @@ fits carry most of the extra refit time. Pilot (`A3_immune_sinkhorn_la1_matched_
 lambda 3, alone on the RTX 3080): 56,404 steps in 7,778 s against 2,793.7 s for the pre-fix fit of the same row in
 production; solver iterations per step (all solves) median 198, p99.9 1,678, max 3,786, falling from a median of
 278 in the first quarter of training to 135 in the last; the loss forward took 6,643 s (85% of the fit).
+
+## Solve precision (user decision SI-58)
+The solve dtype is `alignment.SINKHORN_DTYPE`; `validate_sinkhorn.py` takes it from the environment variable
+`SINKHORN_DTYPE`, `bench_gpu.py` times both. Numbers from `results/si58_summary.md`:
+- **Regression check.** The float64 re-run at 772d59b (cap 500,000, F1 stop) equals the committed
+  `validation_12mb.csv` in all 23 shared columns of the 3,076 rows.
+- **598 hardest minibatches: float32 meets the SI-58 criterion.** 1 - worst cosine 2.788e-07 (float64 2.789e-07),
+  worst relative gradient error 7.489e-4 (float64 7.49e-4), worst relative value error 2.974e-06 (float64
+  3.079e-06), no cap hit, the same iterations (median 154, max 5,273).
+- **All 3,076 minibatches (declared superset check): float32 does not.** Worst relative value error 3.17e-3 on
+  the collapsed R1-extension minibatches (float64 6.67e-05) and 2.69e-4 on A1 (float64 1.55e-05); gradients as in
+  float64.
+- **No speed-up on the RTX 3080.** Median float32/float64 time per call 0.989-1.014 across the five regimes (A3:
+  117.1 vs 117.8 ms and 140.3 vs 142.7 ms). The call is bound by per-iteration kernel launches and the convergence
+  test's host sync, not by float64 arithmetic.
+- **Decision: keep float64** (NB-20261013-20). `test_sinkhorn_matches_converged_reference` fails if the solve runs in
+  float32.

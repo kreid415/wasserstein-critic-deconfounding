@@ -1,0 +1,8 @@
+/home/kendall/experiment_data/wasserstein-critic-deconfounding/code/wcd_final-review-fixes/experiments/sinkhorn_fix_20261013/bench_gpu.py:45: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:822.)
+  return float(np.median(ts)) * 1e3, float(v), g.double().cpu().numpy().ravel()
+A1_wide_l0.1 A1_atac_small_sinkhorn_l0.1_c0_s100_13e9db7f median ms: tag 11.8, branch float64 19.7, float32 19.5
+A1_l10 A1_immune_sinkhorn_l10_c1_s100_6ce27f26 median ms: tag 7.8, branch float64 11.6, float32 11.8
+A1_shrunk_l3000 A1_immune_sinkhorn_l3000_c0_s100_54545ff6 median ms: tag 4.0, branch float64 6.7, float32 6.7
+A3_zstd_l30 A3_atac_small_sinkhorn_la1_matched_hi_c0_s100_add694fe median ms: tag 12.7, branch float64 117.8, float32 117.1
+A3_zstd_l3_immune A3_immune_sinkhorn_la1_matched_hi_c1_s100_ca522bee median ms: tag 12.7, branch float64 142.7, float32 140.3
