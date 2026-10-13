@@ -385,3 +385,17 @@
 - added: 2026-10-13
 - keywords: Sinkhorn, R4-a1, b_common, b*, refit, rule order, A3, R3
 - notebook: NB-20261013-10
+
+## SI-58 · active · method
+- rule: Sinkhorn solve precision: validate a float32 solve on the 598 hardest minibatches and the GPU timing; adopt it only if the worst gradient cosine and value error stay within the float64 results (cosine >= 0.99999, value error <= 1e-4), then re-run the tests and the independent review; otherwise keep float64.
+- source: "Validate float32 first; adopt only if it matches" (user, ask_user answer to the precision question, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, float32, float64, precision, dtype, speed
+- notebook: NB-20261013-14
+
+## SI-59 · active · method
+- rule: Sinkhorn iteration cap: raise SINKHORN_MAX_ITER to 500,000 and keep raising an error at the cap (stage stops loudly); a non-finite marginal error ends the loop at once (review F1).
+- source: "Raise the cap to 500,000 and keep the error (Recommended)" (user, ask_user answer to the cap question, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, SINKHORN_MAX_ITER, cap, iterations, RuntimeError, F2
+- notebook: NB-20261013-15
