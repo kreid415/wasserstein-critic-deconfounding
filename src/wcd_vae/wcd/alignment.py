@@ -26,6 +26,16 @@ Changes from the previous version (code review H2/N16):
     gradient and one final extrapolation step carries the gradient (the envelope-theorem
     gradient at convergence, as in geomloss).
   * Vectorised over batches (one kernel / cost matrix per step instead of one per batch).
+
+Changes of 2026-10-13 to Sinkhorn only (final review I031/I032, user decision SI-51; MMD unchanged):
+  * Both potentials' final transforms back-propagated through both arguments of the shared cost, i.e.
+    twice the envelope gradient. The cost now carries gradient through its row point only (geomloss's
+    cost(x, y.detach())), so the gradient is the envelope-theorem gradient once.
+  * The final eps got one damped update, so the potentials were not converged. Updates now continue at
+    the final eps until every plan's L1 marginal error is below SINKHORN_TOL; reaching
+    SINKHORN_MAX_ITER raises.
+  * The solve runs in float64 on distances from direct coordinate differences (the float32 expansion
+    |x|^2 + |y|^2 - 2<x, y> cancels for a narrow latent far from the origin).
 """
 import math
 
@@ -34,6 +44,10 @@ import torch
 BW_MULTIPLIERS = (0.25, 0.5, 1.0, 2.0, 4.0)      # RBF sigma = sqrt(d) * multiplier
 SINKHORN_BLUR_FRAC = 0.05                          # blur = 0.05 * sqrt(2 d)
 SINKHORN_SCALING = 0.8                             # eps annealing ratio per iteration (per blur)
+# Solve accuracy (experiments/sinkhorn_fix_20261013): at tol 1e-4 the gradient is within 7.5e-4 (relative) of a
+# converged float64 reference on 3,076 minibatches of the 234 pilot fits; the hardest needed 5,273 iterations.
+SINKHORN_TOL = 1e-4                                # L1 marginal error of every plan at the final eps
+SINKHORN_MAX_ITER = 50000                          # iterations at the final eps before raising
 
 
 def _sqdist(z):
@@ -130,9 +144,22 @@ def _eps_schedule(diameter, blur, p, scaling):
     return eps_list
 
 
-def _ot_eps(C, la, lb, eps_list):
-    """Regularised OT value OT_eps(a, b) for K problems sharing the cost C. Gradient flows through
-    C only via the final extrapolation step."""
+def _marginal_err(log_w, h_old, h_new, eps):
+    """Largest L1 marginal error over the K plans, on the side whose potential moves from h_old to h_new
+    (that marginal of the plan is w * exp((h_old - h_new) / eps)); the other side is exact after its update."""
+    return (torch.exp(log_w + (h_old - h_new) / eps) - log_w.exp()).abs().sum(1).max()
+
+
+def _not_converged(err, tol, max_iter):
+    raise RuntimeError(f"Sinkhorn: L1 marginal error {float(err):.3g} > tol {tol:g} after {max_iter} "
+                       "iterations at the final eps")
+
+
+def _ot_eps(C, la, lb, eps_list, tol, max_iter):
+    """Regularised OT value OT_eps(a, b) for K problems sharing the cost C. eps-scaling warm start
+    (symmetrised updates, as geomloss), then Sinkhorn updates at the final eps until converged. Gradient
+    flows through C only via one final transform per potential; C carries gradient through its row point
+    only, so this is the envelope-theorem gradient once."""
     with torch.no_grad():
         Cd = C.detach()
         f = torch.zeros_like(la)
@@ -141,48 +168,73 @@ def _ot_eps(C, la, lb, eps_list):
             f_new = _softmin(eps, Cd, lb, g)
             g_new = _softmin(eps, Cd.T, la, f)
             f, g = 0.5 * (f + f_new), 0.5 * (g + g_new)
-    eps = eps_list[-1]
+        eps = eps_list[-1]
+        for _ in range(max_iter):
+            f = _softmin(eps, Cd, lb, g)
+            g_new = _softmin(eps, Cd.T, la, f)
+            err, g = _marginal_err(lb, g, g_new, eps), g_new
+            if err < tol:
+                break
+        else:
+            _not_converged(err, tol, max_iter)
     f_fin = _softmin(eps, C, lb, g)
-    g_fin = _softmin(eps, C.T, la, f)
+    g_fin = _softmin(eps, C, la, f)            # C, not C.T: the g-side point is C's differentiable row
     a, b = la.exp(), lb.exp()
     return (a * f_fin).sum(1) + (b * g_fin).sum(1)
 
 
-def _ot_eps_sym(C, la, eps_list):
-    """OT_eps(a, a) by symmetric iterations (single potential)."""
+def _ot_eps_sym(C, la, eps_list, tol, max_iter):
+    """OT_eps(a, a) by symmetric (damped) iterations, converged at the final eps as in _ot_eps."""
     with torch.no_grad():
         Cd = C.detach()
         f = torch.zeros_like(la)
         for eps in eps_list:
             f = 0.5 * (f + _softmin(eps, Cd, la, f))
-    f_fin = _softmin(eps_list[-1], C, la, f.detach())
+        eps = eps_list[-1]
+        for _ in range(max_iter):
+            t = _softmin(eps, Cd, la, f)
+            err, f = _marginal_err(la, f, t, eps), 0.5 * (f + t)
+            if err < tol:
+                break
+        else:
+            _not_converged(err, tol, max_iter)
+    f_fin = _softmin(eps, C, la, f)
     return 2.0 * (la.exp() * f_fin).sum(1)
 
 
-def sinkhorn_divergence_weighted(C, A, B, blur, p=1, scaling=SINKHORN_SCALING):
-    """Debiased S_eps(a_k, b_k) for each row k of the weight matrices A, B (shared cost C)."""
+def sinkhorn_divergence_weighted(C, A, B, blur, p=1, scaling=SINKHORN_SCALING, tol=SINKHORN_TOL,
+                                 max_iter=SINKHORN_MAX_ITER):
+    """Debiased S_eps(a_k, b_k) for each row k of the weight matrices A, B (shared cost C, gradient
+    through its row point only: see _cost)."""
     diameter = float(C.detach().max().clamp_min(blur)) ** (1.0 / p)
     eps_list = _eps_schedule(diameter, blur, p, scaling)
     la, lb = _log_w(A), _log_w(B)
-    return _ot_eps(C, la, lb, eps_list) - 0.5 * _ot_eps_sym(C, la, eps_list) - 0.5 * _ot_eps_sym(C, lb, eps_list)
+    return (_ot_eps(C, la, lb, eps_list, tol, max_iter) - 0.5 * _ot_eps_sym(C, la, eps_list, tol, max_iter)
+            - 0.5 * _ot_eps_sym(C, lb, eps_list, tol, max_iter))
+
+
+def _cost(z, p):
+    """Ground cost c(z_i, z_j) from direct coordinate differences (exactly symmetric, no cancellation), with
+    gradient through z_i only (geomloss's cost(x, y.detach())): each final transform then carries its own
+    half of the envelope gradient instead of all of it."""
+    d2 = (z[:, None, :] - z.detach()[None, :, :]).square().sum(-1)
+    if p == 1:
+        # |x - y| is not differentiable at 0 (the diagonal); +1e-12 inside the root fixes that
+        return torch.sqrt(d2 + 1e-12)
+    if p == 2:
+        return 0.5 * d2
+    raise ValueError("p must be 1 or 2")
 
 
 def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, scaling=SINKHORN_SCALING):
-    """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2)."""
+    """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2), solved in float64."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
-    A, B, K = _batch_masks(batch_index, z)
+    zd = z.double()
+    A, B, K = _batch_masks(batch_index, zd)
     if K == 0:
         return z.new_zeros(())
-    d2 = _sqdist(z)
-    if p == 1:
-        # |x - y| is not differentiable at 0 (the diagonal); +1e-12 inside the root fixes that
-        C = torch.sqrt(d2 + 1e-12)
-    elif p == 2:
-        C = 0.5 * d2
-    else:
-        raise ValueError("p must be 1 or 2")
     blur = blur_frac * math.sqrt(2.0 * z.shape[1])
-    return sinkhorn_divergence_weighted(C, A, B, blur, p=p, scaling=scaling).mean()
+    return sinkhorn_divergence_weighted(_cost(zd, p), A, B, blur, p=p, scaling=scaling).mean().to(z.dtype)
 
 
 # Registry of critic-free alignment divergences, by the `adversary` name the plan accepts.
