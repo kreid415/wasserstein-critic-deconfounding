@@ -1,0 +1,182 @@
+{
+  "experiment_id": "sinkhorn_fix_20261013",
+  "created_at": "2026-10-13T22:13:03Z",
+  "pf_version": "1.0",
+  "plan": {
+    "question": "SI-58: does the Sinkhorn solve run in float32 (the committed code with only the solve dtype changed) stay within the float64 accuracy limits against the converged float64 reference of the final review, and how much faster is it per loss call on the RTX 3080?",
+    "primary_outcome": "SI-58 adoption criterion (binary): over the 598 hardest validation minibatches, float32 worst gradient cosine >= 0.99999 AND worst relative value error <= 1e-4 (relative error where |reference value| > 1e-6, the float64 README convention), with no cap hit",
+    "unit_of_analysis": "one 128-cell minibatch from a saved pilot-fit latent (final, early-stage or training-mode capture of the review inventory)",
+    "split_unit": "none: no fitting or selection on these minibatches; every minibatch is compared with its own converged reference",
+    "selection_rule": "the 598 = rows of results/validation_12mb_tol1e-6_cap1e4.csv with zstd==1 or more than 100 final-eps iterations or a cap error (tol_sweep.py selection, fixed before this run); the full 3,076-minibatch set is also run as a declared superset check (it contains the collapsed R1-extension minibatches that the 598 exclude); float64 re-run in the same harness as the comparator",
+    "n_comparisons": 1,
+    "multiple_comparison_correction": "none: one pre-declared decision rule (float32 vs the SI-58 thresholds), no hypothesis test; GPU timing is descriptive",
+    "data_filters": "relative value error only where |reference value| > 1e-6; rows at or below 1e-6 reported with absolute error and counted; no minibatch dropped"
+  },
+  "plan_sha": "f9849dddbb823c01",
+  "extra_items": [],
+  "answers": {
+    "PF-01": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_plan] plan complete (sha f9849dddbb823c01)",
+      "at": "2026-10-13T22:13:03Z",
+      "history": [],
+      "auto": {
+        "check": "pf_check_plan",
+        "ok": true,
+        "summary": "plan complete (sha f9849dddbb823c01)",
+        "warnings": null
+      }
+    },
+    "PF-02": {
+      "status": "pass",
+      "evidence": "plan declares n_comparisons=1; correction: none: one pre-declared decision rule (float32 vs the SI-58 thresholds), no hypothesis test; GPU timing is descriptive",
+      "at": "2026-10-13T22:13:03Z",
+      "history": []
+    },
+    "PF-03": {
+      "status": "n/a",
+      "evidence": "no train/test split: nothing is fitted or selected on these minibatches; each is compared with its own converged float64 reference (sinkhorn_reference.py, tol 1e-10)",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-04": {
+      "status": "pass",
+      "evidence": "unit key (kind, tag, minibatch, zstd): 3,076 rows, 3,076 unique keys in results/validation_12mb.csv; the tol1e-6 selection file has the identical key set (checked 18:20); 598 rows of tol_sweep.csv join one-to-one",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-06": {
+      "status": "pass",
+      "evidence": "the 598 were selected at 09:29 from float64 iteration counts (validation_12mb_tol1e-6_cap1e4.csv) and the thresholds come from SI-58 (CONSTRAINTS.md); both fixed before any float32 result exists",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-07": {
+      "status": "pass",
+      "evidence": "float64 and float32 runs differ only in alignment.SINKHORN_DTYPE (env SINKHORN_DTYPE); printed at 18:20 for both: TOL 1e-4, MAX_ITER 500,000, defaults (1, 0.8, 1e-4, 500000), same NEW file at 772d59b, same tagged OLD file, same minibatches",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-08": {
+      "status": "pass",
+      "evidence": "both runs iterate jobs() over the same inventory (2,808 final + 192 early + 76 trainmode = 3,076); a float32 cap hit is kept in new_error and counts as failing the criterion ('no cap hit'), never dropped; post-run check that both CSVs hold the 3,076 keys",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-09": {
+      "status": "n/a",
+      "evidence": "no zero-intensity or identity baseline; the float64 re-run is a regression check of commit 772d59b against the committed validation_12mb.csv, reported separately",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-10": {
+      "status": "pass",
+      "evidence": "per dtype: 598 hardest minibatches (480 zstd=1, 118 zstd=0) and 3,076 total; regime counts A1 2,160, A1_ext 216, A2A3 432, early 192, trainmode 76 (results/summary.md); no condition below 16",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-12": {
+      "status": "pass",
+      "evidence": "harness = validate_sinkhorn.compare, unchanged except the dtype switch; at 3cbaca4 it reproduced the review reference (relative 5e-12 A1, 5e-8 A3) and tagged-code R1-ext figures (median cosine 0.281, norm ratio 14.44; README); reviewer re-ran 40 rows, 11 columns exactly equal (review F6)",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-16": {
+      "status": "pass",
+      "evidence": "GPU idle before launch (nvidia-smi 0%, 124 MiB, no compute apps, 18:20); bench runs alone, CPU validation starts only after it ends; 3 warm-up calls discarded, 20 timed calls per minibatch with cuda.synchronize, median; dtype order alternates per minibatch",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "pilot at the same settings: the 09:37 validate_sinkhorn.py run (3,076 minibatches, 8 workers) wrote its CSV by 09:55, <= 18 min, ~2.4 CPU-h; two runs at 6 workers each => <= 24 min each, x2 safety 48 min; a stalled float32 solve adds <= ~15 min per minibatch (1.8 ms/iteration x 500,000, review F1 timing); local, no walltime limit",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "pass",
+      "evidence": "no manifest: settings are module constants, printed per dtype at 18:20 (DTYPE float64/float32, TOL 0.0001, MAX_ITER 500000); N_MB 12 and WORKERS 6 given on the command line; solve_dtype written into every CSV row",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-22": {
+      "status": "pass",
+      "evidence": "every minibatch row stores value, reference value, cosine, norm ratio, iterations and any cap error; ProcessPoolExecutor.map re-raises a worker exception, so a crash exits non-zero without writing a partial CSV",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "pass",
+      "evidence": "only declared filter: relative value error where |reference value| > 1e-6; on the committed float64 data 598/598 and 3,064/3,076 rows pass it, the 12 others have absolute error <= 2.5e-16; post-run: same filter, excluded rows reported",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-05": {
+      "status": "n/a",
+      "evidence": "no labels or factors are compared; the only factor is the solve dtype",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-11": {
+      "status": "n/a",
+      "evidence": "vector comparisons (cosine, relative error) against a reference; no model-structure assumption",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-13": {
+      "status": "n/a",
+      "evidence": "deterministic CPU computation on fixed minibatches (seed 80301 + fit seed in the harness); GPU timings use medians of 20 calls x 12 minibatches",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-14": {
+      "status": "pass",
+      "evidence": "comparator is an independent implementation (review's sinkhorn_reference.py, float64, tol 1e-10), not the code under test, so agreement is not by construction",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-15": {
+      "status": "n/a",
+      "evidence": "single changed factor (solve dtype); no causal explanation beyond it is claimed",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-18": {
+      "status": "pass",
+      "evidence": "12 CPU workers (6 per dtype) on 12 cores, ~86 GiB RAM free; the 09:37 run used 8 workers without memory pressure; GPU bench runs alone",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-20": {
+      "status": "pass",
+      "evidence": "independent count: 234 fits x 12 + 192 early + 76 trainmode = 3,076 rows per run (equals validation_12mb.csv); 598 rows in the selected subset (equals tol_sweep.csv at one tolerance)",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-21": {
+      "status": "n/a",
+      "evidence": "no replicates or seeds vary: each minibatch is fixed; the comparison is deterministic",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    },
+    "PF-24": {
+      "status": "pass",
+      "evidence": "tol 1e-4 and cap 500,000 are the committed values; N_MB 12 already used on the same fits at 09:37; dtype restricted to float64/float32 by a dict lookup (KeyError otherwise)",
+      "at": "2026-10-13T22:20:56Z",
+      "history": []
+    }
+  },
+  "verdict": {
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
+    "major_fail": [],
+    "minor_fail": [],
+    "plan_changed": false,
+    "n_items": 24,
+    "n_pass": 17,
+    "n_na": 7,
+    "at": "2026-10-13T22:20:56Z"
+  },
+  "path": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/code/wcd_final-review-fixes/experiments/sinkhorn_fix_20261013"
+}
