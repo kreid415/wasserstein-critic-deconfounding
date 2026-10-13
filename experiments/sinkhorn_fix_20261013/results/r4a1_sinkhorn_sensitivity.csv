@@ -1,0 +1,7 @@
+block,b0,b_common,argmin,M_sinkhorn,bstar,allowed_drop_any,arms_moved_any,allowed_drop_needed,arms_moved_needed
+atac_small|0,0.40176,0.64242,barycenter,0.67556,0.52209,0.04518,barycenter,0.06937,pooled
+atac_small|1,0.69391,0.79817,barycenter,0.80187,0.74604,0.01135,mmd,0.01135,mmd
+immune|0,0.49907,0.56213,barycenter,0.68846,0.5306,0.13208,pooled,0.13208,pooled
+immune|1,0.63817,0.65699,barycenter,0.66286,0.64758,0.00916,barycenter,0.01023,mmd
+sim1|0,0.2323,0.50633,barycenter,0.71528,0.36932,0.25685,reference,none down to b0,
+sim1|1,0.81196,0.81888,mmd,0.83495,0.81542,0.02105,mmd,none down to b0,
