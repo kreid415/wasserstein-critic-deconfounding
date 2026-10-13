@@ -18,6 +18,9 @@ At most 2 jobs run at once (the job script's own limit); each chain starts with 
 Predicted = tagged cost model x that dataset's pilot ratio (its 15 rule-free X1 fits on the same nodes, Oct 4-5). Chains: 1 -> 3 about 4.0 days, 2 -> 4 -> 5 about 4.4 days, plus queue waits; total 8.5 GPU-days. The six adversarial methods have not been timed on an L40S yet.
 If a job runs short of time, its runner is stopped 45 min before the Slurm limit and the finished models are kept; one resume job then fits the rest.
 
+Harness clock (`run_timeout_s`, counted from submission, so it includes waiting for the jobs before it; final review I008): each job up to and including this one may wait 120 h in the queue and run its full 3 days.
+Jobs 1 and 2: 192 h (8 days). Jobs 3 and 4: 384 h (16 days; builder `--chain-position 1 --after-slurm-job <id of job 1 or 2>`). Job 5: 576 h (24 days; `--chain-position 2 --after-slurm-job <id of job 4>`).
+
 ## What each job checks before it fits anything (tagged job script cluster/jhpce/prod_fit_job.sh)
 1. The checkout is the tag prereg-tier12-v2 (c88cce3) and clean.
 2. Exactly one L40S is visible, and the fit environment matches its recorded package versions.

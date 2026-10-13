@@ -90,7 +90,7 @@ Rerunning the same command at the same commit resumes on the same key: fitted ro
 interrupted rows rerun, and the claims of a killed runner (it still holds those of its finished rows as well) are
 cleared once Slurm shows its job ended (tested). A resume
 at another commit would fail the runner's mixed-commit gate (latents of one stage come from one commit).
-The harness's own run clock counts from submission (queue time included), so the plan sets `run_timeout_s` = wall + 120 h.
+The harness's own run clock counts from submission (queue time included), so the plan sets `run_timeout_s` = wall + 120 h; a chained X1 job K places down its chain gets (K + 1) x (wall + 120 h) (experiments/X1_jhpce/x1_jhpce_command.py `--chain-position`, final review I008).
 
 ## Local rehearsal (cluster/jhpce/local_rehearsal.sh)
 

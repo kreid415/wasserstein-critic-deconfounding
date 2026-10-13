@@ -34,6 +34,13 @@ def wall_s(w):
     return ((int(d) * 24 + h) * 60 + m) * 60 + s
 
 
+def run_timeout_s(walltime, queue_allowance_h, chain_position):
+    """The harness clock counts from submission (final review I008): this job and each job before it in its chain
+    may wait in the queue and run to the full walltime. ponytail: assumes the chain's jobs share --walltime (all X1
+    jobs use 3-00:00:00); pass the longest one if that changes."""
+    return int((chain_position + 1) * (wall_s(walltime) + queue_allowance_h * 3600))
+
+
 def committed(path):
     """Bytes of path at this repo's HEAD; refuses if the working-tree file differs or is untracked."""
     blob = subprocess.run(["git", "-C", REPO, "show", f"HEAD:{path}"], capture_output=True)
@@ -58,7 +65,11 @@ def main(argv=None):
     ap.add_argument("--queue-allowance-h", type=float, default=120)
     ap.add_argument("--after-slurm-job", default=None,
                     help="Slurm job id this job waits for (afterany: it starts once that job has ended, however it ended)")
+    ap.add_argument("--chain-position", type=int, default=0,
+                    help="number of jobs before this one in its dependency chain (0: starts at submission)")
     a = ap.parse_args(argv)
+    if a.chain_position < 0 or (a.after_slurm_job is None) != (a.chain_position == 0):
+        raise SystemExit("--after-slurm-job is given exactly when --chain-position > 0 (the jobs before this one)")
     if a.expected_sha != TAG_SHA:
         raise SystemExit(f"--expected-sha must be prereg-tier12-v2 ({TAG_SHA}): PREREG sec 7 pins every stage to the tag")
     if a.after_slurm_job is not None and not re.fullmatch(r"[0-9]+", a.after_slurm_job):
@@ -105,8 +116,9 @@ def main(argv=None):
         'ls -l .',
         'exit "$rc"',
     ])
-    rt = int(wall_s(a.walltime) + a.queue_allowance_h * 3600)
-    plan = dict(job=f"x1_{a.task}", tasks=[a.task], after_slurm_job=a.after_slurm_job, n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
+    rt = run_timeout_s(a.walltime, a.queue_allowance_h, a.chain_position)
+    plan = dict(job=f"x1_{a.task}", tasks=[a.task], after_slurm_job=a.after_slurm_job, chain_position=a.chain_position,
+                n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
                 expected_sha=a.expected_sha, job_args=args, inputs_dir="../x1_inputs",
                 submit=dict(command=command,
                             inputs=[{"src": a.bundle, "dst": "wcd.bundle"},
@@ -116,7 +128,8 @@ def main(argv=None):
                             intent=(f"JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), {a.cpus} CPU {a.mem}, wall {a.walltime}: "
                                     f"X1 fits {a.task} ({n_tags} rows: X1 adversarial arms) at prereg-tier12-v2 "
                                     f"{a.expected_sha[:10]}, fit only, harvest on fastscratch"
-                                    + (f"; starts after Slurm job {a.after_slurm_job} ends" if a.after_slurm_job else ""))))
+                                    + (f"; starts after Slurm job {a.after_slurm_job} ends" if a.after_slurm_job else "")
+                                    + f"; harness clock {rt / 3600:g} h")))
     print(json.dumps(plan, indent=1))
 
 
