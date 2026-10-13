@@ -336,3 +336,17 @@
 - added: 2026-10-04
 - keywords: JHPCE, HOME, latents, delete, embeddings_final, space, SI-49
 - notebook: NB-20261004-18
+
+## SI-51 · active · method
+- rule: Sinkhorn arm: fix the loss gradient (no double-counted final transform) and the final-epsilon convergence, then refit all 234 Sinkhorn pilot fits (A1 180, R1 extension 18, A3 36) at the new tag and re-run the Sinkhorn parts of R1, R4-a1 and R3 before X1.
+- source: "Fix it and redo all 234 (Recommended)" (user, ask_user answer to the Sinkhorn question after the final review, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, gradient, refit, final review, new tag
+- notebook: NB-20261013-02
+
+## SI-52 · active · process
+- rule: Final-review fixes: draft all code guards (I033, I034, I042, I050, I051, I094), launch-file fixes (I008, CR2-01 L40S gate re-run at the new tag) and the document amendments (P1 comparator, underpowered-design claim, b* anchoring, grid-edge rule, R1 trajectory note, frozen P1-P4 analysis code) on a branch with tests; prove non-Sinkhorn fits and scores bit-identical to c88cce3; independent review of each fix; show the user the diff before any new tag.
+- source: "Draft all, show me, then tag (Recommended)" (user, ask_user answer, 2026-10-13)
+- added: 2026-10-13
+- keywords: final review, fixes, new tag, bit-identity, amendments
+- notebook: NB-20261013-02
