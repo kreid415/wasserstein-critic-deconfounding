@@ -1,0 +1,12 @@
+# id	file	original text (must occur once)	mutant text	env (scvi | gpu)	test that must fail
+G01_plan_no_stats	scripts/scvi_adversarial_plan.py	adv_term = self._align_fn(z_adv, batch_index, stats=self._align_stats)	adv_term = self._align_fn(z_adv, batch_index)	scvi	tests/scvi/test_baseline_guard.py::test_resolved_plan_known_answers
+G01_record_always	scripts/fit_paper_config.py	    if n:      # steps whose	    if True:      # steps whose	scvi	tests/scvi/test_baseline_guard.py::test_fitter_writes_the_plan_record_for_every_plan_kind
+G01_no_count	src/wcd_vae/wcd/alignment.py	    if stats is not None:	    if stats is not None and False:	gpu	tests/wcd_vae/test_divergences_v2.py
+G02_sum_omits_gp	scripts/scvi_adversarial_plan.py	            inner = inner + d_loss.detach()	            inner = inner + loss_d.detach()	scvi	tests/scvi/test_nonfinite_guard.py::test_nonfinite_inner_critic_step_raises
+G02_first_step_only	scripts/scvi_adversarial_plan.py	            inner = inner + d_loss.detach()	            inner = inner + (d_loss.detach() if _ == 0 else 0)	scvi	tests/scvi/test_nonfinite_guard.py::test_nonfinite_inner_critic_step_raises
+G03_call_removed	scripts/fit_paper_config.py	    check_extra(r["tag"], arm, extra, r)	    pass	scvi	tests/scvi/test_nonfinite_guard.py::test_fitter_records_divergence_and_nothing_else
+G03_row_not_passed	scripts/fit_paper_config.py	    check_extra(r["tag"], arm, extra, r)	    check_extra(r["tag"], arm, extra)	scvi	tests/scvi/test_nonfinite_guard.py::test_fitter_records_divergence_and_nothing_else
+G05_lam_not_refused	scripts/fit_paper_config.py	_NO_LAM = {**_NO_ADV, "lam": "0"}	_NO_LAM = dict(_NO_ADV)	scvi	tests/scvi/test_runner_and_manifest_missing_arms.py::test_extra_keys_are_consumed_or_refused
+G04_entry_dropped	scripts/fit_paper_config.py	"mmd": {"n_critic": "0"}, "mmd_ref"	"mmd": {}, "mmd_ref"	scvi	tests/scvi/test_runner_and_manifest_missing_arms.py::test_extra_keys_are_consumed_or_refused
+G14_history_unchecked	cluster/jhpce/prod_helpers.py	        if not has_history:	        if False:	scvi	tests/jhpce/test_prod_job.py::test_harvest_files_refuses_a_gpu_latent_without_its_model
+G04_extra_key_dropped	scripts/fit_paper_config.py	              "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler"	              "sampler"	scvi	tests/scvi/test_runner_and_manifest_missing_arms.py::test_extra_keys_are_consumed_or_refused

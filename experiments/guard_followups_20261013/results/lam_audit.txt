@@ -1,0 +1,5 @@
+19 manifest files, 8 with arm and lam columns, 41583 rows
+none: 1428 rows, lam values ['0']
+scanvi: 240 rows, lam values ['0']
+scvi_adv: 240 rows, lam values ['0']
+sysvi: 1440 rows, lam values ['1', '10', '2', '20', '5', '50']
