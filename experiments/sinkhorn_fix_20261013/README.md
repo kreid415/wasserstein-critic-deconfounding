@@ -7,8 +7,11 @@
    geomloss `cost(x, y.detach())` convention), and the g transform uses that same matrix.
 2. **Final epsilon converged.** After the unchanged eps-scaling warm start, alternating Sinkhorn updates (and damped
    symmetric updates for the two debiasing terms) continue at the final eps until every plan's L1 marginal error is
-   below `SINKHORN_TOL = 1e-4`; after `SINKHORN_MAX_ITER = 50,000` iterations the loss raises `RuntimeError`.
-3. **Stable arithmetic.** The solve runs in float64 on distances from direct coordinate differences. The tagged
+   below `SINKHORN_TOL = 1e-4`; after `SINKHORN_MAX_ITER = 500,000` iterations (50,000 until SI-59) the loss raises
+   `RuntimeError`. A NaN marginal error, which is what a NaN or infinite latent gives, stops each solve at once, so
+   the loss is NaN and the training guard records the fit as 'diverged', as at the tag (review F1;
+   `f1_nonfinite_probe.py`).
+3. **Stable arithmetic.** The solve runs in float64 (`SINKHORN_DTYPE`) on distances from direct coordinate differences. The tagged
    float32 expansion |x|^2 + |y|^2 - 2<x,y> cancelled for latents that were narrow and far from the origin (R1
    extension, immune lambda >= 1000), which made the gradient numerical noise.
 
@@ -24,6 +27,7 @@ Not changed: `_sqdist` (the MMD losses use it; SI-52 requires MMD fits to stay b
 | `summarize.py` | `results/summary.md` | the tables below |
 | `pilot_fit.py` (GPU, see below) | `results/pilot_steps_<tag>.csv` (copied from the run folder) | per-step iterations and loss time in one real fit |
 | `r4a1_sinkhorn_sensitivity.py results/r4a1_sinkhorn_sensitivity.csv --search <dirs>` (env `wcd-gpu`) | `results/r4a1_sinkhorn_sensitivity.csv` | how far the refitted Sinkhorn arm's best batch score may fall before R4-a1 moves a non-Sinkhorn cell (NB-20261013-09) |
+| `f1_nonfinite_probe.py > results/f1_nonfinite_probe.txt` | `results/f1_nonfinite_probe.txt` | NaN, +inf and -inf latents give a NaN marginal error at the first iteration (float64 and float32); latents up to s = 30,000 never give an infinite one (review F1) |
 
 Inputs: `sinkhorn_reference.py` is the final review's reference, copied unchanged from
 `review/esc2/sinkhorn_astra/` (sha256 0e6663fb...a709a8, as in that folder's SHA256SUMS). The minibatches are the
@@ -43,10 +47,10 @@ cosine 0.869.
 - **Tolerance 1e-4.** Over the 598 hardest minibatches the relative gradient error stays below about 7x the
   tolerance (max 7.5e-4 at 1e-4). Tighter tolerances lengthen the iteration tail sharply (max 29,190 at 1e-5,
   171,388 at 1e-6) for no material gain.
-- **Cap 50,000, then raise.** About 10x the worst case seen. A fit whose solve cannot converge stops loudly instead
-  of training on an approximate gradient; the pilot checks how far real training stays from the cap. The
-  independent review (finding F2) found a heavier tail on minibatches drawn from the pre-fix A3 latents (max 9,789
-  iterations, atac_small) than in the validation set; the cap policy is to be confirmed before the refit.
+- **Cap 500,000, then raise (user decision SI-59).** The first cap, 50,000, was about 10x the worst case in the
+  validation set, but the independent review (finding F2) found a heavier tail on minibatches drawn from the pre-fix
+  A3 latents (max 9,789 iterations, atac_small); 500,000 is about 50x that. A fit whose solve cannot converge stops
+  loudly instead of training on an approximate gradient; the pilot checks how far real training stays from the cap.
 - **Convergence tested every iteration.** Testing every 10 iterations was 20-27% faster on A3 minibatches and 10%
   slower on A1 ones; not adopted (more code for a modest gain).
 - **No over-relaxation.** Over-relaxed updates (omega 1.5-1.8) cut the iterations on the four slowest minibatches

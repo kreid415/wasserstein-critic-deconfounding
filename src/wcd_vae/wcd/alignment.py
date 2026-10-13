@@ -9,8 +9,9 @@ zero that carries the graph so the plan's torch.autograd.grad works (final revie
 
   mmd       : D = MMD^2 with a fixed multi-scale RBF kernel (V-statistic).
   sinkhorn  : D = debiased Sinkhorn divergence S_eps (Genevay et al. 2018; Feydy et al. 2019)
-              with Euclidean ground cost (p=1), so for small blur it approximates W1, the
-              distance the Wasserstein critics estimate.
+              with Euclidean ground cost (p=1) at eps = blur = 0.05 sqrt(2d). S_eps tends to W1 (the
+              distance the Wasserstein critics estimate) only as the blur goes to 0; at this blur it is
+              well below W1 (review of the Sinkhorn fix, F7), so the loss is not a W1 estimate.
 
 Changes from the previous version (code review H2/N16):
   * Target was the whole minibatch (it contained the batch itself), so each term was a
@@ -35,9 +36,10 @@ Changes of 2026-10-13 to Sinkhorn only (final review I031/I032, user decision SI
     cost(x, y.detach())), so the gradient is the envelope-theorem gradient once.
   * The final eps got one damped update, so the potentials were not converged. Updates now continue at
     the final eps until every plan's L1 marginal error is below SINKHORN_TOL; reaching
-    SINKHORN_MAX_ITER raises.
-  * The solve runs in float64 on distances from direct coordinate differences (the float32 expansion
-    |x|^2 + |y|^2 - 2<x, y> cancels for a narrow latent far from the origin).
+    SINKHORN_MAX_ITER raises. A NaN error (what a NaN or infinite latent gives) stops the loop at once:
+    the loss is then NaN, which the training guard records as the fit outcome 'diverged' (review F1).
+  * The solve runs in SINKHORN_DTYPE (float64) on distances from direct coordinate differences (the float32
+    expansion |x|^2 + |y|^2 - 2<x, y> cancels for a narrow latent far from the origin).
 """
 import math
 
@@ -47,9 +49,12 @@ BW_MULTIPLIERS = (0.25, 0.5, 1.0, 2.0, 4.0)      # RBF sigma = sqrt(d) * multipl
 SINKHORN_BLUR_FRAC = 0.05                          # blur = 0.05 * sqrt(2 d)
 SINKHORN_SCALING = 0.8                             # eps annealing ratio per iteration (per blur)
 # Solve accuracy (experiments/sinkhorn_fix_20261013): at tol 1e-4 the gradient is within 7.5e-4 (relative) of a
-# converged float64 reference on 3,076 minibatches of the 234 pilot fits; the hardest needed 5,273 iterations.
+# converged float64 reference on 3,076 minibatches of the 234 pilot fits. Iterations at the final eps have a heavy
+# tail on standardised inputs (max 5,273 there, 9,789 on minibatches of the pre-fix A3 latents: review F2); a cap
+# hit raises, so the cap sits ~50x above that tail (user decision SI-59).
 SINKHORN_TOL = 1e-4                                # L1 marginal error of every plan at the final eps
-SINKHORN_MAX_ITER = 50000                          # iterations at the final eps before raising
+SINKHORN_MAX_ITER = 500000                         # iterations at the final eps before raising
+SINKHORN_DTYPE = torch.float64                     # solve precision (SI-58: float32 only if validated)
 
 
 def _sqdist(z):
@@ -175,7 +180,7 @@ def _ot_eps(C, la, lb, eps_list, tol, max_iter):
             f = _softmin(eps, Cd, lb, g)
             g_new = _softmin(eps, Cd.T, la, f)
             err, g = _marginal_err(lb, g, g_new, eps), g_new
-            if err < tol:
+            if not err >= tol:     # converged, or NaN (NaN/inf latent): stop now, the NaN loss is 'diverged' (F1)
                 break
         else:
             _not_converged(err, tol, max_iter)
@@ -196,7 +201,7 @@ def _ot_eps_sym(C, la, eps_list, tol, max_iter):
         for _ in range(max_iter):
             t = _softmin(eps, Cd, la, f)
             err, f = _marginal_err(la, f, t, eps), 0.5 * (f + t)
-            if err < tol:
+            if not err >= tol:     # as in _ot_eps
                 break
         else:
             _not_converged(err, tol, max_iter)
@@ -207,7 +212,8 @@ def _ot_eps_sym(C, la, eps_list, tol, max_iter):
 def sinkhorn_divergence_weighted(C, A, B, blur, p=1, scaling=SINKHORN_SCALING, tol=SINKHORN_TOL,
                                  max_iter=SINKHORN_MAX_ITER):
     """Debiased S_eps(a_k, b_k) for each row k of the weight matrices A, B (shared cost C, gradient
-    through its row point only: see _cost)."""
+    through its row point only: see _cost). A cost differentiable in both points would double-count the
+    gradient (review F8). p = 2 (eps = blur^2) is not used by the arm and is tested on two Diracs only."""
     diameter = float(C.detach().max().clamp_min(blur)) ** (1.0 / p)
     eps_list = _eps_schedule(diameter, blur, p, scaling)
     la, lb = _log_w(A), _log_w(B)
@@ -229,9 +235,9 @@ def _cost(z, p):
 
 
 def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, scaling=SINKHORN_SCALING):
-    """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2), solved in float64."""
+    """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2), solved in SINKHORN_DTYPE."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
-    zd = z.double()
+    zd = z.to(SINKHORN_DTYPE)
     A, B, K = _batch_masks(batch_index, zd)
     if K == 0:
         return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)

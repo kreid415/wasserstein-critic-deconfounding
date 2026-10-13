@@ -1,0 +1,20 @@
+s=1        float64  ok finite  iters=   20 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=1        float32  ok finite  iters=   20 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=30       float64  ok finite  iters= 1395 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=30       float32  ok finite  iters= 1394 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=100      float64  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=100      float32  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=300      float64  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=300      float32  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=1000     float64  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=1000     float32  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=10000    float64  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=10000    float32  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=30000    float64  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=30000    float32  cap        iters= 3000 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+one nan    float64  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+one nan    float32  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+one inf    float64  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+one inf    float32  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+one -inf   float64  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+one -inf   float32  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0

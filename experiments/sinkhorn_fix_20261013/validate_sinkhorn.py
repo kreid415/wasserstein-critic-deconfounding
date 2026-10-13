@@ -7,7 +7,8 @@ review/esc2/sinkhorn_astra, sha256 0e6663fb...), on the minibatches that review 
   trainmode: the 76 training-mode minibatches of 19 loaded final models.
 Gradients are w.r.t. the raw float32 posterior means (through the standardisation for zstd rows), as in training.
 Also records the branch solver's iterations at the final eps (cross, self-a, self-b).
-Usage: python validate_sinkhorn.py OUT.csv [N_MB=4] [WORKERS=6]   (CPU only)
+Usage: [SINKHORN_DTYPE=float32] python validate_sinkhorn.py OUT.csv [N_MB=4] [WORKERS=6]   (CPU only)
+SINKHORN_DTYPE sets the branch's solve precision (alignment.SINKHORN_DTYPE; default float64; SI-58 candidate float32).
 """
 import csv, glob, json, math, os, sys
 from concurrent.futures import ProcessPoolExecutor
@@ -35,6 +36,7 @@ def _load(path, name):
 
 
 NEW = _load(f"{REPO}/src/wcd_vae/wcd/alignment.py", "align_new")
+NEW.SINKHORN_DTYPE = {"float64": torch.float64, "float32": torch.float32}[os.environ.get("SINKHORN_DTYPE", "float64")]
 OLD = _load(TAG_SRC, "align_tag")
 ITERS = []
 _err = NEW._marginal_err
@@ -88,6 +90,7 @@ def compare(z, b, zstd):
             out["new_iters_cross"], out["new_iters_self_a"], out["new_iters_self_b"] = ITERS
             out.update(new_error="", new_iters=json.dumps(ITERS))
     out["ref_grad_norm"], out["n_batches"] = float(np.linalg.norm(gr)), int(len(np.unique(b)))
+    out["solve_dtype"] = str(NEW.SINKHORN_DTYPE)
     return out
 
 

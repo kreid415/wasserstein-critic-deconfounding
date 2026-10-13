@@ -1,6 +1,6 @@
 """Pilot (diagnostic, not a pre-registered stage): one full-length fit with the branch Sinkhorn solver, recording for
 every training step the solver's iterations at the final eps (all three solves) and the loss forward time. Question:
-does real training ever approach SINKHORN_MAX_ITER (50,000), which raises? Runs scripts/fit_paper_config.py main()
+does real training ever approach SINKHORN_MAX_ITER (50,000 at the pilot; 500,000 since SI-59), which raises? Runs scripts/fit_paper_config.py main()
 in-process; the only change is a wrapper around the plan's alignment module after it is loaded.
 Env: as fit_paper_config.py (MANIFEST, TAG, PREPPED_DIR, OUT_DIR, WCD_SRC). Appends to OUT_DIR/pilot_steps_<TAG>.csv every
 200 steps and at exit (a killed run keeps what it logged).

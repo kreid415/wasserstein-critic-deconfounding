@@ -20,6 +20,7 @@ ot = pytest.importorskip("ot")
 
 from wcd_vae.wcd.alignment import (
     _batch_masks,
+    _cost,
     _log_w,
     _ot_eps,
     _ot_eps_sym,
@@ -148,6 +149,18 @@ def _small_problem():
 def test_sinkhorn_refuses_bad_p_and_unconverged_solve(call, exc, match):
     with pytest.raises(exc, match=match):
         call()
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf])
+# test-reason: a NaN/inf latent must stop all three solves at once (review F1); the convergence break shares its line
+def test_sinkhorn_nonfinite_latent_stops_at_once_with_nan(bad):
+    """Review F1: a NaN or infinite latent ran every SINKHORN_MAX_ITER iteration and then raised RuntimeError (an
+    infrastructure error to the runner); now each solve stops at once and the NaN loss reaches the training guard
+    (fit outcome 'diverged'). With max_iter=1 the old loops raised here."""
+    z = torch.randn(8, 2, generator=torch.Generator().manual_seed(0), dtype=torch.float64)
+    z[0, 0] = bad
+    A, B, _ = _batch_masks(torch.tensor([0, 1] * 4), z)
+    assert torch.isnan(sinkhorn_divergence_weighted(_cost(z, 1), A, B, 0.1, max_iter=1)).all()
 
 
 @pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others, lambda z, b: mmd_reference(z, b, 7)])
