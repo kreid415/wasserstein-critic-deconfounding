@@ -389,6 +389,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
                                    init=(self._bary_prev if warm else None))
             self._bary_prev = target
         z_d = z_adv.detach()
+        inner = z_d.new_zeros(())          # sum of every inner step's loss: non-finite if any one was (final review I034)
         for _ in range(self.adv_steps):
             if self.is_critic:
                 loss_d, gp = self._head(z_d, batch_index, target, with_gp=True, weights=w)
@@ -404,8 +405,10 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             else:
                 loss_d, gp = self._head(z_d, batch_index, None, with_gp=False)
             opt_d.zero_grad()
-            self.manual_backward(loss_d + gp, retain_graph=False)
+            d_loss = loss_d + gp
+            self.manual_backward(d_loss, retain_graph=False)
             opt_d.step()
+            inner = inner + d_loss.detach()
         self._log("adv_loss", loss_d)
         self._log("adv_gp", gp)
         if self.is_critic:
@@ -434,7 +437,8 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.manual_backward(gen_loss)
         opt_g.step()
         self.log("train_loss", loss_vae, on_step=self.on_step, on_epoch=self.on_epoch, prog_bar=True)
-        self._nf_check(batch_idx, loss_vae=loss_vae, adv_term=adv_term, gen_loss=gen_loss, adv_loss=loss_d, adv_gp=gp)
+        self._nf_check(batch_idx, loss_vae=loss_vae, adv_term=adv_term, gen_loss=gen_loss, adv_loss=loss_d, adv_gp=gp,
+                       adv_inner=inner)
         return loss_vae
 
 

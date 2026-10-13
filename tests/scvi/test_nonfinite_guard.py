@@ -8,7 +8,8 @@ Run in the scvi env, CPU only: CUDA_VISIBLE_DEVICES= WCD_SRC=src python -m pytes
    branches that run scvi-tools' own training_step).
 3. A NaN encoder weight makes torch.distributions refuse q_m in the next forward pass: raised as NonFiniteLossError
    from the original ValueError, at the injected step, listing the poisoned parameter.
-4. Parameters made non-finite by the last optimizer step are caught at the end of training.
+4. Parameters made non-finite by the last optimizer step are caught at the end of training. A non-finite critic
+   loss at an inner critic step is caught even when later inner steps are finite (final review I034).
 5. Any other error in the forward pass propagates unchanged (it is an infrastructure / code error, not a divergence).
 6. scripts/fit_paper_config.py end to end: a diverging row writes OUT_DIR/status/<tag>.json (status diverged, epoch,
    step, the manifest row) and exits with EXIT_DIVERGED, writing no latent; a finite row writes its latent and no
@@ -88,6 +89,23 @@ def test_overflowing_loss_raises_at_first_step(arm):
     assert (e.epoch, e.step) == (0, 0), (e.epoch, e.step)
     assert e.terms["gen_loss"] == float("inf") and np.isfinite(e.terms["loss_vae"]), e.terms
     assert "gen_loss=inf" in str(e)
+
+
+# test-reason: catches a non-finite inner critic step that later inner steps overwrite (final review I034)
+def test_nonfinite_inner_critic_step_raises(monkeypatch):
+    orig, calls = PLAN._head, []
+
+    def head(self, z, batch_index, target, with_gp, weights=None):
+        loss, gp = orig(self, z, batch_index, target, with_gp, weights=weights)
+        calls.append(with_gp)
+        return (loss + float("inf") if calls == [True] else loss), gp     # first critic step only; gradients finite
+
+    monkeypatch.setattr(PLAN, "_head", head)
+    with pytest.raises(fit_outcome.NonFiniteLossError) as ei:
+        _fit("pooled")
+    e = ei.value
+    assert (e.epoch, e.step) == (0, 0) and e.terms["adv_inner"] == float("inf"), e.terms
+    assert np.isfinite(e.terms["adv_loss"]) and np.isfinite(e.terms["gen_loss"]), e.terms
 
 
 @pytest.mark.parametrize("arm", ["none", "scvi_adv"])
