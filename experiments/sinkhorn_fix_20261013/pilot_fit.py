@@ -2,7 +2,8 @@
 every training step the solver's iterations at the final eps (all three solves) and the loss forward time. Question:
 does real training ever approach SINKHORN_MAX_ITER (50,000), which raises? Runs scripts/fit_paper_config.py main()
 in-process; the only change is a wrapper around the plan's alignment module after it is loaded.
-Env: as fit_paper_config.py (MANIFEST, TAG, PREPPED_DIR, OUT_DIR, WCD_SRC). Writes OUT_DIR/pilot_steps_<TAG>.csv.
+Env: as fit_paper_config.py (MANIFEST, TAG, PREPPED_DIR, OUT_DIR, WCD_SRC). Appends to OUT_DIR/pilot_steps_<TAG>.csv every
+200 steps and at exit (a killed run keeps what it logged).
 """
 import atexit
 import csv
@@ -17,6 +18,7 @@ import scvi_adversarial_plan as plan  # noqa: E402
 import fit_paper_config as fit  # noqa: E402
 
 STEPS = []
+LOG = os.path.join(os.environ["OUT_DIR"], f"pilot_steps_{os.environ['TAG']}.csv")
 _load_heads = plan._load_wcd_heads
 
 
@@ -35,22 +37,27 @@ def _instrumented(src_root):
         t = time.perf_counter()
         v = sk(z, b, **kw)
         torch.cuda.synchronize()
-        STEPS.append((len(STEPS), n[0], round((time.perf_counter() - t) * 1e3, 3)))
+        STEPS.append((_flush.done + len(STEPS), n[0], round((time.perf_counter() - t) * 1e3, 3)))
+        if len(STEPS) == 200:
+            _flush()
         return v
 
     al._marginal_err, al.CRITIC_FREE_LOSSES["sinkhorn"] = counted, timed
     return out
 
 
-def _write():
-    with open(os.path.join(os.environ["OUT_DIR"], f"pilot_steps_{os.environ['TAG']}.csv"), "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["step", "iterations_all_solves", "loss_forward_ms"])
-        w.writerows(STEPS)
+def _flush():
+    with open(LOG, "a", newline="") as f:
+        csv.writer(f).writerows(STEPS)
+    _flush.done += len(STEPS)
+    STEPS.clear()
 
 
+_flush.done = 0
+with open(LOG, "w", newline="") as f:
+    csv.writer(f).writerow(["step", "iterations_all_solves", "loss_forward_ms"])
 plan._load_wcd_heads = _instrumented
-atexit.register(_write)
+atexit.register(_flush)
 
 if __name__ == "__main__":
     from fit_outcome import NonFiniteLossError
