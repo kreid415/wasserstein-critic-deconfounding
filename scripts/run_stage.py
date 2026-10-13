@@ -387,7 +387,7 @@ class Outputs:
             return None
         try:
             with np.load(p, allow_pickle=False) as d:
-                missing = sorted({"z", "obs_names", "batch", "celltype", "config"} - set(d.files))
+                missing = sorted({"z", "obs_names", "batch", "celltype", "config", "history"} - set(d.files))
                 if missing:
                     raise InvalidOutput(f"{p}: latent lacks {missing}")
                 z, n_obs = d["z"], len(d["obs_names"])
@@ -397,6 +397,9 @@ class Outputs:
         if z.ndim != 2 or z.dtype.kind != "f" or z.shape[1] != int(row["n_latent"]) or not z.shape[0] == n_obs == n_b == n_c:
             raise InvalidOutput(f"{p}: z {z.shape} {z.dtype} vs n_latent {row['n_latent']}, {n_obs} obs_names, "
                                 f"{n_b} batch, {n_c} celltype")
+        if row_kind(row) == "gpu" and not os.path.isfile(self.model_path(row["tag"])):
+            raise InvalidOutput(f"{p}: no {self.model_path(row['tag'])}: the weights of a GPU fit are missing (after a "
+                                f"scratch purge only a refit recovers them; final review I094)")
         diff = [c for c in FPC.REQUIRED if str(cfg.get("row", {}).get(c)) != row[c]]
         if diff:
             raise InvalidOutput(f"{p}: fitted with other settings than the manifest row ({diff})")

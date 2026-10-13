@@ -14,6 +14,7 @@ import subprocess
 import sys
 import time
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -313,6 +314,25 @@ def test_stale_latent_from_other_settings_is_refused(tmp_path):
     m.to_csv(st.manifest, sep="\t", index=False)
     rc, log = st.run()
     assert rc == rs.EXIT_PREFLIGHT and "other settings than the manifest row (['max_epochs'])" in log, log
+
+
+# test-reason: runs run_stage.py in a subprocess (invisible to check_tests); catches final review I094
+def test_latent_without_model_or_history_is_refused(tmp_path):
+    """Final review I094: completion and resume read the latent alone, so a GPU fit whose weights (or history) were
+    lost, e.g. to a scratch purge, still counted as fitted."""
+    st = Stage(tmp_path, [_row("ok1")])
+    assert st.run("--no-score")[0] == 0
+    model = os.path.join(st.out, "models", "ok1", "model.pt")
+    os.rename(model, model + ".gone")
+    rc, log = st.run("--report-only")
+    assert rc == rs.EXIT_PREFLIGHT and "the weights of a GPU fit are missing" in log, log
+    os.rename(model + ".gone", model)
+    lat = os.path.join(st.out, "latents", "ok1.npz")
+    d = dict(np.load(lat))
+    del d["history"]
+    np.savez(lat, **d)
+    rc, log = st.run("--report-only")
+    assert rc == rs.EXIT_PREFLIGHT and "lacks ['history']" in log, log
 
 
 def test_score_of_another_latent_or_seed_is_refused(tmp_path):

@@ -390,13 +390,24 @@ def cmd_summary(a):
 
 
 # ---- pack --------------------------------------------------------------------------------------------------------
+def _latent_device(path):
+    import numpy as np                     # FIT_PY has numpy; the other subcommands stay standard-library only
+    with np.load(path, allow_pickle=False) as d:
+        return json.loads(str(d["config"])).get("device")
+
+
 def harvest_files(out_dir, tags):
-    """Per-tag files of the runner layout for these tags (the source of truth; the views are added by the caller)."""
+    """Per-tag files of the runner layout for these tags (the source of truth; the views are added by the caller).
+    Refuses a GPU fit's latent without its model weights (final review I094; CPU baselines record device 'cpu')."""
     rel = []
     for t in tags:
         for p in (f"latents/{t}.npz", f"status/{t}.json", f"attempts/{t}.jsonl"):
             if os.path.isfile(os.path.join(out_dir, p)):
                 rel.append(p)
+        lat = os.path.join(out_dir, f"latents/{t}.npz")
+        if os.path.isfile(lat) and not os.path.isfile(os.path.join(out_dir, f"models/{t}/model.pt")) \
+                and _latent_device(lat) != "cpu":
+            raise SystemExit(f"[pack] {t}: a GPU fit's latent without models/{t}/model.pt (refit it; final review I094)")
         for root in (f"models/{t}",):
             for dp, _, fns in os.walk(os.path.join(out_dir, root)):
                 rel += [os.path.relpath(os.path.join(dp, fn), out_dir) for fn in fns]

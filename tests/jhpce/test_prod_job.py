@@ -563,6 +563,23 @@ def test_harvest_local_refuses_views_not_named_after_the_stage_key(sim, tmp_path
     assert m.returncode == 1 and "not named after the recorded stage key" in m.stderr
 
 
+def test_harvest_files_refuses_a_gpu_latent_without_its_model(tmp_path):
+    """Final review I094: the harvest packed models/<tag> only when present, so purged weights were lost silently.
+    A CPU baseline (config device 'cpu') has no model and is packed without one."""
+    import numpy as np
+    spec = importlib.util.spec_from_file_location("prod_helpers", os.path.join(ROOT, "cluster", "jhpce", "prod_helpers.py"))
+    ph = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ph)
+    (tmp_path / "latents").mkdir()
+    for t, cfg in (("g", {"gpu": "NVIDIA L40S"}), ("c", {"device": "cpu"})):
+        np.savez(tmp_path / "latents" / f"{t}.npz", config=json.dumps(cfg))
+    assert ph.harvest_files(str(tmp_path), ["c"]) == ["latents/c.npz"]
+    with pytest.raises(SystemExit, match="g: a GPU fit's latent without models/g/model.pt"):
+        ph.harvest_files(str(tmp_path), ["g"])
+    write(tmp_path / "models" / "g" / "model.pt", "w")
+    assert ph.harvest_files(str(tmp_path), ["g"]) == ["latents/g.npz", "models/g/model.pt"]
+
+
 def test_harvest_local_refuses_a_manifest_without_stage_key_fields(sim):
     spec = importlib.util.spec_from_file_location("harvest_local", sim.repo / "cluster/jhpce/harvest_local.py")
     hl = importlib.util.module_from_spec(spec)
