@@ -150,6 +150,16 @@ def test_sinkhorn_refuses_bad_p_and_unconverged_solve(call, exc, match):
         call()
 
 
+@pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others, lambda z, b: mmd_reference(z, b, 7)])
+def test_no_pair_of_batches_gives_differentiable_zero(fn):
+    """Regression (final review I033): a minibatch with one batch (or no reference) returned a zero without a graph,
+    and the plan's torch.autograd.grad(adv_term, z) raised."""
+    z = torch.randn(6, 3, requires_grad=True)
+    v = fn(z, torch.zeros(6, dtype=torch.long))
+    (gz,) = torch.autograd.grad(v, z)
+    assert float(v) == 0.0 and not gz.any()
+
+
 @pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others])
 def test_gradients_finite_including_duplicate_points(fn):
     z, b = _two_clouds(dtype=torch.float32)

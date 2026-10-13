@@ -1,7 +1,9 @@
 """Critic-free batch-alignment divergences -- AUTHORED (K. Reid). Rewritten 2026-10-02.
 
 Both losses compare each batch with the OTHER batches in the minibatch and average over the
-batches present (equal weight per batch, the same target and weighting as the pooled critic):
+batches present (equal weight per batch, the same target and weighting as the pooled critic). A minibatch
+with no pair to compare (one batch present; for mmd_ref, no reference or no other batch) contributes 0, as a
+zero that carries the graph so the plan's torch.autograd.grad works (final review I033):
 
     L(z) = mean_k D(P_k, P_{-k})
 
@@ -98,7 +100,7 @@ def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None):
     else:
         A, B, K = _batch_masks_weighted(batch_index, z, weights)
     if K == 0:
-        return z.new_zeros(())
+        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
     d2 = _sqdist(z)
     d = z.shape[1]
     kmat = sum(torch.exp(-d2 / (2.0 * d * m * m)) for m in multipliers) / len(multipliers)
@@ -116,7 +118,7 @@ def mmd_reference(z, batch_index, reference_batch, multipliers=BW_MULTIPLIERS):
     ref = batch_index == int(reference_batch)
     others = torch.unique(batch_index[~ref])
     if not bool(ref.any()) or others.numel() == 0:
-        return z.new_zeros(())
+        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
     onehot = (batch_index[None, :] == others[:, None]).to(z.dtype)
     A = onehot / onehot.sum(1, keepdim=True)
     B = (ref.to(z.dtype) / ref.sum())[None, :].expand_as(A)
@@ -232,7 +234,7 @@ def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, sca
     zd = z.double()
     A, B, K = _batch_masks(batch_index, zd)
     if K == 0:
-        return z.new_zeros(())
+        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
     blur = blur_frac * math.sqrt(2.0 * z.shape[1])
     return sinkhorn_divergence_weighted(_cost(zd, p), A, B, blur, p=p, scaling=scaling).mean().to(z.dtype)
 
