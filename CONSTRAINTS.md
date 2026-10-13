@@ -350,3 +350,31 @@
 - added: 2026-10-13
 - keywords: final review, fixes, new tag, bit-identity, amendments
 - notebook: NB-20261013-02
+
+## SI-53 · active · method
+- rule: R1 trajectory (I091): keep the registered R1 and the frozen X1 grids; correct the PREREG §9 sentence that R1 is unaffected and report R1 without trajectory as a disclosed sensitivity analysis.
+- source: "Keep the registered R1 and disclose (Recommended)" (user, ask_user answer to I091, 2026-10-13)
+- added: 2026-10-13
+- keywords: R1, trajectory, sensitivity, grid, I091
+- notebook: NB-20261013-08
+
+## SI-54 · active · process
+- rule: Mixed commits: declare c88cce3 and the new tag result-identical for non-Sinkhorn arms in an explicit committed list backed by the identity checks; rule scripts and the runner accept either commit for those arms only; Sinkhorn rows must carry the new tag; no rescoring.
+- source: "Declare the two commits equivalent (Recommended)" (user, ask_user answer to the provenance question, 2026-10-13)
+- added: 2026-10-13
+- keywords: provenance, commit, scorer_git_sha, allow-mixed-sha, equivalent, tag
+- notebook: NB-20261013-08
+
+## SI-55 · active · method
+- rule: X1 grid edge (I006): correct PAPER_PLAN to PREREG §4: grid extensions only for matching; P1 and the frontier use the six registered lambda points; edge optima are disclosed, no extension fits.
+- source: "Correct PAPER_PLAN to match PREREG (Recommended)" (user, ask_user answer to I006, 2026-10-13)
+- added: 2026-10-13
+- keywords: grid edge, extension, PAPER_PLAN, frontier, I006
+- notebook: NB-20261013-08
+
+## SI-56 · active · method
+- rule: P1 at b* (I072, D-04): anchor every arm's bio-versus-batch curve at lambda=0 (the unintegrated model's scores that define b0); bstar_low_signal cells are not evaluable for P1 and R2/R3 and are reported separately.
+- source: "Anchor at λ=0; low-signal cells not evaluable (Recommended)" (user, ask_user answer to I072/D-04, 2026-10-13)
+- added: 2026-10-13
+- keywords: b*, bstar_low_signal, P1, anchor, R2, R3, I072
+- notebook: NB-20261013-08
