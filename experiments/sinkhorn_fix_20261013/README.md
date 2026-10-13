@@ -30,7 +30,7 @@ Not changed: `_sqdist` (the MMD losses use it; SI-52 requires MMD fits to stay b
 | `bench_gpu.py results/bench_gpu_si58.csv` (GPU) | `results/bench_gpu_si58.csv` | SI-58: ms per call for the tagged code and the branch with the solve in float64 and in float32, and the two dtypes' GPU agreement |
 | `SINKHORN_DTYPE=float64` (and `=float32`) `validate_sinkhorn.py results/validation_12mb_si58_<dtype>.csv 12 6` | `results/validation_12mb_si58_<dtype>.csv` | SI-58: both dtypes at the committed code against the reference; the float64 run is also the regression check of 772d59b |
 | `si58_summary.py` | `results/si58_summary.md` | SI-58 decision table (below) |
-| `f1_nonfinite_probe.py > results/f1_nonfinite_probe.txt` | `results/f1_nonfinite_probe.txt` | NaN, +inf and -inf latents give a NaN marginal error at the first iteration (float64 and float32); latents up to s = 30,000 never give an infinite one (review F1) |
+| `f1_nonfinite_probe.py > results/f1_nonfinite_probe.txt` | `results/f1_nonfinite_probe.txt` | NaN, +inf and -inf latents give a NaN marginal error at the first iteration (float64 and float32), so the solve stops with a NaN loss (review F1); finite latents up to s = 30,000 give no infinite error, but at s = 1e20 and 1e30 the first cross-solve error is +inf with finite potentials and the solve converges a few iterations later (re-review R2-01: from about 1e18), so only a NaN error may stop the loop |
 
 Inputs: `sinkhorn_reference.py` is the final review's reference, copied unchanged from
 `review/esc2/sinkhorn_astra/` (sha256 0e6663fb...a709a8, as in that folder's SHA256SUMS). The minibatches are the

@@ -18,3 +18,7 @@ one inf    float64  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_fi
 one inf    float32  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
 one -inf   float64  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
 one -inf   float32  ok nan     iters=    3 err_inf=   0 err_nan=   3 inf_with_finite_potentials=   0
+s=1e+17    float64  ok finite  iters=    4 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=1e+18    float64  ok finite  iters=    4 err_inf=   0 err_nan=   0 inf_with_finite_potentials=   0
+s=1e+20    float64  ok finite  iters=    4 err_inf=   1 err_nan=   0 inf_with_finite_potentials=   1
+s=1e+30    float64  ok finite  iters=    5 err_inf=   1 err_nan=   0 inf_with_finite_potentials=   1

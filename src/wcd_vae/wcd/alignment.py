@@ -189,7 +189,9 @@ def _ot_eps(C, la, lb, eps_list, tol, max_iter):
             f = _softmin(eps, Cd, lb, g)
             g_new = _softmin(eps, Cd.T, la, f)
             err, g = _marginal_err(lb, g, g_new, eps), g_new
-            if not err >= tol:     # converged, or NaN (NaN/inf latent): stop now, the NaN loss is 'diverged' (F1)
+            # converged, or NaN (a NaN/inf latent): stop; the NaN loss is 'diverged' (F1). An infinite error (finite
+            # latents of about 1e18 or more: re-review R2-01) is not convergence and keeps iterating.
+            if not err >= tol:
                 break
         else:
             _not_converged(err, tol, max_iter)

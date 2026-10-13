@@ -147,8 +147,17 @@ def _small_problem():
     return torch.sqrt(_sqdist(z) + 1e-12), _log_w(A), _log_w(B)
 
 
+def _huge_latent_solve():
+    """Finite latents of scale 1e30: the first cross-solve error is +inf while every potential is finite (re-review
+    R2-01). The loop must keep iterating (here it raises at max_iter=1), not stop as it does on a NaN error."""
+    z = 1e30 * torch.randn(8, 2, generator=torch.Generator().manual_seed(0), dtype=torch.float64)
+    A, B, _ = _batch_masks(torch.tensor([0, 1] * 4), z)
+    return sinkhorn_divergence_weighted(_cost(z, 1), A, B, 0.1, max_iter=1)
+
+
 @pytest.mark.parametrize("call, exc, match", [
     (lambda: sinkhorn_batch_others(torch.randn(8, 2), torch.tensor([0, 1] * 4), p=3), ValueError, "p must be 1 or 2"),
+    (_huge_latent_solve, RuntimeError, "after 1 iterations"),
     (lambda: _ot_eps(*_small_problem(), [0.1], 0.0, 3), RuntimeError, "after 3 iterations"),
     (lambda: _ot_eps_sym(*_small_problem()[:2], [0.1], 0.0, 3), RuntimeError, "after 3 iterations"),
 ])

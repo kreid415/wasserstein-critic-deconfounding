@@ -30,8 +30,11 @@ for bad in (math.nan, math.inf, -math.inf):
     z[5, 3] = bad
     cases[f"one {bad}"] = z
 b = torch.randint(0, 2, (128,), generator=g)
-for name, z in cases.items():
-    for dt in (torch.float64, torch.float32):
+# re-review R2-01: from about 1e18 the first cross-solve error is +inf with finite potentials. float64 solve only:
+# a float32 solve of latents above ~1e19 gives an infinite cost diameter and _eps_schedule would not end (R2-07)
+huge = {f"s={s:g}": s * torch.randn(128, 10, generator=g) for s in (1e17, 1e18, 1e20, 1e30)}
+for name, z in {**cases, **huge}.items():
+    for dt in ((torch.float64,) if name in huge else (torch.float64, torch.float32)):
         log.clear()
         zd = z.to(dt)
         A, B, _ = al._batch_masks(b, zd)
