@@ -378,3 +378,10 @@
 - added: 2026-10-13
 - keywords: b*, bstar_low_signal, P1, anchor, R2, R3, I072
 - notebook: NB-20261013-08
+
+## SI-57 · active · method
+- rule: Sinkhorn redo in rule order: refit the 180 A1 Sinkhorn fits, run R1 for the Sinkhorn family and its extension rows, run R4-a1 over all six arms with the refitted Sinkhorn arm, fit the A3 rows it resolves (including any non-Sinkhorn cell whose window moved), then re-run R2 and R3 in full.
+- source: "Run R4-a1 as registered, in rule order (Recommended)" (user, ask_user answer to the R4-a1 scope question, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, R4-a1, b_common, b*, refit, rule order, A3, R3
+- notebook: NB-20261013-10
