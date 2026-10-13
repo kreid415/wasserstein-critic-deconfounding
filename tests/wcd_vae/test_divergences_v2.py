@@ -18,6 +18,7 @@ import torch
 
 ot = pytest.importorskip("ot")
 
+from wcd_vae.wcd import alignment
 from wcd_vae.wcd.alignment import (
     _batch_masks,
     _cost,
@@ -113,16 +114,20 @@ def _narrow_far():
 
 @pytest.mark.parametrize("case", [_standardised, _narrow_far])
 # test-reason: catches an unconverged final eps (I032) and the float32 distance cancellation; the Diracs cannot
-def test_sinkhorn_matches_converged_reference(case):
-    """Value and gradient (w.r.t. the raw float32 input, through the standardisation) within 1e-5 and 1e-3 of the
-    converged reference. The tagged code: gradient error 1.45 / 1.13; the gradient fix without the convergence
-    loop: 4.4e-2 (standardised); without the stable distances: 0.33 (narrow-far)."""
+def test_sinkhorn_matches_converged_reference(case, monkeypatch):
+    """Value and gradient (w.r.t. the raw float32 input, through the standardisation) within 1e-5 and 3e-4 of the
+    converged reference (committed code: gradient error 9.4e-5 / 3.3e-5). The tagged code: gradient error 1.45 / 1.13;
+    the gradient fix without the convergence loop: 4.4e-2 (standardised); without the stable distances: 0.33
+    (narrow-far); SINKHORN_TOL 1e-3 instead of 1e-4: 8.3e-4 (standardised), value 2.2e-5 (narrow-far) (review F4).
+    The solve must run in float64: float32 passes these checks but gave no speed-up on the RTX 3080 (SI-58)."""
     ref = _review_reference()
     z64, b, zstd = case()
 
     def adv(z):
         return (z - z.mean(0, keepdim=True)) / z.std(0, unbiased=False, keepdim=True).clamp_min(1e-4) if zstd else z
 
+    dtypes, ot_eps = [], alignment._ot_eps
+    monkeypatch.setattr(alignment, "_ot_eps", lambda C, *a: dtypes.append(C.dtype) or ot_eps(C, *a))
     mu = z64.float().requires_grad_(True)
     v = sinkhorn_batch_others(adv(mu), b)
     (g,) = torch.autograd.grad(v, mu)
@@ -130,8 +135,9 @@ def test_sinkhorn_matches_converged_reference(case):
     a64 = adv(m64)
     v_ref, _ = ref.reference_cost(ref.cost_matrix(a64), b, 0.05 * math.sqrt(2 * a64.shape[1]), tol=1e-10)
     (g_ref,) = torch.autograd.grad(v_ref, m64)
+    assert dtypes == [torch.float64]
     assert abs(float(v) - float(v_ref)) < 1e-5 * abs(float(v_ref))
-    assert float((g.double() - g_ref).norm() / g_ref.norm()) < 1e-3
+    assert float((g.double() - g_ref).norm() / g_ref.norm()) < 3e-4
 
 
 def _small_problem():
