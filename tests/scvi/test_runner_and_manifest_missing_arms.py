@@ -65,6 +65,12 @@ def test_extra_keys_are_consumed_or_refused():
     # guard review G-04: every entry of both tables, not a sample (G-05 added lam for none, scvi_adv and scanvi)
     row = {c: v for s in fpc.UNREAD_SETTINGS.values() for c, v in s.items()}     # every unread setting at its value
     assert row == dict(n_critic="0", adv_input="mean", zstd="0", lam="0", likelihood="zinb", decoder="SCVI", cond="1")
+    assert {a: sorted(s) for a, s in fpc.UNREAD_SETTINGS.items()} == {     # a deleted entry is accepted silently
+        **{a: ["adv_input", "lam", "n_critic", "zstd"] for a in ("none", "scvi_adv")},
+        "scanvi": ["adv_input", "cond", "decoder", "lam", "n_critic", "zstd"],
+        "sysvi": ["adv_input", "cond", "decoder", "likelihood", "n_critic", "zstd"],
+        **{a: ["n_critic"] for a in ("mmd", "mmd_ref", "sinkhorn")}}
+    assert set(fpc.EXTRA_ARMS) == {"adv_width", "adv_lr", "bary_iter", "bary_warm_iter", "sampler"}   # likewise
     for arm, settings in fpc.UNREAD_SETTINGS.items():
         fpc.check_extra("t", arm, {}, row)
         for col in settings:
