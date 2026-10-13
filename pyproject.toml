@@ -81,3 +81,7 @@ extend-immutable-calls = ["typer.Argument"]
 
 [project.optional-dependencies]
 test = ["pytest", "pyright", "ruff", "mypy"]
+
+[tool.coverage.run]
+# measure scripts run in subprocesses (fit_paper_config.py end-to-end tests) too; coverage >= 7.10
+patch = ["subprocess"]

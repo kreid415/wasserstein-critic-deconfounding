@@ -13,7 +13,8 @@ Run in the scvi env, CPU only: CUDA_VISIBLE_DEVICES= WCD_SRC=src python -m pytes
 5. Any other error in the forward pass propagates unchanged (it is an infrastructure / code error, not a divergence).
 6. scripts/fit_paper_config.py end to end: a diverging row writes OUT_DIR/status/<tag>.json (status diverged, epoch,
    step, the manifest row) and exits with EXIT_DIVERGED, writing no latent; a finite row writes its latent and no
-   status; a row that fails for another reason exits 1 and writes nothing; a row with a status file is refused.
+   status; a row that fails for another reason exits 1 and writes nothing, as does a row that changes a setting its
+   arm does not read (final review I042, guard review G-03); a row with a status file is refused.
 """
 import json
 import os
@@ -91,21 +92,26 @@ def test_overflowing_loss_raises_at_first_step(arm):
     assert "gen_loss=inf" in str(e)
 
 
-# test-reason: catches a non-finite inner critic step that later inner steps overwrite (final review I034)
-def test_nonfinite_inner_critic_step_raises(monkeypatch):
+# Guard review G-02: a sum without gp, or of the first inner step only, passed the single-case version of this test.
+@pytest.mark.parametrize("step, term", [(0, "loss"), (2, "gp"), (4, "loss")])
+# test-reason: catches a non-finite inner critic step (loss or gp, any of 5) that later steps overwrite (I034)
+def test_nonfinite_inner_critic_step_raises(monkeypatch, step, term):
     orig, calls = PLAN._head, []
 
     def head(self, z, batch_index, target, with_gp, weights=None):
         loss, gp = orig(self, z, batch_index, target, with_gp, weights=weights)
         calls.append(with_gp)
-        return (loss + float("inf") if calls == [True] else loss), gp     # first critic step only; gradients finite
+        if calls == [True] * (step + 1):          # inner critic step `step` of the first training step; gradients finite
+            return (loss + float("inf"), gp) if term == "loss" else (loss, gp + float("inf"))
+        return loss, gp
 
     monkeypatch.setattr(PLAN, "_head", head)
     with pytest.raises(fit_outcome.NonFiniteLossError) as ei:
         _fit("pooled")
     e = ei.value
     assert (e.epoch, e.step) == (0, 0) and e.terms["adv_inner"] == float("inf"), e.terms
-    assert np.isfinite(e.terms["adv_loss"]) and np.isfinite(e.terms["gen_loss"]), e.terms
+    assert np.isfinite(e.terms["adv_loss"]) == (step < 4), e.terms          # step 4 is the last: its loss is logged
+    assert np.isfinite(e.terms["adv_gp"]) and np.isfinite(e.terms["gen_loss"]), e.terms
 
 
 @pytest.mark.parametrize("arm", ["none", "scvi_adv"])
@@ -180,7 +186,8 @@ def run_fitter_rows(code_root, tmp_path):
     """Fit the three probe rows with the fitter at code_root; returns {tag: (returncode, status record or None,
     latent exists)}. Used by the test below and by the mutation check against the base commit."""
     _toy().write_h5ad(tmp_path / "toy__scib.h5ad")
-    rows = [_row("div", lam="1e39"), _row("ok"), _row("err", task="absent")]
+    rows = [_row("div", lam="1e39"), _row("ok"), _row("err", task="absent"),
+            _row("unread", arm="none", lam="0", n_critic="0", zstd="1")]
     man = tmp_path / "m.tsv"
     pd.DataFrame(rows)[fpc.REQUIRED].to_csv(man, sep="\t", index=False)
     out = tmp_path / "out"
@@ -208,6 +215,8 @@ def check_fitter_contract(res, rows):
     assert rc == 0 and st is None and lat, f"finite row: exit {rc}, status {st}, latent {lat}: {err}"
     rc, st, lat, err = res["err"]
     assert rc == 1 and st is None and not lat, f"failing row: exit {rc}, status {st}, latent {lat}"
+    rc, st, lat, err = res["unread"]          # main() refuses a changed setting the arm does not read (G-03)
+    assert rc == 1 and st is None and not lat and "does not read ['zstd']" in err, f"unread row: exit {rc}: {err}"
 
 
 def test_fitter_records_divergence_and_nothing_else(tmp_path):

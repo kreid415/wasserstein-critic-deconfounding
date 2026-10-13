@@ -3,7 +3,8 @@
 Both losses compare each batch with the OTHER batches in the minibatch and average over the
 batches present (equal weight per batch, the same target and weighting as the pooled critic). A minibatch
 with no pair to compare (one batch present; for mmd_ref, no reference or no other batch) contributes 0, as a
-zero that carries the graph so the plan's torch.autograd.grad works (final review I033):
+zero that carries the graph so the plan's torch.autograd.grad works (final review I033); a caller that passes a
+dict as `stats` gets those minibatches counted in stats['no_pair'] (guard review G-01):
 
     L(z) = mean_k D(P_k, P_{-k})
 
@@ -64,6 +65,14 @@ def _sqdist(z):
     return (sq[:, None] + sq[None, :] - 2.0 * z @ z.T).clamp_min(0.0)
 
 
+def _no_pair(z, stats):
+    """The loss of a minibatch with no pair of batches to compare: 0, keeping the graph (I033), counted in
+    stats['no_pair'] when the caller passes a dict (G-01)."""
+    if stats is not None:
+        stats["no_pair"] = stats.get("no_pair", 0) + 1
+    return (z * 0).sum()
+
+
 def _batch_masks(batch_index, z):
     """(A, B, keep): row-normalised weights of batch k (A) and of all other cells (B), [K, n]."""
     ubs = torch.unique(batch_index)
@@ -96,7 +105,7 @@ def _batch_masks_weighted(batch_index, z, weights):
     return A[keep], B[keep], int(keep.sum())
 
 
-def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None):
+def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None, stats=None):
     """mean_k MMD^2(P_k, P_{-k}), RBF kernel averaged over sigma = sqrt(d) * multipliers.
     weights (X3 importance weights): every empirical measure becomes the self-normalised weighted measure."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
@@ -105,7 +114,7 @@ def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None):
     else:
         A, B, K = _batch_masks_weighted(batch_index, z, weights)
     if K == 0:
-        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
+        return _no_pair(z, stats)
     d2 = _sqdist(z)
     d = z.shape[1]
     kmat = sum(torch.exp(-d2 / (2.0 * d * m * m)) for m in multipliers) / len(multipliers)
@@ -116,14 +125,14 @@ def mmd_batch_others(z, batch_index, multipliers=BW_MULTIPLIERS, weights=None):
     return (aka + bkb - 2.0 * akb).mean()
 
 
-def mmd_reference(z, batch_index, reference_batch, multipliers=BW_MULTIPLIERS):
+def mmd_reference(z, batch_index, reference_batch, multipliers=BW_MULTIPLIERS, stats=None):
     """mean over non-reference batches k of MMD^2(P_k, P_ref) (same kernel as mmd_batch_others).
     Reference-anchored alignment without a Wasserstein critic (X7 control)."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
     ref = batch_index == int(reference_batch)
     others = torch.unique(batch_index[~ref])
     if not bool(ref.any()) or others.numel() == 0:
-        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
+        return _no_pair(z, stats)
     onehot = (batch_index[None, :] == others[:, None]).to(z.dtype)
     A = onehot / onehot.sum(1, keepdim=True)
     B = (ref.to(z.dtype) / ref.sum())[None, :].expand_as(A)
@@ -234,13 +243,13 @@ def _cost(z, p):
     raise ValueError("p must be 1 or 2")
 
 
-def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, scaling=SINKHORN_SCALING):
+def sinkhorn_batch_others(z, batch_index, p=1, blur_frac=SINKHORN_BLUR_FRAC, scaling=SINKHORN_SCALING, stats=None):
     """mean_k S_eps(P_k, P_{-k}) with ground cost |x - y| (p=1) or |x - y|^2 / 2 (p=2), solved in SINKHORN_DTYPE."""
     z = z if z.dim() == 2 else z.reshape(z.shape[0], -1)
     zd = z.to(SINKHORN_DTYPE)
     A, B, K = _batch_masks(batch_index, zd)
     if K == 0:
-        return (z * 0).sum()        # no pair of batches to compare: 0, keeping the graph (I033)
+        return _no_pair(z, stats)
     blur = blur_frac * math.sqrt(2.0 * z.shape[1])
     return sinkhorn_divergence_weighted(_cost(zd, p), A, B, blur, p=p, scaling=scaling).mean().to(z.dtype)
 

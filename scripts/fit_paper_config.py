@@ -294,7 +294,7 @@ def main():
         raise ValueError(f"{r['tag']}: {arm} is an X13 CPU baseline; run it with scripts/run_cpu_baselines.py "
                          f"--manifest <manifest> --tag {r['tag']}")
     extra = json.loads(r["extra"])
-    check_extra(r["tag"], arm, extra, r)  # pragma: no cover  # run by the subprocess tests of tests/scvi/test_nonfinite_guard.py section 6, which coverage does not see
+    check_extra(r["tag"], arm, extra, r)
     if arm in ("scanvi", "sysvi") and {"r1_gamma", "sampler", "iw"} & set(extra):
         raise ValueError(f"{r['tag']}: r1_gamma / sampler / iw are adversary options, not defined for {arm}")
     if arm in ("scanvi", "sysvi") and "kl_warmup" in extra:
@@ -499,6 +499,9 @@ def resolved_plan(model):
         if gp:
             fn = sys.modules[type(plan._wcd_head).__module__].multi_class_gradient_penalty
             rec["lambda_gp"] = float(inspect.signature(fn).parameters["lambda_gp"].default)
+    n = getattr(plan, "_align_stats", {}).get("no_pair", 0)
+    if n:      # steps whose minibatch had no pair of batches (zero alignment loss); only when > 0, so every other
+        rec["no_pair_steps"] = n           # fit's config stays byte-identical (guard review G-01)
     rec["optimizers"] = [dict(cls=type(o).__name__,
                               param_groups=[{k: _plain(g[k]) for k in ("lr", "betas", "eps", "weight_decay", "amsgrad")
                                              if k in g} for g in o.param_groups])

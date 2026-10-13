@@ -193,6 +193,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.bary_warm_iter = None if bary_warm_iter is None else int(bary_warm_iter)
         self._bary_prev = None
         self._wcd_head = self._align_fn = self._bary = None
+        self._align_stats = {}     # critic-free losses count steps with no pair of batches here (guard review G-01)
         if base == "scvi_adv" and self.adversarial_classifier is False:
             raise ValueError("scvi_adv needs a batch-conditioned model (scvi disables it when n_batch == 1)")
         if base in ("none", "scvi_adv"):
@@ -227,7 +228,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
             fn = align_mod.CRITIC_FREE_LOSSES[base]
             if base in align_mod.NEEDS_REFERENCE:
                 ref = self.reference_batch
-                self._align_fn = lambda z, b: fn(z, b, reference_batch=ref)
+                self._align_fn = lambda z, b, **kw: fn(z, b, reference_batch=ref, **kw)
             else:
                 self._align_fn = fn
         else:
@@ -365,9 +366,9 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         if self.is_critic_free:
             (opt_g,) = [self.optimizers()]
             if w is None:
-                adv_term = self._align_fn(z_adv, batch_index)
+                adv_term = self._align_fn(z_adv, batch_index, stats=self._align_stats)
             else:
-                adv_term = self._align_fn(z_adv, batch_index, weights=w)
+                adv_term = self._align_fn(z_adv, batch_index, weights=w, stats=self._align_stats)
             g = torch.autograd.grad(adv_term, z_adv, retain_graph=True)[0]
             gen_loss = loss_vae + self.d_coef * adv_term
             opt_g.zero_grad()

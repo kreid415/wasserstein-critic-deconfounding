@@ -169,14 +169,19 @@ def test_sinkhorn_nonfinite_latent_stops_at_once_with_nan(bad):
     assert torch.isnan(sinkhorn_divergence_weighted(_cost(z, 1), A, B, 0.1, max_iter=1)).all()
 
 
-@pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others, lambda z, b: mmd_reference(z, b, 7)])
+@pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others,
+                                lambda z, b, **kw: mmd_reference(z, b, 7, **kw)])
 def test_no_pair_of_batches_gives_differentiable_zero(fn):
     """Regression (final review I033): a minibatch with one batch (or no reference) returned a zero without a graph,
-    and the plan's torch.autograd.grad(adv_term, z) raised."""
+    and the plan's torch.autograd.grad(adv_term, z) raised. Guard review G-01: such calls are counted in `stats`."""
     z = torch.randn(6, 3, requires_grad=True)
     v = fn(z, torch.zeros(6, dtype=torch.long))
     (gz,) = torch.autograd.grad(v, z)
     assert float(v) == 0.0 and not gz.any()
+    stats = {}
+    fn(z, torch.zeros(6, dtype=torch.long), stats=stats)
+    fn(z, torch.tensor([0, 7, 0, 7, 0, 7]), stats=stats)          # two batches (7 = mmd_ref's reference): not counted
+    assert stats == {"no_pair": 1}
 
 
 @pytest.mark.parametrize("fn", [mmd_batch_others, sinkhorn_batch_others])

@@ -245,6 +245,11 @@ def test_resolved_plan_known_answers():
             assert (r["adv_steps"], r["disc_lr"], r["lambda_gp"], r["gradient_penalty"]) == (1, 1e-3, None, False)
             assert (adv["lr"], adv["eps"]) == (1e-3, 0.01)
     json.dumps(r)                                                  # JSON-serialisable (stored in the npz config)
+    _, m = plan.fit_adversarial_scvi(_toy(k=1), "batch", adversary="mmd", d_coef=1.0, n_critic=None, reference_batch="b0",
+                                     adv_input="mean", zstd=False, n_latent=4, max_epochs=1, batch_size=128, seed=0,
+                                     conditioned=True)
+    # one batch: no step has a pair of batches to compare; every step is counted (guard review G-01)
+    assert fpc.resolved_plan(m)["no_pair_steps"] == m.trainer.lightning_module._nf_step + 1 > 0
 
 
 def test_the_head_uses_the_default_gradient_penalty_weight():
@@ -277,4 +282,5 @@ def test_fitter_writes_the_plan_record_for_every_plan_kind(tmp_path):
     assert plans["scvi_adv"]["adversarial_classifier"] is True and len(plans["scvi_adv"]["optimizers"]) == 2
     assert plans["disc"]["adv_steps"] == 1 and plans["disc"]["lambda_gp"] is None
     assert plans["mmd"]["adv_steps"] == 0 and plans["mmd"]["gradient_penalty"] is False
+    assert "no_pair_steps" not in plans["mmd"]           # written only when a step had no pair (guard review G-01)
     assert all(p["n_epochs_kl_warmup"] == 400 for p in plans.values())
