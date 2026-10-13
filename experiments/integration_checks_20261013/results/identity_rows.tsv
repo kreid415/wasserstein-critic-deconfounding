@@ -1,0 +1,65 @@
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+A1_atac_small_barycenter_l0.1_c0_s100_ee1decf8	A1	atac_small	scib	barycenter	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	"{""bary_iter"": 10}"
+A1_atac_small_barycenter_l0.1_c1_s100_b038d321	A1	atac_small	scib	barycenter	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	"{""bary_iter"": 10}"
+A1_atac_small_discriminator_l0.01_c0_s100_6ec84bad	A1	atac_small	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A1_atac_small_discriminator_l0.1_c1_s100_05ffb4d1	A1	atac_small	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_discriminator_la1_matched_c0_s100_73dc63d5	A3	atac_small	scib	discriminator	10	1	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_discriminator_la1_matched_c1_s100_95b8a59b	A3	atac_small	scib	discriminator	10	1	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_discriminator_la1_matched_c0_s100_ce3345be	A2	atac_small	scib	discriminator	10	1	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_discriminator_la1_matched_c1_s100_de5da10b	A2	atac_small	scib	discriminator	10	1	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+X12_atac_small_discriminator_lmatched_hi_c1_s10_35d52e89	X12	atac_small	scib	discriminator	10	1	mean	0	1	LinearSCVI	30	1	128	zinb	512	1	0.9	10	auto	"{""factorial_run"": 1, ""adv_width"": 32, ""adv_lr"": 0.0001}"
+X12_atac_small_discriminator_lmatched_hi_c1_s10_08f36100	X12	atac_small	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""factorial_run"": 0, ""adv_width"": 32, ""adv_lr"": 0.0001}"
+X3_sim2_discriminator_lmatched_hi_c1_s10_0df41ccc	X3	sim2	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 80, ""n_cells"": 17872, ""draw"": ""nested_v1""}, ""iw"": ""depletion_oracle""}"
+X15_immune_discriminator_lmatched_hi_c1_s10_46070c2e	X15	immune	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""kl_warmup"": ""stock""}"
+X8_sim2_discriminator_lmatched_c1_s10_23c0750e	X8	sim2	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 2, ""subset"": 1, ""n_cells"": 3000}}"
+X3_sim2_discriminator_lmatched_hi_c1_s10_1dcd1799	X3	sim2	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 0, ""n_cells"": 17872, ""draw"": ""nested_v1""}}"
+X6_atac_small_discriminator_r1_lmatched_c1_s10_b30342ad	X6	atac_small	scib	discriminator_r1	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""r1_gamma"": 10}"
+X7_atac_small_discriminator_ref_lmatched_c1_s10_0b75bdca	X7	atac_small	scib	discriminator_ref	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	0	{}
+X6_atac_small_discriminator_sn_lmatched_c1_s10_19d3b037	X6	atac_small	scib	discriminator_sn	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	{}
+A1_atac_small_mmd_l0.1_c0_s100_2d71f2a8	A1	atac_small	scib	mmd	0.1	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A1_atac_small_mmd_l0.1_c1_s100_10f59640	A1	atac_small	scib	mmd	0.1	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_mmd_la1_matched_c0_s100_34651428	A3	atac_small	scib	mmd	10	0	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_mmd_la1_matched_c1_s100_2db2b6af	A3	atac_small	scib	mmd	10	0	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+X3_sim2_mmd_lmatched_hi_c1_s10_aa410f7a	X3	sim2	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 50, ""n_cells"": 17872, ""draw"": ""nested_v1""}, ""iw"": ""depletion_oracle""}"
+X15_immune_mmd_lmatched_hi_c1_s10_1d9a4d2a	X15	immune	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""kl_warmup"": ""stock""}"
+X8_sim2_mmd_lmatched_c1_s10_1292b3b4	X8	sim2	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 8, ""subset"": 1, ""n_cells"": 3000}}"
+X3_sim2_mmd_lmatched_hi_c1_s10_3fa26ff7	X3	sim2	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 0, ""n_cells"": 17872, ""draw"": ""nested_v1""}}"
+X7_atac_small_mmd_ref_lmatched_c1_s10_6f9ad853	X7	atac_small	scib	mmd_ref	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	0	{}
+X1_sim2_none_l0_c0_s0_7c6426ec	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_none_l0_c1_s0_b40bea0b	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X15_immune_none_l0_c1_s10_131e05f7	X15	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""kl_warmup"": ""complete""}"
+X8_sim2_none_l0_c1_s10_1c5c8d80	X8	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 16, ""subset"": 0, ""n_cells"": 3000}}"
+X3_sim2_none_l0_c1_s10_42868236	X3	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 95, ""n_cells"": 17872, ""draw"": ""nested_v1""}}"
+A1_atac_small_pooled_l0.1_c0_s100_ad4ad3de	A1	atac_small	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A1_atac_small_pooled_l0.1_c1_s100_31f7ac37	A1	atac_small	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_pooled_la1_matched_c0_s100_aae72b7c	A3	atac_small	scib	pooled	10	5	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_pooled_la1_matched_c1_s100_698d6e62	A3	atac_small	scib	pooled	10	5	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_pooled_la1_matched_c0_s100_e599d92b	A2	atac_small	scib	pooled	10	5	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_pooled_la1_matched_c1_s100_66f98279	A2	atac_small	scib	pooled	10	5	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+X3_sim2_pooled_lmatched_hi_c1_s10_104b941d	X3	sim2	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 50, ""n_cells"": 17872, ""draw"": ""nested_v1""}, ""iw"": ""depletion_oracle""}"
+X15_immune_pooled_lmatched_hi_c1_s10_5eeb0fc4	X15	immune	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""kl_warmup"": ""stock""}"
+X8_sim2_pooled_lmatched_c1_s10_2bf59401	X8	sim2	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 8, ""subset"": 0, ""n_cells"": 3000}, ""sampler"": ""stratified""}"
+X8_sim2_pooled_lmatched_c1_s10_1cde8be5	X8	sim2	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 2, ""subset"": 1, ""n_cells"": 3000}}"
+X3_sim2_pooled_lmatched_hi_c1_s10_3d6061cf	X3	sim2	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 0, ""n_cells"": 17872, ""draw"": ""nested_v1""}}"
+X6_atac_small_pooled_sn_lmatched_c1_s10_567dbe6d	X6	atac_small	scib	pooled_sn	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	{}
+A1_atac_small_reference_l0.1_c0_s100_85160dec	A1	atac_small	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A1_atac_small_reference_l0.1_c1_s100_dc329e29	A1	atac_small	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_reference_la1_matched_c0_s100_2ea1976f	A3	atac_small	scib	reference	10	5	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_reference_la1_matched_c1_s100_1c44a38a	A3	atac_small	scib	reference	10	5	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_reference_la1_matched_c0_s100_396792ef	A2	atac_small	scib	reference	10	5	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A2_atac_small_reference_la1_matched_c1_s100_dbd06353	A2	atac_small	scib	reference	10	5	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+X12_atac_small_reference_lmatched_hi_c1_s10_26b935f1	X12	atac_small	scib	reference	10	5	mean	0	1	LinearSCVI	10	1	128	zinb	512	1	0.9	10	auto	"{""factorial_run"": 6, ""adv_width"": 128, ""adv_lr"": 0.001}"
+X12_atac_small_reference_lmatched_hi_c1_s10_4d945917	X12	atac_small	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	512	1	0.9	10	auto	"{""factorial_run"": 2, ""adv_width"": 128, ""adv_lr"": 0.0001}"
+X3_sim2_reference_lmatched_hi_c1_s10_00fa5c92	X3	sim2	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 50, ""n_cells"": 17872, ""draw"": ""nested_v1""}, ""iw"": ""depletion_oracle""}"
+X8_sim2_reference_lmatched_c1_s10_01619019	X8	sim2	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 8, ""subset"": 1, ""n_cells"": 3000}, ""sampler"": ""stratified""}"
+X8_sim2_reference_lmatched_c1_s10_1d92dde2	X8	sim2	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	auto	"{""subsample"": {""kind"": ""batches"", ""n_batches"": 4, ""subset"": 1, ""n_cells"": 3000}}"
+X3_sim2_reference_lmatched_hi_c1_s10_4ffaf1e5	X3	sim2	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	Batch4Sub2	"{""subsample"": {""kind"": ""composition"", ""batch"": ""Batch3Sub1"", ""types"": [""Group1""], ""deplete_pct"": 50, ""n_cells"": 17872, ""draw"": ""nested_v1""}}"
+X7_atac_small_reference_fixed_lmatched_c1_s10_0816297e	X7	atac_small	scib	reference_fixed	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	10	2	{}
+X13_sim2_scanvi_l0_c1_s0_131a8300	X13	sim2	scib	scanvi	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_scvi_adv_l0_c1_s0_e9ee3db7	X1	sim2	scib	scvi_adv	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+A1_atac_small_sinkhorn_l0.1_c0_s100_13e9db7f	A1	atac_small	scib	sinkhorn	0.1	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A1_atac_small_sinkhorn_l0.1_c1_s100_802e0dfc	A1	atac_small	scib	sinkhorn	0.1	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_sinkhorn_la1_matched_c0_s100_2c5f724b	A3	atac_small	scib	sinkhorn	10	0	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+A3_atac_small_sinkhorn_la1_matched_c1_s100_986974c2	A3	atac_small	scib	sinkhorn	10	0	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	100	auto	{}
+X13_sim2_sysvi_l10_c1_s0_0735891d	X13	sim2	scib	sysvi	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
