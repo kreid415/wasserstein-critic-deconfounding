@@ -391,22 +391,26 @@ def cmd_summary(a):
 
 # ---- pack --------------------------------------------------------------------------------------------------------
 def _latent_device(path):
+    """(config device, whether the latent has its training history)."""
     import numpy as np                     # FIT_PY has numpy; the other subcommands stay standard-library only
     with np.load(path, allow_pickle=False) as d:
-        return json.loads(str(d["config"])).get("device")
+        return json.loads(str(d["config"])).get("device"), "history" in d.files
 
 
 def harvest_files(out_dir, tags):
     """Per-tag files of the runner layout for these tags (the source of truth; the views are added by the caller).
-    Refuses a GPU fit's latent without its model weights (final review I094; CPU baselines record device 'cpu')."""
+    Refuses a latent without its training history, and a GPU fit's latent without its model weights (final review
+    I094, as the stage rule does; CPU baselines record device 'cpu' and an empty history)."""
     rel = []
     for t in tags:
         for p in (f"latents/{t}.npz", f"status/{t}.json", f"attempts/{t}.jsonl"):
             if os.path.isfile(os.path.join(out_dir, p)):
                 rel.append(p)
         lat = os.path.join(out_dir, f"latents/{t}.npz")
-        if os.path.isfile(lat) and not os.path.isfile(os.path.join(out_dir, f"models/{t}/model.pt")) \
-                and _latent_device(lat) != "cpu":
+        device, has_history = _latent_device(lat) if os.path.isfile(lat) else ("cpu", True)
+        if not has_history:
+            raise SystemExit(f"[pack] {t}: a latent without its training history (refit it; final review I094)")
+        if device != "cpu" and not os.path.isfile(os.path.join(out_dir, f"models/{t}/model.pt")):
             raise SystemExit(f"[pack] {t}: a GPU fit's latent without models/{t}/model.pt (refit it; final review I094)")
         for root in (f"models/{t}",):
             for dp, _, fns in os.walk(os.path.join(out_dir, root)):

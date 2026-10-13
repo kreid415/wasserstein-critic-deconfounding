@@ -62,12 +62,20 @@ def test_extra_keys_are_consumed_or_refused():
     for arm, extra, exc in bad:
         with pytest.raises(exc):
             fpc.check_extra("t", arm, extra)
-    row = dict(n_critic="0", adv_input="mean", zstd="0", likelihood="zinb", decoder="SCVI", cond="1")
-    fpc.check_extra("t", "sysvi", {}, row)
-    for arm, col, val in [("none", "zstd", "1"), ("scanvi", "decoder", "LinearSCVI"), ("sysvi", "likelihood", "nb"),
-                          ("sysvi", "cond", "0"), ("sinkhorn", "n_critic", "5")]:
-        with pytest.raises(ValueError, match="does not read"):
-            fpc.check_extra("t", arm, {}, {**row, col: val})
+    # guard review G-04: every entry of both tables, not a sample (G-05 added lam for none, scvi_adv and scanvi)
+    row = {c: v for s in fpc.UNREAD_SETTINGS.values() for c, v in s.items()}     # every unread setting at its value
+    assert row == dict(n_critic="0", adv_input="mean", zstd="0", lam="0", likelihood="zinb", decoder="SCVI", cond="1")
+    for arm, settings in fpc.UNREAD_SETTINGS.items():
+        fpc.check_extra("t", arm, {}, row)
+        for col in settings:
+            with pytest.raises(ValueError, match=f"does not read \\['{col}'\\]"):
+                fpc.check_extra("t", arm, {}, {**row, col: "7"})
+    for key, arms in fpc.EXTRA_ARMS.items():
+        val = "stratified" if key == "sampler" else 1
+        for arm in sorted(arms):
+            fpc.check_extra("t", arm, {key: val, **({"r1_gamma": 10} if arm.endswith("_r1") else {})})
+        with pytest.raises(ValueError, match="do not apply"):
+            fpc.check_extra("t", "mmd", {key: val})
 
 
 @needs_env("PREPPED_DIR")

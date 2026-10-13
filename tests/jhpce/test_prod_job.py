@@ -565,14 +565,18 @@ def test_harvest_local_refuses_views_not_named_after_the_stage_key(sim, tmp_path
 
 def test_harvest_files_refuses_a_gpu_latent_without_its_model(tmp_path):
     """Final review I094: the harvest packed models/<tag> only when present, so purged weights were lost silently.
-    A CPU baseline (config device 'cpu') has no model and is packed without one."""
+    A CPU baseline (config device 'cpu') has no model and is packed without one. A latent without its training
+    history is refused, as the stage rule refuses it (guard review G-14)."""
     import numpy as np
     spec = importlib.util.spec_from_file_location("prod_helpers", os.path.join(ROOT, "cluster", "jhpce", "prod_helpers.py"))
     ph = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ph)
     (tmp_path / "latents").mkdir()
     for t, cfg in (("g", {"gpu": "NVIDIA L40S"}), ("c", {"device": "cpu"})):
-        np.savez(tmp_path / "latents" / f"{t}.npz", config=json.dumps(cfg))
+        np.savez(tmp_path / "latents" / f"{t}.npz", config=json.dumps(cfg), history="{}")
+    np.savez(tmp_path / "latents" / "h.npz", config=json.dumps({"device": "cpu"}))
+    with pytest.raises(SystemExit, match="h: a latent without its training history"):
+        ph.harvest_files(str(tmp_path), ["h"])
     assert ph.harvest_files(str(tmp_path), ["c"]) == ["latents/c.npz"]
     with pytest.raises(SystemExit, match="g: a GPU fit's latent without models/g/model.pt"):
         ph.harvest_files(str(tmp_path), ["g"])

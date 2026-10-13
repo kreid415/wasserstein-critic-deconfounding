@@ -50,13 +50,15 @@ KL_WARMUP = ("stock", "complete")
 # Final review I042: an extra key or row setting that the arm's fit does not read was accepted and silently ignored.
 # Extra keys apply only to these arms (sampler: critics reference and pooled only, SI-24); the row settings below are
 # not read by the arm's fit and must keep these values (sysVI ignores likelihood: it is Gaussian; scANVI and sysVI
-# are always batch-conditioned).
+# are always batch-conditioned; none, scvi_adv and scANVI never read lam, which sysVI reads as its cycle weight:
+# guard review G-05).
 _NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1", "reference",
                  "reference_fixed", "reference_sn", "pooled", "pooled_sn", "barycenter", "barycenter_sn"}
 EXTRA_ARMS = {"adv_width": _NETWORK_ARMS, "adv_lr": _NETWORK_ARMS, "bary_iter": {"barycenter", "barycenter_sn"},
               "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler": {"reference", "pooled"}}
 _NO_ADV = {"n_critic": "0", "adv_input": "mean", "zstd": "0"}
-UNREAD_SETTINGS = {"none": _NO_ADV, "scvi_adv": _NO_ADV, "scanvi": {**_NO_ADV, "decoder": "SCVI", "cond": "1"},
+_NO_LAM = {**_NO_ADV, "lam": "0"}
+UNREAD_SETTINGS = {"none": _NO_LAM, "scvi_adv": _NO_LAM, "scanvi": {**_NO_LAM, "decoder": "SCVI", "cond": "1"},
                    "sysvi": {**_NO_ADV, "likelihood": "zinb", "decoder": "SCVI", "cond": "1"},
                    "mmd": {"n_critic": "0"}, "mmd_ref": {"n_critic": "0"}, "sinkhorn": {"n_critic": "0"}}
 # X3 (SI-41): every composition spec carries draw=X3_DRAW (x3_draw); X3_PERMUTATION_SEED seeds the ONE dose-independent
