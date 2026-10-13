@@ -71,6 +71,7 @@ def compare(z, b, zstd):
             NEW._ot_eps_sym = lambda *a, _f=orig[1]: (ITERS.append(0), _f(*a))[1]
         try:
             v = mod.sinkhorn_batch_others(_adv(mu, zstd), bt)
+        # fl: allow FL171 a cap hit is a measured outcome: kept in new_error and counted by summarize.py / si58_summary.py
         except RuntimeError as e:          # cap reached: record it and the iterations so far
             out.update(new_error=str(e), new_iters=json.dumps(ITERS))
             continue

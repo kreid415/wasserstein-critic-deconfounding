@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Mutation check of the guard follow-ups: each mutant is one planted text change; the named test must fail.
 # Usage: bash mutate.sh COMMIT SCRATCH_WORKTREE_DIR > results/mutation_results.tsv   (local envs scvi-api, wcd-gpu)
+# fl: allow FL122 each mutant is meant to make pytest fail; every exit status is read into the verdict column
 set -uo pipefail
 COMMIT=${1:?commit}; M=${2:?scratch worktree dir}; HERE=$(cd "$(dirname "$0")" && pwd)
 C=/home/kendall/.claude-science/conda/envs
