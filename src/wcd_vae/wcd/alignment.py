@@ -54,7 +54,7 @@ SINKHORN_SCALING = 0.8                             # eps annealing ratio per ite
 # hit raises, so the cap sits ~50x above that tail (user decision SI-59).
 SINKHORN_TOL = 1e-4                                # L1 marginal error of every plan at the final eps
 SINKHORN_MAX_ITER = 500000                         # iterations at the final eps before raising
-SINKHORN_DTYPE = torch.float64                     # solve precision (SI-58: float32 only if validated)
+SINKHORN_DTYPE = torch.float64                     # solve precision; float32 was no faster on the GPU (SI-58)
 
 
 def _sqdist(z):
