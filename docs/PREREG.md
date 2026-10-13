@@ -154,7 +154,8 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   (docs/jhpce/gate_data_v2/g3/scores_192_latents_wcd-kbet.csv). In scib 1.1.7 (metrics/trajectory.py) pseudotime is
   computed on the largest connected component of the kNN graph only (other cells get 0) and the root cell is chosen by
   a vote over diffusion components, so small latent changes can change the value. A1's rule R1 is unaffected: one
-  metric of 8 moving 0.39 in one seed shifts the 3-seed mean C by about 0.016, against the collapse bound 0.10.
+  metric of 8 moving 0.39 in one seed shifts the 3-seed mean C by about 0.016, against the collapse bound 0.10. [Corrected 2026-10-13: R1 does depend on trajectory, through its
+  noise estimate; see the I091 entry below.]
 
 - **2026-10-04, A1 restarts at prereg-tier12-v2 (user decision SI-43, under SI-40).** A code check of prereg-tier12-v1
   (2026-10-03; 14 findings: 0 critical, 3 high, 3 medium, 8 low) led to fixes in the fitting driver, the scorer, the stage
@@ -225,3 +226,27 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   destinations under any tier12* directory; freeze_matched_lambda.py refuses to overwrite an existing
   --extension-manifest when it writes SI-45 rows; and the scANVI/sysVI guard test names the v1 fitter by commit
   (129142b) instead of by tag, because the JHPCE bundle clone carries no tags.
+- **2026-10-13, correction: R1 depends on trajectory through its noise estimate (final review I091; user decision
+  SI-53).** The 2026-10-03 sentence "A1's rule R1 is unaffected" is wrong. R1 uses C twice: in the collapse bound
+  (-0.10), which one unstable metric barely moves, and in the bio noise SD sigma_c of the no-effect test (section 2,
+  delta_c = max(0.01, 3 sigma_c / sqrt(n))). On immune with the conditioned decoder trajectory inflates sigma_c 3.3 to
+  5.4 times (with / without trajectory: barycenter 0.073 / 0.014, pooled 0.060 / 0.017, reference 0.061 / 0.014,
+  discriminator 0.064 / 0.017, MMD 0.060 / 0.018, Sinkhorn 0.059 / 0.013), so delta_c reaches 0.10 to 0.13 and the
+  no-effect test on bio cannot fail there. R1 re-run on the A1 fits without trajectory changes three conditioned-decoder
+  families (W1 critics, MMD, Sinkhorn) from frozen to an extension at the low edge (lambda 0.03, 0.01); the other five
+  families are unchanged (experiments/final_review_amendments_20261013/r1_without_trajectory.py, which first reproduces
+  the record). R1 stays as registered and the frozen X1 grids stand; the trajectory-free R1 is reported as a
+  sensitivity analysis, its Sinkhorn part recomputed on the refitted Sinkhorn fits (SI-57).
+- **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55).** (a) Grid
+  edge: PAPER_PLAN promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4
+  states, R4 extends grids for matching only, frontier and P1 use the six registered lambda points, and an optimum at a
+  grid edge is disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; every
+  discriminator row of the manifest has n_critic 1), not "x10 steps"; the update-budget control is X6's pooled critic at
+  1, 5 and 10 critic steps, so it exists only for the pooled W1 critic. (c) Power: section 5 flags the frozen design
+  UNDERPOWERED (docs/prereg/r1_record.json power: D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power
+  0.131, power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02
+  unreachable; sigma 0.030, tau 0.109; A1 per-block means of opposite sign). P1 is therefore reported as the pooled
+  posterior together with tau, the per-task posteriors and a per-task sign table; PAPER_PLAN's equivalence claim is
+  dropped, and the estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57). (d) The frequentist
+  companion cannot reject with 6 real tasks (smallest two-sided p 2/2⁶ = 0.031 > 0.0125, as section 5 states);
+  PAPER_PLAN's 9-task statement is replaced.

@@ -67,7 +67,7 @@ Practical guidance for scVI users follows from the results, including the possib
 **3 Methods.**
 - **3.1 Backbone.** scvi-tools 1.4.2 SCVI (ZINB) at stock defaults: n_latent 10, batch 128, epoch heuristic, KL warm-up 400 epochs, no early stopping. Batch-conditioned (scVI as used) and unconditioned (adversary as sole integrator, the original paper's setting). λ=0 is bit-identical to stock SCVI (verified, max|Δz| = 0).
 - **3.2 Adversaries** (implementation-faithful equations, R1.minor.3):
-  - V-way discriminator with scvi-tools' bounded fool loss, at 1 and 10 adversary steps;
+  - V-way discriminator with scvi-tools' bounded fool loss, at 1 adversary step (SI-01; the update-budget control is X6's pooled critic at 1, 5 and 10 critic steps, so it exists only for the pooled W1 critic; amended 2026-10-13, D-01);
   - reference critic (per-head WGAN-GP, described as a star of pairwise W1 terms);
   - pooled critic (target = the other batches);
   - MMD;
@@ -88,7 +88,7 @@ Practical guidance for scVI users follows from the results, including the possib
 | Section | Original claim | Hypothesis (two-sided) | Experiments | Primary endpoint and decision | Reviewers |
 |---|---|---|---|---|---|
 | **R0 Premise** | JS gradients vanish for disjoint technology batches | Batches are near-separable in the scVI latent before integration, and discriminator gradients vanish early while critic gradients persist | X4, model-free overlap | Confirm if pre-integration batch AUC ≈ 1 **and** discriminator ‖∇z‖ collapses with stalled batch metrics; otherwise remove the premise from the motivation | R1.major.2 |
-| **R1 Integration vs conservation** (orig. §1) | Critic gives superior local mixing; critic over-corrects; discriminator protective; local/global mismatch | At matched batch removal the critic and discriminator conserve different biology; their ordering differs between local and global batch metrics | X1/X2, X3, X10, A2 (X11 optional) | **P1** Δbio@b\* (reference critic − discriminator ×10 steps) on unscaled aggregates, co-primary frontier hypervolume; **P2** collapse probability; local–global sign test; composition dose-response slope with importance-weighted control | R1.major.1, R2.2, R2.6, R1.minor.2 |
+| **R1 Integration vs conservation** (orig. §1) | Critic gives superior local mixing; critic over-corrects; discriminator protective; local/global mismatch | At matched batch removal the critic and discriminator conserve different biology; their ordering differs between local and global batch metrics | X1/X2, X3, X10, A2 (X11 optional) | **P1** Δbio@b\* (reference critic − discriminator at 1 step, SI-01; amended 2026-10-13, D-01) on unscaled aggregates, co-primary frontier hypervolume; **P2** collapse probability; local–global sign test; composition dose-response slope with importance-weighted control | R1.major.1, R2.2, R2.6, R1.minor.2 |
 | **R2 Scalability and stability** (orig. §2) | Critic scales poorly with batch count ("bottleneck") | The critic–discriminator difference changes with log₂V when per-head sample size and total cells are fixed | X8, X9 | **P3** slope on log₂V (stratified sampler; ceiling-normalised iLISI plus the full suite); attribute to reference design only if the pooled critic shows no slope; divergence rates | R1.minor.1, R2.5 |
 | **R3 Hyperparameter sensitivity** (orig. §3) | Broad λ windows; discriminator bio flat in λ, critic's rises | The difference is attributable to the divergence rather than regularisation, update budget, latent scale or architecture | λ-curves from X1, X6, A3, X12 | Factor effects with CIs; window width (decades within the seed CI of the maximum); sign stability across architectures | R2.2, R3.2, R2.3 |
 | **R4 Reference selection** (orig. §4) | Critic depends on a "topologically dense" reference | Reference coverage affects the reference W1 critic more than a reference JS or MMD design with the same target | X7 | **P4** formulation × coverage interaction (coverage, size, entropy as covariates; seed noise floor); K ≥ 3 only; fixed-reference control | R2.3, R2.5 |
@@ -151,7 +151,7 @@ Practical guidance for scVI users follows from the results, including the possib
 | A — pilot and calibration (~6 d) | A1–A3 on atac_small, immune, sim1 | Grid range per family spans λ=0 → collapse; σ and τ estimated; adversary input and standardisation decided |
 | B — data (CPU, parallel with A) | Acquire HLCA subset, BMMC, Ding 2020, CellBench, Kang 2018; pancreas repairs; registry with md5s; integer guard passes | Table 1 regenerated |
 | **Freeze** | Manifest hash, code SHA, analysis scripts and this pre-registration committed; disclose that the pilot informed the grid ranges | — |
-| C — core (~20 d) | X1/X2 + X13 (X4/X9 logged) | All per-dataset optima interior, else extend the grid |
+| C — core (~20 d) | X1/X2 + X13 (X4/X9 logged) | Grid-edge optima disclosed per dataset; R4 extends grids for matching only (PREREG §4; amended 2026-10-13, I006, SI-55) |
 | D — mechanisms | X7, X8 (tier 1); X3, X6, X12 (tier 2) | — |
 | E — analysis and writing | X10, figures, response letter from new results only | — |
 
@@ -166,22 +166,22 @@ Practical guidance for scVI users follows from the results, including the possib
   - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD).
   - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds.
   - Declare a direction if its posterior probability is ≥ 0.95, equivalence if P(ROPE) ≥ 0.95, and inconclusive otherwise.
-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4. With 9 real tasks the smallest attainable two-sided p is 0.0039, below Holm's first threshold of 0.0125. With 5 families nothing could reach significance, so the new datasets are needed.
+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031, above Holm's first threshold of 0.0125, so the companion cannot reject and is reported descriptively (PREREG §5; amended 2026-10-13, D-02).
 - **λ handling.**
   - The frontier analysis needs no λ selection.
   - Single-λ tables use nested leave-one-dataset-out "transfer λ". Per-dataset oracle optima are shown only as labelled optimistic bounds.
-  - Any optimum at the grid edge triggers grid extension before analysis.
+  - R4 extension points are used for matching only; frontier and P1 use the six pre-registered λ points per family, and an optimum at a grid edge is disclosed, not extended (PREREG §4; amended 2026-10-13, I006, SI-55).
 - **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ.
 - **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures; nothing is dropped silently.
 - **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves.
-- **Power** (provisional; pilot paired seed SD 0.048). The pooled design can certify differences of ≳ 0.02 or equivalence within ±0.02. No per-dataset significance claims. σ and τ are re-estimated in A1 before seeds and N are frozen.
+- **Power** (amended 2026-10-13, D-02; A1 estimate in docs/prereg/r1_record.json `power`, PREREG §5). The frozen design is flagged UNDERPOWERED: for P1 with D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power 0.131 and power at Δ = 0.02 0.104 (D = 4 families: 0.182 and 0.088); equivalence within ±0.01 or ±0.02 is unreachable. σ̂ = 0.030, τ̂ = 0.109, and the A1 per-block means differ in sign (atac_small unconditioned +0.111, sim1 conditioned +0.224, the other four −0.024 to −0.004). P1 is therefore reported as the pooled posterior together with τ̂, the per-task posteriors and a per-task sign table; no equivalence claim and no per-dataset significance claims. The estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57).
 
 ## 6. Methodological rigour: what changes
 
 | Issue | Fix |
 |---|---|
 | λ not commensurable across objectives; "curve dominance" at matched nominal λ is not selection-free | Frontier endpoints (bio at matched batch removal, hypervolume); λ-curves descriptive only |
-| Divergence confounded with gradient penalty, update budget and target design | Discriminator at 1 and 10 steps in the core; X6 factorial; X7 target factorial |
+| Divergence confounded with gradient penalty, update budget and target design | Discriminator at 1 step in the core (SI-01); update budget varied for the pooled critic in X6 (1, 5, 10 steps); X6 factorial; X7 target factorial (amended 2026-10-13, D-01) |
 | Composition shift uncontrolled; "balanced" ≠ independent | X3 dose-response on composition-matched subsamples; d_JS(Y) as a covariate everywhere (measured 0.15–0.44 across tasks, [composition_shift_by_dataset.csv]({{artifact:824c0218-4cb8-450d-a667-8c5ef961aae7}})) |
 | iLISI is label-agnostic and rewards cross-type mixing | Within-label vs cross-label decomposition; full metric suite; no iLISI-only claims |
 | Batch-count "decay" partly a metric ceiling and composition change | Ceiling-normalised iLISI; fixed total cells and composition across V |
