@@ -38,3 +38,10 @@ A1_wide_l0.1        11.69   19.47
 A3_zstd_l30         12.64   117.2
 A3_zstd_l3_immune   12.76   138.7
 ```
+
+## Pilot fits: solver iterations per step (sum over solves) and loss forward ms (RTX 3080, alone)
+
+```
+                                                      steps  iters_median  iters_p99  iters_p99.9  iters_max  loss_ms_median  loss_ms_p99  loss_ms_p99.9  loss_ms_max  loss_s_total
+A3_immune_sinkhorn_la1_matched_hi_c1_s100_ca522bee 5.64e+04           198        658         1678       3786           104.7        350.7          772.3         2665          6643
+```

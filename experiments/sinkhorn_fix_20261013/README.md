@@ -22,7 +22,8 @@ Not changed: `_sqdist` (the MMD losses use it; SI-52 requires MMD fits to stay b
 | `tol_sweep.py results/validation_12mb_tol1e-6_cap1e4.csv results/tol_sweep.csv` | `results/tol_sweep.csv` | accuracy and iterations at tol 1e-3..1e-6 on the 598 hardest minibatches |
 | `bench_gpu.py results/bench_gpu.csv` (GPU) | `results/bench_gpu.csv` | ms per loss forward + backward, tagged vs branch |
 | `summarize.py` | `results/summary.md` | the tables below |
-| `pilot_fit.py` (GPU, see below) | outside the repo | per-step iterations in one real fit |
+| `pilot_fit.py` (GPU, see below) | `results/pilot_steps_<tag>.csv` (copied from the run folder) | per-step iterations and loss time in one real fit |
+| `r4a1_sinkhorn_sensitivity.py results/r4a1_sinkhorn_sensitivity.csv --search <dirs>` (env `wcd-gpu`) | `results/r4a1_sinkhorn_sensitivity.csv` | how far the refitted Sinkhorn arm's best batch score may fall before R4-a1 moves a non-Sinkhorn cell (NB-20261013-09) |
 
 Inputs: `sinkhorn_reference.py` is the final review's reference, copied unchanged from
 `review/esc2/sinkhorn_astra/` (sha256 0e6663fb...a709a8, as in that folder's SHA256SUMS). The minibatches are the
@@ -43,7 +44,9 @@ cosine 0.869.
   tolerance (max 7.5e-4 at 1e-4). Tighter tolerances lengthen the iteration tail sharply (max 29,190 at 1e-5,
   171,388 at 1e-6) for no material gain.
 - **Cap 50,000, then raise.** About 10x the worst case seen. A fit whose solve cannot converge stops loudly instead
-  of training on an approximate gradient; the pilot checks how far real training stays from the cap.
+  of training on an approximate gradient; the pilot checks how far real training stays from the cap. The
+  independent review (finding F2) found a heavier tail on minibatches drawn from the pre-fix A3 latents (max 9,789
+  iterations, atac_small) than in the validation set; the cap policy is to be confirmed before the refit.
 - **Convergence tested every iteration.** Testing every 10 iterations was 20-27% faster on A3 minibatches and 10%
   slower on A1 ones; not adopted (more code for a modest gain).
 - **No over-relaxation.** Over-relaxed updates (omega 1.5-1.8) cut the iterations on the four slowest minibatches
@@ -51,4 +54,7 @@ cosine 0.869.
 
 ## Cost
 GPU ms per call (RTX 3080, one process): A1 4.0-11.7 -> 6.7-19.5; A3 standardised 12.6-12.8 -> 117-139. The A3
-fits carry most of the extra refit time; the pilot measures it on a real fit.
+fits carry most of the extra refit time. Pilot (`A3_immune_sinkhorn_la1_matched_hi_c1_s100_ca522bee`, standardised,
+lambda 3, alone on the RTX 3080): 56,404 steps in 7,778 s against 2,793.7 s for the pre-fix fit of the same row in
+production; solver iterations per step (all solves) median 198, p99.9 1,678, max 3,786, falling from a median of
+278 in the first quarter of training to 135 in the last; the loss forward took 6,643 s (85% of the fit).
