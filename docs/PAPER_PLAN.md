@@ -162,7 +162,8 @@ Practical guidance for scVI users follows from the results, including the possib
 ## 5. Analysis plan (pre-registration)
 
 **Amended 2026-10-14 (user decisions SI-68 to SI-77; PREREG §9).** The analyses of X1 and X13 are specified in
-docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, frozen with the tag prereg-tier12-v3; where this
+docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both frozen by the tag prereg-tier12-v3 before any
+X1 adversarial-arm score is examined; where this
 section differs, the specification applies. It replaces seven statements below, each marked [replaced]: the ROPE and the
 measurement-SD study (margin 0.01, SI-74); failure imputation (failed runs are left out of P1 and the area and counted
 in P2, SI-71); the model formula (family and dataset terms for the arm difference, final review I056, SI-73); "same init

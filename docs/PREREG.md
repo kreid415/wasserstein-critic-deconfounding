@@ -306,13 +306,13 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   The redo cannot clear the flag: barycenter is not an A2/A3 arm, so its A1 points do not change, and b_common is the
   minimum over the six arms. R2 and R3 will therefore keep the defaults whatever A2 and A3 show; A2 and A3 are still
   fitted and reported. Implemented in scripts/decide_a2_a3.py (commit f3c3415; a flagged cell's readings carry status
-  low_signal) and scripts/analysis_x1.py.
+  low_signal) and scripts/analysis_x1.py (commit ff88666).
 - **2026-10-14, the X1 analyses are specified and frozen before X1 runs (final review I001, D-03, D-08, D-09; user
   decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer
   tests (tests/analysis/), every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2
   (collapse rates and the critic-minus-discriminator comparison), local versus global batch removal, single-lambda
   tables with the transfer lambda, best-of-k placement against standard integrators, the lambda-window width and the
-  sensitivity analyses. All are committed with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
+  sensitivity analyses. The tag prereg-tier12-v3 freezes all of them before any X1 adversarial-arm score is
   examined, and the script runs once, after every X1 and X13 row is scored or failed. The follow-up analyses (X3, X6,
   X7, X8, X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined;
   the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN section 5 differs,
