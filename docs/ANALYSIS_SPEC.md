@@ -75,7 +75,8 @@ falls back past its batch peak, I038, I062) are counted and reported, not used.
 **2.3 Not evaluable.** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
 0.01), (ii) either arm's curve never reaches b\*, or (iii) fewer than 4 of the 5 leave-one-seed-out readings exist
 (section 2.4, Q2 option A, SI-69). Not-evaluable cells are listed with their reason. Readings of low-signal
-cells are shown in a separate table and never pooled (SI-56).
+cells are shown in a separate table and never pooled (SI-56). For the pooled results a cell is also not evaluable when
+its standard error is below 1e-6 (reason `zero_spread`, section 4).
 
 **2.4 Contrast and its uncertainty.** d = bio@b\*(reference) - bio@b\*(discriminator).
 
@@ -131,8 +132,15 @@ Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s
 (treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
 the final review required (I056) and PAPER_PLAN section 5's "(1 | family/dataset)". Priors: Delta ~ N(0, 0.1^2);
 tau_f, tau_d ~ half-normal(0.1). Computed exactly: Delta and the random effects are integrated in closed form given
-(tau_f, tau_d), which are integrated on a 201 x 201 grid over [0, 0.5]^2; no random sampling, so results reproduce
-digit for digit. Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
+(tau_f, tau_d), which are integrated on a 201 x 201 grid over [1e-15, 0.5]^2 with points evenly spaced in log(tau)
+(amended 2026-10-14, rigour review AN-01: the evenly spaced grid from 0 first written here was too coarse when a
+dataset's standard error s is below its step, and could change a declaration; section 15.4); no random sampling, so
+results reproduce digit for digit on the same input files (rows are sorted by tag before any sum; on a different CPU
+type the last digits can differ). A dataset enters the model only if its s is at least 1e-6; below that it is listed
+as not evaluable for that endpoint with reason `zero_spread` (amended 2026-10-14, AN-02; for example, neither arm adds
+any frontier area in any leave-one-seed-out repeat, so d = 0 and s = 0 exactly; the model treats s as known and cannot
+use s = 0, and 1e-6 is the smallest s at which its double-precision computation was verified).
+Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
 the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset sign table with leave-one-out
 intervals, without per-dataset significance claims (PREREG section 9, 2026-10-13 (c)). Frequentist companion: exact
 two-sided Wilcoxon signed-rank test on the d_t, descriptive (it cannot reject with 6 datasets, PREREG section 5).
@@ -245,6 +253,9 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
   points; the area on hand-computed point sets; the model against closed forms (tau = 0 gives the inverse-variance
   weighted mean) and brute-force integration; exact Wilcoxon p-values; Clopper-Pearson against `scipy.stats.binomtest`;
   transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity at the crossing.
+  A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-14) catches 54 of 57 one-line
+  errors; of the 3 it misses, two change no reported value by more than 2e-5 (measured) and the third only reorders
+  floating-point sums (rigour review AN-04).
 - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; frozen with the tag prereg-tier12-v3.
 
 ## 15. Implementation details (the agent's proposals, for the diff review; 2026-10-14)
@@ -256,18 +267,31 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
    commit (after the SI-54 equivalence) and one CPU type: best-of-k compares them directly, and the same latent scores
    differently on the local and the cluster CPUs (cross-host check G4). The script refuses an input that lacks any of
    the 8 tasks, any registered lambda of an arm, or the X13 configurations (per task 6 Harmony, 6 Scanorama, 6 sysVI,
-   1 scANVI), and an R4 stage-x1 record whose b0 differs from the data's (a record made from other scores). It never
-   overwrites an existing record.
+   1 scANVI), plain-scVI seeds other than 0-4 (rigour review AN-10), and an R4 stage-x1 record whose b0, b_common, b\*
+   or low-signal flag differs from what `prereg_rules.r4_stage` computes from the same X1 rows, R4 extension rows
+   included (a record made from other or partial scores; amended 2026-10-14, AN-03: only b0 was compared before). It
+   never overwrites an existing record. Input rows are sorted by tag before any sum (AN-11).
 2. P1 (section 2). Exact hits of b\* count as crossings. Under the per-run reading (option B, a sensitivity analysis)
    a cell is not evaluable when fewer than 4 of the 5 per-run readings exist, mirroring rule (iii).
 3. Area (section 3). In each leave-one-seed-out repeat the corner moves with the dropped seed (b0 and c0 from the other
    4 plain-scVI runs) while the divisor b_common - b0 stays fixed, as b\* does. Every repeat gives a value (0 when no
    point lies beyond the corner), so the area has no readings rule. Low-signal cells get no area.
-4. Combining datasets (section 4). Each spread's grid runs from 0 to 5 times its prior scale (201 points, trapezoid
-   rule): [0, 0.5] at scale 0.1 as section 4 states, and scaled with the prior at 0.05, 0.2 and P2's 0.25 so the prior
-   is never cut short. The sign table's "leave-one-out intervals" are each dataset's d ± 1.96 s, with s its
-   leave-one-seed-out standard error. The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
-   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it.
+4. Combining datasets (section 4). Each spread's grid has 201 points evenly spaced in log(tau) from 1e-15 to 5 times
+   its prior scale (trapezoid rule in log tau, so each point's weight carries a factor tau): up to 0.5 at scale 0.1 as
+   section 4 states, and scaled with the prior at 0.05, 0.2 and P2's 0.25 so the prior is never cut short (the
+   half-normal mass beyond 5 scales, 6e-7, is left out). Amended 2026-10-14 (rigour review AN-01): the first version
+   spaced the points evenly from 0 (step 0.0025 at scale 0.1), which is too coarse when a dataset's s is below the
+   step; on the review's test case (s from 0.000175, prior scale 0.2) it gave P(Delta > 0.01) = 0.949, inconclusive,
+   where the converged value is 0.976, a declared direction. The posterior of Delta given the spreads is computed from
+   solves with the covariance A of d without Delta's prior variance (precision 1 / 0.1^2 + 1'A^-1 1), which keeps full
+   double precision for small s (found while checking AN-01: the subtraction it replaces lost up to 0.2% of the
+   variance at s = 1e-4 and was unusable near s = 1e-6). The sign table's "leave-one-out intervals" are each dataset's
+   d ± t(0.975, m - 1) s, with s its leave-one-seed-out standard error from m readings (AN-06: with m = 4 or 5,
+   d ± 1.96 s covers less than 95%). The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
+   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it. Validation
+   (`experiments/analysis_numerics_20261014/`, synthetic inputs): on 240 random sets of 1-6 datasets with s from 1e-6
+   to 0.05, every probability, posterior mean and heterogeneity is within 2e-6 of a finer and wider reference rule,
+   and no declaration differs.
 5. Declarations (section 5). Holm runs over the six frequentist p values of the primary results (P1, area and P2,
    each per decoder).
 6. P2 (section 6). All 6 real datasets enter the comparison: the low-signal flag concerns b\*, which P2 does not use.
@@ -280,13 +304,18 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
 9. Best-of-k (section 9). The decoder-free baselines (Harmony, Scanorama, PCA) and the conditioned-only ones (sysVI,
    scANVI, scvi_adv) appear in both decoders' tables; scVI at lambda = 0 is the table's own decoder. A configuration
    whose runs all failed is left out and its family's N shrinks; frontier positions count front points that dominate
-   a configuration and that it dominates (ties within 1e-9, PREREG section 1).
+   a configuration and that it dominates (ties within 1e-9, PREREG section 1). E_k does not penalise failures (a
+   configuration's score is the mean of its successful runs), so each family's record also gives its number of
+   configurations and of failed runs, and the tables state this (rigour review AN-13).
 10. Window width (section 10). The lower bound is the lower end of the two-sided 95% t interval (t at 0.975, n - 1
     degrees of freedom) of the best point's mean; with fewer than 2 successful runs at the best point no width is
-    computed.
+    computed. The record flags a gap when a point between the window's smallest and largest lambda lies below the
+    bound, so that the width spans it (AN-14).
 11. Sensitivity analyses (section 11). Each changes one setting and reruns everything: trajectory-free C; per-run
-    reading and dropping points with a failed run (P1, area, local-global); corner (b0, 0) (area); pairs-first and six
-    independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2 (P1, area, local-global).
+    reading (P1 and local-global; the area is defined on point means only, section 3, so it has no per-run version:
+    corrected 2026-10-14, AN-05) and dropping points with a failed run (P1, area, local-global); corner (b0, 0)
+    (area); pairs-first and six independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2
+    (P1, area, local-global).
 
 Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and

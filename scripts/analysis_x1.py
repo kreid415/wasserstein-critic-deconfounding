@@ -27,8 +27,11 @@ PRIOR_SCALE = 0.1
 P2_PRIOR_SCALE = 0.25
 GRID_N = 201
 GRID_SPAN = 5.0
+TAU_FLOOR = 1e-15     # each spread is integrated over [TAU_FLOOR, GRID_SPAN x its prior scale], evenly in log(tau)
+S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); below: zero_spread
 DECLARE = 0.95
 MIN_READINGS = 4
+X1_SEEDS = [0, 1, 2, 3, 4]
 W_B, W_C = 0.4, 0.6
 LOCAL = ("iLISI", "kBET", "graph_conn")
 GLOBAL = ("PCR_batch", "ASW_label/batch")
@@ -150,31 +153,35 @@ def read_area(zero, ref, dis, scale, corner="collapse", drop_failed=False):
 def pool(d, s, levels, delta_scale, tau_scale, margin):
     d, s = np.asarray(d, dtype=float), np.asarray(s, dtype=float)
     P._require(d.ndim == s.ndim == 1 and len(d) == len(s) and len(d) >= 1
-               and np.isfinite(d).all() and np.isfinite(s).all() and (s > 0).all(),
-               "pool needs finite equal-length d and positive s, with at least one observation")
+               and np.isfinite(d).all() and np.isfinite(s).all() and (s >= S_MIN).all(),
+               f"pool needs finite equal-length d and positive s (at least {S_MIN:g}), with at least one observation")
     n = len(d)
     P._require(all(len(labels) == n for labels in levels), "pool levels must match the observations")
     P._require(np.isfinite([delta_scale, tau_scale, margin]).all()
                and delta_scale > 0 and tau_scale > 0 and margin >= 0,
                "pool prior scales must be positive and margin nonnegative")
     indices = np.array(list(itertools.product(range(GRID_N), repeat=len(levels))), dtype=int)
-    tau = np.linspace(0, GRID_SPAN * tau_scale, GRID_N)[indices]
+    # trapezoid rule in log(tau) (weight x tau): resolves spreads near a standard error however small (review AN-01)
+    tau = np.geomspace(TAU_FLOOR, GRID_SPAN * tau_scale, GRID_N)[indices]
     log_weight = np.log(np.where((indices == 0) | (indices == GRID_N - 1), 0.5, 1.0)).sum(axis=1)
-    log_weight -= (tau ** 2).sum(axis=1) / (2 * tau_scale ** 2)
+    log_weight += np.log(tau).sum(axis=1) - (tau ** 2).sum(axis=1) / (2 * tau_scale ** 2)
     delta2, s2 = delta_scale ** 2, s ** 2
-    K = np.full((len(indices), n, n), delta2)
+    A = np.zeros((len(indices), n, n)) + np.diag(s2)          # the covariance of d without Delta's prior variance
     for j, labels in enumerate(levels):
         labels = np.asarray(labels)
-        K += tau[:, j, None, None] ** 2 * (labels[:, None] == labels[None, :])
-    V = K + np.diag(s2)
+        A += tau[:, j, None, None] ** 2 * (labels[:, None] == labels[None, :])
+    V = A + delta2
     inverse = np.linalg.inv(V)
     vd = inverse @ d
     log_weight -= 0.5 * (np.linalg.slogdet(V)[1] + np.einsum("ni,i->n", vd, d))
     weights = np.exp(log_weight - log_weight.max())
     weights /= weights.sum()
-    delta_mean = delta2 * vd.sum(axis=1)
-    delta_sd = np.sqrt(delta2 - delta2 ** 2 * inverse.sum(axis=(1, 2)))
-    # K = V - diag(s^2) avoids two batched matrix products for the task posteriors.
+    # Delta | d has precision 1 / delta2 + 1'A^-1 1 and mean 1'A^-1 d / precision: solving with A avoids the
+    # cancellation in delta2 - delta2^2 1'V^-1 1 and delta2 1'V^-1 d when the standard errors are small
+    x = np.linalg.solve(A, np.broadcast_to(np.stack([np.ones(n), d], axis=1), (len(A), n, 2)))
+    delta_var = delta2 / (1 + delta2 * x[:, :, 0].sum(axis=1))
+    delta_mean, delta_sd = delta_var * x[:, :, 1].sum(axis=1), np.sqrt(delta_var)
+    # Var(theta | d) = S - S V^-1 S with S = diag(s^2) avoids two batched matrix products for the task posteriors.
     theta_mean = d - s2 * vd
     theta_sd = np.sqrt(s2 - s2 ** 2 * np.diagonal(inverse, axis1=1, axis2=2))
 
@@ -314,7 +321,7 @@ def best_of_k(scores):
 
 def window(points):
     points = [(lam, scores) for lam, scores in points if len(scores)]
-    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None)
+    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None, gap=None)
     if not points:
         return result
     means = {lam: float(np.mean(scores)) for lam, scores in points}
@@ -328,8 +335,10 @@ def window(points):
     lower = means[best] - stats.t.ppf(0.975, n - 1) * np.std(scores, ddof=1) / math.sqrt(n)
     lams = sorted(lam for lam in means if means[lam] >= lower - P.TIE_TOL)
     P._require(min(lams) > 0, "window lambda must be positive")
+    # gap: a point between the window's ends lies below the bound, so the width spans it (review AN-14)
     return dict(status="ok", best=best, lower=float(lower), lams=lams,
-                width=math.log10(max(lams)) - math.log10(min(lams)), n_points=len(lams))
+                width=math.log10(max(lams)) - math.log10(min(lams)), n_points=len(lams),
+                gap=any(min(lams) < lam < max(lams) and lam not in lams for lam in means))
 
 
 def dominance(config, front):
@@ -357,13 +366,16 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
             P._require(configs.lam.nunique() == want and len(configs[["lam", "n_latent"]].drop_duplicates()) == want,
                        f"X13 {task} {arm}: expected {want} configurations")
     P._require("targets" in r4, "R4 lacks b0 targets")
+    targets = P.r4_stage(out, "x1", r1)["targets"]     # the rule that wrote the record, rerun on these scores (AN-03)
     for task, cond in itertools.product(tasks, (0, 1)):
         key = f"{task}|{cond}"
         P._require(key in r4["targets"] and {"b0", "b_common", "bstar", "bstar_low_signal"} <= set(r4["targets"][key]),
                    f"R4 lacks b0 target for {key}")
-        zero = zero_runs(out, task, cond)
-        P._require(abs(r4["targets"][key]["b0"] - np.mean([b for b, _ in zero.values()])) <= P.TIE_TOL,
-                   f"R4 b0 differs from lambda=0 for {key}")
+        P._require(sorted(zero_runs(out, task, cond)) == X1_SEEDS, f"{key}: plain-scVI seeds are not the X1 seeds 0-4")
+        got, want = r4["targets"][key], targets[key]
+        P._require(got["bstar_low_signal"] == want["bstar_low_signal"]
+                   and all(abs(got[k] - want[k]) <= P.TIE_TOL for k in ("b0", "b_common", "bstar")),
+                   f"R4 targets (b0, b_common, b* or the low-signal flag) differ from these scores for {key}")
     P._require(value in ("C", "C_nt"), f"unknown biology value {value}")
     out = out.assign(C=out[value])
     x1, x13 = out[out.experiment == "X1"], out[out.experiment == "X13"]
@@ -400,19 +412,25 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
                               (((x1.arm == "none") & (x1.cond_i == cond)) | (x1.arm == "scvi_adv"))]])
         anchors, frontier = {}, {}
         fronts = {arm: [(b, c) for _, b, c, _ in P.window_curve(points[arm])] for arm in P.ADV_ARMS}
+        failed = {arm: [p["n_fail"] for p in points[arm]] for arm in P.ADV_ARMS}     # failed runs per configuration
         for (arm, lam, n_latent), config in baselines.groupby(["arm", "lam", "n_latent"], sort=True):
+            anchor = arm == "pca" or (arm in ("harmony", "scanorama") and n_latent != "10")
+            if not anchor:
+                failed.setdefault(arm, []).append(int((config.status == "failed").sum()))
             ok = config[config.status == "ok"]
             if ok.empty:
                 continue
             b, c = float(ok.B.mean()), float(ok.C.mean())
             score = W_B * b + W_C * c
             name = f"{arm}|{lam}|{n_latent}"
-            if arm == "pca" or (arm in ("harmony", "scanorama") and n_latent != "10"):
+            if anchor:
                 anchors[name] = score
             else:
                 family_scores[arm].append(score)
             frontier[name] = {a: dominance((b, c), fronts[a]) for a in P.ADV_ARMS}
-        cell["best_of_k"] = {arm: dict(n=len(v), E=best_of_k(v),
+        # E_k does not penalise failures (a configuration scores the mean of its successful runs): counted (AN-13)
+        cell["best_of_k"] = {arm: dict(n=len(v), E=best_of_k(v), configs=len(failed.get(arm, [])),
+                                      failed_runs=sum(failed.get(arm, [])),
                                       stratum="label_aware" if arm == "scanvi" else "standard")
                              for arm, v in family_scores.items()}
         cell["anchors"], cell["frontier"] = anchors, frontier
@@ -433,12 +451,14 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
                     low_signal.append(dict(task=task, d=None if endpoint == "area" else reading["d"]))
                 elif reading.get("reason") is not None:
                     not_evaluable.append(dict(task=task, reason=reading["reason"]))
+                elif reading["s"] < S_MIN:          # e.g. both arms' areas 0 in every leave-one-seed-out repeat (AN-02)
+                    not_evaluable.append(dict(task=task, reason="zero_spread"))
                 else:
                     evaluable.append(task)
                     d.append(reading["d"])
                     s.append(reading["s"])
-                    signs.append(dict(task=task, d=d[-1], s=s[-1],
-                                      lo=d[-1] - 1.959963984540054 * s[-1], hi=d[-1] + 1.959963984540054 * s[-1]))
+                    q = stats.t.ppf(0.975, reading["m"] - 1)          # s rests on m leave-one-seed-out readings
+                    signs.append(dict(task=task, d=d[-1], s=s[-1], lo=d[-1] - q * s[-1], hi=d[-1] + q * s[-1]))
             entry = dict(combine(evaluable, d, s, structure, scale, MARGIN), tasks=evaluable,
                          not_evaluable=not_evaluable, low_signal=low_signal, signs=signs, wilcoxon_p=wilcoxon_exact(d))
             if endpoint == "local":
@@ -498,7 +518,7 @@ def main(argv=None):
     r4 = P.read_record(a.r4_record, "R4", stage="x1")
     S, score_files = P.read_scores(a.scores)
     F = P.read_failures(a.failures)
-    out = add_scores(P.outcomes(M, S, F, ["X1", "X13"]))
+    out = add_scores(P.outcomes(M, S, F, ["X1", "X13"]).sort_values("tag", ignore_index=True))  # row order (AN-11)
     fail_status = dict(zip(F.tag, F.status))
     primary = analyse(out, r1, r4, fail_status)
     sensitivity = {name: analyse(out, r1, r4, fail_status, **kw) for name, kw in SENSITIVITY.items()}

@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from scipy import stats
-from scipy.integrate import cumulative_trapezoid
+from scipy.integrate import cumulative_trapezoid, trapezoid      # np.trapezoid needs NumPy 2 (env wcd-gpu has 1.26)
 
 # ACCEPT_WORKDIR: the tree under test when this file runs from outside the repo (the offload acceptance check)
 ROOT = os.environ.get("ACCEPT_WORKDIR") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -93,9 +93,14 @@ NOT_SEED_0_1 = [None, None, "x", "x", "x"]          # "x": a reading exists
     # read run by run, only seeds 0 and 1 of the discriminator reach b*
     (pts(REF), pts({1: ([0.56, 0.56, 0.47, 0.47, 0.47], 0.75)}), "per_run",
      dict(m=2, s=None, reason="readings", readings=["x", "x", None, None, None])),
+    # plain scVI's B differs by seed: without seed i the anchor is b0_i = (2.0 - b_i) / 4 and the reference reads
+    # 0.80 - 0.10 (0.50 - b0_i) / (0.60 - b0_i); the discriminator's exact hit reads 0.74 (the anchor must drop seed i)
+    (pts({1: (0.60, 0.70)}), pts({1: (0.50, 0.74)}), "mean",
+     dict(zero=dict(b=[0.38, 0.39, 0.40, 0.41, 0.42]), d=0.01, m=5, reason=None,
+          readings=[0.06 - 0.10 * (0.50 - b) / (0.60 - b) for b in (0.405, 0.4025, 0.40, 0.3975, 0.395)])),
 ])
 def test_p1_reading(ref, dis, mode, want):
-    r = A.read_p1(zero(), ref, dis, 0.50, mode=mode)
+    r = A.read_p1(zero(**want.get("zero", {})), ref, dis, 0.50, mode=mode)
     assert r["mode"] == mode and r["reason"] == want["reason"]
     for k in ("d", "s", "m"):
         if k in want:
@@ -157,6 +162,8 @@ def test_read_area(corner, drop_failed, fail, want):  # test-reason: known answe
     ([0.10, 0.10, 0.10], [0.005, 0.005, 0.005], "above"),
     ([-0.10, -0.10, -0.10], [0.005, 0.005, 0.005], "below"),
     ([0.0, 0.001, -0.001], [0.002, 0.002, 0.002], "equivalent"),
+    ([0.03, 0.03, 0.03], [0.025, 0.025, 0.025], "inconclusive"),    # P(Delta > 0.01) = 0.913: between 0.90 and 0.95
+    ([0.02, 0.02, 0.02], [2e-6, 2e-6, 2e-6], "above"),              # s near S_MIN: Var(Delta | d) without cancellation
 ])
 def test_pool_closed_form(levels, d, s, declaration):
     """Spreads ~0: Delta | d is normal with the inverse-variance weighted mean, shrunk by the N(0, 0.1^2) prior."""
@@ -174,27 +181,37 @@ def test_pool_closed_form(levels, d, s, declaration):
     assert [t["lo"] for t in r["theta"]] == pytest.approx([r["lo"]] * 3, abs=1e-7)
 
 
-def brute(d, s, fam, scale, r, h=0.004, top=0.8, n_delta=4001):
-    """Posterior by brute force: Delta on a fine grid, both spreads by the midpoint rule on [0, top]; the per-dataset
-    means by the precision form of the Gaussian model (beta = Delta, family effects, dataset effects)."""
+def gl_nodes(top, floor=1e-9, panels=24, k=6):
+    """Composite Gauss-Legendre nodes and weights on [floor, top], panels of equal ratio (a rule unlike the code's)."""
+    edges = np.geomspace(floor, top, panels + 1)
+    x, w = np.polynomial.legendre.leggauss(k)
+    a, b = edges[:-1, None], edges[1:, None]
+    return ((a + b) / 2 + (b - a) / 2 * x).ravel(), ((b - a) / 2 * w).ravel()
+
+
+def brute(d, s, fam, scale, r, h=0.004, top=0.8, n_delta=4001, nodes=None, d_range=1.0):
+    """Posterior by brute force: Delta on a fine grid over [-d_range, d_range], both spreads by the midpoint rule on
+    [0, top] or by the given (nodes, weights); the per-dataset means by the precision form of the Gaussian model
+    (beta = Delta, family effects, dataset effects)."""
     d, s, n = np.asarray(d, float), np.asarray(s, float), len(d)
     fams = sorted(set(fam))
     Zf = np.array([[float(a == u) for u in fams] for a in fam])
     X = np.hstack([np.ones((n, 1)), Zf, np.eye(n)])
-    D = np.linspace(-1, 1, n_delta)
+    D = np.linspace(-d_range, d_range, n_delta)
     pD = stats.norm.pdf(D, 0, scale)
-    taus = (np.arange(int(round(top / h))) + 0.5) * h
+    m = int(round(top / h))
+    taus, wts = nodes if nodes is not None else ((np.arange(m) + 0.5) * h, np.full(m, h))
     cum, first, het, theta, mass = np.zeros(n_delta), 0.0, 0.0, np.zeros(n), 0.0
-    for tf in taus:
-        for td in taus:
+    for tf, wf in zip(taus, wts):
+        for td, wd in zip(taus, wts):
             Sig = np.diag(s ** 2 + td ** 2) + tf ** 2 * Zf @ Zf.T
             Si = np.linalg.inv(Sig)
             a, b, c = d @ Si @ d, Si.sum(0) @ d, Si.sum()
             g = pD * np.exp(-0.5 * (a - 2 * D * b + D ** 2 * c)) / math.sqrt(np.linalg.det(Sig))
-            g *= math.exp(-(tf ** 2 + td ** 2) / (2 * scale ** 2))
+            g *= math.exp(-(tf ** 2 + td ** 2) / (2 * scale ** 2)) * wf * wd
             cg = cumulative_trapezoid(g, D, initial=0)
             cum += cg
-            first += np.trapezoid(g * D, D)
+            first += trapezoid(g * D, D)
             het += cg[-1] * math.hypot(tf, td)
             prec = X.T @ (X / s[:, None] ** 2) + np.diag(np.r_[1 / scale ** 2, [1 / tf ** 2] * len(fams), [1 / td ** 2] * n])
             theta += cg[-1] * (X @ np.linalg.solve(prec, X.T @ (d / s ** 2)))
@@ -205,16 +222,23 @@ def brute(d, s, fam, scale, r, h=0.004, top=0.8, n_delta=4001):
                 p_within=cdf(r) - cdf(-r), lo=float(np.interp(0.025, F, D)), hi=float(np.interp(0.975, F, D)))
 
 
-def test_pool_brute_force():  # test-reason: spreads > 0 against brute-force integration (independent algebra and grid)
-    d, s, fam = [0.03, 0.05, -0.02, 0.01], [0.02, 0.025, 0.02, 0.03], ["f1", "f1", "f2", "f3"]
-    r = A.pool(d, s, [fam, ["a", "b", "c", "d"]], 0.1, 0.1, 0.01)
-    b = brute(d, s, fam, 0.1, 0.01)
+@pytest.mark.parametrize("d, s, fam, scale, declaration, grid", [
+    ([0.03, 0.05, -0.02, 0.01], [0.02, 0.025, 0.02, 0.03], ["f1", "f1", "f2", "f3"], 0.1, "inconclusive", {}),
+    # standard errors far below a uniform spread grid's step (0.005 at prior scale 0.2): the 201-point trapezoid gave
+    # P(Delta > 0.01) = 0.949, inconclusive, for this case of the rigour review (AN-01); spreads by Gauss-Legendre
+    ([0.0132, 0.0177, 0.0167, 0.0155, 0.0188, 0.0152], [0.000175, 0.00142, 0.00113, 0.000445, 0.000627, 0.000793],
+     ["pancreas", "lung", "immune", "immune", "atac", "atac"], 0.2, "above",
+     dict(nodes=gl_nodes(1.6), n_delta=20001, d_range=0.5)),
+])
+def test_pool_brute_force(d, s, fam, scale, declaration, grid):  # test-reason: spreads > 0 against brute force
+    r = A.pool(d, s, [fam, [f"t{i}" for i in range(len(d))]], scale, scale, 0.01)
+    b = brute(d, s, fam, scale, 0.01, **grid)
     close(r["mean"], b["mean"], 1e-8)
     close(r["heterogeneity"], b["heterogeneity"], 1e-5)
     assert [t["mean"] for t in r["theta"]] == pytest.approx(b["theta"], abs=1e-8)
     for k in ("lo", "hi", "p_above", "p_below", "p_within"):
         close(r[k], b[k], 5e-5)
-    assert r["declaration"] == "inconclusive" and r["delta_scale"] == 0.1 and r["tau_scale"] == 0.1
+    assert r["declaration"] == declaration and r["delta_scale"] == scale and r["tau_scale"] == scale
 
 
 def test_combine_structures():
@@ -314,10 +338,13 @@ def test_window():
                   (10.0, [0.59, 0.60, 0.58, 0.595, 0.585]), (30.0, [0.3] * 5), (100.0, [])])
     lower = 0.60 - stats.t.ppf(0.975, 4) * math.sqrt(0.00025 / 5)           # best mean - t x SD / sqrt(n) = 0.5804
     assert w == dict(status="ok", best=3.0, lower=pytest.approx(lower, abs=1e-12), lams=[3.0, 10.0],
-                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2)
+                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2, gap=False)
     tie = A.window([(1.0, [0.5, 0.5]), (3.0, [0.5, 0.5])])                   # tie -> smaller lambda; SD 0
     assert tie["best"] == 1.0 and tie["lams"] == [1.0, 3.0] and tie["width"] == pytest.approx(math.log10(3))
-    none = dict(lower=None, lams=None, width=None, n_points=None)
+    # lambda 3 lies below the bound between two points above it: the width spans a gap (review AN-14)
+    gap = A.window([(1.0, [0.60, 0.62, 0.58, 0.61, 0.59]), (3.0, [0.3] * 5), (10.0, [0.59, 0.60, 0.58, 0.595, 0.585])])
+    assert gap["lams"] == [1.0, 10.0] and gap["gap"] is True and gap["n_points"] == 2
+    none = dict(lower=None, lams=None, width=None, n_points=None, gap=None)
     assert A.window([(1.0, [0.5]), (3.0, [0.4, 0.45])]) == dict(none, status="no_interval", best=1.0)
     assert A.window([(1.0, []), (3.0, [])]) == dict(none, status="no_points", best=None)
 
@@ -326,7 +353,7 @@ def test_guards():  # test-reason: refusals at the function boundaries
     with pytest.raises(P.PreregError, match="scale"):
         A.read_area(zero(), pts(REF), pts(REF), 0.0)
     with pytest.raises(P.PreregError, match="positive"):
-        A.pool([0.1, 0.2], [0.01, 0.0], [["a", "b"]], 0.1, 0.1, 0.01)
+        A.pool([0.1, 0.2], [0.01, 5e-7], [["a", "b"]], 0.1, 0.1, 0.01)      # below S_MIN (and so 0)
     with pytest.raises(P.PreregError, match="grid"):
         A.choose_lambda({"a": {1.0: 0.5}, "b": {3.0: 0.5}}, {"a": {1.0: 0}, "b": {3.0: 0}}, ["a", "b"])
     row = dict(task="pancreas", status="ok", B=0.5, C=0.7, **dict.fromkeys(P.BATCH_METRICS, 0.5),
@@ -352,7 +379,9 @@ FAIL = {("lung", "0", "discriminator", "10", "0"): "diverged",
         # lung, so no lambda is eligible for a held-out dataset that trains on both (all outside their families);
         # each keeps a high failure-free point, so b_common (R4) barely moves
         **{("pancreas", "0", "barycenter", lam, "3"): "diverged" for lam in ("0.3", "1", "3", "30")},
-        **{("lung", "0", "barycenter", lam, "3"): "diverged" for lam in ("10", "100")}}
+        **{("lung", "0", "barycenter", lam, "3"): "diverged" for lam in ("10", "100")},
+        ("atac_small", "1", "reference", "10", "2"): "diverged"}    # a failed run at a point that adds area
+ZERO_AREA = ("lung", "1")          # every adversarial point 0.35 below in biology: neither P1 arm adds area (s = 0)
 
 
 def _gain(r):
@@ -374,6 +403,7 @@ def world(r):
         x = math.log10(float(r["lam"])) - CENTRE[(P.FAMILY_OF[r["arm"]], int(r["cond"]))]
         B += _gain(r) * synth.sig(x / 0.3) + synth._noise("B" + r["tag"], 0.003)
         C += -0.25 * synth.sig((x - 1) / 0.3) + BONUS.get(r["arm"], 0.0) * synth.sig(x / 0.3) + synth._noise("C" + r["tag"], 0.003)
+        C -= 0.35 if (r["task"], r["cond"]) == ZERO_AREA else 0.0
         a = SPREAD.get(r["arm"], 0.0) * synth.sig(x / 0.3)
     elif r["experiment"] == "X13":
         B += 0.05 + 0.01 * math.log1p(float(r["lam"]))
@@ -413,10 +443,13 @@ def e2e(tmp_path_factory):
     tmp = str(tmp_path_factory.mktemp("analysis_x1"))
     M, _ = P.read_manifest(X1_MANIFEST)
     M = M[M.experiment.isin(["X1", "X13"])].reset_index(drop=True)
+    r1 = P.read_record(R1_RECORD, "R1")
+    top = max(r1["families"]["mmd|0"]["x1_grid"])     # an R4-x1 extension point: matching only, never P1 (SI-55)
+    M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task="atac_small", cond=0, arm="mmd",
+                                                 lam=P.lam_step(top, +1))])], ignore_index=True)
     man = synth.write_tsv(M, os.path.join(tmp, "manifest.tsv"))
     sp, fp = synth.write_scores(*score_tables(M), os.path.join(tmp, "scores"), "x1")
     S, F = P.read_scores([sp])[0], P.read_failures(fp)
-    r1 = P.read_record(R1_RECORD, "R1")
     r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, no extension
     P.write_record(r4p, P.r4_stage(P.outcomes(M, S, F, ["X1"]), "x1", r1, need=set()), dict(scores=[sp]))
     args = dict(manifest=man, scores=sp, failures=fp, r1=R1_RECORD, r4=r4p, out=os.path.join(tmp, "analysis.json"))
@@ -461,18 +494,26 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
                                                  {"task": "atac_large", "reason": "readings"}]
     assert [x["task"] for x in pooled["1"]["p1"]["low_signal"]] == ["immune"]
     assert pooled["1"]["p1"]["declaration"] == "above" and len(pooled["1"]["p1"]["signs"]) == 4
-    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "immune", "reason": "low_signal"}]
+    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "lung", "reason": "zero_spread"},       # review AN-02
+                                                   {"task": "immune", "reason": "low_signal"}]
     assert pooled["0"]["local"]["declaration"] == "above"
     close(pooled["0"]["local"]["sign_test_p"], 2 / 64)
     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)
     close(pooled["0"]["p1"]["wilcoxon_p"], 2 / 64)
     assert pooled["0"]["p2"]["declaration"] == "below" and len(pooled["0"]["p2"]["diffs"]) == 6
-    # the pooled results use the frozen prior scales and margins (P1 0.1 and 0.01, SI-73/74; P2 0.25 and 0.05, SI-75)
-    p1, p2 = pooled["0"]["p1"], pooled["0"]["p2"]
-    for got, d, s, scale, margin in ((p1, [x["d"] for x in p1["signs"]], [x["s"] for x in p1["signs"]], 0.1, 0.01),
-                                     (p2, [x["d"] for x in p2["diffs"]], [x["se"] for x in p2["diffs"]], 0.25, 0.05)):
-        want = json.loads(json.dumps(A.combine(got["tasks"], d, s, "family", scale, margin)))
-        assert {k: got[k] for k in want} == want
+    # each pooled result combines its own endpoint's cell readings with the frozen prior scales and margins (P1 0.1 and
+    # 0.01, SI-73/74; P2 0.25 and 0.05, SI-75); sign-table limits d -/+ t(0.975, m - 1) s (review AN-06)
+    for cond, endpoint in itertools.product("01", ("p1", "area", "local")):
+        got = pooled[cond][endpoint]
+        reads = [prim["cells"][f"{t}|{cond}"][endpoint] for t in got["tasks"]]
+        want = A.combine(got["tasks"], [x["d"] for x in reads], [x["s"] for x in reads], "family", 0.1, 0.01)
+        assert {k: got[k] for k in want} == json.loads(json.dumps(want))
+        for sign, x in zip(got["signs"], reads):
+            q = stats.t.ppf(0.975, x["m"] - 1)
+            assert [sign["lo"], sign["hi"]] == pytest.approx([x["d"] - q * x["s"], x["d"] + q * x["s"]], abs=1e-12)
+    p2 = pooled["0"]["p2"]
+    want = A.combine(p2["tasks"], [x["d"] for x in p2["diffs"]], [x["se"] for x in p2["diffs"]], "family", 0.25, 0.05)
+    assert {k: p2[k] for k in want} == json.loads(json.dumps(want))
 
     # P2 counts with the planted failures
     p2 = prim["p2"]
@@ -490,10 +531,12 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert bary["immune"]["lam"] is None and bary["immune"]["at"] is None and bary["sim1"]["lam"] is None
     assert bary["pancreas"]["lam"] in (0.3, 1.0, 3.0, 30.0) and bary["lung"]["lam"] in (10.0, 100.0)
     assert bary["pancreas"]["best_lam"] in (10.0, 100.0) and bary["pancreas"]["best"]["n_fail"] == 0
-    assert prim["cells"]["lung|0"]["best_of_k"]["harmony"]["n"] == 5
+    lh = prim["cells"]["lung|0"]["best_of_k"]["harmony"]
+    assert (lh["n"], lh["configs"], lh["failed_runs"]) == (5, 6, 1)        # failures counted, not penalised (AN-13)
     bk = prim["cells"]["sim2|0"]["best_of_k"]
     assert {f: bk[f]["n"] for f in bk} == dict(dict.fromkeys(P.ADV_ARMS, 6), sinkhorn=5, harmony=6, scanorama=6,
                                                  sysvi=6, scanvi=1, none=1, scvi_adv=1)
+    assert (bk["sinkhorn"]["configs"], bk["sinkhorn"]["failed_runs"], bk["mmd"]["failed_runs"]) == (6, 5, 0)
     assert bk["scanvi"]["stratum"] == "label_aware" and bk["harmony"]["stratum"] == "standard"
     assert np.all(np.diff(bk["reference"]["E"]) >= -1e-12) and len(bk["reference"]["E"]) == 6
     assert set(prim["cells"]["sim2|0"]["anchors"]) == {"pca|0|10", "pca|0|50", "harmony|2|50", "scanorama|20|100"}
@@ -510,6 +553,16 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     close(prim["cells"]["pancreas|0"]["anchors"]["pca|0|10"], float(0.4 * pca.B.mean() + 0.6 * pca.C.mean()))
     at = tr["immune"]["at"]
     close(at["S"][0], 0.4 * at["B"][0] + 0.6 * at["C"][0])
+    # frontier positions take (B, C) in that order; each arm's window comes from its own points (review AN-04)
+    h = out[(out.experiment == "X13") & (out.task == "pancreas") & (out.arm == "harmony") & (out.lam == "0.5")
+            & (out.n_latent == "10")]
+    bc, front = (float(h.B.mean()), float(h.C.mean())), [(b, c) for _, b, c, _ in P.window_curve(pts0)]
+    assert fr["harmony|0.5|10"]["reference"] == A.dominance(bc, front) != A.dominance(bc[::-1], front)
+    dis0 = A.arm_points(out, "pancreas", 0, "discriminator", r1["families"]["js|0"]["x1_grid"],
+                        sorted(A.zero_runs(out, "pancreas", 0)))
+    wd = A.window([(p["lam"], [0.4 * p["B"][s] + 0.6 * p["C"][s] for s in p["B"]]) for p in dis0])
+    got = prim["cells"]["pancreas|0"]["window"]["discriminator"]
+    assert got["lams"] == wd["lams"] != w["lams"] and got["lower"] == pytest.approx(wd["lower"], abs=1e-12)
 
     # sensitivity analyses (spec section 11)
     sens = rec["sensitivity"]
@@ -522,6 +575,14 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert sens["prior_0.2"]["pooled"]["0"]["p1"]["tau_scale"] == 0.2
     assert sens["pairs"]["pooled"]["0"]["p1"]["units"] == ["pancreas", "lung", "immune", "atac"]
     assert sens["corner_zero"]["settings"]["corner"] == "zero"
+    # drop_failed reaches the area: the failed reference run in atac_small|1 removes its lambda-10 point (SI-71)
+    t, c = "atac_small", 1
+    tg, z = r4["targets"][f"{t}|{c}"], A.zero_runs(out, t, c)
+    ref, dis = (A.arm_points(out, t, c, a, r1["families"][f"{P.FAMILY_OF[a]}|{c}"]["x1_grid"], sorted(z))
+                for a in ("reference", "discriminator"))
+    dropped = A.read_area(z, ref, dis, tg["b_common"] - tg["b0"], drop_failed=True)["d"]
+    close(sens["drop_failed"]["cells"][f"{t}|{c}"]["area"]["d"], dropped)
+    assert abs(dropped - prim["cells"][f"{t}|{c}"]["area"]["d"]) > 1e-4
 
 
 def _rewrite(src, dst, keep):
@@ -542,7 +603,13 @@ def _rewrite(src, dst, keep):
                                            lambda M: M.task != "sim2")), "tasks"),
     (lambda e, tmp: dict(manifest=_rewrite(e["args"]["manifest"], os.path.join(tmp, "m.tsv"),
                                            lambda M: ~((M.task == "lung") & (M.arm == "scvi_adv")))), "scvi_adv"),
-    (lambda e, tmp: dict(r4=_shift_b0(e["args"]["r4"], os.path.join(tmp, "r4.json"))), "b0"),
+    # an R4 record that was not made from these scores: b0, then b* and the low-signal flag (review AN-03)
+    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "b0", 0.01)), "differ"),
+    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "atac_large|0", "bstar", 0.03)),
+     "differ"),
+    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "bstar_low_signal",
+                                    True)), "differ"),
+    (lambda e, tmp: _without_seed(e, tmp, "4"), "X1 seeds"),                     # review AN-10
     (lambda e, tmp: dict(out=e["args"]["out"]), "exists"),                      # never overwrite a record
 ])
 def test_refusals(e2e, tmp_path, change, match):
@@ -552,8 +619,19 @@ def test_refusals(e2e, tmp_path, change, match):
         A.main(argv(args))
 
 
-def _shift_b0(src, dst):
+def _tamper(src, dst, key, field, change):
     r4 = json.load(open(src))
-    r4["targets"]["lung|0"]["b0"] += 0.01        # an R4 record that was not made from these scores
+    t = r4["targets"][key]
+    t[field] = change if isinstance(change, bool) else t[field] + change
     json.dump(r4, open(dst, "w"))
     return dst
+
+
+def _without_seed(e, tmp, seed):
+    """X1 without one seed and an R4 record made from the same rows, so only the seed check can refuse."""
+    M = e["M"][~((e["M"].experiment == "X1") & (e["M"].seed == seed))]
+    S, F = P.read_scores([e["args"]["scores"]])[0], P.read_failures(e["args"]["failures"])
+    r4 = os.path.join(tmp, "r4.json")
+    P.write_record(r4, P.r4_stage(P.outcomes(M, S, F, ["X1"]), "x1", e["r1"], need=set()),
+                   dict(scores=[e["args"]["scores"]]))
+    return dict(manifest=synth.write_tsv(M, os.path.join(tmp, "m.tsv")), r4=r4)
