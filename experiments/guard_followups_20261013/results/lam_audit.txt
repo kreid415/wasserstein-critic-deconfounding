@@ -1,5 +1,5 @@
 19 manifest files, 8 with arm and lam columns, 41583 rows
-none: 1428 rows, lam values ['0']
-scanvi: 240 rows, lam values ['0']
-scvi_adv: 240 rows, lam values ['0']
-sysvi: 1440 rows, lam values ['1', '10', '2', '20', '5', '50']
+none: 1428 rows summed over the files, 302 distinct row tags, 242 in the manifest of record, lam values ['0']
+scanvi: 240 rows summed over the files, 40 distinct row tags, 40 in the manifest of record, lam values ['0']
+scvi_adv: 240 rows summed over the files, 40 distinct row tags, 40 in the manifest of record, lam values ['0']
+sysvi: 1440 rows summed over the files, 240 distinct row tags, 240 in the manifest of record, lam values ['1', '10', '2', '20', '5', '50']
