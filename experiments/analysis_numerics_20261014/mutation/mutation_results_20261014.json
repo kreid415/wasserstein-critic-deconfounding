@@ -1,0 +1,515 @@
+[
+ {
+  "id": "M01",
+  "group": "declaration",
+  "description": "sign of d reversed (discriminator minus reference)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref0-dis0-mean-want0]",
+  "secs": 2.3
+ },
+ {
+  "id": "M02",
+  "group": "declaration",
+  "description": "margin 0.01 -> 0.02 (P1, area, local)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 58.3
+ },
+ {
+  "id": "M02b",
+  "group": "declaration",
+  "description": "P2 margin 0.05 -> 0.5",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 54.8
+ },
+ {
+  "id": "M03",
+  "group": "declaration",
+  "description": "declaration threshold 0.95 -> 0.90",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d4-s4-inconclusive-levels0]",
+  "secs": 2.7
+ },
+ {
+  "id": "M03b",
+  "group": "declaration",
+  "description": "declaration threshold 0.95 -> 0.99",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d1-s1-fam1-0.2-above-grid1]",
+  "secs": 24.4
+ },
+ {
+  "id": "M04",
+  "group": "declaration",
+  "description": "P1 prior scale 0.1 -> 0.2",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 58.2
+ },
+ {
+  "id": "M04b",
+  "group": "declaration",
+  "description": "P2 prior scale 0.25 -> 0.5",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 64.2
+ },
+ {
+  "id": "M05",
+  "group": "declaration",
+  "description": "family map: every dataset its own family (family term dropped)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 26.1
+ },
+ {
+  "id": "M06",
+  "group": "declaration",
+  "description": "transfer lambda trained leave-one-DATASET-out instead of leave-one-family-out",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_transfer_lambda",
+  "secs": 23.8
+ },
+ {
+  "id": "M07",
+  "group": "table",
+  "description": "window: t degrees of freedom n-1 -> n",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
+  "secs": 27.7
+ },
+ {
+  "id": "M07b",
+  "group": "table",
+  "description": "window: normal quantile instead of t",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
+  "secs": 23.8
+ },
+ {
+  "id": "M08",
+  "group": "declaration",
+  "description": "Holm order: largest p first",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_sign_test_and_holm",
+  "secs": 25.5
+ },
+ {
+  "id": "M09",
+  "group": "declaration",
+  "description": "area corner offset 0.10 -> 0.20 below scVI biology",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_read_area[collapse-False-fail0-want0]",
+  "secs": 1.6
+ },
+ {
+  "id": "M10",
+  "group": "declaration",
+  "description": "collapse boundary 0.10 -> 0.15",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
+  "secs": 23.2
+ },
+ {
+  "id": "M11",
+  "group": "declaration",
+  "description": "jackknife factor (m-1)/m -> 1/m (read_p1)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref0-dis0-mean-want0]",
+  "secs": 1.5
+ },
+ {
+  "id": "M12",
+  "group": "declaration",
+  "description": "leave-one-seed-out anchor does not drop the seed from plain scVI (P1)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref10-dis10-mean-want10]",
+  "secs": 1.5
+ },
+ {
+  "id": "M13",
+  "group": "declaration",
+  "description": "R4 extension rows not excluded from the arm's points",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "",
+  "secs": 29.1
+ },
+ {
+  "id": "M14",
+  "group": "table",
+  "description": "frontier positions: (B, C) swapped",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 63.0
+ },
+ {
+  "id": "M15",
+  "group": "table",
+  "description": "window width of every arm computed from the reference's scores",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 59.1
+ },
+ {
+  "id": "M16",
+  "group": "table",
+  "description": "sign-table z value 1.96 -> 1.0",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 61.9
+ },
+ {
+  "id": "M17",
+  "group": "declaration",
+  "description": "Holm family contains local instead of area",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 58.0
+ },
+ {
+  "id": "M18",
+  "group": "table",
+  "description": "drop_failed sensitivity does not reach the area",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 63.8
+ },
+ {
+  "id": "M19",
+  "group": "declaration",
+  "description": "pooled P2 rate sums all eight tasks (sim1, sim2 pooled with real tasks)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 59.0
+ },
+ {
+  "id": "M20",
+  "group": "declaration",
+  "description": "Agresti-Caffo adds 0.5/1 instead of 1/2",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
+  "secs": 29.9
+ },
+ {
+  "id": "M21",
+  "group": "declaration",
+  "description": "area divisor: b* - b0 instead of b_common - b0",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 65.5
+ },
+ {
+  "id": "M22",
+  "group": "declaration",
+  "description": "local endpoint pooled from the P1 reading",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 66.5
+ },
+ {
+  "id": "M23",
+  "group": "declaration",
+  "description": "GRID_SPAN 5 -> 3 (spread grid cut at 3 prior scales)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
+  "secs": 14.4
+ },
+ {
+  "id": "M24",
+  "group": "declaration",
+  "description": "GRID_N 201 -> 101",
+  "status": "SURVIVED",
+  "exit": 0,
+  "first_failure": "",
+  "secs": 52.8
+ },
+ {
+  "id": "M24b",
+  "group": "declaration",
+  "description": "GRID_N 201 -> 51",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
+  "secs": 11.2
+ },
+ {
+  "id": "M25",
+  "group": "declaration",
+  "description": "P1 contrast arm: pooled instead of reference",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 52.9
+ },
+ {
+  "id": "M26",
+  "group": "declaration",
+  "description": "prior scale of the spreads fixed at 0.1 in the sensitivity analyses",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 23.3
+ },
+ {
+  "id": "M27",
+  "group": "declaration",
+  "description": "family spread prior half-normal -> weight exp(-tau/scale) (wrong prior density)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
+  "secs": 12.8
+ },
+ {
+  "id": "M28",
+  "group": "declaration",
+  "description": "tau grid starts at 0 but trapezoid end weights dropped (rectangle rule)",
+  "status": "SURVIVED",
+  "exit": 0,
+  "first_failure": "",
+  "secs": 74.2
+ },
+ {
+  "id": "M29",
+  "group": "declaration",
+  "description": "marginal covariance: dataset spread omitted (family term only)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 27.8
+ },
+ {
+  "id": "M30",
+  "group": "declaration",
+  "description": "posterior probability of 'equivalent' uses 2*margin",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d0-s0-inconclusive-levels0]",
+  "secs": 1.5
+ },
+ {
+  "id": "M31",
+  "group": "declaration",
+  "description": "R4 target: b_common used as b* in P1",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 59.6
+ },
+ {
+  "id": "M32",
+  "group": "declaration",
+  "description": "low-signal flag ignored (cells pooled)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "",
+  "secs": 34.1
+ },
+ {
+  "id": "M33",
+  "group": "declaration",
+  "description": "per-dataset s of the area replaced by the P1 s",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 64.7
+ },
+ {
+  "id": "M34",
+  "group": "declaration",
+  "description": "failed runs counted as plain scVI-like non-collapse (failures not counted in P2)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
+  "secs": 22.9
+ },
+ {
+  "id": "M35",
+  "group": "table",
+  "description": "best-of-k indexing wrong (comb(i, k-1))",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_best_of_k[S1]",
+  "secs": 27.3
+ },
+ {
+  "id": "N01",
+  "group": "lead",
+  "description": "revert AN-01: uniform spread grid from 0, no Jacobian",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d1-s1-fam1-0.2-above-grid1]",
+  "secs": 25.0
+ },
+ {
+  "id": "N02",
+  "group": "lead",
+  "description": "log-grid Jacobian (weight x tau) dropped",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
+  "secs": 12.4
+ },
+ {
+  "id": "N03",
+  "group": "lead",
+  "description": "TAU_FLOOR 1e-15 -> 1e-5",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
+  "secs": 10.5
+ },
+ {
+  "id": "N04",
+  "group": "lead",
+  "description": "Delta posterior from V^-1 again (cancellation-prone)",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d5-s5-above-levels0]",
+  "secs": 3.1
+ },
+ {
+  "id": "N05",
+  "group": "lead",
+  "description": "zero_spread rule disabled",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "",
+  "secs": 26.0
+ },
+ {
+  "id": "N06a",
+  "group": "lead",
+  "description": "R4 check compares b0 only",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ1]",
+  "secs": 102.9
+ },
+ {
+  "id": "N06b",
+  "group": "lead",
+  "description": "R4 check ignores the low-signal flag",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ2]",
+  "secs": 119.7
+ },
+ {
+  "id": "N07",
+  "group": "lead",
+  "description": "X1 seed check removed",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-X1",
+  "secs": 103.9
+ },
+ {
+  "id": "N08",
+  "group": "lead",
+  "description": "sign table back to the normal quantile",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 62.2
+ },
+ {
+  "id": "N09",
+  "group": "lead",
+  "description": "window gap always False",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
+  "secs": 25.5
+ },
+ {
+  "id": "N10",
+  "group": "lead",
+  "description": "best-of-k failed runs not counted",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 59.5
+ },
+ {
+  "id": "N11",
+  "group": "lead",
+  "description": "input rows not sorted by tag (expected equivalent at test tolerance)",
+  "status": "SURVIVED",
+  "exit": 0,
+  "first_failure": "",
+  "secs": 68.3
+ },
+ {
+  "id": "N12",
+  "group": "lead",
+  "description": "pool accepts any positive s",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_guards",
+  "secs": 28.0
+ },
+ {
+  "id": "N13",
+  "group": "lead",
+  "description": "S_MIN 1e-6 -> 1e-9",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_guards",
+  "secs": 21.5
+ },
+ {
+  "id": "N14",
+  "group": "lead",
+  "description": "R4 targets taken from the record instead of recomputed",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ0]",
+  "secs": 91.0
+ },
+ {
+  "id": "N15",
+  "group": "lead",
+  "description": "sign-table t with m instead of m - 1 degrees of freedom",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 56.7
+ },
+ {
+  "id": "N17",
+  "group": "lead",
+  "description": "best-of-k configs = scored configurations",
+  "status": "killed",
+  "exit": 1,
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 63.6
+ }
+]
