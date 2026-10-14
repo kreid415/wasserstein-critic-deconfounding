@@ -663,6 +663,7 @@ def test_mixed_scorer_provenance_fails_the_gate(tmp_path, column, value):
 
 
 @pytest.mark.parametrize("where", ["score", "latent"])
+# test-reason: the only test that kills a preflight without the SI-54 refusal or without the latents' commits
 def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
     """SI-54: c88cce3 counts as prereg-tier12-v3 for every arm but sinkhorn; existing Sinkhorn output made at c88cce3
     (its score or its latent) is refused before any work, in report-only runs too."""
@@ -708,6 +709,9 @@ def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
     g = st.summary()["gate"]
     assert g["ok"] and g["scorer_provenance"]["scorer_git_sha"] == head and st.summary()["latent_git_shas"] == sorted(
         ["fake", head])
+    eq.write_text(json.dumps(dict(tag="HEAD", commit="0" * 40, commit_ref="old", not_for_arms=["sinkhorn"])))
+    assert rs.main([*st.args(), "--report-only"]) == rs.EXIT_GATE        # no equivalence declared: the same rows mix
+    assert st.summary()["gate"]["mixed_git_sha"] == sorted(["fake", head])
 
 
 def test_other_scorer_fields_may_differ(tmp_path):
