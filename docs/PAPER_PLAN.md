@@ -119,6 +119,16 @@ Practical guidance for scVI users follows from the results, including the possib
 
 ## 4. Experiment matrix and compute
 
+*Superseded in part, 2026-10-14 (documents review DOC-09). The Fits column below is the design-time estimate of
+2026-10-02. The manifest of record (manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv, 6,930 rows, sha256 6efbe422;
+docs/manifest_v3_counts.csv) has A1 1,098, A2 108, A3 180, X1 3,000, X3 828, X6 216, X7 216, X8 504, X12 288, X13 408
+and X15 84 fits. X1 and X2 are one experiment with both decoders; X15 (KL, Kullback-Leibler, warm-up sensitivity,
+SI-44) is not in the matrix; X11 and X14 (tier 3) are not in the manifest. The 'equal configuration budget' of the X13
+row is replaced as in section 5 (Budget parity). Current GPU-hours (graphics processing unit hours) per experiment are
+in docs/manifest_v3_cost.csv; the GPU-h and Days columns and the scope table below are not updated. The core is six
+real scIB tasks in four dataset families plus two simulations (SI-02: no new datasets), not the 9 real tasks in 7
+families assumed below.*
+
 | ID | Section | Experiment | Seeds | Fits | GPU-h* | Days** | Tier |
 |---|---|---|---|---|---|---|---|
 | A1 | all | Stock-default re-pilot and calibration | 3 | 891 | 271 | 3.8 | 1 |
@@ -167,15 +177,15 @@ Practical guidance for scVI users follows from the results, including the possib
 of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both frozen by the tag
 prereg-tier12-v3 before any X1 adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of
 2026-10-14, which also records the 19 X1 scores that exist from the local run of 2026-10-12); where this section
-differs, the specification applies. It replaces seven statements below, each marked [replaced]: the ROPE and the
-measurement-SD study (margin 0.01, SI-74); failure imputation (failed runs are left out of P1 and the area and counted
-in P2, SI-71); the model formula (family and dataset terms for the arm difference, final review I056, SI-73); "same
-init and minibatch order" (PREREG §9, code check CR-07); equal configuration counts (best-of-k compared at equal k,
-final review D-19); the transfer λ (leave-one-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm over the six
-primary results, ANALYSIS_SPEC §5). The replacements for equal configuration counts, the transfer λ and Holm are the
-agent's proposals (ANALYSIS_SPEC §9, §8, §5) until the user approves them at the diff review. P3, P4 and the other
-follow-up analyses are specified later, with the X7/X8 redesign, before any X1 adversarial-arm score is examined
-(SI-68).
+differs, the specification applies. It replaces seven statements below, marked [replaced] eight times (the ROPE and
+the measurement-SD study carry one marker each): the ROPE and the measurement-SD study (margin 0.01, SI-74); failure
+imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (family and
+dataset terms for the arm difference, final review I056, SI-73); "same init and minibatch order" (PREREG §9, code
+check CR-07); equal configuration counts (best-of-k compared at equal k, final review D-19); the transfer λ
+(leave-one-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm over the six primary results, ANALYSIS_SPEC §5).
+The replacements for equal configuration counts, the transfer λ and Holm are the agent's proposals (ANALYSIS_SPEC §9,
+§8, §5) until the user approves them at the diff review. P3, P4 and the other follow-up analyses are specified later,
+with the X7/X8 redesign, before any X1 adversarial-arm score is examined (SI-68).
 
 - **Unit of inference: the dataset.**
   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.
@@ -191,7 +201,7 @@ follow-up analyses are specified later, with the X7/X8 redesign, before any X1 a
   - The frontier analysis needs no λ selection.
   - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8; the agent's proposal for the transfer rule (SI-77 decides only the selection score), pending the diff review]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
   - R4 extension points are used for matching only; frontier and P1 use the six pre-registered λ points per family, and an optimum at a grid edge is disclosed, not extended (PREREG §4; amended 2026-10-13, I006, SI-55).
-- **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ.
+- **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ. [Not covered by ANALYSIS_SPEC: its locked analyses use the unscaled selection score of SI-77, so these scaling sensitivities have no counterpart there; they stay unspecified unless the user locks them (question for the diff review).]
 - **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures [replaced: failed runs left out of P1 and the area and counted in P2, SI-71]; nothing is dropped silently.
 - **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9; the agent's proposal, pending the diff review].
 - **Power** (amended 2026-10-13, D-02; A1 estimate in docs/prereg/r1_record.json `power`, PREREG §5). The frozen design is flagged UNDERPOWERED: for P1 with D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power 0.131 and power at Δ = 0.02 0.104 (D = 4 families: 0.182 and 0.088); equivalence within ±0.01 or ±0.02 is unreachable. These are the figures of the matched-lambda contrast on all six A1 pilot blocks, including the simulation sim1 and the two low-signal blocks, not of the frozen P1 (amended 2026-10-14); without sim1 the same formulas give SE 0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4), and equivalence is still unreachable (PREREG §9, entry of 2026-10-13, part (c)). σ̂ = 0.030, τ̂ = 0.109, and the A1 per-block means differ in sign (atac_small unconditioned +0.111, sim1 conditioned +0.224, the other four −0.024 to −0.004). P1 is therefore reported as the pooled posterior together with τ̂, the per-task posteriors and a per-task sign table; no equivalence claim and no per-dataset significance claims. The estimate will be recomputed, with the frozen P1 reading and only the evaluable blocks, when R4-a1 is re-run after the Sinkhorn redo (SI-57).
@@ -207,12 +217,20 @@ follow-up analyses are specified later, with the X7/X8 redesign, before any X1 a
 | Batch-count "decay" partly a metric ceiling and composition change | Ceiling-normalised iLISI; fixed total cells and composition across V |
 | K=2 tasks make reference choice irrelevant | Reference analyses on K ≥ 3 only; state the equivalence |
 | Winner's curse in λ selection; pre-registered λ=20 was chosen from benchmark data | Transfer-λ rule; interior-optimum check |
-| Unequal tuning budgets; scANVI uses labels | Equal configuration counts; scANVI in its own stratum |
+| Unequal tuning budgets; scANVI uses labels | Equal configuration counts [superseded for best-of-k placement: families compared at equal k, ANALYSIS_SPEC §9, the agent's proposal pending the diff review]; scANVI in its own stratum |
 | scIB min–max depends on the comparison set | Raw metrics primary; one fixed set |
-| Dataset count too small for any significance across families | Add 4 raw-count real datasets (≈ 9 real tasks, 7 families) |
+| Dataset count too small for any significance across families | Add 4 raw-count real datasets (≈ 9 real tasks, 7 families) [dropped by SI-02: six real tasks in four dataset families] |
 | Mechanistic language | Used only for factors isolated by X3–X8 |
 
 ## 7. Datasets
+
+*Superseded in part, 2026-10-14 (documents review DOC-09; SI-02, SI-03). The benchmark uses the eight prepped scIB
+tasks of scripts/build_paper_manifest.py (TASKS; cells and batches under the scIB batch keys): pancreas 16,382 and 9,
+lung 32,472 and 16, immune 33,506 and 10, immune_hum_mou 97,861 and 23, atac_small 11,270 and 3, atac_large 84,813 and
+11, sim1 12,097 and 6, sim2 19,318 and 16 (the cell counts agree with docs/prepped_fingerprints_scib.json). The table
+below is the design-time plan: its pancreas row (14,890 cells, 8 batches, technology key) and its immune_hum_mou row
+(core key species, V = 2) differ from what is fitted, and the rows marked [dropped] are removed by SI-02 (no new
+datasets).*
 
 | Task | Family | Batch key (core) | V | Cells | Decision |
 |---|---|---|---|---|---|
@@ -221,12 +239,12 @@ follow-up analyses are specified later, with the X7/X8 redesign, before any X1 a
 | immune_hum_mou | immune | species (core, disjoint-support case); batch (23) for X8 | 2 | 97,861 | Rounding keyed on 'chemistry'; no min_genes |
 | atac_small | ATAC | batchname | 3 | 11,270 | Integer; describe as gene activity |
 | atac_large | ATAC | batchname_all | 11 | 84,813 | Integer |
-| HLCA subset (replaces lung) | lung | study | ~8 | ~40k† | CELLxGENE raw counts; scIB lung dropped (its 10x v2 batch, 70% of cells, is log-normalised and unrecoverable from the file) |
-| BMMC (NeurIPS 2021) | bone marrow | site × donor | 13 | ~69k† | GSE194122; confirm the counts layer |
-| Ding 2020 PBMC | PBMC technologies | technology | 7 | ~30k† | GSE132044 count matrices; low-composition-shift control |
-| CellBench | cell lines | protocol | ~4 | ~5k† | GSE118767; identity known by design (ground truth for over-correction) |
+| HLCA subset (replaces lung) [dropped: SI-02] | lung | study | ~8 | ~40k† | CELLxGENE raw counts; scIB lung dropped (its 10x v2 batch, 70% of cells, is log-normalised and unrecoverable from the file) |
+| BMMC (NeurIPS 2021) [dropped: SI-02] | bone marrow | site × donor | 13 | ~69k† | GSE194122; confirm the counts layer |
+| Ding 2020 PBMC [dropped: SI-02] | PBMC technologies | technology | 7 | ~30k† | GSE132044 count matrices; low-composition-shift control |
+| CellBench [dropped: SI-02] | cell lines | protocol | ~4 | ~5k† | GSE118767; identity known by design (ground truth for over-correction) |
 | sim1, sim2 | simulation | Batch (sim2 SubBatch 16 for X8) | 6, 4 | 12,097; 19,318 | Integer; separate family |
-| Kang 2018 | — | donor | 8 | — | GSE96583; downstream condition preservation only |
+| Kang 2018 [dropped: SI-02] | — | donor | 8 | — | GSE96583; downstream condition preservation only |
 
 †Planning assumption; confirm at download.
 
@@ -241,7 +259,7 @@ Each critical and high finding was re-checked against the source code. The empir
 | C1 | critical | Composite added raw scib pcr() (higher = worse) with + sign | Fixed on the scIB-native path (pcr_comparison); retire old path (N9) | fixed (pilot path) |
 | C2 | critical | Prep copied log-normalised X into layers['counts']; every NB/ZINB fit on log data | Fixed: source counts layer; integer guard over every value; recorded rounding only for quantifier expected counts | fixed (11bd8e6, ca6c3a0) |
 | N4 | high | Pooled critic target includes the head's own batch: estimates (1-pi_k) W1(P_k, rest); for K=2 it is half the reference objective and reference choice cannot matter | Target = other batches (or reweight 1/(1-pi_k)); state K=2 equivalence; run reference analyses only on K>=3 | must fix before freeze |
-| N3 | high | Barycenter = 64 anchors initialised near 0 and moved by the generator optimiser (eps 0.01): fixed point at small lambda, contracting quantiser at large lambda | Drop (recommended) or rebuild (k-means init after warm-up, >= batch-size anchors, own optimiser) | decision |
+| N3 | high | Barycenter = 64 anchors initialised near 0 and moved by the generator optimiser (eps 0.01): fixed point at small lambda, contracting quantiser at large lambda | Drop (recommended) or rebuild (k-means init after warm-up, >= batch-size anchors, own optimiser) | closed: the barycenter critic is an arm of the design (SI-14 cold-start target, SI-18 member of the W1 grid family; X1 has 480 barycenter rows) |
 | N2 | high | z-standardisation divides by one pooled RMS of sampled z: anisotropy and noise-inflation shortcuts | Per-dimension standardisation using posterior-mean statistics; diagnostic arm unless spectrum matches lambda0 | must fix before A3 |
 | H2/N16 | high | Sinkhorn: normalising scale under no_grad (drives latent contraction) and squared-Euclidean cost (W2^2, not W1) | Scale with gradient; p=1 cost for a W1-matched arm; describe MMD as a different IPM | must fix before freeze |
 | N10 | high | Pancreas, lung, immune_hum_mou cannot be prepped; min_genes=300 removes 10-11% of cells from two curated scIB tasks, unevenly by cell type | Per-dataset repairs (table); rounding column field; skip min_genes on curated files; report cells vs scIB Table 1 | must fix before freeze |
@@ -275,7 +293,9 @@ Each critical and high finding was re-checked against the source code. The empir
 1. **Scope:** Tier 1 (≈32.1 d) or Tier 1+2 (≈36.5 d). *Recommend Tier 1+2:* X3, X6 and X12 answer R1.major.2, R2.3 and R3.2 directly.
 2. **Adversary input:** posterior means (DANN/WDGRL-consistent; matches what is scored) or samples (scvi-tools convention). *Recommend deciding from pilot A2*, defaulting to means.
 3. **Batch keys:** scIB standard keys (comparable to scIB; real multi-batch structure) or technology keys. *Recommend scIB keys*, with technology keys as a labelled variant.
-4. **New datasets:** HLCA subset, BMMC, Ding 2020, CellBench (+ Kang 2018). Needed to reach ≥ 8 independent real tasks.
-5. **Barycenter critic:** drop (recommended) or rebuild properly.
+4. **New datasets:** HLCA subset, BMMC, Ding 2020, CellBench (+ Kang 2018). Needed to reach ≥ 8 independent real
+  tasks. [Dropped by SI-02: no new datasets.]
+5. **Barycenter critic:** drop (recommended) or rebuild properly. [Closed: the barycenter critic is one of the six
+  adversarial arms (SI-14, SI-18); X1 has 480 barycenter rows.]
 6. **GPUs:** stay at local + 1 JHPCE GPU, or allow more when your other agents are idle.
 7. **Public record:** post a new preprint version superseding v1–v3 (including the D1 disclosure) and update the README.
