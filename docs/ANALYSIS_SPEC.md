@@ -4,8 +4,9 @@
 2026-10-14 (ask_user), all as recommended: Q1-Q5 (ledger SI-68 to SI-72, notebook NB-20261014-01 to -05) and Q6, Q7, Q9,
 Q10, Q11 (SI-73 to SI-77, NB-20261014-07 to -11), marked **DECIDED Qn**; each lists its options with the recommended
 option first and its reason. Details not asked as questions (among them the
-not-evaluable rule in section 2.3, the multiplicity rule in section 5, the transfer-lambda rule in section 8 and sections
-9-11) are the agent's proposals and are shown to the user at the diff review. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
+not-evaluable rule in section 2.3, the multiplicity rule in section 5, the transfer-lambda rule in section 8, sections
+9-11 and the implementation details in section 15) are the agent's proposals and are shown to the user at the diff
+review. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
 (`tests/analysis/`) are committed and frozen with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
 examined (final review I001, D-03, D-08, D-09; SI-52). The decision rules R1-R4 (PREREG sections 2-4) do not change.
 Where PAPER_PLAN section 5 and this file differ, this file applies; PAPER_PLAN gets a dated pointer (section 13).*
@@ -219,7 +220,9 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 - C without trajectory on immune and immune_hum_mou (SI-38) for every comparison above; b\* is unchanged (batch only).
 - The other reading rule (Q2: each run read on its own curve, SI-69), failure handling (Q4: points with any failed run
   removed, SI-71), the other corner (Q5: (b0, 0), proposed) and dataset structure (Q6).
-- Priors: half-normal scales 0.05 and 0.2.
+- Priors: the prior scales of the overall difference Delta and of both spreads set together to 0.05, and to 0.2, as
+  question Q6 proposed (SI-73). (Corrected 2026-10-14: this line said "half-normal scales 0.05 and 0.2", which named
+  only the spreads.)
 - R1 without trajectory (SI-53) is an A1 re-analysis, already stated in PREREG section 9.
 
 ## 12. Not in this file
@@ -243,6 +246,47 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
   weighted mean) and brute-force integration; exact Wilcoxon p-values; Clopper-Pearson against `scipy.stats.binomtest`;
   transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity at the crossing.
 - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; frozen with the tag prereg-tier12-v3.
+
+## 15. Implementation details (the agent's proposals, for the diff review; 2026-10-14)
+
+Writing `scripts/analysis_x1.py` needed the details below, which sections 1-11 leave open. Each is the agent's
+proposal and goes to the user at the diff review (SI-52); none changes a decision SI-68 to SI-77.
+
+1. Inputs. X1 and X13 rows are read as one input through `prereg_rules.outcomes`, so they must share one scorer
+   commit (after the SI-54 equivalence) and one CPU type: best-of-k compares them directly, and the same latent scores
+   differently on the local and the cluster CPUs (cross-host check G4). The script refuses an input that lacks any of
+   the 8 tasks, any registered lambda of an arm, or the X13 configurations (per task 6 Harmony, 6 Scanorama, 6 sysVI,
+   1 scANVI), and an R4 stage-x1 record whose b0 differs from the data's (a record made from other scores). It never
+   overwrites an existing record.
+2. P1 (section 2). Exact hits of b\* count as crossings. Under the per-run reading (option B, a sensitivity analysis)
+   a cell is not evaluable when fewer than 4 of the 5 per-run readings exist, mirroring rule (iii).
+3. Area (section 3). In each leave-one-seed-out repeat the corner moves with the dropped seed (b0 and c0 from the other
+   4 plain-scVI runs) while the divisor b_common - b0 stays fixed, as b\* does. Every repeat gives a value (0 when no
+   point lies beyond the corner), so the area has no readings rule. Low-signal cells get no area.
+4. Combining datasets (section 4). Each spread's grid runs from 0 to 5 times its prior scale (201 points, trapezoid
+   rule): [0, 0.5] at scale 0.1 as section 4 states, and scaled with the prior at 0.05, 0.2 and P2's 0.25 so the prior
+   is never cut short. The sign table's "leave-one-out intervals" are each dataset's d ± 1.96 s, with s its
+   leave-one-seed-out standard error. The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
+   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it.
+5. Declarations (section 5). Holm runs over the six frequentist p values of the primary results (P1, area and P2,
+   each per decoder).
+6. P2 (section 6). All 6 real datasets enter the comparison: the low-signal flag concerns b\*, which P2 does not use.
+   The per-dataset difference and its standard error are both Agresti-Caffo's (rates after adding one collapse and
+   one non-collapse per arm). P2's prior scale 0.25 has no prior-sensitivity variant.
+7. Local versus global (section 7). A dataset is evaluable exactly when it is for P1 (same crossing).
+8. Transfer lambda (section 8). The per-dataset best lambda (the optimistic bound) uses the same failure-free rule
+   within that dataset. When no lambda is failure-free in every training dataset, the transfer lambda is reported as
+   missing.
+9. Best-of-k (section 9). The decoder-free baselines (Harmony, Scanorama, PCA) and the conditioned-only ones (sysVI,
+   scANVI, scvi_adv) appear in both decoders' tables; scVI at lambda = 0 is the table's own decoder. A configuration
+   whose runs all failed is left out and its family's N shrinks; frontier positions count front points that dominate
+   a configuration and that it dominates (ties within 1e-9, PREREG section 1).
+10. Window width (section 10). The lower bound is the lower end of the two-sided 95% t interval (t at 0.975, n - 1
+    degrees of freedom) of the best point's mean; with fewer than 2 successful runs at the best point no width is
+    computed.
+11. Sensitivity analyses (section 11). Each changes one setting and reruns everything: trajectory-free C; per-run
+    reading and dropping points with a failed run (P1, area, local-global); corner (b0, 0) (area); pairs-first and six
+    independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2 (P1, area, local-global).
 
 Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
