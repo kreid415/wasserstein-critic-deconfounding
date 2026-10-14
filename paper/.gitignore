@@ -1,0 +1,11 @@
+paper.pdf
+*.log
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+.dg_build/
+# the root .gitignore ignores *.tex; track the paper sources here
+!paper.tex
+!refs.bib
