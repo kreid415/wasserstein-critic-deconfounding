@@ -399,3 +399,10 @@
 - added: 2026-10-13
 - keywords: Sinkhorn, SINKHORN_MAX_ITER, cap, iterations, RuntimeError, F2
 - notebook: NB-20261013-15
+
+## SI-60 · active · process
+- rule: New tag name: prereg-tier12-v3 (the tag that SI-54's equivalence list names; c88cce3 = prereg-tier12-v2 is result-identical to it for non-Sinkhorn arms).
+- source: "prereg-tier12-v3 (Recommended)" (user, ask_user answer to the tag-name question, 2026-10-14)
+- added: 2026-10-13
+- keywords: tag, prereg-tier12-v3, equivalent
+- notebook: NB-20261013-28
