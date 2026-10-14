@@ -315,14 +315,16 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   model-based estimate (the guard review, reproduced by the documents review of 2026-10-14; not simulated runs) they
   are expected in X7 reference-anchored MMD on pancreas (27 fits, 25.9 expected to meet at least one) and sim1 (all 18
   fits), and in about 14% of the 48 X3 atac_small MMD fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1
-  fits of each of MMD and Sinkhorn; their counts are reported with the results. (I034, a4f4be0) A non-finite critic
-  loss at any inner critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses
-  manifest settings and extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell
-  names or labels are not those of the prepped file in the same order, and the two pilot writers whose latents carry
-  no cell names are retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every
-  tested label to rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts
-  as complete, is resumed and is harvested from the cluster only with its model weights (GPU fits) and training
-  history. (I008, 2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
+  fits of each of MMD and Sinkhorn. The counts will be tabulated by arm, task and experiment from the latents' plan
+  records by a short reporting script written after the runs. No code reads no_pair_steps yet; the script affects no
+  rule, so it can follow the tag (proposal for the diff review). (I034, a4f4be0) A non-finite critic loss at any inner
+  critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses manifest settings and
+  extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell names or labels are
+  not those of the prepped file in the same order, and the two pilot writers whose latents carry no cell names are
+  retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every tested label to
+  rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts as complete, is
+  resumed and is harvested from the cluster only with its model weights (GPU fits) and training history. (I008,
+  2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
 - **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
   SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
   define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
