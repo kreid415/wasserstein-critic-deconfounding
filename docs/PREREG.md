@@ -287,14 +287,17 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   +infinity and then converge a few iterations later (re-review R2-01, commit 89d5e2c). The solve stays in float64
   (SI-58, SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at
   most 1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
-  criterion on all 3,076. All 234 Sinkhorn pilot fits (A1 180, R1 extension 18, A3 36) are refitted and rescored at the
-  tag prereg-tier12-v3; then, in rule order (SI-57): R1 for the Sinkhorn family with its extension rows; R4 stage a1
-  over all six arms with the refitted Sinkhorn arm; the A3 rows it then resolves (including any non-Sinkhorn cell whose
-  window moved); R2 and R3 in full. No other fit is redone (SI-54 entry above), and the power estimate of section 5 is
-  recomputed with R4-a1. The solver was validated on 3,076 minibatches from the pre-fix fits of atac_small, immune and
-  sim1 (3, 10 and 6 batches; review note F6); the check is repeated on the refitted latents before convergence is
-  claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records of the redo will be
-  committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
+  criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
+  Then, in rule order (SI-57): R1 for the Sinkhorn family, with the extension rows it asks for; R4 stage a1 over all
+  six arms with the refitted Sinkhorn arm; the A3 rows it then resolves (the Sinkhorn rows, and any non-Sinkhorn cell
+  whose window moved); R2 and R3 in full. The extension rows and the A3 Sinkhorn rows are therefore outputs of R1 and
+  R4-a1 on the new fits, not a fixed list: before the fix there were 18 and 36 of them, 234 rows with the 180 A1 fits
+  (the count named in SI-51), and the numbers may change (NB-20261013-09). No existing non-Sinkhorn fit is redone
+  (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
+  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the pre-fix fits of atac_small,
+  immune and sim1 (3, 10 and 6 batches; review note F6); the check is repeated on the refitted latents before
+  convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records of the
+  redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
   docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
   docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
   checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
