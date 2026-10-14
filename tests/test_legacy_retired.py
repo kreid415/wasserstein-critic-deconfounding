@@ -2,7 +2,6 @@
 RETIRED message and a non-zero exit before doing anything, and none is left in scripts/.
 Run: python -m pytest -q tests/test_legacy_retired.py (any env with python and bash)."""
 import os
-import shutil
 import subprocess
 import sys
 
