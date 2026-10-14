@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+raise SystemExit('RETIRED (code check CR-10 follow-up; final review I050, user decision SI-64, 2026-10-13): this pilot writer saves no cell names, so score_scib_native.py refuses its latents. Current fitter: scripts/fit_paper_config.py via scripts/run_stage.py. See legacy/README.md.')  # retired; kept for provenance only
 """Stock scVI exactly as a typical user runs it: SCVI(adata) with all defaults, train() with all
 defaults, batch-conditioned on the counts layer. Reference line for the counts pilot.
 Env: SCVI_DS, SEED, OUT (npz path)."""

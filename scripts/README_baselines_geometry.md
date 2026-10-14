@@ -23,7 +23,9 @@ are the original pancreas-hardcoded versions, kept for provenance.)
 
 **scVI, env `scvi-env`:** prep the AnnData in `wcd-kbet`, fit in `scvi-env`
 reading the h5ad (avoids importing the harness package, which pulls scib), score
-in `wcd-kbet`: `scripts/scvi_fit_pancreas.py` + `scripts/scvi_score.py`.
+in `wcd-kbet`: `scripts/scvi_fit_pancreas.py` + `scripts/scvi_score.py`. (Retired 2026-10-13: the fitter
+now lives in `legacy/` and stops at once, because its latents carry no cell names and the scorer refuses them;
+final review I050, SI-64.)
 
 ## Geometry (trustworthiness / continuity)
 

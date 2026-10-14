@@ -15,6 +15,7 @@ the pre-revision results (FINAL_RESULTS.md). That design was rejected: the commi
 | score_parallel.sh, score_baselines_parallel.sh | parallel drivers of score_final_config.py |
 | run_final_baselines.py | baselines in the rejected npz/scoring format |
 | jhpce_gate_then_drain.sh, run_final_sweep.sh, run_scvi_adv_sweep.sh, run_scvi_xf_sweep.sh, run_scvi_xk_sweep.sh, run_scvi_xo_sweep.sh, run_scvi_xop_probe.sh, build_final_manifest.py, build_unified_manifest.py, build_final_report.py, analyze_final.py | drivers of the pre-revision sweeps and reports; retired at the integration merge (2026-10-04) because they call files above |
+| fit_stock_scvi.py, scvi_fit_pancreas.py | pilot latent writers that save no cell names (obs_names), so the scorer refuses their latents since final review I050; retired 2026-10-13 (user decision SI-64). No manifest, runner or PREREG step uses them |
 
 Current path: `scripts/prep_scib_task.py` -> `scripts/build_paper_manifest.py` -> `scripts/run_stage.py`
 (fits with `scripts/fit_paper_config.py`, X13 CPU rows with `scripts/run_cpu_baselines.py`, scores with

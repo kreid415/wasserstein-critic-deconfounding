@@ -1,3 +1,4 @@
+raise SystemExit('RETIRED (code check CR-10 follow-up; final review I050, user decision SI-64, 2026-10-13): this pilot writer saves no cell names, so score_scib_native.py refuses its latents. Current fitter: scripts/fit_paper_config.py via scripts/run_stage.py. See legacy/README.md.')  # retired; kept for provenance only
 import os, numpy as np, scanpy as sc
 DS = os.environ.get("SCVI_DS", "pancreas")
 SEED = int(os.environ.get("SCVI_SEED", "0"))
