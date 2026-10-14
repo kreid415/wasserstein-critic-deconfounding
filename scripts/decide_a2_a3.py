@@ -9,6 +9,9 @@ blocks. The alternative replaces the default only if >= 2/3 of the cells are eva
 >= 1 per task x decoder, the mean Dbio@b* > ROPE, the mean is > 0 within each task x decoder, and the
 alternative has no more failed fits. A2 only: if posterior samples miss b* in any cell where posterior
 means reach it, X1 uses means (masking).
+SI-56 / SI-66 (user decisions 2026-10-13): a cell whose task x decoder R4-a1 flags bstar_low_signal stays in n but
+is not evaluable (status 'low_signal', its reading kept as reading_status / bio), so while such a block is flagged
+the one-evaluable-cell-per-task-x-decoder criterion fails and the default stays.
 SI-45 (code check CR-11): where R4 stage a1 left a window neighbour without an A1 fit (edge_unresolved), the
 default half is read from the A1 extension rows freeze_matched_lambda.py wrote for it (pass that manifest with
 --manifest and its scores with --scores); without them the cell is refused.
@@ -63,6 +66,9 @@ def cells_for(out, exp, r4a1):
         for name, pts in ((st["default"][0], d_pts), (st["alt"][0], a_pts)):
             rec[name] = dict(P.bio_at_bstar(P.window_curve(pts), bstar), n_fail=sum(p["n_fail"] for p in pts),
                              curve=P.window_curve(pts))
+            if r4a1["targets"][f"{t}|{c}"]["bstar_low_signal"]:
+                # SI-56 / SI-66: stays in n but cannot be judged (nor mask); the reading is kept for the separate report
+                rec[name].update(status="low_signal", reading_status=rec[name]["status"])
         cells.append(rec)
     P._require(cells, f"no {exp} cells")
     return cells

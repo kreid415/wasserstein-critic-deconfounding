@@ -135,20 +135,32 @@ def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):
         freeze_matched_lambda.check_no_x1_reuse(pd.concat([M4, dup], ignore_index=True))
 
 
-def test_r2_switches_to_sample_when_it_wins_and_moves_the_followups(tmp_path):
+@pytest.mark.parametrize("low_signal", [False, True])
+def test_r2_switches_to_sample_when_it_wins_and_moves_the_followups(tmp_path, low_signal):
     tmp = str(tmp_path)
     M, man, sp, fp = _run_a1(tmp)
     assert _r1(tmp, [man], [sp], fp) == 0 and _r4(tmp, "a1", os.path.join(tmp, "m.r1.tsv"), [sp], fp) == 0
+    if low_signal:          # SI-56 / SI-66: a flagged task x decoder stays in n and is not evaluable, so R2 keeps the mean
+        p = os.path.join(tmp, "r4a1.json")
+        r4 = json.load(open(p))
+        r4["targets"]["immune|1"]["bstar_low_signal"] = True
+        json.dump(r4, open(p, "w"))
 
     def better(r):
         st, B, C = synth.world(r)
         return st, B, C + (0.03 if r["experiment"] == "A2" else 0.0)
     assert _decide(tmp, _pilots(tmp, sp, fp, better), fp) == 0
     rec = json.load(open(os.path.join(tmp, "r23.json")))
-    assert rec["adv_input"] == "sample" and rec["decisions"]["R2"]["switch"] and rec["zstd"] == "0"
+    want = "mean" if low_signal else "sample"
+    r2 = rec["decisions"]["R2"]
+    assert rec["adv_input"] == want and r2["switch"] is not low_signal and r2["coverage"] is not low_signal
+    flagged = [c for c in r2["cells"] if c["group"] == "immune|1"]
+    assert r2["n_cells"] == 12 and len(flagged) == 3 and rec["zstd"] == "0"
+    assert all((c["sample"]["status"] == "low_signal" and c["sample"]["reading_status"] == "bracketed") is low_signal
+               for c in flagged)
     M3, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
     adv = M3[M3.experiment.isin(["X1"] + list(P.FOLLOWUPS)) & ~M3.arm.isin(P.NO_ADVERSARY)]
-    assert set(adv.adv_input) == {"sample"}
+    assert set(adv.adv_input) == {want}
 
 
 def test_r2_masking_keeps_the_mean(tmp_path):
