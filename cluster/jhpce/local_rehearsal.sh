@@ -37,7 +37,11 @@ case "/$WORK/" in */tier12/*) echo "FATAL: --work $WORK is inside a 'tier12' dir
 
 # ---- plan and bundle (as for a submission) -------------------------------------------------------------------------
 mkdir -p "$WORK/harness" "$WORK/bin" "$WORK/home"
-TMPREF="refs/heads/rehearsal-tmp-$$"                    # git clone of a bundle takes refs/heads/* only
+# A clone of a bundle takes the branches and tags the bundle lists and no other refs, so the commit gets a temporary
+# branch. No tag is listed, so prereg-tier12-v3 does not resolve in the clone, SI-54 maps nothing and the runner's
+# one-commit check fails a stage that mixes c88cce3 rows with new rows; add refs/tags/prereg-tier12-v3 to the bundle
+# command to make the tag resolve.
+TMPREF="refs/heads/rehearsal-tmp-$$"                    # a branch: a clone takes branches and listed tags only
 git -C "$REPO" update-ref "$TMPREF" "$SHA"
 git -C "$REPO" bundle create -q "$WORK/harness/wcd.bundle" "$TMPREF" || { git -C "$REPO" update-ref -d "$TMPREF"; exit 2; }
 git -C "$REPO" update-ref -d "$TMPREF"

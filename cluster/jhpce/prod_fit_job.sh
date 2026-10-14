@@ -23,7 +23,10 @@
 #      ledger files packed on fastscratch (parts <= 250 MiB + SHA-256)
 # --dry-run: steps 1-6 and the runner's dry run, then the plan in job_summary.json; nothing is fitted or packed.
 # Resume-safe: rerun the same command at the same commit; the key is the same (same tags file), fitted rows are kept
-# (runner preflight), interrupted rows rerun. (Latents fitted at another commit fail the runner's mixed-SHA gate.)
+# (runner preflight), interrupted rows rerun. (Latents fitted at another commit fail the runner's one-commit check,
+# except non-Sinkhorn latents fitted at c88cce3: SI-54 (docs/EQUIVALENT_COMMITS.json) reads that commit as the tag
+# prereg-tier12-v3's, but only if the tag resolves in the job's clone, i.e. the bundle lists refs/tags/prereg-tier12-v3.
+# Sinkhorn output at c88cce3 is refused whatever the bundle lists.)
 # Exit: 0 gate passed | 2 node witness/tests | 3 repository | 7 concurrency/claims | 8 inputs | 9 environment |
 #       10 harvest pack failed | 11 runner output breaks the stage-key/ledger contract |
 #       runner codes 4 preflight refused, 5 infrastructure stop, 6 incomplete, 128+n signal.
