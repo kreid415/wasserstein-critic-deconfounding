@@ -242,30 +242,32 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   entry (sigma_c 0.059 / 0.013, and the move of the Sinkhorn family to an extension) are pre-fix: they come from the
   discarded Sinkhorn fits. The trajectory-free R1 is reported as a sensitivity analysis, its Sinkhorn part recomputed
   on the refitted Sinkhorn fits.
-- **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55).** (a) Grid
-  edge: PAPER_PLAN promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4
-  states, R4 extends grids for matching only, frontier and P1 use the six registered lambda points, and an optimum at a
-  grid edge is disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; every
-  discriminator row of the manifest has n_critic 1), not "x10 steps"; the update-budget control is X6's pooled critic at
-  1, 5 and 10 critic steps, so it exists only for the pooled W1 critic. (c) Power: section 5 flags the frozen design
-  UNDERPOWERED (docs/prereg/r1_record.json, power). Its figures are those of the matched-lambda contrast of section 5
-  (reference critic minus discriminator, each at its R4-a1 matched lambda), estimated from all six A1 pilot blocks (3
-  tasks x 2 decoders), which include the simulation sim1 and the two blocks flagged low-signal (entry on low-signal
-  blocks below); they are not the power of the frozen P1, which reads biology at the target batch score b\* by
-  interpolation (docs/ANALYSIS_SPEC.md section 2.2). For D = 6 real tasks: SE 0.045, minimal detectable effect at 80 %
-  power 0.131, power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02
-  unreachable; sigma 0.030 (12 degrees of freedom), tau 0.109 (4 degrees of freedom); A1 per-block means of opposite
-  sign, and in the conditioned decoder sim1 supplies 67 % of the squared spread of the three block means. Without
-  sim1, the same formulas on the four remaining blocks give sigma 0.033 (8 degrees of freedom), tau 0.056 (2 degrees
-  of freedom), SE 0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4);
-  equivalence is still unreachable (experiments/final_review_amendments_20261013/power_without_sim1.py). The
-  conclusion, underpowered, holds either way. P1 is therefore reported as the pooled posterior together with tau, the
-  per-task posteriors and a per-task sign table; PAPER_PLAN's equivalence claim is dropped, and the power estimate
-  will be recomputed with the frozen P1 reading and only the evaluable blocks when R4-a1 is re-run after the Sinkhorn
-  redo (SI-57). (d) The frequentist companion cannot reject with 6 real tasks: the smallest attainable two-sided p,
-  2/2⁶ = 0.031, is above Holm's first threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the
-  six primary results of the frozen X1 analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted
-  level in either version. PAPER_PLAN's 9-task statement is replaced.
+- **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55 for part (a)).**
+  Part (a) is the user's decision SI-55; parts (b) to (d) correct PAPER_PLAN to the registered text of this file (and,
+  for (b), to the user's earlier decision SI-01); they are not separate user decisions. (a) Grid edge: PAPER_PLAN
+  promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4 states, R4 extends
+  grids for matching only, frontier and P1 use the six registered lambda points, and an optimum at a grid edge is
+  disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; every discriminator row of
+  the manifest has n_critic 1), not "x10 steps"; the update-budget control is X6's pooled critic at 1, 5 and 10 critic
+  steps, so it exists only for the pooled W1 critic. (c) Power: section 5 flags the frozen design UNDERPOWERED
+  (docs/prereg/r1_record.json, power). Its figures are those of the matched-lambda contrast of section 5 (reference
+  critic minus discriminator, each at its R4-a1 matched lambda), estimated from all six A1 pilot blocks (3 tasks x 2
+  decoders), which include the simulation sim1 and the two blocks flagged low-signal (entry on low-signal blocks
+  below); they are not the power of the frozen P1, which reads biology at the target batch score b\* by interpolation
+  (docs/ANALYSIS_SPEC.md section 2.2). For D = 6 real tasks: SE 0.045, minimal detectable effect at 80 % power 0.131,
+  power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02 unreachable; sigma
+  0.030 (12 degrees of freedom), tau 0.109 (4 degrees of freedom); A1 per-block means of opposite sign, and in the
+  conditioned decoder sim1 supplies 67 % of the squared spread of the three block means. Without sim1, the same
+  formulas on the four remaining blocks give sigma 0.033 (8 degrees of freedom), tau 0.056 (2 degrees of freedom), SE
+  0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4); equivalence is still
+  unreachable (experiments/final_review_amendments_20261013/power_without_sim1.py). The conclusion, underpowered,
+  holds either way. P1 is therefore reported as the pooled posterior together with tau, the per-task posteriors and a
+  per-task sign table; PAPER_PLAN's equivalence claim is dropped, and the power estimate will be recomputed with the
+  frozen P1 reading and only the evaluable blocks when R4-a1 is re-run after the Sinkhorn redo (SI-57). (d) The
+  frequentist companion cannot reject with 6 real tasks: the smallest attainable two-sided p, 2/2⁶ = 0.031, is above
+  Holm's first threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the six primary results of
+  the frozen X1 analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted level in either version.
+  PAPER_PLAN's 9-task statement is replaced.
 - **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
   (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
   scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for
@@ -396,14 +398,19 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   any X1 adversarial-arm score is examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in
   PAPER_PLAN section 5.
 - **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
-  (final review I001, D-03, D-08, D-09; user decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and
-  scripts/analysis_x1.py implements with known-answer tests (tests/analysis/), every analysis of X1 and X13 data: P1
-  per decoder with the frontier area as co-primary, P2 (collapse rates and the critic-minus-discriminator comparison),
-  local versus global batch removal, single-lambda tables with the transfer lambda, best-of-k placement against
-  standard integrators, the lambda-window width and the sensitivity analyses. The tag prereg-tier12-v3 will freeze all
-  of them. No X1 adversarial-arm score is to be examined (as defined in the disclosure above) before the tag is made,
-  and the script is then run once, after every X1 and X13 row is scored or failed (a procedure: the script refuses to
-  overwrite an existing record). The follow-up analyses (X3, X6, X7, X8, X12, X15) are specified later, with the X7/X8
-  redesign, while X1 runs and before any X1 adversarial-arm score is examined (SI-68); the premise check R0 and X10
-  are exploratory. This entry does not change R1-R4. Where PAPER_PLAN section 5 differs, the specification applies
-  (its section 13 lists the replaced statements).
+  (final review I001, D-03, D-08, D-09; user decisions SI-68 to SI-77, and the agent's proposals named below).**
+  docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer tests (tests/analysis/),
+  every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2 (collapse rates and the
+  critic-minus-discriminator comparison), local versus global batch removal, single-lambda tables with the transfer
+  lambda, best-of-k placement against standard integrators, the lambda-window width and the sensitivity analyses. The
+  user's decisions are SI-68 to SI-77. Details that no question covered are the agent's proposals, marked as such in
+  docs/ANALYSIS_SPEC.md; among them are its section 2.3 (the not-evaluable rule), section 5 (multiplicity: Holm over
+  the six primary results), section 8 (the leave-one-family-out rule for the transfer lambda; SI-77 decides only the
+  selection score), sections 9 to 11 and the implementation details of section 15. They become rules only if the user
+  approves them at the diff review; each approval will be recorded as a new ledger entry before the tag is made. The
+  tag prereg-tier12-v3 will freeze all of them. No X1 adversarial-arm score is to be examined (as defined in the
+  disclosure above) before the tag is made, and the script is then run once, after every X1 and X13 row is scored or
+  failed (a procedure: the script refuses to overwrite an existing record). The follow-up analyses (X3, X6, X7, X8,
+  X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 adversarial-arm score is
+  examined (SI-68); the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN
+  section 5 differs, the specification applies (its section 13 lists the replaced statements).
