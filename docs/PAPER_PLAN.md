@@ -72,8 +72,10 @@ Practical guidance for scVI users follows from the results, including the possib
   - pooled critic (target = the other batches);
   - MMD;
   - Sinkhorn: a debiased Sinkhorn divergence with a Euclidean (p = 1) cost at epsilon = 0.05 sqrt(2d), 0.224 for 10
-    latent dimensions. At this epsilon it is 0.86-0.89 of the exact W1 on A1-type latents and 0.53-0.77 on standardised
-    A3 latents, so it is not a W1 estimate (amended 2026-10-14, Sinkhorn review note F7);
+    latent dimensions. At this epsilon it is 0.86-0.89 of the exact W1 on A1-type latents and 0.53-0.77 on
+    standardised A3 latents (provisional: from the Sinkhorn review log, 5 pre-fix latents with 8 minibatches each,
+    which is not in this repository; to be recomputed on the refitted latents), so it is not a W1 estimate (amended
+    2026-10-14, Sinkhorn review note F7);
   - scvi-tools' own AdversarialTrainingPlan (κ = 1 − kl_weight) as the "as people use it" anchor.
 - **3.3 Adversary input.** Posterior mean or sample, decided by pilot A2.
 - **3.4 Training and disclosures.** Shared optimiser; adversary optimiser; inner-loop minibatch reuse; fixed λ vs the KL ramp, reporting final kl_weight per dataset (immune 0.595).

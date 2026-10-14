@@ -279,45 +279,50 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   (lesson RR-01).
 - **2026-10-13, Sinkhorn arm corrected; its pilot fits are redone in rule order before X1 (final review I031, I032;
   user decisions SI-51, SI-57, SI-58, SI-61, SI-62).** The tagged Sinkhorn loss counted the gradient through its final
-  transform twice (twice the stated method's gradient) and stopped the solve before it converged at the final epsilon.
-  Since commit 3cbaca4 the gradient is taken once (envelope theorem) and every transport plan at the final epsilon
-  converges to an L1 marginal error of 1e-4 (SINKHORN_TOL), in float64 with direct-difference distances. Limits: at most
-  500,000 iterations at the final epsilon, and reaching the cap raises an error that stops the stage (SI-61); a NaN
-  marginal error ends the solve at once, a +infinity error does not, because finite latents of about 1e18 or more give
-  +infinity and then converge a few iterations later (re-review R2-01, commit 89d5e2c). The solve stays in float64
-  (SI-58, SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at
-  most 1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
-  criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
-  Then, in rule order (SI-57): R1 for the Sinkhorn family, with the extension rows it asks for; R4 stage a1 over all
-  six arms with the refitted Sinkhorn arm; the A3 rows it then resolves (the Sinkhorn rows, and any non-Sinkhorn cell
-  whose window moved); R2 and R3 in full. The extension rows and the A3 Sinkhorn rows are therefore outputs of R1 and
-  R4-a1 on the new fits, not a fixed list: before the fix there were 18 and 36 of them, 234 rows with the 180 A1 fits
-  (the count named in SI-51), and the numbers may change (NB-20261013-09). No existing non-Sinkhorn fit is redone
-  (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
-  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the pre-fix fits of atac_small,
-  immune and sim1 (3, 10 and 6 batches; review note F6); the check is repeated on the refitted latents before
-  convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records of the
-  redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
-  docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
-  docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
-  checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
-  of the six registered lambda per arm.
+  transform twice (on the validation minibatches below, the tagged gradient had a median norm 2.00 times that of the
+  converged gradient on A1 fits and 2.27 times on A3 fits; on the R1 extension rows 14.4 times, with median cosine
+  0.28, over the 204 of 216 minibatches where the tagged code gave a finite gradient) and stopped the solve before it
+  converged at the final epsilon. Since commit 3cbaca4 the gradient is taken once (envelope theorem) and every
+  transport plan at the final epsilon converges to an L1 marginal error of 1e-4 (SINKHORN_TOL), in float64 with
+  direct-difference distances. Limits: at most 500,000 iterations at the final epsilon, and reaching the cap raises an
+  error that stops the stage (SI-61); a NaN marginal error ends the solve at once, a +infinity error does not, because
+  finite latents of about 1e18 or more give +infinity and then converge a few iterations later (re-review R2-01,
+  commit 89d5e2c). The solve stays in float64 (SI-58, SI-62): float32 met the agreement criterion (worst gradient
+  cosine at least 0.99999, relative value error at most 1e-4) on the 598 hardest validation minibatches, but was no
+  faster at 128-cell minibatches and failed the value criterion on all 3,076. The 180 A1 Sinkhorn fits will be
+  refitted and rescored first, at the tag prereg-tier12-v3. Then, in rule order (SI-57): R1 for the Sinkhorn family,
+  with the extension rows it asks for; R4 stage a1 over all six arms with the refitted Sinkhorn arm; the A3 rows it
+  then resolves (the Sinkhorn rows, and any non-Sinkhorn cell whose window moved); R2 and R3 in full. The extension
+  rows and the A3 Sinkhorn rows are therefore outputs of R1 and R4-a1 on the new fits, not a fixed list: before the
+  fix there were 18 and 36 of them, 234 rows with the 180 A1 fits (the count named in SI-51), and the numbers may
+  change (NB-20261013-09). No existing non-Sinkhorn fit is redone (SI-54 entry above); non-Sinkhorn A3 rows are fitted
+  anew only where a window moves. The power estimate of section 5 will be recomputed with R4-a1. The solver was
+  validated on 3,076 minibatches from the 234 pre-fix fits of atac_small, immune and sim1 (3, 10 and 6 batches; review
+  note F6): 2,808 final-epoch minibatches (12 from each fit) and 268 captured earlier in training or in training mode
+  (192 and 76); the check is repeated on the refitted latents before convergence is claimed for them or for the X1
+  tasks with more batches (up to 23, immune_hum_mou). The records of the redo will be committed beside the frozen
+  ones, which stay unchanged (names proposed for the diff review): docs/prereg/r1_record_sinkhorn_redo.json (R1),
+  docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and
+  R3). The six non-Sinkhorn grids of the redone R1 record will be checked against docs/prereg/r1_record.json, and
+  docs/ANALYSIS_SPEC.md will name the redone R1 record as its source of the six registered lambda per arm.
 - **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
   SI-63, SI-64; guard review follow-ups G-01 to G-14).** None changes a completed fit or score: at commit c3fd92d, 59 of
   59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
   columns (experiments/integration_checks_20261013; NB-20261013-39). (I033, c4be14b) A minibatch in which a critic-free
   loss has no pair of batches to compare (one batch present; for reference-anchored MMD, no reference cell or no other
   batch) contributes a zero that keeps the gradient graph, instead of stopping the fit; the fitter counts such
-  minibatches and writes no_pair_steps into the latent's plan record when there are any (G-01, 96f4258). They are
-  expected in X7 reference-anchored MMD on pancreas and sim1, and rarely in X3 atac_small MMD, X8 sim2 MMD and X1 sim1
-  MMD and Sinkhorn; their counts are reported with the results. (I034, a4f4be0) A non-finite critic loss at any inner
-  critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses manifest settings and
-  extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell names or labels are
-  not those of the prepped file in the same order, and the two pilot writers whose latents carry no cell names are
-  retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every tested label to
-  rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts as complete, is
-  resumed and is harvested from the cluster only with its model weights (GPU fits) and training history. (I008,
-  2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
+  minibatches and writes no_pair_steps into the latent's plan record when there are any (G-01, 96f4258). In a
+  model-based estimate (the guard review, reproduced by the documents review of 2026-10-14; not simulated runs) they
+  are expected in X7 reference-anchored MMD on pancreas (27 fits, 25.9 expected to meet at least one) and sim1 (all 18
+  fits), and in about 14% of the 48 X3 atac_small MMD fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1
+  fits of each of MMD and Sinkhorn; their counts are reported with the results. (I034, a4f4be0) A non-finite critic
+  loss at any inner critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses
+  manifest settings and extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell
+  names or labels are not those of the prepped file in the same order, and the two pilot writers whose latents carry
+  no cell names are retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every
+  tested label to rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts
+  as complete, is resumed and is harvested from the cluster only with its model weights (GPU fits) and training
+  history. (I008, 2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
 - **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
   SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
   define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
