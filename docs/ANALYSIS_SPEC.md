@@ -1,0 +1,245 @@
+# Analysis specification for the X1 endpoints (draft for the user's choices)
+
+*Status: DRAFT, 2026-10-13, branch `final-review-fixes`. Items marked **OPEN Qn** list the options with the recommended
+option first and its reason. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
+(`tests/analysis/`) are committed and frozen with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
+examined (final review I001, D-03, D-08, D-09; SI-52). The decision rules R1-R4 (PREREG sections 2-4) do not change.
+Where PAPER_PLAN section 5 and this file differ, this file applies; PAPER_PLAN gets a dated pointer (section 13).*
+
+Words used below. *Run* (fit) = one model trained with one seed. *Point* = one penalty strength (lambda) of one method
+on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* = batch score, *C* = biology score
+(PREREG section 1, unscaled scIB means). *b0, c0* = mean B and C of plain scVI (lambda = 0) in the cell.
+*b\** = the matched batch-removal target of rule R4: half-way from b0 to the batch removal that every method reaches.
+
+## 0. Scope and timing (OPEN Q1)
+
+| Analysis | Data | Data exist |
+|---|---|---|
+| P1 biology at matched batch removal, with the frontier area | X1 | X1 |
+| P2 collapse rate; local versus global batch removal | X1 | X1 |
+| P2 composition dose-response | X3 | after R4-x1 |
+| P3 batch-count scaling | X8 (NO-GO as designed: I015, I077, I078, D-07) | after R4-x1 |
+| P4 reference choice | X7 (NO-GO as designed: D-06, I089) | after R4-x1 |
+| R3 lambda-window width | X1 | X1 |
+| R3 factor effects | X6, X12 (A3 done) | after R4-x1 |
+| R5 placement against standard integrators (best-of-k); single-lambda tables | X13, X1 | X1 |
+| R0 premise (batch separability, gradient traces) | X1 histories, lambda = 0 latents | X1 |
+| X10 downstream biology | X1 latents and models | X1 |
+| X15 KL warm-up sensitivity | X15 | after R4-x1 |
+
+Options:
+- **A (recommended).** Lock now every analysis of X1 or X13 data, except R0 and X10, which are labelled exploratory
+  (no confirm/refute claim; the "JS gradients vanish" premise is then not claimed as shown, PAPER_PLAN section 2 "drop
+  or soften"). Lock the follow-up analyses (X3, X6, X7, X8, X12, X15) later, together with the X7/X8 design fixes,
+  while X1 runs, before R4-x1 runs and before anyone examines an X1 result.
+  Reason: each analysis is fixed before its own data and before any X1 result exist; X7/X8 must be redesigned anyway,
+  so P3/P4 code written now would analyse a design that will change; follow-up fits cannot start before R4-x1, which
+  needs every X1 score, so the later lock costs no time.
+- **B.** Lock only P1 and the frontier area now; everything else is exploratory unless locked before its data are examined.
+- **C.** Lock everything now, including P3/P4 as currently designed, with dated amendments after the X7/X8 fixes.
+
+## 1. Inputs and shared definitions (registered; no choice)
+
+- Score rows, failures and the X1 manifest are read through `prereg_rules.outcomes` (PREREG section 1: a row neither
+  scored nor failed stops the analysis; one scorer commit and CPU type per input, with the SI-54 equivalence). The
+  analysis runs once, after all 3,000 X1 rows are scored or failed.
+- B, C as PREREG section 1: C includes trajectory conservation on immune and immune_hum_mou (SI-28); the
+  trajectory-free C is a sensitivity analysis (SI-38, section 11).
+- b0, b_common, b\* and `bstar_low_signal` per cell are read from the frozen R4 stage-x1 record (PREREG section 4:
+  "The same b\* is proposed for P1"); the analysis never recomputes them.
+- Points: lambda = 0 (arm `none`) and the six registered lambda of each arm's family and decoder (`docs/prereg/r1_record.json`
+  `x1_grid`). R4-x1 extension rows are not used (PREREG section 4; SI-55).
+- Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large (`prereg_rules.REAL_TASKS`), in 4 families
+  (`TASK_FAMILY`: all 33,506 immune cells are in immune_hum_mou; atac_small and atac_large share 3,618 cells, final
+  review I073). sim1 and sim2 are reported per task and never pooled with real tasks (PAPER_PLAN section 5).
+- P1 contrast: the reference W1 critic minus the discriminator at 1 adversary step (SI-01; PREREG section 9,
+  2026-10-13 (b)).
+
+## 2. P1: biology at matched batch removal
+
+**2.1 Curve.** For an arm in a cell: the lambda = 0 point (b0, c0) followed by its six registered points in increasing
+lambda, each point = mean B and mean C over its successful runs (OPEN Q2, OPEN Q4). Anchoring at lambda = 0 is the
+user's decision SI-56.
+
+**2.2 Reading.** bio@b\* = C on the curve where B = b\*: walking up in lambda from the anchor, the first point equal to
+b\* (within 1e-9) or the first adjacent pair whose B values bracket b\* (linear interpolation in B), i.e.
+`prereg_rules.bio_at_bstar`, the R2/R3 reading (PREREG section 3). The anchor lies below b\* (b\* - b0 = 0.5 (b_common -
+b0) > 0), so this is the weakest penalty at which the method first reaches the target. Further crossings (a curve that
+falls back past its batch peak, I038, I062) are counted and reported, not used.
+
+**2.3 Not evaluable.** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
+0.01), (ii) either arm's curve never reaches b\*, or (iii) fewer than 4 of the 5 leave-one-seed-out readings exist
+(section 2.4, recommended option of Q2). Not-evaluable cells are listed with their reason. Readings of low-signal
+cells are shown in a separate table and never pooled (SI-56).
+
+**2.4 Contrast and its uncertainty.** d = bio@b\*(reference) - bio@b\*(discriminator).
+
+OPEN Q2, how the five runs are combined:
+- **A (recommended).** Average first: read bio@b\* on the curve of point means (the R2/R3 reading). Uncertainty by
+  leave-one-seed-out: repeat the whole reading 5 times, each time without one seed (the same seed removed from both
+  arms and from lambda = 0; b\* stays fixed); s^2 = ((m - 1)/m) x sum_i (d_(i) - mean d_(.))^2 over the m readings that
+  exist. Reason: one registered reading for bio@b\* in the whole project; less sensitive to a single noisy run; the
+  leave-one-out repeat still carries the noise in where the curve crosses b\*.
+- **B.** Read each run on its own curve (its own lambda = 0 run as anchor), d_s per seed, d = mean over seeds where both
+  arms are read, s = SD/sqrt(n). Single-run curves are noisier: more crossings, and seeds that never reach b\* drop out.
+
+The option not chosen is reported as a sensitivity analysis.
+
+OPEN Q4, failed runs (status `diverged` or `nonfinite_latent`):
+- **A (recommended).** Left out of P1 and the frontier area: a point is the mean over its successful runs (PREREG
+  section 1 "seed mean"); a point whose runs all failed is skipped; every failure counts in P2 (section 6).
+  Sensitivity: points with any failed run removed. Reason: the registered rule; failures are still reported, as P2.
+- **B.** Count a failed run as plain scVI (its lambda = 0 scores), PAPER_PLAN section 5 "impute the unintegrated
+  score". Problem: a failed run at a strong penalty then looks as if it removed no batch effect, which can create a
+  false crossing of b\* (final review D-03).
+
+**2.5 Decoders (OPEN Q3).**
+- **A (recommended).** One P1 result per decoder, both primary; never pooled across decoders. Reason: the conditioned
+  decoder (scVI as people use it, SI-09) and the unconditioned decoder (the adversary is the only batch correction, the
+  original paper's setting) are different uses, and the effect may differ; in the pilot 2 of 3 conditioned cells
+  (immune, sim1) were low-signal, so a conditioned-only primary could rest on few datasets.
+- **B.** Conditioned decoder primary, unconditioned secondary.
+- **C.** One result pooled over both decoders, with decoder as an adjustment term.
+
+## 3. Frontier area, co-primary with P1 (OPEN Q5)
+
+For an arm in a cell, the area is the part of the batch-biology plane reached or dominated by its six points (point
+means as in section 2): the union of rectangles [b_ref, B_i] x [c_ref, C_i] over points with B_i > b_ref and C_i > c_ref.
+For pooling across tasks it is divided by the cell's common batch range (b_common - b0), which expresses it in
+biology-score units. Low-signal cells are not evaluable (the divisor is below 0.02). The contrast, uncertainty and
+pooling follow sections 2.4 and 4.
+
+Options for the corner (b_ref, c_ref):
+- **A (recommended).** (b0, c0 - 0.10): scVI's batch score and 0.10 below scVI's biology score, the collapse bound of
+  rule R1 (PREREG section 1). Only settings that remove more batch than scVI and keep biology above the collapse line
+  add area. Reason: in the pilot (A1, seeds 100-102) plain scVI's C was 0.67-0.90 per cell, and the methods' points
+  moved C by -0.59 to +0.23 from it (the middle half of points by -0.19 to +0.09). With a corner at biology 0 every
+  rectangle's height carries the whole 0.67-0.90 baseline, so the area would mostly measure how far a method pushes
+  batch removal, not what it costs in biology.
+- **B.** (b0, 0), the final review's example (D-03).
+- **C.** The area becomes a secondary, descriptive measure; P1's reading at b\* is the single primary result per decoder.
+
+## 4. Combining datasets (OPEN Q6, asked next)
+
+Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s_t^2) with s_t from section 2.4
+(treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
+the final review required (I056) and PAPER_PLAN section 5's "(1 | family/dataset)". Priors: Delta ~ N(0, 0.1^2);
+tau_f, tau_d ~ half-normal(0.1). Computed exactly: Delta and the random effects are integrated in closed form given
+(tau_f, tau_d), which are integrated on a 201 x 201 grid over [0, 0.5]^2; no random sampling, so results reproduce
+digit for digit. Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
+the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset sign table with leave-one-out
+intervals, without per-dataset significance claims (PREREG section 9, 2026-10-13 (c)). Frequentist companion: exact
+two-sided Wilcoxon signed-rank test on the d_t, descriptive (it cannot reject with 6 datasets, PREREG section 5).
+
+Options: **A (recommended)** the family term above; **B** average the two related pairs first (4 units, one tau);
+**C** six independent datasets (one tau).
+
+## 5. Declarations
+
+Rule (PAPER_PLAN section 5, Corani 2017): a direction if P(Delta > r) >= 0.95 or P(Delta < -r) >= 0.95; practically
+equivalent if P(|Delta| <= r) >= 0.95; otherwise inconclusive. At the frozen power estimate equivalence is unreachable
+(PREREG sections 5 and 9).
+
+OPEN Q7, the margin r (asked next):
+- **A (recommended).** r = 0.01, PREREG section 1's constant (delta_min, also the R2/R3 margin), for P1, the area (in
+  biology units) and the local-global split. The measurement SD may still be reported, descriptively.
+- **B.** r = max(0.01, 2 x measurement SD), PAPER_PLAN section 5. Needs a re-scoring study specified and run before
+  any declaration (which 5% of latents, which seeds and machines, which estimator: final review I003, D-18).
+
+Multiplicity (proposed, for the diff review): each declaration is made on its own posterior (marginal); the report
+states how many primary results were judged (P1 and the area for each decoder, plus P2 for each decoder); the Wilcoxon
+companion applies Holm over all of them (descriptive; final review I040).
+
+## 6. P2: collapse rate (OPEN Q9, asked next)
+
+A run collapses when it failed, or when its C is at least 0.10 below the C of the same seed's lambda = 0 run (the R1
+collapse bound applied per run). Rate per arm and decoder = collapsed runs / runs, over the six registered points and 5
+seeds, per dataset and pooled over the 6 real datasets, with Clopper-Pearson 95% intervals (PAPER_PLAN section 5);
+failure types reported separately. Each family's six points span the same stretch of its response by R1's rule (from
+no effect to the onset of over-correction or collapse on the pilot tasks), which is what makes rates comparable across
+families; the three W1 critics share one grid.
+
+Options: **A (recommended)** also a pooled reference-minus-discriminator difference: per dataset the difference in
+rates with the Agresti-Caffo standard error (one collapse and one non-collapse added per arm), the section 4 model
+with priors scaled for proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points);
+**B** rates and intervals only, no declaration.
+
+## 7. Local versus global batch removal (OPEN Q10, asked next)
+
+Split as in the earlier reviewer response (E6): local = mean(iLISI, kBET, graph_conn), the kNN-neighbourhood metrics;
+global = mean(PCR_batch, ASW_label/batch), whole-embedding geometry. Then B = (3 local + 2 global)/5 exactly. At
+matched batch removal both arms have B = b\*, so 3 x (local difference) + 2 x (global difference) = 0: "their ordering
+differs between local and global metrics" (PAPER_PLAN section 3, R1 row) is then true by construction whenever the
+local difference is not 0.
+
+Options: **A (recommended)** one signed question: at matched batch removal, does the critic get there through more
+local mixing (local difference > 0, equivalently global difference < 0)? The local score is read at the same crossing
+as P1 (same interpolation weights); per decoder: exact two-sided sign test over the real datasets and the section 4
+model with r = 0.01. **B** compare the orderings at each arm's matched lambda (R4-x1), where B is only approximately
+matched, so the comparison mixes in the leftover batch difference. **C** descriptive plots only.
+
+## 8. Single-lambda tables: transfer lambda (OPEN Q11, asked next)
+
+For each held-out real dataset, arm and decoder, the transfer lambda is the registered point that maximises the
+selection score S averaged over the training datasets: the real datasets of the other families (leave-one-family-out,
+so immune and immune_hum_mou, which share cells, never choose each other's lambda; likewise atac_small and atac_large).
+Only points without a failed run in any training dataset are eligible (as R4); ties go to the smaller lambda.
+sim1 and sim2 take the lambda chosen on all 6 real datasets. The tables report B, C and S at the transfer lambda (mean
+and SD over seeds) next to the per-dataset best lambda, labelled an optimistic bound (PAPER_PLAN section 5).
+
+Options for S (the same S is used in sections 9 and 10): **A (recommended)** S = 0.4 B + 0.6 C, scIB's weights without
+min-max scaling, so S does not depend on which methods are compared; **B** the best C among points with B >= b\* of
+the training dataset (final review D-08's example); **C** S = C.
+
+## 9. Placement against standard integrators: best-of-k (R5)
+
+Per dataset and decoder, each method family's configurations: each adversarial arm (6 lambda), Harmony (6 theta at 10
+PCs), Scanorama (6 knn at 10 dimensions), sysVI (6 cycle weights), and k = 1 methods (scANVI, scVI lambda = 0,
+scvi_adv); PCA is the uncorrected anchor, not a family (SI-36). Configuration score = mean S over its runs
+(deterministic baselines: one run). Expected best of k configurations drawn at random: E_k = sum_i S_(i) C(i-1, k-1) /
+C(N, k) with S sorted ascending, k = 1..N; families compared at equal k (final review I084, D-19); labelled optimistic
+(chosen and reported on the same data). scANVI is shown in its own label-aware stratum. The 50-PC and 100-dimension
+tool defaults are sensitivity points, not family members. Frontier positions: every baseline configuration's (B, C)
+against each arm's six-point front, descriptive.
+
+## 10. Lambda-window width (R3, X1 part)
+
+Per arm, dataset and decoder: the best point maximises mean S; the window is every point whose mean S is at least the
+lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); width = log10(largest lambda in the window)
+- log10(smallest), in decades (0 for a single point), plus the number of points (PAPER_PLAN section 3, R3 row:
+"decades within the seed CI of the maximum"). Descriptive.
+
+## 11. Sensitivity analyses (all reported; none changes a declaration)
+
+- C without trajectory on immune and immune_hum_mou (SI-38) for every comparison above; b\* is unchanged (batch only).
+- The other reading rule (Q2), failure handling (Q4), corner (Q5) and dataset structure (Q6).
+- Priors: half-normal scales 0.05 and 0.2.
+- R1 without trajectory (SI-53) is an A1 re-analysis, already stated in PREREG section 9.
+
+## 12. Not in this file
+
+Depending on Q1: P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
+X7/X8 fixes; R0 and X10 exploratory; the measurement-SD re-score (Q7).
+
+## 13. PAPER_PLAN section 5 statements this file replaces (dated pointer added there at sign-off)
+
+ROPE (Q7); failure imputation (Q4); the model formula without an arm-by-dataset term (I056); "same init and minibatch
+order" (PREREG section 9 CR-07; I067, I081); "every method family gets the same number of configurations" (best-of-k at
+equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (section 5).
+
+## 14. Implementation, tests and freeze
+
+- `scripts/analysis_x1.py`: reads the X1 manifest, scores and failures through `prereg_rules`, the frozen R1 and R4-x1
+  records and the X13 rows; writes one JSON record (inputs' SHA-256, git SHA, constants, every per-cell quantity and
+  declaration) with `prereg_rules.write_record`; refuses incomplete inputs; no plots.
+- Known-answer tests in `tests/analysis/`: curves with one and several crossings, unreached, low-signal and failed
+  points; the area on hand-computed point sets; the model against closed forms (tau = 0 gives the inverse-variance
+  weighted mean) and brute-force integration; exact Wilcoxon p-values; Clopper-Pearson against `scipy.stats.binomtest`;
+  transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity at the crossing.
+- `scripts/check_tests.py`, fail-loud lint, notebook RESULT; frozen with the tag prereg-tier12-v3.
+
+Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
+`scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
+`r4_a1_record.json`, the X1 and full manifests (v3), review/rereview/design_fable/REVIEW_design_recheck.md (D-03, D-04,
+D-06..D-10, D-18..D-20) and review/lead/verified_issues.csv (I001, I003, I038, I040, I056, I062, I067, I072, I073,
+I077, I078, I081, I084, I086, I089), revision/reviewer_response.md (E6 local/global split).
