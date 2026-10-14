@@ -54,6 +54,10 @@ Options:
   "The same b\* is proposed for P1"); the analysis never recomputes them.
 - Points: lambda = 0 (arm `none`) and the six registered lambda of each arm's family and decoder (`docs/prereg/r1_record.json`
   `x1_grid`). R4-x1 extension rows are not used (PREREG section 4; SI-55).
+- b\* is computed after any R4-x1 extension round: R4 takes each arm's best batch score from all of its X1 points,
+  extension points included (PREREG section 4), while P1 and the area read only the six registered points. An arm
+  whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); the report gives the number of
+  such cells by arm, next to that arm's best batch score in the R4 record (rigour review AN-09, DOC-10).
 - Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large (`prereg_rules.REAL_TASKS`), in 4 families
   (`TASK_FAMILY`: all 33,506 immune cells are in immune_hum_mou; atac_small and atac_large share 3,618 cells, final
   review I073). sim1 and sim2 are reported per task and never pooled with real tasks (PAPER_PLAN section 5).
@@ -120,7 +124,8 @@ Options for the corner (b_ref, c_ref):
   rule R1 (PREREG section 1). Only settings that remove more batch than scVI and keep biology above the collapse line
   add area. Reason: in the pilot (A1, seeds 100-102) plain scVI's C was 0.67-0.90 per cell, and the methods' points
   moved C by -0.59 to +0.23 from it (the middle half of all 300 points by -0.09 to 0.00; within each cell the middle half lies inside -0.19 to +0.09;
-  corrected 2026-10-14, NB-20261014-06). With a corner at biology 0 every
+  corrected 2026-10-14, NB-20261014-06; pilot-informed: the 300 points are A1's 5 non-Sinkhorn arms x 6 cells x 10
+  lambda, rigour review DOC-17). With a corner at biology 0 every
   rectangle's height carries the whole 0.67-0.90 baseline, so the area would mostly measure how far a method pushes
   batch removal, not what it costs in biology.
 - **B.** (b0, 0), the final review's example (D-03).
@@ -131,7 +136,8 @@ Options for the corner (b_ref, c_ref):
 Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s_t^2) with s_t from section 2.4
 (treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
 the final review required (I056) and PAPER_PLAN section 5's "(1 | family/dataset)". Priors: Delta ~ N(0, 0.1^2);
-tau_f, tau_d ~ half-normal(0.1). Computed exactly: Delta and the random effects are integrated in closed form given
+tau_f, tau_d ~ half-normal(0.1) (pilot-informed: the A1 pilot's between-task SD of the matched-lambda contrast is
+0.109, with 4 degrees of freedom, `docs/prereg/r1_record.json` power.tau; rigour review DOC-17). Computed exactly: Delta and the random effects are integrated in closed form given
 (tau_f, tau_d), which are integrated on a 201 x 201 grid over [1e-15, 0.5]^2 with points evenly spaced in log(tau)
 (amended 2026-10-14, rigour review AN-01: the evenly spaced grid from 0 first written here was too coarse when a
 dataset's standard error s is below its step, and could change a declaration; section 15.4); no random sampling, so
@@ -175,7 +181,11 @@ families; the three W1 critics share one grid.
 
 Options: **A (recommended; chosen 2026-10-14, SI-75)** also a pooled reference-minus-discriminator difference: per dataset the difference in
 rates with the Agresti-Caffo standard error (one collapse and one non-collapse added per arm), the section 4 model
-with priors scaled for proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points);
+with priors scaled for proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points;
+pilot-informed: the margin and the prior scale were chosen after the pilot collapse rates were shown; the question
+gave the unconditioned discriminator as 8 of 45 collapsed runs, which leaves out its 9 runs at lambda 0.03 from the
+R1 extension; with them it is 8 of 54, so the unconditioned reference-minus-discriminator difference is +3.7 points,
+not +0.7 (NB-20261014-22); whether SI-75 stands is put to the user at the diff review);
 **B** rates and intervals only, no declaration.
 
 ## 7. Local versus global batch removal (DECIDED Q10: option A, SI-76)
@@ -256,6 +266,10 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
   A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-14) catches 54 of 57 one-line
   errors; of the 3 it misses, two change no reported value by more than 2e-5 (measured) and the third only reorders
   floating-point sums (rigour review AN-04).
+- Run commands (AN-18), from the repo root of a checkout that contains the tag prereg-tier12-v3 (inputs that mix the
+  two equivalent commits of SI-54 resolve only there): tests `python scripts/check_tests.py --base <base> --src scripts
+  -- tests/analysis tests/prereg` (env scvi-api plus pytest-cov); the analysis as in the usage line of
+  `scripts/analysis_x1.py`. "Runs once" is a procedure: the script itself only refuses to overwrite an existing record.
 - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; frozen with the tag prereg-tier12-v3.
 
 ## 15. Implementation details (the agent's proposals, for the diff review; 2026-10-14)
@@ -316,6 +330,33 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
     corrected 2026-10-14, AN-05) and dropping points with a failed run (P1, area, local-global); corner (b0, 0)
     (area); pairs-first and six independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2
     (P1, area, local-global).
+
+## 16. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16)
+
+1. Each dataset's standard error s comes from 4 or 5 leave-one-seed-out readings of a statistic that is not smooth
+   (a curve crossing, a union of rectangles), and the pooled model treats it as known. In the review's simulation this
+   made the pooled interval conservative and the per-dataset intervals cover less than 95%, so single-dataset statements
+   are less certain than their intervals suggest; at the pilot's noise "practically equivalent" cannot be declared.
+2. P1 is the difference of two six-point piecewise-linear curves read at b\*, so it depends on the registered lambda
+   spacing (the W1 critics' grids have one-decade gaps); in the pilot, reading one of six cells on ten points instead
+   of six moved its difference by 0.011. No sensitivity analysis is planned.
+3. P2's collapse rates are taken over each family's own six points, placed by R1 from the pilot's onset of collapse,
+   so rates are comparable across families only approximately; no sensitivity analysis is planned. The Clopper-Pearson
+   and Agresti-Caffo intervals treat the 30 runs of a cell (6 strengths x 5 seeds) as independent, although each run's
+   collapse is judged against the same seed's plain-scVI biology score, so the 6 runs of a seed share their threshold
+   (in the review's simulation the intervals' coverage was 0.91 to 1.00).
+4. Each declaration is made on its own posterior, without a correction for the number of results judged (section 5,
+   a proposal for the diff review); only the Wilcoxon companions get Holm's correction. The local-versus-global
+   question (section 7) is one signed question per decoder and lies outside the six primary results and their Holm
+   family.
+5. The family spread tau_f rests on four dataset families, two of them with two datasets, so its prior can dominate;
+   the prior-scale sensitivity analyses (0.05 and 0.2, section 11) show how much.
+6. The pairs-first sensitivity analysis combines the two datasets of a family as if their errors were independent,
+   although they share cells (immune within immune_hum_mou; atac_small and atac_large); with equal s and fully
+   correlated errors the pair's standard error would be 41% larger (1 instead of 0.71 s).
+7. P1 compares the reference critic at 5 critic steps per model update with the discriminator at 1 step (X1 manifest);
+   the update-budget control (X6) exists only for the pooled critic (PREREG section 9), so P1 does not separate the
+   divergence from the extra critic steps.
 
 Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
