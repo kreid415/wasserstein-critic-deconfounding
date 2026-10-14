@@ -250,3 +250,14 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   dropped, and the estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57). (d) The frequentist
   companion cannot reject with 6 real tasks (smallest two-sided p 2/2⁶ = 0.031 > 0.0125, as section 5 states);
   PAPER_PLAN's 9-task statement is replaced.
+- **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
+  (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
+  scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for
+  every arm except sinkhorn. The evidence is the fit and score identity checks of
+  experiments/integration_checks_20261013, which are re-run at the candidate commit before it is tagged (SI-52).
+  prereg_rules.py (scorer_git_sha) and run_stage.py (scorer_git_sha and the latents' git_sha) read c88cce3 as the tag's
+  commit for those arms when rows mix commits, and still require one commit after that. Sinkhorn output made at c88cce3
+  is refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
+  too. Sinkhorn rows are refitted and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from a
+  checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
+  (lesson RR-01).
