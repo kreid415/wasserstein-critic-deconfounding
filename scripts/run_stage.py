@@ -48,8 +48,9 @@ with a status record, or any other record, is a broken contract (infrastructure)
 Scorer provenance (CR-05): every score row must carry scorer_git_sha, scorer_dirty, cpu_simd, numba_cpu_name and
 scorer_versions; the completion gate (and the preflight, for existing rows) refuses a stage whose rows disagree on
 any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba targets or package versions.
-SI-54 (docs/EQUIVALENT_COMMITS.json): in scorer_git_sha and the latents' git_sha, c88cce3 counts as tag
-prereg-tier12-v3 for every arm except sinkhorn; the preflight refuses existing Sinkhorn output made at c88cce3.
+SI-54 (docs/EQUIVALENT_COMMITS.json): in scorer_git_sha and the git_sha of latents and divergence records, c88cce3
+counts as tag prereg-tier12-v3 for every arm except sinkhorn; the preflight refuses existing Sinkhorn output (score,
+latent or divergence record) made at c88cce3.
 Completion gate: exit 0 only if every selected row is final (scored, diverged or nonfinite_latent; with --no-score
 also fitted), none is both scored and failed, none is missing and the score rows share one scorer provenance. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
 EXIT_GATE, or 128 + signal after SIGINT / SIGTERM (running work is stopped and its claims released).
@@ -658,6 +659,8 @@ class Stage:
             states[st] += 1
             if (info.get("latent") or {}).get("git_sha"):
                 made_at.append((info["latent"]["git_sha"], r["arm"]))
+            if (info.get("status") or {}).get("git_sha"):     # a divergence record names its commit too (SI-54)
+                made_at.append((info["status"]["git_sha"], r["arm"]))
             if st == "scored":
                 scored[tag] = info["score"]["provenance"]
                 made_at.append((scored[tag]["scorer_git_sha"], r["arm"]))
@@ -1132,7 +1135,10 @@ class Stage:
                             fit_wall_s=fe.get("wall_s", ""), fit_seconds=lat.get("fit_seconds", ""),
                             score_started=ss.get("start", ""), score_ended=se.get("end", ""),
                             score_wall_s=se.get("wall_s", ""), fit_log=fs.get("log", ""), score_log=ss.get("log", ""),
-                            device=lat.get("device", ""), git_sha=lat.get("git_sha", ""),
+                            device=lat.get("device", ""),
+                            # the commit of the fit: its latent's, else its divergence record's (the final SI-54 check
+                            # and summary['latent_git_shas'] read this column)
+                            git_sha=lat.get("git_sha", "") or (info.get("status") or {}).get("git_sha", ""),
                             claimed_by=(f"{owner.get('host')}:{owner.get('pid')}" if owner else "")))
         return out
 

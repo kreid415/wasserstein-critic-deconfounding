@@ -662,25 +662,32 @@ def test_mixed_scorer_provenance_fails_the_gate(tmp_path, column, value):
     assert rc == rs.EXIT_GATE and "mixed_scorer_provenance" in log, log
 
 
-@pytest.mark.parametrize("where", ["score", "latent"])
-# test-reason: the only test that kills a preflight without the SI-54 refusal or without the latents' commits
+@pytest.mark.parametrize("where", ["score", "latent", "status"])
+# test-reason: the only test that kills a preflight without the SI-54 refusal or without a commit it reads
 def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
     """SI-54: c88cce3 counts as prereg-tier12-v3 for every arm but sinkhorn; existing Sinkhorn output made at c88cce3
-    (its score or its latent) is refused before any work, in report-only runs too."""
+    (its score, its latent or its divergence record) is refused before any work, in report-only runs too."""
     old = json.load(open(pr.EQUIVALENT_COMMITS))["commit"]
-    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1")])
+    plan = {"s1": "diverge"} if where == "status" else None
+    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1")], plan=plan)
     flags = ("--no-score",) if where == "latent" else ()      # an edited latent would orphan its score
     assert st.run(*flags)[0] == 0
     if where == "score":
         p = os.path.join(st.out, "scores", "s1.csv")
         df = pd.read_csv(p, dtype=str, keep_default_na=False)
         df.assign(scorer_git_sha=old).to_csv(p, index=False)
-    else:
+    elif where == "latent":
         p = os.path.join(st.out, "latents", "s1.npz")
         with np.load(p) as d:
             arrs = dict(d)
         arrs["config"] = json.dumps(dict(json.loads(str(arrs["config"])), git_sha=old))
         np.savez_compressed(p, **arrs)
+    else:           # no latent, no score; the real fitter writes its commit into the record, the fake does not
+        p = os.path.join(st.out, "status", "s1.json")
+        with open(p) as f:
+            rec = json.load(f)
+        with open(p, "w") as f:
+            json.dump(dict(rec, git_sha=old), f)
     for extra in ((), ("--report-only",)):
         rc, log = st.run(*flags, *extra)
         assert rc == rs.EXIT_PREFLIGHT and "existing output: ['sinkhorn'] rows at c88cce3" in log, log
@@ -688,11 +695,12 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
 
 def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
     """SI-54: a non-Sinkhorn row fitted and scored at the old commit and a Sinkhorn row at the tag pass the gate
-    (latent git_sha and scorer_git_sha). In-process, with a temporary list whose old commit is the fakes' 'fake' and
-    whose tag is HEAD."""
+    (latent git_sha and scorer_git_sha); the commit in a divergence record counts like a latent's (rigour review
+    CF-02: it mixes the stage at another commit, and maps like a latent's at the old one). In-process, with a
+    temporary list whose old commit is the fakes' 'fake' and whose tag is HEAD."""
     head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], check=True, capture_output=True,
                           text=True).stdout.strip()
-    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1")])
+    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1"), _row("v1")], plan={"v1": "diverge"})
     assert st.run("--no-score")[0] == 0
     p = os.path.join(st.out, "latents", "s1.npz")
     with np.load(p) as d:
@@ -709,6 +717,18 @@ def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
     g = st.summary()["gate"]
     assert g["ok"] and g["scorer_provenance"]["scorer_git_sha"] == head and st.summary()["latent_git_shas"] == sorted(
         ["fake", head])
+    p = os.path.join(st.out, "status", "v1.json")             # the fake fitter's divergence record carries no commit
+    with open(p) as f:
+        rec = json.load(f)
+
+    def report_with_record_at(sha):
+        with open(p, "w") as f:
+            json.dump(dict(rec, git_sha=sha), f)
+        return rs.main([*st.args(), "--report-only"])
+
+    assert report_with_record_at("feedbeef") == rs.EXIT_GATE      # a record at another commit mixes the stage
+    assert st.summary()["gate"]["mixed_git_sha"] == sorted(["fake", head, "feedbeef"])
+    assert report_with_record_at("fake") == 0                     # at the old commit it counts as the tag's
     eq.write_text(json.dumps(dict(tag="HEAD", commit="0" * 40, commit_ref="old", not_for_arms=["sinkhorn"])))
     assert rs.main([*st.args(), "--report-only"]) == rs.EXIT_GATE        # no equivalence declared: the same rows mix
     assert st.summary()["gate"]["mixed_git_sha"] == sorted(["fake", head])
