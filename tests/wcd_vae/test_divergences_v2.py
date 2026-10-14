@@ -9,6 +9,7 @@ Barycenter: reproduces a single measure, sits at the midpoint of two translated 
 its W2 objective beats using either input cloud as the target.
 """
 import importlib.util
+import inspect
 import math
 from pathlib import Path
 
@@ -137,6 +138,8 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
     (g_ref,) = torch.autograd.grad(v_ref, m64)
     assert dtypes == [torch.float64]
     assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-59 (re-review R2-04)
+    # sinkhorn_batch_others passes no max_iter, so the function's default is the cap in force (rigour review CF-08)
+    assert inspect.signature(sinkhorn_divergence_weighted).parameters["max_iter"].default == alignment.SINKHORN_MAX_ITER
     assert abs(float(v) - float(v_ref)) < 1e-5 * abs(float(v_ref))
     assert float((g.double() - g_ref).norm() / g_ref.norm()) < 3e-4
 
@@ -158,7 +161,9 @@ def _huge_latent_solve():
 
 @pytest.mark.parametrize("call, exc, match", [
     (lambda: sinkhorn_batch_others(torch.randn(8, 2), torch.tensor([0, 1] * 4), p=3), ValueError, "p must be 1 or 2"),
-    (_huge_latent_solve, RuntimeError, "after 1 iterations"),
+    # an ordinary latent also raises at max_iter=1, with a finite error (0.06 at scale 1); only the huge latent
+    # gives the infinite error this row is about (rigour review CF-08)
+    (_huge_latent_solve, RuntimeError, "marginal error inf .* after 1 iterations"),
     (lambda: _ot_eps(*_small_problem(), [0.1], 0.0, 3), RuntimeError, "after 3 iterations"),
     (lambda: _ot_eps_sym(*_small_problem()[:2], [0.1], 0.0, 3), RuntimeError, "after 3 iterations"),
 ])
