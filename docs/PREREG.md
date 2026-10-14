@@ -1,6 +1,6 @@
 # Pre-registered decision rules for the Tier 1+2 rerun
 
-*Status, 2026-10-14. Version 2 of the rules (tag `prereg-tier12-v2`, commit c88cce3, 2026-10-04) was signed off by the user on 2026-10-02 and revised with the user's answers of 2026-10-02/03 (§7). It was frozen before the restarted A1's first fit (§9), and every rule in it is a deterministic function of scored results. This file on branch `final-review-fixes` also holds a draft of version 3, the amendments of 2026-10-13 and 2026-10-14 in §9. Version 3 will be frozen by the tag `prereg-tier12-v3` (user decision SI-60) only after the user has reviewed the full diff (SI-52); that tag has not been made. The sentence "nothing in this file is chosen after seeing A1, A2, A3 or X1 data" holds for version 2 only. The version 3 amendments were decided after A1, A2 and A3 had been fitted and scored and after the local X1 run had started; the table at the start of §9 gives, for each one, when the user decided it, the commit, the data that existed at that time and whether any result or decision changed.*
+*Status, 2026-10-14. Version 2 of the rules (tag `prereg-tier12-v2`, commit c88cce3, 2026-10-04) was signed off by the user on 2026-10-02 and revised with the user's answers of 2026-10-02/03 (§7). It was frozen before the restarted A1's first fit (§9), and every rule in it is a deterministic function of scored results. This file on branch `final-review-fixes` also holds a draft of version 3, the amendments of 2026-10-13 and 2026-10-14 in §9. Version 3 will be frozen by the tag `prereg-tier12-v3` (user decision SI-60) only after the user has reviewed the full diff (SI-52); that tag has not been made. The sentence "nothing in this file is chosen after seeing A1, A2, A3 or X1 data" holds for version 2 only. The version 3 amendments were decided after A1, A2 and A3 had been fitted and scored and after the local X1 run had started; the table of amendments in §9 gives, for each one, when the user decided it, the commit, the data that existed at that time and whether any result or decision changed.*
 
 Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_grid.py` (R1 and the power report), `scripts/freeze_matched_lambda.py` (R4; stages `a1` and `x1`), `scripts/decide_a2_a3.py` (R2, R3). Tests: `tests/prereg/`. Version 3 adds `docs/ANALYSIS_SPEC.md` (the X1 analyses; it holds agent proposals that the user has not yet approved), `scripts/analysis_x1.py` (their code) with its known-answer tests in `tests/analysis/`, and `docs/EQUIVALENT_COMMITS.json` (the commits declared result-identical, SI-54). Governs `scripts/build_paper_manifest.py --design pilot` (design of record, CONSTRAINTS.md SI-16).
 
@@ -101,7 +101,7 @@ Per task t and decoder c, on the stage's own fits (A1: A1 grid, seeds 100–102;
 
 ## 5. Power (reported by `freeze_a1_grid.py`; the design is fixed)
 
-From A1, for the P1 contrast (reference critic − discriminator), per task × decoder: each arm at its R4-a1 matched λ, d_s = C_reference(s) − C_discriminator(s) per seed. σ̂ = pooled within-(task, decoder) SD of d_s; τ̂² = max(0, Var_t(mean d) − σ̂²/n) per decoder, pooled. For the fixed design (5 seeds, SI-16) with D = 6 real tasks (pancreas, lung, immune, immune_hum_mou, atac_small, atac_large; simulations are a separate family, PAPER_PLAN §5) and, conservatively, D = 4 families: SE = √((τ̂² + σ̂²/5)/D); power of a one-sided posterior-probability-0.95 call (non-central t, D − 1 df) for Δ = 0.02; the minimal detectable effect at 80 %; whether the 95 % interval at Δ = 0 fits inside ±0.01 and ±0.02 (equivalence). The design is flagged UNDERPOWERED when the minimal detectable effect exceeds 0.02 or equivalence within ±0.02 is unreachable.
+From A1, for the P1 contrast (reference critic − discriminator), per task × decoder: each arm at its R4-a1 matched λ, d_s = C_reference(s) − C_discriminator(s) per seed. σ̂ = pooled within-(task, decoder) SD of d_s; τ̂² = max(0, Var_t(mean d) − σ̂²/n) per decoder, pooled. For the fixed design (5 seeds, SI-16) with D = 6 real tasks (pancreas, lung, immune, immune_hum_mou, atac_small, atac_large; simulations are a separate family, PAPER_PLAN §5) and, conservatively, D = 4 dataset families: SE = √((τ̂² + σ̂²/5)/D); power of a one-sided posterior-probability-0.95 call (non-central t, D − 1 df) for Δ = 0.02; the minimal detectable effect at 80 %; whether the 95 % interval at Δ = 0 fits inside ±0.01 and ±0.02 (equivalence). The design is flagged UNDERPOWERED when the minimal detectable effect exceeds 0.02 or equivalence within ±0.02 is unreachable.
 
 Known before any data: the frequentist companion (exact Wilcoxon on dataset means, Holm over P1–P4) cannot reject with 6 real tasks. The smallest two-sided p is 2/2⁶ = 0.031, above Holm's first threshold 0.05/4 = 0.0125. PAPER_PLAN §5 relied on 9 real tasks; SI-02 removed the new datasets. [Amended 2026-10-14: the frozen X1 analysis applies Holm over six primary results (P1, the frontier area and P2, each for both decoders), not four, so its first threshold is 0.05/6 = 0.0083. The six-test rule is the agent's proposal in docs/ANALYSIS_SPEC.md section 15, item 5, and awaits the diff review. docs/prereg/r1_record.json still stores the four-test value, 0.0125 (N_ENDPOINTS = 4 in scripts/prereg_rules.py). The smallest two-sided p, 0.031, is above both thresholds, so the companion cannot reject at the Holm-adjusted level in either version; unadjusted, 0.031 is below 0.05.]
 
@@ -151,11 +151,55 @@ had been fitted and scored and after the local X1 run had started on 2026-10-12,
 affects" holds for them only for the stages that have not yet run: the Sinkhorn redo, the X1 fits still to be made and
 the single X1 analysis run. R2 and R3 had already been run once on the A2/A3 results (2026-10-12, NB-20261012-01)
 before the rule for low-signal blocks (SI-56, SI-66) was decided; SI-57 has them run again after the Sinkhorn redo.
-The table lists every version 3 amendment with the data that existed when the user decided it. Times are from the
-notebook and `git log`.
-Each entry dated 2026-10-13 or 2026-10-14 below starts with a status line that says what is done, with date and
-commit, and what is planned; a step that has not been done is written with "will be". The entries of 2026-10-03 and
-2026-10-04 describe work that is done and frozen in version 2.
+The table after the glossary lists every version 3 amendment with the data that existed when the user decided it.
+Times are from the notebook and `git log`. Each entry dated 2026-10-13 or 2026-10-14 below starts with a status line
+that says what is done, with date and commit, and what is planned; a step that has not been done is written with "will
+be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and frozen in version 2.
+
+**Glossary.** Labels and terms that the entries below use.
+
+| Label | What it is |
+|---|---|
+| SI-nn | Entry nn of the decision ledger (CONSTRAINTS.md). "User decision SI-nn" is the user's own answer to a question; entries marked as agent decisions are not the user's. |
+| NB-yyyymmdd-nn | Entry nn of the lab notebook of that date (notebook/yyyy-mm-dd.md). |
+| I0nn, for example I091 | Finding nn of the final pre-publication review of 2026-10-13. docs/review_final/REVIEW_FINAL.md tabulates the 17 it names; the full list (verified_issues.csv) is not in this repository. |
+| D-nn, for example D-01 | Finding nn of that review's recheck of the design documents. |
+| CR-nn, RR-nn | A finding of the code review of tag prereg-tier12-v1 (2026-10-03), or of the re-review of its fixes (2026-10-04). |
+| F1 to F8, R2-01 to R2-09 | Notes of the first and the second independent review of the Sinkhorn fix (NB-20261013-13, NB-20261013-25). |
+| G-01 to G-18 | Findings of the independent review of the guard commits (NB-20261013-13). experiments/guard_followups_20261013/README.md lists those that were addressed (G-01 to G-05 and G-14). |
+| DOC-nn | Finding nn of the documents review of 2026-10-14 (NB-20261014-20). |
+| 018c8f1 and similar | A commit of this repository (seven hexadecimal characters). |
+
+| Term | What it is |
+|---|---|
+| version 2, version 3 | Version 2 is the frozen set of rules (tag prereg-tier12-v2, commit c88cce3). Version 3 is this file with the amendments of 2026-10-13 and 2026-10-14; its tag prereg-tier12-v3 has not been made. |
+| arm | One method in the comparison. Plain scVI (single-cell variational inference, the base model) is arm none (penalty strength 0). The six adversarial arms are discriminator, reference, pooled, barycenter, mmd and sinkhorn. |
+| penalty strength, lambda | The weight of the batch-alignment term that an arm adds to the scVI loss. A grid is the list of strengths that are fitted; lambda = 0 is plain scVI. |
+| discriminator, critic | The discriminator is a network trained to tell the batches apart (a Jensen-Shannon, JS, divergence). A critic is a network trained to estimate the Wasserstein-1 (W1) distance between batches: the reference critic compares each batch with a reference batch, the pooled critic with the other batches together, and the barycenter critic with a barycenter (an average distribution) of the batches. |
+| critic-free loss | A loss computed directly from the cells' latent coordinates, with no trained network: MMD (maximum mean discrepancy), reference-anchored MMD, and Sinkhorn. |
+| Sinkhorn, epsilon | The debiased Sinkhorn divergence, a regularised optimal-transport distance between batches, found by Sinkhorn iterations. Epsilon is its smoothing strength, lowered step by step; the final epsilon is the last value (src/wcd_vae/wcd/alignment.py). |
+| transport plan, L1 marginal error, envelope theorem | The transport plan says how much of each cell's weight moves to each cell of the other batch; its row sums and column sums must equal the cells' weights. The L1 marginal error is the total absolute amount by which they miss; the solver runs until it is below 1e-4 (SINKHORN_TOL). By the envelope theorem, the cost of the converged plan does not change to first order when the plan changes, so the gradient can be taken with the plan held fixed. |
+| gradient graph | The record of operations from which the optimiser computes gradients. A zero loss that lacks it cannot be differentiated and stops the fit. |
+| no_pair_steps | The number of training steps whose minibatch gave a critic-free loss no pair of batches to compare. The fitter writes it into the latent's plan record only when it is above zero. |
+| conditioned, unconditioned decoder | The conditioned decoder receives the batch label (scVI as usually used). The unconditioned decoder does not, so the adversary is the only batch-removal mechanism (PAPER_PLAN section 3.1). |
+| task, dataset family | A task is one of the eight prepared datasets: pancreas, lung, immune, immune_hum_mou, atac_small and atac_large (the six real tasks), and sim1 and sim2 (simulations). A dataset family groups related real tasks (SI-73): pancreas; lung; immune (immune, immune_hum_mou); ATAC (chromatin-accessibility data: atac_small, atac_large). |
+| penalty-strength family | The arms that share one penalty-strength grid (section 2 calls it a divergence family): JS {discriminator}; W1 {reference, pooled, barycenter}; MMD {mmd}; Sinkhorn {sinkhorn}. Each has one grid per decoder condition. |
+| block, task-by-decoder block, cell | R1 calls a task x decoder x arm combination a block. R2 and R3 call it a cell (SI-27), whereas docs/ANALYSIS_SPEC.md uses cell for a task x decoder pair. In this section a task-by-decoder block is one task with one decoder condition and all its arms, and a cell of the tissue is called a single cell. |
+| B, C | B is the batch-removal score, the mean of five scIB (single-cell integration benchmark) batch metrics. C is the biology-conservation score, the mean of the task's scIB biology metrics (section 1). Higher is better for both. |
+| trajectory, kBET | Trajectory is the scIB biology metric for how well the order of cells along a developmental path (pseudotime) is kept; it is part of C on immune and immune_hum_mou. kBET is the k-nearest-neighbour batch-effect test, one of the five metrics in B. |
+| b0, b_common, b\* | b0 is the batch score B of plain scVI. b_common is the highest B that every arm reaches. b\* = b0 + 0.5 (b_common - b0) is the target batch score at which arms are matched (section 4). |
+| matched lambda | The penalty strength at which an arm's seed-mean B is closest to b\*; ties go to the smaller strength (section 4, rule R4). |
+| bstar_low_signal | A flag on a task-by-decoder block where b_common - b0 is below 0.02, so that b\* cannot be placed reliably (SI-56). |
+| sigma_c, delta_c, delta_min | sigma_c is the between-seed standard deviation of the change in C. delta_c is the smallest change in C that rule R1 counts as an effect, max(delta_min, 3 sigma_c / sqrt(n)) with n the number of seeds; delta_min = 0.01 is the registered smallest difference that counts (section 2, SI-74). |
+| R1 to R4 | The four decision rules (sections 2 to 4). R1 sets each penalty-strength family's six-point grid for X1 from A1. R2 decides whether the adversary reads the posterior mean or a posterior sample, R3 whether its input is standardised, and R4 sets the matched lambdas. PAPER_PLAN uses R0 to R5 for research questions instead. |
+| A1, A2, A3, X1 | Pilot experiments: A1 fits the penalty-strength grid, A2 tests the adversary input, A3 tests standardisation. X1 is the core experiment (8 tasks, both decoders, seeds 0 to 4). X3, X6, X7, X8, X12, X13 and X15 are follow-up experiments (section 0, PAPER_PLAN section 4). |
+| P1, P2, trade-off area | P1 is the difference in C between the reference critic and the discriminator at the target batch score b\*, one result per decoder. The trade-off area (also called frontier area) is the area between an arm's curve of C against B and the collapse line, counted only where the arm removes more batch effect than plain scVI (SI-72). P2 is how often runs collapse, that is, fail or lose 0.10 or more of C against the same seed's plain scVI run (SI-75). |
+| Holm | Holm's step-down correction for testing several results: the smallest p-value is compared with 0.05 divided by the number of tests, the next smallest with 0.05 divided by one fewer, and so on. |
+| power, SE, sigma, tau, D | In section 5, sigma is the between-seed standard deviation of the per-seed difference between two arms, tau is the standard deviation of the true difference between tasks, and SE is the standard error of the mean difference over tasks. Power is the probability that a call at 95 % posterior probability detects a difference of 0.02; the minimal detectable effect is the smallest difference found with 80 % power. D is the number of tasks (or dataset families) in section 5, and a difference in C at b\* in section 3. |
+| transfer lambda, best-of-k | The transfer lambda is the single penalty strength that a method uses on datasets it was not tuned on (docs/ANALYSIS_SPEC.md section 8, a proposal). Best-of-k is the best score among k configurations; methods are compared at equal k (section 9 of that file, a proposal). |
+| diff review, proposal | The diff review is the user's review of the full diff of branch final-review-fixes before the tag is made (SI-52). A proposal is text that the agent suggested; it becomes a rule only if the user approves it there. |
+
+**Amendments of version 3.**
 
 | # | Amendment | Decided by the user (2026-10-13 and 14, New York time) | Committed | Data behind the decision | Result or decision changed? |
 |---|---|---|---|---|---|
@@ -177,7 +221,7 @@ commit, and what is planned; a step that has not been done is written with "will
   computed on the largest connected component of the kNN graph only (other cells get 0) and the root cell is chosen by
   a vote over diffusion components, so small latent changes can change the value. A1's rule R1 is unaffected: one
   metric of 8 moving 0.39 in one seed shifts the 3-seed mean C by about 0.016, against the collapse bound 0.10. [Corrected 2026-10-13: R1 does depend on trajectory, through its
-  noise estimate; see the I091 entry below.]
+  noise estimate; see the entry of 2026-10-13 on R1 and the trajectory score below (finding I091).]
 
 - **2026-10-04, A1 restarts at prereg-tier12-v2 (user decision SI-43, under SI-40).** A code check of prereg-tier12-v1
   (2026-10-03; 14 findings: 0 critical, 3 high, 3 medium, 8 low) led to fixes in the fitting driver, the scorer, the stage
@@ -248,43 +292,45 @@ commit, and what is planned; a step that has not been done is written with "will
   destinations under any tier12* directory; freeze_matched_lambda.py refuses to overwrite an existing
   --extension-manifest when it writes SI-45 rows; and the scANVI/sysVI guard test names the v1 fitter by commit
   (129142b) instead of by tag, because the JHPCE bundle clone carries no tags.
-- **2026-10-13, correction: R1 depends on trajectory through its noise estimate (final review I091; user decision
-  SI-53).**
+- **2026-10-13, correction: R1 depends on trajectory through its noise estimate (final review finding I091: R1 was
+  wrongly said to be unaffected by the trajectory score; user decision SI-53: keep R1 as registered and disclose
+  this).**
   Status: text committed 2026-10-13 (018c8f1), with the trajectory-free R1 script
   (experiments/final_review_amendments_20261013/r1_without_trajectory.py); R1 for the Sinkhorn family is planned,
   after the Sinkhorn redo.
-  The 2026-10-03 sentence "A1's rule R1 is unaffected" is wrong. R1 uses C twice: in the collapse bound
-  (-0.10), which one unstable metric barely moves, and in the bio noise SD sigma_c of the no-effect test (section 2,
-  delta_c = max(0.01, 3 sigma_c / sqrt(n))). On immune with the conditioned decoder trajectory inflates sigma_c 3.3 to
-  5.4 times (with / without trajectory: barycenter 0.073 / 0.014, pooled 0.060 / 0.017, reference 0.061 / 0.014,
-  discriminator 0.064 / 0.017, MMD 0.060 / 0.018, Sinkhorn 0.059 / 0.013, the last from the pre-fix Sinkhorn fits), so
-  delta_c reaches 0.10 to 0.13 and the no-effect test on bio cannot fail there. R1 re-run on the A1 fits without
-  trajectory changes three conditioned-decoder families (W1 critics, MMD, Sinkhorn) from frozen to an extension at the
-  low edge (lambda 0.03, 0.01); the other five families are unchanged
-  (experiments/final_review_amendments_20261013/r1_without_trajectory.py, which first reproduces the record). R1 stays
-  as registered (SI-53). The frozen X1 grids stand for every arm except Sinkhorn: the Sinkhorn grid will be re-derived
-  by R1 on the refitted Sinkhorn fits (SI-57; entry on the Sinkhorn arm below), so docs/prereg/r1_record.json, which
-  still holds the superseded Sinkhorn grid, will be superseded by the redone record. The Sinkhorn figures in this
-  entry (sigma_c 0.059 / 0.013, and the move of the Sinkhorn family to an extension) are pre-fix: they come from the
-  discarded Sinkhorn fits. The trajectory-free R1 will be reported as a sensitivity analysis, its Sinkhorn part recomputed
-  on the refitted Sinkhorn fits.
-- **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55 for part (a)).**
+  The 2026-10-03 sentence "A1's rule R1 is unaffected" is wrong. R1, the rule that sets each penalty-strength family's
+  grid from A1, uses the biology score C twice: in the collapse bound (-0.10), which one unstable metric barely moves,
+  and in sigma_c, the between-seed standard deviation of the change in C, which sets delta_c, the smallest change in C
+  that counts as an effect (section 2; delta_c = max(0.01, 3 sigma_c / sqrt(n)), n the number of seeds). On immune
+  with the conditioned decoder the trajectory metric (how well the order of cells along a developmental path is kept)
+  inflates sigma_c 3.3 to 5.4 times (with / without trajectory: barycenter 0.073 / 0.014, pooled 0.060 / 0.017,
+  reference 0.061 / 0.014, discriminator 0.064 / 0.017, MMD 0.060 / 0.018, Sinkhorn 0.059 / 0.013, the last from the
+  pre-fix Sinkhorn fits), so delta_c reaches 0.10 to 0.13 and the no-effect test on bio cannot fail there. R1 re-run
+  on the A1 fits without trajectory changes three conditioned-decoder penalty-strength families (W1 critics, MMD,
+  Sinkhorn) from frozen to an extension at the low edge (lambda 0.03, 0.01); the other five penalty-strength families
+  are unchanged (experiments/final_review_amendments_20261013/r1_without_trajectory.py, which first reproduces the
+  record). R1 stays as registered (SI-53). The frozen X1 grids stand for every arm except Sinkhorn: the Sinkhorn grid
+  will be re-derived by R1 on the refitted Sinkhorn fits (SI-57; entry on the Sinkhorn arm below), so
+  docs/prereg/r1_record.json, which still holds the superseded Sinkhorn grid, will be superseded by the redone record.
+  The Sinkhorn figures in this entry (sigma_c 0.059 / 0.013, and the move of the Sinkhorn family to an extension) are
+  pre-fix: they come from the discarded Sinkhorn fits. The trajectory-free R1 will be reported as a sensitivity
+  analysis, its Sinkhorn part recomputed on the refitted Sinkhorn fits.
+- **2026-10-13, PAPER_PLAN corrected to this file (final review finding I006, the X1 grid-edge rule, and
+  design-recheck findings D-01, the P1 comparator, and D-02, the power claim; user decision SI-55 for part (a)).**
   Status: done (2026-10-13, 018c8f1); the power estimate of part (c) is planned to be recomputed after the Sinkhorn
   redo.
   Part (a) is the user's decision SI-55; parts (b) to (d) correct PAPER_PLAN to the registered text of this file (and,
   for (b), to the user's earlier decision SI-01); they are not separate user decisions. (a) Grid edge: PAPER_PLAN
   promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4 states, R4 extends
   grids for matching only, frontier and P1 use the six registered lambda points, and an optimum at a grid edge is
-  disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; every discriminator row of
-  the manifest has n_critic 1), not "x10 steps"; the update-budget control is X6's pooled critic at 1, 5 and 10 critic
+  disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; n_critic, the number of adversary updates per training step, is 1 in every discriminator row of the manifest), not "x10 steps"; the update-budget control is X6's pooled critic at 1, 5 and 10 critic
   steps, so it exists only for the pooled W1 critic. (c) Power: section 5 flags the frozen design UNDERPOWERED
   (docs/prereg/r1_record.json, power). Its figures are those of the matched-lambda contrast of section 5 (reference
   critic minus discriminator, each at its R4-a1 matched lambda), estimated from all six A1 pilot blocks (3 tasks x 2
   decoders), which include the simulation sim1 and the two blocks flagged low-signal (entry on low-signal blocks
   below); they are not the power of the frozen P1, which reads biology at the target batch score b\* by interpolation
-  (docs/ANALYSIS_SPEC.md section 2.2). For D = 6 real tasks: SE 0.045, minimal detectable effect at 80 % power 0.131,
-  power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02 unreachable; sigma
-  0.030 (12 degrees of freedom), tau 0.109 (4 degrees of freedom); A1 per-block means of opposite sign, and in the
+  (docs/ANALYSIS_SPEC.md section 2.2). For D = 6 real tasks (D is the number of tasks or dataset families, section 5): SE (standard error of the mean difference over tasks) 0.045, minimal detectable effect at 80 % power 0.131,
+  power at Delta = 0.02 0.104; D = 4 dataset families 0.182 and 0.088; equivalence within ±0.01 or ±0.02 unreachable; sigma (between-seed standard deviation of the per-seed difference) 0.030 (12 degrees of freedom), tau (standard deviation of the true difference between tasks) 0.109 (4 degrees of freedom); A1 per-block means of opposite sign, and in the
   conditioned decoder sim1 supplies 67 % of the squared spread of the three block means. Without sim1, the same
   formulas on the four remaining blocks give sigma 0.033 (8 degrees of freedom), tau 0.056 (2 degrees of freedom), SE
   0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4); equivalence is still
@@ -296,7 +342,8 @@ commit, and what is planned; a step that has not been done is written with "will
   Holm's first threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the six primary results of
   the frozen X1 analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted level in either version.
   PAPER_PLAN's 9-task statement is replaced.
-- **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).**
+- **2026-10-13, two commits declared result-identical (user decision SI-54: treat fits and scores from the two commits
+  as one set for every arm except Sinkhorn; user decision SI-60: name the new tag prereg-tier12-v3).**
   Status: done (2026-10-13): the equivalence list and the check that reads it (8ce5a54), their tests (7c32579) and the
   identity evidence at c3fd92d (NB-20261013-39, -40). Planned: the tag, the Sinkhorn refits, and a repeat of the
   identity checks if a later commit changes code that a fit or a score runs.
@@ -310,7 +357,7 @@ commit, and what is planned; a step that has not been done is written with "will
   non-Sinkhorn rows are identical, and the 4 Sinkhorn rows differ, as intended (SI-51). Scores: 7 stored latents
   (plain scVI, a pooled critic on immune, a simulation, a standardised fit, the barycenter critic, one X1 fit and one
   X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns. An earlier
-  run at 2b52542 (fit_identity.csv, score_identity.csv) came before guard follow-ups G-01 to G-14 changed fit code and
+  run at 2b52542 (fit_identity.csv, score_identity.csv) came before the guard follow-ups G-01 to G-05 and G-14 changed fit code and
   is kept as history. The evidence is narrow: one fit per code path, one epoch, one latent per scorer path. It holds
   for a later candidate commit only if that commit changes no code that a fit or a score runs. Before the tag is made,
   `git diff c3fd92d <candidate commit>` over src/, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py,
@@ -327,16 +374,17 @@ commit, and what is planned; a step that has not been done is written with "will
   too. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
   a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
   (lesson RR-01).
-- **2026-10-13, Sinkhorn arm corrected; its pilot fits will be redone in rule order before X1 (final review I031, I032;
-  user decisions SI-51, SI-57, SI-58, SI-61, SI-62).**
+- **2026-10-13, Sinkhorn arm corrected; its pilot fits will be redone in rule order before X1 (final review findings
+  I031, the gradient counted twice, and I032, the solve stopped before it converged; user decisions SI-51, fix the arm
+  and redo all 234 pilot fits, SI-57, redo in rule order, SI-58 and SI-62, solver precision, and SI-61, the iteration
+  cap).**
   Status: the code fix is done (2026-10-13, 3cbaca4 and 89d5e2c) and so is the solver validation (NB-20261013-03,
   -19). The redo described below is planned; neither the notebook nor the repository records a start (2026-10-14).
   The tagged Sinkhorn loss counted the gradient through its final
   transform twice (on the validation minibatches below, the tagged gradient had a median norm 2.00 times that of the
   converged gradient on A1 fits and 2.27 times on A3 fits; on the R1 extension rows 14.4 times, with median cosine
   0.28, over the 204 of 216 minibatches where the tagged code gave a finite gradient) and stopped the solve before it
-  converged at the final epsilon. Since commit 3cbaca4 the gradient is taken once (envelope theorem) and every
-  transport plan at the final epsilon converges to an L1 marginal error of 1e-4 (SINKHORN_TOL), in float64 with
+  converged at the final epsilon. Since commit 3cbaca4 the gradient is taken once, with the transport plan held fixed (envelope theorem), and every transport plan at the final epsilon is iterated until its L1 marginal error, the total absolute amount by which its row or column sums miss the weights they must match, is below 1e-4 (SINKHORN_TOL), in float64 (double precision) with
   direct-difference distances. Limits: at most 500,000 iterations at the final epsilon, and reaching the cap raises an
   error that stops the stage (SI-61); a NaN marginal error ends the solve at once, a +infinity error does not, because
   finite latents of about 1e18 or more give +infinity and then converge a few iterations later (re-review R2-01,
@@ -363,40 +411,55 @@ commit, and what is planned; a step that has not been done is written with "will
   docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
   checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
   of the six registered lambda per arm.
-- **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
-  SI-63, SI-64; guard review follow-ups G-01 to G-14).**
-  Status: done (2026-10-13, c4be14b to c3fd92d; identity checks at c3fd92d, NB-20261013-39, -40).
-  None changes a completed fit or score: at commit c3fd92d, 59 of
-  59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
-  columns (experiments/integration_checks_20261013; NB-20261013-39). (I033, c4be14b) A minibatch in which a critic-free
-  loss has no pair of batches to compare (one batch present; for reference-anchored MMD, no reference cell or no other
-  batch) contributes a zero that keeps the gradient graph, instead of stopping the fit; the fitter counts such
-  minibatches and writes no_pair_steps into the latent's plan record when there are any (G-01, 96f4258). In a
-  model-based estimate (the guard review, reproduced by the documents review of 2026-10-14; not simulated runs) they
-  are expected in X7 reference-anchored MMD on pancreas (27 fits, 25.9 expected to meet at least one) and sim1 (all 18
-  fits), and in about 14% of the 48 X3 atac_small MMD fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1
-  fits of each of MMD and Sinkhorn. The counts will be tabulated by arm, task and experiment from the latents' plan
-  records by a short reporting script written after the runs. No code reads no_pair_steps yet; the script affects no
-  rule, so it can follow the tag (proposal for the diff review). (I034, a4f4be0) A non-finite critic loss at any inner
-  critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses manifest settings and
-  extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell names or labels are
-  not those of the prepped file in the same order, and the two pilot writers whose latents carry no cell names are
-  retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every tested label to
-  rejection 1) is recorded, any other result without an R call refused. Where scib 1.1.7 finds NMI equal to 0 at every
-  clustering resolution it keeps no clustering, and the scorer keeps scib's loud error (SI-65); the case is then
-  decided case by case. Proposal for the diff review: the user decides each such case, and every case is listed with
-  the results. (I094, 46d79f2) A fit counts as complete, is resumed and is harvested from the cluster only with its
-  model weights (GPU fits) and training history. (I008, 2b52542) Each chained cluster job's clock is (chain position +
-  1) x (walltime + queue allowance).
-- **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
-  SI-56, SI-66).**
+- **2026-10-13, guards before the tag (final review findings I033, I034, I042, I050, I051, I094 and I008, each
+  explained in the list below; user decisions SI-52, SI-63, SI-64; follow-ups to the independent review of the guard
+  commits, findings G-01 to G-05 and G-14).**
+  Status: done (2026-10-13, c4be14b to c3fd92d; identity checks at c3fd92d, NB-20261013-39, -40). A guard is a
+  stricter check or an extra record in the code. None of them changes a completed fit or score: at commit c3fd92d the
+  one-epoch test refits of 59 of 59 non-Sinkhorn code paths give the same latents as at c88cce3 (the 4 Sinkhorn code
+  paths differ, as intended), and 7 of 7 stored latents give identical scores in all 32 compared columns
+  (experiments/integration_checks_20261013; NB-20261013-39 for the fits, NB-20261013-40 for the scores).
+  - Minibatches with nothing to compare (I033, commit c4be14b; follow-up G-01, commit 96f4258). MMD,
+    reference-anchored MMD and Sinkhorn are critic-free losses: they compare the batches present in a minibatch of
+    cells directly, with no trained network. When a minibatch holds only one batch (for reference-anchored MMD: no
+    reference cell, or no other batch), there is nothing to compare. The loss is then a zero that keeps the gradient
+    graph, instead of stopping the fit. The fitter counts such minibatches and writes the count, no_pair_steps, into
+    the latent's plan record when it is above zero. A model-based estimate (the guard review, reproduced by the
+    documents review of 2026-10-14; not simulated runs) expects them in X7 reference-anchored MMD on pancreas (27
+    fits, 25.9 expected to meet at least one) and on sim1 (all 18 fits), and in about 14% of the 48 X3 atac_small MMD
+    fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1 fits of each of MMD and Sinkhorn. The counts will
+    be tabulated by arm, task and experiment from the latents' plan records by a short reporting script written after
+    the runs. No code reads no_pair_steps yet; the script affects no rule, so it can follow the tag (proposal for the
+    diff review).
+  - Failures inside the critic's training loop (I034, commit a4f4be0). The critic can be updated more than once inside
+    each training step. A loss that is not finite (not a number, NaN, or infinite) at any of these inner steps, not
+    only the last, now marks the fit as diverged.
+  - Settings that an arm does not read (I042, commit 5f30f17; SI-63). A fit refuses manifest settings and extra keys
+    that its arm does not read, so that a setting cannot be changed without any effect and without notice.
+  - Checks in the scorer (I050 and I051, commit f5ea0c3; SI-64, commit c3fd92d). The scorer refuses a latent whose
+    cell names or labels are not those of the prepared data file in the same order, and the two pilot writers whose
+    latents carry no cell names are retired to legacy/ (SI-64). A kBET result of exactly 0 with no seeded call to R
+    (the statistical language in which kBET is implemented) is recorded, because scib then sets the rejection of every
+    tested label to 1; any other result without a call to R is refused.
+  - A normalised mutual information of 0 (SI-65). Where scib 1.1.7 finds NMI, the normalised mutual information, equal
+    to 0 at every clustering resolution, it keeps no clustering, and the scorer keeps scib's loud error; the case is
+    then decided case by case. Proposal for the diff review: the user decides each such case, and every case is listed
+    with the results.
+  - Complete fits only (I094, commit 46d79f2). A fit counts as complete, is resumed and is harvested from the cluster
+    only if its model weights (graphics processing unit, GPU, fits) and training history are present.
+  - Job time limits (I008, commit 2b52542). Each job in a chain of cluster jobs gets a time limit of (chain position +
+    1) x (walltime + queue allowance), so a later job is not killed because the jobs before it ran long.
+- **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review finding I072 and
+  design-recheck finding D-04, on how P1 reads the target batch score b\* when it lies outside an arm's grid; user
+  decisions SI-56, start at lambda = 0 and treat low-signal blocks as not evaluable, and SI-66, count them as not
+  evaluable in R2 and R3).**
   Status: decided 2026-10-13; rule code done 2026-10-14 (f3c3415 for R2 and R3, ff88666 for P1); the R2 and R3 re-runs
   are planned, after the Sinkhorn redo (SI-57).
   Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
   define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
-  point. A task x decoder flagged bstar_low_signal (b_common - b0 < 2 delta_min = 0.02, section 4) has too small a
+  point. A task x decoder flagged bstar_low_signal (b0 is plain scVI's batch score and b_common the highest batch score that every arm reaches; the flag is set when b_common - b0 < 2 delta_min = 0.02, section 4) has too small a
   batch range for b\* to be read reliably: its cells are not evaluable for P1 or for R2/R3, and their readings are
-  reported separately, never pooled. In R2/R3 such cells stay in n (the user chose this over leaving them out; SI-66),
+  reported separately, never pooled. In R2/R3 such cells stay in n, the number of cells the rule counts (the user chose this over leaving them out; SI-66),
   so while a block is flagged, criterion 1 of section 3 ("at least one per task x decoder") fails and R2 and R3 keep
   their defaults, posterior mean and standardisation off. The user decided SI-56 and SI-66 on 2026-10-13; the rule was
   implemented on 2026-10-14, in scripts/decide_a2_a3.py (commit f3c3415, 07:50; a flagged cell's readings carry status
@@ -417,8 +480,8 @@ commit, and what is planned; a step that has not been done is written with "will
   the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
   has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
   them is a question for the diff review.
-- **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (documents review
-  DOC-01).**
+- **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (finding DOC-01 of
+  the documents review of 2026-10-14).**
   Status: written 2026-10-14. Open: the user's confirmation that nobody read an X1 adversarial-arm score value.
   The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
   run X1 locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same
@@ -440,13 +503,13 @@ commit, and what is planned; a step that has not been done is written with "will
   any X1 adversarial-arm score is examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in
   PAPER_PLAN section 5.
 - **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
-  (final review I001, D-03, D-08, D-09; user decisions SI-68 to SI-77, and the agent's proposals named below).**
+  (final review finding I001, that the P1 to P4 analysis code had to be frozen before X1 scores are read;
+  design-recheck findings D-03, D-08 and D-09; user decisions SI-68 to SI-77, and the agent's proposals named
+  below).**
   Status: specification and code committed 2026-10-14 (56c0762, 990d37d, ff88666; three test gaps closed in 858101b).
   Planned: the freeze by the tag, and the single analysis run after every X1 and X13 row is scored or failed.
   docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer tests (tests/analysis/),
-  every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2 (collapse rates and the
-  critic-minus-discriminator comparison), local versus global batch removal, single-lambda tables with the transfer
-  lambda, best-of-k placement against standard integrators, the lambda-window width and the sensitivity analyses. The
+  every analysis of X1 and X13 data: P1 (biology kept at equal batch removal) per decoder with the frontier (trade-off) area as co-primary, P2 (how often runs collapse, and the critic-minus-discriminator comparison), local versus global batch removal, single-lambda tables (one penalty strength per method, chosen on the other datasets: the transfer lambda), best-of-k placement (best score among k tries) against standard integrators, the width of each method's range of good penalty strengths (the lambda window) and the sensitivity analyses. The
   user's decisions are SI-68 to SI-77. Details that no question covered are the agent's proposals, marked as such in
   docs/ANALYSIS_SPEC.md; among them are its section 2.3 (the not-evaluable rule), section 5 (multiplicity: Holm over
   the six primary results), section 8 (the leave-one-family-out rule for the transfer lambda; SI-77 decides only the
