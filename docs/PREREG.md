@@ -243,15 +243,24 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   grid edge is disclosed, not extended. (b) P1 comparator: the discriminator at 1 adversary step (SI-01; every
   discriminator row of the manifest has n_critic 1), not "x10 steps"; the update-budget control is X6's pooled critic at
   1, 5 and 10 critic steps, so it exists only for the pooled W1 critic. (c) Power: section 5 flags the frozen design
-  UNDERPOWERED (docs/prereg/r1_record.json power: D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power
-  0.131, power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02
-  unreachable; sigma 0.030, tau 0.109; A1 per-block means of opposite sign). P1 is therefore reported as the pooled
-  posterior together with tau, the per-task posteriors and a per-task sign table; PAPER_PLAN's equivalence claim is
-  dropped, and the estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57). (d) The frequentist
-  companion cannot reject with 6 real tasks: the smallest attainable two-sided p, 2/2⁶ = 0.031, is above Holm's first
-  threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the six primary results of the frozen X1
-  analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted level in either version. PAPER_PLAN's
-  9-task statement is replaced.
+  UNDERPOWERED (docs/prereg/r1_record.json, power). Its figures are those of the matched-lambda contrast of section 5
+  (reference critic minus discriminator, each at its R4-a1 matched lambda), estimated from all six A1 pilot blocks (3
+  tasks x 2 decoders), which include the simulation sim1 and the two blocks flagged low-signal (entry on low-signal
+  blocks below); they are not the power of the frozen P1, which reads biology at the target batch score b\* by
+  interpolation (docs/ANALYSIS_SPEC.md section 2.2). For D = 6 real tasks: SE 0.045, minimal detectable effect at 80 %
+  power 0.131, power at Delta = 0.02 0.104; D = 4 families 0.182 and 0.088; equivalence within ±0.01 or ±0.02
+  unreachable; sigma 0.030 (12 degrees of freedom), tau 0.109 (4 degrees of freedom); A1 per-block means of opposite
+  sign, and in the conditioned decoder sim1 supplies 67 % of the squared spread of the three block means. Without
+  sim1, the same formulas on the four remaining blocks give sigma 0.033 (8 degrees of freedom), tau 0.056 (2 degrees
+  of freedom), SE 0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4);
+  equivalence is still unreachable (experiments/final_review_amendments_20261013/power_without_sim1.py). The
+  conclusion, underpowered, holds either way. P1 is therefore reported as the pooled posterior together with tau, the
+  per-task posteriors and a per-task sign table; PAPER_PLAN's equivalence claim is dropped, and the power estimate
+  will be recomputed with the frozen P1 reading and only the evaluable blocks when R4-a1 is re-run after the Sinkhorn
+  redo (SI-57). (d) The frequentist companion cannot reject with 6 real tasks: the smallest attainable two-sided p,
+  2/2⁶ = 0.031, is above Holm's first threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the
+  six primary results of the frozen X1 analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted
+  level in either version. PAPER_PLAN's 9-task statement is replaced.
 - **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
   (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
   scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for

@@ -1,0 +1,62 @@
+{
+ "all_blocks": {
+  "sigma": 0.029837243500067532,
+  "sigma_df": 12,
+  "tau": 0.10937986459016084,
+  "tau_df": 4,
+  "designs": {
+   "real_tasks": {
+    "D": 6,
+    "df": 5,
+    "se": 0.04498519570869656,
+    "mde80": 0.1306631837466057,
+    "power_at_delta": 0.10435882408578023,
+    "equivalence_feasible": {
+     "0.01": false,
+     "0.02": false
+    }
+   },
+   "families": {
+    "D": 4,
+    "df": 3,
+    "se": 0.055095387732773025,
+    "mde80": 0.18178443022106544,
+    "power_at_delta": 0.08778159447261547,
+    "equivalence_feasible": {
+     "0.01": false,
+     "0.02": false
+    }
+   }
+  }
+ },
+ "without_sim1": {
+  "sigma": 0.0328546469671803,
+  "sigma_df": 8,
+  "tau": 0.05578622686208053,
+  "tau_df": 2,
+  "designs": {
+   "real_tasks": {
+    "D": 6,
+    "df": 5,
+    "se": 0.02355132223101683,
+    "mde80": 0.0684067435003012,
+    "power_at_delta": 0.18233981013256306,
+    "equivalence_feasible": {
+     "0.01": false,
+     "0.02": false
+    }
+   },
+   "families": {
+    "D": 4,
+    "df": 3,
+    "se": 0.02884436111692858,
+    "mde80": 0.09517050276846684,
+    "power_at_delta": 0.13696245684785435,
+    "equivalence_feasible": {
+     "0.01": false,
+     "0.02": false
+    }
+   }
+  }
+ }
+}
