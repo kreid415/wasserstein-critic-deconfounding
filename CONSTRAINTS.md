@@ -449,3 +449,10 @@
 - added: 2026-10-13
 - keywords: R2, R3, bstar_low_signal, evaluable, coverage, SI-56
 - notebook: NB-20261013-35
+
+## SI-67 · active · writing
+- rule: Communicate more clearly: plain language a genetics PhD student can follow without earlier messages; explain what each step entails and why; spell out labels and acronyms (profile NO-JARGON rule).
+- source: "you need to communicate more clearly. What are the remaining steps before experimentation? Explain what they entail and why." (user, 2026-10-13)
+- added: 2026-10-13
+- keywords: *
+- notebook: NB-20261013-36
