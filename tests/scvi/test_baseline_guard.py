@@ -11,7 +11,9 @@ config (CR-09). Run in the scvi env, CPU only: CUDA_VISIBLE_DEVICES= WCD_SRC=src
    exits EXIT_DIVERGED with no latent; a finite sysVI row writes its latent with config 'plan'.
 4. resolved_plan known answers: scvi-tools' generator optimiser (Adam, lr 1e-3, eps 0.01, weight decay 1e-6) and KL
    warm-up (400 epochs; 0 for sysVI, which scvi-tools forces), WGAN-GP critic Adam(1e-4, betas (0, 0.9)) with
-   n_critic 5 and lambda_GP 10, discriminator Adam lr 1e-3 with one step and no gradient penalty.
+   n_critic 5 and lambda_GP 10, discriminator Adam lr 1e-3 with one step and no gradient penalty. With one batch every
+   step is counted as having no pair, and recorded, through each call of the critic-free loss (plain, reference-
+   anchored, importance-weighted), also for a count of 1 (guard review G-01, rigour review CF-01).
 """
 import json
 import os
@@ -245,11 +247,18 @@ def test_resolved_plan_known_answers():
             assert (r["adv_steps"], r["disc_lr"], r["lambda_gp"], r["gradient_penalty"]) == (1, 1e-3, None, False)
             assert (adv["lr"], adv["eps"]) == (1e-3, 0.01)
     json.dumps(r)                                                  # JSON-serialisable (stored in the npz config)
-    _, m = plan.fit_adversarial_scvi(_toy(k=1), "batch", adversary="mmd", d_coef=1.0, n_critic=None, reference_batch="b0",
-                                     adv_input="mean", zstd=False, n_latent=4, max_epochs=1, batch_size=128, seed=0,
-                                     conditioned=True)
-    # one batch: no step has a pair of batches to compare; every step is counted (guard review G-01)
-    assert fpc.resolved_plan(m)["no_pair_steps"] == m.trainer.lightning_module._nf_step + 1 > 0
+    # one batch: no step has a pair of batches to compare; every step is counted (guard review G-01) through each call
+    # of the critic-free loss in the training step: plain (mmd, sinkhorn), reference-anchored wrapper (mmd_ref) and
+    # importance-weighted (X3, mmd only); a fit with exactly one such step is recorded too (rigour review CF-01)
+    for arm, iw in (("mmd", False), ("mmd_ref", False), ("sinkhorn", False), ("mmd", True)):
+        _, m = plan.fit_adversarial_scvi(_toy(k=1), "batch", adversary=arm, d_coef=1.0, n_critic=None,
+                                         reference_batch="b0", adv_input="mean", zstd=False, n_latent=4, max_epochs=1,
+                                         batch_size=128, seed=0, conditioned=True,
+                                         iw_weights={"b0": {f"t{i}": 1.0 for i in range(3)}} if iw else None)
+        lm = m.trainer.lightning_module
+        assert fpc.resolved_plan(m).get("no_pair_steps") == lm._nf_step + 1 > 0, (arm, iw)
+        lm._align_stats["no_pair"] = 1                             # exactly one such step
+        assert fpc.resolved_plan(m).get("no_pair_steps") == 1, (arm, iw)
 
 
 def test_the_head_uses_the_default_gradient_penalty_weight():
