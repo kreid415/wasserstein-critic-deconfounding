@@ -32,7 +32,7 @@ MUTANTS = {
                                       checks.check_provenance_missing),
     "provenance_columns_ignored": ("    missing = [c for c in PROVENANCE_COLS if c not in s.columns]\n",
                                    "    missing = []\n", checks.check_provenance_missing),
-    "provenance_check_not_called": ("    check_provenance(s, experiments)\n", "    pass\n",
+    "provenance_check_not_called": ('    check_provenance(s, experiments, s.tag.map(rows.set_index("tag").arm))\n', "    pass\n",
                                     checks.check_provenance_mix),
     # SI-45 (code check CR-11): the unresolved window neighbour is marked and turned into default-half rows
     "si45_not_marked": ('                        cell.setdefault("edge_unresolved", []).append(nbr)\n',

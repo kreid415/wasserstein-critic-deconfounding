@@ -662,6 +662,54 @@ def test_mixed_scorer_provenance_fails_the_gate(tmp_path, column, value):
     assert rc == rs.EXIT_GATE and "mixed_scorer_provenance" in log, log
 
 
+@pytest.mark.parametrize("where", ["score", "latent"])
+def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
+    """SI-54: c88cce3 counts as prereg-tier12-v3 for every arm but sinkhorn; existing Sinkhorn output made at c88cce3
+    (its score or its latent) is refused before any work, in report-only runs too."""
+    old = json.load(open(pr.EQUIVALENT_COMMITS))["commit"]
+    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1")])
+    flags = ("--no-score",) if where == "latent" else ()      # an edited latent would orphan its score
+    assert st.run(*flags)[0] == 0
+    if where == "score":
+        p = os.path.join(st.out, "scores", "s1.csv")
+        df = pd.read_csv(p, dtype=str, keep_default_na=False)
+        df.assign(scorer_git_sha=old).to_csv(p, index=False)
+    else:
+        p = os.path.join(st.out, "latents", "s1.npz")
+        with np.load(p) as d:
+            arrs = dict(d)
+        arrs["config"] = json.dumps(dict(json.loads(str(arrs["config"])), git_sha=old))
+        np.savez_compressed(p, **arrs)
+    for extra in ((), ("--report-only",)):
+        rc, log = st.run(*flags, *extra)
+        assert rc == rs.EXIT_PREFLIGHT and "existing output: ['sinkhorn'] rows at c88cce3" in log, log
+
+
+def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
+    """SI-54: a non-Sinkhorn row fitted and scored at the old commit and a Sinkhorn row at the tag pass the gate
+    (latent git_sha and scorer_git_sha). In-process, with a temporary list whose old commit is the fakes' 'fake' and
+    whose tag is HEAD."""
+    head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], check=True, capture_output=True,
+                          text=True).stdout.strip()
+    st = Stage(tmp_path, [_row("s1", arm="sinkhorn"), _row("d1")])
+    assert st.run("--no-score")[0] == 0
+    p = os.path.join(st.out, "latents", "s1.npz")
+    with np.load(p) as d:
+        arrs = dict(d)
+    arrs["config"] = json.dumps(dict(json.loads(str(arrs["config"])), git_sha=head))
+    np.savez_compressed(p, **arrs)
+    st.set_plan({}, {}, score_prov={"s1": {"scorer_git_sha": head}})
+    eq = tmp_path / "eq.json"
+    eq.write_text(json.dumps(dict(tag="HEAD", commit="fake", commit_ref="old", not_for_arms=["sinkhorn"])))
+    monkeypatch.setattr(pr, "EQUIVALENT_COMMITS", str(eq))
+    for k, v in st.env().items():
+        monkeypatch.setenv(k, v)
+    assert rs.main(st.args()) == 0
+    g = st.summary()["gate"]
+    assert g["ok"] and g["scorer_provenance"]["scorer_git_sha"] == head and st.summary()["latent_git_shas"] == sorted(
+        ["fake", head])
+
+
 def test_other_scorer_fields_may_differ(tmp_path):
     """Only SCORER_PROVENANCE is gated: two scoring hosts of one CPU class (same SIMD level and numba target)."""
     st = Stage(tmp_path, [_row("ok1"), _row("ok2")])

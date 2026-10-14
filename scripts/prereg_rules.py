@@ -71,6 +71,7 @@ FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivi
 # values of any of them, and a row without them is refused (lead decision 2026-10-04: A1 restarts at the new tag, so
 # every rule input row carries them). numba_cpu_name is '' when NUMBA_CPU_NAME is unset; the others are never empty.
 PROVENANCE_COLS = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
+EQUIVALENT_COMMITS = os.path.join(HERE, os.pardir, "docs", "EQUIVALENT_COMMITS.json")   # SI-54
 PROVENANCE_MAY_BE_EMPTY = ("numba_cpu_name",)
 
 
@@ -216,9 +217,37 @@ def _read_score_file(path):
     return df
 
 
-def check_provenance(s, experiments):
+def refuse_uncovered(shas, arms):
+    """SI-54: rows of an arm that docs/EQUIVALENT_COMMITS.json excludes (sinkhorn) may not carry its old commit."""
+    shas, arms = [str(s) for s in shas], list(arms)
+    _require(len(shas) == len(arms), f"{len(shas)} commits but {len(arms)} arms")
+    with open(EQUIVALENT_COMMITS) as f:
+        E = json.load(f)
+    bad = sorted({a for s, a in zip(shas, arms) if s == E["commit"] and a in E["not_for_arms"]})
+    _require(not bad, f"{bad} rows at {E['commit'][:7]} ({E['commit_ref']}): their code changed since; refit and "
+                      f"rescore them at {E['tag']} (SI-54, docs/EQUIVALENT_COMMITS.json)")
+    return E
+
+
+def equivalent_commits(shas, arms):
+    """SI-54: the commits of one rule input or stage, with the declared old commit read as the tag's commit when rows
+    mix commits. The caller still requires one commit, so an undeclared commit, or a tag absent from this checkout
+    (not yet made, or a bundle without it: RR-01), leaves the mix to be refused."""
+    shas = [str(s) for s in shas]
+    E = refuse_uncovered(shas, arms)
+    if E["commit"] not in shas or len(set(shas)) == 1:
+        return shas
+    r = subprocess.run(["git", "-C", HERE, "rev-parse", "--verify", "--quiet", f"{E['tag']}^{{commit}}"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        return shas
+    return [r.stdout.strip() if s == E["commit"] else s for s in shas]
+
+
+def check_provenance(s, experiments, arms):
     """Code check CR-05, rule side: every score row of one rule input carries the scorer provenance columns, with a
-    value (numba_cpu_name may be ''), and all rows share one value per column."""
+    value (numba_cpu_name may be ''), and all rows share one value per column (scorer_git_sha after SI-54's
+    equivalence; arms: each row's arm)."""
     missing = [c for c in PROVENANCE_COLS if c not in s.columns]
     _require(not missing, f"scores of {experiments} lack the scorer provenance columns {missing} (written by "
                           f"score_scib_native.py since code check CR-05); rescore with the current scorer")
@@ -230,6 +259,7 @@ def check_provenance(s, experiments):
             lacking |= s[c].astype(str).str.strip().eq("")
     bad = sorted(s.tag[lacking])
     _require(not bad, f"{len(bad)} score rows of {experiments} lack scorer provenance values, e.g. {bad[:5]}")
+    s = s.assign(scorer_git_sha=equivalent_commits(s.scorer_git_sha, arms))
     mixed = {c: sorted(s[c].astype(str).unique()) for c in PROVENANCE_COLS if s[c].astype(str).nunique() > 1}
     _require(not mixed, f"scores of {experiments} mix scorer provenance: "
                         + "; ".join(f"{c} {v[:3]}{' ...' if len(v) > 3 else ''}" for c, v in mixed.items())
@@ -287,7 +317,7 @@ def outcomes(M, S, F, experiments):
         _require(ks.notna().all() and ks.nunique() == 1,
                  f"scores of {experiments} mix kBET seeds {sorted(ks.dropna().unique().tolist())} "
                  f"({int(ks.isna().sum())} rows without one); measurement-SD re-scores belong in their own directory")
-    check_provenance(s, experiments)
+    check_provenance(s, experiments, s.tag.map(rows.set_index("tag").arm))
     rows = rows.merge(s[["tag"] + BATCH_METRICS + BIO_METRICS], on="tag", how="left", validate="one_to_one")
     rows["status"] = np.where(rows.tag.isin(set(f.tag)), "failed", "ok")
     B, C = [], []

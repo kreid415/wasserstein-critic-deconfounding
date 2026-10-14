@@ -48,6 +48,8 @@ with a status record, or any other record, is a broken contract (infrastructure)
 Scorer provenance (CR-05): every score row must carry scorer_git_sha, scorer_dirty, cpu_simd, numba_cpu_name and
 scorer_versions; the completion gate (and the preflight, for existing rows) refuses a stage whose rows disagree on
 any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba targets or package versions.
+SI-54 (docs/EQUIVALENT_COMMITS.json): in scorer_git_sha and the latents' git_sha, c88cce3 counts as tag
+prereg-tier12-v3 for every arm except sinkhorn; the preflight refuses existing Sinkhorn output made at c88cce3.
 Completion gate: exit 0 only if every selected row is final (scored, diverged or nonfinite_latent; with --no-score
 also fitted), none is both scored and failed, none is missing and the score rows share one scorer provenance. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
 EXIT_GATE, or 128 + signal after SIGINT / SIGTERM (running work is stopped and its claims released).
@@ -349,13 +351,17 @@ def unfittable(row):
 
 
 # ---- outputs: one reading of the per-tag files for the preflight, the post-run checks, the ledger and the gate ----
-def scorer_provenance(prov):
-    """prov: {tag: {column: value}} over SCORER_PROVENANCE. Returns ({column: value} for the columns every row
+def scorer_provenance(prov, rows):
+    """prov: {tag: {column: value}} over SCORER_PROVENANCE; rows: {tag: manifest row}. scorer_git_sha is compared
+    after SI-54's equivalence (prereg_rules.equivalent_commits). Returns ({column: value} for the columns every row
     shares, {column: {value: dict(n, tags)}} for the columns whose rows disagree (tags: the first three))."""
+    tags = sorted(prov)
+    sha = dict(zip(tags, PR.equivalent_commits([prov[t]["scorer_git_sha"] for t in tags],
+                                               [rows[t]["arm"] for t in tags])))
     by = {c: collections.defaultdict(list) for c in SCORER_PROVENANCE}
-    for tag in sorted(prov):
+    for tag in tags:
         for c in SCORER_PROVENANCE:
-            by[c][prov[tag][c]].append(tag)
+            by[c][sha[tag] if c == "scorer_git_sha" else prov[tag][c]].append(tag)
     common = {c: v for c, vals in by.items() if len(vals) == 1 for v in vals}
     mixed = {c: {v: dict(n=len(ts), tags=ts[:3]) for v, ts in sorted(vals.items())}
              for c, vals in by.items() if len(vals) > 1}
@@ -641,7 +647,7 @@ class Stage:
             for v, name in ((a.r_home, "--r-home / R_HOME"), (a.r_libs, "--r-libs / R_LIBS")):
                 if not v or not os.path.isdir(v):
                     problems.append(f"scoring needs {name} (an existing directory), got {v!r}")
-        states, scored, cpu_need = collections.Counter(), {}, []
+        states, scored, cpu_need, made_at = collections.Counter(), {}, [], []
         for tag in self.order:
             r = self.rows[tag]
             try:
@@ -650,8 +656,11 @@ class Stage:
                 problems.append(f"invalid output: {e}")
                 continue
             states[st] += 1
+            if (info.get("latent") or {}).get("git_sha"):
+                made_at.append((info["latent"]["git_sha"], r["arm"]))
             if st == "scored":
                 scored[tag] = info["score"]["provenance"]
+                made_at.append((scored[tag]["scorer_git_sha"], r["arm"]))
             if tag in self.mem:
                 continue
             self.mem[tag] = (st, "")
@@ -666,12 +675,16 @@ class Stage:
                 self.fit_q.append(tag)
             elif st == "needs_score":
                 self.score_q.append(tag)
+        try:                                              # SI-54, in report-only runs too
+            PR.refuse_uncovered([s for s, _ in made_at], [arm for _, arm in made_at])
+        except PR.PreregError as e:
+            raise StageError("preflight refused:\n  " + "\n  ".join(problems + [f"existing output: {e}"])) from e
         if not a.report_only:
             if cpu_need and not a.cpu_lanes:
                 problems.append(f"{len(cpu_need)} X13 CPU-baseline rows need a fit (arms {sorted(RCB.CPU_ARMS)}, "
                                 f"e.g. {cpu_need[:3]}): give --cpu-lanes N and --cpu-python, or leave them out of "
                                 f"the stage (--tags-file)")
-            mixed = scorer_provenance(scored)[1]
+            mixed = scorer_provenance(scored, self.rows)[1]
             if mixed:
                 problems.append(f"existing score rows disagree on scorer provenance {mixed}: a stage is scored by "
                                 f"one scorer build on one CPU class (CR-05); rescore the disagreeing rows")
@@ -1083,7 +1096,7 @@ class Stage:
             n = S.tag.value_counts()
             dup = sorted(t for t in scored if n.get(t, 0) != 1)
         common, mixed = scorer_provenance({t: info["score"]["provenance"] for t, (st, info) in states.items()
-                                           if st == "scored"})
+                                           if st == "scored"}, self.rows)
         n_final = sum(counts[s] for s in final)
         if n_final + len(not_final) != len(self.order):
             raise StageError(f"gate count mismatch: {n_final} final + {len(not_final)} not final != {len(self.order)}")
@@ -1150,7 +1163,9 @@ class Stage:
             summary["gate"] = g
             summary["latent_git_shas"] = sorted({str(x["git_sha"]) for x in rows if x["git_sha"]})
             summary["devices"] = sorted({str(x["device"]) for x in rows if x["device"]})
-            if len(summary["latent_git_shas"]) > 1 and not self.a.allow_mixed_sha:
+            fitted = [x for x in rows if x["git_sha"]]
+            one_sha = len(set(PR.equivalent_commits([x["git_sha"] for x in fitted], [x["arm"] for x in fitted]))) < 2
+            if not one_sha and not self.a.allow_mixed_sha:
                 g["ok"] = False
                 g["mixed_git_sha"] = summary["latent_git_shas"]
             atomic_write(os.path.join(d, f"{self.key}.json"), json.dumps(summary, indent=1))

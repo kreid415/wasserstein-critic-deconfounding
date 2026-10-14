@@ -4,7 +4,9 @@ these columns (A1 restarts at the new tag, so every rule input row carries them)
 tests/prereg/test_mutation.py (provenance_*).
 """
 import ast
+import json
 import os
+import subprocess
 
 import pandas as pd
 import pytest
@@ -71,3 +73,40 @@ def test_failed_rows_need_no_score_row():
     F2 = pd.DataFrame(dict(tag=gone, status="diverged", detail="synthetic"))
     out = P.outcomes(M, S[~S.tag.isin(gone)], F2, ["A1"])
     assert (out.status == "failed").sum() == 2
+
+
+@pytest.mark.parametrize("sinkhorn, tag, refused", [
+    (None, "HEAD", None),                                    # no Sinkhorn row, all at the old commit: one commit
+    ("tag", "HEAD", None),                                   # old commit for the other arms, Sinkhorn at the tag
+    ("old", "HEAD", "\\['sinkhorn'\\] rows at 0123456"),       # Sinkhorn at the old commit: refused
+    ("f" * 40, "HEAD", "mix scorer provenance"),             # an undeclared commit stays a mix
+    ("tag", "no-such-tag", "mix scorer provenance"),         # tag absent from the checkout (RR-01): the mix stays
+])
+def test_si54_equivalent_commits_through_outcomes(tmp_path, monkeypatch, sinkhorn, tag, refused):
+    """SI-54: docs/EQUIVALENT_COMMITS.json reads its old commit as the tag's commit for every arm but sinkhorn.
+    Here the old commit is synth's scorer_git_sha and the tag is the checkout's HEAD."""
+    M, S, F = checks._prov_input()
+    old = synth.PROVENANCE["scorer_git_sha"]
+    head = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], check=True, capture_output=True,
+                          text=True).stdout.strip()
+    eq = tmp_path / "eq.json"
+    eq.write_text(json.dumps(dict(tag=tag, commit=old, commit_ref="prereg-tier12-v2", not_for_arms=["sinkhorn"])))
+    monkeypatch.setattr(P, "EQUIVALENT_COMMITS", str(eq))
+    if sinkhorn is None:
+        M = M[M.arm != "sinkhorn"]
+    else:
+        S = S.copy()
+        S.loc[S.tag.isin(M.tag[M.arm == "sinkhorn"]), "scorer_git_sha"] = dict(tag=head, old=old).get(sinkhorn, sinkhorn)
+    if refused is None:
+        assert len(P.outcomes(M, S, F, ["A1"])) == len(M)
+    else:
+        with pytest.raises(P.PreregError, match=refused):
+            P.outcomes(M, S, F, ["A1"])
+
+
+# test-reason: pins the committed list's content (user decisions SI-54, SI-60); the other tests use a temporary list
+def test_the_committed_equivalence_list():
+    """SI-54 / SI-60: the committed list names c88cce3 (tag prereg-tier12-v2), the new tag, and excludes sinkhorn."""
+    E = json.load(open(P.EQUIVALENT_COMMITS))
+    assert (E["commit"], E["commit_ref"], E["tag"], E["not_for_arms"]) == (
+        "c88cce3c569e9de47f2d65c6794ca3890637786a", "prereg-tier12-v2", "prereg-tier12-v3", ["sinkhorn"])
