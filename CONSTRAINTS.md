@@ -393,12 +393,13 @@
 - keywords: Sinkhorn, float32, float64, precision, dtype, speed
 - notebook: NB-20261013-14
 
-## SI-59 · active · method
+## SI-59 · retired · method
 - rule: Sinkhorn iteration cap: raise SINKHORN_MAX_ITER to 500,000 and keep raising an error at the cap (stage stops loudly); a non-finite marginal error ends the loop at once (review F1).
 - source: "Raise the cap to 500,000 and keep the error (Recommended)" (user, ask_user answer to the cap question, 2026-10-13)
 - added: 2026-10-13
 - keywords: Sinkhorn, SINKHORN_MAX_ITER, cap, iterations, RuntimeError, F2
 - notebook: NB-20261013-15
+- retired: 2026-10-13 · user accepted NaN-only stop: "Accept NaN-only; reword SI-59 (Recommended)" (2026-10-13); replaced by the next rule
 
 ## SI-60 · active · process
 - rule: New tag name: prereg-tier12-v3 (the tag that SI-54's equivalence list names; c88cce3 = prereg-tier12-v2 is result-identical to it for non-Sinkhorn arms).
@@ -406,3 +407,38 @@
 - added: 2026-10-13
 - keywords: tag, prereg-tier12-v3, equivalent
 - notebook: NB-20261013-28
+
+## SI-61 · active · method
+- rule: Sinkhorn iteration cap: SINKHORN_MAX_ITER = 500,000 and the cap still raises an error (stage stops loudly). A NaN marginal error ends the solve loop at once; a +infinity error does not (it occurs for finite latents of about 1e18 or more and the solve converges a few iterations later; re-review R2-01).
+- source: "Accept NaN-only; reword SI-59 (Recommended)" (user, ask_user answer to decision 2, F1 stop rule, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, SINKHORN_MAX_ITER, cap, NaN, F1
+- notebook: NB-20261013-30
+
+## SI-62 · active · method
+- rule: Sinkhorn solve precision: keep float64 (float32 met the SI-58 criterion on the 598 but gives no speed-up at 128-cell minibatches and fails the value threshold on all 3,076).
+- source: "Keep float64 (Recommended)" (user, ask_user answer to decision 3, SI-58 precision, 2026-10-13)
+- added: 2026-10-13
+- keywords: Sinkhorn, float32, float64, precision
+- notebook: NB-20261013-31
+
+## SI-63 · active · method
+- rule: I042 unread settings: accept the per-arm refusals as implemented (5f30f17 plus G-05), not the review's list; none reads decoder, likelihood and cond, scANVI reads likelihood.
+- source: "Accept as implemented (Recommended)" (user, ask_user answer to decision 4, I042 refusals, 2026-10-13)
+- added: 2026-10-13
+- keywords: I042, allow-list, unread, check_extra
+- notebook: NB-20261013-32
+
+## SI-64 · active · process
+- rule: I050: keep refusing latents without cell names; move fit_stock_scvi.py and scvi_fit_pancreas.py to legacy/ as retired scripts.
+- source: "Keep refusal; move both to legacy/ as retired (Recommended)" (user, ask_user answer to decision 5, I050 legacy, 2026-10-13)
+- added: 2026-10-13
+- keywords: I050, legacy, fit_stock_scvi, scvi_fit_pancreas
+- notebook: NB-20261013-33
+
+## SI-65 · active · method
+- rule: scib 1.1.7 NMI-0 edge case (no clustering kept when NMI is 0 at every resolution): keep the loud error; decide case by case if it occurs.
+- source: "Keep the loud error (Recommended)" (user, ask_user answer to decision 6, NMI-0 case, 2026-10-13)
+- added: 2026-10-13
+- keywords: NMI, scib, cluster_optimal_resolution, edge case
+- notebook: NB-20261013-34
