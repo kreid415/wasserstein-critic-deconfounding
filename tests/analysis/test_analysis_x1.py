@@ -87,6 +87,9 @@ NOT_SEED_0_1 = [None, None, "x", "x", "x"]          # "x": a reading exists
     # mean B 0.506 reaches b*, but without seed 0 or 1 it is 0.4925: 3 of 5 leave-one-seed-out readings (spec 2.3)
     (pts(REF), pts({1: ([0.56, 0.56, 0.47, 0.47, 0.47], 0.75)}), "mean",
      dict(m=3, s=None, reason="readings", readings=NOT_SEED_0_1)),
+    # 4 of 5 readings is enough (mean B 0.508; without seed 0 it is 0.48, without any other seed 0.515)
+    (pts(REF), pts({1: ([0.62, 0.48, 0.48, 0.48, 0.48], 0.75)}), "mean",
+     dict(m=4, s=0.0, reason=None, readings=[None, "x", "x", "x", "x"])),
     # read run by run, only seeds 0 and 1 of the discriminator reach b*
     (pts(REF), pts({1: ([0.56, 0.56, 0.47, 0.47, 0.47], 0.75)}), "per_run",
      dict(m=2, s=None, reason="readings", readings=["x", "x", None, None, None])),
@@ -464,6 +467,12 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)
     close(pooled["0"]["p1"]["wilcoxon_p"], 2 / 64)
     assert pooled["0"]["p2"]["declaration"] == "below" and len(pooled["0"]["p2"]["diffs"]) == 6
+    # the pooled results use the frozen prior scales and margins (P1 0.1 and 0.01, SI-73/74; P2 0.25 and 0.05, SI-75)
+    p1, p2 = pooled["0"]["p1"], pooled["0"]["p2"]
+    for got, d, s, scale, margin in ((p1, [x["d"] for x in p1["signs"]], [x["s"] for x in p1["signs"]], 0.1, 0.01),
+                                     (p2, [x["d"] for x in p2["diffs"]], [x["se"] for x in p2["diffs"]], 0.25, 0.05)):
+        want = json.loads(json.dumps(A.combine(got["tasks"], d, s, "family", scale, margin)))
+        assert {k: got[k] for k in want} == want
 
     # P2 counts with the planted failures
     p2 = prim["p2"]
@@ -492,6 +501,15 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert len(fr) == 25 and set(fr["harmony|0.5|10"]) == set(P.ADV_ARMS)
     w = prim["cells"]["pancreas|0"]["window"]["reference"]
     assert w["status"] == "ok" and w["n_points"] == len(w["lams"])
+    # selection score S = 0.4 B + 0.6 C (SI-77): best-of-k's E_N is the best configuration's S
+    g0 = r1["families"]["w1|0"]["x1_grid"]
+    pts0 = A.arm_points(out, "pancreas", 0, "reference", g0, sorted(A.zero_runs(out, "pancreas", 0)))
+    close(prim["cells"]["pancreas|0"]["best_of_k"]["reference"]["E"][-1],
+          max(0.4 * np.mean(list(p["B"].values())) + 0.6 * np.mean(list(p["C"].values())) for p in pts0 if p["B"]))
+    pca = out[(out.experiment == "X13") & (out.task == "pancreas") & (out.arm == "pca") & (out.n_latent == "10")]
+    close(prim["cells"]["pancreas|0"]["anchors"]["pca|0|10"], float(0.4 * pca.B.mean() + 0.6 * pca.C.mean()))
+    at = tr["immune"]["at"]
+    close(at["S"][0], 0.4 * at["B"][0] + 0.6 * at["C"][0])
 
     # sensitivity analyses (spec section 11)
     sens = rec["sensitivity"]
