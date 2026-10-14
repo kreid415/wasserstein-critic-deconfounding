@@ -375,13 +375,35 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
   has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
   them is a question for the diff review.
-- **2026-10-14, the X1 analyses are specified and frozen before X1 runs (final review I001, D-03, D-08, D-09; user
-  decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer
-  tests (tests/analysis/), every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2
-  (collapse rates and the critic-minus-discriminator comparison), local versus global batch removal, single-lambda
-  tables with the transfer lambda, best-of-k placement against standard integrators, the lambda-window width and the
-  sensitivity analyses. The tag prereg-tier12-v3 freezes all of them before any X1 adversarial-arm score is
-  examined, and the script runs once, after every X1 and X13 row is scored or failed. The follow-up analyses (X3, X6,
-  X7, X8, X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined;
-  the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN section 5 differs,
-  the specification applies (its section 13 lists the replaced statements).
+- **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (documents review
+  DOC-01).** The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
+  run X1 locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same
+  day to wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not
+  scored and 1,097 still needed a fit. By file name (NB-20261014-21) the 19 scored rows are 17 adversarial-arm rows,
+  all on immune with the conditioned decoder and seed 0 (discriminator at the first to sixth registered penalty
+  strength, pooled critic at the first to fifth, reference critic at the first to sixth), and 2 rows of the arms none
+  and scvi_adv; section 0 lets fits that depend on no rule (the X1 arms none and scvi_adv, X13) run while A1 to A3 are
+  in progress. An audit of every chat record of this project (NB-20261014-21, 2026-10-14) found no display or analysis
+  of an X1 score value: three automated integrity checks read these rows (scorer provenance and versions; finite
+  required metrics; counts of kBET zeros and R calls) and printed only counts pooled over all stages, and the runner
+  and the scorer log only tags and timings. One of the 19 rows (arm discriminator, immune, conditioned decoder, seed
+  0, first penalty strength; tag X1_immune_discriminator_lg1_c1_s0_122afe99) was rescored in the identity checks of
+  2026-10-13 (NB-20261013-12, -16 and -40) and compared with its original row by script, column by column, for
+  equality only. The audit cannot show that nobody opened a score file outside those chat records: open item for the
+  diff review, the user confirms whether anyone read an X1 adversarial-arm score value. Proposed definition for the
+  diff review (not yet approved): an X1 adversarial-arm score is "examined" when a value of it is read by a person or
+  entered into an analysis script; integrity checks that print only counts or flags are not analysis scripts. "Before
+  any X1 adversarial-arm score is examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in
+  PAPER_PLAN section 5.
+- **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
+  (final review I001, D-03, D-08, D-09; user decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and
+  scripts/analysis_x1.py implements with known-answer tests (tests/analysis/), every analysis of X1 and X13 data: P1
+  per decoder with the frontier area as co-primary, P2 (collapse rates and the critic-minus-discriminator comparison),
+  local versus global batch removal, single-lambda tables with the transfer lambda, best-of-k placement against
+  standard integrators, the lambda-window width and the sensitivity analyses. The tag prereg-tier12-v3 will freeze all
+  of them. No X1 adversarial-arm score is to be examined (as defined in the disclosure above) before the tag is made,
+  and the script is then run once, after every X1 and X13 row is scored or failed (a procedure: the script refuses to
+  overwrite an existing record). The follow-up analyses (X3, X6, X7, X8, X12, X15) are specified later, with the X7/X8
+  redesign, while X1 runs and before any X1 adversarial-arm score is examined (SI-68); the premise check R0 and X10
+  are exploratory. This entry does not change R1-R4. Where PAPER_PLAN section 5 differs, the specification applies
+  (its section 13 lists the replaced statements).

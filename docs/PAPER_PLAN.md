@@ -164,15 +164,16 @@ Practical guidance for scVI users follows from the results, including the possib
 ## 5. Analysis plan (pre-registration)
 
 **Amended 2026-10-14 (user decisions SI-68 to SI-77; PREREG §9).** The analyses of X1 and X13 are specified in
-docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both frozen by the tag prereg-tier12-v3 before any
-X1 adversarial-arm score is examined; where this
-section differs, the specification applies. It replaces seven statements below, each marked [replaced]: the ROPE and the
-measurement-SD study (margin 0.01, SI-74); failure imputation (failed runs are left out of P1 and the area and counted
-in P2, SI-71); the model formula (family and dataset terms for the arm difference, final review I056, SI-73); "same init
-and minibatch order" (PREREG §9, code check CR-07); equal configuration counts (best-of-k compared at equal k, final
-review D-19); the transfer λ (leave-one-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm over the six primary
-results, ANALYSIS_SPEC §5). P3, P4 and the other follow-up analyses are specified later, with the X7/X8 redesign, before
-any X1 result is examined (SI-68).
+docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both frozen by the tag prereg-tier12-v3 before any X1
+adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of 2026-10-14, which also records the 19
+X1 scores that exist from the local run of 2026-10-12); where this section differs, the specification applies. It
+replaces seven statements below, each marked [replaced]: the ROPE and the measurement-SD study (margin 0.01, SI-74);
+failure imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (family
+and dataset terms for the arm difference, final review I056, SI-73); "same init and minibatch order" (PREREG §9, code
+check CR-07); equal configuration counts (best-of-k compared at equal k, final review D-19); the transfer λ
+(leave-one-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm over the six primary results, ANALYSIS_SPEC §5).
+P3, P4 and the other follow-up analyses are specified later, with the X7/X8 redesign, before any X1 adversarial-arm
+score is examined (SI-68).
 
 - **Unit of inference: the dataset.**
   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.
