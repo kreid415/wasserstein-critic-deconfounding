@@ -303,24 +303,29 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   direct-difference distances. Limits: at most 500,000 iterations at the final epsilon, and reaching the cap raises an
   error that stops the stage (SI-61); a NaN marginal error ends the solve at once, a +infinity error does not, because
   finite latents of about 1e18 or more give +infinity and then converge a few iterations later (re-review R2-01,
-  commit 89d5e2c). The solve stays in float64 (SI-58, SI-62): float32 met the agreement criterion (worst gradient
-  cosine at least 0.99999, relative value error at most 1e-4) on the 598 hardest validation minibatches, but was no
-  faster at 128-cell minibatches and failed the value criterion on all 3,076. The 180 A1 Sinkhorn fits will be
-  refitted and rescored first, at the tag prereg-tier12-v3. Then, in rule order (SI-57): R1 for the Sinkhorn family,
-  with the extension rows it asks for; R4 stage a1 over all six arms with the refitted Sinkhorn arm; the A3 rows it
-  then resolves (the Sinkhorn rows, and any non-Sinkhorn cell whose window moved); R2 and R3 in full. The extension
-  rows and the A3 Sinkhorn rows are therefore outputs of R1 and R4-a1 on the new fits, not a fixed list: before the
-  fix there were 18 and 36 of them, 234 rows with the 180 A1 fits (the count named in SI-51), and the numbers may
-  change (NB-20261013-09). No existing non-Sinkhorn fit is redone (SI-54 entry above); non-Sinkhorn A3 rows are fitted
-  anew only where a window moves. The power estimate of section 5 will be recomputed with R4-a1. The solver was
-  validated on 3,076 minibatches from the 234 pre-fix fits of atac_small, immune and sim1 (3, 10 and 6 batches; review
-  note F6): 2,808 final-epoch minibatches (12 from each fit) and 268 captured earlier in training or in training mode
-  (192 and 76); the check is repeated on the refitted latents before convergence is claimed for them or for the X1
-  tasks with more batches (up to 23, immune_hum_mou). The records of the redo will be committed beside the frozen
-  ones, which stay unchanged (names proposed for the diff review): docs/prereg/r1_record_sinkhorn_redo.json (R1),
-  docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and
-  R3). The six non-Sinkhorn grids of the redone R1 record will be checked against docs/prereg/r1_record.json, and
-  docs/ANALYSIS_SPEC.md will name the redone R1 record as its source of the six registered lambda per arm.
+  commit 89d5e2c). A fit that reaches the cap is neither scored nor recorded as failed: the stage stops (SI-61), and a
+  rerun with the same seed and code can be expected to reach the cap again. Section 1 treats infrastructure errors as
+  rerunnable and requires every row to end as scored or failed, so a persistent cap hit has no registered outcome.
+  Proposal for the diff review: the stage stays stopped until the user decides whether such a fit is recorded as a
+  failed fit (and so counted in P2), and the decision is listed with the results. The solve stays in float64 (SI-58,
+  SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at most
+  1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
+  criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
+  Then, in rule order (SI-57): R1 for the Sinkhorn family, with the extension rows it asks for; R4 stage a1 over all
+  six arms with the refitted Sinkhorn arm; the A3 rows it then resolves (the Sinkhorn rows, and any non-Sinkhorn cell
+  whose window moved); R2 and R3 in full. The extension rows and the A3 Sinkhorn rows are therefore outputs of R1 and
+  R4-a1 on the new fits, not a fixed list: before the fix there were 18 and 36 of them, 234 rows with the 180 A1 fits
+  (the count named in SI-51), and the numbers may change (NB-20261013-09). No existing non-Sinkhorn fit is redone
+  (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
+  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the 234 pre-fix fits of
+  atac_small, immune and sim1 (3, 10 and 6 batches; review note F6): 2,808 final-epoch minibatches (12 from each fit)
+  and 268 captured earlier in training or in training mode (192 and 76); the check is repeated on the refitted latents
+  before convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records
+  of the redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
+  docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
+  docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
+  checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
+  of the six registered lambda per arm.
 - **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
   SI-63, SI-64; guard review follow-ups G-01 to G-14).** None changes a completed fit or score: at commit c3fd92d, 59 of
   59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
@@ -338,9 +343,12 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell names or labels are
   not those of the prepped file in the same order, and the two pilot writers whose latents carry no cell names are
   retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every tested label to
-  rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts as complete, is
-  resumed and is harvested from the cluster only with its model weights (GPU fits) and training history. (I008,
-  2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
+  rejection 1) is recorded, any other result without an R call refused. Where scib 1.1.7 finds NMI equal to 0 at every
+  clustering resolution it keeps no clustering, and the scorer keeps scib's loud error (SI-65); the case is then
+  decided case by case. Proposal for the diff review: the user decides each such case, and every case is listed with
+  the results. (I094, 46d79f2) A fit counts as complete, is resumed and is harvested from the cluster only with its
+  model weights (GPU fits) and training history. (I008, 2b52542) Each chained cluster job's clock is (chain position +
+  1) x (walltime + queue allowance).
 - **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
   SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
   define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
