@@ -231,12 +231,17 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   (-0.10), which one unstable metric barely moves, and in the bio noise SD sigma_c of the no-effect test (section 2,
   delta_c = max(0.01, 3 sigma_c / sqrt(n))). On immune with the conditioned decoder trajectory inflates sigma_c 3.3 to
   5.4 times (with / without trajectory: barycenter 0.073 / 0.014, pooled 0.060 / 0.017, reference 0.061 / 0.014,
-  discriminator 0.064 / 0.017, MMD 0.060 / 0.018, Sinkhorn 0.059 / 0.013), so delta_c reaches 0.10 to 0.13 and the
-  no-effect test on bio cannot fail there. R1 re-run on the A1 fits without trajectory changes three conditioned-decoder
-  families (W1 critics, MMD, Sinkhorn) from frozen to an extension at the low edge (lambda 0.03, 0.01); the other five
-  families are unchanged (experiments/final_review_amendments_20261013/r1_without_trajectory.py, which first reproduces
-  the record). R1 stays as registered and the frozen X1 grids stand; the trajectory-free R1 is reported as a
-  sensitivity analysis, its Sinkhorn part recomputed on the refitted Sinkhorn fits (SI-57).
+  discriminator 0.064 / 0.017, MMD 0.060 / 0.018, Sinkhorn 0.059 / 0.013, the last from the pre-fix Sinkhorn fits), so
+  delta_c reaches 0.10 to 0.13 and the no-effect test on bio cannot fail there. R1 re-run on the A1 fits without
+  trajectory changes three conditioned-decoder families (W1 critics, MMD, Sinkhorn) from frozen to an extension at the
+  low edge (lambda 0.03, 0.01); the other five families are unchanged
+  (experiments/final_review_amendments_20261013/r1_without_trajectory.py, which first reproduces the record). R1 stays
+  as registered (SI-53). The frozen X1 grids stand for every arm except Sinkhorn: the Sinkhorn grid will be re-derived
+  by R1 on the refitted Sinkhorn fits (SI-57; entry on the Sinkhorn arm below), so docs/prereg/r1_record.json, which
+  still holds the superseded Sinkhorn grid, will be superseded by the redone record. The Sinkhorn figures in this
+  entry (sigma_c 0.059 / 0.013, and the move of the Sinkhorn family to an extension) are pre-fix: they come from the
+  discarded Sinkhorn fits. The trajectory-free R1 is reported as a sensitivity analysis, its Sinkhorn part recomputed
+  on the refitted Sinkhorn fits.
 - **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55).** (a) Grid
   edge: PAPER_PLAN promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4
   states, R4 extends grids for matching only, frontier and P1 use the six registered lambda points, and an optimum at a
@@ -288,7 +293,12 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   window moved); R2 and R3 in full. No other fit is redone (SI-54 entry above), and the power estimate of section 5 is
   recomputed with R4-a1. The solver was validated on 3,076 minibatches from the pre-fix fits of atac_small, immune and
   sim1 (3, 10 and 6 batches; review note F6); the check is repeated on the refitted latents before convergence is
-  claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou).
+  claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records of the redo will be
+  committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
+  docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
+  docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
+  checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
+  of the six registered lambda per arm.
 - **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
   SI-63, SI-64; guard review follow-ups G-01 to G-14).** None changes a completed fit or score: at commit c3fd92d, 59 of
   59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
