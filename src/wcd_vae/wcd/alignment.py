@@ -51,11 +51,12 @@ SINKHORN_BLUR_FRAC = 0.05                          # blur = 0.05 * sqrt(2 d)
 SINKHORN_SCALING = 0.8                             # eps annealing ratio per iteration (per blur)
 # Solve accuracy (experiments/sinkhorn_fix_20261013): at tol 1e-4 the gradient is within 7.5e-4 (relative) of a
 # converged float64 reference on 3,076 minibatches of the 234 pilot fits. Iterations at the final eps have a heavy
-# tail on standardised inputs (max 5,273 there, 9,789 on minibatches of the pre-fix A3 latents: review F2); a cap
-# hit raises, so the cap sits ~50x above that tail (user decision SI-59).
+# tail on standardised inputs (pre-fix A3 latents: max 5,273 over the 480 standardised validation minibatches, 9,789
+# over 10,800 atac_small minibatches of review F2); a cap hit raises, so the cap sits ~50x above that tail (SI-59).
 SINKHORN_TOL = 1e-4                                # L1 marginal error of every plan at the final eps
 SINKHORN_MAX_ITER = 500000                         # iterations at the final eps before raising
-SINKHORN_DTYPE = torch.float64                     # solve precision; float32 was no faster on the GPU (SI-58)
+SINKHORN_DTYPE = torch.float64                     # solve precision; float32 no faster at 128-cell minibatches (SI-58)
+# (from 512 cells float32 is ~2.7x faster per iteration on the RTX 3080: re-review R2-05)
 
 
 def _sqdist(z):

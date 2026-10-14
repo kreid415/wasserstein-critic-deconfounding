@@ -77,7 +77,9 @@ The solve dtype is `alignment.SINKHORN_DTYPE`; `validate_sinkhorn.py` takes it f
 - **All 3,076 minibatches (declared superset check): float32 does not.** Worst relative value error 3.17e-3 on
   the collapsed R1-extension minibatches (float64 6.67e-05) and 2.69e-4 on A1 (float64 1.55e-05); gradients as in
   float64.
-- **No speed-up on the RTX 3080.** Median float32/float64 time per call 0.989-1.014 across the five regimes (A3:
+- **No speed-up on the RTX 3080 at 128-cell minibatches** (the `batch_size` of every Sinkhorn manifest row; from
+  512 cells float32 is about 2.7x faster per iteration, re-review R2-05). Median float32/float64 time per call
+  0.989-1.014 across the five regimes (A3:
   117.1 vs 117.8 ms and 140.3 vs 142.7 ms). The call is bound by per-iteration kernel launches and the convergence
   test's host sync, not by float64 arithmetic.
 - **Decision: keep float64** (NB-20261013-20). `test_sinkhorn_matches_converged_reference` fails if the solve runs in

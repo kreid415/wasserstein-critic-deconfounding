@@ -136,6 +136,7 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
     v_ref, _ = ref.reference_cost(ref.cost_matrix(a64), b, 0.05 * math.sqrt(2 * a64.shape[1]), tol=1e-10)
     (g_ref,) = torch.autograd.grad(v_ref, m64)
     assert dtypes == [torch.float64]
+    assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-59 (re-review R2-04)
     assert abs(float(v) - float(v_ref)) < 1e-5 * abs(float(v_ref))
     assert float((g.double() - g_ref).norm() / g_ref.norm()) < 3e-4
 
