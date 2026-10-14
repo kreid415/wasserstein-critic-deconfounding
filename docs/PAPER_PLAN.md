@@ -181,7 +181,7 @@ any X1 result is examined (SI-68).
   - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD) [replaced: margin 0.01, ANALYSIS_SPEC §5, SI-74].
   - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds [replaced: no re-scoring study, SI-74].
   - Declare a direction if its posterior probability is ≥ 0.95, equivalence if P(ROPE) ≥ 0.95, and inconclusive otherwise.
-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031, above Holm's first threshold of 0.0125, so the companion cannot reject and is reported descriptively (PREREG §5; amended 2026-10-13, D-02).
+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031. That is above Holm's first threshold in both versions (0.05/4 = 0.0125 for P1–P4; 0.05/6 = 0.0083 for the six primary results), so the companion cannot reject at the Holm-adjusted level and is reported descriptively (PREREG §5; amended 2026-10-13, D-02, and 2026-10-14).
 - **λ handling.**
   - The frontier analysis needs no λ selection.
   - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8]. Per-dataset oracle optima are shown only as labelled optimistic bounds.

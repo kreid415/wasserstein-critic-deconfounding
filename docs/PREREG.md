@@ -103,7 +103,7 @@ Per task t and decoder c, on the stage's own fits (A1: A1 grid, seeds 100–102;
 
 From A1, for the P1 contrast (reference critic − discriminator), per task × decoder: each arm at its R4-a1 matched λ, d_s = C_reference(s) − C_discriminator(s) per seed. σ̂ = pooled within-(task, decoder) SD of d_s; τ̂² = max(0, Var_t(mean d) − σ̂²/n) per decoder, pooled. For the fixed design (5 seeds, SI-16) with D = 6 real tasks (pancreas, lung, immune, immune_hum_mou, atac_small, atac_large; simulations are a separate family, PAPER_PLAN §5) and, conservatively, D = 4 families: SE = √((τ̂² + σ̂²/5)/D); power of a one-sided posterior-probability-0.95 call (non-central t, D − 1 df) for Δ = 0.02; the minimal detectable effect at 80 %; whether the 95 % interval at Δ = 0 fits inside ±0.01 and ±0.02 (equivalence). The design is flagged UNDERPOWERED when the minimal detectable effect exceeds 0.02 or equivalence within ±0.02 is unreachable.
 
-Known before any data: the frequentist companion (exact Wilcoxon on dataset means, Holm over P1–P4) cannot reject with 6 real tasks. The smallest two-sided p is 2/2⁶ = 0.031, above Holm's first threshold 0.05/4 = 0.0125. PAPER_PLAN §5 relied on 9 real tasks; SI-02 removed the new datasets.
+Known before any data: the frequentist companion (exact Wilcoxon on dataset means, Holm over P1–P4) cannot reject with 6 real tasks. The smallest two-sided p is 2/2⁶ = 0.031, above Holm's first threshold 0.05/4 = 0.0125. PAPER_PLAN §5 relied on 9 real tasks; SI-02 removed the new datasets. [Amended 2026-10-14: the frozen X1 analysis applies Holm over six primary results (P1, the frontier area and P2, each for both decoders), not four, so its first threshold is 0.05/6 = 0.0083. The six-test rule is the agent's proposal in docs/ANALYSIS_SPEC.md section 15, item 5, and awaits the diff review. docs/prereg/r1_record.json still stores the four-test value, 0.0125 (N_ENDPOINTS = 4 in scripts/prereg_rules.py). The smallest two-sided p, 0.031, is above both thresholds, so the companion cannot reject at the Holm-adjusted level in either version; unadjusted, 0.031 is below 0.05.]
 
 ## 6. Freeze protocol
 
@@ -248,8 +248,10 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   unreachable; sigma 0.030, tau 0.109; A1 per-block means of opposite sign). P1 is therefore reported as the pooled
   posterior together with tau, the per-task posteriors and a per-task sign table; PAPER_PLAN's equivalence claim is
   dropped, and the estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57). (d) The frequentist
-  companion cannot reject with 6 real tasks (smallest two-sided p 2/2⁶ = 0.031 > 0.0125, as section 5 states);
-  PAPER_PLAN's 9-task statement is replaced.
+  companion cannot reject with 6 real tasks: the smallest attainable two-sided p, 2/2⁶ = 0.031, is above Holm's first
+  threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the six primary results of the frozen X1
+  analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted level in either version. PAPER_PLAN's
+  9-task statement is replaced.
 - **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
   (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
   scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for
