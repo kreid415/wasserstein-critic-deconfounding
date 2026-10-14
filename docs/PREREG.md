@@ -334,10 +334,13 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   (docs/prereg/r2r3_record.json) was made at c88cce3 on 2026-10-12, before the rule was implemented. Applying the rule
   to its stored cells changes no decision: R2 had 12 of 12 cells evaluable and a mean change in biology score
   (alternative minus default) of -0.0014, and has 9 of 12 and -0.0042 with the rule; R3 had 17 of 20 and +0.0010, and
-  has 13 of 20 (14 needed) and -0.0014; a switch needs a mean change above 0.01, which neither version reaches. A2 and
-  A3 exist (all 288 rows fitted and scored; the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the
-  fix) are to be redone (SI-57). SI-57 still has them refitted and R2 and R3 re-run; since neither can change what X1
-  uses while the flag holds, whether to keep them is a question for the diff review.
+  has 13 of 20 (14 needed) and -0.0014; a switch needs a mean change above 0.01, which neither version reaches. The
+  pilot R2/R3 counts quoted elsewhere come from the frozen record made at c88cce3; the current code reports the new
+  counts for the same inputs (checked 2026-10-14 by running prereg_rules.decide_binary on the record's stored cells
+  with the low-signal marking that decide_a2_a3.cells_for applies). A2 and A3 exist (all 288 rows fitted and scored;
+  the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
+  has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
+  them is a question for the diff review.
 - **2026-10-14, the X1 analyses are specified and frozen before X1 runs (final review I001, D-03, D-08, D-09; user
   decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer
   tests (tests/analysis/), every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2
