@@ -5,6 +5,12 @@
  "commit": "c88cce3c569e9de47f2d65c6794ca3890637786a",
  "commit_ref": "prereg-tier12-v2",
  "not_for_arms": ["sinkhorn"],
- "evidence": ["experiments/integration_checks_20261013/results/fit_identity.csv",
-              "experiments/integration_checks_20261013/results/score_identity.csv"]
+ "evidence": [
+  {"file": "experiments/integration_checks_20261013/results/fit_identity_c3fd92d.csv", "run_at_commit": "c3fd92d", "notebook": "NB-20261013-39", "shows": "63 fit rows, one per code path, refitted for 1 epoch on CPU with 1 thread at both commits: 59 of 59 non-Sinkhorn rows give identical latents; the 4 Sinkhorn rows differ, as intended (SI-51)"},
+  {"file": "experiments/integration_checks_20261013/results/score_identity_c3fd92d.csv", "run_at_commit": "c3fd92d", "notebook": "NB-20261013-40", "shows": "7 stored latents rescored by both versions of the scorer: identical in all 32 compared columns"},
+  {"file": "experiments/integration_checks_20261013/results/run_c3fd92d.sh", "run_at_commit": "c3fd92d", "notebook": "NB-20261013-37", "shows": "the command that produced the two files above; re-run it with the worktree at a later candidate commit"},
+  {"file": "experiments/integration_checks_20261013/results/fit_identity.csv", "run_at_commit": "2b52542", "notebook": "NB-20261013-12", "shows": "first run, before guard follow-ups G-01 to G-05 and G-14 changed fit code; superseded by the c3fd92d run"},
+  {"file": "experiments/integration_checks_20261013/results/score_identity.csv", "run_at_commit": "2b52542", "notebook": "NB-20261013-12 and NB-20261013-16", "shows": "first run; superseded by the c3fd92d run"}
+ ],
+ "valid_for_a_candidate_commit_if": "git diff c3fd92d <candidate> over src/, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py, scripts/score_scib_native.py and the files they import shows no change; otherwise re-run experiments/integration_checks_20261013/results/run_c3fd92d.sh with the worktree at the candidate (docs/PREREG.md section 9, entry of 2026-10-13 on the two commits)"
 }

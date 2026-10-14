@@ -269,14 +269,24 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
 - **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
   (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
   scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for
-  every arm except sinkhorn. The evidence is the fit and score identity checks of
-  experiments/integration_checks_20261013, which are re-run at the candidate commit before it is tagged (SI-52).
-  prereg_rules.py (scorer_git_sha) and run_stage.py (scorer_git_sha and the latents' git_sha) read c88cce3 as the tag's
-  commit for those arms when rows mix commits, and still require one commit after that. Sinkhorn output made at c88cce3
-  is refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
-  too. Sinkhorn rows are refitted and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from a
-  checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
-  (lesson RR-01).
+  every arm except sinkhorn. The evidence is a pair of identity checks made at commit c3fd92d on 2026-10-13
+  (NB-20261013-39 for fits, NB-20261013-40 for scores; files fit_identity_c3fd92d.csv, score_identity_c3fd92d.csv and
+  run_c3fd92d.sh in experiments/integration_checks_20261013/results). Fits: one row for each of 63 code paths of the
+  committed manifests was refitted for one epoch on CPU with one thread at both commits; the latents of 59 of 59
+  non-Sinkhorn rows are identical, and the 4 Sinkhorn rows differ, as intended (SI-51). Scores: 7 stored latents
+  (plain scVI, a pooled critic on immune, a simulation, a standardised fit, the barycenter critic, one X1 fit and one
+  X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns. An earlier
+  run at 2b52542 (fit_identity.csv, score_identity.csv) came before guard follow-ups G-01 to G-14 changed fit code and
+  is kept as history. The evidence is narrow: one fit per code path, one epoch, one latent per scorer path. It holds
+  for a later candidate commit only if that commit changes no code that a fit or a score runs. Before the tag is made,
+  `git diff c3fd92d <candidate commit>` over src/, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py,
+  scripts/score_scib_native.py and the files they import will be checked for changes; if there is one, the identity
+  checks will be re-run at the candidate commit (run_c3fd92d.sh; SI-52). prereg_rules.py (scorer_git_sha) and
+  run_stage.py (scorer_git_sha and the latents' git_sha) read c88cce3 as the tag's commit for those arms when rows mix
+  commits, and still require one commit after that. Sinkhorn output made at c88cce3 is refused: prereg_rules refuses
+  the rule input, and the run_stage preflight refuses the stage, in report-only runs too. Sinkhorn rows are refitted
+  and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from a checkout, the mix stays and
+  is refused, so a JHPCE bundle that combines rows from both commits must carry the tag (lesson RR-01).
 - **2026-10-13, Sinkhorn arm corrected; its pilot fits are redone in rule order before X1 (final review I031, I032;
   user decisions SI-51, SI-57, SI-58, SI-61, SI-62).** The tagged Sinkhorn loss counted the gradient through its final
   transform twice (on the validation minibatches below, the tagged gradient had a median norm 2.00 times that of the
