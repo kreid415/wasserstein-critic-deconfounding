@@ -70,7 +70,12 @@ def test_extra_keys_are_consumed_or_refused():
         "scanvi": ["adv_input", "cond", "decoder", "lam", "n_critic", "zstd"],
         "sysvi": ["adv_input", "cond", "decoder", "likelihood", "n_critic", "zstd"],
         **{a: ["n_critic"] for a in ("mmd", "mmd_ref", "sinkhorn")}}
-    assert set(fpc.EXTRA_ARMS) == {"adv_width", "adv_lr", "bary_iter", "bary_warm_iter", "sampler"}   # likewise
+    heads = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1",       # the arms that train
+             "reference", "reference_fixed", "reference_sn", "pooled", "pooled_sn",              # an adversary head
+             "barycenter", "barycenter_sn"}
+    # likewise the arms of every key (rigour review CF-03: a deleted arm only shortened the loop below)
+    assert fpc.EXTRA_ARMS == {"adv_width": heads, "adv_lr": heads, "bary_iter": {"barycenter", "barycenter_sn"},
+                              "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler": {"reference", "pooled"}}
     for arm, settings in fpc.UNREAD_SETTINGS.items():
         fpc.check_extra("t", arm, {}, row)
         for col in settings:
