@@ -1,7 +1,8 @@
 # Analysis specification for the X1 endpoints (draft for the user's choices)
 
-*Status: DRAFT, 2026-10-13, branch `final-review-fixes`. Items marked **OPEN Qn** list the options with the recommended
-option first and its reason. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
+*Status: DRAFT, 2026-10-13, branch `final-review-fixes`. Round 1 was decided by the user on 2026-10-14
+(ask_user): Q1-Q5 as recommended, ledger SI-68 to SI-72, notebook NB-20261014-01 to -05, marked **DECIDED Qn**. Round 2
+(Q6, Q7, Q9, Q10, Q11) is open. Items marked **OPEN Qn** list the options with the recommended option first and its reason. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
 (`tests/analysis/`) are committed and frozen with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
 examined (final review I001, D-03, D-08, D-09; SI-52). The decision rules R1-R4 (PREREG sections 2-4) do not change.
 Where PAPER_PLAN section 5 and this file differ, this file applies; PAPER_PLAN gets a dated pointer (section 13).*
@@ -11,7 +12,7 @@ on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* =
 (PREREG section 1, unscaled scIB means). *b0, c0* = mean B and C of plain scVI (lambda = 0) in the cell.
 *b\** = the matched batch-removal target of rule R4: half-way from b0 to the batch removal that every method reaches.
 
-## 0. Scope and timing (OPEN Q1)
+## 0. Scope and timing (DECIDED Q1: option A, SI-68)
 
 | Analysis | Data | Data exist |
 |---|---|---|
@@ -28,7 +29,7 @@ on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* =
 | X15 KL warm-up sensitivity | X15 | after R4-x1 |
 
 Options:
-- **A (recommended).** Lock now every analysis of X1 or X13 data, except R0 and X10, which are labelled exploratory
+- **A (recommended; chosen 2026-10-14, SI-68).** Lock now every analysis of X1 or X13 data, except R0 and X10, which are labelled exploratory
   (no confirm/refute claim; the "JS gradients vanish" premise is then not claimed as shown, PAPER_PLAN section 2 "drop
   or soften"). Lock the follow-up analyses (X3, X6, X7, X8, X12, X15) later, together with the X7/X8 design fixes,
   while X1 runs, before R4-x1 runs and before anyone examines an X1 result.
@@ -58,7 +59,7 @@ Options:
 ## 2. P1: biology at matched batch removal
 
 **2.1 Curve.** For an arm in a cell: the lambda = 0 point (b0, c0) followed by its six registered points in increasing
-lambda, each point = mean B and mean C over its successful runs (OPEN Q2, OPEN Q4). Anchoring at lambda = 0 is the
+lambda, each point = mean B and mean C over its successful runs (DECIDED Q2 and Q4: SI-69, SI-71). Anchoring at lambda = 0 is the
 user's decision SI-56.
 
 **2.2 Reading.** bio@b\* = C on the curve where B = b\*: walking up in lambda from the anchor, the first point equal to
@@ -69,13 +70,13 @@ falls back past its batch peak, I038, I062) are counted and reported, not used.
 
 **2.3 Not evaluable.** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
 0.01), (ii) either arm's curve never reaches b\*, or (iii) fewer than 4 of the 5 leave-one-seed-out readings exist
-(section 2.4, recommended option of Q2). Not-evaluable cells are listed with their reason. Readings of low-signal
+(section 2.4, Q2 option A, SI-69). Not-evaluable cells are listed with their reason. Readings of low-signal
 cells are shown in a separate table and never pooled (SI-56).
 
 **2.4 Contrast and its uncertainty.** d = bio@b\*(reference) - bio@b\*(discriminator).
 
-OPEN Q2, how the five runs are combined:
-- **A (recommended).** Average first: read bio@b\* on the curve of point means (the R2/R3 reading). Uncertainty by
+DECIDED Q2 (SI-69), how the five runs are combined:
+- **A (recommended; chosen 2026-10-14, SI-69).** Average first: read bio@b\* on the curve of point means (the R2/R3 reading). Uncertainty by
   leave-one-seed-out: repeat the whole reading 5 times, each time without one seed (the same seed removed from both
   arms and from lambda = 0; b\* stays fixed); s^2 = ((m - 1)/m) x sum_i (d_(i) - mean d_(.))^2 over the m readings that
   exist. Reason: one registered reading for bio@b\* in the whole project; less sensitive to a single noisy run; the
@@ -85,23 +86,23 @@ OPEN Q2, how the five runs are combined:
 
 The option not chosen is reported as a sensitivity analysis.
 
-OPEN Q4, failed runs (status `diverged` or `nonfinite_latent`):
-- **A (recommended).** Left out of P1 and the frontier area: a point is the mean over its successful runs (PREREG
+DECIDED Q4 (SI-71), failed runs (status `diverged` or `nonfinite_latent`):
+- **A (recommended; chosen 2026-10-14, SI-71).** Left out of P1 and the frontier area: a point is the mean over its successful runs (PREREG
   section 1 "seed mean"); a point whose runs all failed is skipped; every failure counts in P2 (section 6).
   Sensitivity: points with any failed run removed. Reason: the registered rule; failures are still reported, as P2.
 - **B.** Count a failed run as plain scVI (its lambda = 0 scores), PAPER_PLAN section 5 "impute the unintegrated
   score". Problem: a failed run at a strong penalty then looks as if it removed no batch effect, which can create a
   false crossing of b\* (final review D-03).
 
-**2.5 Decoders (OPEN Q3).**
-- **A (recommended).** One P1 result per decoder, both primary; never pooled across decoders. Reason: the conditioned
+**2.5 Decoders (DECIDED Q3: option A, SI-70).**
+- **A (recommended; chosen 2026-10-14, SI-70).** One P1 result per decoder, both primary; never pooled across decoders. Reason: the conditioned
   decoder (scVI as people use it, SI-09) and the unconditioned decoder (the adversary is the only batch correction, the
   original paper's setting) are different uses, and the effect may differ; in the pilot 2 of 3 conditioned cells
   (immune, sim1) were low-signal, so a conditioned-only primary could rest on few datasets.
 - **B.** Conditioned decoder primary, unconditioned secondary.
 - **C.** One result pooled over both decoders, with decoder as an adjustment term.
 
-## 3. Frontier area, co-primary with P1 (OPEN Q5)
+## 3. Frontier area, co-primary with P1 (DECIDED Q5: option A, SI-72)
 
 For an arm in a cell, the area is the part of the batch-biology plane reached or dominated by its six points (point
 means as in section 2): the union of rectangles [b_ref, B_i] x [c_ref, C_i] over points with B_i > b_ref and C_i > c_ref.
@@ -110,10 +111,11 @@ biology-score units. Low-signal cells are not evaluable (the divisor is below 0.
 pooling follow sections 2.4 and 4.
 
 Options for the corner (b_ref, c_ref):
-- **A (recommended).** (b0, c0 - 0.10): scVI's batch score and 0.10 below scVI's biology score, the collapse bound of
+- **A (recommended; chosen 2026-10-14, SI-72).** (b0, c0 - 0.10): scVI's batch score and 0.10 below scVI's biology score, the collapse bound of
   rule R1 (PREREG section 1). Only settings that remove more batch than scVI and keep biology above the collapse line
   add area. Reason: in the pilot (A1, seeds 100-102) plain scVI's C was 0.67-0.90 per cell, and the methods' points
-  moved C by -0.59 to +0.23 from it (the middle half of points by -0.19 to +0.09). With a corner at biology 0 every
+  moved C by -0.59 to +0.23 from it (the middle half of all 300 points by -0.09 to 0.00; within each cell the middle half lies inside -0.19 to +0.09;
+  corrected 2026-10-14, NB-20261014-06). With a corner at biology 0 every
   rectangle's height carries the whole 0.67-0.90 baseline, so the area would mostly measure how far a method pushes
   batch removal, not what it costs in biology.
 - **B.** (b0, 0), the final review's example (D-03).
@@ -212,13 +214,14 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 ## 11. Sensitivity analyses (all reported; none changes a declaration)
 
 - C without trajectory on immune and immune_hum_mou (SI-38) for every comparison above; b\* is unchanged (batch only).
-- The other reading rule (Q2), failure handling (Q4), corner (Q5) and dataset structure (Q6).
+- The other reading rule (Q2: each run read on its own curve, SI-69), failure handling (Q4: points with any failed run
+  removed, SI-71), the other corner (Q5: (b0, 0), proposed) and dataset structure (Q6).
 - Priors: half-normal scales 0.05 and 0.2.
 - R1 without trajectory (SI-53) is an A1 re-analysis, already stated in PREREG section 9.
 
 ## 12. Not in this file
 
-Depending on Q1: P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
+Per Q1 (SI-68): P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
 X7/X8 fixes; R0 and X10 exploratory; the measurement-SD re-score (Q7).
 
 ## 13. PAPER_PLAN section 5 statements this file replaces (dated pointer added there at sign-off)

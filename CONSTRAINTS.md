@@ -456,3 +456,43 @@
 - added: 2026-10-13
 - keywords: *
 - notebook: NB-20261013-36
+
+## SI-68 · active · process
+- rule: Lock all X1 analyses now; the rest during X1. Lock now: P1 (biology kept at equal batch removal) and its trade-off area; P2 (how often runs collapse, i.e. fail or lose 0.10 or more biology score); the local-versus-global test; tables of each method at one penalty strength chosen on the other datasets; the comparison with standard tools (Harmony, Scanorama, sysVI, scANVI) when every method gets the same number of tries; and how wide each method's range of good penalty strengths is. Lock later, while X1 runs and before anyone looks at an X1 result: P3, P4 and the other follow-up analyses, together with the X7/X8 redesign. Exploratory (no confirmed or refuted claim): the premise check (R0) and X10 (downstream biology at matched batch removal).
+- source: "Lock all X1 analyses now; the rest during X1 (Recommended)" (user, ask_user answer to "Which analyses should be written as code and locked before X1 starts?", 2026-10-14)
+- added: 2026-10-14
+- keywords: lock, scope, exploratory, R0, X10, P3, P4, follow-up analyses
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py, docs/PREREG.md, docs/PAPER_PLAN.md
+- notebook: NB-20261014-01
+
+## SI-69 · active · method
+- rule: Average the 5 runs first: at each penalty strength, average the batch and biology scores over the 5 runs, then read the target once; uncertainty by repeating the whole reading 5 times, each time leaving one seed out of both methods and of plain scVI (the reading R2 and R3 already use). A curve that crosses the target twice uses the first crossing (the weaker penalty); reading each run separately is reported as a sensitivity analysis.
+- source: "Average the 5 runs first (Recommended)" (user, ask_user answer to "Should the 5 runs be averaged before this reading, or read one by one?", 2026-10-14)
+- added: 2026-10-14
+- keywords: P1, bio@b*, leave-one-seed-out, reading, crossing, seed mean
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-02
+
+## SI-70 · active · method
+- rule: Two P1 results, one per decoder (conditioned and unconditioned): both are main results; they are never averaged together.
+- source: "Two results, one per decoder (Recommended)" (user, ask_user answer to "How should P1 treat the two [decoders]?", 2026-10-14)
+- added: 2026-10-14
+- keywords: decoder, conditioned, unconditioned, primary, P1
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-03
+
+## SI-71 · active · method
+- rule: Leave failed runs out of P1 and its trade-off area: each penalty strength's score is the average of its successful runs (PREREG section 1); a strength where all 5 runs failed is skipped; sensitivity analysis: drop every strength with any failed run. Every failure is counted in P2, the collapse rate.
+- source: "Leave failed runs out of P1 (Recommended)" (user, ask_user answer to "How should failed runs enter P1 and its trade-off area?", 2026-10-14)
+- added: 2026-10-14
+- keywords: failed, failure, diverged, nonfinite_latent, impute, P2
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-04
+
+## SI-72 · active · method
+- rule: Trade-off area corner at the collapse line: plain scVI's batch score and 0.10 below plain scVI's biology score (the R1 collapse threshold). Only settings that remove more batch effect than scVI and keep biology above the collapse line add area; overlapping rectangles count once; to combine datasets each area is divided by the dataset's batch range (plain scVI's batch score to the highest batch score every method reaches).
+- source: "Corner at the collapse line (Recommended)" (user, ask_user answer to "Where should the corner be? (P1 trade-off area)", 2026-10-14)
+- added: 2026-10-14
+- keywords: area, hypervolume, frontier, corner, trade-off area
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-05
