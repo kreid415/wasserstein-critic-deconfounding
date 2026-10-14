@@ -71,10 +71,14 @@ Practical guidance for scVI users follows from the results, including the possib
   - reference critic (per-head WGAN-GP, described as a star of pairwise W1 terms);
   - pooled critic (target = the other batches);
   - MMD;
-  - Sinkhorn with a W1 (p=1) cost;
+  - Sinkhorn: a debiased Sinkhorn divergence with a Euclidean (p = 1) cost at epsilon = 0.05 sqrt(2d), 0.224 for 10
+    latent dimensions. At this epsilon it is 0.86-0.89 of the exact W1 on A1-type latents and 0.53-0.77 on standardised
+    A3 latents, so it is not a W1 estimate (amended 2026-10-14, Sinkhorn review note F7);
   - scvi-tools' own AdversarialTrainingPlan (κ = 1 − kl_weight) as the "as people use it" anchor.
 - **3.3 Adversary input.** Posterior mean or sample, decided by pilot A2.
 - **3.4 Training and disclosures.** Shared optimiser; adversary optimiser; inner-loop minibatch reuse; fixed λ vs the KL ramp, reporting final kl_weight per dataset (immune 0.595).
+  - Sinkhorn solve (amended 2026-10-14; PREREG §9, SI-51, SI-61, SI-62): float64, converged at the final epsilon to an L1 marginal error of 1e-4 within at most 500,000 iterations. The solver check used minibatches from the pre-fix fits of atac_small, immune and sim1 (3, 10 and 6 batches) and is repeated on the refitted latents before convergence is claimed for them or for tasks with up to 23 batches (review note F6).
+  - sysVI fits a Gaussian likelihood with its own SysVAE decoder; for sysVI rows the manifest's likelihood ("zinb") and decoder ("SCVI") columns, and the records of the 150 sysVI filler latents, carry placeholders that the fit does not read (amended 2026-10-14, guard review note G-07; SI-63). Table notes say so.
 - **3.5 Data.** Integer counts only (guard checks every value). Per-dataset repairs (§7). scIB batch keys. HVGs by seurat_v3 on counts with batch_key. No min_genes filter on curated files. Table 1 regenerated.
 - **3.6 Evaluation.**
   - `scib.metrics.metrics` (scib 1.1.7); raw metrics are primary.
@@ -88,7 +92,7 @@ Practical guidance for scVI users follows from the results, including the possib
 | Section | Original claim | Hypothesis (two-sided) | Experiments | Primary endpoint and decision | Reviewers |
 |---|---|---|---|---|---|
 | **R0 Premise** | JS gradients vanish for disjoint technology batches | Batches are near-separable in the scVI latent before integration, and discriminator gradients vanish early while critic gradients persist | X4, model-free overlap | Confirm if pre-integration batch AUC ≈ 1 **and** discriminator ‖∇z‖ collapses with stalled batch metrics; otherwise remove the premise from the motivation | R1.major.2 |
-| **R1 Integration vs conservation** (orig. §1) | Critic gives superior local mixing; critic over-corrects; discriminator protective; local/global mismatch | At matched batch removal the critic and discriminator conserve different biology; their ordering differs between local and global batch metrics | X1/X2, X3, X10, A2 (X11 optional) | **P1** Δbio@b\* (reference critic − discriminator at 1 step, SI-01; amended 2026-10-13, D-01) on unscaled aggregates, co-primary frontier hypervolume; **P2** collapse probability; local–global sign test; composition dose-response slope with importance-weighted control | R1.major.1, R2.2, R2.6, R1.minor.2 |
+| **R1 Integration vs conservation** (orig. §1) | Critic gives superior local mixing; critic over-corrects; discriminator protective; local/global mismatch | At matched batch removal the critic and discriminator conserve different biology; their ordering differs between local and global batch metrics [reworded 2026-10-14, SI-76: at matched batch removal, does the critic get there through more local mixing (mean of iLISI, kBET and graph connectivity) than the discriminator? Because B = (3 local + 2 global)/5, the ordering differs by construction whenever the local difference is not 0; ANALYSIS_SPEC §7] | X1/X2, X3, X10, A2 (X11 optional) | **P1** Δbio@b\* (reference critic − discriminator at 1 step, SI-01; amended 2026-10-13, D-01) on unscaled aggregates, co-primary frontier hypervolume; **P2** collapse probability; local–global sign test; composition dose-response slope with importance-weighted control | R1.major.1, R2.2, R2.6, R1.minor.2 |
 | **R2 Scalability and stability** (orig. §2) | Critic scales poorly with batch count ("bottleneck") | The critic–discriminator difference changes with log₂V when per-head sample size and total cells are fixed | X8, X9 | **P3** slope on log₂V (stratified sampler; ceiling-normalised iLISI plus the full suite); attribute to reference design only if the pooled critic shows no slope; divergence rates | R1.minor.1, R2.5 |
 | **R3 Hyperparameter sensitivity** (orig. §3) | Broad λ windows; discriminator bio flat in λ, critic's rises | The difference is attributable to the divergence rather than regularisation, update budget, latent scale or architecture | λ-curves from X1, X6, A3, X12 | Factor effects with CIs; window width (decades within the seed CI of the maximum); sign stability across architectures | R2.2, R3.2, R2.3 |
 | **R4 Reference selection** (orig. §4) | Critic depends on a "topologically dense" reference | Reference coverage affects the reference W1 critic more than a reference JS or MMD design with the same target | X7 | **P4** formulation × coverage interaction (coverage, size, entropy as covariates; seed noise floor); K ≥ 3 only; fixed-reference control | R2.3, R2.5 |
@@ -157,23 +161,33 @@ Practical guidance for scVI users follows from the results, including the possib
 
 ## 5. Analysis plan (pre-registration)
 
+**Amended 2026-10-14 (user decisions SI-68 to SI-77; PREREG §9).** The analyses of X1 and X13 are specified in
+docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, frozen with the tag prereg-tier12-v3; where this
+section differs, the specification applies. It replaces seven statements below, each marked [replaced]: the ROPE and the
+measurement-SD study (margin 0.01, SI-74); failure imputation (failed runs are left out of P1 and the area and counted
+in P2, SI-71); the model formula (family and dataset terms for the arm difference, final review I056, SI-73); "same init
+and minibatch order" (PREREG §9, code check CR-07); equal configuration counts (best-of-k compared at equal k, final
+review D-19); the transfer λ (leave-one-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm over the six primary
+results, ANALYSIS_SPEC §5). P3, P4 and the other follow-up analyses are specified later, with the X7/X8 redesign, before
+any X1 result is examined (SI-68).
+
 - **Unit of inference: the dataset.**
   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.
   - Simulations form a separate family, excluded from primary pooling.
-  - Model: score ~ arm + (1 | family/dataset) + (1 | dataset:seed). Seeds are nested replicates, paired across arms (same init and minibatch order).
+  - Model: score ~ arm + (1 | family/dataset) + (1 | dataset:seed) [replaced: ANALYSIS_SPEC §4]. Seeds are nested replicates, paired across arms (same init and minibatch order) [replaced: PREREG §9, CR-07].
 - **Primary endpoints P1–P4** (§3, Results table). They are computed on unscaled scIB metrics with `pcr_comparison`; batch and bio are reported separately and as the composite.
 - **Decision rules.**
-  - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD).
-  - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds.
+  - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD) [replaced: margin 0.01, ANALYSIS_SPEC §5, SI-74].
+  - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds [replaced: no re-scoring study, SI-74].
   - Declare a direction if its posterior probability is ≥ 0.95, equivalence if P(ROPE) ≥ 0.95, and inconclusive otherwise.
-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031, above Holm's first threshold of 0.0125, so the companion cannot reject and is reported descriptively (PREREG §5; amended 2026-10-13, D-02).
+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031, above Holm's first threshold of 0.0125, so the companion cannot reject and is reported descriptively (PREREG §5; amended 2026-10-13, D-02).
 - **λ handling.**
   - The frontier analysis needs no λ selection.
-  - Single-λ tables use nested leave-one-dataset-out "transfer λ". Per-dataset oracle optima are shown only as labelled optimistic bounds.
+  - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
   - R4 extension points are used for matching only; frontier and P1 use the six pre-registered λ points per family, and an optimum at a grid edge is disclosed, not extended (PREREG §4; amended 2026-10-13, I006, SI-55).
 - **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ.
-- **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures; nothing is dropped silently.
-- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves.
+- **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures [replaced: failed runs left out of P1 and the area and counted in P2, SI-71]; nothing is dropped silently.
+- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9].
 - **Power** (amended 2026-10-13, D-02; A1 estimate in docs/prereg/r1_record.json `power`, PREREG §5). The frozen design is flagged UNDERPOWERED: for P1 with D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power 0.131 and power at Δ = 0.02 0.104 (D = 4 families: 0.182 and 0.088); equivalence within ±0.01 or ±0.02 is unreachable. σ̂ = 0.030, τ̂ = 0.109, and the A1 per-block means differ in sign (atac_small unconditioned +0.111, sim1 conditioned +0.224, the other four −0.024 to −0.004). P1 is therefore reported as the pooled posterior together with τ̂, the per-task posteriors and a per-task sign table; no equivalence claim and no per-dataset significance claims. The estimate is recomputed when R4-a1 is re-run after the Sinkhorn redo (SI-57).
 
 ## 6. Methodological rigour: what changes

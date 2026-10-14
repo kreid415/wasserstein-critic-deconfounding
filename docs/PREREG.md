@@ -72,7 +72,7 @@ g1 < … < g6 are the six λ values; X1 rows of the family and decoder take them
 - A2: arms discriminator, reference, pooled; input ∈ {posterior mean (A1 fits), posterior sample (new)} → 12 cells (2 tasks × 2 decoders × 3 arms), 108 new fits.
 - A3: arms discriminator, reference, pooled, mmd, sinkhorn; per-dimension standardisation ∈ {off (A1 fits), on (new)} → 20 cells (2 × 2 × 5), 180 new fits.
 
-**Endpoint per cell** (task, decoder, arm): D = bio@b*(alternative) − bio@b*(default). bio@b*(setting) is the seed-mean C linearly interpolated at B = b* (the stage-`a1` b* of that task and decoder) along the setting's window in λ order: the first adjacent pair whose seed-mean B values bracket b*; an exact hit takes that point. A window point whose seeds all failed is skipped. If a setting's B stays below b* at every window point it is *unreached-low*; above at every point, *unreached-high*. A cell is evaluable when both settings bracket b*.
+**Endpoint per cell** (task, decoder, arm): D = bio@b*(alternative) − bio@b*(default). bio@b*(setting) is the seed-mean C linearly interpolated at B = b* (the stage-`a1` b* of that task and decoder) along the setting's window in λ order: the first adjacent pair whose seed-mean B values bracket b*; an exact hit takes that point. A window point whose seeds all failed is skipped. If a setting's B stays below b* at every window point it is *unreached-low*; above at every point, *unreached-high*. A cell is evaluable when both settings bracket b*. [Amended 2026-10-13: a cell of a task × decoder flagged bstar_low_signal is not evaluable and stays in n; section 9, SI-56, SI-66.]
 
 **Decision.** One pooled decision over the cells of both decoders (SI-27). The alternative replaces the default for X1 only if all of:
 1. at least ⌈2n/3⌉ of the n cells are evaluable (A2: 8 of 12; A3: 14 of 20), with at least one per task × decoder;
@@ -261,3 +261,59 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   too. Sinkhorn rows are refitted and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from a
   checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
   (lesson RR-01).
+- **2026-10-13, Sinkhorn arm corrected; its pilot fits are redone in rule order before X1 (final review I031, I032;
+  user decisions SI-51, SI-57, SI-58, SI-61, SI-62).** The tagged Sinkhorn loss counted the gradient through its final
+  transform twice (twice the stated method's gradient) and stopped the solve before it converged at the final epsilon.
+  Since commit 3cbaca4 the gradient is taken once (envelope theorem) and every transport plan at the final epsilon
+  converges to an L1 marginal error of 1e-4 (SINKHORN_TOL), in float64 with direct-difference distances. Limits: at most
+  500,000 iterations at the final epsilon, and reaching the cap raises an error that stops the stage (SI-61); a NaN
+  marginal error ends the solve at once, a +infinity error does not, because finite latents of about 1e18 or more give
+  +infinity and then converge a few iterations later (re-review R2-01, commit 89d5e2c). The solve stays in float64
+  (SI-58, SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at
+  most 1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
+  criterion on all 3,076. All 234 Sinkhorn pilot fits (A1 180, R1 extension 18, A3 36) are refitted and rescored at the
+  tag prereg-tier12-v3; then, in rule order (SI-57): R1 for the Sinkhorn family with its extension rows; R4 stage a1
+  over all six arms with the refitted Sinkhorn arm; the A3 rows it then resolves (including any non-Sinkhorn cell whose
+  window moved); R2 and R3 in full. No other fit is redone (SI-54 entry above), and the power estimate of section 5 is
+  recomputed with R4-a1. The solver was validated on 3,076 minibatches from the pre-fix fits of atac_small, immune and
+  sim1 (3, 10 and 6 batches; review note F6); the check is repeated on the refitted latents before convergence is
+  claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou).
+- **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
+  SI-63, SI-64; guard review follow-ups G-01 to G-14).** None changes a completed fit or score: at commit c3fd92d, 59 of
+  59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
+  columns (experiments/integration_checks_20261013; NB-20261013-39). (I033, c4be14b) A minibatch in which a critic-free
+  loss has no pair of batches to compare (one batch present; for reference-anchored MMD, no reference cell or no other
+  batch) contributes a zero that keeps the gradient graph, instead of stopping the fit; the fitter counts such
+  minibatches and writes no_pair_steps into the latent's plan record when there are any (G-01, 96f4258). They are
+  expected in X7 reference-anchored MMD on pancreas and sim1, and rarely in X3 atac_small MMD, X8 sim2 MMD and X1 sim1
+  MMD and Sinkhorn; their counts are reported with the results. (I034, a4f4be0) A non-finite critic loss at any inner
+  critic step, not only the last, marks the fit diverged. (I042, 5f30f17; SI-63) A fit refuses manifest settings and
+  extra keys its arm does not read. (I050, I051, f5ea0c3) The scorer refuses a latent whose cell names or labels are
+  not those of the prepped file in the same order, and the two pilot writers whose latents carry no cell names are
+  retired to legacy/ (SI-64, c3fd92d); a kBET of exactly 0 with no seeded R call (scib set every tested label to
+  rejection 1) is recorded, any other result without an R call refused. (I094, 46d79f2) A fit counts as complete, is
+  resumed and is harvested from the cluster only with its model weights (GPU fits) and training history. (I008,
+  2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
+- **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
+  SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that define
+  b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that point. A
+  task x decoder flagged bstar_low_signal (b_common - b0 < 2 delta_min = 0.02, section 4) has too small a batch range
+  for b\* to be read reliably: its cells are not evaluable for P1 or for R2/R3, and their readings are reported
+  separately, never pooled. In R2/R3 such cells stay in n (the user chose this over leaving them out; SI-66), so while a
+  block is flagged, criterion 1 of section 3 ("at least one per task x decoder") fails and R2 and R3 keep their
+  defaults, posterior mean and standardisation off. Consequence for this run: the frozen R4-a1 record (made at c88cce3)
+  flags immune with the conditioned decoder (b0 0.6382; b_common 0.6570, the barycenter critic's highest batch score).
+  The redo cannot clear the flag: barycenter is not an A2/A3 arm, so its A1 points do not change, and b_common is the
+  minimum over the six arms. R2 and R3 will therefore keep the defaults whatever A2 and A3 show; A2 and A3 are still
+  fitted and reported. Implemented in scripts/decide_a2_a3.py (commit f3c3415; a flagged cell's readings carry status
+  low_signal) and scripts/analysis_x1.py.
+- **2026-10-14, the X1 analyses are specified and frozen before X1 runs (final review I001, D-03, D-08, D-09; user
+  decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer
+  tests (tests/analysis/), every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2
+  (collapse rates and the critic-minus-discriminator comparison), local versus global batch removal, single-lambda
+  tables with the transfer lambda, best-of-k placement against standard integrators, the lambda-window width and the
+  sensitivity analyses. All are committed with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
+  examined, and the script runs once, after every X1 and X13 row is scored or failed. The follow-up analyses (X3, X6,
+  X7, X8, X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined;
+  the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN section 5 differs,
+  the specification applies (its section 13 lists the replaced statements).
