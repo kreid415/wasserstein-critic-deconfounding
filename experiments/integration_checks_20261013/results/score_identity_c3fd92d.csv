@@ -1,0 +1,8 @@
+tag,n_columns,differing,differing_vs_production
+A1_atac_small_none_l0_c0_s100_70bf3a6a,32,,
+A1_immune_pooled_l1_c1_s100_c9078158,32,,
+A1_sim1_discriminator_l1_c0_s101_9fa40115,32,,
+A3_atac_small_reference_la1_matched_c1_s100_1c44a38a,32,,
+A1_immune_barycenter_l3000_c0_s100_05671529,32,,
+X1_immune_discriminator_lg1_c1_s0_122afe99,32,,score_host
+X13_pancreas_sysvi_l10_c1_s0_60b085ea,32,,

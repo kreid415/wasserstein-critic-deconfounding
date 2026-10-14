@@ -26,6 +26,12 @@ SCORE_PY=$C/wcd-kbet/bin/python R_HOME=$C/wcd-kbet/lib/R R_LIBS=D/Rlib_kbet PREP
 | fit identity, 63 rows | `results/fit_identity.csv` | 59 of 59 non-Sinkhorn rows give equal latents (numpy.array_equal); 4 of 4 Sinkhorn rows differ, as intended (SI-51); no non-zero exit |
 | test suites at 2b52542 | `results/suites_2b52542_summary.txt` | stage_e2e 63 passed; scvi 111 passed, 1 skipped; x13+scoring 31; other 322; jhpce 42 |
 | score identity, 7 latents | `results/score_identity.csv` | old = new in all 32 columns compared (scorer_git_sha, scorer_dirty, score_seconds excluded) for 7 of 7; new = the stage's own production score row for 7 of 7, apart from score_host for the local X1 latent (scored on host `gimli`) |
+| fit identity at c3fd92d (re-run after the guard follow-ups G-01..G-14), 63 rows | `results/fit_identity_c3fd92d.csv` | 59 of 59 non-Sinkhorn rows equal (numpy.array_equal); 4 of 4 Sinkhorn rows differ (SI-51); no non-zero exit; new = worktree `code/wt_identity` moved to c3fd92d; command `results/run_c3fd92d.sh` (fits and scores at once, 4 + 3 lanes; NB-20261013-39, -40) |
+| score identity at c3fd92d, 7 latents | `results/score_identity_c3fd92d.csv` | old = new in all 32 compared columns for 7 of 7; new = production row for 7 of 7 apart from score_host for the local X1 latent, as above |
+
+The c3fd92d rows stand for a later candidate commit only if the diff from c3fd92d to it changes no fit or score code
+(src/, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py, scripts/score_scib_native.py and their imports);
+otherwise re-run `results/run_c3fd92d.sh` with the worktree at the candidate.
 
 The 7 latents cover A1 lambda = 0 (atac_small), a pooled critic on immune (trajectory and cell-cycle metrics), a
 simulation (sim1), a standardised A3 fit, the barycenter critic at lambda 3000, a local X1 fit and an X13 sysVI filler.
