@@ -182,7 +182,7 @@ the measurement-SD study carry one marker each): the ROPE (region of practical e
 imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (dataset-family and dataset terms for the arm difference, final review finding I056, SI-73); "same init and minibatch order" (PREREG §9, code check CR-07: equal seeds give equal initialisation, but not equal minibatch order, between arms with and without an adversary head); equal configuration counts (best-of-k compared at equal k, design-recheck finding D-19); the transfer λ (the single penalty strength a method uses on datasets it was not tuned on; leave-one-dataset-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm's correction for several tests, over the six primary results, ANALYSIS_SPEC §5).
 The replacements for equal configuration counts, the transfer λ and Holm are the agent's proposals (ANALYSIS_SPEC §9,
 §8, §5) until the user approves them at the diff review. P3, P4 and the other follow-up analyses are specified later,
-with the X7/X8 redesign, before any X1 adversarial-arm score is examined (SI-68).
+with the X7/X8 redesign, before any X1 result is examined (SI-68).
 
 - **Unit of inference: the dataset.**
   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.

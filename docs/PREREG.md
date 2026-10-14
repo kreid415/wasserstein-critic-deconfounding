@@ -188,7 +188,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
 | B, C | B is the batch-removal score, the mean of five scIB (single-cell integration benchmark) batch metrics. C is the biology-conservation score, the mean of the task's scIB biology metrics (section 1). Higher is better for both. |
 | trajectory, kBET | Trajectory is the scIB biology metric for how well the order of cells along a developmental path (pseudotime) is kept; it is part of C on immune and immune_hum_mou. kBET is the k-nearest-neighbour batch-effect test, one of the five metrics in B. |
 | b0, b_common, b\* | b0 is the batch score B of plain scVI. b_common is the highest B that every arm reaches. b\* = b0 + 0.5 (b_common - b0) is the target batch score at which arms are matched (section 4). |
-| matched lambda | The penalty strength at which an arm's seed-mean B is closest to b\*; ties go to the smaller strength (section 4, rule R4). |
+| matched lambda | Among the grid points with no failed seed, the penalty strength at which an arm's seed-mean B is closest to b\*; ties go to the smaller strength (section 4, rule R4). |
 | bstar_low_signal | A flag on a task-by-decoder block where b_common - b0 is below 0.02, so that b\* cannot be placed reliably (SI-56). |
 | sigma_c, delta_c, delta_min | sigma_c is the between-seed standard deviation of the change in C. delta_c is the smallest change in C that rule R1 counts as an effect, max(delta_min, 3 sigma_c / sqrt(n)) with n the number of seeds; delta_min = 0.01 is the registered smallest difference that counts (section 2, SI-74). |
 | R1 to R4 | The four decision rules (sections 2 to 4). R1 sets each penalty-strength family's six-point grid for X1 from A1. R2 decides whether the adversary reads the posterior mean or a posterior sample, R3 whether its input is standardised, and R4 sets the matched lambdas. PAPER_PLAN uses R0 to R5 for research questions instead. |
@@ -363,14 +363,14 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   `git diff c3fd92d <candidate commit>` over src/, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py,
   scripts/score_scib_native.py and the files they import will be checked for changes; if there is one, the identity
   checks will be re-run at the candidate commit (run_c3fd92d.sh; SI-52). prereg_rules.py (scorer_git_sha) and
-  run_stage.py (scorer_git_sha and the latents' git_sha) read c88cce3 as the tag's commit for those arms when rows mix
+  run_stage.py (scorer_git_sha, and the git_sha of latents and of divergence records, rigour review CF-02) read c88cce3 as the tag's commit for those arms when rows mix
   commits, and still require one commit after that. Two limits follow from this design. First, score rows carry the
   scorer's commit, not the fit's, so a rule input cannot show a Sinkhorn latent that was fitted at c88cce3 and
   rescored at the tag; the stage runner's start-up check catches it through the commit that fitted the latent. Second,
   "Sinkhorn rows must carry the new tag" is enforced as "no Sinkhorn row at c88cce3, and one commit per input once
   c88cce3 is read as the tag": a stage made entirely at one other commit is not refused by this list, so every stage
-  is fitted and scored from one worktree pinned at the tag (2026-10-04 entry (b)). Sinkhorn output made at c88cce3 is
-  refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
+  is fitted and scored from one worktree pinned at the tag (2026-10-04 entry (b)). Sinkhorn output made at c88cce3 (a score, a latent or a
+  divergence record) is refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
   too. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
   a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
   (lesson RR-01).
@@ -518,6 +518,6 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   tag prereg-tier12-v3 will freeze all of them. No X1 adversarial-arm score is to be examined (as defined in the
   disclosure above) before the tag is made, and the script is then run once, after every X1 and X13 row is scored or
   failed (a procedure: the script refuses to overwrite an existing record). The follow-up analyses (X3, X6, X7, X8,
-  X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 adversarial-arm score is
-  examined (SI-68); the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN
+  X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined (SI-68,
+  whose words are "before anyone looks at an X1 result", any arm); the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN
   section 5 differs, the specification applies (its section 13 lists the replaced statements).
