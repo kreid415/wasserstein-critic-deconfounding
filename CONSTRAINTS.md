@@ -496,3 +496,43 @@
 - keywords: area, hypervolume, frontier, corner, trade-off area
 - files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
 - notebook: NB-20261014-05
+
+## SI-73 · active · method
+- rule: Combine the 6 real datasets with a family term: each dataset's true difference = the overall difference + a family effect + a dataset effect (families: pancreas; lung; immune = immune and immune_hum_mou; ATAC = atac_small and atac_large). Prior assumptions: the overall difference and the spreads between datasets each at scale 0.1, with scales 0.05 and 0.2 as sensitivity analyses; exact calculation (no random sampling), so results reproduce digit for digit.
+- source: "Family term (Recommended)" (user, ask_user answer to "How should the 6 real datasets be combined into one overall answer per decoder?", 2026-10-14)
+- added: 2026-10-14
+- keywords: family, combining datasets, hierarchical, prior, spread, pooled
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-07
+
+## SI-74 · active · method
+- rule: Margin 0.01, the registered smallest difference that counts (PREREG section 1), for P1, the trade-off area (in biology-score units) and the local-versus-global test. A direction is declared when the probability that the difference lies beyond the margin in that direction is at least 95%; practically equivalent when the probability that it lies within plus or minus the margin is at least 95%; otherwise inconclusive. Measurement noise can still be reported, descriptively.
+- source: "Margin 0.01 (Recommended)" (user, ask_user answer to "Which margin? (when the overall difference counts)", 2026-10-14)
+- added: 2026-10-14
+- keywords: margin, ROPE, declaration, equivalent, inconclusive, measurement noise
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-08
+
+## SI-75 · active · method
+- rule: P2: a run collapses when it fails, or when its biology score is 0.10 or more below the same seed's plain-scVI run. Rates per method and decoder, per dataset and pooled over the 6 real datasets, with exact (Clopper-Pearson) 95% intervals; also combine the per-dataset differences in collapse rate (critic minus discriminator) with the same model as P1 (prior scales 0.25), and declare a direction only beyond a margin of 5 percentage points.
+- source: "Rates plus a formal comparison (Recommended)" (user, ask_user answer to "Should P2 also formally compare the reference critic with the discriminator?", 2026-10-14)
+- added: 2026-10-14
+- keywords: P2, collapse rate, collapse, Clopper-Pearson, percentage points
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-09
+
+## SI-76 · active · method
+- rule: Local versus global as one signed question: at matched batch removal, does the critic get there through more local mixing (local average of iLISI, kBET and graph connectivity above the discriminator's, which is the same as the global average of principal-component regression and batch silhouette width below it)? The local average is read at the same crossing of the target as P1; per decoder an exact two-sided sign test over the real datasets plus the P1 combining model with margin 0.01. Rewords the paper plan's hypothesis (dated note in the plan).
+- source: "One signed question (Recommended)" (user, ask_user answer to "How should this analysis be set up? (local versus global batch metrics)", 2026-10-14)
+- added: 2026-10-14
+- keywords: local, global, local-global, iLISI, sign test, local mixing
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py, docs/PAPER_PLAN.md
+- notebook: NB-20261014-10
+
+## SI-77 · active · method
+- rule: Selection score for the single-strength tables, the comparison with standard tools at equal numbers of tries, and the width of the range of good strengths: 0.4 x batch score + 0.6 x biology score (scIB's weights), without scIB's min-max scaling.
+- source: "scIB weights, unscaled (Recommended)" (user, ask_user answer to "Which score? (ranking a method's penalty strengths)", 2026-10-14)
+- added: 2026-10-14
+- keywords: selection score, transfer lambda, best-of-k, window width, min-max, scIB weights
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+- notebook: NB-20261014-11

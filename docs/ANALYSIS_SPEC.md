@@ -1,8 +1,11 @@
 # Analysis specification for the X1 endpoints (draft for the user's choices)
 
-*Status: DRAFT, 2026-10-13, branch `final-review-fixes`. Round 1 was decided by the user on 2026-10-14
-(ask_user): Q1-Q5 as recommended, ledger SI-68 to SI-72, notebook NB-20261014-01 to -05, marked **DECIDED Qn**. Round 2
-(Q6, Q7, Q9, Q10, Q11) is open. Items marked **OPEN Qn** list the options with the recommended option first and its reason. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
+*Status: DRAFT, 2026-10-13, branch `final-review-fixes`. Rounds 1 and 2 were decided by the user on
+2026-10-14 (ask_user), all as recommended: Q1-Q5 (ledger SI-68 to SI-72, notebook NB-20261014-01 to -05) and Q6, Q7, Q9,
+Q10, Q11 (SI-73 to SI-77, NB-20261014-07 to -11), marked **DECIDED Qn**; each lists its options with the recommended
+option first and its reason. Details not asked as questions (among them the
+not-evaluable rule in section 2.3, the multiplicity rule in section 5, the transfer-lambda rule in section 8 and sections
+9-11) are the agent's proposals and are shown to the user at the diff review. After the user's answers this file, `scripts/analysis_x1.py` and its known-answer tests
 (`tests/analysis/`) are committed and frozen with the tag prereg-tier12-v3, before any X1 adversarial-arm score is
 examined (final review I001, D-03, D-08, D-09; SI-52). The decision rules R1-R4 (PREREG sections 2-4) do not change.
 Where PAPER_PLAN section 5 and this file differ, this file applies; PAPER_PLAN gets a dated pointer (section 13).*
@@ -121,7 +124,7 @@ Options for the corner (b_ref, c_ref):
 - **B.** (b0, 0), the final review's example (D-03).
 - **C.** The area becomes a secondary, descriptive measure; P1's reading at b\* is the single primary result per decoder.
 
-## 4. Combining datasets (OPEN Q6, asked next)
+## 4. Combining datasets (DECIDED Q6: option A, SI-73)
 
 Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s_t^2) with s_t from section 2.4
 (treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
@@ -133,7 +136,7 @@ the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset
 intervals, without per-dataset significance claims (PREREG section 9, 2026-10-13 (c)). Frequentist companion: exact
 two-sided Wilcoxon signed-rank test on the d_t, descriptive (it cannot reject with 6 datasets, PREREG section 5).
 
-Options: **A (recommended)** the family term above; **B** average the two related pairs first (4 units, one tau);
+Options: **A (recommended; chosen 2026-10-14, SI-73)** the family term above; **B** average the two related pairs first (4 units, one tau);
 **C** six independent datasets (one tau).
 
 ## 5. Declarations
@@ -142,8 +145,8 @@ Rule (PAPER_PLAN section 5, Corani 2017): a direction if P(Delta > r) >= 0.95 or
 equivalent if P(|Delta| <= r) >= 0.95; otherwise inconclusive. At the frozen power estimate equivalence is unreachable
 (PREREG sections 5 and 9).
 
-OPEN Q7, the margin r (asked next):
-- **A (recommended).** r = 0.01, PREREG section 1's constant (delta_min, also the R2/R3 margin), for P1, the area (in
+DECIDED Q7 (SI-74), the margin r:
+- **A (recommended; chosen 2026-10-14, SI-74).** r = 0.01, PREREG section 1's constant (delta_min, also the R2/R3 margin), for P1, the area (in
   biology units) and the local-global split. The measurement SD may still be reported, descriptively.
 - **B.** r = max(0.01, 2 x measurement SD), PAPER_PLAN section 5. Needs a re-scoring study specified and run before
   any declaration (which 5% of latents, which seeds and machines, which estimator: final review I003, D-18).
@@ -152,7 +155,7 @@ Multiplicity (proposed, for the diff review): each declaration is made on its ow
 states how many primary results were judged (P1 and the area for each decoder, plus P2 for each decoder); the Wilcoxon
 companion applies Holm over all of them (descriptive; final review I040).
 
-## 6. P2: collapse rate (OPEN Q9, asked next)
+## 6. P2: collapse rate (DECIDED Q9: option A, SI-75)
 
 A run collapses when it failed, or when its C is at least 0.10 below the C of the same seed's lambda = 0 run (the R1
 collapse bound applied per run). Rate per arm and decoder = collapsed runs / runs, over the six registered points and 5
@@ -161,12 +164,12 @@ failure types reported separately. Each family's six points span the same stretc
 no effect to the onset of over-correction or collapse on the pilot tasks), which is what makes rates comparable across
 families; the three W1 critics share one grid.
 
-Options: **A (recommended)** also a pooled reference-minus-discriminator difference: per dataset the difference in
+Options: **A (recommended; chosen 2026-10-14, SI-75)** also a pooled reference-minus-discriminator difference: per dataset the difference in
 rates with the Agresti-Caffo standard error (one collapse and one non-collapse added per arm), the section 4 model
 with priors scaled for proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points);
 **B** rates and intervals only, no declaration.
 
-## 7. Local versus global batch removal (OPEN Q10, asked next)
+## 7. Local versus global batch removal (DECIDED Q10: option A, SI-76)
 
 Split as in the earlier reviewer response (E6): local = mean(iLISI, kBET, graph_conn), the kNN-neighbourhood metrics;
 global = mean(PCR_batch, ASW_label/batch), whole-embedding geometry. Then B = (3 local + 2 global)/5 exactly. At
@@ -174,13 +177,13 @@ matched batch removal both arms have B = b\*, so 3 x (local difference) + 2 x (g
 differs between local and global metrics" (PAPER_PLAN section 3, R1 row) is then true by construction whenever the
 local difference is not 0.
 
-Options: **A (recommended)** one signed question: at matched batch removal, does the critic get there through more
+Options: **A (recommended; chosen 2026-10-14, SI-76)** one signed question: at matched batch removal, does the critic get there through more
 local mixing (local difference > 0, equivalently global difference < 0)? The local score is read at the same crossing
 as P1 (same interpolation weights); per decoder: exact two-sided sign test over the real datasets and the section 4
 model with r = 0.01. **B** compare the orderings at each arm's matched lambda (R4-x1), where B is only approximately
 matched, so the comparison mixes in the leftover batch difference. **C** descriptive plots only.
 
-## 8. Single-lambda tables: transfer lambda (OPEN Q11, asked next)
+## 8. Single-lambda tables: transfer lambda (DECIDED Q11: option A, SI-77)
 
 For each held-out real dataset, arm and decoder, the transfer lambda is the registered point that maximises the
 selection score S averaged over the training datasets: the real datasets of the other families (leave-one-family-out,
@@ -189,7 +192,7 @@ Only points without a failed run in any training dataset are eligible (as R4); t
 sim1 and sim2 take the lambda chosen on all 6 real datasets. The tables report B, C and S at the transfer lambda (mean
 and SD over seeds) next to the per-dataset best lambda, labelled an optimistic bound (PAPER_PLAN section 5).
 
-Options for S (the same S is used in sections 9 and 10): **A (recommended)** S = 0.4 B + 0.6 C, scIB's weights without
+Options for S (the same S is used in sections 9 and 10): **A (recommended; chosen 2026-10-14, SI-77)** S = 0.4 B + 0.6 C, scIB's weights without
 min-max scaling, so S does not depend on which methods are compared; **B** the best C among points with B >= b\* of
 the training dataset (final review D-08's example); **C** S = C.
 
@@ -222,7 +225,7 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 ## 12. Not in this file
 
 Per Q1 (SI-68): P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
-X7/X8 fixes; R0 and X10 exploratory; the measurement-SD re-score (Q7).
+X7/X8 fixes; R0 and X10 exploratory; no measurement-SD re-score study (Q7 option A, SI-74).
 
 ## 13. PAPER_PLAN section 5 statements this file replaces (dated pointer added there at sign-off)
 
