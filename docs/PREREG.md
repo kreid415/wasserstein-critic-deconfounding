@@ -153,6 +153,9 @@ the single X1 analysis run. R2 and R3 had already been run once on the A2/A3 res
 before the rule for low-signal blocks (SI-56, SI-66) was decided; SI-57 has them run again after the Sinkhorn redo.
 The table lists every version 3 amendment with the data that existed when the user decided it. Times are from the
 notebook and `git log`.
+Each entry dated 2026-10-13 or 2026-10-14 below starts with a status line that says what is done, with date and
+commit, and what is planned; a step that has not been done is written with "will be". The entries of 2026-10-03 and
+2026-10-04 describe work that is done and frozen in version 2.
 
 | # | Amendment | Decided by the user (2026-10-13 and 14, New York time) | Committed | Data behind the decision | Result or decision changed? |
 |---|---|---|---|---|---|
@@ -246,7 +249,11 @@ notebook and `git log`.
   --extension-manifest when it writes SI-45 rows; and the scANVI/sysVI guard test names the v1 fitter by commit
   (129142b) instead of by tag, because the JHPCE bundle clone carries no tags.
 - **2026-10-13, correction: R1 depends on trajectory through its noise estimate (final review I091; user decision
-  SI-53).** The 2026-10-03 sentence "A1's rule R1 is unaffected" is wrong. R1 uses C twice: in the collapse bound
+  SI-53).**
+  Status: text committed 2026-10-13 (018c8f1), with the trajectory-free R1 script
+  (experiments/final_review_amendments_20261013/r1_without_trajectory.py); R1 for the Sinkhorn family is planned,
+  after the Sinkhorn redo.
+  The 2026-10-03 sentence "A1's rule R1 is unaffected" is wrong. R1 uses C twice: in the collapse bound
   (-0.10), which one unstable metric barely moves, and in the bio noise SD sigma_c of the no-effect test (section 2,
   delta_c = max(0.01, 3 sigma_c / sqrt(n))). On immune with the conditioned decoder trajectory inflates sigma_c 3.3 to
   5.4 times (with / without trajectory: barycenter 0.073 / 0.014, pooled 0.060 / 0.017, reference 0.061 / 0.014,
@@ -259,9 +266,11 @@ notebook and `git log`.
   by R1 on the refitted Sinkhorn fits (SI-57; entry on the Sinkhorn arm below), so docs/prereg/r1_record.json, which
   still holds the superseded Sinkhorn grid, will be superseded by the redone record. The Sinkhorn figures in this
   entry (sigma_c 0.059 / 0.013, and the move of the Sinkhorn family to an extension) are pre-fix: they come from the
-  discarded Sinkhorn fits. The trajectory-free R1 is reported as a sensitivity analysis, its Sinkhorn part recomputed
+  discarded Sinkhorn fits. The trajectory-free R1 will be reported as a sensitivity analysis, its Sinkhorn part recomputed
   on the refitted Sinkhorn fits.
 - **2026-10-13, PAPER_PLAN corrected to this file (final review I006, D-01, D-02; user decision SI-55 for part (a)).**
+  Status: done (2026-10-13, 018c8f1); the power estimate of part (c) is planned to be recomputed after the Sinkhorn
+  redo.
   Part (a) is the user's decision SI-55; parts (b) to (d) correct PAPER_PLAN to the registered text of this file (and,
   for (b), to the user's earlier decision SI-01); they are not separate user decisions. (a) Grid edge: PAPER_PLAN
   promised that any X1 optimum at a grid edge triggers an extension before analysis; as section 4 states, R4 extends
@@ -287,9 +296,13 @@ notebook and `git log`.
   Holm's first threshold, which is 0.0125 for the four tests of section 5 and 0.0083 for the six primary results of
   the frozen X1 analysis (bracketed note in section 5); it cannot reject at the Holm-adjusted level in either version.
   PAPER_PLAN's 9-task statement is replaced.
-- **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).** This amends the 2026-10-04 entry
+- **2026-10-13, two commits declared result-identical (user decisions SI-54, SI-60).**
+  Status: done (2026-10-13): the equivalence list and the check that reads it (8ce5a54), their tests (7c32579) and the
+  identity evidence at c3fd92d (NB-20261013-39, -40). Planned: the tag, the Sinkhorn refits, and a repeat of the
+  identity checks if a later commit changes code that a fit or a score runs.
+  This amends the 2026-10-04 entry
   (b): rule inputs and stages may now combine rows from two commits. docs/EQUIVALENT_COMMITS.json declares that fits and
-  scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the new tag prereg-tier12-v3 for
+  scores made at c88cce3 (tag prereg-tier12-v2) are result-identical to those made at the planned tag prereg-tier12-v3 for
   every arm except sinkhorn. The evidence is a pair of identity checks made at commit c3fd92d on 2026-10-13
   (NB-20261013-39 for fits, NB-20261013-40 for scores; files fit_identity_c3fd92d.csv, score_identity_c3fd92d.csv and
   run_c3fd92d.sh in experiments/integration_checks_20261013/results). Fits: one row for each of 63 code paths of the
@@ -311,11 +324,14 @@ notebook and `git log`.
   c88cce3 is read as the tag": a stage made entirely at one other commit is not refused by this list, so every stage
   is fitted and scored from one worktree pinned at the tag (2026-10-04 entry (b)). Sinkhorn output made at c88cce3 is
   refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
-  too. Sinkhorn rows are refitted and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from
+  too. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
   a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
   (lesson RR-01).
-- **2026-10-13, Sinkhorn arm corrected; its pilot fits are redone in rule order before X1 (final review I031, I032;
-  user decisions SI-51, SI-57, SI-58, SI-61, SI-62).** The tagged Sinkhorn loss counted the gradient through its final
+- **2026-10-13, Sinkhorn arm corrected; its pilot fits will be redone in rule order before X1 (final review I031, I032;
+  user decisions SI-51, SI-57, SI-58, SI-61, SI-62).**
+  Status: the code fix is done (2026-10-13, 3cbaca4 and 89d5e2c) and so is the solver validation (NB-20261013-03,
+  -19). The redo described below is planned; neither the notebook nor the repository records a start (2026-10-14).
+  The tagged Sinkhorn loss counted the gradient through its final
   transform twice (on the validation minibatches below, the tagged gradient had a median norm 2.00 times that of the
   converged gradient on A1 fits and 2.27 times on A3 fits; on the R1 extension rows 14.4 times, with median cosine
   0.28, over the 204 of 216 minibatches where the tagged code gave a finite gradient) and stopped the solve before it
@@ -340,7 +356,7 @@ notebook and `git log`.
   (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
   will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the 234 pre-fix fits of
   atac_small, immune and sim1 (3, 10 and 6 batches; review note F6): 2,808 final-epoch minibatches (12 from each fit)
-  and 268 captured earlier in training or in training mode (192 and 76); the check is repeated on the refitted latents
+  and 268 captured earlier in training or in training mode (192 and 76); the check will be repeated on the refitted latents
   before convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records
   of the redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
   docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
@@ -348,7 +364,9 @@ notebook and `git log`.
   checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
   of the six registered lambda per arm.
 - **2026-10-13, guards before the tag (final review I033, I034, I042, I050, I051, I094, I008; user decisions SI-52,
-  SI-63, SI-64; guard review follow-ups G-01 to G-14).** None changes a completed fit or score: at commit c3fd92d, 59 of
+  SI-63, SI-64; guard review follow-ups G-01 to G-14).**
+  Status: done (2026-10-13, c4be14b to c3fd92d; identity checks at c3fd92d, NB-20261013-39, -40).
+  None changes a completed fit or score: at commit c3fd92d, 59 of
   59 non-Sinkhorn fits are identical to c88cce3 and 7 of 7 scored latents give identical values in all 32 compared
   columns (experiments/integration_checks_20261013; NB-20261013-39). (I033, c4be14b) A minibatch in which a critic-free
   loss has no pair of batches to compare (one batch present; for reference-anchored MMD, no reference cell or no other
@@ -371,7 +389,10 @@ notebook and `git log`.
   model weights (GPU fits) and training history. (I008, 2b52542) Each chained cluster job's clock is (chain position +
   1) x (walltime + queue allowance).
 - **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
-  SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
+  SI-56, SI-66).**
+  Status: decided 2026-10-13; rule code done 2026-10-14 (f3c3415 for R2 and R3, ff88666 for P1); the R2 and R3 re-runs
+  are planned, after the Sinkhorn redo (SI-57).
+  Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
   define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
   point. A task x decoder flagged bstar_low_signal (b_common - b0 < 2 delta_min = 0.02, section 4) has too small a
   batch range for b\* to be read reliably: its cells are not evaluable for P1 or for R2/R3, and their readings are
@@ -397,7 +418,9 @@ notebook and `git log`.
   has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
   them is a question for the diff review.
 - **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (documents review
-  DOC-01).** The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
+  DOC-01).**
+  Status: written 2026-10-14. Open: the user's confirmation that nobody read an X1 adversarial-arm score value.
+  The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
   run X1 locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same
   day to wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not
   scored and 1,097 still needed a fit. By file name (NB-20261014-21) the 19 scored rows are 17 adversarial-arm rows,
@@ -418,6 +441,8 @@ notebook and `git log`.
   PAPER_PLAN section 5.
 - **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
   (final review I001, D-03, D-08, D-09; user decisions SI-68 to SI-77, and the agent's proposals named below).**
+  Status: specification and code committed 2026-10-14 (56c0762, 990d37d, ff88666; three test gaps closed in 858101b).
+  Planned: the freeze by the tag, and the single analysis run after every X1 and X13 row is scored or failed.
   docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer tests (tests/analysis/),
   every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2 (collapse rates and the
   critic-minus-discriminator comparison), local versus global batch removal, single-lambda tables with the transfer

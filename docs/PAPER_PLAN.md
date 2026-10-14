@@ -174,8 +174,8 @@ families assumed below.*
 ## 5. Analysis plan (pre-registration)
 
 **Amended 2026-10-14 (user decisions SI-68 to SI-77 and the agent's proposals marked below; PREREG §9).** The analyses
-of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both frozen by the tag
-prereg-tier12-v3 before any X1 adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of
+of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both to be frozen by the tag
+prereg-tier12-v3 (not yet made) before any X1 adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of
 2026-10-14, which also records the 19 X1 scores that exist from the local run of 2026-10-12); where this section
 differs, the specification applies. It replaces seven statements below, marked [replaced] eight times (the ROPE and
 the measurement-SD study carry one marker each): the ROPE and the measurement-SD study (margin 0.01, SI-74); failure
