@@ -442,3 +442,10 @@
 - added: 2026-10-13
 - keywords: NMI, scib, cluster_optimal_resolution, edge case
 - notebook: NB-20261013-34
+
+## SI-66 · active · method
+- rule: R2/R3 counting of low-signal cells (SI-56): cells of a task x decoder flagged bstar_low_signal stay in n and count as not evaluable; so while such a block is flagged, the 'at least one evaluable cell per task x decoder' condition fails and R2/R3 keep the default (posterior mean; standardisation off).
+- source: "A: count it as 'could not be judged'" (user, ask_user answer to decision 1, R2/R3 counting, 2026-10-13)
+- added: 2026-10-13
+- keywords: R2, R3, bstar_low_signal, evaluable, coverage, SI-56
+- notebook: NB-20261013-35
