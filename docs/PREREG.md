@@ -283,10 +283,16 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   scripts/score_scib_native.py and the files they import will be checked for changes; if there is one, the identity
   checks will be re-run at the candidate commit (run_c3fd92d.sh; SI-52). prereg_rules.py (scorer_git_sha) and
   run_stage.py (scorer_git_sha and the latents' git_sha) read c88cce3 as the tag's commit for those arms when rows mix
-  commits, and still require one commit after that. Sinkhorn output made at c88cce3 is refused: prereg_rules refuses
-  the rule input, and the run_stage preflight refuses the stage, in report-only runs too. Sinkhorn rows are refitted
-  and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from a checkout, the mix stays and
-  is refused, so a JHPCE bundle that combines rows from both commits must carry the tag (lesson RR-01).
+  commits, and still require one commit after that. Two limits follow from this design. First, score rows carry the
+  scorer's commit, not the fit's, so a rule input cannot show a Sinkhorn latent that was fitted at c88cce3 and
+  rescored at the tag; the stage runner's start-up check catches it through the commit that fitted the latent. Second,
+  "Sinkhorn rows must carry the new tag" is enforced as "no Sinkhorn row at c88cce3, and one commit per input once
+  c88cce3 is read as the tag": a stage made entirely at one other commit is not refused by this list, so every stage
+  is fitted and scored from one worktree pinned at the tag (2026-10-04 entry (b)). Sinkhorn output made at c88cce3 is
+  refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
+  too. Sinkhorn rows are refitted and rescored at the tag (SI-57); no other row is rescored. If the tag is absent from
+  a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
+  (lesson RR-01).
 - **2026-10-13, Sinkhorn arm corrected; its pilot fits are redone in rule order before X1 (final review I031, I032;
   user decisions SI-51, SI-57, SI-58, SI-61, SI-62).** The tagged Sinkhorn loss counted the gradient through its final
   transform twice (on the validation minibatches below, the tagged gradient had a median norm 2.00 times that of the
