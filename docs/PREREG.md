@@ -316,18 +316,28 @@ the tag prereg-tier12-v2, which freezes this file again before the restarted A1'
   resumed and is harvested from the cluster only with its model weights (GPU fits) and training history. (I008,
   2b52542) Each chained cluster job's clock is (chain position + 1) x (walltime + queue allowance).
 - **2026-10-13, P1 starts at lambda = 0; low-signal cells are not evaluable (final review I072, D-04; user decisions
-  SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that define
-  b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that point. A
-  task x decoder flagged bstar_low_signal (b_common - b0 < 2 delta_min = 0.02, section 4) has too small a batch range
-  for b\* to be read reliably: its cells are not evaluable for P1 or for R2/R3, and their readings are reported
-  separately, never pooled. In R2/R3 such cells stay in n (the user chose this over leaving them out; SI-66), so while a
-  block is flagged, criterion 1 of section 3 ("at least one per task x decoder") fails and R2 and R3 keep their
-  defaults, posterior mean and standardisation off. Consequence for this run: the frozen R4-a1 record (made at c88cce3)
-  flags immune with the conditioned decoder (b0 0.6382; b_common 0.6570, the barycenter critic's highest batch score).
-  The redo cannot clear the flag: barycenter is not an A2/A3 arm, so its A1 points do not change, and b_common is the
-  minimum over the six arms. R2 and R3 will therefore keep the defaults whatever A2 and A3 show; A2 and A3 are still
-  fitted and reported. Implemented in scripts/decide_a2_a3.py (commit f3c3415; a flagged cell's readings carry status
-  low_signal) and scripts/analysis_x1.py (commit ff88666).
+  SI-56, SI-66).** Every arm's bio-versus-batch curve starts at the lambda = 0 point, the plain-scVI scores that
+  define b0, so a curve whose lowest registered point already lies beyond b\* is read between lambda = 0 and that
+  point. A task x decoder flagged bstar_low_signal (b_common - b0 < 2 delta_min = 0.02, section 4) has too small a
+  batch range for b\* to be read reliably: its cells are not evaluable for P1 or for R2/R3, and their readings are
+  reported separately, never pooled. In R2/R3 such cells stay in n (the user chose this over leaving them out; SI-66),
+  so while a block is flagged, criterion 1 of section 3 ("at least one per task x decoder") fails and R2 and R3 keep
+  their defaults, posterior mean and standardisation off. The user decided SI-56 and SI-66 on 2026-10-13; the rule was
+  implemented on 2026-10-14, in scripts/decide_a2_a3.py (commit f3c3415, 07:50; a flagged cell's readings carry status
+  low_signal) and scripts/analysis_x1.py (commit ff88666, 08:04). Until f3c3415 the rule code did not apply them
+  (NB-20261014-14). The frozen R4-a1 record (made at c88cce3) flags two blocks: immune with the conditioned decoder
+  (b0 0.6382; b_common 0.6570, the barycenter critic's highest batch score; difference 0.0188) and sim1 with the
+  conditioned decoder (b0 0.8120; b_common 0.8189, set by MMD; difference 0.0069). sim1 is not an A2/A3 task, so only
+  the immune block bears on R2 and R3. The Sinkhorn redo cannot clear either flag: b_common is the minimum over the
+  six arms and Sinkhorn sets it in no block of the record, so replacing the Sinkhorn arm can only lower it (and could
+  flag further blocks). R2 and R3 will therefore keep the defaults whatever A2 and A3 show. The R2/R3 record
+  (docs/prereg/r2r3_record.json) was made at c88cce3 on 2026-10-12, before the rule was implemented. Applying the rule
+  to its stored cells changes no decision: R2 had 12 of 12 cells evaluable and a mean change in biology score
+  (alternative minus default) of -0.0014, and has 9 of 12 and -0.0042 with the rule; R3 had 17 of 20 and +0.0010, and
+  has 13 of 20 (14 needed) and -0.0014; a switch needs a mean change above 0.01, which neither version reaches. A2 and
+  A3 exist (all 288 rows fitted and scored; the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the
+  fix) are to be redone (SI-57). SI-57 still has them refitted and R2 and R3 re-run; since neither can change what X1
+  uses while the flag holds, whether to keep them is a question for the diff review.
 - **2026-10-14, the X1 analyses are specified and frozen before X1 runs (final review I001, D-03, D-08, D-09; user
   decisions SI-68 to SI-77).** docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer
   tests (tests/analysis/), every analysis of X1 and X13 data: P1 per decoder with the frontier area as co-primary, P2
