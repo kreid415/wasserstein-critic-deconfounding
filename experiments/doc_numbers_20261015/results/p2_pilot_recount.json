@@ -1,0 +1,46 @@
+{
+ "ext0_cond0": {
+  "reference": [
+   10,
+   54
+  ],
+  "discriminator": [
+   8,
+   45
+  ],
+  "diff_points": 0.74
+ },
+ "ext0_cond1": {
+  "reference": [
+   15,
+   54
+  ],
+  "discriminator": [
+   17,
+   54
+  ],
+  "diff_points": -3.7
+ },
+ "ext1_cond0": {
+  "reference": [
+   10,
+   54
+  ],
+  "discriminator": [
+   8,
+   54
+  ],
+  "diff_points": 3.7
+ },
+ "ext1_cond1": {
+  "reference": [
+   15,
+   54
+  ],
+  "discriminator": [
+   17,
+   54
+  ],
+  "diff_points": -3.7
+ }
+}

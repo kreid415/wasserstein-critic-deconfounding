@@ -1,0 +1,1 @@
+refused as intended: blinded path refused: /home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores

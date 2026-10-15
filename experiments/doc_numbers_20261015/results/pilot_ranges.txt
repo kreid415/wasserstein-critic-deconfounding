@@ -1,0 +1,7 @@
+score files 1098, A1 manifest rows without Sinkhorn 918
+plain scVI C per cell (6 cells): 0.666 to 0.897
+points (5 non-Sinkhorn arms x 6 cells x 10 penalty strengths): 300
+shift of C from plain scVI, all points: -0.590 to 0.231
+shift of C, middle half of all points: -0.0936 to 0.0047
+shift of C, within each cell the middle half lies inside: -0.188 to 0.090
+inputs ledger SHA-256: e1fc5d6c1f2f7880370d3121f449edb6a688248c9a3e4e318555b842156ad5d8

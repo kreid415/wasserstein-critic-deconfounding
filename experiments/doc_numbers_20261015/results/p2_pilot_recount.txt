@@ -1,0 +1,14 @@
+score files 1134 | manifest rows without Sinkhorn 936 of which R1 extension 18 | rows without a score: 0
+
+-- with the R1 extension rows: False
+decoder unconditioned: reference 10/54, discriminator 8/45, critic minus discriminator +0.7 points; discriminator strengths [0.1, 0.3, 1.0, 3.0, 10.0]
+decoder conditioned: reference 15/54, discriminator 17/54, critic minus discriminator -3.7 points; discriminator strengths [0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+
+-- with the R1 extension rows: True
+decoder unconditioned: reference 10/54, discriminator 8/54, critic minus discriminator +3.7 points; discriminator strengths [0.03, 0.1, 0.3, 1.0, 3.0, 10.0]
+decoder conditioned: reference 15/54, discriminator 17/54, critic minus discriminator -3.7 points; discriminator strengths [0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+
+R1 extension rows of the discriminator (unconditioned decoder), collapsed / runs by strength: {0.01: {'sum': 0, 'size': 9}, 0.03: {'sum': 0, 'size': 9}}
+
+quoted: discriminator 8 of 54 (not 8 of 45) with the nine lambda 0.03 rows, reference minus discriminator +3.7 (not +0.7) points for the unconditioned decoder, -3.7 for the conditioned; 0 of the 9 lambda 0.03 runs collapsed
+inputs ledger SHA-256: 45fc1469f4ebda645034c39e65835dc0fe18c1d619e1616c661ed95980b82362

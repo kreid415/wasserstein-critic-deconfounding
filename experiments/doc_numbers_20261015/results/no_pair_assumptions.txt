@@ -1,0 +1,12 @@
+scvi-tools 1.4.2
+True: n_train = ceil(train_size * n_samples) in validate_data_split
+True: DataSplitter default drop_last is False
+True: train_dataloader uses shuffle=True and drop_last=self.drop_last
+True: a last minibatch of fewer than 3 cells with an explicit train_size is only warned about
+True: the project passes drop_last nowhere
+True: all critic-free manifest rows use batch size 128 and train_size 0.9
+True: the stratified sampler is used only for the arms reference and pooled
+critic-free rows: 1734
+sim1: N 12097, n_train 10888, steps 86, last minibatch 8 cells; per-epoch probability of a minibatch with no pair: exact 1.5130e-05, Monte Carlo 1.4800e-05 (296 of 20000000)
+expected fits with at least one such minibatch out of 60 at 400 epochs: 0.3620
+inputs ledger SHA-256: dd6019ff171a81277d2b347f67dfcc46d2a555059160f887c0ccd7113bb0d918

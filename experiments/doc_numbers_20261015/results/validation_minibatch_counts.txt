@@ -1,0 +1,11 @@
+minibatches in total: 3,076 = 2,808 final-epoch + 192 early + 76 training-mode
+final-epoch minibatches: 2,808 from 234 pre-fix fits, [12] from each fit; fits by stage {'A1': 180, 'A1_ext_r1_round1': 18, 'A2A3': 36}
+training-mode minibatches: 76 from 19 fits, 19 of them among the 234 fits
+early minibatches: 192 from 160 replay tags, 0 of them among the 234 fits; by stage {'epoch2': 56, 'epoch3': 56, 'untrained': 80}
+
+median tagged / converged gradient-norm ratio of the final-epoch minibatches, by stage:
+  A1: 2.000 (quoted 2.0)
+  A2A3: 2.273 (quoted 2.27)
+  A1_ext_r1_round1: 14.439 (quoted 14.4)
+R1 extension minibatches with a finite tagged gradient: 204 of 216; median cosine 0.281 (quoted 204 of 216, 0.28)
+inputs ledger SHA-256: eea769c89977f0c0725aaed78cf4096e5821fa5e084eca99a36894adc1a1e5c9

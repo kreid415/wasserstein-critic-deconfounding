@@ -1,0 +1,6 @@
+rows of the X1 arms none and scvi_adv and the X13 arms scanvi and sysvi on all 8 tasks: 400
+on the five cluster-job tasks: 250
+by job: {'A': 100, 'B': 150}
+by task: {'atac_large': 50, 'immune_hum_mou': 50, 'lung': 50, 'pancreas': 50, 'sim2': 50}
+by experiment and arm: {'X1 none': 50, 'X1 scvi_adv': 25, 'X13 scanvi': 25, 'X13 sysvi': 150}
+inputs ledger SHA-256: ac6f723920881d43dcb6a51e669ceb79f20fa0d40c2c2bab57b502025a0410a5
