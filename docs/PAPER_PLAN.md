@@ -173,7 +173,7 @@ families assumed below.*
 
 ## 5. Analysis plan (pre-registration)
 
-**Amended 2026-10-14 (user decisions SI-68 to SI-77 and the agent's proposals marked below; PREREG §9).** The analyses
+**Amended 2026-10-14 and 2026-10-15 (user decisions SI-68 to SI-77, and SI-80, which approved the agent's proposals marked below; PREREG §9).** The analyses
 of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both to be frozen by the tag
 prereg-tier12-v3 (not yet made) before any X1 or X13 score is examined ("examined" is defined in PREREG §9, entry of
 2026-10-14, which also records the X1 and X13 scores that already exist: the 19 of the local run of 2026-10-12 and the
@@ -181,9 +181,10 @@ earlier baseline scores); where this section
 differs, the specification applies. It replaces seven statements below, marked [replaced] eight times (the ROPE and
 the measurement-SD study carry one marker each): the ROPE (region of practical equivalence) and the measurement-SD study (the standard deviation of repeated scoring of one embedding; margin 0.01, SI-74); failure
 imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (dataset-family and dataset terms for the arm difference, final review finding I056, SI-73); "same init and minibatch order" (PREREG §9, code check CR-07: equal seeds give equal initialisation, but not equal minibatch order, between arms with and without an adversary head); equal configuration counts (best-of-k compared at equal k, design-recheck finding D-19); the transfer λ (the single penalty strength a method uses on datasets it was not tuned on; leave-one-dataset-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm's correction for several tests, over the six primary results, ANALYSIS_SPEC §5).
-The replacements for equal configuration counts, the transfer λ and Holm are the agent's proposals (ANALYSIS_SPEC §9,
-§8, §5) until the user approves them at the diff review. P3, P4 and the other follow-up analyses are specified later,
-with the X7/X8 redesign, before any X1 result is examined (SI-68).
+Equal numbers of tries is the user's decision (SI-68, SI-77). The best-of-k estimator and the composition of the method
+families (ANALYSIS_SPEC §9), the transfer λ rule (§8) and the Holm correction (§5) were the agent's proposals; the user
+approved them on 2026-10-15 (SI-80). P3, P4 and the other follow-up analyses are specified later, with the X7/X8
+redesign, before any X1 result is examined (SI-68, whose own words the user confirmed on 2026-10-15, NB-20261015-09).
 
 - **Unit of inference: the dataset.**
   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.
@@ -194,14 +195,14 @@ with the X7/X8 redesign, before any X1 result is examined (SI-68).
   - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD) [replaced: margin 0.01, ANALYSIS_SPEC §5, SI-74].
   - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds [replaced: no re-scoring study, SI-74].
   - Declare a direction if its posterior probability is ≥ 0.95, equivalence if P(ROPE) ≥ 0.95, and inconclusive otherwise.
-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5; the agent's proposal, pending the diff review]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031. That is above Holm's first threshold in both versions (0.05/4 = 0.0125 for P1–P4; 0.05/6 = 0.0083 for the six primary results), so the companion cannot reject at the Holm-adjusted level and is reported descriptively (PREREG §5; amended 2026-10-13, D-02, and 2026-10-14).
+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5; the agent's proposal, approved by the user on 2026-10-15, SI-80]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031. That is above Holm's first threshold in both versions (0.05/4 = 0.0125 for P1–P4; 0.05/6 = 0.0083 for the six primary results), so the companion cannot reject at the Holm-adjusted level and is reported descriptively (PREREG §5; amended 2026-10-13, D-02, and 2026-10-14).
 - **λ handling.**
   - The frontier analysis needs no λ selection.
-  - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8; the agent's proposal for the transfer rule (SI-77 decides only the selection score), pending the diff review]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
+  - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8; the agent's proposal for the transfer rule, approved by the user on 2026-10-15, SI-80 (SI-77 decides only the selection score)]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
   - R4 extension points are used for matching only; frontier and P1 use the six pre-registered λ points per family, and an optimum at a grid edge is disclosed, not extended (PREREG §4; amended 2026-10-13, I006, SI-55).
 - **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ. [Not covered by ANALYSIS_SPEC: its locked analyses use the unscaled selection score of SI-77, so these scaling sensitivities have no counterpart there; they stay unspecified unless the user locks them (question for the diff review).]
 - **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures [replaced: failed runs left out of P1 and the area and counted in P2, SI-71]; nothing is dropped silently.
-- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9; the agent's proposal, pending the diff review].
+- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9; equal numbers of tries is the user's decision (SI-68, SI-77); the best-of-k estimator and the family composition are the agent's proposals, approved by the user on 2026-10-15, SI-80].
 - **Power** (amended 2026-10-13, D-02; A1 estimate in docs/prereg/r1_record.json `power`, PREREG §5). The frozen design is flagged UNDERPOWERED: for P1 with D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power 0.131 and power at Δ = 0.02 0.104 (D = 4 dataset families: 0.182 and 0.088); equivalence within ±0.01 or ±0.02 is unreachable. These are the figures of the matched-lambda contrast on all six A1 pilot blocks, including the simulation sim1 and the two low-signal blocks, not of the frozen P1 (amended 2026-10-14); without sim1 the same formulas give SE 0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4), and equivalence is still unreachable (PREREG §9, entry of 2026-10-13, part (c)). σ̂ = 0.030, τ̂ = 0.109, and the A1 per-block means differ in sign (atac_small unconditioned +0.111, sim1 conditioned +0.224, the other four −0.024 to −0.004). P1 is therefore reported as the pooled posterior together with τ̂, the per-task posteriors and a per-task sign table; no equivalence claim and no per-dataset significance claims. The estimate will be recomputed, with the frozen P1 reading and only the evaluable blocks, when R4-a1 is re-run after the Sinkhorn redo (SI-57).
 
 ## 6. Methodological rigour: what changes
@@ -215,7 +216,7 @@ with the X7/X8 redesign, before any X1 result is examined (SI-68).
 | Batch-count "decay" partly a metric ceiling and composition change | Ceiling-normalised iLISI; fixed total cells and composition across V |
 | K=2 tasks make reference choice irrelevant | Reference analyses on K ≥ 3 only; state the equivalence |
 | Winner's curse in λ selection; pre-registered λ=20 was chosen from benchmark data | Transfer-λ rule; interior-optimum check |
-| Unequal tuning budgets; scANVI uses labels | Equal configuration counts [superseded for best-of-k placement: families compared at equal k, ANALYSIS_SPEC §9, the agent's proposal pending the diff review]; scANVI in its own stratum |
+| Unequal tuning budgets; scANVI uses labels | Equal configuration counts [superseded for best-of-k placement: families compared at equal k, ANALYSIS_SPEC §9; equal numbers of tries is the user's decision (SI-68, SI-77), the estimator and the families are the agent's proposals approved on 2026-10-15, SI-80]; scANVI in its own stratum |
 | scIB min–max depends on the comparison set | Raw metrics primary; one fixed set |
 | Dataset count too small for any significance across families | Add 4 raw-count real datasets (≈ 9 real tasks, 7 families) [dropped by SI-02: six real tasks in four dataset families] |
 | Mechanistic language | Used only for factors isolated by X3–X8 |
