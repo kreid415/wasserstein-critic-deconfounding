@@ -37,11 +37,13 @@ on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* =
 (PREREG section 1, unscaled scIB means). *b0, c0* = mean B and C of plain scVI (lambda = 0) in the cell.
 *b\** = the matched batch-removal target of rule R4: half-way from b0 to the batch removal that every method reaches.
 Elsewhere the words differ: PREREG rules R2 and R3 use *cell* for a task x decoder x arm combination, and PREREG
-section 9 calls a task x decoder pair a task-by-decoder block; a cell of the tissue is called a single cell. Labels:
+section 9 calls a task x decoder pair a task-by-decoder block; a cell of the tissue is called a single cell. R0 to R5 in
+sections 0, 9 and 10 are PAPER_PLAN's research questions; R1 to R4 elsewhere are the registered rules (PREREG sections 2-4). Labels:
 SI-nn is entry nn of the decision ledger (CONSTRAINTS.md) and NB-yyyymmdd-nn an entry of the lab notebook; I0nn and
 D-nn are findings of the final review of 2026-10-13 and of its recheck of the design documents; AN-nn and DOC-nn are
-findings of the rigour review of 2026-10-14 (analysis and documents parts); Qn is a question put to the user on
-2026-10-14 (Appendix A). PREREG section 9 has a glossary of the other labels and terms.
+findings of the rigour review of 2026-10-14 (analysis and documents parts); AN-Rnn and DOC-Rnn are findings of the independent
+re-check of the fixes (2026-10-14), fixed on 2026-10-15; Qn is a question put to the user on 2026-10-14 (Appendix A). PREREG
+section 9 has a glossary of the other labels and terms.
 
 ## 0. Scope and timing (user decision SI-68, question Q1)
 
@@ -402,8 +404,8 @@ I077, I078, I081, I084, I086, I089), revision/reviewer_response.md (E6 local/glo
 
 ## Appendix A. Decision log (rigour review DOC-13, 2026-10-14)
 
-The user answered Q1 to Q5 (round 1) and Q6, Q7, Q9, Q10 and Q11 (round 2) on 2026-10-14 with the recommended option
-each time. Each question's options and reasons are quoted below from this file as it stood before the sections above
+The user answered Q1 to Q5 (round 1) and Q6, Q7, Q9, Q10 and Q11 (round 2) on 2026-10-14, each time taking the option the
+agent recommended. Each question's options and reasons are quoted below from this file as it stood before the sections above
 were reduced to rules (commit fd9c8e3), dated corrections included. The questions as put to the user and the answers
 are in the notebook DECISION entries named and in the ledger.
 
