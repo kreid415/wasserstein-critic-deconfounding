@@ -4,6 +4,7 @@ Synthetic inputs only: the analysis must not run on any X1 or X13 score before t
 Every expected value is derived by hand (the derivation is stated next to the case) or by an independent method
 (scipy, enumeration, brute-force integration), never by the code under test.
 """
+import csv
 import itertools
 import json
 import math
@@ -28,6 +29,7 @@ import synth  # noqa: E402
 SEEDS = [0, 1, 2, 3, 4]
 X1_MANIFEST = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v3.x1.tsv")
 R1_RECORD = os.path.join(ROOT, "docs", "prereg", "r1_record.json")
+KNOWN = os.path.join(ROOT, "experiments", "analysis_numerics_20261014", "known_answers_small_s.csv")
 
 
 def pts(spec, fail=()):
@@ -239,6 +241,23 @@ def test_pool_brute_force(d, s, fam, scale, declaration, grid):  # test-reason: 
     for k in ("lo", "hi", "p_above", "p_below", "p_within"):
         close(r[k], b[k], 5e-5)
     assert r["declaration"] == declaration and r["delta_scale"] == scale and r["tau_scale"] == scale
+
+
+def _known():
+    with open(KNOWN, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+@pytest.mark.parametrize("row", _known(), ids=lambda row: row["name"])
+def test_pool_known_answers_small_s(row):  # test-reason: s of 1e-6 to 3e-6 against 50-digit values pins the spread grid's floor and size
+    """Six datasets with standard errors just above S_MIN against the independent reference of
+    experiments/analysis_numerics_20261014/known_answers_small_s.py (50-digit arithmetic, other quadrature); AN-R08."""
+    tasks, d, s = (row[k].split(";") for k in ("tasks", "d", "s"))
+    r = A.combine(tasks, [float(x) for x in d], [float(x) for x in s], row["structure"], float(row["scale"]),
+                  float(row["margin"]))
+    assert r["raised"] == [] and min(float(x) for x in s) >= 1e-6
+    for k in ("p_above", "p_below", "p_within", "mean", "lo", "hi", "heterogeneity"):
+        close(r[k], float(row[k]), 1e-8)
 
 
 def test_combine_structures():
