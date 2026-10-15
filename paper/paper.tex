@@ -152,7 +152,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \item When cell-type (label) proportions differ between two batches (domains), any one classifier applied to the shared latent space makes errors: if the label distributions are farther apart than the latent distributions, its error summed over the two batches is at least $\tfrac12\bigl(d_{JS}(\mathcal{D}^Y_S,\mathcal{D}^Y_T)-d_{JS}(\mathcal{D}^Z_S,\mathcal{D}^Z_T)\bigr)^2$, which grows as the latent distributions are aligned more tightly ($d_{JS}$: square root of the JS divergence; $\mathcal{D}^Y$, $\mathcal{D}^Z$: label and latent distributions of the two batches $S$, $T$) \citep[Thm.~4.3; binary labels]{zhao2019learning}.
 \item Exact alignment with zero source error, under any distance that is zero only for identical distributions (a JS classifier, Wasserstein, maximum mean discrepancy (MMD)), leaves target error of at least the label-proportion gap \citep[Prop.~3.1; binary labels]{wu2019domain}.
 \item Exact alignment under any such distance therefore costs accuracy under composition shift; whether the divergence arms over-align at the finite penalty strengths used here is a hypothesis, tested by the dose-response X3 \pending{X3 analysis}{specified during X1, before any X1 result is examined (SI-68)}.
-\item An adversarial conditional variational autoencoder (VAE) and GLUE (a graph-linked embedding method) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+\item An adversarial conditional variational autoencoder (VAE) and GLUE (a graph-linked embedding method for multi-omics integration; \citealp{cao2022multi}) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
 \item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}.
 \end{itemize}
 
@@ -296,6 +296,7 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; eight of its 13 tasks are used here \src{SI-02; \file{docs/prepped_fingerprints_scib.json}}.
 \item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
 \item scIB-E (extended scIB): six losses on the batch label in one scVI framework (GAN, HSIC, orthogonal projection, mutual-information minimisation, gradient reversal, reverse cross-entropy), then label-aware levels in scANVI; loss weights tuned with Ray Tune (automated hyperparameter search) on the immune task \citep{yi2025benchmarking}.
+\item Li et al.: learns the whole trade-off between scVI's loss (negative evidence lower bound) and a latent-space batch measure, either a neural-network mutual-information estimate (MINE, Mutual Information Neural Estimation) or maximum mean discrepancy, by Pareto multi-task learning \citep{li2022trade}.
 \end{itemize}
 
 \paragraph{Deep generative models.}
@@ -312,6 +313,10 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item AD-AE (adversarial deconfounding autoencoder): autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
 \item scDREAMER (single-cell deep generative integration model with adversarial classifier): adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
 \item scvi-tools' adversarial batch classifier: fool loss weighted by one minus the KL weight (arm scvi\_adv) \src{scvi-tools 1.4.2: scvi/train/\_trainingplans.py:535, 674--695; \file{scvi_adversarial_plan.py}:175--177}.
+\item AIF (Adversarial Information Factorization): a conditional variational autoencoder on gene expression whose encoder is trained against an auxiliary cross-entropy classifier of batch from the latent code; cells are then decoded under one chosen batch label \citep{monnier2024novel}.
+\item ABC (Autoencoder-based Batch Correction): an autoencoder trained against a multi-class batch discriminator with categorical cross-entropy, plus cell-type classifier branches that use labels to retain biological signal; no reference batch is designated \citep{danino2024batch}.
+\item scStarCorrect: a StarGAN-based model combining a batch-conditioned variational autoencoder with a domain-aware discriminator that aligns every batch to one fixed reference batch, so correction runs one way \citep{gu2025scstarcorrect} \pending{full-text check and paragraph placement (abstract read only; IEEE closed access)}{full text obtained}.
+\item Portal: a unified framework of adversarial domain translation that learns harmonised representations of datasets, applied across samples, platforms and data types and to integration of millions of cells \citep{zhao2022adversarial} \pending{full-text check and paragraph placement (abstract read only; subscription journal)}{full text obtained}.
 \end{itemize}
 
 \paragraph{Wasserstein critics.}
@@ -321,6 +326,8 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item ResPAN: WGAN with random-walk mutual-nearest-neighbour pairing and skip-connected autoencoders \citep{wang2022respan}.
 \item IMAAE (integrating multiple single-cell datasets via an adversarial autoencoder): adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
 \item In the IMAAE paper, a GAN-only model tried at the design stage under-corrected with three or more batches (one dataset, judged from UMAP plots); the authors then used the GAN to constrain the latent space of an autoencoder \citep{wang2023integrating}.
+\item Beaconet (Batch Effect Adversarial Correction Network): corrects each batch in gene-expression space with a corrector network, trained against one Wasserstein-distance critic per batch with a gradient penalty; no reference batch is chosen \citep{xu2024beaconet}.
+\item IMGG (integrating multiple single-cell datasets through connected graphs and generative adversarial networks): a generator on highly variable genes trained with a Wasserstein GAN with gradient penalty (WGAN-GP) critic towards a synthetic intermediate target built from similar-cell cohorts matched across batches by mutual nearest neighbours \citep{wang2022imgg}.
 \end{itemize}
 
 \paragraph{Kernel and optimal-transport alignment.}
@@ -331,7 +338,7 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item BERMUDA (batch effect removal using deep autoencoders): MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
 \item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
 \item Entropy-regularised OT \citep{cuturi2013sinkhorn}; Sinkhorn divergences interpolate between OT and MMD \citep{genevay2018learning,feydy2019interpolating}; Wasserstein barycenters \citep{cuturi2014fast}; POT (Python Optimal Transport) library \citep{flamary2021pot}.
-\item \pending{further single-cell methods from the review's coverage search, read at abstract level only: iDLC (optimal-transport-regularised adversarial alignment, 2026 preprint), scStarCorrect (adversarial alignment to one fixed reference batch), Beaconet (adversarial, no reference), Portal (adversarial domain translation), AIF, ABC and IMGG (adversarial), and the batch-removal versus biology trade-off curve on scVI of Li et al. 2022}{your decision on coverage; each line then checked in the full text}
+\item iDLC: separates biological and technical components in a latent space, then aligns batches with an adversarial term regularised by optimal transport, guided by mutual-nearest-neighbour cell pairs \citep{jiang2026geometric} \pending{full-text check and paragraph placement (abstract read only; bioRxiv returned HTTP 429)}{full text obtained}.
 \end{itemize}
 
 \section{Methods}
