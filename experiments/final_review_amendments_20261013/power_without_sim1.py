@@ -2,8 +2,11 @@
 
 Re-derives `power` of docs/prereg/r1_record.json from its stored per-block summaries with the formulas of
 prereg_rules.power_report (and stops if the committed values are not reproduced), then drops the sim1 blocks and repeats.
-The root search starts at 0.01: scipy's non-central t returns NaN above a non-centrality of about 38, which the start of
-1.0 in power_report reaches when the standard error is below about 0.026.
+The root search starts at 0.01 because the search from 1.0 in power_report stopped, until SI-86 (the user's decision of
+2026-10-15 to restart it at 0.01 when it fails), for some standard errors, among them the one without sim1: with scipy
+1.17.1 the non-central t (scipy.stats.nct.cdf) returns NaN (not a number) at isolated large non-centralities (the effect
+divided by its standard error), the first at 42.15 for 5 degrees of freedom and at 57.24 for 3; 7 of 230 tested pairs of
+standard error and degrees of freedom failed (script 05_power_report_nan_probe.py of the documents re-check, 2026-10-14).
 Usage (repo root, env scvi-api): python experiments/final_review_amendments_20261013/power_without_sim1.py
 Writes results/power_without_sim1.json."""
 import json
