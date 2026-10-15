@@ -481,14 +481,21 @@ def e2e(tmp_path_factory):
     M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task=EXT[0], cond=int(EXT[1]), arm=EXT[2],
                                                  lam=float(EXT[3]))])], ignore_index=True)
     man = synth.write_tsv(M, os.path.join(tmp, "manifest.tsv"))
-    sp, fp = synth.write_scores(*score_tables(M), os.path.join(tmp, "scores"), "x1")
+    tables = score_tables(M)
+    sp, fp = synth.write_scores(*tables, os.path.join(tmp, "scores"), "x1")
     S, F = P.read_scores([sp])[0], P.read_failures(fp)
     r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, with the extension row
     P.write_record(r4p, P.r4_stage(P.outcomes(M, S, F, ["X1"]), "x1", r1, need=set()), dict(scores=[sp]))
     args = dict(manifest=man, scores=sp, failures=fp, r1=R1_RECORD, r4=r4p, out=os.path.join(tmp, "analysis.json"))
     assert A.main(argv(args)) == 0
+    # the same inputs with the rows of every file in another order (review AN-11, AN-R14)
+    shuf = dict(args, manifest=synth.write_tsv(M.sample(frac=1, random_state=1), os.path.join(tmp, "manifest_shuffled.tsv")),
+                out=os.path.join(tmp, "analysis_shuffled.json"))
+    shuf["scores"], shuf["failures"] = synth.write_scores(*(t.sample(frac=1, random_state=1) for t in tables),
+                                                          os.path.join(tmp, "scores_shuffled"), "x1")
+    assert A.main(argv(shuf)) == 0
     return dict(args=args, rec=json.load(open(args["out"])), M=M, out=A.add_scores(P.outcomes(M, S, F, ["X1", "X13"])),
-                r1=r1, r4=json.load(open(r4p)))
+                r1=r1, r4=json.load(open(r4p)), shuffled=json.load(open(shuf["out"])))
 
 
 def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects and not-evaluable bookkeeping
@@ -500,6 +507,8 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert prim["settings"] == dict(value="C", mode="mean", corner="collapse", structure="family", scale=0.1)
     assert len(prim["cells"]) == 16 and prim["n_primary"] == 6
     assert set(prim["holm"]) == {f"{e}|{c}" for e in ("p1", "area", "p2") for c in (0, 1)}
+    # the same inputs with the rows of every file in another order give the same numbers (review AN-11, AN-R14)
+    assert e2e["shuffled"]["primary"] == prim and e2e["shuffled"]["sensitivity"] == rec["sensitivity"]
     # the extension row raises the barycenter's best batch score in atac_small|0 above the other arms': b* moves, and the
     # record is accepted only because the analysis sees the row (planted error: a recompute from registered points only)
     reg = out[~((out.task == EXT[0]) & (out.cond == EXT[1]) & (out.arm == EXT[2]) & (out.lam == EXT[3]))]
