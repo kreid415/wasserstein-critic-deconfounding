@@ -580,18 +580,21 @@ the training dataset (final review D-08's example); **C** S = C.
 
 No question was numbered Q8. In the first draft of this file (commit 6d0ca1f, 2026-10-13) the multiplicity rule,
 which sits between Q7 and Q9, was already written as a proposal for the diff review rather than as a question, and
-the later questions kept their numbers. The multiplicity rule of section 5 is therefore the agent's proposal.
+the later questions kept their numbers. The multiplicity rule of section 5 was therefore the agent's proposal; the user
+approved it as a rule on 2026-10-15 (SI-80).
 
-### A.3 Open items for the diff review
+### A.3 The questions of the diff review (answered 2026-10-15)
 
-1. Whether SI-75 stands. The question quoted 8 of 45 collapsed runs for the discriminator with the unconditioned
-   decoder; the recount is 8 of 54 (NB-20261014-22), so the quoted critic-minus-discriminator difference is +3.7
-   percentage points, not +0.7. Both are inside the 5-point margin.
-2. The definition of "examined" (PREREG section 9, entry of 2026-10-14), and whether anyone read an X1
-   adversarial-arm score value.
-3. Approval of the agent's proposals: section 2.3, section 5 (multiplicity), section 8 (the transfer rule), sections
-   9 and 10, the sensitivity analyses of section 11 that no decision names, and section 15. Each approval becomes a
-   new ledger entry before the tag is made.
-4. The name of the redone R1 record that section 1 gives to the analysis (`docs/prereg/r1_record_sinkhorn_redo.json`).
-5. Whether the scaling sensitivities of PAPER_PLAN section 5 (leave-one-method-out rescaling, z-score aggregation, a
-   composite without the silhouette metrics, rank stability) are locked here; this file has no counterpart today.
+No open items remain in this file. On 2026-10-15 the user answered all 19 questions of the diff review (ledger SI-78 to SI-87;
+notebook NB-20261015-02 to -20, with the correction -21), and later decided how the audit's findings are listed (SI-88,
+NB-20261015-25). PREREG section 9 has the complete list of the questions and answers, with the file and line where each is
+explained. The answers that decide something in this file:
+
+1. SI-78: what "examined" means (status paragraph). NB-20261015-15: the user states that nobody read an X1 or X13 score value.
+   SI-88: how PREREG lists the displays the audit found.
+2. SI-80: the agent's proposals are rules (sections 2.3, 5, 8, 9, 10, the unnamed sensitivity analyses of section 11, and 15).
+3. SI-81 (c): a reporting script written after the runs tabulates the per-arm counts of cells that never reach b\* (section 1).
+4. SI-82: PAPER_PLAN's four scaling checks are exploratory (section 12).
+5. SI-83: a standard error below 1e-6 is raised to 1e-6 (section 4). SI-84: five design choices of the code are approved and the
+   accuracy ranges are stated (sections 4, 14 and 15).
+6. NB-20261015-07: SI-75 stands (section 6). SI-87: the Sinkhorn redo overwrites five record files in place (section 1).
