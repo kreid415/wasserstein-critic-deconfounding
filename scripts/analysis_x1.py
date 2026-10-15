@@ -28,7 +28,7 @@ P2_PRIOR_SCALE = 0.25
 GRID_N = 201
 GRID_SPAN = 5.0
 TAU_FLOOR = 1e-15     # each spread is integrated over [TAU_FLOOR, GRID_SPAN x its prior scale], evenly in log(tau)
-S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); below: zero_spread
+S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); a smaller one is raised to it (SI-83)
 DECLARE = 0.95
 MIN_READINGS = 4
 X1_SEEDS = [0, 1, 2, 3, 4]
@@ -212,11 +212,19 @@ def pool(d, s, levels, delta_scale, tau_scale, margin):
                 delta_scale=delta_scale, tau_scale=tau_scale, margin=margin)
 
 
+def raise_s(units, s, level):
+    """SI-83: a standard error below S_MIN enters the pool as S_MIN and is listed (unit, level, its own value);
+    one that is NaN, infinite or negative stops the run."""
+    P._require(all(math.isfinite(x) and x >= 0 for x in s), "standard errors must be finite and nonnegative")
+    return [max(x, S_MIN) for x in s], [dict(unit=u, level=level, s=float(x)) for u, x in zip(units, s) if x < S_MIN]
+
+
 def combine(tasks, d, s, structure, scale, margin):
     if not tasks:
-        return dict(n=0, declaration="not_evaluable")
+        return dict(n=0, declaration="not_evaluable", raised=[])
     P._require(structure in ("family", "independent", "pairs"), f"unknown pooling structure {structure}")
     P._require(len(tasks) == len(d) == len(s), "pool tasks, d and s must have equal lengths")
+    s, raised = raise_s(tasks, s, "dataset")
     units = list(tasks)
     if structure == "independent":
         levels = [units]
@@ -230,8 +238,10 @@ def combine(tasks, d, s, structure, scale, margin):
             groups = [[i for i, f in enumerate(families) if f == u] for u in units]
             d = [float(np.mean([d[i] for i in g])) for g in groups]
             s = [math.sqrt(sum(s[i] ** 2 for i in g)) / len(g) for g in groups]
+            s, pairs = raise_s(units, s, "pair")      # sqrt(s1^2 + s2^2) / 2 can fall below S_MIN even after each s is raised
+            raised += pairs
             levels = [units]
-    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure)
+    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, raised=raised)
 
 
 def wilcoxon_exact(d):
@@ -451,9 +461,7 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
                     low_signal.append(dict(task=task, d=None if endpoint == "area" else reading["d"]))
                 elif reading.get("reason") is not None:
                     not_evaluable.append(dict(task=task, reason=reading["reason"]))
-                elif reading["s"] < S_MIN:          # e.g. both arms' areas 0 in every leave-one-seed-out repeat (AN-02)
-                    not_evaluable.append(dict(task=task, reason="zero_spread"))
-                else:
+                else:          # s below S_MIN (e.g. both arms' areas 0 in every repeat) is raised inside combine (SI-83)
                     evaluable.append(task)
                     d.append(reading["d"])
                     s.append(reading["s"])

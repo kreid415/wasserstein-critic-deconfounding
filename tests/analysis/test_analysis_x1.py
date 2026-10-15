@@ -256,7 +256,23 @@ def test_combine_structures():
     su = [0.01, 0.02, math.hypot(0.015, 0.01) / 2, math.hypot(0.02, 0.025) / 2]
     assert pairs["units"] == units and pairs["n"] == 4
     close(pairs["mean"], A.pool(du, su, [units], 0.1, 0.1, 0.01)["mean"])
-    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable"}
+    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable", "raised": []}
+
+    # SI-83: a standard error below 1e-6 enters the pool as 1e-6 and is listed with its own value; 1e-6 itself stays
+    low = [1e-6, 0.9e-6, 1e-16, 0.0, 0.01, 0.02]
+    for structure, levels in (("family", [[P.TASK_FAMILY[t] for t in tasks], tasks]), ("independent", [tasks])):
+        got, want = A.combine(tasks, d, low, structure, 0.1, 0.01), A.pool(d, [1e-6] * 4 + low[4:], levels, 0.1, 0.1, 0.01)
+        assert got["raised"] == [dict(unit=t, level="dataset", s=x) for t, x in zip(tasks[1:4], low[1:4])]
+        assert {k: got[k] for k in want} == want
+    # pairs: each dataset is raised first; the family's averaged sqrt(s1^2 + s2^2) / 2 is raised again when it is
+    # below 1e-6, which the averaged standard error of two datasets at 1.2e-6 is (8.5e-7; review AN-R01)
+    for s_pair, listed, averaged in (([1.2e-6, 1.2e-6], [], 1.2e-6 / math.sqrt(2)),
+                                     ([0.0, 1e-16], [("atac_small", 0.0), ("atac_large", 1e-16)], 1e-6 / math.sqrt(2))):
+        got = A.combine(["atac_small", "atac_large"], [0.02, 0.03], s_pair, "pairs", 0.1, 0.01)
+        want = A.pool([0.025], [1e-6], [["atac"]], 0.1, 0.1, 0.01)
+        assert got["raised"] == [dict(unit=u, level="dataset", s=x) for u, x in listed] + [
+            dict(unit="atac", level="pair", s=pytest.approx(averaged, abs=1e-15))]
+        assert got["n"] == 1 and {k: got[k] for k in want} == want
 
 
 # ---------------------------------------------------------------------------------------------
@@ -353,7 +369,10 @@ def test_guards():  # test-reason: refusals at the function boundaries
     with pytest.raises(P.PreregError, match="scale"):
         A.read_area(zero(), pts(REF), pts(REF), 0.0)
     with pytest.raises(P.PreregError, match="positive"):
-        A.pool([0.1, 0.2], [0.01, 5e-7], [["a", "b"]], 0.1, 0.1, 0.01)      # below S_MIN (and so 0)
+        A.pool([0.1, 0.2], [0.01, 5e-7], [["a", "b"]], 0.1, 0.1, 0.01)      # pool does not raise s (combine does, SI-83)
+    for bad in (float("nan"), float("inf"), -1e-3):                          # only s in [0, S_MIN) is raised; these stop the run
+        with pytest.raises(P.PreregError, match="finite"):
+            A.combine(["a", "b"], [0.1, 0.2], [0.01, bad], "independent", 0.1, 0.01)
     with pytest.raises(P.PreregError, match="grid"):
         A.choose_lambda({"a": {1.0: 0.5}, "b": {3.0: 0.5}}, {"a": {1.0: 0}, "b": {3.0: 0}}, ["a", "b"])
     row = dict(task="pancreas", status="ok", B=0.5, C=0.7, **dict.fromkeys(P.BATCH_METRICS, 0.5),
@@ -494,11 +513,16 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
                                                  {"task": "atac_large", "reason": "readings"}]
     assert [x["task"] for x in pooled["1"]["p1"]["low_signal"]] == ["immune"]
     assert pooled["1"]["p1"]["declaration"] == "above" and len(pooled["1"]["p1"]["signs"]) == 4
-    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "lung", "reason": "zero_spread"},       # review AN-02
-                                                   {"task": "immune", "reason": "low_signal"}]
+    # lung's area is 0 in every repeat (s = 0): the dataset is kept, its s raised to 1e-6 and listed (SI-83)
+    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "immune", "reason": "low_signal"}]
+    assert "lung" in pooled["1"]["area"]["tasks"] and prim["cells"]["lung|1"]["area"]["s"] == 0.0
+    assert {(c, e): v["raised"] for c in "01" for e, v in pooled[c].items() if v["raised"]} == {
+        ("1", "area"): [dict(unit="lung", level="dataset", s=0.0)]}
     assert pooled["0"]["local"]["declaration"] == "above"
     close(pooled["0"]["local"]["sign_test_p"], 2 / 64)
     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)
+    # a dataset is evaluable for the local reading exactly when it is for P1 (same crossing; spec section 15.7)
+    assert all(pooled[c]["local"]["tasks"] == pooled[c]["p1"]["tasks"] for c in "01")
     close(pooled["0"]["p1"]["wilcoxon_p"], 2 / 64)
     assert pooled["0"]["p2"]["declaration"] == "below" and len(pooled["0"]["p2"]["diffs"]) == 6
     # each pooled result combines its own endpoint's cell readings with the frozen prior scales and margins (P1 0.1 and
