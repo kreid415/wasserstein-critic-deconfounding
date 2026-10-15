@@ -1,0 +1,5 @@
+H2_family_0.1                difference from the 50-digit value: code 2.8e-10; GRID_N 151 4.3e-10; GRID_N 101 4.4e-10; TAU_FLOOR 1e-9 6.8e-05
+H2_family_0.2                difference from the 50-digit value: code 1.9e-10; GRID_N 151 2.2e-09; GRID_N 101 1.3e-10; TAU_FLOOR 1e-9 6.8e-05
+H2_independent_0.1           difference from the 50-digit value: code 1.1e-09; GRID_N 151 9.4e-10; GRID_N 101 7.8e-10; TAU_FLOOR 1e-9 3.5e-05
+H2_spread_family_0.2         difference from the 50-digit value: code 4.3e-09; GRID_N 151 6.9e-09; GRID_N 101 2.7e-06; TAU_FLOOR 1e-9 2.7e-09
+H2_spread_independent_0.2    difference from the 50-digit value: code 1.9e-10; GRID_N 151 4.9e-08; GRID_N 101 2.1e-05; TAU_FLOOR 1e-9 1.3e-10
