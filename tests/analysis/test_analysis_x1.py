@@ -249,9 +249,10 @@ def _known():
 
 
 @pytest.mark.parametrize("row", _known(), ids=lambda row: row["name"])
-def test_pool_known_answers_small_s(row):  # test-reason: s of 1e-6 to 3e-6 against 50-digit values pins the spread grid's floor and size
+def test_pool_known_answers_small_s(row):  # test-reason: s of 1e-6 to 3e-6 against 50-digit values pins the spread grid's floor, size and span
     """Six datasets with standard errors just above S_MIN against the independent reference of
     experiments/analysis_numerics_20261014/known_answers_small_s.py (50-digit arithmetic, other quadrature); AN-R08."""
+    assert (A.GRID_N, A.GRID_SPAN, A.TAU_FLOOR) == (201, 5.0, 1e-15)   # the registered grid, specification section 4 (AN-R08)
     tasks, d, s = (row[k].split(";") for k in ("tasks", "d", "s"))
     r = A.combine(tasks, [float(x) for x in d], [float(x) for x in s], row["structure"], float(row["scale"]),
                   float(row["margin"]))
@@ -692,7 +693,8 @@ def _rewrite(src, dst, keep):
     (lambda e, tmp: dict(manifest=_rewrite(e["args"]["manifest"], os.path.join(tmp, "m.tsv"),
                                            lambda M: ~((M.task == EXT[0]) & (M.cond == EXT[1]) & (M.arm == EXT[2])
                                                        & (M.lam == EXT[3])))),
-     r"for atac_small\|0: record .* recomputed .* extension rows"),
+     r"for atac_small\|0: record \[[-0-9.e]+, [-0-9.e]+, [-0-9.e]+, (True|False)\], recomputed \[[-0-9.e]+, [-0-9.e]+, "
+     r"[-0-9.e]+, (True|False)\]; if R4 added extension rows"),
     (lambda e, tmp: _without_seed(e, tmp, "4"), "X1 seeds"),                     # review AN-10
     (lambda e, tmp: dict(out=e["args"]["out"]), "exists"),                      # never overwrite a record
 ])
