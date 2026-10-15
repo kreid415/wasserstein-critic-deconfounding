@@ -19,7 +19,7 @@ Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_g
 | R4-x1 | — | X1 scored | follow-up `lam` = matched_lo / matched / matched_hi | `freeze_matched_lambda.py --stage x1` |
 | X3, X6, X7, X8, X12 | seeds 10–12 (SI-26) | R4-x1 | | |
 
-Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress. A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
+Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress; 250 of them already exist, and part of their scores (section 9, entry of 2026-10-14 on the disclosure). A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
 
 ## 1. Definitions shared by all rules
 
@@ -205,12 +205,12 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
 |---|---|---|---|---|---|
 | 1 | R1 depends on the trajectory through its noise estimate (I091, SI-53) | 2026-10-13 11:46 | 018c8f1 (10-13 14:46) | A1 scores (bio-score noise estimates) | No registered rule changes. R1 without trajectory is a sensitivity analysis; the frozen X1 grids stand except Sinkhorn (row 4) |
 | 2 | PAPER_PLAN corrected to this file: grid edge (SI-55), P1 comparator, power, Holm (I006, D-01, D-02) | Grid edge (SI-55): 2026-10-13 11:46. The other corrections are not user decisions | 018c8f1 (10-13 14:46) | A1 record (power figures) | No. PAPER_PLAN text only; Holm over six results is a later proposal (row 8) |
-| 3 | Two commits declared result-identical (SI-54; SI-60 names the tag) | SI-54: 2026-10-13 11:46. SI-60: 20:03 | 8ce5a54 (20:10), 7c32579 (20:30), b2c68c8 (20:30) | No X1 score value cited. The identity checks rescored 7 latents by script, one of them an X1 adversarial-arm latent | No |
+| 3 | Two commits declared result-identical (SI-54; SI-60 names the tag) | SI-54: 2026-10-13 11:46. SI-60: 20:03 | 8ce5a54 (20:10), 7c32579 (20:30), b2c68c8 (20:30) | No X1 or X13 score value cited. The identity checks rescored 7 latents by script, one of them an X1 adversarial-arm latent and one an X13 sysVI latent, and printed two metrics of each (disclosure entry of 2026-10-14) | No |
 | 4 | Sinkhorn arm corrected, its pilot fits redone in rule order (SI-51, SI-57, SI-58, SI-61, SI-62) | 2026-10-13: 07:45 (SI-51) to 20:48 (SI-61, SI-62) | 3cbaca4 (09:56), 89d5e2c (19:46); text 4d86a55 (10-14 07:54) | Pilot Sinkhorn fits (A1, A3); no X1 score cited | Yes. Sinkhorn A1, R1, R4-a1, A3 and R2/R3 results will be redone; the X1 Sinkhorn grid will change |
 | 5 | Guards before the tag (I033, I034, I042, I050, I051, I094, I008; G-01 to G-05 and G-14) | SI-52: 2026-10-13 07:45. SI-63, SI-64: 20:48 | c4be14b (10:09) to c3fd92d (21:00) | No score cited | No completed fit or score changes: 59 of 59 non-Sinkhorn fits and 7 of 7 latents identical (NB-20261013-39, -40) |
 | 6 | P1 starts at lambda = 0; low-signal blocks are not evaluable (I072, D-04, SI-56) | 2026-10-13 11:46 | Text 4d86a55 (10-14 07:54); code f3c3415 (R2/R3, 07:50) and ff88666 (P1, 08:04) | A1 and A2/A3 results; the R4-a1 record of 2026-10-10 already flagged two low-signal blocks | No. R2 and R3 keep their defaults with or without the rule |
 | 7 | Low-signal blocks count as not evaluable in R2 and R3 (SI-66) | 2026-10-13 20:53 | f3c3415 (10-14 07:50); text 4d86a55 | A2/A3 results; R2 and R3 had been run once on them on 2026-10-12 (NB-20261012-01, cea50ca) | No. On the stored cells R2 has 9 of 12 cells evaluable (mean change -0.0042) and R3 13 of 20 (-0.0014); both keep their defaults |
-| 8 | The X1 analyses are specified (I001, D-03, D-08, D-09; SI-68 to SI-77, plus agent proposals marked in ANALYSIS_SPEC) | SI-68 to SI-72: 2026-10-14 06:45. SI-73 to SI-77: 06:57 | 6d0ca1f (draft, 10-13 21:22), 56c0762 (06:47), 990d37d (06:58), ff88666 (08:04), de741a0 (08:48) | A1 pilot ranges and collapse rates; 19 X1 rows had been scored on 2026-10-12 and an audit of chat records found no value displayed or analysed (NB-20261014-21). The question behind SI-75 quoted 8 of 45 pilot runs for the discriminator with the unconditioned decoder; the recount is 8 of 54 (NB-20261014-22) | New rules only; nothing already frozen changes. Whether SI-75 stands is open: the quoted difference of +0.7 points is +3.7 after the recount, both inside the 5-point margin |
+| 8 | The X1 analyses are specified (I001, D-03, D-08, D-09; SI-68 to SI-77, plus agent proposals marked in ANALYSIS_SPEC) | SI-68 to SI-72: 2026-10-14 06:45. SI-73 to SI-77: 06:57 | 6d0ca1f (draft, 10-13 21:22), 56c0762 (06:47), 990d37d (06:58), ff88666 (08:04), de741a0 (08:48) | A1 pilot ranges and collapse rates; 19 X1 rows had been scored on 2026-10-12, earlier X1 and X13 baseline scores existed, and two displays of values had occurred (X13 runner tests on 2026-10-02; two metrics of one X1 and one X13 rescore on 2026-10-13); the disclosure entry gives the facts, and the user lists the displays as shown to the agent only (SI-88). The question behind SI-75 quoted 8 of 45 pilot runs for the discriminator with the unconditioned decoder; the recount is 8 of 54 (NB-20261014-22) | New rules only; nothing already frozen changes. Whether SI-75 stands is open: the quoted difference of +0.7 points is +3.7 after the recount, both inside the 5-point margin |
 
 - **2026-10-03, sensitivity analysis without trajectory (user decision, SI-38).** Every X1 comparison on immune and
   immune_hum_mou is also reported with the bio score C recomputed without trajectory conservation (C over the
@@ -356,7 +356,9 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   committed manifests was refitted for one epoch on CPU with one thread at both commits; the latents of 59 of 59
   non-Sinkhorn rows are identical, and the 4 Sinkhorn rows differ, as intended (SI-51). Scores: 7 stored latents
   (plain scVI, a pooled critic on immune, a simulation, a standardised fit, the barycenter critic, one X1 fit and one
-  X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns. An earlier
+  X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns.
+  The X1 fit is one of the 19 early X1 rows and the X13 row is sysVI on pancreas; the check also printed two metrics
+  of each of these two rescores (section 9, entry of 2026-10-14 on the disclosure). An earlier
   run at 2b52542 (fit_identity.csv, score_identity.csv) came before the guard follow-ups G-01 to G-05 and G-14 changed fit code and
   is kept as history. The evidence is narrow: one fit per code path, one epoch, one latent per scorer path. It holds
   for a later candidate commit only if that commit changes no code that a fit or a score runs. Before the tag is made,
@@ -480,29 +482,79 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
   has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
   them is a question for the diff review.
-- **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (finding DOC-01 of
-  the documents review of 2026-10-14).**
-  Status: written 2026-10-14. Open: the user's confirmation that nobody read an X1 adversarial-arm score value.
-  The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
-  run X1 locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same
-  day to wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not
-  scored and 1,097 still needed a fit. By file name (NB-20261014-21) the 19 scored rows are 17 adversarial-arm rows,
-  all on immune with the conditioned decoder and seed 0 (discriminator at the first to sixth registered penalty
-  strength, pooled critic at the first to fifth, reference critic at the first to sixth), and 2 rows of the arms none
-  and scvi_adv; section 0 lets fits that depend on no rule (the X1 arms none and scvi_adv, X13) run while A1 to A3 are
-  in progress. An audit of every chat record of this project (NB-20261014-21, 2026-10-14) found no display or analysis
-  of an X1 score value: three automated integrity checks read these rows (scorer provenance and versions; finite
-  required metrics; counts of kBET zeros and R calls) and printed only counts pooled over all stages, and the runner
-  and the scorer log only tags and timings. One of the 19 rows (arm discriminator, immune, conditioned decoder, seed
-  0, first penalty strength; tag X1_immune_discriminator_lg1_c1_s0_122afe99) was rescored in the identity checks of
-  2026-10-13 (NB-20261013-12, -16 and -40) and compared with its original row by script, column by column, for
-  equality only. The audit cannot show that nobody opened a score file outside those chat records: open item for the
-  diff review, the user confirms whether anyone read an X1 adversarial-arm score value. Proposed definition for the
-  diff review (not yet approved): an X1 adversarial-arm score is "examined" when a value of it is read by a person or
-  entered into an analysis script; integrity checks that print only counts or flags are not analysis scripts. "Before
-  any X1 adversarial-arm score is examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in
-  PAPER_PLAN section 5.
-- **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
+- **2026-10-14, disclosure: part of X1 and X13 was fitted and scored before the X1 analyses were specified (finding
+  DOC-01 of the documents review of 2026-10-14; widened on 2026-10-15 by the user's decisions SI-78, SI-79 and SI-88
+  and by findings DOC-R01, DOC-R02 and DOC-R14 of the documents re-check).**
+  Status: written 2026-10-14, revised 2026-10-15 after the user's decisions SI-78, SI-79 and SI-88 and the audit of
+  2026-10-15. Planned: the time stamp from GitHub for the tag, after the tag is made (SI-79, below).
+  The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to run X1
+  locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same day to
+  wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not scored
+  and 1,097 still needed a fit. The 19 scored rows are kept as X1 rows: they were fitted at the tag checkout c88cce3
+  (NB-20261012-04), which SI-54 declares result-identical to the tag prereg-tier12-v3 for every arm except Sinkhorn,
+  and none of the 19 is a Sinkhorn row. Counted from the names of the score files, not from their contents
+  (NB-20261014-21), the 19 scored rows are 17 adversarial-arm rows, all on immune with the conditioned decoder and
+  seed 0 (discriminator at the first to sixth registered penalty strength, pooled critic at the first to fifth,
+  reference critic at the first to sixth), and 2 rows of the arms none and scvi_adv.
+  Fits that depend on no rule (the X1 arms none and scvi_adv, X13; section 0 lets them run while A1 to A3 are in
+  progress) also exist, and their scores are partly made. The project's compute cluster (called JHPCE in the notebook)
+  fitted 250 of them at tag prereg-tier12-v2: the X1 arms none and scvi_adv and the X13 baselines scANVI and sysVI, on
+  atac_large and immune_hum_mou (pass A, 100 fits) and on lung, pancreas and sim2 (pass B, 150 fits). Both jobs were
+  complete on 2026-10-06 (NB-20261006-01); the counts are those of the manifest of record
+  (experiments/doc_numbers_20261015/filler_fit_counts.py). Their latents are scored on this machine. Pass B was scored
+  in full, 150 of 150, by 2026-10-07; its entry says that the check was of file counts, finiteness and provenance and
+  that the metric values were not inspected (NB-20261007-01). Of pass A, 1 of 100 was scored by 2026-10-07
+  (NB-20261006-04, NB-20261007-01) and 99 were still to score when it resumed on 2026-10-12 (NB-20261012-02); it was
+  paused the same day for the final review (NB-20261012-05), and the notebook records no later progress.
+  The SHA-256 hash of every existing X1 and X13 score file is committed in experiments/x1_x13_score_hashes_20261015/
+  (SI-79). Hashing reads a file's bytes and shows no value, so a later reader can use the list to check that no file
+  has changed since the list was made. The README of that folder groups the files and is the inventory of what exists.
+  The groups, found from file names, folder names and dates only, are:
+  - (1) the 19 early X1 rows above;
+  - (2) the scores of the earlier fits above;
+  - (3) the rescoring by the scorer identity checks of 2026-10-13: 7 stored latents, among them one of the 19 early X1
+    rows (tag X1_immune_discriminator_lg1_c1_s0_122afe99) and one X13 row (sysVI on pancreas, tag
+    X13_pancreas_sysvi_l10_c1_s0_60b085ea); the old and the new scores were compared with each other and with the
+    stored row by script, column by column (NB-20261013-12, -16 and -40);
+  - (4) two test runs of the X13 baseline runner on atac_small on 2026-10-02, before the first tag prereg-tier12-v1,
+    each scoring 6 latents of Harmony, Scanorama and PCA (NB-20261002-09 and -10); they are not registered rows;
+  - (5) the probe outputs of the final pre-publication review of 2026-10-12 and 13: its probes scored 49 registered
+    configurations, each with the task, arm, penalty strength, decoder and seed of a registered X1 or X13 row, 42 from
+    fits that the reviewers made themselves on sim1, atac_small and pancreas (adversarial arms included), at the code
+    of 2026-10-12 and with training settings not yet checked, and 7 that rescore 6 real X1 baseline latents of arm
+    none. These are not the registered production fits.
+  The date that GitHub shows for the tag prereg-tier12-v3 will be recorded in the notebook after the tag is made, as a
+  time stamp from outside this repository (SI-79).
+  **Definition of "examined" (user decision SI-78, 2026-10-15).**
+  A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm.
+  For example, a check that prints how many required metrics are finite does not examine a score; a person who opens a
+  score file and reads a batch score does, and so does a script that averages scores. "Before any X1 or X13 score is
+  examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in PAPER_PLAN section 5.
+  The audit of 2026-10-14 (NB-20261014-21), made by the agent that ran the checks, searched the logs of the agent's
+  working sessions on this project for reads of tier12_v2/X1_local/scores (12 messages) and for the printed output of
+  the scripts that read them, and checked two log statements (run_stage.py and score_scib_native.py, which log only
+  tags and timings). Three automated integrity checks read the 19 rows (scorer provenance and versions; finite
+  required metrics; counts of kBET zeros and R calls) and printed only counts pooled over all stages. That audit
+  searched one folder, and NB-20261015-23 corrects its conclusion in the light of the audit of 2026-10-15 below.
+  On 2026-10-15 the user answered the question whether anyone, the agent or anyone else, had read the value of an X1
+  or X13 score: no, nobody read a value (NB-20261015-15). The audit made later that day (NB-20261015-22; its method
+  and results are in the README of experiments/x1_x13_score_hashes_20261015/) found two displays of values:
+  - On 2026-10-02, before the first tag prereg-tier12-v1, the output of a sub-agent's tool call showed all metrics of
+    the six X13 runner-test runs on atac_small (Harmony, Scanorama and PCA test configurations, which are not
+    registered rows). NB-20261002-10 and the notebook page of 2026-10-02 also record run-to-run differences of NMI,
+    ARI and iLISI and a kBET value from these tests.
+  - On 2026-10-13, before 17:13, the scorer identity check printed in the lead agent's session the old and new values
+    of two metrics, PCR_batch (the principal-component-regression batch score) and cell-cycle conservation, for one X1
+    adversarial-arm run (immune, discriminator, first registered penalty strength, conditioned decoder, seed 0; one of
+    the 19 early local X1 rows) and for one X13 run (pancreas, sysVI). The first commit of the X1 analysis
+    specification was at 21:22 that day, and the user decided its first rules on 2026-10-14.
+  The audit of 2026-10-15 found no value from the 49 probe score files of group (5) in 56 session transcripts or
+  26,722 review output files. Its limits: it is a pattern search of printed output; a value printed without a file,
+  folder or metric name nearby can be missed; the sessions of Codex, a second AI assistant that took part in the
+  reviews, left only output files; and what an agent read without printing cannot be known.
+  The user decided on 2026-10-15 (SI-88, NB-20261015-25) that these two displays are listed as shown to the agent only
+  and do not count as examined under SI-78. This entry gives their facts, dates and limits in full.
+- **2026-10-14, the X1 analyses are specified and will be frozen before any X1 or X13 score is examined
   (final review finding I001, that the P1 to P4 analysis code had to be frozen before X1 scores are read;
   design-recheck findings D-03, D-08 and D-09; user decisions SI-68 to SI-77, and the agent's proposals named
   below).**
@@ -515,7 +567,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   the six primary results), section 8 (the leave-one-family-out rule for the transfer lambda; SI-77 decides only the
   selection score), sections 9 to 11 and the implementation details of section 15. They become rules only if the user
   approves them at the diff review; each approval will be recorded as a new ledger entry before the tag is made. The
-  tag prereg-tier12-v3 will freeze all of them. No X1 adversarial-arm score is to be examined (as defined in the
+  tag prereg-tier12-v3 will freeze all of them. No X1 or X13 score is to be examined (as defined in the
   disclosure above) before the tag is made, and the script is then run once, after every X1 and X13 row is scored or
   failed (a procedure: the script refuses to overwrite an existing record). The follow-up analyses (X3, X6, X7, X8,
   X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined (SI-68,

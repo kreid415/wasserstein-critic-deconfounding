@@ -175,8 +175,9 @@ families assumed below.*
 
 **Amended 2026-10-14 (user decisions SI-68 to SI-77 and the agent's proposals marked below; PREREG §9).** The analyses
 of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both to be frozen by the tag
-prereg-tier12-v3 (not yet made) before any X1 adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of
-2026-10-14, which also records the 19 X1 scores that exist from the local run of 2026-10-12); where this section
+prereg-tier12-v3 (not yet made) before any X1 or X13 score is examined ("examined" is defined in PREREG §9, entry of
+2026-10-14, which also records the X1 and X13 scores that already exist: the 19 of the local run of 2026-10-12 and the
+earlier baseline scores); where this section
 differs, the specification applies. It replaces seven statements below, marked [replaced] eight times (the ROPE and
 the measurement-SD study carry one marker each): the ROPE (region of practical equivalence) and the measurement-SD study (the standard deviation of repeated scoring of one embedding; margin 0.01, SI-74); failure
 imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (dataset-family and dataset terms for the arm difference, final review finding I056, SI-73); "same init and minibatch order" (PREREG §9, code check CR-07: equal seeds give equal initialisation, but not equal minibatch order, between arms with and without an adversary head); equal configuration counts (best-of-k compared at equal k, design-recheck finding D-19); the transfer λ (the single penalty strength a method uses on datasets it was not tuned on; leave-one-dataset-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm's correction for several tests, over the six primary results, ANALYSIS_SPEC §5).
