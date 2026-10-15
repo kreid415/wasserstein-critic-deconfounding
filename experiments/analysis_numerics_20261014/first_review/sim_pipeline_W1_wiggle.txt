@@ -1,0 +1,9 @@
+scenario W1_wiggle: 120 dataset cells
+  P1 evaluable fraction 1.000; bias of d (mean d - noise-free polyline reading) mean +0.0041 sd 0.0016
+  bias of d relative to the smooth truth theta_t (interpolation + noise): mean -0.0002, sd 0.0016, max |.| 0.0052
+  ratio rms(jackknife s) / true SD of d: median 1.115, 10-90% 0.999-1.260
+  coverage of d +/- 1.96 s about theta: mean 0.853, min 0.680
+  with b* frozen at its noise-free value: ratio median 1.162; coverage 0.869; true SD median 0.0127 vs 0.0122 with b* re-estimated
+  pooled: 40 replicate worlds; declarations above 0.000 below 0.000 equivalent 0.000
+  coverage of the 95% interval for Delta (truth 0.0): 1.000;  mean posterior mean +0.0001
+  coverage of the 95% interval for the mean of evaluable theta: 1.000; per-dataset theta coverage 0.887

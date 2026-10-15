@@ -1,0 +1,9 @@
+scenario S1_het: 120 dataset cells
+  P1 evaluable fraction 1.000; bias of d (mean d - noise-free polyline reading) mean -0.0001 sd 0.0010
+  bias of d relative to the smooth truth theta_t (interpolation + noise): mean -0.0001, sd 0.0010, max |.| 0.0036
+  ratio rms(jackknife s) / true SD of d: median 1.012, 10-90% 0.953-1.098
+  coverage of d +/- 1.96 s about theta: mean 0.878, min 0.795
+  with b* frozen at its noise-free value: ratio median 1.007; coverage 0.879; true SD median 0.0097 vs 0.0097 with b* re-estimated
+  pooled: 520 replicate worlds; declarations above 0.000 below 0.006 equivalent 0.000
+  coverage of the 95% interval for Delta (truth 0.0): 0.998;  mean posterior mean -0.0025
+  coverage of the 95% interval for the mean of evaluable theta: 1.000; per-dataset theta coverage 0.881

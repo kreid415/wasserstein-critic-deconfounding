@@ -1,0 +1,13 @@
+{
+ "A_target": 0.3,
+ "A_cp_coverage": 0.9995,
+ "B_target": 0.13333333333333333,
+ "B_cp_coverage": 0.914,
+ "AC_target_diff": 0.09166666666666667,
+ "AC_paired_coverage": 0.9488,
+ "AC_paired_se": 0.0756399386848759,
+ "AC_indep_coverage": 0.9186,
+ "AC_indep_se": 0.07633088001617701,
+ "R": 20000,
+ "seed": 7
+}
