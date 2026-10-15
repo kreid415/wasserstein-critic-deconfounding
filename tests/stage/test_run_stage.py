@@ -682,7 +682,7 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
             arrs = dict(d)
         arrs["config"] = json.dumps(dict(json.loads(str(arrs["config"])), git_sha=old))
         np.savez_compressed(p, **arrs)
-    else:           # no latent, no score; the real fitter writes its commit into the record, the fake does not
+    else:           # no latent, no score; the record's commit (the fake writes 'fake', the real fitter its own)
         p = os.path.join(st.out, "status", "s1.json")
         with open(p) as f:
             rec = json.load(f)
@@ -691,6 +691,58 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
     for extra in ((), ("--report-only",)):
         rc, log = st.run(*flags, *extra)
         assert rc == rs.EXIT_PREFLIGHT and "existing output: ['sinkhorn'] rows at c88cce3" in log, log
+
+
+@pytest.mark.parametrize("where, plan, edit, allow_dirty, refusal", [
+    pytest.param("latent", "diverge", lambda c: c.update(git_dirty=True), False,
+                 "fitted from a dirty or unknown checkout (git_dirty=True)", id="latent-git_dirty-true"),
+    pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), False,
+                 "fitted from a dirty or unknown checkout (git_dirty=True)", id="S1-record-git_dirty-true"),
+    pytest.param("status", "diverge", lambda c: c.update(git_dirty=None), False,
+                 "fitted from a dirty or unknown checkout (git_dirty=None)", id="S2-record-git_dirty-null"),
+    pytest.param("status", "diverge", lambda c: c.pop("git_sha"), False,
+                 "the record names no git_sha", id="S3-record-without-git_sha"),
+    pytest.param("status", "diverge", lambda c: None, False, None, id="S0-record-as-the-fake-fitter-writes-it"),
+    pytest.param("status", "nan", lambda c: None, False, None, id="S4-nonfinite_latent-record-of-the-runner"),
+    pytest.param("status", "nan", lambda c: c.pop("git_sha"), False,
+                 "the record names no git_sha", id="S5-nonfinite_latent-record-without-git_sha"),
+    pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), True, None, id="S1-allow-dirty-accepted"),
+])
+# test-reason: only test of the dirty-checkout and no-commit refusals (all other stage tests pass --allow-dirty)
+def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, where, plan, edit, allow_dirty, refusal):
+    """SI-85 (the user's decision of 2026-10-15, rule A of the code re-check, finding CF-R03): a divergence record (the
+    file a fit writes when its training loss becomes non-finite), like a latent (the saved embedding), must name its
+    commit and come from a clean checkout; the start-up check refuses one that does not, unless --allow-dirty is given.
+    Scenarios (S0 to S4 are those of the re-check, S5 is added here): S0 the record as the fake fitter writes it,
+    accepted; S1 git_dirty true, S2 git_dirty null and S3 no git_sha, refused; S4 the runner's own nonfinite_latent
+    record (a commit, no clean flag), accepted; S5 a nonfinite_latent record without a commit, refused. Records of two
+    arms are used, one that is not Sinkhorn (v1) and the Sinkhorn arm (s1): the rule asks no arm. Every other stage test
+    passes --allow-dirty, and the refusal of a latent from a dirty checkout had no test before.
+    The runner is called as a function inside the test (not as a separate program) with --report-only, which runs the
+    start-up and final checks only, so the outcome does not depend on this repository's own checkout being clean."""
+    st = Stage(tmp_path, [_row("n1"), _row("v1"), _row("s1", arm="sinkhorn")], plan={"v1": plan, "s1": plan})
+    assert st.run("--no-score")[0] == 0
+    files = ["latents/n1.npz"] if where == "latent" else ["status/v1.json", "status/s1.json"]
+    for f in files:
+        p = os.path.join(st.out, f)
+        if where == "latent":
+            with np.load(p) as d:
+                arrs = dict(d)
+            cfg = json.loads(str(arrs["config"]))
+            edit(cfg)
+            np.savez_compressed(p, **dict(arrs, config=json.dumps(cfg)))
+        else:
+            with open(p) as fh:
+                rec = json.load(fh)
+            edit(rec)
+            with open(p, "w") as fh:
+                json.dump(rec, fh)
+    rc = rs.main([a for a in st.args("--no-score", "--report-only") if allow_dirty or a != "--allow-dirty"])
+    out, err = capsys.readouterr()
+    if refusal is None:
+        assert rc == 0, out + err
+    else:
+        assert rc == rs.EXIT_PREFLIGHT and all(f"{f}: {refusal}" in err for f in files), out + err
 
 
 def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
@@ -717,7 +769,7 @@ def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
     g = st.summary()["gate"]
     assert g["ok"] and g["scorer_provenance"]["scorer_git_sha"] == head and st.summary()["latent_git_shas"] == sorted(
         ["fake", head])
-    p = os.path.join(st.out, "status", "v1.json")             # the fake fitter's divergence record carries no commit
+    p = os.path.join(st.out, "status", "v1.json")             # the fake fitter's divergence record names commit 'fake'
     with open(p) as f:
         rec = json.load(f)
 

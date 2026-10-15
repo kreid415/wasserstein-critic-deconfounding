@@ -51,6 +51,10 @@ any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba
 SI-54 (docs/EQUIVALENT_COMMITS.json): in scorer_git_sha and the git_sha of latents and divergence records, c88cce3
 counts as tag prereg-tier12-v3 for every arm except sinkhorn; the preflight refuses existing Sinkhorn output (score,
 latent or divergence record) made at c88cce3.
+SI-85 (decision of 2026-10-15): a divergence record, like a latent, must name its git commit and, unless --allow-dirty,
+come from a clean checkout; the start-up check (preflight) and the final check at the end of a run refuse one that
+does not. A nonfinite_latent record (written by this runner or by run_cpu_baselines.py) names a commit but carries no
+clean flag, and stays accepted.
 Completion gate: exit 0 only if every selected row is final (scored, diverged or nonfinite_latent; with --no-score
 also fitted), none is both scored and failed, none is missing and the score rows share one scorer provenance. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
 EXIT_GATE, or 128 + signal after SIGINT / SIGTERM (running work is stopped and its claims released).
@@ -437,6 +441,13 @@ class Outputs:
         diff = [c for c in FPC.REQUIRED if str(rec["row"].get(c)) != row[c]]
         if diff:
             raise InvalidOutput(f"{p}: recorded for other settings than the manifest row ({diff})")
+        # SI-85: a divergence record is held to the rule of a latent: it names its commit and, unless --allow-dirty,
+        # comes from a clean checkout. The clean flag is asked of 'diverged' records only: the nonfinite_latent
+        # records of this runner and of run_cpu_baselines.py carry git_sha but no git_dirty.
+        if rec["status"] == "diverged" and rec.get("git_dirty") is not False and not self.allow_dirty:
+            raise InvalidOutput(f"{p}: fitted from a dirty or unknown checkout (git_dirty={rec.get('git_dirty')})")
+        if not rec.get("git_sha"):
+            raise InvalidOutput(f"{p}: the record names no git_sha")
         return rec
 
     def score(self, row, latent_sha):

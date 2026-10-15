@@ -88,7 +88,8 @@ def fit():
         sys.exit(fit_outcome.EXIT_DIVERGED)
     if b == "diverge":
         fit_outcome.write_status(out, tag, "diverged", detail="non-finite training loss at epoch 3, step 41: "
-                                 "gen_loss=inf", row=row, epoch=3, step=41, terms={"gen_loss": float("inf")})
+                                 "gen_loss=inf", row=row, epoch=3, step=41, terms={"gen_loss": float("inf")},
+                                 git_sha="fake", git_dirty=False)   # as the real fitter's provenance()
         sys.exit(fit_outcome.EXIT_DIVERGED)
     n, k = 30, int(row["n_latent"])
     z = np.random.default_rng(0).normal(size=(n, k)).astype(np.float32)
