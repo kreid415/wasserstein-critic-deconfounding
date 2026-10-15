@@ -306,18 +306,35 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
 
 - `scripts/analysis_x1.py`: reads the X1 manifest, scores and failures through `prereg_rules`, the frozen R1 and R4-x1
   records and the X13 rows; writes one JSON record (inputs' SHA-256, git SHA, constants, every per-cell quantity and
-  declaration) with `prereg_rules.write_record`; refuses incomplete inputs; no plots.
+  declaration) with `prereg_rules.write_record`; refuses incomplete inputs; no plots. When R4 added extension rows to an X1
+  grid, the extension manifests and their score directories are passed with the same options, together with one failures
+  table that covers every row (the usage line of the script says so); the script recomputes the R4 targets from those rows
+  and refuses a record whose targets differ, printing the recorded and the recomputed values (AN-R03, AN-R07). It reads the R1
+  record under the name `docs/prereg/r1_record.json`, which is also its name after the Sinkhorn redo (SI-87, section 1).
 - Known-answer tests in `tests/analysis/`: curves with one and several crossings, unreached, low-signal and failed
   points; the area on hand-computed point sets; the model against closed forms (tau = 0 gives the inverse-variance
-  weighted mean) and brute-force integration; exact Wilcoxon p-values; Clopper-Pearson against `scipy.stats.binomtest`;
-  transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity at the crossing.
-  A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-14) catches 54 of 57 one-line
-  errors; of the 3 it misses, two change no reported value by more than 2e-5 (measured) and the third only reorders
-  floating-point sums (rigour review AN-04).
-- Run commands (AN-18), from the repo root of a checkout that contains the tag prereg-tier12-v3 (inputs that mix the
-  two equivalent commits of SI-54 resolve only there): tests `python scripts/check_tests.py --base <base> --src scripts
-  -- tests/analysis tests/prereg` (env scvi-api plus pytest-cov); the analysis as in the usage line of
-  `scripts/analysis_x1.py`. "Runs once" is a procedure: the script itself only refuses to overwrite an existing record.
+  weighted mean), brute-force integration and, for standard errors of 1e-6 to 3e-6, 50-digit values of five synthetic sets
+  (the registered grid constants are asserted with them; AN-R08); the floor of 1e-6 on a standard error and the list of
+  raised datasets, also for the pairs-first average (SI-83); exact Wilcoxon p-values; Clopper-Pearson against
+  `scipy.stats.binomtest`; transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity
+  at the crossing; the count of configurations with no successful run between the window's ends (AN-R13); an end-to-end record
+  built from the rows in their given order and in shuffled order, which must be equal (AN-R14), and from a manifest without an
+  R4 extension row, which moves b* and is refused with the values printed (AN-R03).
+  A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-15; its README lists every error) applies
+  73 one-line errors to `scripts/analysis_x1.py`, each alone, and the tests catch 72 of them. The one it misses, M28 (no half
+  weights at the two end points of the spread grid), changes no reported value by more than 2.0e-6 (measured on 60 synthetic
+  worlds), because both ends of the grid carry almost no weight (rigour review AN-04).
+- Run commands (AN-18, AN-R04), from the repo root of a checkout that contains the tag prereg-tier12-v3 (inputs that mix the
+  two equivalent commits of SI-54 resolve only there): tests `python scripts/check_tests.py --base 973a97d --src scripts --
+  tests/analysis tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py` (env scvi-api plus pytest-cov;
+  about 14 minutes). It requires every line and branch changed since 973a97d in `scripts/` to be run by a test; on 2026-10-15 it
+  printed OK for the changes of that day on top of the branch at 5d06a27 (429 passed, 18 skipped, 838 s), and it is run again
+  on the final tree before the tag is made. `--src` takes a directory: coverage.py reads a file path such as
+  `scripts/analysis_x1.py` as a module name and collects no data, and `check_tests.py` then either stops or prints OK from a
+  leftover `.check_tests/cov.json`, so no file path is used. A shorter list of test folders fails on the lines of the scripts it
+  leaves out: `tests/analysis tests/prereg` alone fails on `scripts/run_stage.py` lines 662 and 663, which only `tests/stage`
+  runs (AN-R04). The analysis runs as in the usage line of `scripts/analysis_x1.py`. "Runs once" is a procedure: the script
+  itself only refuses to overwrite an existing record.
 - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; to be frozen with the tag prereg-tier12-v3, which has not
   been made.
 
