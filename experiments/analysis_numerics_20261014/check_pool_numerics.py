@@ -146,10 +146,7 @@ def part4(worlds):
 
 
 def part3():
-    try:
-        import mpmath as mp
-    except ImportError:          # pragma: no cover
-        return None
+    import mpmath as mp          # required: without it there is no 40-digit table, and the run stops
     mp.mp.dps = 40
     fam, units = FAM6, list("abcdef")
     base = np.array([0.013, 0.018, 0.017, 0.0155, 0.019, 0.0152])
@@ -202,14 +199,13 @@ if __name__ == "__main__":  # pragma: no cover  # validation script
     p4 = part4(worlds)
     p2.to_csv(os.path.join(OUT, "stress_240.csv"), index=False)
     p3 = part3()
-    if p3 is not None:
-        p3.to_csv(os.path.join(OUT, "precision_mpmath.csv"), index=False)
+    p3.to_csv(os.path.join(OUT, "precision_mpmath.csv"), index=False)
     summary = dict(review_case=p1[["scale", "code", "p_above", "ref_p_above", "declaration", "ref_declaration",
                                    "max_abs_err"]].to_dict("records"),
                    stress=dict(worlds=len(p2), max_abs_err=float(p2.max_abs_err.max()),
                                max_abs_err_reference_cut_at_5_scales=float(p2.max_abs_err_cut5.max()),
                                declaration_mismatches=int((p2.declaration != p2.ref_declaration).sum()),
                                s_min=float(p2.s_min.min())),
-                   precision=None if p3 is None else p3.to_dict("records"), uncaught_planted_errors=p4)
+                   precision=p3.to_dict("records"), uncaught_planted_errors=p4)
     json.dump(summary, open(os.path.join(OUT, "summary.json"), "w"), indent=1)
     print(json.dumps(summary, indent=1))
