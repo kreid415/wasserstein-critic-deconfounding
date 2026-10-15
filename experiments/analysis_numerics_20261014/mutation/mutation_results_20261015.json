@@ -5,8 +5,9 @@
   "description": "sign of d reversed (discriminator minus reference)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref0-dis0-mean-want0]",
-  "secs": 2.3
+  "secs": 1.5
  },
  {
   "id": "M02",
@@ -14,8 +15,9 @@
   "description": "margin 0.01 -> 0.02 (P1, area, local)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 58.3
+  "secs": 78.1
  },
  {
   "id": "M02b",
@@ -23,8 +25,9 @@
   "description": "P2 margin 0.05 -> 0.5",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 54.8
+  "secs": 78.8
  },
  {
   "id": "M03",
@@ -32,8 +35,9 @@
   "description": "declaration threshold 0.95 -> 0.90",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d4-s4-inconclusive-levels0]",
-  "secs": 2.7
+  "secs": 2.2
  },
  {
   "id": "M03b",
@@ -41,8 +45,9 @@
   "description": "declaration threshold 0.95 -> 0.99",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d1-s1-fam1-0.2-above-grid1]",
-  "secs": 24.4
+  "secs": 20.4
  },
  {
   "id": "M04",
@@ -50,8 +55,9 @@
   "description": "P1 prior scale 0.1 -> 0.2",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 58.2
+  "secs": 78.2
  },
  {
   "id": "M04b",
@@ -59,8 +65,9 @@
   "description": "P2 prior scale 0.25 -> 0.5",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 64.2
+  "secs": 80.7
  },
  {
   "id": "M05",
@@ -68,8 +75,9 @@
   "description": "family map: every dataset its own family (family term dropped)",
   "status": "killed",
   "exit": 1,
-  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
-  "secs": 26.1
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 20.5
  },
  {
   "id": "M06",
@@ -77,8 +85,9 @@
   "description": "transfer lambda trained leave-one-DATASET-out instead of leave-one-family-out",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_transfer_lambda",
-  "secs": 23.8
+  "secs": 22.3
  },
  {
   "id": "M07",
@@ -86,8 +95,9 @@
   "description": "window: t degrees of freedom n-1 -> n",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
-  "secs": 27.7
+  "secs": 22.4
  },
  {
   "id": "M07b",
@@ -95,8 +105,9 @@
   "description": "window: normal quantile instead of t",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
-  "secs": 23.8
+  "secs": 22.2
  },
  {
   "id": "M08",
@@ -104,8 +115,9 @@
   "description": "Holm order: largest p first",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_sign_test_and_holm",
-  "secs": 25.5
+  "secs": 22.1
  },
  {
   "id": "M09",
@@ -113,8 +125,9 @@
   "description": "area corner offset 0.10 -> 0.20 below scVI biology",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_read_area[collapse-False-fail0-want0]",
-  "secs": 1.6
+  "secs": 1.4
  },
  {
   "id": "M10",
@@ -122,8 +135,9 @@
   "description": "collapse boundary 0.10 -> 0.15",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
-  "secs": 23.2
+  "secs": 22.2
  },
  {
   "id": "M11",
@@ -131,8 +145,9 @@
   "description": "jackknife factor (m-1)/m -> 1/m (read_p1)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref0-dis0-mean-want0]",
-  "secs": 1.5
+  "secs": 1.4
  },
  {
   "id": "M12",
@@ -140,8 +155,9 @@
   "description": "leave-one-seed-out anchor does not drop the seed from plain scVI (P1)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_p1_reading[ref10-dis10-mean-want10]",
-  "secs": 1.5
+  "secs": 1.4
  },
  {
   "id": "M13",
@@ -149,8 +165,9 @@
   "description": "R4 extension rows not excluded from the arm's points",
   "status": "killed",
   "exit": 1,
-  "first_failure": "",
-  "secs": 29.1
+  "kind": "ERROR",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 24.1
  },
  {
   "id": "M14",
@@ -158,8 +175,9 @@
   "description": "frontier positions: (B, C) swapped",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 63.0
+  "secs": 79.9
  },
  {
   "id": "M15",
@@ -167,8 +185,9 @@
   "description": "window width of every arm computed from the reference's scores",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 59.1
+  "secs": 80.6
  },
  {
   "id": "M16",
@@ -176,8 +195,9 @@
   "description": "sign-table z value 1.96 -> 1.0",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 61.9
+  "secs": 79.0
  },
  {
   "id": "M17",
@@ -185,8 +205,9 @@
   "description": "Holm family contains local instead of area",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 58.0
+  "secs": 78.3
  },
  {
   "id": "M18",
@@ -194,8 +215,9 @@
   "description": "drop_failed sensitivity does not reach the area",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 63.8
+  "secs": 84.0
  },
  {
   "id": "M19",
@@ -203,8 +225,9 @@
   "description": "pooled P2 rate sums all eight tasks (sim1, sim2 pooled with real tasks)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 59.0
+  "secs": 81.4
  },
  {
   "id": "M20",
@@ -212,8 +235,9 @@
   "description": "Agresti-Caffo adds 0.5/1 instead of 1/2",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
-  "secs": 29.9
+  "secs": 22.4
  },
  {
   "id": "M21",
@@ -221,8 +245,9 @@
   "description": "area divisor: b* - b0 instead of b_common - b0",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 65.5
+  "secs": 78.8
  },
  {
   "id": "M22",
@@ -230,8 +255,9 @@
   "description": "local endpoint pooled from the P1 reading",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 66.5
+  "secs": 80.3
  },
  {
   "id": "M23",
@@ -239,17 +265,19 @@
   "description": "GRID_SPAN 5 -> 3 (spread grid cut at 3 prior scales)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
-  "secs": 14.4
+  "secs": 10.1
  },
  {
   "id": "M24",
   "group": "declaration",
   "description": "GRID_N 201 -> 101",
-  "status": "SURVIVED",
-  "exit": 0,
-  "first_failure": "",
-  "secs": 52.8
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 19.2
  },
  {
   "id": "M24b",
@@ -257,8 +285,9 @@
   "description": "GRID_N 201 -> 51",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
-  "secs": 11.2
+  "secs": 8.8
  },
  {
   "id": "M25",
@@ -266,8 +295,9 @@
   "description": "P1 contrast arm: pooled instead of reference",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 52.9
+  "secs": 81.7
  },
  {
   "id": "M26",
@@ -275,8 +305,9 @@
   "description": "prior scale of the spreads fixed at 0.1 in the sensitivity analyses",
   "status": "killed",
   "exit": 1,
-  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
-  "secs": 23.3
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_spread_family_0.2]",
+  "secs": 21.8
  },
  {
   "id": "M27",
@@ -284,8 +315,9 @@
   "description": "family spread prior half-normal -> weight exp(-tau/scale) (wrong prior density)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
-  "secs": 12.8
+  "secs": 10.2
  },
  {
   "id": "M28",
@@ -293,8 +325,9 @@
   "description": "tau grid starts at 0 but trapezoid end weights dropped (rectangle rule)",
   "status": "SURVIVED",
   "exit": 0,
+  "kind": "",
   "first_failure": "",
-  "secs": 74.2
+  "secs": 88.0
  },
  {
   "id": "M29",
@@ -302,8 +335,9 @@
   "description": "marginal covariance: dataset spread omitted (family term only)",
   "status": "killed",
   "exit": 1,
-  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
-  "secs": 27.8
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 20.3
  },
  {
   "id": "M30",
@@ -311,8 +345,9 @@
   "description": "posterior probability of 'equivalent' uses 2*margin",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d0-s0-inconclusive-levels0]",
-  "secs": 1.5
+  "secs": 1.4
  },
  {
   "id": "M31",
@@ -320,8 +355,9 @@
   "description": "R4 target: b_common used as b* in P1",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 59.6
+  "secs": 75.4
  },
  {
   "id": "M32",
@@ -329,8 +365,9 @@
   "description": "low-signal flag ignored (cells pooled)",
   "status": "killed",
   "exit": 1,
-  "first_failure": "",
-  "secs": 34.1
+  "kind": "ERROR",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 26.3
  },
  {
   "id": "M33",
@@ -338,8 +375,9 @@
   "description": "per-dataset s of the area replaced by the P1 s",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 64.7
+  "secs": 79.0
  },
  {
   "id": "M34",
@@ -347,8 +385,9 @@
   "description": "failed runs counted as plain scVI-like non-collapse (failures not counted in P2)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_collapse_counts",
-  "secs": 22.9
+  "secs": 22.0
  },
  {
   "id": "M35",
@@ -356,8 +395,9 @@
   "description": "best-of-k indexing wrong (comb(i, k-1))",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_best_of_k[S1]",
-  "secs": 27.3
+  "secs": 22.2
  },
  {
   "id": "N01",
@@ -365,8 +405,9 @@
   "description": "revert AN-01: uniform spread grid from 0, no Jacobian",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d1-s1-fam1-0.2-above-grid1]",
-  "secs": 25.0
+  "secs": 21.6
  },
  {
   "id": "N02",
@@ -374,8 +415,9 @@
   "description": "log-grid Jacobian (weight x tau) dropped",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
-  "secs": 12.4
+  "secs": 9.8
  },
  {
   "id": "N03",
@@ -383,8 +425,9 @@
   "description": "TAU_FLOOR 1e-15 -> 1e-5",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_brute_force[d0-s0-fam0-0.1-inconclusive-grid0]",
-  "secs": 10.5
+  "secs": 9.8
  },
  {
   "id": "N04",
@@ -392,17 +435,9 @@
   "description": "Delta posterior from V^-1 again (cancellation-prone)",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_closed_form[d5-s5-above-levels0]",
-  "secs": 3.1
- },
- {
-  "id": "N05",
-  "group": "lead",
-  "description": "zero_spread rule disabled",
-  "status": "killed",
-  "exit": 1,
-  "first_failure": "",
-  "secs": 26.0
+  "secs": 2.2
  },
  {
   "id": "N06a",
@@ -410,8 +445,9 @@
   "description": "R4 check compares b0 only",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ1]",
-  "secs": 102.9
+  "secs": 110.8
  },
  {
   "id": "N06b",
@@ -419,8 +455,9 @@
   "description": "R4 check ignores the low-signal flag",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ2]",
-  "secs": 119.7
+  "secs": 110.4
  },
  {
   "id": "N07",
@@ -428,8 +465,9 @@
   "description": "X1 seed check removed",
   "status": "killed",
   "exit": 1,
-  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-X1",
-  "secs": 103.9
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-X1 seeds]",
+  "secs": 113.1
  },
  {
   "id": "N08",
@@ -437,8 +475,9 @@
   "description": "sign table back to the normal quantile",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 62.2
+  "secs": 81.4
  },
  {
   "id": "N09",
@@ -446,8 +485,9 @@
   "description": "window gap always False",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
-  "secs": 25.5
+  "secs": 22.8
  },
  {
   "id": "N10",
@@ -455,17 +495,19 @@
   "description": "best-of-k failed runs not counted",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 59.5
+  "secs": 78.0
  },
  {
   "id": "N11",
   "group": "lead",
   "description": "input rows not sorted by tag (expected equivalent at test tolerance)",
-  "status": "SURVIVED",
-  "exit": 0,
-  "first_failure": "",
-  "secs": 68.3
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 77.9
  },
  {
   "id": "N12",
@@ -473,8 +515,9 @@
   "description": "pool accepts any positive s",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_guards",
-  "secs": 28.0
+  "secs": 23.1
  },
  {
   "id": "N13",
@@ -482,8 +525,9 @@
   "description": "S_MIN 1e-6 -> 1e-9",
   "status": "killed",
   "exit": 1,
-  "first_failure": "tests/analysis/test_analysis_x1.py::test_guards",
-  "secs": 21.5
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 22.0
  },
  {
   "id": "N14",
@@ -491,8 +535,9 @@
   "description": "R4 targets taken from the record instead of recomputed",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ0]",
-  "secs": 91.0
+  "secs": 96.4
  },
  {
   "id": "N15",
@@ -500,8 +545,9 @@
   "description": "sign-table t with m instead of m - 1 degrees of freedom",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 56.7
+  "secs": 78.9
  },
  {
   "id": "N17",
@@ -509,7 +555,178 @@
   "description": "best-of-k configs = scored configurations",
   "status": "killed",
   "exit": 1,
+  "kind": "FAILED",
   "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
-  "secs": 63.6
+  "secs": 80.1
+ },
+ {
+  "id": "O02",
+  "group": "round 3",
+  "description": "grid floor: TAU_FLOOR 1e-15 -> 1e-9",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 20.3
+ },
+ {
+  "id": "O11",
+  "group": "round 3",
+  "description": "R4 recompute tolerance 1e-9 -> 1e-3",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ4]",
+  "secs": 106.9
+ },
+ {
+  "id": "O12",
+  "group": "round 3",
+  "description": "R4 recompute: b_common not compared",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-differ3]",
+  "secs": 109.2
+ },
+ {
+  "id": "O16",
+  "group": "round 3",
+  "description": "sort key: rows sorted by lambda instead of tag",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 78.8
+ },
+ {
+  "id": "O18",
+  "group": "round 3",
+  "description": "failed-run total: max instead of sum",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 80.8
+ },
+ {
+  "id": "O20",
+  "group": "round 3",
+  "description": "gap flag: looks only at the first interior point",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
+  "secs": 21.1
+ },
+ {
+  "id": "O22",
+  "group": "round 3",
+  "description": "grid point count 201 -> 151",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 19.3
+ },
+ {
+  "id": "O23",
+  "group": "round 3",
+  "description": "sign table: t degrees of freedom a constant 4 (right only when m = 5)",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 79.7
+ },
+ {
+  "id": "O24",
+  "group": "round 3",
+  "description": "R4 recompute ignores the extension rows (computed on the six registered points only)",
+  "status": "killed",
+  "exit": 1,
+  "kind": "ERROR",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_end_to_end",
+  "secs": 23.8
+ },
+ {
+  "id": "F07",
+  "group": "round 3",
+  "description": "floor: '<' changed to '<=' at the threshold (s = 1e-6 listed as raised)",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 20.0
+ },
+ {
+  "id": "F08",
+  "group": "round 3",
+  "description": "floor: threshold 1.5e-6",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_pool_known_answers_small_s[H2_family_0.1]",
+  "secs": 20.1
+ },
+ {
+  "id": "F09",
+  "group": "round 3",
+  "description": "floor applied only when s == 0",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 21.5
+ },
+ {
+  "id": "F10",
+  "group": "round 3",
+  "description": "floor not applied to the pair's averaged standard error",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 22.4
+ },
+ {
+  "id": "G01",
+  "group": "round 3",
+  "description": "n_all_failed_between counts every failed configuration, not only those between the window's ends",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_window",
+  "secs": 21.3
+ },
+ {
+  "id": "G02",
+  "group": "round 3",
+  "description": "floor: NaN, infinite and negative standard errors not refused",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_guards",
+  "secs": 21.5
+ },
+ {
+  "id": "G03",
+  "group": "round 3",
+  "description": "refusal message: recorded and recomputed values not printed",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_refusals[<lambda>-for atac_small\\\\|0: record \\\\[[-0-9.e]+, [-0-9.e]+, [-0-9.e]+, (True|False)\\\\], recomputed \\\\[[-0-9.e]+, [-0-9.e]+, [-0-9.e]+, (True|False)\\\\]; if R4 added extension rows]",
+  "secs": 86.0
+ },
+ {
+  "id": "G04",
+  "group": "round 3",
+  "description": "pairs: the family's standard error averages the datasets' own s, not the raised ones",
+  "status": "killed",
+  "exit": 1,
+  "kind": "FAILED",
+  "first_failure": "tests/analysis/test_analysis_x1.py::test_combine_structures",
+  "secs": 22.9
  }
 ]
