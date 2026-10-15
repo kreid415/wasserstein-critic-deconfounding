@@ -671,6 +671,22 @@ def _power(delta, se, df):
     return float(1 - stats.nct.cdf(tcrit, df, delta / se))
 
 
+def _mde80(se, df):
+    """Smallest effect detected with power 0.8: the root of power(x) - 0.8, searched upwards from 1.0. scipy's
+    non-central t is NaN at isolated large non-centralities (the effect divided by its standard error), which stops
+    the search for some small standard errors; it then restarts at 0.01 (SI-86, the user's decision of 2026-10-15).
+    A search that works from 1.0 gives the same value as before; one that fails from both starts raises."""
+    for hi in (1.0, 0.01):
+        try:
+            while _power(hi, se, df) < 0.8:
+                hi *= 2
+                _require(hi < 1e6, f"power never reaches 0.8 (se={se})")
+            return optimize.brentq(lambda x: _power(x, se, df) - 0.8, 1e-9, hi)
+        except ValueError as e:      # the power is NaN at a point of the search: try the next start
+            err = e
+    raise PreregError(f"power search failed from the starts 1.0 and 0.01 (se={se}, df={df}): {err}") from err
+
+
 def power_report(out, r4a1):
     """P1 contrast (reference - discriminator) at the R4-a1 matched lambda, per A1 task x decoder."""
     blocks, var_num, var_den, by_cond = {}, 0.0, 0, {}
@@ -701,11 +717,7 @@ def power_report(out, r4a1):
     for label, D in (("real_tasks", len(REAL_TASKS)), ("families", len(set(TASK_FAMILY.values())))):
         se = math.sqrt((tau ** 2 + sigma ** 2 / POWER_SEEDS) / D)
         df = D - 1
-        hi = 1.0
-        while _power(hi, se, df) < 0.8:
-            hi *= 2
-            _require(hi < 1e6, f"power never reaches 0.8 (se={se})")
-        mde = optimize.brentq(lambda x: _power(x, se, df) - 0.8, 1e-9, hi)
+        mde = _mde80(se, df)
         designs[label] = dict(D=D, df=df, se=se, power_at_delta=_power(POWER_DELTA, se, df), mde80=mde,
                               equivalence_feasible={str(h): bool(stats.t.ppf(0.975, df) * se < h) for h in EQUIV_BOUNDS})
     p_min = 2.0 / 2 ** len(REAL_TASKS)

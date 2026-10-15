@@ -393,3 +393,21 @@ def test_power_report_on_synthetic_a1():
     assert math.isclose(P._power(d["mde80"], d["se"], d["df"]), 0.8, abs_tol=1e-6)
     assert pw["frequentist_can_reject"] is False and math.isclose(pw["wilcoxon_min_p_two_sided"], 0.03125)
     assert pw["designs"]["families"]["D"] == 4
+
+
+# test-reason: the only test with an input on which the search from 1.0 fails (SI-86) and of the raise when both fail
+def test_mde80_restarts_at_0_01_only_when_the_search_from_1_fails():
+    """SI-86 (the user's decision of 2026-10-15 to restart the power search at 0.01 when the search from 1.0 fails).
+    With scipy 1.17.1 the non-central t (nct.cdf) is NaN (not a number) at x = 1.0 for the standard error of the pilot
+    without sim1, which stopped the search that starts at 1.0 (documents re-check of 2026-10-14, script
+    05_power_report_nan_probe.py: 7 of 230 tested standard errors). The search now restarts at 0.01 and finds the value
+    that experiments/final_review_amendments_20261013/power_without_sim1.py found with a search that starts at 0.01.
+    A design of one dataset (0 degrees of freedom) has no power: both starts fail and the search raises. The power at
+    the answer is checked with the upper-tail probability (the survival function), which has no NaN."""
+    se, df = 0.02355132223101683, 5
+    assert math.isnan(P._power(1.0, se, df))                     # the premise: the search from 1.0 cannot start here
+    mde = P._mde80(se, df)
+    assert math.isclose(mde, 0.0684067435003012, rel_tol=1e-9)
+    assert math.isclose(stats.nct.sf(stats.t.ppf(0.95, df), df, mde / se), 0.8, abs_tol=1e-9)
+    with pytest.raises(P.PreregError, match="power search failed from the starts 1.0 and 0.01"):
+        P._mde80(0.02, 0)
