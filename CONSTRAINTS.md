@@ -610,9 +610,9 @@
 - notebook: NB-20261015-19
 
 ## SI-87 · active · process
-- rule: The Sinkhorn redo overwrites docs/prereg/r1_record.json, r4_a1_record.json, r2r3_record.json and the two round1 record files in place (no *_sinkhorn_redo.json names); the old versions stay at tags prereg-tier12-v2 and prereg-tier12-v3, PREREG says so, and the redo's notebook entry lists every decision for the other five arms that changed.
+- rule: The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place (no *_sinkhorn_redo.json names); the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo, and in the commits that froze them (they do not exist at prereg-tier12-v2, which predates them; correction NB-20261015-21); PREREG says so, and the redo's notebook entry lists every decision for the other five arms that changed.
 - source: "Overwrite; old versions kept at the tags (Recommended)" (user, ask_user answer to "Do you approve these file names for the redone Sinkhorn decision records?", 2026-10-15); first answer: "if the previous sinkhorns are not relevant, just overwrite them" (user, 2026-10-15)
 - added: 2026-10-15
 - keywords: record, r1_record, r4_a1_record, r2r3_record, sinkhorn_redo, overwrite, redo
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
-- notebook: NB-20261015-20
+- notebook: NB-20261015-20, NB-20261015-21
