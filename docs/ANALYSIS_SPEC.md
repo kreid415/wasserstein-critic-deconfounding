@@ -286,6 +286,10 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 Per Q1 (SI-68): P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
 X7/X8 fixes; R0 and X10 exploratory; no measurement-SD re-score study (SI-74).
 
+PAPER_PLAN section 5's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette
+metrics, rank stability by Kendall's tau) are reported, labelled not pre-registered, and used for no conclusion (exploratory; user
+decision SI-82, 2026-10-15). `scripts/analysis_x1.py` has no counterpart for them.
+
 ## 13. PAPER_PLAN section 5 statements this file replaces (dated pointer added there at sign-off)
 
 ROPE (Q7); failure imputation (Q4); the model formula without an arm-by-dataset term (I056); "same init and minibatch
