@@ -488,9 +488,9 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   pilot R2/R3 counts quoted elsewhere come from the frozen record made at c88cce3; the current code reports the new
   counts for the same inputs (checked 2026-10-14 by running prereg_rules.decide_binary on the record's stored cells
   with the low-signal marking that decide_a2_a3.cells_for applies). A2 and A3 exist (all 288 rows fitted and scored;
-  the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
-  has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
-  them is a question for the diff review.
+  the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 has
+  them refitted and R2 and R3 re-run. Neither can change what X1 uses while the flag holds, and the user decided on
+  2026-10-15 to keep every step of SI-57 in rule order all the same (NB-20261015-08).
 - **2026-10-14, disclosure: part of X1 and X13 was fitted and scored before the X1 analyses were specified (finding
   DOC-01 of the documents review of 2026-10-14; widened on 2026-10-15 by the user's decisions SI-78, SI-79 and SI-88
   and by findings DOC-R01, DOC-R02 and DOC-R14 of the documents re-check).**
