@@ -1,7 +1,7 @@
 % refs.bib -- framing track (Introduction, Related work) plus the shared seed-list keys.
 % Metadata from Crossref (journal DOIs) or the proceedings page (PMLR, NeurIPS, JMLR, OpenReview); retrieved 2026-10-14.
 % verified = {date via doi|url}: metadata check; the claim checks are in evidence.md.
-% Seed key corani2017time is kept for cross-track consistency although the convention would give corani2017statistical.
+% Key corani2017statistical (formerly the seed key corani2017time), renamed at integration on 2026-10-15.
 
 @article{lopez2018deep,
   author = {Lopez, Romain and Regier, Jeffrey and Cole, Michael B. and Jordan, Michael I. and Yosef, Nir},
@@ -81,7 +81,7 @@
 }
 
 @article{ganin2016domain,
-  author = {Yaroslav Ganin and Evgeniya Ustinova and Hana Ajakan and Pascal Germain and Hugo Larochelle and Fran{\c{c}}ois Laviolette and Mario March and Victor Lempitsky},
+  author = {Yaroslav Ganin and Evgeniya Ustinova and Hana Ajakan and Pascal Germain and Hugo Larochelle and Fran{\c{c}}ois Laviolette and Mario Marchand and Victor Lempitsky},
   title = {Domain-Adversarial Training of Neural Networks},
   journal = {Journal of Machine Learning Research},
   volume = {17},
@@ -340,7 +340,7 @@
   verified = {2026-10-14 via doi}
 }
 
-@article{corani2017time,
+@article{corani2017statistical,
   author = {Corani, Giorgio and Benavoli, Alessio and Dem{\v{s}}ar, Janez and Mangili, Francesca and Zaffalon, Marco},
   title = {Statistical comparison of classifiers through {Bayesian} hierarchical modelling},
   journal = {Machine Learning},
@@ -580,17 +580,18 @@
   verified = {2026-10-14 via doi}
 }
 
-@misc{reid2025topology,
+@article{reid2025topology,
   author = {Reid, Kendall and Stein-O'Brien, Genevieve and Guven, Erhan},
-  title = {Topology Matters: The Trade-off Between {Wasserstein} Critics and Discriminators for Single-Cell Data Integration},
-  howpublished = {bioRxiv preprint},
+  title = {Topology Matters: The Trade-off Between {Wasserstein} Critics and Discriminators in Single-Cell Data Integration},
+  journal = {bioRxiv},
+  note = {Version 3, posted 2026-05-05},
   year = {2025},
   doi = {10.1101/2025.11.12.688061},
   verified = {2026-10-14 via doi}
 }
 
 @inproceedings{arjovsky2017towards,
-  author = {Martin Arjovsky and Leon Bottou},
+  author = {Martin Arjovsky and L{\'e}on Bottou},
   title = {Towards Principled Methods for Training Generative Adversarial Networks},
   booktitle = {International Conference on Learning Representations},
   year = {2017},
@@ -601,7 +602,7 @@
 }
 
 @article{luecken2025defining,
-  author = {Luecken, Malte D. and Gigante, Scott and Burkhardt, Daniel B. and Cannoodt, Robrecht and Strobl, Daniel C. and Markov, Nikolay S. and Zappia, Luke and Palla, Giovanni and Lewis, Wesley and Dimitrov, Daniel and Vinyard, Michael E. and Magruder, D. S. and Mueller, Michaela F. and Andersson, Alma and Dann, Emma and Qin, Qian and Otto, Dominik J. and Klein, Michal and Botvinnik, Olga Borisovna and Deconinck, Louise and Waldrant, Kai and Yasa, Sai Nirmayi and Sza{\l}ata, Artur and Benz, Andrew and Li, Zhijian and Rieck, Bastian and Ahlmann-Eltze, Constantin and da Veiga Beltrame, Eduardo and Bravo Gonz{\'a}lez-Blas, Carmen and Chen, Ann T. and DeMeo, Benjamin and Ergen, Can and Floc'hlay, Swann and Gayoso, Adam and Hicks, Stephanie and Ji, Yuge and Kleshchevnikov, Vitalii and La Manno, Gioele and Lombardo, Maximilian G. and Lopez, Romain and Righelli, Dario and Sarkar, Hirak and Svensson, Valentine and Tong, Alexander and Xing, Galen and Xu, Chenling and Bloom, Jonathan M. and Pisco, Angela Oliveira and Saez-Rodriguez, Julio and Wulsin, Drausin and Pinello, Luca and Saeys, Yvan and Theis, Fabian J. and Krishnaswamy, Smita},
+  author = {Luecken, Malte D. and Gigante, Scott and Burkhardt, Daniel B. and Cannoodt, Robrecht and Strobl, Daniel C. and Markov, Nikolay S. and Zappia, Luke and Palla, Giovanni and Lewis, Wesley and Dimitrov, Daniel and Vinyard, Michael E. and Magruder, D. S. and Mueller, Michaela F. and Andersson, Alma and Dann, Emma and Qin, Qian and Otto, Dominik J. and Klein, Michal and Botvinnik, Olga Borisovna and Deconinck, Louise and Waldrant, Kai and Yasa, Sai Nirmayi and Sza{\l}ata, Artur and Benz, Andrew and Li, Zhijian and {Open Problems Jamboree Members} and Rieck, Bastian and Ahlmann-Eltze, Constantin and da Veiga Beltrame, Eduardo and Bravo Gonz{\'a}lez-Blas, Carmen and Chen, Ann T. and DeMeo, Benjamin and Ergen, Can and Floc'hlay, Swann and Gayoso, Adam and Hicks, Stephanie and Ji, Yuge and Kleshchevnikov, Vitalii and La Manno, Gioele and Lombardo, Maximilian G. and Lopez, Romain and Righelli, Dario and Sarkar, Hirak and Svensson, Valentine and Tong, Alexander and Xing, Galen and Xu, Chenling and Bloom, Jonathan M. and Pisco, Angela Oliveira and Saez-Rodriguez, Julio and Wulsin, Drausin and Pinello, Luca and Saeys, Yvan and Theis, Fabian J. and Krishnaswamy, Smita},
   title = {Defining and benchmarking open problems in single-cell analysis},
   journal = {Nature Biotechnology},
   volume = {43},
@@ -635,5 +636,18 @@
   url = {https://arxiv.org/abs/1802.05957},
   eprint = {1802.05957},
   archiveprefix = {arXiv},
+  verified = {2026-10-15 via url}
+}
+
+@inproceedings{genevay2018learning,
+  author = {Genevay, Aude and Peyr{\'e}, Gabriel and Cuturi, Marco},
+  title = {Learning Generative Models with {Sinkhorn} Divergences},
+  booktitle = {Proceedings of the Twenty-First International Conference on Artificial Intelligence and Statistics},
+  series = {Proceedings of Machine Learning Research},
+  volume = {84},
+  pages = {1608--1617},
+  year = {2018},
+  publisher = {PMLR},
+  url = {https://proceedings.mlr.press/v84/genevay18a.html},
   verified = {2026-10-15 via url}
 }
