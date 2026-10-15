@@ -30,7 +30,8 @@ P2_MARGIN = 0.05
 PRIOR_SCALE = 0.1
 P2_PRIOR_SCALE = 0.25
 GRID_N = 201
-GRID_SPAN = 5.0
+GRID_SPAN = 5.0       # the grid ends at 5 prior scales: every reported value is within 2e-6 of a reference while the datasets' differences
+                      # spread by at most 3 prior scales; beyond that it grows (4e-5 to 3e-4 at 5 to 6 scales; SI-84, AN-R10)
 TAU_FLOOR = 1e-15     # each spread is integrated over [TAU_FLOOR, GRID_SPAN x its prior scale], evenly in log(tau)
 S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); a smaller one is raised to it (SI-83)
 DECLARE = 0.95

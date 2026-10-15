@@ -8,7 +8,8 @@
    amended code against the reference (step 0.06 for two spreads, 0.01 for one), and against the same reference cut
    at 5 prior scales as the code is (to separate the prior truncation from the integration rule).
 3. Per-grid-node precision of the formulas for Delta | d against 40-digit arithmetic (mpmath).
-4. The effect of the two planted errors the tests do not catch (M24: 101 grid points, M28: no half end weights).
+4. The effect of the two planted errors the tests of 2026-10-14 did not catch (M24: 101 grid points, M28: no half end weights;
+   the known answers added on 2026-10-15 catch M24). The summary key is still called `uncaught_planted_errors`.
 Inputs are synthetic only (no X1 score is read). Run from the repo root:  python experiments/analysis_numerics_20261014/check_pool_numerics.py
 Environment used on 2026-10-14: conda env `python` (Python 3.11.15, numpy 2.4.6, scipy 1.17.1, pandas 2.3.3, mpmath 1.4.1).
 """
@@ -126,7 +127,7 @@ def part2():
 
 
 def part4(worlds):
-    """Effect of two planted errors that the tests do not catch (mutation/run_mut.py M24, M28) on the stress worlds
+    """Effect of two planted errors that the tests of 2026-10-14 did not catch (mutation/run_mut.py M24, M28) on the stress worlds
     0, 4, 8, ...: largest change of any reported probability, mean, interval end or heterogeneity."""
     import inspect
     src = inspect.getsource(A.pool)
