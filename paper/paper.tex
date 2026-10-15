@@ -37,7 +37,7 @@
 
 \section*{How to read this outline}
 \begin{itemize}
-\item Three status forms. Plain text followed by a grey bracket \src{source} is \textbf{locked}: a user decision in the decision ledger (\file{CONSTRAINTS.md}), a rule frozen at tag prereg-tier12-v2 (commit c88cce3), or a fact verified in a file. \pending{what is still open}{the event that will lock it} marks text that is \textbf{not locked}. \unverified{key} marks a citation key whose claim has not yet been checked against its source.
+\item Three status forms. Plain text followed by a grey bracket \src{source} is \textbf{locked}: a user decision in the decision ledger (\file{CONSTRAINTS.md}), a rule frozen at tag prereg-tier12-v2 (commit c88cce3), or a fact verified in a file. \pending{what is still open}{the event that will lock it} marks text that is \textbf{not locked}. \unverified{key} marks a citation key whose claim has not yet been checked against its source; none remains. Author-year citations are checked: each claim against the source text, recorded in \file{paper/evidence.md}, which names the citations checked against the abstract or metadata only and those read in a preprint version.
 \item SI-nn: entry nn of the decision ledger \file{CONSTRAINTS.md} (77 entries). Each quotes the user's answer, except SI-42, a lead-agent decision that is not locked, and the sentence of SI-17 marked as an agent-derived corollary. SI-35 and SI-59 are retired (replaced by SI-46 and SI-61).
 \item PREREG \S n: section n of \file{docs/PREREG.md}, the pre-registered decision rules. Frozen at tag prereg-tier12-v2 (commit c88cce3) and byte-identical at 08f1e3c: \S0--\S2, \S4, \S6--\S8, the Disclosure paragraph, and 11 of the 12 section 9 entries dated 2026-10-03/04 \src{\file{docs/PREREG.md} at c88cce3 and 08f1e3c, compared}. At 08f1e3c, \S3, \S5 and the 2026-10-03 entry also carry bracketed notes dated 2026-10-13/14 (version 3): the \S3 note and the 2026-10-03 correction implement SI-56, SI-66 and SI-53; the \S5 note (Holm over six results) is an agent proposal. The section 9 entries dated 2026-10-13 and 2026-10-14 are version 3, which is not frozen.
 \item ANALYSIS\_SPEC \S n: section n of \file{docs/ANALYSIS_SPEC.md}, the draft specification of the X1 analyses. It holds user decisions (SI-68 to SI-77) and agent proposals that wait for the user's review of the full diff.
@@ -111,10 +111,109 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \item Availability: code in the GitHub repository kreid415/wasserstein-critic-deconfounding \src{git remote}; \pending{tag and commit of record}{tag prereg-tier12-v3}; scIB task files with checksums [S-D2]; the earlier preprint is replaced by the next version once results exist \src{SI-07}.
 \end{itemize}
 
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
+
+\paragraph{Batch effects.}
 \begin{itemize}
-\item \pending{background; what the JS and W1 losses do and do not guarantee; composition shift and over-alignment; the gap; the contribution, each claim with a checked citation}{citation check of the source papers}
+\item Batch effects are technical variation from laboratory conditions, reagent lots, personnel, instruments, time or pipeline; they mislead when correlated with the outcome \citep{leek2010tackling,yu2024assessing}.
+\item In single-cell RNA sequencing (scRNA-seq), separately processed replicates differ substantially \citep{tung2017batch}, and batch effects remain a single-cell problem \citep{goh2022batch}.
+\item Correction fails both ways: residual effects mislead, over-correction removes biology \citep{yu2024assessing}.
+\item Integration is scored on two axes: batch removal and conservation of biological variation \citep{luecken2022benchmarking}.
 \end{itemize}
+
+\paragraph{Adversarial integration.}
+\begin{itemize}
+\item An encoder is trained against an adversary that predicts the batch, or another confounder such as age, from the latent code \citep{ganin2016domain,dincer2020adversarial}.
+\item A discriminator targets the Jensen--Shannon (JS) divergence: at its optimum the generative adversarial network (GAN) objective is $-\log 4 + 2\,\mathrm{JSD}$ \citep[Thm.~1]{goodfellow2014generative}.
+\item A Wasserstein-1 (W1) critic estimates the earth mover's distance through its 1-Lipschitz dual \citep{arjovsky2017wasserstein}; WGAN-GP (Wasserstein GAN with gradient penalty) enforces the constraint softly \citep[Sec.~4]{gulrajani2017improved}.
+\end{itemize}
+
+\paragraph{JS versus W1, stated precisely.}
+\begin{itemize}
+\item W1 is continuous for continuous generators, and differentiable almost everywhere for locally Lipschitz ones (with a regularity assumption); JS and Kullback--Leibler (KL) divergences are not \citep[Thm.~1]{arjovsky2017wasserstein}.
+\item On disjoint parallel lines JS $=\log 2$ at every nonzero offset, while W1 equals the offset \citep[Example~1]{arjovsky2017wasserstein}.
+\item For disjoint supports or non-aligned low-dimensional manifolds, a perfect discriminator with zero gradient on both supports exists \citep[Thms.~2.1--2.2]{arjovsky2017towards}.
+\item The saturating loss $\log(1-D)$ then has vanishing generator gradients near the optimal discriminator \citep[Thm.~2.4]{arjovsky2017towards}.
+\item The non-saturating loss $-\log D$ need not vanish, but with a noisy discriminator its gradient is Cauchy-distributed, i.e.\ unstable \citep[Thms.~2.5--2.6]{arjovsky2017towards}.
+\item Continuous noise added to the discriminator input removes the disjoint-support assumption \citep[Thm.~3.1]{arjovsky2017towards}.
+\item In the main experiment X1, the stock scvi-tools adversary sees posterior samples (Gaussian noise) \src{scvi-tools 1.4.2: scvi/nn/\_base\_components.py:304--305, scvi/train/\_trainingplans.py:689; \file{scvi_adversarial_plan.py}:348--351; arm scvi\_adv in \file{manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv}}.
+\item The authored arms see the posterior mean by default \src{SI-19; \file{scvi_adversarial_plan.py}:359}, and X1 keeps it: the frozen rule-R4 record on A1 flags immune with the conditioned decoder as low-signal, so rules R2 and R3 cannot switch while that flag holds, and refitting Sinkhorn, which sets $b_{\mathrm{common}}$ in no block, cannot remove the flag \src{SI-66; \file{docs/prereg/r4_a1_record.json}}. \pending{formal re-run of rules R2 and R3}{after the Sinkhorn redo (SI-57)}
+\item The discriminator arm minimises scvi-tools' fool loss (cross-entropy to the uniform distribution over the other batches, over all cells) at one adversary step \src{SI-01; \file{scvi_adversarial_plan.py}:8--9, 292--298}; for two batches this is the label-flipped non-saturating loss.
+\item Thms.~2.4--2.6 assume a fixed data distribution; here every batch's latent moves, so they do not transfer automatically.
+\item The vanishing-gradient premise (a fairness concern of Reviewer~1) is examined, not assumed: the premise check R0 (pre-integration batch separability; adversary gradient norms) is exploratory \src{SI-68; PAPER\_PLAN \S3; decision letter, Reviewer 1, major comment 2}.
+\end{itemize}
+
+\paragraph{Composition shift and over-alignment.}
+\begin{itemize}
+\item When cell-type (label) proportions differ between batches (domains), aligning the latent distributions forces error, $\varepsilon_S+\varepsilon_T \geq \tfrac12\bigl(d_{JS}(\mathcal{D}^Y_S,\mathcal{D}^Y_T)-d_{JS}(\mathcal{D}^Z_S,\mathcal{D}^Z_T)\bigr)^2$, more as alignment tightens \citep[Thm.~4.3; binary labels, JS distance]{zhao2019learning}.
+\item Exact alignment with zero source error, under any distance that is zero only for identical distributions (a JS classifier, Wasserstein, maximum mean discrepancy (MMD)), leaves target error of at least the label-proportion gap \citep[Prop.~3.1; binary labels]{wu2019domain}.
+\item Over-alignment under composition shift is thus predicted for every divergence arm, not only W1.
+\item An adversarial conditional variational autoencoder (VAE) and GLUE mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+\item scCRAFT added a triplet loss against the over-correction of its adversarial loss under heterogeneous compositions \citep{he2025partially}.
+\item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}.
+\end{itemize}
+
+\paragraph{Loss versus tuning in GANs.}
+\begin{itemize}
+\item For image GANs, most losses reached similar scores with enough tuning and restarts; none consistently beat the non-saturating GAN \citep{lucic2018gans}.
+\item The non-saturating loss was stable across datasets and hyperparameters; spectral normalisation consistently helped, the gradient penalty only sometimes \citep{kurach2019large}.
+\item A critic--discriminator difference may thus reflect regularisation, update budget or tuning, not the divergence (image results).
+\end{itemize}
+
+\paragraph{Gap.}
+\begin{itemize}
+\item Closest controlled-backbone study: scIB-E, six batch losses (GAN, Hilbert--Schmidt independence, orthogonal projection, mutual information, gradient reversal, reverse cross-entropy) in one scVI (single-cell variational inference) framework; no W1, MMD or optimal-transport (OT) term \citep{yi2025benchmarking}.
+\item No budget-matched comparison of JS, W1 and MMD/OT objectives on a stock scVI backbone was found: a search-based absence, not an exhaustive one \src{PAPER\_PLAN \S2; search repeated 2026-10-15, evidence.md}.
+\item No `first' claim is made; reference anchoring already exists for W1 critics (iMAP) and MMD (SAUCIE, MMD-ResNet) \src{PAPER\_PLAN \S2}.
+\end{itemize}
+
+\paragraph{Contribution.}
+\begin{itemize}
+\item Scope: adversaries and divergences added to one stock scVI backbone at scvi-tools defaults; equal epochs, minibatch and latent size within each experiment and task for every arm, plain scVI and sysVI, with the exceptions declared in Methods (Backbone) \src{SI-10; SI-04}, on the standard scIB (single-cell integration benchmarking) tasks \src{SI-02}.
+\item A controlled decomposition of the critic--discriminator trade-off \pending{the decomposition as the paper's stated contribution (PAPER\_PLAN \S2; no ledger entry)}{your decision}. How much is:
+\begin{enumerate}
+\item operating point: arms compared at equal batch removal (P1, biology kept at equal batch removal) \src{SI-68};
+\item composition-driven over-alignment: dose-response X3 (cell types depleted in one batch at rising doses) \pending{X3 analysis}{specified during X1, before any X1 result is examined (SI-68)};
+\item W1 geometry or latent scale: W1 critics against MMD and Sinkhorn arms \src{SI-18}; per-dimension standardisation of the adversary input, compared in pilot A3 under rule R3 \src{SI-20; SI-27}; off in X1 for the same reason as the adversary input \src{SI-66; \file{docs/prereg/r4_a1_record.json}} \pending{formal re-run of rule R3}{after the Sinkhorn redo (SI-57)};
+\item regularisation and update budget: X6 (the discriminator plain, spectrally normalised or with an R1 gradient penalty; the pooled critic at 1, 5 and 10 critic steps, and spectrally normalised at 1 and 5) \src{SI-22; manifest} \pending{X6 analysis}{specified during X1 (SI-68)};
+\item target design, reference versus symmetric: X7 \pending{X7 redesign (rated NO-GO as designed; final-review findings D-06, D-07)}{redesigned during X1, locked before any X1 result is examined (SI-68)}.
+\end{enumerate}
+\item Guidance for scVI users follows from the results, possibly that no adversary beats stock scVI; comparison with stock scVI and standard tools (Harmony, Scanorama, sysVI, scANVI) at equal numbers of tries \src{SI-68, SI-77} \pending{outcome}{results of X1 and of the baseline experiment X13}.
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------
+% CLAIMS TO DROP OR SOFTEN (for the writer). Sources: PAPER_PLAN section 2; original_manuscript_claims_audit.csv
+% (C-ids); this track's source checks (evidence.md). None may re-enter as settled.
+%  - "JS fails on disjoint technology batches" / "vanishing gradients ... leading to failed training" (C01 partially
+%    supported). R0 is exploratory (SI-68): it can describe separability and gradient norms, not confirm the premise.
+%  - "First systematic comparison" / "no study has isolated the adversarial objective" (C02 untested). scIB-E compared six
+%    batch losses inside scVI; WDGRL and iMAP already use W1 critics; iMAP and SAUCIE already use reference anchoring.
+%  - "Critics over-correct" as a W1 property (C06 invalidated), unless shown at matched batch removal; Zhao 2019, Wu 2019
+%    and sysVI predict over-alignment for any strong aligner under composition shift.
+%  - "Weak integration is protective" (C09 invalidated): that is the trade-off curve itself, unless shown at matched alignment.
+%  - All topology language: "Topology Matters", "topological bottleneck", "radial projection", "topologically dense
+%    reference", "topological collapse" (C12 untested, C14 contradicted; Reviewer 2 comment 3: nothing topological was measured).
+%  - "W1 gives robust gradients regardless of initial separation" (C23): true of the distance (WGAN Thm 1), not of a
+%    gradient-penalty critic, which enforces the Lipschitz constraint only softly (WGAN-GP Sec. 4).
+%  - "Superior local mixing" (C04, C05), "scales poorly" (C10, C11), "broad lambda windows" (C16, C17), "~24% more
+%    training time" (C18 contradicted), "ideal for severe disjoint batch effects" (C20 untested), barycenter as "the
+%    theoretical solution" (C21), "primary limitation is over-correction" (C22).
+%  - IMAAE as "Wasserstein-based" and as "motivating their decision to enforce a global Gaussian prior" (C24): the IMAAE
+%    text never uses the word Wasserstein (its loss has WGAN-GP form) and the motivation link is the July authors' reading.
+%  - "The unbalanced scenario is known to drive severe over-correction" (C25, uncited): cite sysVI, scCRAFT and Maan 2024
+%    for what they show, scoped to their methods; "balanced" was not composition-independent (C08 contradicted).
+%  - July background attributions that the sources do not support (this track): batch effects from "the sequencing
+%    technology" cited to Tung 2017 (Tung studies separately processed C1 replicates on one platform); the
+%    statistical / geometric / deep-generative taxonomy cited to scIB (scIB groups methods by output: graph, embedding,
+%    corrected matrix); "sample age" cited to Stegle 2015 (not checked; dropped; AD-AE names age as a confounder).
+%  - PAPER_PLAN section 2 gap wording "trained on real counts": SI-15 fits the scIB files as distributed (no strict-count
+%    main run), so "real counts" is dropped from the gap line.
+%  - PAPER_PLAN section 3 "the premise becomes a tested hypothesis": SI-68 makes R0 exploratory.
+%  - Pilot hint "stock scVI 0.726 vs best conditioned arm 0.646" (PAPER_PLAN section 2): provisional (one dataset, three
+%    seeds, pre-stock schedule); not a result.
+%  - August-revision sentence "the barycenter has not previously been used as a learnable ... target inside an
+%    adversarial critic": a 'first' claim; not carried.
+% ---------------------------------------------------------------------------------------------------
 
 \subsection{Research questions}
 All six research questions are open: 19 of the 3,000 X1 rows are scored (local run paused on 2026-10-12) and the X1 analysis has not been run \src{NB-20261012-05; NB-20261014-21}. \pending{that no X1 result has been examined}{the user's confirmation at the diff review (ANALYSIS\_SPEC App.~A.3, item 2)}
@@ -165,9 +264,65 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item Status: open.
 \end{itemize}
 
-\section{Related work}
+% Taxonomy carried over from the July submission (statistical, geometric, deep generative, adversarial):
+%   Topology_Matters.zip oup-authoring-template.tex:137,139 = 08f1e3c manuscript_tm/oup-authoring-template/
+%   oup-authoring-template.tex:135,137; additions named in PAPER_PLAN section 3, item 2. One line per work.
+
+\section{Related work}\label{sec:related}
+
+\paragraph{Statistical and geometric integration.}
 \begin{itemize}
-\item \pending{earlier adversarial and distribution-matching integration methods, grouped by approach, one checked line each}{citation check of the source papers}
+\item limma: gene-wise linear models that can include batch terms; \texttt{removeBatchEffect} \citep{ritchie2015limma}.
+\item ComBat: empirical Bayes batch adjustment, robust for small batches \citep{johnson2007adjusting}.
+\item MNN: correction from mutual nearest neighbours between batches \citep{haghverdi2018batch}.
+\item Seurat: anchors between datasets, across technologies and modalities \citep{stuart2019comprehensive}.
+\item Harmony: shared embedding where cells group by cell type, not dataset \citep{korsunsky2019fast}.
+\item Scanorama: finds and merges the cell types shared by pairs of datasets \citep{hie2019efficient}.
+\end{itemize}
+
+\paragraph{Benchmarks.}
+\begin{itemize}
+\item 14 methods, five scenarios, including non-identical cell types across batches \citep{tran2020benchmark}.
+\item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; its tasks are used here \src{SI-02}.
+\item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
+\end{itemize}
+
+\paragraph{Deep generative models.}
+\begin{itemize}
+\item scVI: zero-inflated negative binomial model conditioned on batch, with a low-dimensional Gaussian latent \citep{lopez2018deep}; implemented in scvi-tools \citep{gayoso2022python}.
+\item scANVI: semi-supervised scVI that uses cell-type labels \citep{xu2021probabilistic}.
+\item sysVI: conditional VAE with a VampPrior and latent cycle-consistency, for substantial batch effects \citep{hrovatin2025integrating}.
+\item trVAE: MMD on the decoder layer that follows the bottleneck \citep{lotfollahi2020conditional}.
+\end{itemize}
+
+\paragraph{Adversarial (JS-type) integration.}
+\begin{itemize}
+\item DANN: domain-indiscriminate features via gradient reversal against a domain classifier \citep{ganin2016domain}.
+\item AD-AE: autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
+\item scDREAMER: adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
+\item scIB-E: six batch losses in one scVI framework, weights tuned with Ray Tune \citep{yi2025benchmarking}.
+\item scvi-tools' adversarial batch classifier: fool loss weighted by one minus the KL weight (arm scvi\_adv) \src{scvi-tools 1.4.2: scvi/train/\_trainingplans.py:535, 674--695; \file{scvi_adversarial_plan.py}:175--177}.
+\item scCRAFT: multi-domain GAN discriminator plus a dual-resolution triplet loss against over-correction \citep{he2025partially}.
+\item scCRAFT was the backbone of the original submission and earlier preprint \citep{reid2025topology} \src{Topology\_Matters.zip: oup-authoring-template.tex:142}; stock scVI replaces it \src{SI-10} \pending{whether the main text names scCRAFT (PAPER\_PLAN \S3: only as the earlier backbone; July convention: no mention)}{your decision}.
+\end{itemize}
+
+\paragraph{Wasserstein critics.}
+\begin{itemize}
+\item WDGRL: a gradient-penalised domain critic estimates the empirical W1 between source and target features, which the feature extractor minimises \citep{shen2018wasserstein}.
+\item iMAP: adversarial losses optimised with WGAN-GP; one dataset is the uncorrected anchor \citep{wang2021imap}.
+\item ResPAN: WGAN with random-walk mutual-nearest-neighbour pairing and skip-connected autoencoders \citep{wang2022respan}.
+\item IMAAE: adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
+\item IMAAE's plain GAN under-corrected with three or more batches \citep{wang2023integrating}.
+\end{itemize}
+
+\paragraph{Kernel and optimal-transport alignment.}
+\begin{itemize}
+\item MMD: largest difference in expectations over the unit ball of a reproducing-kernel Hilbert space \citep{gretton2012kernel}.
+\item MMD-ResNet: residual network minimising the MMD from source batches to one target batch \citep{shaham2017removal}.
+\item SAUCIE: MMD penalty on an internal layer aligning batches to a reference batch \citep{amodio2019exploring}.
+\item BERMUDA: MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
+\item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
+\item Entropy-regularised OT \citep{cuturi2013sinkhorn}; Sinkhorn divergences interpolate between OT and MMD \citep{feydy2019interpolating}; Wasserstein barycenters \citep{cuturi2014fast}; POT library \citep{flamary2021pot}.
 \end{itemize}
 
 \section{Methods}
@@ -176,7 +331,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \subsection{Backbone}\label{m:backbone}
 [S-M1, S-E2, S-E3]
 \begin{itemize}
-\item scvi-tools SCVI (\unverified{lopez2018deep}; \unverified{gayoso2022python}) at its defaults for every arm and baseline: 10 latent dimensions, one hidden layer of 128 units, zero-inflated negative binomial (ZINB) likelihood, 90\% training split, minibatch 128 \src{SI-10; \file{build_paper_manifest.py}:62; manifest}.
+\item scvi-tools SCVI (\citealp{lopez2018deep}; \citealp{gayoso2022python}) at its defaults for every arm and baseline: 10 latent dimensions, one hidden layer of 128 units, zero-inflated negative binomial (ZINB) likelihood, 90\% training split, minibatch 128 \src{SI-10; \file{build_paper_manifest.py}:62; manifest}.
 \item Epochs by the scvi-tools heuristic $\min(400, \mathrm{round}(20000 \times 400/n))$ on the $n$ cells fitted, no early stopping; within an experiment and task every arm, plain scVI and sysVI share epochs, minibatch and latent size; declared exceptions: scANVI's extra epochs, X12's factorial levels, and the subsample-sized epochs of X3 and X8 \src{SI-04; \file{build_paper_manifest.py}:114; \file{scvi_adversarial_plan.py}:563; \file{fit_paper_config.py}:401; PREREG \S9, 2026-10-04 (CR-12); manifest}.
 \item Scope: scVI as people use it \src{SI-09}.
 \item Plain scVI (arm none, $\lambda = 0$) is the stock training plan; a committed test asserts bit-identity with stock SCVI \src{\file{scvi_adversarial_plan.py}:4; \file{tests/scvi/test_adversarial_plan_v2.py}:48}.
@@ -194,14 +349,14 @@ Reproduction detail is in the Supplementary material [S-...].
 [S-M1--S-M7, S-E2]
 \begin{itemize}
 \item Each arm except scvi\_adv adds $\lambda \times$ (alignment term) to the loss, $\lambda$ fixed throughout \src{\file{scvi_adversarial_plan.py}:436, :177; \file{fit_paper_config.py}:340; manifest}.
-\item Discriminator (JS; \unverified{goodfellow2014generative}): classifies each cell's batch; the encoder minimises scvi-tools' bounded fool loss; 1 discriminator step per training step \src{SI-01; \file{scvi_adversarial_plan.py}:206, :292; manifest}.
-\item Reference critic (W1; \unverified{arjovsky2017wasserstein}): one head per batch estimates W1 to a reference batch, whose cells also move; 5 critic steps \src{\file{wcd/critic.py}:72; \file{scvi_adversarial_plan.py}:421; manifest}.
+\item Discriminator (JS; \citealp{goodfellow2014generative}): classifies each cell's batch; the encoder minimises scvi-tools' bounded fool loss; 1 discriminator step per training step \src{SI-01; \file{scvi_adversarial_plan.py}:206, :292; manifest}.
+\item Reference critic (W1; \citealp{arjovsky2017wasserstein}): one head per batch estimates W1 to a reference batch, whose cells also move; 5 critic steps \src{\file{wcd/critic.py}:72; \file{scvi_adversarial_plan.py}:421; manifest}.
 \item Pooled critic (W1): head $k$ targets all other batches \src{\file{wcd/critic.py}:77}.
-\item Barycenter critic (W1): head $k$ targets a Wasserstein-2 barycenter (average distribution; \unverified{cuturi2014fast}) of the minibatch's batches, recomputed per step, cold start, at most 10 iterations \src{SI-14 (10 iterations); \file{wcd/barycenter.py}:38, :72--73 (cap 10, stop threshold $10^{-7}$); manifest}.
-\item MMD (no network): squared maximum mean discrepancy (\unverified{gretton2012kernel}) of each batch to the others, fixed multi-scale Gaussian kernel \src{\file{wcd/alignment.py}:49, :109}.
-\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\unverified{cuturi2013sinkhorn}; \unverified{feydy2019interpolating}), Euclidean cost, blur $0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{recomputed on refitted latents}.
+\item Barycenter critic (W1): head $k$ targets a Wasserstein-2 barycenter (average distribution; \citealp{cuturi2014fast}) of the minibatch's batches, recomputed per step, cold start, at most 10 iterations \src{SI-14 (10 iterations); \file{wcd/barycenter.py}:38, :72--73 (cap 10, stop threshold $10^{-7}$); manifest}.
+\item MMD (no network): squared maximum mean discrepancy (\citealp{gretton2012kernel}) of each batch to the others, fixed multi-scale Gaussian kernel \src{\file{wcd/alignment.py}:49, :109}.
+\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\citealp{cuturi2013sinkhorn}; \citealp{feydy2019interpolating}), Euclidean cost, blur $0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{recomputed on refitted latents}.
 \item scvi\_adv: scvi-tools' own classifier adversary (32 hidden units, weight $1 -$ KL weight), conditioned decoder only, outside rules R1--R4 \src{\file{scvi_adversarial_plan.py}:5, :177; PREREG \S3; manifest}.
-\item Discriminator and critics: same head architecture (latent, 128, 128, one output per batch; ReLU) \src{\file{wcd/adversarial.py}:50, :76}; critics add a per-head gradient penalty (\unverified{gulrajani2017improved}) of weight 10 \src{\file{wcd/critic.py}:158}.
+\item Discriminator and critics: same head architecture (latent, 128, 128, one output per batch; ReLU) \src{\file{wcd/adversarial.py}:50, :76}; critics add a per-head gradient penalty (\citealp{gulrajani2017improved}) of weight 10 \src{\file{wcd/critic.py}:158}.
 \item Reference batch: highest cell-type Shannon entropy, ties by size \src{\file{wcd/data.py}:32; \file{fit_paper_config.py}:324; manifest}.
 \end{itemize}
 
@@ -228,7 +383,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \subsection{Data}
 [S-D1, S-D2]
 \begin{itemize}
-\item Eight of the scIB benchmark's integration tasks (\unverified{luecken2022benchmarking}), no new datasets: six real (pancreas, lung, immune, immune\_hum\_mou, atac\_small, atac\_large) and two simulations (sim1, sim2) \src{SI-02; \file{build_paper_manifest.py}:54; \file{docs/prepped_fingerprints_scib.json}}; scIB's batch and label keys \src{SI-03}.
+\item Eight of the scIB benchmark's integration tasks (\citealp{luecken2022benchmarking}), no new datasets: six real (pancreas, lung, immune, immune\_hum\_mou, atac\_small, atac\_large) and two simulations (sim1, sim2) \src{SI-02; \file{build_paper_manifest.py}:54; \file{docs/prepped_fingerprints_scib.json}}; scIB's batch and label keys \src{SI-03}.
 \item Fitted as distributed, with the counts layer exactly as scIB fed scVI \src{SI-15}; 18 batches in 4 tasks hold non-integer values \src{\file{docs/prepped_fingerprints_scib.json}}.
 \item Genes: 2,000 highly variable genes per RNA task (scib.pp.hvg\_batch); all features of the ATAC gene-activity matrices \src{\file{docs/prepped_fingerprints_scib.json}}.
 \item Families: pancreas; lung; immune (immune, immune\_hum\_mou); ATAC (atac\_small, atac\_large) \src{SI-73}.
@@ -241,7 +396,7 @@ Reproduction detail is in the Supplementary material [S-...].
 [S-E2, S-E6]
 \begin{itemize}
 \item scib.metrics.metrics (scib 1.1.7) on the posterior-mean embedding and its neighbour graph \src{SI-08; \file{score_scib_native.py}:207, :214}.
-\item B: mean of PCR comparison, batch ASW, graph iLISI, graph connectivity, kBET (\unverified{buttner2019test}) \src{PREREG \S1; \file{score_scib_native.py}:51}. C: mean of NMI, ARI, cell-type ASW, isolated-label F1 and silhouette, graph cLISI, plus cell-cycle conservation (pancreas, lung, immune, immune\_hum\_mou) and trajectory (immune, immune\_hum\_mou, the tasks with pseudotime) \src{PREREG \S1; SI-28; \file{score_scib_native.py}:52, :212--213}.
+\item B: mean of PCR comparison, batch ASW, graph iLISI, graph connectivity, kBET (\citealp{buttner2019test}) \src{PREREG \S1; \file{score_scib_native.py}:51}. C: mean of NMI, ARI, cell-type ASW, isolated-label F1 and silhouette, graph cLISI, plus cell-cycle conservation (pancreas, lung, immune, immune\_hum\_mou) and trajectory (immune, immune\_hum\_mou, the tasks with pseudotime) \src{PREREG \S1; SI-28; \file{score_scib_native.py}:52, :212--213}.
 \item Raw values on $[0, 1]$; no rule uses min--max scaling; required metrics must be finite \src{PREREG \S1}.
 \item kBET: R seed 0 set before every call; rule scripts refuse mixed kBET seeds \src{PREREG \S1; \file{score_scib_native.py}:54, :80}.
 \item NMI of 0 at every resolution keeps scib's error, decided case by case \src{SI-65}; latents without cell names are refused \src{SI-64}.
@@ -275,7 +430,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Area corner: plain scVI's B and its C minus 0.10; divided by the task's batch range to pool \src{SI-72}.
 \item Pooling: overall + family + task effects, prior scales 0.1 (0.05, 0.2 as sensitivity), exact calculation \src{SI-73}.
 \item Margin 0.01; direction, practical equivalence or inconclusive at posterior probability 0.95 \src{SI-74}.
-\item P2: collapse = failed, or C at least 0.10 below the same seed's plain scVI; Clopper--Pearson intervals (\unverified{clopper1934use}); pooled critic-minus-discriminator difference (prior 0.25, margin 5 points) \src{SI-75}. \pending{whether SI-75 stands after the pilot recount (8 of 54, not 8 of 45)}{diff review}
+\item P2: collapse = failed, or C at least 0.10 below the same seed's plain scVI; Clopper--Pearson intervals (\citealp{clopper1934use}); pooled critic-minus-discriminator difference (prior 0.25, margin 5 points) \src{SI-75}. \pending{whether SI-75 stands after the pilot recount (8 of 54, not 8 of 45)}{diff review}
 \item Local versus global: mean of iLISI, kBET, graph connectivity at the P1 crossing; sign test plus the P1 model, margin 0.01 \src{SI-76}.
 \item Selection score $S = 0.4B + 0.6C$, unscaled \src{SI-77}.
 \item Frequentist companion: exact two-sided Wilcoxon signed-rank test on the per-task differences, with Holm's correction over the four primary endpoints P1--P4; with 6 real tasks its smallest p, $2/2^6 = 0.031$, is above Holm's first threshold $0.05/4 = 0.0125$, so it cannot reject at the Holm-adjusted level \src{PREREG \S5; \file{docs/prereg/r1_record.json} power}. \pending{Holm over six primary results (first threshold 0.0083) and reporting the companion as descriptive}{diff review (ANALYSIS\_SPEC \S4, \S5)}
@@ -290,7 +445,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \begin{itemize}
 \item Seeds 10--12, at the strengths matched by rule R4 on X1; variant arms inherit their base arm's strength \src{PREREG \S4; SI-26}. \pending{matched strengths}{rule R4 on the scored X1}
 \item X3: one non-reference batch depleted of two cell types (sim2: one) at doses 0--100\%, equal cell count per dose, reference fixed at the dose-0 choice, importance-weighted control at 50, 80, 95\% \src{SI-25; SI-31--33; SI-41; manifest}. \pending{draw and weights as implemented (SI-42, lead-agent decision)}{the user's confirmation}
-\item X6: discriminator plain, spectrally normalised (\unverified{miyato2018spectral}) or with an R1 gradient penalty ($\gamma$ 10; \unverified{mescheder2018training}); pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps \src{SI-22; manifest}.
+\item X6: discriminator plain, spectrally normalised (\citealp{miyato2018spectral}) or with an R1 gradient penalty ($\gamma$ 10; \citealp{mescheder2018training}); pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps \src{SI-22; manifest}.
 \item X12: 8-run fractional factorial, resolution III, over latent size, adversary width and learning rate, minibatch and linear-or-default decoder \src{\file{build_paper_manifest.py}:259, :269; I028}.
 \item X15: stock against completing KL warm-up, immune and atac\_large, 84 fits \src{SI-44; manifest}.
 \item \pending{analyses of X3, X6, X12, X15}{locked during X1, before any X1 result is examined (SI-68)}
@@ -302,11 +457,11 @@ Reproduction detail is in the Supplementary material [S-...].
 [S-E1, S-E2]
 \begin{itemize}
 \item Plain scVI = X1 arm none \src{manifest}; scANVI adds $\min(10, \max(2, \mathrm{round}(E/3)))$ epochs after its scVI pretraining \src{SI-04; \file{fit_paper_config.py}:401; PREREG \S9, 2026-10-04 (CR-12); manifest}.
-\item Harmony (\unverified{korsunsky2019fast}): $\theta \in \{0, 0.5, 1, 2, 4, 8\}$ at 10 PCs, once each, fresh process, pinned threads; 50 PCs at $\theta$ 2 as sensitivity \src{SI-34}.
-\item Scanorama (\unverified{hie2019efficient}): knn $\in \{2, 5, 10, 20, 40, 80\}$ at 10 dimensions, once each; 100 dimensions at knn 20 as sensitivity \src{SI-46}.
+\item Harmony (\citealp{korsunsky2019fast}): $\theta \in \{0, 0.5, 1, 2, 4, 8\}$ at 10 PCs, once each, fresh process, pinned threads; 50 PCs at $\theta$ 2 as sensitivity \src{SI-34}.
+\item Scanorama (\citealp{hie2019efficient}): knn $\in \{2, 5, 10, 20, 40, 80\}$ at 10 dimensions, once each; 100 dimensions at knn 20 as sensitivity \src{SI-46}.
 \item PCA: once at 10 (and 50) components, the uncorrected anchor \src{SI-36}.
-\item scANVI (\unverified{xu2021probabilistic}): scIB's protocol, scVI then scANVI with all labels; seeds 0--4 \src{\file{fit_paper_config.py}:399, :401; manifest}.
-\item sysVI (\unverified{hrovatin2025integrating}): scvi-tools' SysVI, cycle weight $\in \{1, 2, 5, 10, 20, 50\}$, seeds 0--4, no KL warm-up \src{\file{fit_paper_config.py}:404, :413; manifest; PREREG \S9, 2026-10-04 (CR-12)}.
+\item scANVI (\citealp{xu2021probabilistic}): scIB's protocol, scVI then scANVI with all labels; seeds 0--4 \src{\file{fit_paper_config.py}:399, :401; manifest}.
+\item sysVI (\citealp{hrovatin2025integrating}): scvi-tools' SysVI, cycle weight $\in \{1, 2, 5, 10, 20, 50\}$, seeds 0--4, no KL warm-up \src{\file{fit_paper_config.py}:404, :413; manifest; PREREG \S9, 2026-10-04 (CR-12)}.
 \item Harmony, Scanorama and PCA use the file's normalised values on its highly variable genes \src{\file{run_cpu_baselines.py}:230}.
 \item \pending{placement rule (best-of-k at equal k; scANVI in a label-aware stratum)}{diff review (ANALYSIS\_SPEC \S9)}
 \end{itemize}
@@ -402,35 +557,10 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 \end{itemize}
 
 
-\section*{References}
-\addcontentsline{toc}{section}{References}
-\pending{reference list (only verified keys enter it)}{literature check of the cited works}
-
-
-\subsection*{Citation leads not yet verified}
-\addcontentsline{toc}{subsection}{Citation leads not yet verified}
-Keys shown as \unverified{key} in the text; none enters the reference list until its claim is checked against the source.
-\begin{itemize}
-\item \texttt{arjovsky2017wasserstein}
-\item \texttt{buttner2019test}
-\item \texttt{clopper1934use}
-\item \texttt{cuturi2013sinkhorn}
-\item \texttt{cuturi2014fast}
-\item \texttt{feydy2019interpolating}
-\item \texttt{flamary2021pot}
-\item \texttt{gayoso2022python}
-\item \texttt{goodfellow2014generative}
-\item \texttt{gretton2012kernel}
-\item \texttt{gulrajani2017improved}
-\item \texttt{hie2019efficient}
-\item \texttt{hrovatin2025integrating}
-\item \texttt{korsunsky2019fast}
-\item \texttt{lopez2018deep}
-\item \texttt{luecken2022benchmarking}
-\item \texttt{mescheder2018training}
-\item \texttt{miyato2018spectral}
-\item \texttt{xu2021probabilistic}
-\end{itemize}
+\renewcommand{\bibsection}{\section*{References}\addcontentsline{toc}{section}{References}}
+\renewcommand{\bibfont}{\raggedright}  % long proceedings URLs otherwise leave empty justified lines
+\bibliographystyle{plainnat}
+\bibliography{refs}
 
 
 \clearpage
@@ -459,7 +589,7 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \end{itemize}
 \paragraph{S-M4 Barycenter target.}
 \begin{itemize}
-\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (POT stop threshold $10^{-7}$) with exact transport plans (POT free\_support\_barycenter; \unverified{flamary2021pot}); recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
+\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (POT stop threshold $10^{-7}$) with exact transport plans (POT free\_support\_barycenter; \citealp{flamary2021pot}); recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
 \end{itemize}
 \paragraph{S-M5 MMD.}
 \begin{itemize}
@@ -484,8 +614,8 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \end{itemize}
 \paragraph{S-M9 Follow-up arm variants.}
 \begin{itemize}
-\item R1 penalty (X6; \unverified{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
-\item Spectral normalisation (X6; \unverified{miyato2018spectral}): every head layer spectrally normalised and the gradient penalty dropped \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py}:288}.
+\item R1 penalty (X6; \citealp{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
+\item Spectral normalisation (X6; \citealp{miyato2018spectral}): every head layer spectrally normalised and the gradient penalty dropped \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py}:288}.
 \item Reference-anchored JS (X7): binary heads ``batch $k$ against the reference'', class-balanced cross-entropy, non-saturating generator loss with labels flipped, reference cells not detached, one step \src{SI-23; \file{wcd/discriminator_losses.py}:49}. Fixed reference: reference cells detached in the generator step \src{\file{scvi_adversarial_plan.py}:419}. Reference-anchored MMD: MMD$^2$ of each batch to the reference \src{\file{wcd/alignment.py}:129}.
 \item Stratified sampler (X8, reference and pooled critics only): $128/V$ cells per batch per minibatch, without replacement within a batch; epoch = $\lceil n_{\mathrm{train}}/128 \rceil$ steps; the fit fails when a batch has fewer training cells than its quota \src{SI-24; \file{wcd/sampling.py}:30}.
 \item Importance weights (X3, doses 50, 80 and 95\% only): target = each batch's composition before depletion; $w = 1/(\text{keep fraction})$ for cells of the depleted types in the depleted batch and 1 otherwise; every per-batch mean in the adversary and generator terms becomes the self-normalised mean $\sum_i w_i f(z_i)/\sum_i w_i$, with the same weights in discriminator, reference and pooled critics and MMD \src{SI-25}; the gradient penalty is unweighted \src{\file{wcd/adversarial.py}:91}. \pending{as implemented, $w[b, y] = n_{K_0}(b, y)/n_{K_d}(b, y)$ from the realised nested draws}{the user's confirmation of SI-42 (a lead-agent decision)}
@@ -534,7 +664,7 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \end{itemize}
 \paragraph{S-M16 P2 collapse rate.}
 \begin{itemize}
-\item A run collapses if it failed or if $C \leq C_{\lambda = 0}(\text{same seed}) - 0.10$; rate per arm and decoder over the six registered points and 5 seeds, per task and pooled over the 6 real tasks, with Clopper--Pearson 95\% intervals (\unverified{clopper1934use}) \src{SI-75}.
+\item A run collapses if it failed or if $C \leq C_{\lambda = 0}(\text{same seed}) - 0.10$; rate per arm and decoder over the six registered points and 5 seeds, per task and pooled over the 6 real tasks, with Clopper--Pearson 95\% intervals (\citealp{clopper1934use}) \src{SI-75}.
 \item Comparison: per-task rate difference (reference minus discriminator) with the Agresti--Caffo standard error, pooled with the S-M15 model at $\Delta \sim N(0, 0.25^2)$, $\tau \sim$ half-normal(0.25), margin 0.05 \src{SI-75; ANALYSIS\_SPEC App.~A.1, Q9 option A}. \pending{whether SI-75 stands}{diff review}
 \end{itemize}
 \paragraph{S-M17 Local versus global batch removal.}
