@@ -56,19 +56,26 @@ before R4-x1 runs and before anyone examines an X1 result. (Q1's options and rea
 - B, C as PREREG section 1: C includes trajectory conservation on immune and immune_hum_mou (SI-28); the
   trajectory-free C is a sensitivity analysis (SI-38, section 11).
 - b0, b_common, b\* and `bstar_low_signal` per cell are read from the frozen R4 stage-x1 record (PREREG section 4:
-  "The same b\* is proposed for P1"); the analysis never recomputes them.
+  "The same b\* is proposed for P1"), and the analysis refuses unless `prereg_rules.r4_stage` gives the same values from the same
+  X1 rows (section 15.1; re-check findings AN-R02, DOC-R03). It therefore needs every row that R4 used, extension rows included.
 - Points: lambda = 0 (arm `none`) and the six registered lambda of each arm's family and decoder (`x1_grid` of the R1
-  record given to `scripts/analysis_x1.py` with `--r1-record`). R4-x1 extension rows are not used (PREREG section 4;
-  SI-55). For every arm except Sinkhorn the six lambda are those of `docs/prereg/r1_record.json`; the Sinkhorn grid is
-  re-derived by R1 on the refitted Sinkhorn fits (SI-57), so the analysis is given the redone R1 record
-  (`docs/prereg/r1_record_sinkhorn_redo.json`, name proposed for the diff review), whose six non-Sinkhorn grids are
-  checked against `docs/prereg/r1_record.json` first (PREREG section 9, entry on the Sinkhorn arm). The script stops
-  when a registered lambda of an arm is missing from that arm's X1 rows ("registered lambda grid is incomplete"), so a
-  record that still holds the superseded Sinkhorn grid is refused.
+  record given to `scripts/analysis_x1.py` with `--r1-record`). R4-x1 extension rows are not used as points (PREREG section 4;
+  SI-55). For every arm except Sinkhorn the six lambda are those of `docs/prereg/r1_record.json` as it stands at tag
+  prereg-tier12-v3; the Sinkhorn grid will be re-derived by R1 on the refitted Sinkhorn fits (SI-57).
+  The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place; the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo.
+  The analysis will therefore be given `docs/prereg/r1_record.json` (user decision SI-87, 2026-10-15). The six non-Sinkhorn grids
+  of the redone record are to be checked by hand against the version at tag prereg-tier12-v3
+  (`git show prereg-tier12-v3:docs/prereg/r1_record.json`), because the script does not compare grids: it reads `x1_grid` from
+  the record it is given (re-check finding DOC-R10). The script stops when a registered lambda of an arm is missing from that
+  arm's X1 rows ("registered lambda grid is incomplete"), so a record that still holds the superseded Sinkhorn grid is refused.
 - b\* is computed after any R4-x1 extension round: R4 takes each arm's best batch score from all of its X1 points,
   extension points included (PREREG section 4), while P1 and the area read only the six registered points. An arm
-  whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); the report gives the number of
-  such cells by arm, next to that arm's best batch score in the R4 record (rigour review AN-09, DOC-10).
+  whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); only the two arms of the P1 contrast, the
+  reference and the discriminator, can do this. The number of such cells for each arm, next to that arm's best batch score M in
+  the R4 record, and the no-pair training-step counts (CF-06) are tabulated by a reporting script written after the runs, not by
+  `scripts/analysis_x1.py` (user decision SI-81 (c), 2026-10-15; re-check finding AN-R15). The analysis record keeps each cell's
+  reading status for the two arms (`p1.status`: `bracketed`, `unreached_low`, `unreached_high` or `no_points`) and the R4 record keeps M
+  (`targets.<cell>.M`, all six arms), so the script only counts and pairs them and changes no result.
 - Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large (`prereg_rules.REAL_TASKS`), in 4 families
   (`TASK_FAMILY`: all 33,506 immune cells are in immune_hum_mou; atac_small and atac_large share 3,618 cells, final
   review I073). sim1 and sim2 are reported per task and never pooled with real tasks (PAPER_PLAN section 5).
