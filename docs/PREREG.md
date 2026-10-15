@@ -392,9 +392,10 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   finite latents of about 1e18 or more give +infinity and then converge a few iterations later (re-review R2-01,
   commit 89d5e2c). A fit that reaches the cap is neither scored nor recorded as failed: the stage stops (SI-61), and a
   rerun with the same seed and code can be expected to reach the cap again. Section 1 treats infrastructure errors as
-  rerunnable and requires every row to end as scored or failed, so a persistent cap hit has no registered outcome.
-  Proposal for the diff review: the stage stays stopped until the user decides whether such a fit is recorded as a
-  failed fit (and so counted in P2), and the decision is listed with the results. The solve stays in float64 (SI-58,
+  rerunnable and requires every row to end as scored or failed, so a persistent cap hit had no registered outcome.
+  The user decided on 2026-10-15 (SI-81 (b)): the stage stays stopped until the user decides whether such a fit is
+  recorded as a failed fit; a fit recorded as failed counts as a collapse in P2, and the decision is listed with the
+  results. The solve stays in float64 (SI-58,
   SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at most
   1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
   criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
@@ -432,13 +433,15 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     cells directly, with no trained network. When a minibatch holds only one batch (for reference-anchored MMD: no
     reference cell, or no other batch), there is nothing to compare. The loss is then a zero that keeps the gradient
     graph, instead of stopping the fit. The fitter counts such minibatches and writes the count, no_pair_steps, into
-    the latent's plan record when it is above zero. A model-based estimate (the guard review, reproduced by the
-    documents review of 2026-10-14; not simulated runs) expects them in X7 reference-anchored MMD on pancreas (27
-    fits, 25.9 expected to meet at least one) and on sim1 (all 18 fits), and in about 14% of the 48 X3 atac_small MMD
-    fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1 fits of each of MMD and Sinkhorn. The counts will
-    be tabulated by arm, task and experiment from the latents' plan records by a short reporting script written after
-    the runs. No code reads no_pair_steps yet; the script affects no rule, so it can follow the tag (proposal for the
-    diff review).
+    the latent's plan record when it is above zero. A model-based estimate (a calculation, not simulated runs; first
+    made in the guard review, recomputed by experiments/doc_numbers_20261015/no_pair_expectations.py from the manifest
+    of record and the prepared data, with the scvi-tools assumptions checked by no_pair_assumptions.py in the same
+    folder) expects them in X7 reference-anchored MMD on pancreas (27 fits, 25.9 expected to meet at least one) and on
+    sim1 (all 18 fits), and in about 14% of the 48 X3 atac_small MMD fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of
+    the 60 X1 sim1 fits of each of MMD and Sinkhorn. The counts, by arm, task and experiment from the latents' plan
+    records, and, per arm, the number of cells that are not evaluable because the arm never reaches the target batch
+    score b* (docs/ANALYSIS_SPEC.md) are tabulated by a reporting script that is written after the runs (user decision
+    SI-81 (c), 2026-10-15). No code reads no_pair_steps yet; the script affects no rule, so it can follow the tag.
   - Failures inside the critic's training loop (I034, commit a4f4be0). The critic can be updated more than once inside
     each training step. A loss that is not finite (not a number, NaN, or infinite) at any of these inner steps, not
     only the last, now marks the fit as diverged.
@@ -451,8 +454,8 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     tested label to 1; any other result without a call to R is refused.
   - A normalised mutual information of 0 (SI-65). Where scib 1.1.7 finds NMI, the normalised mutual information, equal
     to 0 at every clustering resolution, it keeps no clustering, and the scorer keeps scib's loud error; the case is
-    then decided case by case. Proposal for the diff review: the user decides each such case, and every case is listed
-    with the results.
+    then decided case by case (SI-65, 2026-10-13). The user decided on 2026-10-15 (SI-81 (a)) that he decides each such
+    case and that every case is listed with the results.
   - Complete fits only (I094, commit 46d79f2). A fit counts as complete, is resumed and is harvested from the cluster
     only if its model weights (graphics processing unit, GPU, fits) and training history are present.
   - Job time limits (I008, commit 2b52542). Each job in a chain of cluster jobs gets a time limit of (chain position +
