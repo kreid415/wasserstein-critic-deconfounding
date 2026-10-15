@@ -198,7 +198,7 @@ The margin (user decision SI-74, Q7) is r = 0.01, PREREG section 1's constant (d
 P1, the area (in biology units) and the local-global split. The measurement SD may still be reported, descriptively.
 (Q7's options and reasons: Appendix A.1.)
 
-Multiplicity (the agent's proposal, for the diff review; no question covered it, Appendix A.2): each declaration is
+Multiplicity (decided 2026-10-15, SI-80; no question of 2026-10-14 covered it, Appendix A.2): each declaration is
 made on its own posterior (marginal); the report states how many primary results were judged (P1 and the area for
 each decoder, plus P2 for each decoder: six); the Wilcoxon companion applies Holm over all six (descriptive; final
 review I040). Holm's first threshold is then 0.05/6 = 0.0083. With six real datasets the smallest exact two-sided
@@ -235,9 +235,9 @@ The analysis is one signed question: at matched batch removal, does the critic g
 interpolation weights); per decoder: exact two-sided sign test over the real datasets and the section 4 model with
 r = 0.01. (Q10's options: Appendix A.1.)
 
-## 8. Single-lambda tables: transfer lambda (selection score: user decision SI-77, Q11; transfer rule: the agent's proposal)
+## 8. Single-lambda tables: transfer lambda (selection score: user decision SI-77, Q11; transfer rule: decided 2026-10-15, SI-80)
 
-Transfer rule (the agent's proposal, for the diff review). For each held-out real dataset, arm and decoder, the
+Transfer rule (decided 2026-10-15, SI-80). For each held-out real dataset, arm and decoder, the
 transfer lambda is the registered point that maximises the
 selection score S averaged over the training datasets: the real datasets of the other families (leave-one-family-out,
 so immune and immune_hum_mou, which share cells, never choose each other's lambda; likewise atac_small and atac_large).
@@ -249,7 +249,10 @@ The selection score (user decision SI-77, Q11) is S = 0.4 B + 0.6 C, scIB's weig
 does not depend on which methods are compared; the same S is used in sections 9 and 10. (Q11's options: Appendix
 A.1.)
 
-## 9. Placement against standard integrators: best-of-k (R5; the agent's proposal, for the diff review)
+## 9. Placement against standard integrators: best-of-k (R5; decided 2026-10-15, SI-80)
+
+Giving every method the same number of tries is the user's decision (SI-68, SI-77). The best-of-k estimator below and the
+composition of the method families were the agent's proposals, approved as rules on 2026-10-15 (SI-80).
 
 Per dataset and decoder, each method family's configurations: each adversarial arm (6 lambda), Harmony (6 theta at 10
 PCs), Scanorama (6 knn at 10 dimensions), sysVI (6 cycle weights), and k = 1 methods (scANVI, scVI lambda = 0,
@@ -260,7 +263,7 @@ C(N, k) with S sorted ascending, k = 1..N; families compared at equal k (final r
 tool defaults are sensitivity points, not family members. Frontier positions: every baseline configuration's (B, C)
 against each arm's six-point front, descriptive.
 
-## 10. Lambda-window width (R3, X1 part; the agent's proposal, for the diff review)
+## 10. Lambda-window width (R3, X1 part; decided 2026-10-15, SI-80)
 
 Per arm, dataset and decoder: the best point maximises mean S; the window is every point whose mean S is at least the
 lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); width = log10(largest lambda in the window)
@@ -271,8 +274,8 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 
 - C without trajectory on immune and immune_hum_mou (SI-38) for every comparison above; b\* is unchanged (batch only).
 - The per-run reading (section 2.4; the option of Q2 not chosen, SI-69), failure handling (points with any failed run
-  removed, section 2.4; SI-71), the corner (b0, 0) (section 3; the agent's proposal) and the dataset structure (pairs
-  first, and six independent datasets; section 4; the agent's proposal).
+  removed, section 2.4; SI-71), the corner (b0, 0) (section 3; decided 2026-10-15, SI-80) and the dataset structure (pairs
+  first, and six independent datasets; section 4; decided 2026-10-15, SI-80).
 - Priors: the prior scales of the overall difference Delta and of both spreads set together to 0.05, and to 0.2, as
   question Q6 proposed (SI-73). (Corrected 2026-10-14: this line said "half-normal scales 0.05 and 0.2", which named
   only the spreads.)
@@ -308,10 +311,11 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
 - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; to be frozen with the tag prereg-tier12-v3, which has not
   been made.
 
-## 15. Implementation details (the agent's proposals, for the diff review; 2026-10-14)
+## 15. Implementation details (decided 2026-10-15, SI-80; written 2026-10-14)
 
-Writing `scripts/analysis_x1.py` needed the details below, which sections 1-11 leave open. Each is the agent's
-proposal and goes to the user at the diff review (SI-52); none changes a decision SI-68 to SI-77.
+Writing `scripts/analysis_x1.py` needed the details below, which sections 1-11 leave open. Each was the agent's
+proposal; the user approved them as rules on 2026-10-15 (SI-80), with the designs of the rigour review as decided in SI-83 and
+SI-84; none changes a decision SI-68 to SI-77.
 
 1. Inputs. X1 and X13 rows are read as one input through `prereg_rules.outcomes`, so they must share one scorer
    commit (after the SI-54 equivalence) and one CPU type: best-of-k compares them directly, and the same latent scores
@@ -384,7 +388,7 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
    collapse is judged against the same seed's plain-scVI biology score, so the 6 runs of a seed share their threshold
    (in the review's simulation the intervals' coverage was 0.91 to 1.00).
 4. Each declaration is made on its own posterior, without a correction for the number of results judged (section 5,
-   a proposal for the diff review); only the Wilcoxon companions get Holm's correction. The local-versus-global
+   decided 2026-10-15, SI-80); only the Wilcoxon companions get Holm's correction. The local-versus-global
    question (section 7) is one signed question per decoder and lies outside the six primary results and their Holm
    family.
 5. The family spread tau_f rests on four dataset families, two of them with two datasets, so its prior can dominate;
@@ -396,7 +400,7 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
    the update-budget control (X6) exists only for the pooled critic (PREREG section 9), so P1 does not separate the
    divergence from the extra critic steps.
 
-Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
+Sources checked for this specification: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-88),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
 `r4_a1_record.json`, the X1 and full manifests (v3), review/rereview/design_fable/REVIEW_design_recheck.md (D-03, D-04,
 D-06..D-10, D-18..D-20) and review/lead/verified_issues.csv (I001, I003, I038, I040, I056, I062, I067, I072, I073,
