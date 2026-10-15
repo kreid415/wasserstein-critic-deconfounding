@@ -1,0 +1,28 @@
+{
+ "counts": {
+  "X1_local/ledger": 2,
+  "X1_local/runner_log": 1,
+  "X1_local/runner_record": 1,
+  "X1_local/score": 19,
+  "X1_local/scoring_log": 20,
+  "fillers/ledger": 11,
+  "fillers/runner_log": 4,
+  "fillers/runner_record": 3,
+  "fillers/score": 158,
+  "fillers/scoring_log": 162,
+  "identity_check/comparison": 3,
+  "identity_check/score": 12,
+  "identity_check/scoring_log": 12,
+  "review_probes/ledger": 302,
+  "review_probes/score": 49,
+  "review_probes/scoring_log": 42,
+  "sealed/sealed": 2,
+  "x13_cpu_test/score": 12,
+  "x13_cpu_test/scoring_log": 12
+ },
+ "csv_sha256": "519e7335f2f38f77a59ec7d51ddb52a3ae99bff7dcedd8964a36ab57d4298cb4",
+ "data_root": "/home/kendall/experiment_data/wasserstein-critic-deconfounding",
+ "files": 827,
+ "hashed_at_utc": "2026-10-15T14:25:49Z",
+ "script_sha256": "b22c6d37beb5b0e30753552bcf81216cf527129be899d169d46c513fb16e2bd9"
+}
