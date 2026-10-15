@@ -32,7 +32,7 @@
 {\LARGE\bfseries Paper outline}\\[4pt]
 {\large Wasserstein critic versus discriminator in adversarial batch correction on scVI}\\[6pt]
 \pending{title}{your decision}\quad \pending{authors and target journal}{your decision}\\[2pt]
-{\small Outline of the revision of Bioinformatics submission BIOINF-2026-1434; repository state: commit 08f1e3c, 2026-10-14.}
+{\small Outline of the paper; repository state: commit 08f1e3c, 2026-10-14.}
 \end{center}
 
 \section*{How to read this outline}
@@ -152,7 +152,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \item When cell-type (label) proportions differ between two batches (domains), any one classifier applied to the shared latent space makes errors: if the label distributions are farther apart than the latent distributions, its error summed over the two batches is at least $\tfrac12\bigl(d_{JS}(\mathcal{D}^Y_S,\mathcal{D}^Y_T)-d_{JS}(\mathcal{D}^Z_S,\mathcal{D}^Z_T)\bigr)^2$, which grows as the latent distributions are aligned more tightly ($d_{JS}$: square root of the JS divergence; $\mathcal{D}^Y$, $\mathcal{D}^Z$: label and latent distributions of the two batches $S$, $T$) \citep[Thm.~4.3; binary labels]{zhao2019learning}.
 \item Exact alignment with zero source error, under any distance that is zero only for identical distributions (a JS classifier, Wasserstein, maximum mean discrepancy (MMD)), leaves target error of at least the label-proportion gap \citep[Prop.~3.1; binary labels]{wu2019domain}.
 \item Exact alignment under any such distance therefore costs accuracy under composition shift; whether the divergence arms over-align at the finite penalty strengths used here is a hypothesis, tested by the dose-response X3 \pending{X3 analysis}{specified during X1, before any X1 result is examined (SI-68)}.
-\item An adversarial conditional variational autoencoder (VAE) and GLUE (a graph-linked embedding method for multi-omics integration; \citealp{cao2022multi}) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+\item An adversarial conditional variational autoencoder (VAE) and GLUE (graph-linked unified embedding, a multi-omics integration method that aligns the embeddings of omics layers with an adversarial discriminator; \citealp{cao2022multi}) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
 \item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}.
 \end{itemize}
 
@@ -166,8 +166,8 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \paragraph{Gap.}
 \begin{itemize}
 \item Closest controlled-backbone study: scIB-E, an extension of the single-cell integration benchmark scIB, with six batch losses (GAN, Hilbert--Schmidt independence criterion (HSIC), orthogonal projection, mutual information, gradient reversal, reverse cross-entropy) in one scVI framework; no W1, optimal-transport (OT) or explicit MMD term between batch distributions (its HSIC term measures dependence between latent code and batch label) \citep{yi2025benchmarking}.
-\item No comparison of JS, W1 and MMD or OT objectives on one stock scVI backbone was found (searches of 2026-10-15 in OpenAlex, arXiv and Europe PMC from 2017, with citation tracking and web searches; scope and limits in \file{paper/evidence.md}): a search-based absence, not an exhaustive one \src{\file{paper/evidence.md}, Gap search} \pending{search repeated}{before submission}.
-\item Reference anchoring and W1 critics already exist: a W1 critic for domain-invariant features \citep{shen2018wasserstein}, reference-anchored WGAN-GP integration \citep{wang2021imap} and MMD alignment to a reference or target batch \citep{amodio2019exploring,shaham2017removal}.
+\item No comparison of JS, W1 and MMD or OT objectives on one stock scVI backbone was found (searches of 2026-10-15 in OpenAlex, arXiv and Europe PMC from 2017, with citation tracking and web searches; scope and limits in \file{paper/evidence.md}): the nearest designs are Li et al., which compares MMD with an adversarial mutual-information penalty on a preliminary scVI \citep{li2022trade}, and iDLC, a WGAN-GP critic with a Sinkhorn term on a residual autoencoder, whose ablation removes the Sinkhorn term but has no JS or MMD arm \citep{jiang2026geometric}; a search-based absence, not an exhaustive one \src{\file{paper/evidence.md}, Gap search} \pending{search repeated}{before submission}.
+\item Reference anchoring and W1 critics already exist: a W1 critic for domain-invariant features \citep{shen2018wasserstein}, reference-anchored WGAN-GP integration \citep{wang2021imap}, a WGAN-GP critic with a Sinkhorn term towards a reference batch \citep{jiang2026geometric} and MMD alignment to a reference or target batch \citep{amodio2019exploring,shaham2017removal}.
 \end{itemize}
 
 \paragraph{Contribution.}
@@ -296,7 +296,6 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; eight of its 13 tasks are used here \src{SI-02; \file{docs/prepped_fingerprints_scib.json}}.
 \item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
 \item scIB-E (extended scIB): six losses on the batch label in one scVI framework (GAN, HSIC, orthogonal projection, mutual-information minimisation, gradient reversal, reverse cross-entropy), then label-aware levels in scANVI; loss weights tuned with Ray Tune (automated hyperparameter search) on the immune task \citep{yi2025benchmarking}.
-\item Li et al.: learns the whole trade-off between scVI's loss (negative evidence lower bound) and a latent-space batch measure, either a neural-network mutual-information estimate (MINE, Mutual Information Neural Estimation) or maximum mean discrepancy, by Pareto multi-task learning \citep{li2022trade}.
 \end{itemize}
 
 \paragraph{Deep generative models.}
@@ -313,10 +312,10 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item AD-AE (adversarial deconfounding autoencoder): autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
 \item scDREAMER (single-cell deep generative integration model with adversarial classifier): adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
 \item scvi-tools' adversarial batch classifier: fool loss weighted by one minus the KL weight (arm scvi\_adv) \src{scvi-tools 1.4.2: scvi/train/\_trainingplans.py:535, 674--695; \file{scvi_adversarial_plan.py}:175--177}.
-\item AIF (Adversarial Information Factorization): a conditional variational autoencoder on gene expression whose encoder is trained against an auxiliary cross-entropy classifier of batch from the latent code; cells are then decoded under one chosen batch label \citep{monnier2024novel}.
+\item AIF (Adversarial Information Factorization): a conditional variational autoencoder on gene expression with a real-versus-reconstructed GAN discriminator and an auxiliary cross-entropy classifier of batch from the latent code that the encoder is trained against; cells are then decoded under one batch label, which acts as a reference (the study used the most represented batch) \citep{monnier2024novel}.
 \item ABC (Autoencoder-based Batch Correction): an autoencoder trained against a multi-class batch discriminator with categorical cross-entropy, plus cell-type classifier branches that use labels to retain biological signal; no reference batch is designated \citep{danino2024batch}.
-\item scStarCorrect: a StarGAN-based model combining a batch-conditioned variational autoencoder with a domain-aware discriminator that aligns every batch to one fixed reference batch, so correction runs one way \citep{gu2025scstarcorrect} \pending{full-text check and paragraph placement (abstract read only; IEEE closed access)}{full text obtained}.
-\item Portal: a unified framework of adversarial domain translation that learns harmonised representations of datasets, applied across samples, platforms and data types and to integration of millions of cells \citep{zhao2022adversarial} \pending{full-text check and paragraph placement (abstract read only; subscription journal)}{full text obtained}.
+\item scStarCorrect: a StarGAN-based model combining a batch-conditioned variational autoencoder with a domain-aware discriminator that aligns every batch to one fixed reference batch, so correction runs one way \citep{gu2025scstarcorrect} \pending{full-text check, including the adversarial loss form (the StarGAN model it builds on used a WGAN-GP objective; if kept, move this line to Wasserstein critics) and paragraph placement (abstract read only; IEEE closed access)}{full text obtained}.
+\item Portal: a unified framework of adversarial domain translation that learns harmonised representations of datasets, applied across samples, platforms and data types and to integration of millions of cells \citep{zhao2022adversarial} \pending{full-text check, including the adversarial loss form and paragraph placement (abstract read only; subscription journal; bioRxiv version not retrievable)}{full text obtained}.
 \end{itemize}
 
 \paragraph{Wasserstein critics.}
@@ -326,8 +325,9 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item ResPAN: WGAN with random-walk mutual-nearest-neighbour pairing and skip-connected autoencoders \citep{wang2022respan}.
 \item IMAAE (integrating multiple single-cell datasets via an adversarial autoencoder): adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
 \item In the IMAAE paper, a GAN-only model tried at the design stage under-corrected with three or more batches (one dataset, judged from UMAP plots); the authors then used the GAN to constrain the latent space of an autoencoder \citep{wang2023integrating}.
-\item Beaconet (Batch Effect Adversarial Correction Network): corrects each batch in gene-expression space with a corrector network, trained against one Wasserstein-distance critic per batch with a gradient penalty; no reference batch is chosen \citep{xu2024beaconet}.
-\item IMGG (integrating multiple single-cell datasets through connected graphs and generative adversarial networks): a generator on highly variable genes trained with a Wasserstein GAN with gradient penalty (WGAN-GP) critic towards a synthetic intermediate target built from similar-cell cohorts matched across batches by mutual nearest neighbours \citep{wang2022imgg}.
+\item Beaconet (Batch Effect Adversarial Correction Network): a corrector network on log-scaled gene expression, trained against one Wasserstein-distance network per batch that compares the batch with the mixture of the other batches, with a soft 1-Lipschitz penalty (weight 10, after WGAN-GP); no reference batch is chosen \citep{xu2024beaconet}.
+\item IMGG (integrating multiple single-cell datasets through connected graphs and generative adversarial networks): a generator on highly variable genes trained with a WGAN-GP loss (never named Wasserstein) plus an L2 reconstruction loss, which the authors added because the adversarial loss alone made integrating several batches difficult, towards a synthetic intermediate target built from similar-cell cohorts matched across batches by mutual nearest neighbours \citep{wang2022imgg}.
+\item iDLC: a residual autoencoder whose latent space is split into biological and technical parts, then a generator that maps the expression profiles of each source batch to a reference batch, trained against a WGAN-GP discriminator (five discriminator steps per generator step) with a Sinkhorn optimal-transport term added to the generator loss, using mutual-nearest-neighbour cell pairs as supervision \citep{jiang2026geometric}.
 \end{itemize}
 
 \paragraph{Kernel and optimal-transport alignment.}
@@ -338,7 +338,7 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
 \item BERMUDA (batch effect removal using deep autoencoders): MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
 \item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
 \item Entropy-regularised OT \citep{cuturi2013sinkhorn}; Sinkhorn divergences interpolate between OT and MMD \citep{genevay2018learning,feydy2019interpolating}; Wasserstein barycenters \citep{cuturi2014fast}; POT (Python Optimal Transport) library \citep{flamary2021pot}.
-\item iDLC: separates biological and technical components in a latent space, then aligns batches with an adversarial term regularised by optimal transport, guided by mutual-nearest-neighbour cell pairs \citep{jiang2026geometric} \pending{full-text check and paragraph placement (abstract read only; bioRxiv returned HTTP 429)}{full text obtained}.
+\item Li et al.: on a preliminary scVI (version 0.3.0), adds a latent-space batch measure to the scVI loss, either maximum mean discrepancy or an adversarially trained neural estimate of mutual information (MINE, Mutual Information Neural Estimation), and learns the whole trade-off between the two objectives by Pareto multi-task learning \citep{li2022trade}.
 \end{itemize}
 
 \section{Methods}
@@ -423,7 +423,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \subsection{Pre-registered design}
 [S-M10--S-M12, S-E1, S-E4, S-E6]
 \begin{itemize}
-\item Tier 1 and Tier 2 experiments (Tier 2 adds X3, X6, X12) \src{SI-05; PAPER\_PLAN \S4}; all strength grids re-derived from new pilot fits, none selected from earlier sweeps \src{SI-13}.
+\item Tier 1 and Tier 2 experiments (Tier 2 adds X3, X6, X12) \src{SI-05; PAPER\_PLAN \S4}; all strength grids derived from this study's pilot fits (A1--A3), none taken from other experiments \src{SI-13}.
 \item Stage order: A1, rule R1, rule R4 on A1, A2/A3, rules R2/R3, X1, rule R4 on X1, follow-ups; rule-free fits (X1 none and scvi\_adv, X13) may run earlier \src{PREREG \S0}.
 \item Seeds: A1--A3 100--102, X1 and X13 0--4, follow-ups 10--12, so no follow-up reuses an X1 fit that chose its strength \src{SI-26; PREREG \S4}.
 \item Rule R1: one six-point grid per family and decoder (8 grids), from no effect to over-correction or collapse \src{SI-16; SI-18; PREREG \S2}; constants: smallest effect 0.01, noise multiple 3, collapse 0.10 \src{PREREG \S1}.
