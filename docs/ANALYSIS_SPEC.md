@@ -90,11 +90,11 @@ are for the matched-lambda contrast on all six A1 pilot blocks, including the si
 they will be recomputed with this reading and only the evaluable blocks when R4-a1 is re-run after the Sinkhorn redo
 (rigour review DOC-07; PREREG section 9, entry of 2026-10-13, part (c)). The recomputation changes no rule.
 
-**2.3 Not evaluable (the agent's proposal, for the diff review).** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
+**2.3 Not evaluable (decided 2026-10-15, SI-80).** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
 0.01), (ii) either arm's curve never reaches b\*, or (iii) fewer than 4 of the 5 leave-one-seed-out readings exist
 (section 2.4; SI-69). Not-evaluable cells are listed with their reason. Readings of low-signal
-cells are shown in a separate table and never pooled (SI-56). For the pooled results a cell is also not evaluable when
-its standard error is below 1e-6 (reason `zero_spread`, section 4).
+cells are shown in a separate table and never pooled (SI-56). A very small standard error is not a reason: the pooled
+model keeps the cell and raises its standard error to 1e-6 (section 4; SI-83).
 
 **2.4 Contrast and its uncertainty.** d = bio@b\*(reference) - bio@b\*(discriminator).
 
@@ -138,10 +138,21 @@ tau_f, tau_d ~ half-normal(0.1) (pilot-informed: the A1 pilot's between-task SD 
 (amended 2026-10-14, rigour review AN-01: the evenly spaced grid from 0 first written here was too coarse when a
 dataset's standard error s is below its step, and could change a declaration; section 15.4); no random sampling, so
 results reproduce digit for digit on the same input files (rows are sorted by tag before any sum; on a different CPU
-type the last digits can differ). A dataset enters the model only if its s is at least 1e-6; below that it is listed
-as not evaluable for that endpoint with reason `zero_spread` (amended 2026-10-14, AN-02; for example, neither arm adds
-any frontier area in any leave-one-seed-out repeat, so d = 0 and s = 0 exactly; the model treats s as known and cannot
-use s = 0, and 1e-6 is the smallest s at which its double-precision computation was verified).
+type the last digits can differ).
+
+A dataset whose leave-one-seed-out standard error is below 0.000001 (1e-6) is kept, with its standard error raised to 1e-6; the same floor applies in the paired-datasets sensitivity analysis, and every raised dataset is listed in the analysis record.
+This is user decision SI-83 (2026-10-15). It replaces an exclusion of such datasets that was drafted on 2026-10-14 (rigour review
+AN-02); the user rejected the exclusion because dropping a dataset that is certain would bias the result towards the uncertain
+datasets. For example, when neither arm adds any frontier area in any leave-one-seed-out repeat, d = 0 and s = 0 exactly, and the
+dataset enters the model as d = 0 with s = 1e-6. The model treats s as known and cannot use s = 0; 1e-6 is the smallest s at which
+its double-precision computation was verified (section 15.4). In the pairs sensitivity analysis each dataset's s is raised first;
+the averaged standard error of a family, sqrt(s1^2 + s2^2) / 2, can fall below 1e-6 even then (two datasets at 1.2e-6 average to
+8.5e-7) and is raised again (re-check finding AN-R01). A standard error that is NaN, infinite or negative stops the run. The record
+lists every raised dataset or pair in the field `raised` of the pooled result (one list for each endpoint and decoder, in the
+primary analysis and in every sensitivity analysis); an entry gives `unit` (the dataset, or the family in the pairs analysis),
+`level` (`dataset` or `pair`) and `s` (its value before raising). The per-dataset sign table shows each dataset's own s, not the
+raised value.
+
 Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
 the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset sign table with leave-one-out
 intervals, without per-dataset significance claims (PREREG section 9, 2026-10-13 (c)). Frequentist companion: exact
@@ -309,7 +320,9 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
 6. P2 (section 6). All 6 real datasets enter the comparison: the low-signal flag concerns b\*, which P2 does not use.
    The per-dataset difference and its standard error are both Agresti-Caffo's (rates after adding one collapse and
    one non-collapse per arm). P2's prior scale 0.25 has no prior-sensitivity variant.
-7. Local versus global (section 7). A dataset is evaluable exactly when it is for P1 (same crossing).
+7. Local versus global (section 7). A dataset is evaluable exactly when it is for P1: the local reading is read at the same
+   crossing, so it has the same not-evaluable reasons, and a small standard error is raised, not a reason (SI-83). The end-to-end
+   test checks that the two lists of evaluable datasets are equal (re-check finding AN-R05).
 8. Transfer lambda (section 8). The per-dataset best lambda (the optimistic bound) uses the same failure-free rule
    within that dataset. When no lambda is failure-free in every training dataset, the transfer lambda is reported as
    missing.
