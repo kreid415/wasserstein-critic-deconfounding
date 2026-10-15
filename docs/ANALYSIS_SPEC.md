@@ -390,7 +390,9 @@ SI-84; none changes a decision SI-68 to SI-77.
 10. Window width (section 10). The lower bound is the lower end of the two-sided 95% t interval (t at 0.975, n - 1
     degrees of freedom) of the best point's mean; with fewer than 2 successful runs at the best point no width is
     computed. The record flags a gap when a point between the window's smallest and largest lambda lies below the
-    bound, so that the width spans it (AN-14).
+    bound, so that the width spans it (AN-14). A configuration whose runs all failed has no mean and is not a point of the window;
+    the record counts those that lie strictly between the window's smallest and largest lambda in `n_all_failed_between`,
+    because the width spans them although `gap` does not flag them (AN-R13).
 11. Sensitivity analyses (section 11). Each changes one setting and reruns everything: trajectory-free C; per-run
     reading (P1 and local-global; the area is defined on point means only, section 3, so it has no per-run version:
     corrected 2026-10-14, AN-05) and dropping points with a failed run (P1, area, local-global); corner (b0, 0)
