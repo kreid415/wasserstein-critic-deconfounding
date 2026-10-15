@@ -583,6 +583,7 @@
 - added: 2026-10-15
 - keywords: zero_spread, zero spread, standard error, floor, S_MIN, cut-off
 - files: scripts/analysis_x1.py, docs/ANALYSIS_SPEC.md
+- notebook: NB-20261015-16
 
 ## SI-84 · active · method
 - rule: Approved: the log-spaced 201-point grid for the between-dataset spreads (AN-01), the solve-based formula for the overall difference, recomputing b0, b_common, b* and the low-signal flag from the same rows and stopping on a mismatch (AN-03), t-based sign-table limits (AN-06), and the per-run sensitivity limited to P1 and the local-versus-global test (AN-05); the specification states where the grid is accurate and that the sign-table limits are approximate.
@@ -590,6 +591,7 @@
 - added: 2026-10-15
 - keywords: log grid, Gauss-Legendre, precision, recompute, t-based, sign table, per-run
 - files: scripts/analysis_x1.py, docs/ANALYSIS_SPEC.md
+- notebook: NB-20261015-17
 
 ## SI-85 · active · process
 - rule: The stage runner refuses a Sinkhorn divergence record that carries no git commit or was made from a checkout with uncommitted changes, as it refuses such results (code re-check CF-R03, rule A; runner-made nonfinite_latent records stay accepted); one test covers the refusals for records and results together.
@@ -597,6 +599,7 @@
 - added: 2026-10-15
 - keywords: divergence record, git_sha, git_dirty, uncommitted, run_stage
 - files: scripts/run_stage.py, tests/stage/test_run_stage.py
+- notebook: NB-20261015-18
 
 ## SI-86 · active · method
 - rule: prereg_rules.power_report restarts its root search at 0.01 when the search from 1.0 fails; every result that works today stays bit-identical; applied before the tag (documents re-check DOC-R12).
@@ -604,6 +607,7 @@
 - added: 2026-10-15
 - keywords: power_report, power, minimal detectable effect, non-central t, NaN
 - files: scripts/prereg_rules.py, tests/prereg
+- notebook: NB-20261015-19
 
 ## SI-87 · active · process
 - rule: The Sinkhorn redo overwrites docs/prereg/r1_record.json, r4_a1_record.json, r2r3_record.json and the two round1 record files in place (no *_sinkhorn_redo.json names); the old versions stay at tags prereg-tier12-v2 and prereg-tier12-v3, PREREG says so, and the redo's notebook entry lists every decision for the other five arms that changed.
@@ -611,3 +615,4 @@
 - added: 2026-10-15
 - keywords: record, r1_record, r4_a1_record, r2r3_record, sinkhorn_redo, overwrite, redo
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
+- notebook: NB-20261015-20
