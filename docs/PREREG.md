@@ -404,15 +404,21 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   R4-a1 on the new fits, not a fixed list: before the fix there were 18 and 36 of them, 234 rows with the 180 A1 fits
   (the count named in SI-51), and the numbers may change (NB-20261013-09). No existing non-Sinkhorn fit is redone
   (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
-  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the 234 pre-fix fits of
-  atac_small, immune and sim1 (3, 10 and 6 batches; review note F6): 2,808 final-epoch minibatches (12 from each fit)
-  and 268 captured earlier in training or in training mode (192 and 76); the check will be repeated on the refitted latents
-  before convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records
-  of the redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
-  docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
-  docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
-  checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
-  of the six registered lambda per arm.
+  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches in all (review note F6;
+  experiments/doc_numbers_20261015/validation_minibatch_counts.py recomputes the counts from
+  experiments/sinkhorn_fix_20261013/results/validation_12mb.csv): 2,808 final-epoch minibatches from the 234 pre-fix
+  fits of atac_small, immune and sim1 (3, 10 and 6 batches; 12 from each fit), 76 training-mode minibatches from 19 of
+  those fits, and 192 minibatches captured earlier in training in separate replays (160 replay tags, none of them
+  among the 234 fits). The check will be repeated on the refitted latents before convergence is claimed for them or
+  for the X1 tasks with more batches (up to 23, immune_hum_mou).
+  The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place; the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo.
+  The five files were last changed by the commits 2f17f77 (r1_record.json), 03882dc (r1_record_round1.json), dae54b0
+  (r4_a1_record.json), 55e66d4 (r4_a1_record_round1.json) and cea50ca (r2r3_record.json), so those commits also hold
+  the versions before the redo. The tag prereg-tier12-v2 was made before the restarted A1 pilot ran and does not hold
+  these files. The redo's notebook entry will list every decision for the other five arms that changed. The six
+  non-Sinkhorn grids of the redone R1 record are to be checked by hand against the version at tag prereg-tier12-v3
+  (the analysis script reads the grid from the record it is given and does not compare grids), and
+  docs/ANALYSIS_SPEC.md will name the redone R1 record as its source of the six registered lambda per arm.
 - **2026-10-13, guards before the tag (final review findings I033, I034, I042, I050, I051, I094 and I008, each
   explained in the list below; user decisions SI-52, SI-63, SI-64; follow-ups to the independent review of the guard
   commits, findings G-01 to G-05 and G-14).**
