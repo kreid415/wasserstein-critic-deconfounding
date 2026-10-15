@@ -1,19 +1,36 @@
-# Analysis specification for the X1 endpoints (draft for the diff review)
+# Analysis specification for the X1 endpoints (rules; not yet frozen)
 
-*Status, 2026-10-14: draft until the user has reviewed the full diff of branch `final-review-fixes` (SI-52). The user
-decided questions Q1 to Q7 and Q9 to Q11 on 2026-10-14, all as recommended (ledger SI-68 to SI-77; notebook
-NB-20261014-01 to -05 and -07 to -11); no question was numbered Q8 (Appendix A.2). Sections 0 to 16 state the rules
-only. The options the user did not choose, the reasons given with each question and the open items are in the
-decision log, Appendix A (rigour review DOC-13). Details that no question covered are the agent's proposals: section
-2.3 (the not-evaluable rule), section 5 (multiplicity), section 8 (the transfer-lambda rule; SI-77 decides only the
-selection score), sections 9 and 10, the sensitivity analyses of section 11 that no decision names, and section 15. A
-proposal becomes a rule only if the user approves it at the diff review, and each approval will be recorded as a new
-ledger entry before the tag is made. After the diff review this file, `scripts/analysis_x1.py` (committed 2026-10-14,
-ff88666; three test gaps closed in 858101b) and its known-answer tests (`tests/analysis/`) will be frozen by the tag
-prereg-tier12-v3, which has not been made, before any X1 adversarial-arm score is examined (final review I001, D-03,
-D-08, D-09; SI-52). "Examined" is defined, as a proposal the user has not yet approved, in PREREG section 9, entry of
-2026-10-14. The decision rules R1-R4 (PREREG sections 2-4) do not change. Where PAPER_PLAN section 5 and this file
-differ, this file applies; PAPER_PLAN has a dated pointer (section 13).*
+*Status, 2026-10-15: not yet frozen. The user is shown the final diff of branch `final-review-fixes` once more and says yes
+before the tag prereg-tier12-v3 is made (SI-52, SI-60). On 2026-10-14 the user decided questions Q1 to Q7 and Q9 to Q11, each time
+taking the option the agent recommended (ledger SI-68 to SI-77; notebook NB-20261014-01 to -05 and -07 to -11); no question was
+numbered Q8 (Appendix A.2). On 2026-10-15 the user answered the 19 questions of the diff review (ledger SI-78 to SI-87; the
+list is in PREREG section 9) and decided how the audit's findings are listed (SI-88). Those that concern this file: SI-78 (what "examined" means); SI-80 (the agent's proposals of section
+2.3, section 5, section 8, sections 9 and 10, the section 11 sensitivity analyses that no decision names, and section 15 are
+approved as rules; equal numbers of tries in section 9 is the user's own decision, SI-68 and SI-77, and only the best-of-k estimator
+and the composition of the method families were proposals); SI-81 (c) (a reporting script written after the runs); SI-82
+(PAPER_PLAN's four scaling checks are exploratory); SI-83 (a standard error below 1e-6 is raised to 1e-6); SI-84 (five design
+choices of the analysis code are approved and the accuracy ranges are stated); SI-87 (the Sinkhorn redo overwrites five record
+files); SI-88 (how the audit's findings are listed in PREREG). Sections 0 to 16 state the rules only. The options the user did not
+choose, the reasons given with each question and the answers of 2026-10-15 are in the decision log, Appendix A.*
+
+*The specification and `scripts/analysis_x1.py` were first committed on 2026-10-14 (56c0762, 990d37d, ff88666; three test gaps closed
+in 858101b). After the independent rigour review of 2026-10-14 they were revised in 8b90d79 (code and tests), 6aaa3ac (numerical
+checks in `experiments/analysis_numerics_20261014/`), a1d497b, 56febe4 and 4af5069 (this file), and after the independent
+re-check and the user's answers of 2026-10-15 again: the zero-spread floor (SI-83), the accuracy ranges and designs (SI-84), the record
+names (SI-87), the labels of the agent's proposals (SI-80) and the re-check fixes AN-R01 to AN-R15. The user has not approved the
+final text. The tag prereg-tier12-v3, not these commit ids, fixes the registered version: this file, the script and its known-answer
+tests (`tests/analysis/`) will be frozen by that tag, which has not been made, before any X1 or X13 score is examined (final review
+I001, D-03, D-08, D-09; SI-52).*
+
+**Examined (user decision SI-78, 2026-10-15).** A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm.
+The user states that nobody read an X1 or X13 score value (NB-20261015-15). The agent's own audit of 2026-10-14 (NB-20261014-21,
+made by the agent that ran the checks) is narrower: it searched the agent's session logs for reads of `tier12_v2/X1_local/scores`,
+the printed output of the scripts that read them and two log statements, and it cannot show that nobody opened a file. PREREG
+section 9 lists the X1 and X13 scores that already exist, the displays and automated reads found, and how they are classified (the
+displays are listed as shown to the agent only, not as examined; SI-88).
+
+*The decision rules R1-R4 (PREREG sections 2-4) do not change. Where PAPER_PLAN section 5 and this file differ, this file applies;
+PAPER_PLAN has a dated pointer (section 13).*
 
 Words used below. *Run* (fit) = one model trained with one seed. *Point* = one penalty strength (lambda) of one method
 on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* = batch score, *C* = biology score
@@ -45,7 +62,8 @@ findings of the rigour review of 2026-10-14 (analysis and documents parts); Qn i
 Every analysis of X1 or X13 data is locked now, except R0 and X10, which are labelled exploratory (no confirm/refute
 claim; the "JS gradients vanish" premise is then not claimed as shown, PAPER_PLAN section 2 "drop or soften"). The
 follow-up analyses (X3, X6, X7, X8, X12, X15) are locked later, together with the X7/X8 design fixes, while X1 runs,
-before R4-x1 runs and before anyone examines an X1 result. (Q1's options and reasons: Appendix A.1.)
+before R4-x1 runs and before anyone examines an X1 result (SI-68's own words; "examined" as defined in the status paragraph,
+SI-78). (Q1's options and reasons: Appendix A.1.)
 
 ## 1. Inputs and shared definitions (registered; no choice)
 
@@ -407,7 +425,8 @@ Options:
 [Note 2026-10-14, documents review DOC-01: 19 X1 rows had been scored on 2026-10-12, so the reason's "before any
 X1 result exist" did not hold when the user chose. The lock is stated as "before any X1 adversarial-arm score is
 examined" for this file (status line) and as "before anyone examines an X1 result" for the follow-up analyses
-(section 0; SI-68's words: "before anyone looks at an X1 result"); PREREG section 9, entry of 2026-10-14.]
+(section 0; SI-68's words: "before anyone looks at an X1 result"); PREREG section 9, entry of 2026-10-14. On 2026-10-15
+SI-78 widened the status line's wording to every X1 and X13 score, of any arm.]
 
 **Q2, how the five runs are combined (SI-69, NB-20261014-02).**
 
