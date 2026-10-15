@@ -156,6 +156,12 @@ Sensitivity analysis: the corner (b0, 0) (section 11). (Q5's options and reasons
 
 ## 4. Combining datasets (user decision SI-73, Q6)
 
+SI-73 decides the model, its priors and an exact calculation without random sampling. The details marked "amended 2026-10-14"
+below are the agent's implementation choices made after the rigour review (the 201 x 201 grid evenly spaced in log(tau), its lower
+end 1e-15 and cap 0.5, the formula for the overall difference that solves with A, and the remark that the last digits can differ on
+a different CPU type); the user approved them on 2026-10-15 (SI-84). The floor of 1e-6 on a standard error is the user's decision
+SI-83 (2026-10-15).
+
 Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s_t^2) with s_t from section 2.4
 (treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
 the final review required (I056) and PAPER_PLAN section 5's "(1 | family/dataset)". Priors: Delta ~ N(0, 0.1^2);
@@ -164,8 +170,8 @@ tau_f, tau_d ~ half-normal(0.1) (pilot-informed: the A1 pilot's between-task SD 
 (tau_f, tau_d), which are integrated on a 201 x 201 grid over [1e-15, 0.5]^2 with points evenly spaced in log(tau)
 (amended 2026-10-14, rigour review AN-01: the evenly spaced grid from 0 first written here was too coarse when a
 dataset's standard error s is below its step, and could change a declaration; section 15.4); no random sampling, so
-results reproduce digit for digit on the same input files (rows are sorted by tag before any sum; on a different CPU
-type the last digits can differ).
+results reproduce digit for digit on the same input files and the same CPU type (rows are sorted by tag before any sum, so
+their order does not matter; on a different CPU type the last digits can differ; amended 2026-10-14, SI-84).
 
 A dataset whose leave-one-seed-out standard error is below 0.000001 (1e-6) is kept, with its standard error raised to 1e-6; the same floor applies in the paired-datasets sensitivity analysis, and every raised dataset is listed in the analysis record.
 This is user decision SI-83 (2026-10-15). It replaces an exclusion of such datasets that was drafted on 2026-10-14 (rigour review
@@ -345,11 +351,25 @@ SI-84; none changes a decision SI-68 to SI-77.
    double precision for small s (found while checking AN-01: the subtraction it replaces lost up to 0.2% of the
    variance at s = 1e-4 and was unusable near s = 1e-6). The sign table's "leave-one-out intervals" are each dataset's
    d ± t(0.975, m - 1) s, with s its leave-one-seed-out standard error from m readings (AN-06: with m = 4 or 5,
-   d ± 1.96 s covers less than 95%). The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
-   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it. Validation
-   (`experiments/analysis_numerics_20261014/`, synthetic inputs): on 240 random sets of 1-6 datasets with s from 1e-6
-   to 0.05, every probability, posterior mean and heterogeneity is within 2e-6 of a finer and wider reference rule,
-   and no declaration differs.
+   d ± 1.96 s covers less than 95%; the limits stay approximate, because s is a jackknife standard error of a statistic that is not
+   smooth, section 16, limitation 1). The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
+   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it. With fewer than
+   three evaluable datasets the pooled result is inconclusive by construction (AN-R12): with every dataset showing the same
+   difference, P(Delta > 0.01) did not exceed 0.82 with one dataset, 0.94 with two datasets of different families and 0.88
+   with two of one family, and P(|Delta| <= 0.01) did not exceed 0.15, 0.33 and 0.26, for differences up to 2 and standard
+   errors from 1e-6 to 0.01 at the prior scale 0.1 (`experiments/analysis_numerics_20261014/ceilings.json`); three datasets
+   need a difference of at least 0.03 to 0.08, depending on s, to declare a direction. Conditioned-decoder cells that are
+   low-signal drop out of the pool (section 2.3), so this can happen in the real run; each declaration keeps the number of
+   evaluable datasets beside it. Accuracy (user decision SI-84; `experiments/analysis_numerics_20261014/`, synthetic inputs):
+   on 240 random sets of 1-6 datasets with s from 1e-6 to 0.05, every probability, posterior mean and heterogeneity is
+   within 2e-6 of a finer and wider reference rule, and no declaration differs. An independent reference (closed-form
+   block algebra, Gauss-Legendre quadrature, 50-digit arithmetic; `ref_pool.py`, `ref_mp.py`) agrees with the code to 1.5e-9
+   on the ordinary sets, to 7e-7 for a single dataset, and to 2e-6 while the datasets' differences spread by at most three
+   prior scales (a standard deviation of 0.3 at the prior scale 0.1). Beyond that the error grows: for a spread of 4, 5, 6 and 8 prior
+   scales (prior scale 0.1) the largest error of a declaration probability is 1.3e-6, 1.1e-5, 2.9e-5 and 2.1e-4, and that of
+   any reported value 1.1e-5, 7.8e-5, 3.0e-4 and 2.8e-3; part of it is the posterior mass beyond 5 prior scales that the grid
+   leaves out (2.2e-5, 1.5e-4 and 3.3e-3 at a spread of 5, 6 and 8 prior scales), the rest the integration rule. No
+   declaration differed from the reference in any of these sets (`compare_with_reference.json`).
 5. Declarations (section 5). Holm runs over the six frequentist p values of the primary results (P1, area and P2,
    each per decoder).
 6. P2 (section 6). All 6 real datasets enter the comparison: the low-signal flag concerns b\*, which P2 does not use.
