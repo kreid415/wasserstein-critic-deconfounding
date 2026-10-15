@@ -536,3 +536,38 @@
 - keywords: selection score, transfer lambda, best-of-k, window width, min-max, scIB weights
 - files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
 - notebook: NB-20261014-11
+
+## SI-78 · active · process
+- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores).
+- source: "Every X1 and X13 score, any arm (Recommended)" (user, ask_user answer to "What counts as having 'examined' an X1 result?", 2026-10-15)
+- added: 2026-10-15
+- keywords: examined, blinding, X1 score, X13 score, freeze
+- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
+
+## SI-79 · active · process
+- rule: Record SHA-256 hashes of every existing X1 and X13 score file (hashing reads bytes and shows no value) and the date GitHub shows for the tag prereg-tier12-v3 as an outside time stamp; commit the hash list and state it in PREREG.
+- source: "Record hashes and the tag's GitHub date (Recommended)" (user, ask_user answer to "Should we record a fingerprint (a SHA-256 hash) of every existing X1 and X13 score file?", 2026-10-15)
+- added: 2026-10-15
+- keywords: hash, SHA-256, score files, time stamp, tag date
+- files: docs/PREREG.md
+
+## SI-80 · active · method
+- rule: The agent's proposals in docs/ANALYSIS_SPEC.md are approved as rules: section 2.3 (not-evaluable rule), section 5 (marginal declarations; Holm over the six primary results for the descriptive Wilcoxon companion only), section 8 (leave-one-family-out transfer rule), section 9 (best-of-k placement against standard tools), section 10 (width of the range of good strengths), the section 11 sensitivity analyses that no decision names, and section 15 (implementation details). Parts that implement the rigour-review designs asked separately at the same review (the zero-spread exclusion in sections 2.3 and 4, question 1; the t-based sign-table limits in section 15 and the other designs of question 2) follow the user's answers to those questions.
+- source: "Approve all (Recommended)" (user, ask_user answer to "Do you approve the agent's proposals in the analysis specification (docs/ANALYSIS_SPEC.md)?", 2026-10-15)
+- added: 2026-10-15
+- keywords: proposal, not evaluable, Holm, transfer rule, best-of-k, window width, sensitivity, implementation details
+- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+
+## SI-81 · active · process
+- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2. (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs.
+- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15)
+- added: 2026-10-15
+- keywords: NMI-0, NMI, iteration cap, no-pair, unreached, reporting script
+- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
+
+## SI-82 · active · method
+- rule: PAPER_PLAN's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau) are all reported, labelled not pre-registered, and used for no conclusion (exploratory).
+- source: "Report all four as exploratory (Recommended)" (user, ask_user answer to "What should happen to the paper plan's four scaling checks?", 2026-10-15)
+- added: 2026-10-15
+- keywords: scaling sensitivities, z-score, leave-one-method-out, silhouette, Kendall, exploratory
+- files: docs/PAPER_PLAN.md, docs/ANALYSIS_SPEC.md
