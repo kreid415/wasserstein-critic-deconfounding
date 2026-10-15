@@ -1,6 +1,6 @@
 """Known-answer tests for scripts/analysis_x1.py, the frozen X1 analysis (docs/ANALYSIS_SPEC.md section 14).
 
-Synthetic inputs only: the analysis must not run on any X1 adversarial-arm score before the tag prereg-tier12-v3.
+Synthetic inputs only: the analysis must not run on any X1 or X13 score before the tag prereg-tier12-v3 (SI-78).
 Every expected value is derived by hand (the derivation is stated next to the case) or by an independent method
 (scipy, enumeration, brute-force integration), never by the code under test.
 """
@@ -401,6 +401,11 @@ FAIL = {("lung", "0", "discriminator", "10", "0"): "diverged",
         **{("lung", "0", "barycenter", lam, "3"): "diverged" for lam in ("10", "100")},
         ("atac_small", "1", "reference", "10", "2"): "diverged"}    # a failed run at a point that adds area
 ZERO_AREA = ("lung", "1")          # every adversarial point 0.35 below in biology: neither P1 arm adds area (s = 0)
+# an R4-x1 extension point (used for matching only, never P1; SI-55) of the arm that sets b_common in atac_small, decoder 0,
+# with a batch score above its six registered points: b_common and so b* rise, so the analysis must see the row (AN-R07)
+EXT = ("atac_small", "0", "barycenter",
+       P.fmt_lam(P.lam_step(max(json.load(open(R1_RECORD))["families"]["w1|0"]["x1_grid"]), +1)))
+EXT_BUMP = 0.05
 
 
 def _gain(r):
@@ -421,6 +426,7 @@ def world(r):
     if r["arm"] in P.ADV_ARMS:
         x = math.log10(float(r["lam"])) - CENTRE[(P.FAMILY_OF[r["arm"]], int(r["cond"]))]
         B += _gain(r) * synth.sig(x / 0.3) + synth._noise("B" + r["tag"], 0.003)
+        B += EXT_BUMP if (r["task"], r["cond"], r["arm"], r["lam"]) == EXT else 0.0
         C += -0.25 * synth.sig((x - 1) / 0.3) + BONUS.get(r["arm"], 0.0) * synth.sig(x / 0.3) + synth._noise("C" + r["tag"], 0.003)
         C -= 0.35 if (r["task"], r["cond"]) == ZERO_AREA else 0.0
         a = SPREAD.get(r["arm"], 0.0) * synth.sig(x / 0.3)
@@ -463,13 +469,12 @@ def e2e(tmp_path_factory):
     M, _ = P.read_manifest(X1_MANIFEST)
     M = M[M.experiment.isin(["X1", "X13"])].reset_index(drop=True)
     r1 = P.read_record(R1_RECORD, "R1")
-    top = max(r1["families"]["mmd|0"]["x1_grid"])     # an R4-x1 extension point: matching only, never P1 (SI-55)
-    M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task="atac_small", cond=0, arm="mmd",
-                                                 lam=P.lam_step(top, +1))])], ignore_index=True)
+    M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task=EXT[0], cond=int(EXT[1]), arm=EXT[2],
+                                                 lam=float(EXT[3]))])], ignore_index=True)
     man = synth.write_tsv(M, os.path.join(tmp, "manifest.tsv"))
     sp, fp = synth.write_scores(*score_tables(M), os.path.join(tmp, "scores"), "x1")
     S, F = P.read_scores([sp])[0], P.read_failures(fp)
-    r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, no extension
+    r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, with the extension row
     P.write_record(r4p, P.r4_stage(P.outcomes(M, S, F, ["X1"]), "x1", r1, need=set()), dict(scores=[sp]))
     args = dict(manifest=man, scores=sp, failures=fp, r1=R1_RECORD, r4=r4p, out=os.path.join(tmp, "analysis.json"))
     assert A.main(argv(args)) == 0
@@ -486,6 +491,11 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert prim["settings"] == dict(value="C", mode="mean", corner="collapse", structure="family", scale=0.1)
     assert len(prim["cells"]) == 16 and prim["n_primary"] == 6
     assert set(prim["holm"]) == {f"{e}|{c}" for e in ("p1", "area", "p2") for c in (0, 1)}
+    # the extension row raises the barycenter's best batch score in atac_small|0 above the other arms': b* moves, and the
+    # record is accepted only because the analysis sees the row (planted error: a recompute from registered points only)
+    reg = out[~((out.task == EXT[0]) & (out.cond == EXT[1]) & (out.arm == EXT[2]) & (out.lam == EXT[3]))]
+    plain = P.r4_stage(reg, "x1", r1, need=set())["targets"]["atac_small|0"]
+    assert r4["targets"]["atac_small|0"]["bstar"] - plain["bstar"] > 1e-5      # about 1.7e-4, against a recompute tolerance of 1e-9
 
     # wiring: the record's cell values are the functions' values on the same runs
     t, c = "pancreas", 1
@@ -633,6 +643,15 @@ def _rewrite(src, dst, keep):
      "differ"),
     (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "bstar_low_signal",
                                     True)), "differ"),
+    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "pancreas|1", "b_common", 0.01)),
+     "differ"),                                                                 # b_common alone (AN-R07)
+    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "bstar", 2e-9)),
+     "differ"),                                                                 # just outside the 1e-9 tolerance (AN-R07)
+    # a record made with an R4 extension row, given without that row: refused, and the message names the cause (AN-R03)
+    (lambda e, tmp: dict(manifest=_rewrite(e["args"]["manifest"], os.path.join(tmp, "m.tsv"),
+                                           lambda M: ~((M.task == EXT[0]) & (M.cond == EXT[1]) & (M.arm == EXT[2])
+                                                       & (M.lam == EXT[3])))),
+     r"for atac_small\|0: record .* recomputed .* extension rows"),
     (lambda e, tmp: _without_seed(e, tmp, "4"), "X1 seeds"),                     # review AN-10
     (lambda e, tmp: dict(out=e["args"]["out"]), "exists"),                      # never overwrite a record
 ])

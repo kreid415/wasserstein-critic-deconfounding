@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 """Frozen X1 analysis: matched biology, frontier area, collapse, local mixing and lambda selection,
 with deterministic posterior pooling and the registered sensitivities (docs/ANALYSIS_SPEC.md).
-This script must not be run on any X1 adversarial-arm score before the tag prereg-tier12-v3.
+This script must not be run on any X1 or X13 score before the tag prereg-tier12-v3 (SI-78: an analysis script that
+uses a score examines it).
 
 Usage (repo root):
   python scripts/analysis_x1.py --manifest manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv \
-      --scores <dir> --failures <csv> --r1-record docs/prereg/r1_record.json \
+      [--manifest <each R4 extension manifest>] --scores <dir> [<each R4 extension scores dir>] \
+      --failures <csv that covers every row> --r1-record docs/prereg/r1_record.json \
       --r4-record docs/prereg/r4_x1_record.json --out-json <analysis.json>
+The script recomputes the R4 targets from the rows it is given (prereg_rules.r4_stage) and refuses a record that
+differs: when R4 extended the X1 grids, pass the extension manifests and their scores too, or a valid record is refused.
 """
 import argparse
 import itertools
@@ -383,9 +387,12 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
                    f"R4 lacks b0 target for {key}")
         P._require(sorted(zero_runs(out, task, cond)) == X1_SEEDS, f"{key}: plain-scVI seeds are not the X1 seeds 0-4")
         got, want = r4["targets"][key], targets[key]
+        four = ("b0", "b_common", "bstar", "bstar_low_signal")
         P._require(got["bstar_low_signal"] == want["bstar_low_signal"]
                    and all(abs(got[k] - want[k]) <= P.TIE_TOL for k in ("b0", "b_common", "bstar")),
-                   f"R4 targets (b0, b_common, b* or the low-signal flag) differ from these scores for {key}")
+                   f"R4 targets (b0, b_common, b* or the low-signal flag) differ from these scores for {key}: record "
+                   f"{[got[k] for k in four]}, recomputed {[want[k] for k in four]}; if R4 added extension rows, pass "
+                   "their manifest as a further --manifest and their scores with --scores")
     P._require(value in ("C", "C_nt"), f"unknown biology value {value}")
     out = out.assign(C=out[value])
     x1, x13 = out[out.experiment == "X1"], out[out.experiment == "X13"]
