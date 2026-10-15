@@ -354,13 +354,20 @@ def test_window():
                   (10.0, [0.59, 0.60, 0.58, 0.595, 0.585]), (30.0, [0.3] * 5), (100.0, [])])
     lower = 0.60 - stats.t.ppf(0.975, 4) * math.sqrt(0.00025 / 5)           # best mean - t x SD / sqrt(n) = 0.5804
     assert w == dict(status="ok", best=3.0, lower=pytest.approx(lower, abs=1e-12), lams=[3.0, 10.0],
-                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2, gap=False)
+                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2, gap=False, n_all_failed_between=0)
     tie = A.window([(1.0, [0.5, 0.5]), (3.0, [0.5, 0.5])])                   # tie -> smaller lambda; SD 0
     assert tie["best"] == 1.0 and tie["lams"] == [1.0, 3.0] and tie["width"] == pytest.approx(math.log10(3))
     # lambda 3 lies below the bound between two points above it: the width spans a gap (review AN-14)
-    gap = A.window([(1.0, [0.60, 0.62, 0.58, 0.61, 0.59]), (3.0, [0.3] * 5), (10.0, [0.59, 0.60, 0.58, 0.595, 0.585])])
-    assert gap["lams"] == [1.0, 10.0] and gap["gap"] is True and gap["n_points"] == 2
-    none = dict(lower=None, lams=None, width=None, n_points=None, gap=None)
+    good, other = [0.60, 0.62, 0.58, 0.61, 0.59], [0.59, 0.60, 0.58, 0.595, 0.585]
+    gap = A.window([(1.0, good), (3.0, [0.3] * 5), (10.0, other)])
+    assert gap["lams"] == [1.0, 10.0] and gap["gap"] is True and gap["n_points"] == 2 and gap["n_all_failed_between"] == 0
+    # a configuration with no successful run between the ends is counted and leaves the gap rule alone (AN-R13)
+    failed = A.window([(1.0, good), (3.0, []), (10.0, other)])
+    assert failed["lams"] == [1.0, 10.0] and failed["gap"] is False and failed["n_all_failed_between"] == 1
+    # the low point may lie deep inside the window, not next to its smallest lambda (AN-R09)
+    deep = A.window([(1.0, good), (3.0, [0.595] * 5), (10.0, [0.3] * 5), (30.0, []), (100.0, other)])
+    assert deep["lams"] == [1.0, 3.0, 100.0] and deep["gap"] is True and deep["n_all_failed_between"] == 1
+    none = dict(lower=None, lams=None, width=None, n_points=None, gap=None, n_all_failed_between=None)
     assert A.window([(1.0, [0.5]), (3.0, [0.4, 0.45])]) == dict(none, status="no_interval", best=1.0)
     assert A.window([(1.0, []), (3.0, [])]) == dict(none, status="no_points", best=None)
 
@@ -414,6 +421,8 @@ def _gain(r):
     lone = {"reference": "1", "discriminator": "0"}.get(r["arm"])
     if (r["task"], r["cond"]) == ("atac_large", "1") and lone:
         return 0.30 if r["seed"] == lone else 0.004        # one responding seed per P1 arm: 3 of 5 readings
+    if (r["task"], r["cond"]) == ("immune_hum_mou", "1") and r["arm"] in ("reference", "discriminator"):
+        return 0.30 if r["seed"] == "1" else 0.004         # the same responding seed for both P1 arms: 4 of 5 readings
     return 0.30
 
 
@@ -533,6 +542,7 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)
     # a dataset is evaluable for the local reading exactly when it is for P1 (same crossing; spec section 15.7)
     assert all(pooled[c]["local"]["tasks"] == pooled[c]["p1"]["tasks"] for c in "01")
+    assert prim["cells"]["immune_hum_mou|1"]["p1"]["m"] == 4      # a sign-table cell with 4 readings: t with 3 df (AN-R09)
     close(pooled["0"]["p1"]["wilcoxon_p"], 2 / 64)
     assert pooled["0"]["p2"]["declaration"] == "below" and len(pooled["0"]["p2"]["diffs"]) == 6
     # each pooled result combines its own endpoint's cell readings with the frozen prior scales and margins (P1 0.1 and
@@ -567,6 +577,9 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert bary["pancreas"]["best_lam"] in (10.0, 100.0) and bary["pancreas"]["best"]["n_fail"] == 0
     lh = prim["cells"]["lung|0"]["best_of_k"]["harmony"]
     assert (lh["n"], lh["configs"], lh["failed_runs"]) == (5, 6, 1)        # failures counted, not penalised (AN-13)
+    # the total over configurations, not the largest count: 4 and 2 configurations with one failed run each (AN-R09)
+    assert [(prim["cells"][f"{t}|0"]["best_of_k"]["barycenter"]["configs"],
+             prim["cells"][f"{t}|0"]["best_of_k"]["barycenter"]["failed_runs"]) for t in ("pancreas", "lung")] == [(6, 4), (6, 2)]
     bk = prim["cells"]["sim2|0"]["best_of_k"]
     assert {f: bk[f]["n"] for f in bk} == dict(dict.fromkeys(P.ADV_ARMS, 6), sinkhorn=5, harmony=6, scanorama=6,
                                                  sysvi=6, scanvi=1, none=1, scvi_adv=1)

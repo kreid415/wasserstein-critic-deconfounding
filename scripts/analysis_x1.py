@@ -334,8 +334,10 @@ def best_of_k(scores):
 
 
 def window(points):
+    empty = [lam for lam, scores in points if not len(scores)]      # configurations with no successful run (AN-R13)
     points = [(lam, scores) for lam, scores in points if len(scores)]
-    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None, gap=None)
+    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None, gap=None,
+                  n_all_failed_between=None)
     if not points:
         return result
     means = {lam: float(np.mean(scores)) for lam, scores in points}
@@ -352,7 +354,8 @@ def window(points):
     # gap: a point between the window's ends lies below the bound, so the width spans it (review AN-14)
     return dict(status="ok", best=best, lower=float(lower), lams=lams,
                 width=math.log10(max(lams)) - math.log10(min(lams)), n_points=len(lams),
-                gap=any(min(lams) < lam < max(lams) and lam not in lams for lam in means))
+                gap=any(min(lams) < lam < max(lams) and lam not in lams for lam in means),
+                n_all_failed_between=sum(min(lams) < lam < max(lams) for lam in empty))     # the width spans these too
 
 
 def dominance(config, front):
