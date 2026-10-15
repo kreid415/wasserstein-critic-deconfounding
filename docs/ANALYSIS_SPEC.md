@@ -219,7 +219,7 @@ Also a pooled reference-minus-discriminator difference: per dataset the differen
 standard error (one collapse and one non-collapse added per arm), the section 4 model with priors scaled for
 proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points). Pilot-informed: the
 margin and the prior scale were chosen after the pilot collapse rates were shown, and one rate quoted with the question
-was miscounted (Appendix A.1, Q9); whether SI-75 stands is an open item for the diff review (Appendix A.3). (Q9's
+was miscounted (Appendix A.1, Q9); the user confirmed on 2026-10-15 that SI-75 stands (NB-20261015-07). (Q9's
 options: Appendix A.1.)
 
 ## 7. Local versus global batch removal (user decision SI-76, Q10)
