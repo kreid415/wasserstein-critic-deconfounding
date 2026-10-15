@@ -1,0 +1,2068 @@
+{
+ "run_at_local": "2026-10-15T10:33",
+ "identifiers": [
+  "X13_atac_small_harmony_d10",
+  "X13_atac_small_harmony_d50",
+  "X13_atac_small_harmony_l0_c0_s0_01854d78",
+  "X13_atac_small_harmony_l2_c0_s0_21282fe8",
+  "X13_atac_small_pca_d10",
+  "X13_atac_small_pca_d50",
+  "X13_atac_small_pca_l0_c0_s0_1c0b8c79",
+  "X13_atac_small_scanorama_d10",
+  "X13_atac_small_scanorama_d100",
+  "X13_atac_small_scanorama_l20_c0_s0_331f85e9",
+  "X13_atac_small_scanvi_l0_c1_s0_56638b3a",
+  "X13_atac_small_sysvi_l2_c1_s0_b9909310",
+  "X13_pancreas_sysvi_l10_c1_s0_60b085ea",
+  "X13_sim1_harmony_l2_c0_s0_4846b3fa",
+  "X13_sim1_pca_l0_c0_s0_1b3b2731",
+  "X13_sim1_scanorama_l2_c0_s0_0e5642c4",
+  "X13_sim1_scanvi_l0_c1_s0_59ea2122",
+  "X13_sim1_sysvi_l1_c1_s0_7ee62c6d",
+  "X1_atac_large_none_l0_c1_s0_2561dc45",
+  "X1_atac_small_barycenter_lg1_c1_s0_e483c0c4",
+  "X1_atac_small_discriminator_lg1_c1_s0_3daf1ca8",
+  "X1_atac_small_mmd_lg1_c1_s0_a206f22e",
+  "X1_atac_small_none_l0_c1_s0_731728c3",
+  "X1_atac_small_pooled_lg1_c1_s0_dabd57df",
+  "X1_atac_small_reference_lg1_c1_s0_71ad1ddd",
+  "X1_atac_small_scvi_adv_l0_c1_s0_1a53c945",
+  "X1_atac_small_sinkhorn_lg1_c1_s0_170e21a8",
+  "X1_immune_discriminator_lg1_c1_s0_122afe99",
+  "X1_immune_hum_mou_none_l0_c1_s0_c66698bb",
+  "X1_immune_none_l0_c1_s0_c7efda46",
+  "X1_lung_none_l0_c1_s0_4f21c092",
+  "X1_pancreas_barycenter_lg1_c1_s0_e17af560",
+  "X1_pancreas_discriminator_lg1_c1_s0_4c5771f2",
+  "X1_pancreas_none_l0_c1_s0_d18f6091",
+  "X1_pancreas_pooled_lg1_c0_s0_d927e322",
+  "X1_pancreas_sinkhorn_lg1_c0_s0_9e21198d",
+  "X1_sim1_barycenter_lg1_c1_s0_99e10333",
+  "X1_sim1_discriminator_lg1_c1_s0_4897d60d",
+  "X1_sim1_mmd_lg1_c0_s0_f1c13d3f",
+  "X1_sim1_mmd_lg1_c1_s0_d2271e66",
+  "X1_sim1_none_l0_c1_s0_6e3ac79a",
+  "X1_sim1_pooled_lg1_c1_s0_c6ce657b",
+  "X1_sim1_reference_lg1_c1_s0_f802bd10",
+  "X1_sim1_scvi_adv_l0_c1_s0_f1b08e60",
+  "X1_sim1_sinkhorn_lg1_c1_s0_b8186c49",
+  "X1_sim2_none_l0_c1_s0_b40bea0b"
+ ],
+ "folders": [
+  "review/out/scope_claude",
+  "review/out/model_code_codex",
+  "review/out/metrics_codex",
+  "review/out/pipeline_claude",
+  "review/out/pipeline_codex",
+  "x13_cpu_baselines_atac_small_test",
+  "review/identity_"
+ ],
+ "files": {
+  "files_scanned": 26722,
+  "files_mentioning": 268,
+  "flagged": [
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/test_tmp2/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/pipeline_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/pipeline_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/pipeline_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/tmp/pytest_jhpce/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_codex/rehearsal_source/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_fable/probes/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_fable/probes/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_fable/probes/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_summary_refuses_a_ledger_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dry_run_mode_plans_withou0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_prepped_fingerprint_misma0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_scratch_under_home_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_TI0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_CO0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_refusal_attributes0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stagekey_reads_the_runner0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_vie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_rejects_tam0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_stop_guard_stops_runner_r0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_deadline_too_close_refuse0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_dirty_tree_refused0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claim_without_slurm_id_re0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_overlapping_live_job_refu0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o2/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_tie0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/template0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_happy_path_uses_the_runne0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_killed_views_rebui0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_runner_infrastructure_sto0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_node_witness_refuses_wron1/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_concurrency_slots0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o3/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_claims_of_earlier_jobs_RU0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_refusals_before_any_fit_o4/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_failing_node_tests_abort0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_guard_before_the_runner_p0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_unknown_slurm_state_count0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_fit_env_version_mismatch_0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_environment_refusals0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/esc_pipeline_and_data_astra/cluster_pytest/test_harvest_local_refuses_a_m0/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_claude/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_claude/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_claude/clone/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_claude/clone2/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_claude/clone2/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_claude/clone2/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_claude/cov/report/coverage_tests.json",
+    "id": null,
+    "masked": "{\"meta\": {\"format\": #, \"version\": \"#.#.#\", \"timestamp\": \"####-##-##T##:##:##.######\", \"branch_coverage\": true, \"show_contexts\": true}, \"files\": {\"/home/kendall/experiment_data/wasserstein-critic-deconfounding/review/out/scope_clau"
+   },
+   {
+    "file": "review/out/scope_claude/cov/report/coverage_rehearsal.json",
+    "id": null,
+    "masked": "{\"meta\": {\"format\": #, \"version\": \"#.#.#\", \"timestamp\": \"####-##-##T##:##:##.######\", \"branch_coverage\": true, \"show_contexts\": true}, \"files\": {\"/home/kendall/experiment_data/wasserstein-critic-deconfounding/review/out/scope_clau"
+   },
+   {
+    "file": "review/out/scope_claude/cov/report/coverage_probe.json",
+    "id": null,
+    "masked": "{\"meta\": {\"format\": #, \"version\": \"#.#.#\", \"timestamp\": \"####-##-##T##:##:##.######\", \"branch_coverage\": true, \"show_contexts\": true}, \"files\": {\"/home/kendall/experiment_data/wasserstein-critic-deconfounding/review/out/scope_clau"
+   },
+   {
+    "file": "review/out/scope_claude/cov/report/coverage_union.json",
+    "id": null,
+    "masked": "{\"meta\": {\"format\": #, \"version\": \"#.#.#\", \"timestamp\": \"####-##-##T##:##:##.######\", \"branch_coverage\": true, \"show_contexts\": false}, \"files\": {\"/home/kendall/experiment_data/wasserstein-critic-deconfounding/review/out/scope_cla"
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work2/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work2/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/scope_claude/rehearsal/work2/scratch/prod/job_990001/repo/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/metrics_claude/clone_tests/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/metrics_claude/clone_tests/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/metrics_claude/clone_tests/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   },
+   {
+    "file": "review/out/metrics_claude/clone_k15/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on id"
+   },
+   {
+    "file": "review/out/metrics_claude/clone_k15/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: KBET_SEED # twice: kBET #.################ both times, # seeded R calls each; seeds # and #: #.#### and #.####; the scorer without set.seed (mutant): #.################ and #.################ on the same latent; every "
+   },
+   {
+    "file": "review/out/metrics_claude/clone_k15/notebook/2026-10-02.md",
+    "id": null,
+    "masked": "- observed: C = unscaled mean of the task's bio metrics reproduced on # known-answer cases (immune, immune_hum_mou: # metrics, #.##; pancreas, lung: #, #.##; atac_small, sim#: #, #.##); scib_overall bio score, max abs change from "
+   }
+  ]
+ },
+ "transcripts": {
+  "frames_scanned": 56,
+  "frames_mentioning": 45,
+  "flagged": [
+   {
+    "frame": "0a35ec66-5615-4a60-85a5-78043c4c3ede",
+    "session": "Prereg rules",
+    "msg": 343,
+    "block": "tool_result",
+    "id": null,
+    "masked": "##-- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama identical; harmonize reruns on"
+   },
+   {
+    "frame": "0a35ec66-5615-4a60-85a5-78043c4c3ede",
+    "session": "Prereg rules",
+    "msg": 343,
+    "block": "tool_result",
+    "id": null,
+    "masked": "{\\\"BIO_METRICS\\\": [\\\"NMI_cluster/label\\\", \\\"ARI_cluster/label\\\", \\\"ASW_label\\\", \\\"isolated_label_F#\\\", \\\"isolated_label_silhouette\\\", \\\"cLISI\\\", \\\"cell_cycle_conservation\\\", \\\"trajectory\\\"], \\\"C|atac_large\\\": {\\\"expected\\\": #.####"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_harmony_d10",
+    "masked": "X##_atac_small_harmony_d##      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_harmony_d50",
+    "masked": "X##_atac_small_harmony_d##      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_pca_d10",
+    "masked": "X##_atac_small_pca_d##      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_pca_d50",
+    "masked": "X##_atac_small_pca_d##      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_scanorama_d10",
+    "masked": "X##_atac_small_scanorama_d##      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 327,
+    "block": "tool_result",
+    "id": "X13_atac_small_scanorama_d10",
+    "masked": "X##_atac_small_scanorama_d###      #.###            #.###  #.###       #.### #.###              #.###              #.###      #.###              #.###                      #.###  #.###                      NaN          ###.#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 390,
+    "block": "text:user",
+    "id": null,
+    "masked": "- X## atac_small: # latents written & scored by score_scib_native.py with # failures, ## embedding metrics finite. Harmony not reproducible run-to-run (d## run# vs run# max|dz| #.###, mean #.####, NMI \u2212#.###, ARI \u2212#.###, iLISI \u2212#."
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 499,
+    "block": "tool_result",
+    "id": null,
+    "masked": "notebook/####-##-##.md:##:- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 505,
+    "block": "tool_result",
+    "id": null,
+    "masked": "- problem: two runs of run_cpu_baselines.py on atac_small: harmony d## latents differ (max|dz| #.###, mean #.####, rms z #.##; NMI -#.###, ARI -#.###, iLISI -#.###), harmony d##, PCA and Scanorama ide"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 926,
+    "block": "text:user",
+    "id": null,
+    "masked": "bash/python (envs scvi-api, wcd-gpu, wcd-kbet, python), repl (host.archive.search, host.findings, host.send_message, host.submit_output, host.exec_interrupt), ask_user (# sign-offs ####-##-##), fetch_article_fulltext (Harmony PMC#"
+   },
+   {
+    "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+    "session": "Missing arms",
+    "msg": 1357,
+    "block": "text:user",
+    "id": null,
+    "masked": "- (iii) X#_pancreas_none_l#_c#_s##_#####c## (##,### of ##,### cells): scorer PCR_batch #.###### = all-feature reference #.######; HVG reference #.#; pcr_before all-feature #.###### vs HVG #.######."
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": null,
+    "masked": "A#_immune_pooled_l#_c#_s###_c####### {'PCR_batch': '#.################ vs #.################ (+#.##e-##)', 'cell_cycle_conservation': '#.################ vs #.############### (-#.##e-##)'} | prod host localhost threads? {}"
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": null,
+    "masked": "A#_sim#_discriminator_l#_c#_s###_#fa##### {'PCR_batch': '#.################ vs #.################ (+#.##e-##)'} | prod host localhost threads? {}"
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": null,
+    "masked": "A#_atac_small_reference_la#_matched_c#_s###_ {'PCR_batch': '#.################ vs #.################ (-#.##e-##)'} | prod host localhost threads? {}"
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": null,
+    "masked": "A#_immune_barycenter_l####_c#_s###_######## {'PCR_batch': '#.################ vs #.################ (-#.##e-##)', 'cell_cycle_conservation': '#.############### vs #.################# (+#.##e-##)'} | prod host localhost threads? {}"
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": "X1_immune_discriminator_lg1_c1_s0_122afe99",
+    "masked": "X#_immune_discriminator_lg#_c#_s#_###afe## {'PCR_batch': '#.################ vs #.################ (-#.##e-##)', 'cell_cycle_conservation': '#.################ vs #.################ (-#.##e-##)'} | prod host gimli threads? {}"
+   },
+   {
+    "frame": "baa34fcd-1c91-49e8-9dbc-4886fdc87614",
+    "session": "OPERON",
+    "msg": 554,
+    "block": "tool_result",
+    "id": "X13_pancreas_sysvi_l10_c1_s0_60b085ea",
+    "masked": "X##_pancreas_sysvi_l##_c#_s#_##b###ea {'PCR_batch': '#.################ vs #.################ (-#.##e-##)', 'cell_cycle_conservation': '#.################ vs #.################ (+#.##e-##)'} | prod host localhost threads? {}"
+   },
+   {
+    "frame": "4ed45ef1-bcc8-480d-84c1-5c1beb4bf4b2",
+    "session": "Guard review",
+    "msg": 418,
+    "block": "text:user",
+    "id": null,
+    "masked": "- **I###/I###:** identity probe (##-cell fixture, real main(), spy on scib.metrics.metrics): pre-fix (#f##f##) all wrong-identity latents (within-batch permuted, unknown names, duplicated names, wrong celltype) REACHED scib; head "
+   },
+   {
+    "frame": "808e34dd-b051-468b-bde4-30046910db74",
+    "session": "Analysis review",
+    "msg": 241,
+    "block": "text:user",
+    "id": null,
+    "masked": "Project `proj_f#d#########` (\u201cquantify the impact of Wasserstein GANs and discriminator GANs on single-cell batch correction\u201d; pre-registered benchmark of Wasserstein critics vs discriminator adversaries, scVI backbone, scIB metri"
+   },
+   {
+    "frame": "808e34dd-b051-468b-bde4-30046910db74",
+    "session": "Analysis review",
+    "msg": 241,
+    "block": "text:user",
+    "id": null,
+    "masked": "Arms: `none` (\u03bb=# plain scVI), `discriminator` (js family, n_critic=#), `reference`, `pooled`, `barycenter` (w# family; n_critic #, share one grid), `mmd`, `sinkhorn`, `scvi_adv`; X## baselines harmony, scanorama, pca, sysvi, scan"
+   },
+   {
+    "frame": "78da076e-a094-4d0a-9d8d-c19576934b0a",
+    "session": "Docs review",
+    "msg": 284,
+    "block": "text:user",
+    "id": "X1_immune_discriminator_lg1_c1_s0_122afe99",
+    "masked": "**Reproduced numbers (all \u2713):** power (r#_record.json): D=# SE #.####, MDE## #.####, power@#.## #.####; D=# SE #.####, MDE #.####, power #.####; \u03c3\u0302 #.###### (df##), \u03c4\u0302 #.###### (df#); smallest exact two-sided Wilcoxon p (n=#)=#.##"
+   },
+   {
+    "frame": "7cca0c41-02de-466b-b3ec-bed7bde85f0a",
+    "session": "Code recheck",
+    "msg": 313,
+    "block": "text:user",
+    "id": null,
+    "masked": "- **Tiers (lead's exact commands, base ###a##d, own clone each):** scripts tier ### passed, ## skipped, ###.## s, check_tests OK; src tier ### passed, ###.# s, OK. fd#c#e#..##f#e#c differs only in # docs/*.md + # notebook files (#"
+   },
+   {
+    "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+    "session": "Docs recheck",
+    "msg": 311,
+    "block": "text:user",
+    "id": null,
+    "masked": "**power_report NaN (script ##, check #):** with se #.##### (D=#, df #) `power_report`'s start-#.# search raises ValueError \"function value at x=#.# is NaN\" (scipy #.##.# nct.cdf NaN at isolated non-centrality patches: first ##.## "
+   },
+   {
+    "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+    "session": "Docs recheck",
+    "msg": 495,
+    "block": "tool_result",
+    "id": null,
+    "masked": "- **Imprecise**: the NaN values of `nct.cdf` are isolated, from non-centrality ##.## (# df) and ##.## (# df) upward (### of ##,### tested values between #.# and ### for # df), not everything above ##. Of ### (standard error, degre"
+   },
+   {
+    "frame": "17c506be-e21c-4e42-bae8-d638e83a0c14",
+    "session": "OPERON",
+    "msg": 36,
+    "block": "tool_result",
+    "id": null,
+    "masked": "[# of ###|### \\\\(SE] ...The failure is real and loud: ValueError 'The function value at x=#.# is NaN' at se #.##### (script ##). The NaN is not 'above about ##': isolated values from ##.## (df #) and ##.## (df #); # of ### grid pa"
+   }
+  ]
+ },
+ "classification": {
+  "display_1": "2026-10-02, sub-agent 'Missing arms' (frame 9c73f1c4), message 327: table of the six X13 runner-test runs on atac_small (Harmony d10/d50, Scanorama d10/d100, PCA d10/d50; not registered configurations) with all metrics; run-to-run differences of NMI, ARI and iLISI and a kBET value are in notebook NB-20261002-10 and the 2026-10-02 page",
+  "display_2": "2026-10-13, lead session baa34fcd, message 554: old and new scorer values (16 digits) of PCR_batch and cell_cycle_conservation for X1_immune_discriminator_lg1_c1_s0_122afe99 and X13_pancreas_sysvi_l10_c1_s0_60b085ea (scorer identity check)",
+  "other_flags": "copies of the committed notebook page 2026-10-02.md inside test scratch folders; power-report numbers, test counts, project descriptions and known-answer fixture values of 2026-10-02 (before any X1 fit existed); no value from the 49 final-review probe score files"
+ }
+}
