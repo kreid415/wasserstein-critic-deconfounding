@@ -616,3 +616,11 @@
 - keywords: record, r1_record, r4_a1_record, r2r3_record, sinkhorn_redo, overwrite, redo
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
 - notebook: NB-20261015-20, NB-20261015-21
+
+## SI-88 · active · process
+- rule: The two displays of score values found by the 2026-10-15 audit (2026-10-02: all scores of six X13 runner-test runs on atac_small; 2026-10-13: PCR_batch and cell-cycle conservation of one X1 discriminator run and one X13 sysVI run in the scorer identity check) are listed in PREREG as shown to the agent only, not as examined under SI-78; the facts, dates and limits are stated in full.
+- source: "No, list them as shown to the agent only" (user, ask_user answer to "Your rule SI-78 says a score is 'examined' when a person reads its value. Should these two cases count as examined?", 2026-10-15)
+- added: 2026-10-15
+- keywords: examined, displayed, shown to the agent, identity check, audit, SI-78
+- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
+- notebook: NB-20261015-25
