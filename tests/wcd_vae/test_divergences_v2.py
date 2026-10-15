@@ -9,7 +9,6 @@ Barycenter: reproduces a single measure, sits at the midpoint of two translated 
 its W2 objective beats using either input cloud as the target.
 """
 import importlib.util
-import inspect
 import math
 from pathlib import Path
 
@@ -127,8 +126,10 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
     def adv(z):
         return (z - z.mean(0, keepdim=True)) / z.std(0, unbiased=False, keepdim=True).clamp_min(1e-4) if zstd else z
 
-    dtypes, ot_eps = [], alignment._ot_eps
-    monkeypatch.setattr(alignment, "_ot_eps", lambda C, *a: dtypes.append(C.dtype) or ot_eps(C, *a))
+    dtypes, caps, ot_eps, ot_eps_sym = [], [], alignment._ot_eps, alignment._ot_eps_sym
+    monkeypatch.setattr(alignment, "_ot_eps",
+                        lambda C, *a: dtypes.append(C.dtype) or caps.append(a[-1]) or ot_eps(C, *a))
+    monkeypatch.setattr(alignment, "_ot_eps_sym", lambda C, *a: caps.append(a[-1]) or ot_eps_sym(C, *a))
     mu = z64.float().requires_grad_(True)
     v = sinkhorn_batch_others(adv(mu), b)
     (g,) = torch.autograd.grad(v, mu)
@@ -137,9 +138,11 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
     v_ref, _ = ref.reference_cost(ref.cost_matrix(a64), b, 0.05 * math.sqrt(2 * a64.shape[1]), tol=1e-10)
     (g_ref,) = torch.autograd.grad(v_ref, m64)
     assert dtypes == [torch.float64]
-    assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-59 (re-review R2-04)
-    # sinkhorn_batch_others passes no max_iter, so the function's default is the cap in force (rigour review CF-08)
-    assert inspect.signature(sinkhorn_divergence_weighted).parameters["max_iter"].default == alignment.SINKHORN_MAX_ITER
+    assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-61 of 2026-10-13 (SI-59 retired)
+    # the cap that each of the three solves of this production call received (one cross solve, two symmetric ones) is
+    # the constant, so a smaller default or a literal at any call site shows here (a cap of 50,000 passed by the caller,
+    # or of 1,000 by one symmetric solve, had passed every test: code re-check of 2026-10-14, finding CF-R02)
+    assert caps == [alignment.SINKHORN_MAX_ITER] * 3
     assert abs(float(v) - float(v_ref)) < 1e-5 * abs(float(v_ref))
     assert float((g.double() - g_ref).norm() / g_ref.norm()) < 3e-4
 
