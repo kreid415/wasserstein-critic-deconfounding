@@ -1,0 +1,4 @@
+exit code 6 (EXIT_GATE=6: nothing is fitted yet; EXIT_PREFLIGHT=4 would be a refusal)
+[18:02:51] [stage] A1__atac_small+immune+sim1__tags-a19e4683640a: 180 rows {'needs_fit': 180}; to run: 180 fits, up to 180 scores; out /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/588cef60-5895-4424-8610-7ae8297f5fee/scratch_out/report_only_out
+[18:02:51] [gate] FAIL: 0/180 final; counts {'needs_fit': 180}
+runner_git (ledger json): {'git_sha': '10a1ca5874fbcdc033b148525b5e71d866306bdb', 'git_dirty': False}; tags file sha256 a19e4683640aff7922d4124afff8f04d1a492ba83fbf9444d113ddc8f41b6ebf; out dir was workspace scratch, not D
