@@ -2,7 +2,7 @@
 
 Blinding (SI-68, SI-78): these scripts read committed files of this repository, the obs tables of the prepared datasets
 and the scores of the pilot experiments A1 and A1_ext_r1_round1. They never read an X1 or X13 score. `data_path` refuses
-every path that contains the name of a blinded folder, and `python common.py` shows the refusal.
+every path that contains the name of a blinded folder (including review/out and review/verify) and every score folder other than those two pilot ones, and `python common.py` shows the refusal.
 
 Usage from a clone of the repository: python experiments/doc_numbers_20261015/<script>.py (see README.md).
 """
@@ -16,14 +16,16 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]                      # experiments/doc_numbers_20261015 -> repository root
 DATA = Path(os.environ.get("WCD_DATA", "/home/kendall/experiment_data/wasserstein-critic-deconfounding"))
 RESULTS = HERE / "results"
-BLINDED = ("X1_local", "jhpce_tier12", "review_sealed", "identity", "/logs/", "fillers_x1_x13", "x13_cpu_baselines")
+BLINDED = ("X1_local", "jhpce_tier12", "review_sealed", "identity", "/logs/", "fillers_x1_x13", "x13_cpu_baselines",
+           "review/out", "review/verify")
+PILOT_SCORES = tuple(f"{DATA}/tier12_v2/{d}/scores/" for d in ("A1", "A1_ext_r1_round1"))   # the only score folders these scripts read
 sys.path.insert(0, str(REPO / "scripts"))   # PYTHONSAFEPATH=1 does not add the script folder
 
 
 def data_path(*parts):
-    """A path under the data folder, refused if it names a blinded folder."""
+    """A path under the data folder, refused if it names a blinded folder or is a score folder other than the two pilot ones (RC-m8)."""
     p = DATA.joinpath(*parts)
-    if any(b in str(p) for b in BLINDED):
+    if any(b in str(p) for b in BLINDED) or ("/scores" in str(p) and not str(p).startswith(PILOT_SCORES)):
         raise PermissionError(f"blinded path refused: {p}")
     return p
 
@@ -50,6 +52,13 @@ def write_inputs(name, paths):
 
 
 if __name__ == "__main__":     # positive control for the blinding guard
+    for refused in (("review", "out", "x"), ("review", "verify"), ("tier12_v2", "A2", "scores", "a.csv"), ("tier12_v2", "A1", "scores_x", "a.csv")):
+        try:
+            data_path(*refused)
+        except PermissionError:
+            continue
+        raise SystemExit(f"the blinding guard did not refuse {refused}")
+    data_path("tier12_v2", "A1", "scores", "*.csv"), data_path("tier12_v2", "A1_ext_r1_round1", "scores", "*.csv")   # the pilot folders stay readable
     try:
         data_path("tier12_v2", "X1_local", "scores")
     except PermissionError as e:
