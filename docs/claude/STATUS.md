@@ -13,7 +13,7 @@ Blinding (SI-78, SI-79): this file holds counts and status only. It contains no 
 ## 1. State in one paragraph
 
 The pre-registration is frozen again as version 3: tag `prereg-tier12-v3` (annotated, tag object ce056088ee) points to
-10a1ca5 and is pushed (NB-20261016-34, repo 857234a). It freezes `docs/PREREG.md` v3 (section 9 amendments, SI-51 to SI-91),
+10a1ca5 and is pushed (NB-20261016-34, commit 857234a). It freezes `docs/PREREG.md` v3 (section 9 amendments, SI-51 to SI-91),
 `docs/ANALYSIS_SPEC.md`, `scripts/analysis_x1.py` with `tests/analysis`, `docs/EQUIVALENT_COMMITS.json`, and the code of every
 stage. The user approved the final diff (NB-20261016-32); a display audit before the tag found no new display of a score
 (NB-20261016-29, -30, -33); the tag was made before the Sinkhorn redo, as SI-87 requires. Done: the final-review fixes, the
@@ -156,7 +156,7 @@ as the confirming re-review of fb7edac and has since done the following, in orde
 3. Fix pass (RUNNER_ENGINEER, Sonnet) applied as 3b9cf67, dcde2c5, a0ea5cd, 5f9bab0 (NB-20261016-28). The lead re-ran the
    scripts test tier at 8f223c8: 445 passed, 18 skipped, check_tests OK (NB-20261016-31).
 4. User said yes to the tag (NB-20261016-32, 17:47); top-up display audit over 222 messages found 0 flagged lines
-   (NB-20261016-33, repo 10a1ca5); tag made and pushed (NB-20261016-34, 17:54, repo 857234a, the newest notebook entry I saw).
+   (NB-20261016-33, repo 10a1ca5); tag made and pushed (NB-20261016-34, 17:54, commit 857234a; the preflight GO record followed as 1ad44cb).
 5. Last action: dispatched a read-only pre-launch check of the Sinkhorn redo stage 1 to sub-agent 588cef60 (RUNNER_ENGINEER,
    Sonnet; processing, 54 messages at the snapshot): writes `experiments/preflight_sinkhorn_redo_20261016/PREFLIGHT.md`,
    `preflight.json` and a bundle on branch `preflight-sinkhorn-redo`; launches nothing; the lead waits for it and then launches
@@ -164,19 +164,19 @@ as the confirming re-review of fb7edac and has since done the following, in orde
 Other recent sessions (all finished): 95c88c4c (round-3 patches, SI-89, audit redo; handoff 14), 83e5f00a (user's request to
 cut pre-launch questions; produced the defaults rule above), d684be61 and 17c506be (round-3 fixes, 19-question diff review),
 ed231f45 and 544c8a5f (paper intro, related work, references on branch `paper`).
-Note: the live checkout's local `origin/final-review-fixes` reference was stale (2610107), and GitHub's branch head was 10a1ca5
-when read, so 857234a may not have been pushed. Run `git log origin/final-review-fixes` and
-`git ls-remote origin` first, and expect later notebook entries (NB-20261016-35 onward, or 2026-10-17 pages).
+Update (2026-10-16 18:45 New York): 857234a and 1ad44cb are pushed; `origin/final-review-fixes` = 1ad44cb. Session cec0e8c3
+ended while asking the user for the go on Sinkhorn redo stage 1 (preflight GO in `experiments/preflight_sinkhorn_redo_20261016/`;
+launcher `run_A1_sinkhorn_redo.sh` there, 180 fits, about 13 h on the RTX 3080). Nothing was launched. Expect later notebook
+entries (NB-20261016-35 onward, or 2026-10-17 pages) only if the user ran something since.
 
 ## 6. Branches and tags
 
 - `final-review-fixes`: the research branch; 10a1ca5 on GitHub at the snapshot, 289 commits ahead of `main`.
-- `claude-code-migration`: this hand-over bundle, one commit on 10a1ca5.
-- Notebook and ledger appends happen on one branch only, `final-review-fixes`. Until the user confirms that no Claude
-  Science session is still writing and `git log origin/final-review-fixes` shows their last commits (at hand-over the
-  running session held two unpushed commits, 857234a NB-20261016-34 and 1ad44cb, a Sinkhorn-redo preflight GO), append
-  nothing to `notebook/` or `CONSTRAINTS.md`. Then: `git checkout final-review-fixes && git pull && git merge
-  origin/claude-code-migration`, push, and work on `final-review-fixes` (or short branches merged back into it).
+- `claude-code-migration`: this hand-over bundle, one commit on 1ad44cb (= 10a1ca5 + NB-20261016-34 + preflight GO record).
+- Notebook and ledger appends happen on one branch only, `final-review-fixes`. The Claude Science sessions have
+  finished and pushed (last commits 857234a, notebook entry NB-20261016-34, and 1ad44cb, the Sinkhorn-redo preflight GO);
+  this branch sits on 1ad44cb. First action of the first Claude Code session: `git checkout final-review-fixes && git pull
+  && git merge origin/claude-code-migration`, push, and work on `final-review-fixes` (or short branches merged back into it).
 - `main`: stale (5cb75c0, 2026-10-13); an ancestor of `final-review-fixes`; do not work on it.
 - `paper`: the manuscript outline (`paper/paper.tex`, `refs.bib`, `evidence.md`, disclosures); 1bc6304 (2026-10-15), 150 commits
   ahead of `main`, branched from 08f1e3c. Not yet merged with the later fixes; the paper's numbers must be re-read from the

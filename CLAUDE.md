@@ -52,17 +52,16 @@ Built on 2026-10-16 from the Claude Science project (memory, notebook, ledger, p
 
 | ref | role |
 |---|---|
-| `claude-code-migration` | this bundle (CLAUDE.md, `.claude/`, `docs/claude/`, `envs/`, `archive/`) on top of `final-review-fixes` @ 10a1ca5 |
+| `claude-code-migration` | this bundle (CLAUDE.md, `.claude/`, `docs/claude/`, `envs/`, `archive/`) on top of `final-review-fixes` @ 1ad44cb |
 | `final-review-fixes` | live research branch (fixes, PREREG v3, analysis code, notebook) |
 | `paper` | manuscript draft `paper/paper.tex`, `paper/refs.bib` (not merged into the research branch) |
 | `main` | stale (2026-10-13, 5cb75c0); do not build on it until the user decides to merge |
 | tags `prereg-tier12-v1/-v2/-v3` | pre-registration freezes; v3 (10a1ca5) is current, v2 = c88cce3 |
 
-Notebook and ledger appends happen on one branch only, `final-review-fixes`. Until the user confirms that no Claude
-Science session is still writing and `git log origin/final-review-fixes` shows their last commits (at hand-over the
-running session held two unpushed commits, 857234a NB-20261016-34 and 1ad44cb, a Sinkhorn-redo preflight GO), append
-nothing to `notebook/` or `CONSTRAINTS.md`. Then: `git checkout final-review-fixes && git pull && git merge
-origin/claude-code-migration`, push, and work on `final-review-fixes` (or short branches merged back into it).
+Notebook and ledger appends happen on one branch only, `final-review-fixes`. The Claude Science sessions have
+finished and pushed (last commits 857234a, notebook entry NB-20261016-34, and 1ad44cb, the Sinkhorn-redo preflight GO);
+this branch sits on 1ad44cb. First action of the first Claude Code session: `git checkout final-review-fixes && git pull
+&& git merge origin/claude-code-migration`, push, and work on `final-review-fixes` (or short branches merged back into it).
 This bundle adds new files and changes only the README download block, so the merge is clean.
 
 ## Repository map
