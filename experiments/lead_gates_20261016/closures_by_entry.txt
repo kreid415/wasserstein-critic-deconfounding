@@ -1,0 +1,44 @@
+== fit_paper_config.py (the fitter; entry point of the identity proof): 3 files: scripts/fit_outcome.py, scripts/fit_paper_config.py, scripts/scvi_adversarial_plan.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: NONE
+     changed in this round 5d06a27..HEAD and in this closure: NONE
+== scvi_adversarial_plan.py (the training plan; entry point of the identity proof): 2 files: scripts/fit_outcome.py, scripts/scvi_adversarial_plan.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: NONE
+     changed in this round 5d06a27..HEAD and in this closure: NONE
+== run_cpu_baselines.py (X13 CPU runner): 3 files: scripts/fit_outcome.py, scripts/host_info.py, scripts/run_cpu_baselines.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: NONE
+     changed in this round 5d06a27..HEAD and in this closure: NONE
+== run_stage.py (the stage runner): 8 files: scripts/build_paper_manifest.py, scripts/fit_outcome.py, scripts/fit_paper_config.py, scripts/host_info.py, scripts/prereg_rules.py, scripts/run_cpu_baselines.py, scripts/run_stage.py, scripts/scvi_adversarial_plan.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: ['scripts/run_stage.py']
+     changed in this round 5d06a27..HEAD and in this closure: ['scripts/prereg_rules.py', 'scripts/run_stage.py']
+== score_scib_native.py (the scorer; entry point of the identity proof): 2 files: scripts/host_info.py, scripts/score_scib_native.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: NONE
+     changed in this round 5d06a27..HEAD and in this closure: NONE
+== prod_helpers.py (cluster job helpers): 1 files: cluster/jhpce/prod_helpers.py
+     changed in earlier rounds c3fd92d..5d06a27 and in this closure: NONE
+     changed in this round 5d06a27..HEAD and in this closure: NONE
+
+files changed in this round (all): ['CONSTRAINTS.md', 'docs/ANALYSIS_SPEC.md', 'docs/EQUIVALENT_COMMITS.json', 'docs/PAPER_PLAN.md', 'docs/PREREG.md', 'experiments/analysis_numerics_20261014/README.md', 'experiments/analysis_numerics_20261014/ceilings.json', 'experiments/analysis_numerics_20261014/ceilings.py', 'experiments/analysis_numerics_20261014/check_pool_numerics.py', 'experiments/analysis_numerics_20261014/compare_with_reference.json', 'experiments/analysis_numerics_20261014/compare_with_reference.py', 'experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.json', 'experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.py', 'experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.csv', 'experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.py', 'experiments/analysis_numerics_20261014/first_review/run_simulations.sh', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline.py', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_S0_null.txt', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_S1_het.txt', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_S2_effect.txt', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_S3_noisy_null.txt', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_S4_curved.txt', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline_W1_wiggle.txt', 'experiments/analysis_numerics_20261014/known_answers_effects.py', 'experiments/analysis_numerics_20261014/known_answers_effects.txt', 'experiments/analysis_numerics_20261014/known_answers_small_s.csv', 'experiments/analysis_numerics_20261014/known_answers_small_s.py', 'experiments/analysis_numerics_20261014/mutation/mutants_lead.py', 'experiments/analysis_numerics_20261014/mutation/mutants_r3.py', 'experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json', 'experiments/analysis_numerics_20261014/mutation/run_mut.py', 'experiments/analysis_numerics_20261014/ref_mp.py', 'experiments/analysis_numerics_20261014/ref_pool.py', 'experiments/analysis_numerics_20261014/validate_algebra.json', 'experiments/analysis_numerics_20261014/validate_algebra.py', 'experiments/doc_numbers_20261015/README.md', 'experiments/doc_numbers_20261015/common.py', 'experiments/doc_numbers_20261015/filler_fit_counts.py', 'experiments/doc_numbers_20261015/no_pair_assumptions.py', 'experiments/doc_numbers_20261015/no_pair_expectations.py', 'experiments/doc_numbers_20261015/p2_pilot_recount.py', 'experiments/doc_numbers_20261015/pilot_ranges.py', 'experiments/doc_numbers_20261015/results/blinding_guard.txt', 'experiments/doc_numbers_20261015/results/filler_fit_counts.txt', 'experiments/doc_numbers_20261015/results/filler_fit_counts_inputs.csv', 'experiments/doc_numbers_20261015/results/no_pair_assumptions.txt', 'experiments/doc_numbers_20261015/results/no_pair_assumptions_inputs.csv', 'experiments/doc_numbers_20261015/results/no_pair_expectations.txt', 'experiments/doc_numbers_20261015/results/no_pair_expectations_inputs.csv', 'experiments/doc_numbers_20261015/results/no_pair_groups.csv', 'experiments/doc_numbers_20261015/results/p2_pilot_recount.json', 'experiments/doc_numbers_20261015/results/p2_pilot_recount.txt', 'experiments/doc_numbers_20261015/results/p2_pilot_recount_inputs.csv', 'experiments/doc_numbers_20261015/results/pilot_ranges.txt', 'experiments/doc_numbers_20261015/results/pilot_ranges_inputs.csv', 'experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt', 'experiments/doc_numbers_20261015/results/validation_minibatch_counts_inputs.csv', 'experiments/doc_numbers_20261015/run_all.sh', 'experiments/doc_numbers_20261015/validation_minibatch_counts.py', 'experiments/final_review_amendments_20261013/power_without_sim1.py', 'experiments/x1_x13_score_hashes_20261015/README.md', 'experiments/x1_x13_score_hashes_20261015/audit_displayed_values.json', 'experiments/x1_x13_score_hashes_20261015/audit_displayed_values.py', 'experiments/x1_x13_score_hashes_20261015/hash_score_files.py', 'experiments/x1_x13_score_hashes_20261015/score_file_hashes.csv', 'experiments/x1_x13_score_hashes_20261015/summary.json', 'notebook/2026-10-15.md', 'notebook/2026-10-16.md', 'notebook/INDEX.md', 'scripts/analysis_x1.py', 'scripts/prereg_rules.py', 'scripts/run_stage.py', 'tests/analysis/test_analysis_x1.py', 'tests/prereg/test_rules.py', 'tests/stage/fake_env.py', 'tests/stage/test_run_stage.py', 'tests/wcd_vae/test_divergences_v2.py']
+
+python files that import run_stage: 3
+     experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.py
+     tests/stage/test_run_stage.py
+     tests/stage/test_run_stage_e2e.py
+python files that import prereg_rules: 18
+     experiments/analysis_numerics_20261014/compare_with_reference.py
+     experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.py
+     experiments/analysis_numerics_20261014/first_review/sim_pipeline.py
+     experiments/doc_numbers_20261015/p2_pilot_recount.py
+     experiments/doc_numbers_20261015/pilot_ranges.py
+     experiments/final_review_amendments_20261013/power_without_sim1.py
+     experiments/final_review_amendments_20261013/r1_without_trajectory.py
+     experiments/metric_bio_trajectory/check_bio_trajectory.py
+     experiments/sinkhorn_fix_20261013/r4a1_sinkhorn_sensitivity.py
+     scripts/analysis_x1.py
+     scripts/decide_a2_a3.py
+     scripts/freeze_a1_grid.py
+     scripts/freeze_matched_lambda.py
+     scripts/run_stage.py
+     tests/analysis/test_analysis_x1.py
+     tests/prereg/synth.py
+     tests/stage/test_run_stage.py
+     tests/stage/test_run_stage_e2e.py

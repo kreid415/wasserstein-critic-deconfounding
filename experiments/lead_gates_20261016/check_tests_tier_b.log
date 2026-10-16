@@ -1,0 +1,43 @@
+........................................................................ [ 41%]
+........................................................................ [ 83%]
+............................                                             [100%]
+=============================== warnings summary ===============================
+tests/wcd_vae/test_adversarial_engages.py::test_discriminator_head_learns_batch_from_separable_latent
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/pkg_resources/_vendor/pyparsing.py:87: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wcd_vae/test_adversarial_engages.py: 4 warnings
+tests/wcd_vae/test_metrics.py: 8 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/anndata/_core/aligned_df.py:68: ImplicitModificationWarning: Transforming to str index.
+    warnings.warn("Transforming to str index.", ImplicitModificationWarning)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/2f3b88fa-4886-4cba-bb2e-d4d299d79fd6/work/tier_b/tests/wcd_vae/test_backbones.py:28: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+tests/wcd_vae/test_formulations.py: 5 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/scanpy/preprocessing/_simple.py:590: FutureWarning: Use sc.pp.normalize_total instead
+    normalize_per_cell(
+
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[reference]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[pooled]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[barycenter]
+tests/wcd_vae/test_formulations.py::test_barycenter_has_no_learnable_anchors
+tests/wcd_vae/test_formulations.py::test_reference_only_has_no_anchors
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/2f3b88fa-4886-4cba-bb2e-d4d299d79fd6/work/tier_b/tests/wcd_vae/test_formulations.py:25: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_metrics.py::test_resolution_cache_uses_igraph_with_matched_iterations
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/2f3b88fa-4886-4cba-bb2e-d4d299d79fd6/work/tier_b/src/wcd_vae/wcd/experiment.py:278: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    sc.tl.leiden(adata, **kwargs)  # scanpy/scib default -- keeps parity
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.15-final-0 _______________
+
+Coverage JSON written to file .check_tests/cov.json
+172 passed, 66 warnings in 131.08s (0:02:11)
+check_tests: OK (every changed --src line and branch is tested; no redundant new tests; base 973a97d)

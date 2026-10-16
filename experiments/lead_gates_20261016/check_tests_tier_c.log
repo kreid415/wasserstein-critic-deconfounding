@@ -1,0 +1,97 @@
+............../home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/coverage/report_core.py:120: CoverageWarning: Couldn't parse '/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/2f3b88fa-4886-4cba-bb2e-d4d299d79fd6/work/tier_c/scripts/score_scib_native.py<mutant>': No source for code: '/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/2f3b88fa-4886-4cba-bb2e-d4d299d79fd6/work/tier_c/scripts/score_scib_native.py<mutant>'. (couldnt-parse); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+                                                           [100%]
+=============================== warnings summary ===============================
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_scorer_provenance_and_subset.py::test_full_data_pcr_uses_the_all_feature_reference_and_rows_carry_provenance
+tests/scoring/test_scorer_provenance_and_subset.py::test_subsample_pcr_reference_is_the_all_feature_pca_of_the_subset
+tests/scoring/test_scorer_provenance_and_subset.py::test_meta_may_not_set_scorer_columns
+tests/scoring/test_scorer_provenance_and_subset.py::test_kbet_without_r_calls_is_recorded_only_when_scib_forced_every_label
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/clustering.py:96: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    cluster_function(adata, resolution=res, key_added=resolution_key, **kwargs)
+
+tests/scoring/test_kbet_determinism.py: 6 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 22 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+    mask_var_param, mask_var = _handle_mask_var(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 2 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:186: UserWarning: iso_threshold is equal to number of batches in data, no isolated labels will be found
+    isolated_labels = get_isolated_labels(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 2 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:212: FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    scores = pd.Series(scores)
+
+tests/scoring/test_kbet_determinism.py: 42 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 82 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/algorithms.py:522: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    common = np.find_common_type([values.dtype, comps_array.dtype], [])
+
+tests/scoring/test_kbet_determinism.py: 18 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 24 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/kbet.py:229: DeprecationWarning: The global conversion available with activate() is deprecated and will be removed in the next major release. Use a local converter.
+    anndata2ri.activate()
+
+tests/scoring/test_kbet_determinism.py: 6 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 9 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/lisi.py:172: UserWarning: 'batch_key' is deprecated and will be ignore
+    warnings.warn("'batch_key' is deprecated and will be ignore", stacklevel=1)
+
+tests/scoring/test_kbet_determinism.py: 30 warnings
+tests/scoring/test_scorer_provenance_and_subset.py: 62 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/dtypes/cast.py:1641: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    return np.find_common_type(types, [])
+
+tests/scoring/test_scorer_provenance_and_subset.py::test_kbet_without_r_calls_is_recorded_only_when_scib_forced_every_label
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/pcr.py:349: RuntimeWarning: invalid value encountered in divide
+    return 1 - ss_residual / ss_total
+
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/trajectory.py:120: ImplicitModificationWarning: Trying to modify attribute `.obs` of view, initializing view as actual.
+    n_components, adata_post.obs["neighborhood"] = connected_components(
+
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag
+tests/scoring/test_scorer_provenance_and_subset.py::test_trajectory_root_flag_natural_fallback
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scanpy/tools/_dpt.py:25: ImplicitModificationWarning: Setting element `.obsm['X_diffmap']` of view, initializing view as actual.
+    adata.obsm["X_diffmap"] = dpt.eigen_basis
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.15-final-0 _______________
+
+Coverage JSON written to file .check_tests/cov.json
+14 passed, 343 warnings in 129.49s (0:02:09)
+FAIL scripts/analysis_x1.py: changed lines never run: [15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 28, 29, 30, 31, 32, 33, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 61, 64, 65, 68, 69, 70, 71, 73, 76, 77, 78, 79, 80, 81, 83, 84, 85, 86, 87, 88, 90, 91, 92, 93, 95, 96, 97, 98, 99, 101, 102, 103, 104, 105, 106, 107, 110, 111, 112, 113, 114, 115, 116, 117, 119, 120, 123, 124, 125, 126, 127, 128, 131, 132, 133, 134, 135, 137, 138, 139, 140, 141, 142, 143, 145, 146, 148, 149, 150, 151, 152, 153, 154, 155, 158, 159, 160, 163, 164, 165, 168, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 186, 187, 188, 190, 191, 193, 194, 195, 197, 198, 202, 203, 204, 206, 207, 208, 209, 210, 211, 213, 214, 220, 223, 224, 227, 228, 229, 230, 231, 232, 233, 234, 235, 237, 238, 239, 240, 242, 243, 244, 245, 246, 247, 248, 249, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 264, 265, 266, 267, 270, 271, 272, 273, 274, 275, 278, 279, 280, 281, 282, 285, 286, 287, 288, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 305, 306, 308, 309, 310, 311, 312, 313, 314, 315, 316, 319, 320, 321, 322, 323, 325, 326, 327, 330, 331, 332, 333, 337, 338, 339, 340, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 356, 362, 363, 364, 367, 371, 372, 373, 374, 377, 378, 379, 380, 381, 382, 383, 384, 386, 387, 388, 389, 390, 392, 393, 394, 395, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 415, 416, 417, 418, 420, 421, 425, 427, 429, 430, 431, 432, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 450, 451, 453, 457, 458, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 476, 477, 478, 479, 480, 481, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 515, 516, 517, 518, 519, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 548, 550]
+FAIL scripts/check_tests.py: changed lines never run: [10, 11, 13, 16, 17, 20, 21, 22, 25, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 65, 66, 67, 68, 69, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 122, 123, 124, 125, 126, 127, 128, 131, 132]
+FAIL scripts/decide_a2_a3.py: changed lines never run: [69, 71]
+FAIL scripts/fit_paper_config.py: changed lines never run: [55, 57, 59, 60, 61, 94, 100, 101, 102, 103, 104, 105, 299, 504, 505, 506]
+FAIL scripts/prereg_rules.py: changed lines never run: [74, 220, 222, 223, 224, 225, 226, 227, 229, 232, 236, 237, 238, 239, 240, 242, 243, 244, 247, 262, 320, 674, 679, 680, 681, 682, 683, 684, 685, 686, 687, 720]
+FAIL scripts/run_stage.py: changed lines never run: [359, 363, 364, 367, 369, 401, 411, 412, 428, 429, 449, 450, 451, 452, 664, 673, 674, 675, 676, 679, 694, 695, 696, 697, 703, 1185, 1186, 1187]
+FAIL scripts/scvi_adversarial_plan.py: changed lines never run: [196, 231, 369, 371, 393, 409, 410, 412, 441]
+WARN tests/analysis/test_analysis_x1.py::test_p1_reading: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_pool_closed_form: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_combine_structures: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_wilcoxon_exact: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_transfer_lambda: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_window: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/analysis/test_analysis_x1.py::test_refusals: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/jhpce/test_prod_job.py::test_harvest_files_refuses_a_gpu_latent_without_its_model: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/jhpce/test_x1_command.py::test_chained_job_clock_covers_every_job_up_its_chain: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/prereg/test_cli_e2e.py::test_r2_switches_to_sample_when_it_wins_and_moves_the_followups: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/prereg/test_provenance_rule.py::test_si54_equivalent_commits_through_outcomes: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/stage/test_run_stage.py::test_si54_old_commit_counts_as_the_tag_in_the_gate: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/wcd_vae/test_divergences_v2.py::test_sinkhorn_two_diracs_exact: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/wcd_vae/test_divergences_v2.py::test_sinkhorn_refuses_bad_p_and_unconverged_solve: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'
+WARN tests/wcd_vae/test_divergences_v2.py::test_no_pair_of_batches_gives_differentiable_zero: covers no line other tests miss -> delete it, fold it into an existing test, or add '# test-reason: <what it catches that others do not>'

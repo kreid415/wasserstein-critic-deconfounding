@@ -1,0 +1,31 @@
+== fit (run_stage.py, fit_paper_config.py, scvi_adversarial_plan.py, run_cpu_baselines.py): 8 files in the static import closure
+    scripts/build_paper_manifest.py, scripts/fit_outcome.py, scripts/fit_paper_config.py, scripts/host_info.py, scripts/prereg_rules.py, scripts/run_cpu_baselines.py, scripts/run_stage.py, scripts/scvi_adversarial_plan.py
+    changed c3fd92d..HEAD and in closure: ['scripts/prereg_rules.py', 'scripts/run_stage.py']
+== scorer (score_scib_native.py): 2 files in the static import closure
+    scripts/host_info.py, scripts/score_scib_native.py
+    changed c3fd92d..HEAD and in closure: NONE
+== cluster job helpers (prod_helpers.py): 1 files in the static import closure
+    cluster/jhpce/prod_helpers.py
+    changed c3fd92d..HEAD and in closure: NONE
+
+dynamic-reference scan (lines naming another .py file, subprocess, importlib, exec) in closure files:
+   scripts/fit_paper_config.py:288: import importlib.util
+   scripts/fit_paper_config.py:289: spec = importlib.util.spec_from_file_location("wcd_data", os.path.join(os.environ["WCD_SRC"], "wcd_vae", "wcd", "data.py"))
+   scripts/fit_paper_config.py:290: wcd_data = importlib.util.module_from_spec(spec); spec.loader.exec_module(wcd_data)
+   scripts/prereg_rules.py:90: def metric_lists(path=os.path.join(HERE, "score_scib_native.py")):
+   scripts/run_cpu_baselines.py:42: import importlib.metadata as md
+   scripts/run_stage.py:91: FIT_SCRIPT = os.path.join(HERE, "fit_paper_config.py")
+   scripts/run_stage.py:92: SCORE_SCRIPT = os.path.join(HERE, "score_scib_native.py")
+   scripts/run_stage.py:93: CPU_SCRIPT = os.path.join(HERE, "run_cpu_baselines.py")
+   scripts/run_stage.py:898: fitter = "run_cpu_baselines.py" if cpu else "fitter"
+   scripts/score_scib_native.py:48: import importlib, os, json, socket, subprocess, sys, time, numpy as np, pandas as pd, scanpy as sc, scib
+   scripts/score_scib_native.py:96: kbet_mod = importlib.import_module("scib.metrics.kbet")
+   scripts/score_scib_native.py:115: traj = importlib.import_module("scib.metrics.trajectory")
+   scripts/score_scib_native.py:148: import importlib.metadata as md
+   scripts/scvi_adversarial_plan.py:44: import importlib.util
+   scripts/scvi_adversarial_plan.py:111: spec = importlib.util.spec_from_file_location(modname, path)
+   scripts/scvi_adversarial_plan.py:112: mod = importlib.util.module_from_spec(spec)
+   scripts/scvi_adversarial_plan.py:129: spec = importlib.util.spec_from_file_location(modname, path)
+   scripts/scvi_adversarial_plan.py:130: mod = importlib.util.module_from_spec(spec)
+
+changed code files in the range: ['cluster/jhpce/local_rehearsal.sh', 'cluster/jhpce/prod_fit_job.sh', 'experiments/analysis_numerics_20261014/ceilings.json', 'experiments/analysis_numerics_20261014/ceilings.py', 'experiments/analysis_numerics_20261014/check_pool_numerics.py', 'experiments/analysis_numerics_20261014/compare_with_reference.json', 'experiments/analysis_numerics_20261014/compare_with_reference.py', 'experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.json', 'experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.py', 'experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.py', 'experiments/analysis_numerics_20261014/first_review/run_simulations.sh', 'experiments/analysis_numerics_20261014/first_review/sim_pipeline.py', 'experiments/analysis_numerics_20261014/known_answers_effects.py', 'experiments/analysis_numerics_20261014/known_answers_small_s.py', 'experiments/analysis_numerics_20261014/mutation/mutants_lead.py', 'experiments/analysis_numerics_20261014/mutation/mutants_r3.py', 'experiments/analysis_numerics_20261014/mutation/mutants_review.py', 'experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json', 'experiments/analysis_numerics_20261014/mutation/run_mut.py', 'experiments/analysis_numerics_20261014/ref_mp.py', 'experiments/analysis_numerics_20261014/ref_pool.py', 'experiments/analysis_numerics_20261014/summary.json', 'experiments/analysis_numerics_20261014/validate_algebra.json', 'experiments/analysis_numerics_20261014/validate_algebra.py', 'experiments/doc_numbers_20261015/common.py', 'experiments/doc_numbers_20261015/filler_fit_counts.py', 'experiments/doc_numbers_20261015/no_pair_assumptions.py', 'experiments/doc_numbers_20261015/no_pair_expectations.py', 'experiments/doc_numbers_20261015/p2_pilot_recount.py', 'experiments/doc_numbers_20261015/pilot_ranges.py', 'experiments/doc_numbers_20261015/results/p2_pilot_recount.json', 'experiments/doc_numbers_20261015/run_all.sh', 'experiments/doc_numbers_20261015/validation_minibatch_counts.py', 'experiments/final_review_amendments_20261013/power_without_sim1.py', 'experiments/final_review_amendments_20261013/results/power_without_sim1.json', 'experiments/guard_followups_20261013/lam_audit.py', 'experiments/integration_checks_20261013/results/run_c3fd92d.sh', 'experiments/x1_x13_score_hashes_20261015/audit_displayed_values.json', 'experiments/x1_x13_score_hashes_20261015/audit_displayed_values.py', 'experiments/x1_x13_score_hashes_20261015/hash_score_files.py', 'experiments/x1_x13_score_hashes_20261015/summary.json', 'scripts/analysis_x1.py', 'scripts/decide_a2_a3.py', 'scripts/prereg_rules.py', 'scripts/run_stage.py', 'tests/analysis/__init__.py', 'tests/analysis/test_analysis_x1.py', 'tests/prereg/test_cli_e2e.py', 'tests/prereg/test_rules.py', 'tests/scvi/test_baseline_guard.py', 'tests/scvi/test_runner_and_manifest_missing_arms.py', 'tests/stage/fake_env.py', 'tests/stage/test_run_stage.py', 'tests/test_legacy_retired.py', 'tests/wcd_vae/test_divergences_v2.py']
