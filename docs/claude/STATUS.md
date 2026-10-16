@@ -28,12 +28,13 @@ JHPCE X1 (cluster part, 1,800 fits), follow-ups X3/X6/X7/X8/X12/X15, the X1 anal
 
 1. Orient (any machine, minutes). `git fetch --all --tags`; confirm `prereg-tier12-v3` -> 10a1ca5; read notebook pages from
    2026-10-16 onward; read `CONSTRAINTS.md` (active rules SI-01..SI-92). The notebook and ledger helpers are ported: `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, `nb_index`,
-   `nb_check`; `nb_check('.')` verified all 248 entries and their hash chain at 10a1ca5) and
+   `nb_check`; `nb_check('.')` verified all 249 entries and their hash chain at 1ad44cb) and
    `.claude/skills/standing-instructions/kernel.py` (`si_add`, `si_retire`, `si_link`). Append entries only through them;
    never edit old entries.
 2. Record the date GitHub shows for the tag (SI-79; NB-20261016-34 says it is still to be read). Why: an outside time stamp
-   for the freeze. Local tag date: 2026-10-16T21:48:50Z. Where: new notebook entry; read the tag's page or events with `gh`.
-   Machine: any with GitHub access (cloud VM works).
+   for the freeze. Local tag date: 2026-10-16T21:48:50Z. Where: new notebook entry; without `gh` use
+   `curl -s https://api.github.com/repos/kreid415/wasserstein-critic-deconfounding/git/refs/tags/prereg-tier12-v3` and the
+   tag object it points to (`tagger.date`); the events API keeps push events 90 days. Machine: any with GitHub access.
 3. Fix the launchers that still name the v2 commit. `experiments/X1_local/run_X1_local.sh` (line 14 insists the checkout is
    c88cce3; it also pins the manifest hash MAN_SHA and the v2 checkout folder) and `experiments/X1_jhpce/x1_jhpce_command.py`
    (line 23, constant TAG_SHA = c88cce3, review item G-17) must point at the v3 tag; the 384 h and 576 h harness time limits of chained JHPCE jobs are unverified
@@ -172,7 +173,7 @@ entries (NB-20261016-35 onward, or 2026-10-17 pages) only if the user ran someth
 ## 6. Branches and tags
 
 - `final-review-fixes`: the research branch; 10a1ca5 on GitHub at the snapshot, 289 commits ahead of `main`.
-- `claude-code-migration`: this hand-over bundle, one commit on 1ad44cb (= 10a1ca5 + NB-20261016-34 + preflight GO record).
+- `claude-code-migration`: this hand-over bundle, five commits on 1ad44cb (= 10a1ca5 + NB-20261016-34 + preflight GO record).
 - Notebook and ledger appends happen on one branch only, `final-review-fixes`. The Claude Science sessions have
   finished and pushed (last commits 857234a, notebook entry NB-20261016-34, and 1ad44cb, the Sinkhorn-redo preflight GO);
   this branch sits on 1ad44cb. First action of the first Claude Code session: `git checkout final-review-fixes && git pull

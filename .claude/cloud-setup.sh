@@ -20,6 +20,9 @@ if [ "$(cat "$PREFIX/.env_yml_sha256" 2>/dev/null || true)" != "$SHA" ]; then
   "$ROOT/bin/micromamba" create -y -q -n wcd-cpu -f "$ENV_YML"
   echo "$SHA" > "$PREFIX/.env_yml_sha256"
 fi
+# Repo-local git identity for notebook/ledger commits (public repo: noreply address only)
+git -C "$REPO" config user.name kreid415
+git -C "$REPO" config user.email kreid415@users.noreply.github.com
 LINE="export PATH=\"$PREFIX/bin:\$PATH\"  # wcd-cpu env"
 if [ -z "${WCD_MM_ROOT:-}" ]; then grep -qxF "$LINE" "$HOME/.bashrc" 2>/dev/null || echo "$LINE" >> "$HOME/.bashrc"; fi
 # In a Claude Code session hook, CLAUDE_ENV_FILE makes the PATH change visible to the session's shell commands.
