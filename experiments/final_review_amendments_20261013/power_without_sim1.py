@@ -6,7 +6,9 @@ The root search starts at 0.01 because the search from 1.0 in power_report stopp
 2026-10-15 to restart it at 0.01 when it fails), for some standard errors, among them the one without sim1: with scipy
 1.17.1 the non-central t (scipy.stats.nct.cdf) returns NaN (not a number) at isolated large non-centralities (the effect
 divided by its standard error), the first at 42.15 for 5 degrees of freedom and at 57.24 for 3; 7 of 230 tested pairs of
-standard error and degrees of freedom failed (script 05_power_report_nan_probe.py of the documents re-check, 2026-10-14).
+standard error and degrees of freedom failed (script 05_power_report_nan_probe.py of the documents re-check, 2026-10-14, committed
+next to this file byte-identical to the re-checker's copy; its output is results/05_power_report_nan_probe.txt; usage: python
+experiments/final_review_amendments_20261013/05_power_report_nan_probe.py <repo>, rerun on 2026-10-16 with identical output).
 Usage (repo root, env scvi-api): python experiments/final_review_amendments_20261013/power_without_sim1.py
 Writes results/power_without_sim1.json."""
 import json

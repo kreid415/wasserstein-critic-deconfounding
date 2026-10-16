@@ -1,0 +1,11 @@
+scipy 1.17.1
+without sim1, six tasks: se 0.02355 df 5 start 1.0: ValueError: The function value at x=1.0 is NaN; solver cannot continue.
+without sim1, six tasks: se 0.02355 df 5 start 0.01: mde80 0.0684067435
+all six blocks, six tasks (the committed record): se 0.04499 df 5 start 1.0: mde80 0.1306631837
+all six blocks, six tasks (the committed record): se 0.04499 df 5 start 0.01: mde80 0.1306631837
+df 3: nct.cdf is NaN at 140 of 39950 non-centralities on 0.5-400 (first 57.24); nct.sf is NaN at 0
+df 5: nct.cdf is NaN at 447 of 39950 non-centralities on 0.5-400 (first 42.15); nct.sf is NaN at 0
+standard errors (0.003-0.06, step 0.0005) at which the start-1.0 search raises: [(6, 0.0175), (6, 0.0185), (6, 0.0215), (6, 0.022), (6, 0.0225), (6, 0.0235), (4, 0.0165)]
+proxy standard error, all six blocks: 0.04499
+proxy standard error, without sim1: 0.02355
+proxy standard error, four blocks not flagged low-signal: 0.02741
