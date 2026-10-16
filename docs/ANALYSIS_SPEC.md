@@ -418,7 +418,7 @@ SI-84; none changes a decision SI-68 to SI-77.
     (area); pairs-first and six independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2
     (P1, area, local-global).
 
-## 16. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16)
+## 16. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16; user decision 2026-10-16: NB-20261016-15)
 
 1. Each dataset's standard error s comes from 4 or 5 leave-one-seed-out readings of a statistic that is not smooth
    (a curve crossing, a union of rectangles), and the pooled model treats it as known. In a simulation of six synthetic
@@ -452,6 +452,10 @@ SI-84; none changes a decision SI-68 to SI-77.
 7. P1 compares the reference critic at 5 critic steps per model update with the discriminator at 1 step (X1 manifest);
    the update-budget control (X6) exists only for the pooled critic (PREREG section 9), so P1 does not separate the
    divergence from the extra critic steps.
+8. Iteration-cap hits of the Sinkhorn solve (500,000 iterations, PREREG SI-61) and zero-NMI cases (scib finds zero normalised
+   mutual information at every clustering resolution, SI-65) are decided by the user case by case, and no default outcome is
+   registered for either (SI-81; user, 2026-10-16, NB-20261016-15). A referee may see a decision taken after the data as
+   freedom after the data; each decision is listed with the results.
 
 Sources checked for this specification: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-89),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and

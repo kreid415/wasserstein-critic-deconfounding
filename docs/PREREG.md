@@ -405,7 +405,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   rerunnable and requires every row to end as scored or failed, so a persistent cap hit had no registered outcome.
   The user decided on 2026-10-15 (SI-81 (b)): the stage stays stopped until the user decides whether such a fit is
   recorded as a failed fit; a fit recorded as failed counts as a collapse in P2, and the decision is listed with the
-  results. The solve stays in float64 (SI-58,
+  results. This is a stated limitation: no default outcome is registered for it (the user kept it case by case on 2026-10-16, SI-81, NB-20261016-15), so a referee may see each decision, taken after the data, as freedom after the data; every such decision is listed with the results. The solve stays in float64 (SI-58,
   SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at most
   1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
   criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
@@ -465,7 +465,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   - A normalised mutual information of 0 (SI-65). Where scib 1.1.7 finds NMI, the normalised mutual information, equal
     to 0 at every clustering resolution, it keeps no clustering, and the scorer keeps scib's loud error; the case is
     then decided case by case (SI-65, 2026-10-13). The user decided on 2026-10-15 (SI-81 (a)) that he decides each such
-    case and that every case is listed with the results.
+    case and that every case is listed with the results. This is a stated limitation: no default outcome is registered for the NMI-0 case (the user kept it case by case on 2026-10-16, SI-81, NB-20261016-15), so a referee may see each decision, taken after the data, as freedom after the data; every such decision is listed with the results.
   - Complete fits only (I094, commit 46d79f2). A fit counts as complete, is resumed and is harvested from the cluster
     only if its model weights (graphics processing unit, GPU, fits) and training history are present.
   - Job time limits (I008, commit 2b52542). Each job in a chain of cluster jobs gets a time limit of (chain position +
