@@ -1,0 +1,19 @@
+{
+ "what": "top-up of the pre-tag display audit: every message stored after the audit cut-off 2026-10-16 16:35:57 New York, in every session active since then, none excluded",
+ "script": "experiments/pretag_audit_20261016/audit_displayed_values.py, run_transcripts(host, repo=git archive of 49d0571, csv=score_file_hashes.csv sha256 23a8534dae1a8782..., project proj_f1d989766996, since_ms=2026-10-16 16:35:57 New York, own_frame='(none excluded)') in the repl tool; whole sessions are read from message 0",
+ "sessions": [
+  "cec0e8c3-fb10-4b52-b96b-36cd527252c9 (lead)",
+  "d7cc219b-2a86-40fc-a7c1-dc22f304850d (pre-tag audit sub-agent, excluded from NB-20261016-29)"
+ ],
+ "cutoff_new_york": "2026-10-16 17:48:17 EDT",
+ "sessions_in_scope": 2,
+ "frames_scanned": 2,
+ "messages_scanned": 222,
+ "messages_mentioning": 46,
+ "frames_mentioning": 2,
+ "identifiers": 565,
+ "flagged_total": 0,
+ "flagged_after_cutoff": 0,
+ "classes_after_cutoff": {},
+ "unclassified_after_cutoff": 0
+}
