@@ -16,13 +16,406 @@
   "review_probes/ledger": 302,
   "review_probes/score": 49,
   "review_probes/scoring_log": 42,
+  "review_probes/status_record": 24,
   "sealed/sealed": 2,
   "x13_cpu_test/score": 12,
   "x13_cpu_test/scoring_log": 12
  },
- "csv_sha256": "519e7335f2f38f77a59ec7d51ddb52a3ae99bff7dcedd8964a36ab57d4298cb4",
+ "counts_by_group_kind_task_date_ny": [
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "X1_local",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "X1_local",
+   "kind": "runner_log",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "X1_local",
+   "kind": "runner_record",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 19,
+   "group": "X1_local",
+   "kind": "score",
+   "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 20,
+   "group": "X1_local",
+   "kind": "scoring_log",
+   "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 6,
+   "group": "fillers",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 3,
+   "group": "fillers",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "fillers",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 1,
+   "group": "fillers",
+   "kind": "runner_log",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 1,
+   "group": "fillers",
+   "kind": "runner_log",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "fillers",
+   "kind": "runner_log",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 2,
+   "group": "fillers",
+   "kind": "runner_record",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "fillers",
+   "kind": "runner_record",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 1,
+   "group": "fillers",
+   "kind": "score",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 7,
+   "group": "fillers",
+   "kind": "score",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 24,
+   "group": "fillers",
+   "kind": "score",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 26,
+   "group": "fillers",
+   "kind": "score",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 50,
+   "group": "fillers",
+   "kind": "score",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 15,
+   "group": "fillers",
+   "kind": "score",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 35,
+   "group": "fillers",
+   "kind": "score",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 2,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 10,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 24,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 26,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 50,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 15,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 35,
+   "group": "fillers",
+   "kind": "scoring_log",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 3,
+   "group": "identity_check",
+   "kind": "comparison",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 6,
+   "group": "identity_check",
+   "kind": "score",
+   "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 6,
+   "group": "identity_check",
+   "kind": "score",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 6,
+   "group": "identity_check",
+   "kind": "scoring_log",
+   "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 6,
+   "group": "identity_check",
+   "kind": "scoring_log",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 280,
+   "group": "review_probes",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 22,
+   "group": "review_probes",
+   "kind": "ledger",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "atac_large"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 21,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "atac_small"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 5,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 17,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "sim1"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 1,
+   "group": "review_probes",
+   "kind": "score",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 20,
+   "group": "review_probes",
+   "kind": "scoring_log",
+   "task": "atac_small"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 4,
+   "group": "review_probes",
+   "kind": "scoring_log",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 16,
+   "group": "review_probes",
+   "kind": "scoring_log",
+   "task": "sim1"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "review_probes",
+   "kind": "scoring_log",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 22,
+   "group": "review_probes",
+   "kind": "status_record",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-13",
+   "files": 2,
+   "group": "review_probes",
+   "kind": "status_record",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 2,
+   "group": "sealed",
+   "kind": "sealed",
+   "task": "n/a"
+  },
+  {
+   "date_ny": "2026-10-02",
+   "files": 12,
+   "group": "x13_cpu_test",
+   "kind": "score",
+   "task": "atac_small"
+  },
+  {
+   "date_ny": "2026-10-02",
+   "files": 12,
+   "group": "x13_cpu_test",
+   "kind": "scoring_log",
+   "task": "atac_small"
+  }
+ ],
+ "csv_sha256": "fc748a5129120fc285c37494fd576c71b9f56c58fc901e00d652e08e72d5303b",
  "data_root": "/home/kendall/experiment_data/wasserstein-critic-deconfounding",
- "files": 827,
- "hashed_at_utc": "2026-10-15T14:25:49Z",
- "script_sha256": "b22c6d37beb5b0e30753552bcf81216cf527129be899d169d46c513fb16e2bd9"
+ "files": 851,
+ "filler_score_files_per_pass_and_date_ny": {
+  "pass A": {
+   "2026-10-06": 1,
+   "2026-10-12": 7
+  },
+  "pass B": {
+   "2026-10-06": 89,
+   "2026-10-07": 61
+  }
+ },
+ "hashed_at_utc": "2026-10-16T18:11:45Z",
+ "identity_check_files_per_kind_and_date_ny": {
+  "comparison": {
+   "2026-10-13": {
+    "files": 3,
+    "first_mtime_ny": "2026-10-13 12:08:17 EDT",
+    "last_mtime_ny": "2026-10-13 21:46:21 EDT"
+   }
+  },
+  "score": {
+   "2026-10-13": {
+    "files": 12,
+    "first_mtime_ny": "2026-10-13 11:56:20 EDT",
+    "last_mtime_ny": "2026-10-13 21:46:19 EDT"
+   }
+  },
+  "scoring_log": {
+   "2026-10-13": {
+    "files": 12,
+    "first_mtime_ny": "2026-10-13 11:56:20 EDT",
+    "last_mtime_ny": "2026-10-13 21:46:19 EDT"
+   }
+  }
+ },
+ "script_sha256": "ea2008b3ea7559b72b7440f233862cc94f3c7478bfe9c7047584571b09d49226"
 }

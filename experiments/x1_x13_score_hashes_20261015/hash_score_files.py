@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SHA-256 list of every existing X1 and X13 score file (user decision SI-79, 2026-10-15).
+"""SHA-256 list of every existing X1 and X13 score file (user decision SI-79, 2026-10-15; status records added 2026-10-16).
 
 Reads each selected file in binary mode only to hash it; never decodes, parses or prints file
 contents, so no score value is shown (SI-78: checks that print only counts or flags do not count
@@ -10,8 +10,24 @@ Usage (standard library only; any Python >= 3.8):
         --data-root /home/kendall/experiment_data/wasserstein-critic-deconfounding
 Writes score_file_hashes.csv and summary.json next to this script (or into --out-dir).
 """
-import argparse, csv, datetime, hashlib, json, os, sys
-from collections import Counter
+import argparse, csv, datetime, hashlib, json, os, re, sys
+from collections import Counter, defaultdict
+from zoneinfo import ZoneInfo
+
+NY = ZoneInfo("America/New_York")
+TASKS = sorted(["atac_large", "atac_small", "immune_hum_mou", "immune", "lung", "pancreas", "sim1", "sim2"], key=len, reverse=True)
+PASS_OF = {"atac_large": "A", "immune_hum_mou": "A", "lung": "B", "pancreas": "B", "sim2": "B"}   # filler scoring passes
+TASK_RE = re.compile(r"^X1\d*_(" + "|".join(TASKS) + r")_")
+
+
+def task_of(rel):
+    """Task named in a file name that starts X1_ or X13_ (else 'n/a')."""
+    m = TASK_RE.match(rel.split("/")[-1])
+    return m.group(1) if m else "n/a"
+
+
+def ny_time(mtime_utc):
+    return datetime.datetime.strptime(mtime_utc, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc).astimezone(NY)
 
 PRUNE_DIRS = {".git", "models", "latents", "__pycache__"}
 PRUNE_TOP = {"code", "Rlib_kbet", "prepped_final", "prepped_scib", "data_final"}
@@ -27,6 +43,8 @@ def kind_of(rel):
         return None
     if parts[0] == "review_sealed":
         return "sealed"
+    if "status" in parts[:-1] and name.endswith(".json"):      # OUT/status/<tag>.json: the divergence and
+        return "status_record"                                 # nonfinite_latent records the stage runner reads (SI-79, 2026-10-16)
     if rel.startswith("tier12_v2/logs/") and name.startswith("X1"):
         return "runner_log"
     if parts[0] == "jhpce_tier12" and len(parts) == 3 and parts[1] == "logs":
@@ -101,9 +119,24 @@ def main():
         w.writeheader()
         w.writerows(rows)
     counts = Counter((r["group"], r["kind"]) for r in rows)
+    by = Counter((r["group"], r["kind"], task_of(r["path"]), ny_time(r["mtime_utc"]).strftime("%Y-%m-%d")) for r in rows)
+    fill = defaultdict(Counter)
+    for r in rows:
+        if r["group"] == "fillers" and r["kind"] == "score":
+            fill["pass " + PASS_OF.get(task_of(r["path"]), "?")][ny_time(r["mtime_utc"]).strftime("%Y-%m-%d")] += 1
+    ident = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        if r["group"] == "identity_check":
+            ident[r["kind"]][ny_time(r["mtime_utc"]).strftime("%Y-%m-%d")].append(ny_time(r["mtime_utc"]))
+    ident = {k: {day: {"files": len(v), "first_mtime_ny": min(v).strftime("%Y-%m-%d %H:%M:%S %Z"),
+                       "last_mtime_ny": max(v).strftime("%Y-%m-%d %H:%M:%S %Z")} for day, v in sorted(dd.items())}
+             for k, dd in sorted(ident.items())}
     summary = {"data_root": root, "files": len(rows),
                "hashed_at_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "counts": {g + "/" + k: n for (g, k), n in sorted(counts.items())},
+               "counts_by_group_kind_task_date_ny": [{"group": g, "kind": k, "task": t, "date_ny": dt, "files": n} for (g, k, t, dt), n in sorted(by.items())],
+               "filler_score_files_per_pass_and_date_ny": {k: dict(sorted(v.items())) for k, v in sorted(fill.items())},
+               "identity_check_files_per_kind_and_date_ny": ident,
                "csv_sha256": sha256(out_csv), "script_sha256": sha256(os.path.abspath(__file__))}
     with open(os.path.join(a.out_dir, "summary.json"), "w") as fh:
         json.dump(summary, fh, indent=1, sort_keys=True)
