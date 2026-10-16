@@ -632,3 +632,17 @@
 - keywords: latent, git_sha, run_stage, provenance
 - files: scripts/run_stage.py, tests/stage/test_run_stage.py
 - notebook: NB-20261016-10
+
+## SI-90 · active · process
+- rule: Hash them: the attempts/*.jsonl runner logs (local X1 and fillers) go into the SI-79 hash list with the score files
+- source: NB-20261016-22
+- added: 2026-10-16
+- keywords: h, a, s, h, l, i, s, t, a, t, t, e, m, p, t, s, S, I, -, 7, 9
+- notebook: NB-20261016-22
+
+## SI-91 · active · process
+- rule: Add one test for scripts/check_tests.py (its lines no test tier runs)
+- source: NB-20261016-23
+- added: 2026-10-16
+- keywords: c, h, e, c, k, _, t, e, s, t, s, c, o, v, e, r, a, g, e
+- notebook: NB-20261016-23
