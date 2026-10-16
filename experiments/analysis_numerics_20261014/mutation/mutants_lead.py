@@ -5,8 +5,8 @@ error out, disabled) is retired: SI-83 removed the rule, and the floor that repl
 RETARGET = {
     "M16": [('q = stats.t.ppf(0.975, reading["m"] - 1)', 'q = 1.0')],
     "M27": [('- (tau ** 2).sum(axis=1) / (2 * tau_scale ** 2)', '- tau.sum(axis=1) / tau_scale')],
-    "M26": [("return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, raised=raised)",   # combine also returns `raised`
-             "return dict(pool(d, s, levels, scale, 0.1, margin), units=units, structure=structure, raised=raised)")],
+    "M26": [("return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, **raised_record(raised))",   # combine also returns `raised`
+             "return dict(pool(d, s, levels, scale, 0.1, margin), units=units, structure=structure, **raised_record(raised))")],
 }
 NEW = [
     ("N01", "revert AN-01: uniform spread grid from 0, no Jacobian",
