@@ -529,19 +529,19 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   (SI-79). Hashing reads a file's bytes and shows no value, so a later reader can use the list to check that no file
   has changed since the list was made. The README of that folder groups the files and is the inventory of what exists.
   The groups, found from file names, folder names and dates only, are:
-  - (1) the 19 early X1 rows above;
-  - (2) the scores of the earlier fits above;
+  - (1) the 19 early X1 rows above (README group X1_local);
+  - (2) the scores of the earlier fits above (group fillers);
   - (3) the rescoring by the scorer identity checks of 2026-10-13: 7 stored latents, among them one of the 19 early X1
     rows (tag X1_immune_discriminator_lg1_c1_s0_122afe99) and one X13 row (sysVI on pancreas, tag
     X13_pancreas_sysvi_l10_c1_s0_60b085ea); the old and the new scores were compared with each other and with the
-    stored row by script, column by column (NB-20261013-12, -16 and -40);
+    stored row by script, column by column (NB-20261013-12, -16 and -40; group identity_check);
   - (4) two test runs of the X13 baseline runner on atac_small on 2026-10-02, before the first tag prereg-tier12-v1,
-    each scoring 6 latents of Harmony, Scanorama and PCA (NB-20261002-09 and -10); they are not registered rows;
+    each scoring 6 latents of Harmony, Scanorama and PCA (NB-20261002-09 and -10; group x13_cpu_test); they are not registered rows;
   - (5) the probe outputs of the final pre-publication review of 2026-10-12 and 13: its probes scored 49 registered
     configurations, each with the task, arm, penalty strength, decoder and seed of a registered X1 or X13 row, 42 from
     fits that the reviewers made themselves on sim1, atac_small and pancreas (adversarial arms included), at the code
     of 2026-10-12 and with training settings not yet checked, and 7 that rescore 6 real X1 baseline latents of arm
-    none. These are not the registered production fits.
+    none. These are not the registered production fits (group review_probes; the README's sixth group, sealed, holds the 2 non-score files of review_sealed).
   The date that GitHub shows for the tag prereg-tier12-v3 will be recorded in the notebook after the tag is made, as a
   time stamp from outside this repository (SI-79).
   **Definition of "examined" (user decision SI-78, 2026-10-15).**
