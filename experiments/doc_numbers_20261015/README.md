@@ -26,16 +26,19 @@ clone gives byte-identical files in `results/`.
 
 ## What each script regenerates
 
-Line numbers are those of the commit that adds this file; for `docs/ANALYSIS_SPEC.md` (changed by another round-3 fix) they are the
-lines at commit 5d06a27.
+Line numbers are those of the commit that adds this file; for `docs/ANALYSIS_SPEC.md` they are the lines after the round-3
+analysis fixes (commit 6925a4c).
 
 | quoted number | quoted at | script | output |
 |---|---|---|---|
 | 250 earlier X1 and X13 baseline fits (X1 arms `none`, `scvi_adv`; X13 arms scANVI, sysVI; tasks atac_large, immune_hum_mou, lung, pancreas, sim2) | PREREG.md:22, :520 | `filler_fit_counts.py` | `results/filler_fit_counts.txt`: 250 manifest rows = 100 (cluster job A: atac_large, immune_hum_mou) + 150 (job B: lung, pancreas, sim2); 50 per task; X1 `none` 50, X1 `scvi_adv` 25, X13 scANVI 25, X13 sysVI 150 (the same arms have 400 rows on all 8 tasks) |
 | 3,076 validation minibatches = 2,808 final-epoch (234 pre-fix fits x 12) + 192 early + 76 training-mode (19 fits); 160 replay tags, none among the 234 fits | PREREG.md:418-423 | `validation_minibatch_counts.py` | `results/validation_minibatch_counts.txt` |
 | median gradient-norm ratios 2.00 (A1), 2.27 (A3), 14.4 (R1 extension); 204 of 216 finite; median cosine 0.28 | PREREG.md:396-398 | `validation_minibatch_counts.py` | same file (2.000, 2.273, 14.439; 204 of 216; 0.281) |
-| P2 recount: discriminator with the unconditioned decoder collapsed in 8 of 54 pilot runs (8 of 45 without its nine lambda 0.03 runs); reference minus discriminator +3.7 points (+0.7 with 45) | PREREG.md:218 (amendment-table row 8), :624 (question 10); ANALYSIS_SPEC.md:461-463, :488-490 | `p2_pilot_recount.py` | `results/p2_pilot_recount.txt`, `.json` (also prints reference 10 of 54, and the conditioned decoder 15 and 17 of 54, not quoted; 0 of the 9 lambda 0.03 runs collapsed) |
-| pilot ranges: plain scVI biology score C 0.67 to 0.90 per cell; shift of C from it -0.59 to +0.23 over 300 points; middle half -0.09 to 0.00; within a cell -0.19 to +0.09 | ANALYSIS_SPEC.md:127, :433-436 | `pilot_ranges.py` | `results/pilot_ranges.txt` (unrounded: 0.666 to 0.897; -0.590 to 0.231; -0.0936 to 0.0047; -0.188 to 0.090) |
+| P2 recount: discriminator with the unconditioned decoder collapsed in 8 of 54 pilot runs (8 of 45 without its nine lambda 0.03 runs); reference minus discriminator +3.7 points (+0.7 with 45) | PREREG.md:218 (amendment-table row 8), :624 (question 10); ANALYSIS_SPEC.md:559-561 | `p2_pilot_recount.py` | `results/p2_pilot_recount.txt`, `.json` (also prints reference 10 of 54, and the conditioned decoder 15 and 17 of 54, not quoted; 0 of the 9 lambda 0.03 runs collapsed) |
+| pilot ranges: plain scVI biology score C 0.67 to 0.90 per cell; shift of C from it -0.59 to +0.23 over 300 points; middle half -0.09 to 0.00; within a cell -0.19 to +0.09 | ANALYSIS_SPEC.md:153-154, :530-532 | `pilot_ranges.py` | `results/pilot_ranges.txt` (unrounded: 0.666 to 0.897; -0.590 to 0.231; -0.0936 to 0.0047; -0.188 to 0.090) |
+| first review's pipeline simulation (six scenarios): single-dataset intervals d ± 1.96 s covered 0.85 to 0.88; pooled 95% interval for Delta covered 0.998 to 1.000; 'practically equivalent' declared in none of 2,640 pooled worlds | ANALYSIS_SPEC.md:422-428 | `../analysis_numerics_20261014/first_review/run_simulations.sh` (runs `sim_pipeline.py`) | `../analysis_numerics_20261014/first_review/sim_pipeline_<scenario>.txt` (single-dataset coverage 0.853 to 0.883) |
+| '0.011' (reading atac_small, conditioned decoder, on ten points instead of six; reference minus discriminator 0.017 and 0.028) | ANALYSIS_SPEC.md:430-433 | `../analysis_numerics_20261014/first_review/pilot_grid_reading.py` | `../analysis_numerics_20261014/first_review/pilot_grid_reading.csv` (d_shift 0.011039) |
+| P2 clustering simulation: Clopper-Pearson coverage 0.9995 and 0.914; Agresti-Caffo 0.949 (paired) and 0.919 (independent) | ANALYSIS_SPEC.md:438-441 | `../analysis_numerics_20261014/first_review/p2_clustering_sim.py` | `../analysis_numerics_20261014/first_review/p2_clustering_sim.json` (0.9488, 0.9186) |
 | fits expected to meet a minibatch with no pair of batches: 25.9 of 27 (X7 pancreas reference-anchored MMD), 18 of 18 (X7 sim1), about 14% of 48 (X3 atac_small MMD), 4.5% of 24 (X8 sim2 MMD), 0.6% of 60 (X1 sim1, MMD and Sinkhorn each) | PREREG.md:446-451 | `no_pair_expectations.py`, `no_pair_assumptions.py` | `results/no_pair_expectations.txt` (25.92; 18.00; 6.673 = 13.9%; 1.076 = 4.5%; 0.3615 = 0.60%), `results/no_pair_groups.csv` (every critic-free group), `results/no_pair_assumptions.txt` |
 
 How the no-pair numbers are made: a calculation, not simulated runs. For each critic-free row of the manifest of record the script takes the
@@ -53,8 +56,6 @@ scvi-tools 1.4.2 source and the project code, and checks one case by Monte Carlo
 
 | number | quoted at | where it comes from |
 |---|---|---|
-| '0.011' (reading one of six cells on ten points instead of six moved its difference) | ANALYSIS_SPEC.md:340 | the first review's simulation; no script for it is in this repository (a grep of the `.py`, `.md` and `.json` files of `experiments/analysis_numerics_20261014` at 5d06a27 finds none of 'coverage', 'spacing', '0.011', '0.91'); not re-run by the re-check |
-| coverage of the intervals '0.91 to 1.00', 'conservative', 'less than 95%' | ANALYSIS_SPEC.md:345, :336-337 | the first review's simulation; no script for it is in this repository (same grep); not re-run by the re-check |
 | Sinkhorn-to-W1 ratios 0.86-0.89 and 0.53-0.77 (5 pre-fix latents, 8 minibatches each) | PAPER_PLAN.md:75-79 | the Sinkhorn review log, which is not in this repository; PAPER_PLAN marks them provisional until they are recomputed on the refitted latents |
 
 A document that quotes these numbers should say that they cannot be reproduced from this repository.

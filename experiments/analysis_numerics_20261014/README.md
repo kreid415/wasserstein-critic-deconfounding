@@ -309,7 +309,7 @@ Results of the re-run of 2026-10-15 (committed outputs; the code is the one of t
   equivalent" was declared in none of the 2,640 pooled worlds (5 x 520 and 40).
 - `p2_clustering_sim.json`: Clopper-Pearson coverage 0.9995 (independent runs, collapse probability rising with lambda) and
   0.914 (a collapse threshold shared by the 6 strengths of a seed); Agresti-Caffo coverage of the difference 0.949 (paired seeds) and
-  0.919 (independent seeds); limitation 3's "0.91 to 1.00".
+  0.919 (independent seeds); limitation 3 quotes these four (it replaced the first review's "0.91 to 1.00").
 - `pilot_grid_reading.csv`: the six cells' differences on all ten lambda and on the registered grid; five do not move, atac_small
   with the conditioned decoder moves from 0.0172 to 0.0282, by 0.0110 (limitation 2's "0.011").
 
