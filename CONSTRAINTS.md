@@ -538,7 +538,7 @@
 - notebook: NB-20261014-11
 
 ## SI-78 · active · process
-- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores). Only a person reading a value counts; a value shown to an AI agent is disclosed, not examined (user, 2026-10-16).
+- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores). Of readers, only a person counts: a value shown to an AI agent is disclosed, not examined; use by an analysis script still counts as examined (user, 2026-10-16; NB-20261016-24).
 - source: "Every X1 and X13 score, any arm (Recommended)" (user, ask_user answer to "What counts as having 'examined' an X1 result?", 2026-10-15); "No, people only" (user, ask_user answer to "From now on, does an X1 or X13 score value shown to an AI agent count as 'examined' under SI-78?", 2026-10-16)
 - added: 2026-10-15
 - keywords: examined, blinding, X1 score, X13 score, freeze

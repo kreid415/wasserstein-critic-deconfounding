@@ -49,3 +49,5 @@ Diagnosis in wcd-kbet: `import rpy2.robjects` works there (rpy2 3.6.7, R 4.5.2).
 
 7. FILES: check_tests_tier_{a,b,c}.log and .exit (none above 1 MB, none trimmed), union_of_tiers.txt, closures_by_entry.txt, import_closure_reused_unchanged.txt, ct_union_eval.py, closures_by_entry.py, import_closure_reused_unchanged.py.
    The .log files were produced in work clones outside the repo; git add -f is used for them.
+
+NOTE (2026-10-16, confirming re-review CR-01): the commit id da8542e8941c3005e6ef1c7d7981dbabb8a410be cited at lines 2, 4, 8 and 45 above is the id the tested clone had. In the branch final-review-fixes the same change is commit 4b02068f041a289c2e7ff4f52830fb3c01a1a176 (same tree 23ae51b8ecad237ee393df025022552d20fb7c6e). Read da8542e as 4b02068.

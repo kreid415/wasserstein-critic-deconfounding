@@ -23,7 +23,7 @@ tests (`tests/analysis/`) will be frozen by that tag, which has not been made, b
 I001, D-03, D-08, D-09; SI-52).*
 
 **Examined (user decision SI-78, 2026-10-15, amended 2026-10-16).** A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm.
-Only a person reading a value counts: a value shown to an AI agent is disclosed, not examined (user, 2026-10-16, NB-20261016-14); the listing of the displays found by the audits as "shown to the agent only" (SI-88; PREREG section 9) follows from this definition.
+Of readers, only a person counts: a value shown to an AI agent is disclosed, not examined; use by an analysis script still counts as examined (user, 2026-10-16, NB-20261016-14, NB-20261016-24); the listing of the displays found by the audits as "shown to the agent only" (SI-88; PREREG section 9) follows from this definition.
 The user states that nobody read an X1 or X13 score value (NB-20261015-15). The agent's own audit of 2026-10-14 (NB-20261014-21,
 made by the agent that ran the checks) is narrower: it searched the agent's session logs for reads of `tier12_v2/X1_local/scores`,
 the printed output of the scripts that read them and two log statements, and it cannot show that nobody opened a file. PREREG

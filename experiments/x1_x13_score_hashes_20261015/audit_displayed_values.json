@@ -2,7 +2,7 @@
  "run_date_new_york": "2026-10-16",
  "cutoff_new_york": "2026-10-16 14:37:57 EDT",
  "transcripts_since": "2026-10-02 00:00 New York",
- "excluded_session": "95c88c4c-ebed-4754-99e3-6251a2898c3f (the session that ran this audit)",
+ "excluded_session": "95c88c4c-ebed-4754-99e3-6251a2898c3f (the lead session that started the audit; sub-agent 6501cf06 ran it)",
  "sessions_in_scope": 69,
  "sessions_searched": 68,
  "sessions_mentioning": 65,
@@ -5943,5 +5943,16 @@
   ],
   "flagged_total": 486
  },
- "note": "Flagged lines of the classes 'verbatim copy of committed ...' are counted (flagged_total, classes) but not listed. All other flagged lines are listed digit-masked."
+ "note": "Flagged lines of the classes 'verbatim copy of committed ...' are counted (flagged_total, classes) but not listed. All other flagged lines are listed digit-masked.",
+ "manual_overrides": [
+  {
+   "frame": "4295f20e",
+   "session_name": "Verify cluster",
+   "message": 117,
+   "timestamp_new_york": "2026-10-12 23:54",
+   "identifier": "X13_lung_scanvi_l0_c1_s0_8e6f5009",
+   "manual_class": "agent display",
+   "note": "added by hand 2026-10-16 (CR-06); head -c 600 of the first filler score file; the audit script's automatic classes did not mark it"
+  }
+ ]
 }
