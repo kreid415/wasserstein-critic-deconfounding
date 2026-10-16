@@ -598,7 +598,7 @@
 - source: "Refuse them, as for results (Recommended)" (user, ask_user answer to "Should the stage runner refuse a Sinkhorn 'divergence record' that lacks the code version, or that was made from code with uncommitted changes?", 2026-10-15)
 - added: 2026-10-15
 - keywords: divergence record, git_sha, git_dirty, uncommitted, run_stage
-- files: scripts/run_stage.py, tests/stage/test_run_stage.py
+- files: scripts/run_stage.py, tests/stage/test_run_stage.py, tests/stage/fake_env.py
 - notebook: NB-20261015-18
 
 ## SI-86 · active · method
