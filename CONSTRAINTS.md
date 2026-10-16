@@ -646,3 +646,10 @@
 - added: 2026-10-16
 - keywords: c, h, e, c, k, _, t, e, s, t, s, c, o, v, e, r, a, g, e
 - notebook: NB-20261016-23
+
+## SI-92 · active · collaboration
+- rule: I only want to discuss decisions that matter for the experiment. Defer others until after the experiments are launched
+- source: "I only want to discuss decisions that matter for the experiment. Defer others until after the experiments are launched" (user, 2026-10-16)
+- added: 2026-10-16
+- keywords: *
+- notebook: NB-20261016-26
