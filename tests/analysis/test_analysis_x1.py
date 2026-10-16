@@ -276,13 +276,15 @@ def test_combine_structures():
     su = [0.01, 0.02, math.hypot(0.015, 0.01) / 2, math.hypot(0.02, 0.025) / 2]
     assert pairs["units"] == units and pairs["n"] == 4
     close(pairs["mean"], A.pool(du, su, [units], 0.1, 0.1, 0.01)["mean"])
-    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable", "raised": []}
+    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable", "raised": [],
+                                                         "n_raised_datasets": 0, "n_raised_pairs": 0}
 
     # SI-83: a standard error below 1e-6 enters the pool as 1e-6 and is listed with its own value; 1e-6 itself stays
     low = [1e-6, 0.9e-6, 1e-16, 0.0, 0.01, 0.02]
     for structure, levels in (("family", [[P.TASK_FAMILY[t] for t in tasks], tasks]), ("independent", [tasks])):
         got, want = A.combine(tasks, d, low, structure, 0.1, 0.01), A.pool(d, [1e-6] * 4 + low[4:], levels, 0.1, 0.1, 0.01)
         assert got["raised"] == [dict(unit=t, level="dataset", s=x) for t, x in zip(tasks[1:4], low[1:4])]
+        assert (got["n_raised_datasets"], got["n_raised_pairs"]) == (3, 0)       # the count next to the declaration (SI-83)
         assert {k: got[k] for k in want} == want
     # pairs: each dataset is raised first; the family's averaged sqrt(s1^2 + s2^2) / 2 is raised again when it is
     # below 1e-6, which the averaged standard error of two datasets at 1.2e-6 is (8.5e-7; review AN-R01)
@@ -293,6 +295,7 @@ def test_combine_structures():
         assert got["raised"] == [dict(unit=u, level="dataset", s=x) for u, x in listed] + [
             dict(unit="atac", level="pair", s=pytest.approx(averaged, abs=1e-15))]
         assert got["n"] == 1 and {k: got[k] for k in want} == want
+        assert (got["n_raised_datasets"], got["n_raised_pairs"]) == (len(listed), 1)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -566,6 +569,7 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
     assert "lung" in pooled["1"]["area"]["tasks"] and prim["cells"]["lung|1"]["area"]["s"] == 0.0
     assert {(c, e): v["raised"] for c in "01" for e, v in pooled[c].items() if v["raised"]} == {
         ("1", "area"): [dict(unit="lung", level="dataset", s=0.0)]}
+    assert {(c, e): v["n_raised_datasets"] for c in "01" for e, v in pooled[c].items() if v["n_raised_datasets"]} == {("1", "area"): 1}
     assert pooled["0"]["local"]["declaration"] == "above"
     close(pooled["0"]["local"]["sign_test_p"], 2 / 64)
     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)

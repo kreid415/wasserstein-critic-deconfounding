@@ -224,9 +224,15 @@ def raise_s(units, s, level):
     return [max(x, S_MIN) for x in s], [dict(unit=u, level=level, s=float(x)) for u, x in zip(units, s) if x < S_MIN]
 
 
+def raised_record(raised):
+    """The `raised` list and, next to the declaration, how many datasets (and, in the pairs analysis, families) it holds (SI-83)."""
+    return dict(raised=raised, n_raised_datasets=sum(r["level"] == "dataset" for r in raised),
+                n_raised_pairs=sum(r["level"] == "pair" for r in raised))
+
+
 def combine(tasks, d, s, structure, scale, margin):
     if not tasks:
-        return dict(n=0, declaration="not_evaluable", raised=[])
+        return dict(n=0, declaration="not_evaluable", **raised_record([]))
     P._require(structure in ("family", "independent", "pairs"), f"unknown pooling structure {structure}")
     P._require(len(tasks) == len(d) == len(s), "pool tasks, d and s must have equal lengths")
     s, raised = raise_s(tasks, s, "dataset")
@@ -246,7 +252,7 @@ def combine(tasks, d, s, structure, scale, margin):
             s, pairs = raise_s(units, s, "pair")      # sqrt(s1^2 + s2^2) / 2 can fall below S_MIN even after each s is raised
             raised += pairs
             levels = [units]
-    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, raised=raised)
+    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, **raised_record(raised))
 
 
 def wilcoxon_exact(d):

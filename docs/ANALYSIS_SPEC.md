@@ -186,7 +186,9 @@ the averaged standard error of a family, sqrt(s1^2 + s2^2) / 2, can fall below 1
 lists every raised dataset or pair in the field `raised` of the pooled result (one list for each endpoint and decoder, in the
 primary analysis and in every sensitivity analysis); an entry gives `unit` (the dataset, or the family in the pairs analysis),
 `level` (`dataset` or `pair`) and `s` (its value before raising). The per-dataset sign table shows each dataset's own s, not the
-raised value.
+raised value. Next to each declaration the pooled result also gives the count of its `raised` list: `n_raised_datasets` (the entries of level
+`dataset`) and `n_raised_pairs` (those of level `pair`, nonzero only in the pairs analysis). Every pooled declaration is reported with
+these counts (user decision 2026-10-16, SI-83, NB-20261016-17); they are derived from `raised`, and no rule or number changes.
 
 Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
 the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset sign table with leave-one-out
