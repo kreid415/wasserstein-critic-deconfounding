@@ -1,10 +1,10 @@
 # Analysis specification for the X1 endpoints (rules; not yet frozen)
 
-*Status, 2026-10-15: not yet frozen. The user is shown the final diff of branch `final-review-fixes` once more and says yes
+*Status, 2026-10-16 (ledger SI-78 to SI-89): not yet frozen. The user is shown the final diff of branch `final-review-fixes` once more and says yes
 before the tag prereg-tier12-v3 is made (SI-52, SI-60). On 2026-10-14 the user decided questions Q1 to Q7 and Q9 to Q11, each time
 taking the option the agent recommended (ledger SI-68 to SI-77; notebook NB-20261014-01 to -05 and -07 to -11); no question was
 numbered Q8 (Appendix A.2). On 2026-10-15 the user answered the 19 questions of the diff review (ledger SI-78 to SI-87; the
-list is in PREREG section 9) and decided how the audit's findings are listed (SI-88). Those that concern this file: SI-78 (what "examined" means); SI-80 (the agent's proposals of section
+list is in PREREG section 9) and decided how the audit's findings are listed (SI-88). On 2026-10-16 the user answered the findings of the independent re-check (SI-78, SI-81 and SI-83 amended; SI-85 widened; SI-89 added). Those that concern this file: SI-78 (what "examined" means); SI-80 (the agent's proposals of section
 2.3, section 5, section 8, sections 9 and 10, the section 11 sensitivity analyses that no decision names, and section 15 are
 approved as rules; equal numbers of tries in section 9 is the user's own decision, SI-68 and SI-77, and only the best-of-k estimator
 and the composition of the method families were proposals); SI-81 (c) (a reporting script written after the runs); SI-82
@@ -452,7 +452,7 @@ SI-84; none changes a decision SI-68 to SI-77.
    the update-budget control (X6) exists only for the pooled critic (PREREG section 9), so P1 does not separate the
    divergence from the extra critic steps.
 
-Sources checked for this specification: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-88),
+Sources checked for this specification: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-89),
 `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
 `r4_a1_record.json`, the X1 and full manifests (v3), review/rereview/design_fable/REVIEW_design_recheck.md (D-03, D-04,
 D-06..D-10, D-18..D-20) and review/lead/verified_issues.csv (I001, I003, I038, I040, I056, I062, I067, I072, I073,
