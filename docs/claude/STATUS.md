@@ -43,8 +43,8 @@ JHPCE X1 (cluster part, 1,800 fits), follow-ups X3/X6/X7/X8/X12/X15, the X1 anal
    (frozen by the tag); launcher files under `experiments/` are not named in the tag message.
 4. Sinkhorn redo, stage 1 (SI-57): refit the 180 A1 Sinkhorn fits with the corrected solver (tolerance 1e-4, iteration cap
    500,000, float64: SI-58, SI-61, SI-62). Why: the old Sinkhorn gradient was wrong (SI-51, NB-20261013-01). Preflight first
-   (skills `.claude/skills/experiment-preflight` and `experiment-preflight-singlecell`; the Claude Science session's pre-launch check wrote `experiments/preflight_sinkhorn_redo_20261016/` on branch
-   `preflight-sinkhorn-redo`). Where: `scripts/run_stage.py` (usage at its top), A1 manifest in `manifests/`, output under
+   (skills `.claude/skills/experiment-preflight` and `experiment-preflight-singlecell`; the pre-launch check record is committed in 1ad44cb at `experiments/preflight_sinkhorn_redo_20261016/`, verdict GO;
+   launch sequence, conditions and the independent launch review: `docs/claude/LAUNCH_SINKHORN_STAGE1.md`). Where: `scripts/run_stage.py` (usage at its top), A1 manifest in `manifests/`, output under
    `$D/tier12*/`. Cost reference: the hardest-regime full-length fit took 7,778 s, 2.8x the pre-fix time (NB-20261013-11).
    Machine: the user's local RTX 3080 machine (a local run needs no cluster go, but report it). Not the cloud VM (no GPU, no data).
 5. Re-run the rules in order, overwriting the record files in place (SI-87; old versions stay at the tags):
@@ -159,8 +159,8 @@ as the confirming re-review of fb7edac and has since done the following, in orde
    (NB-20261016-33, repo 10a1ca5); tag made and pushed (NB-20261016-34, 17:54, commit 857234a; the preflight GO record followed as 1ad44cb).
 5. Last action: dispatched a read-only pre-launch check of the Sinkhorn redo stage 1 to sub-agent 588cef60 (RUNNER_ENGINEER,
    Sonnet; processing, 54 messages at the snapshot): writes `experiments/preflight_sinkhorn_redo_20261016/PREFLIGHT.md`,
-   `preflight.json` and a bundle on branch `preflight-sinkhorn-redo`; launches nothing; the lead waits for it and then launches
-   only on GO plus the user's go. Its verdict was not available when this was written.
+   `preflight.json`; launches nothing. Outcome: GO; the record was committed as 1ad44cb on `final-review-fixes`. The session
+   then asked the user for the go and ended without an answer; nothing was launched.
 Other recent sessions (all finished): 95c88c4c (round-3 patches, SI-89, audit redo; handoff 14), 83e5f00a (user's request to
 cut pre-launch questions; produced the defaults rule above), d684be61 and 17c506be (round-3 fixes, 19-question diff review),
 ed231f45 and 544c8a5f (paper intro, related work, references on branch `paper`).
@@ -184,7 +184,7 @@ entries (NB-20261016-35 onward, or 2026-10-17 pages) only if the user ran someth
 - Merged historic branches (0 commits ahead of `main`, kept for history): amend-v2, fix-runner, fix-score-fit, integrate-arms2,
   integrate-fixes, integrate-gate-v2, integrate-jhpce, integrate-phase0, jhpce-gate-v2, jhpce-production, jhpce-setup,
   missing-arms, missing-arms-v2, prereg-rules, prereg-v2, stage-runner.
-- `claude-code-migration`: this migration's branch (new); `preflight-sinkhorn-redo`: lives in a sub-agent's clone as a bundle, not on GitHub.
+- `claude-code-migration`: this migration's branch (new).
 - Tags: `prereg-tier12-v1` (129142b, 2026-10-03), `prereg-tier12-v2` (c88cce3, 2026-10-04; the code the A1-A3 pilots ran under, and the
   one the local X1 launcher and the JHPCE plan still name; result-identical to v3 for every arm but Sinkhorn per `docs/EQUIVALENT_COMMITS.json`, SI-54),
   `prereg-tier12-v3` (10a1ca5, 2026-10-16; the freeze the Sinkhorn redo and X1 run under; do not move or recreate it).

@@ -36,8 +36,10 @@
       "Bash(git add --all:*)",
       "Bash(git push -f:*)",
       "Bash(git push --force-with-lease:*)",
-      "Bash(git push * --delete *)",
-      "Bash(git push * :refs/tags/*)"
+      "Bash(git push origin --delete:*)",
+      "Bash(git push origin :refs/tags:*)",
+      "Bash(git tag -f:*)",
+      "Bash(git tag --force:*)"
     ]
   },
   "hooks": {

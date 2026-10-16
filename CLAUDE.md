@@ -38,7 +38,8 @@ Built on 2026-10-16 from the Claude Science project (memory, notebook, ledger, p
 3. **Cluster jobs need the user's explicit go** (show command, resources, walltime, outputs, job count first).
    Cancel only job ids you submitted. Read `.claude/rules/compute.md` first.
 4. **Lab notebook is append-only and hash-chained** (`notebook/`; one page per day, New York time). Add entries with
-   `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, then `nb_index`; `nb_check('.')` must report ok). Fix
+   `.claude/skills/lab-notebook/kernel.py` (`nb_entry` rebuilds INDEX.md and commits on the checked-out branch, so run it
+   only with `final-review-fixes` checked out; `nb_check('.')` must report ok). Fix
    mistakes with a CORRECTION entry, never by editing. Every experiment, result, decision and user rule gets one.
 5. **Public repo.** No tokens, keys, cookies, journal correspondence or personal details in any commit. Git identity: `kreid415`,
    `kreid415@users.noreply.github.com`. Never `git add -A` or `git add .` (scratch files exist); add paths by name.
@@ -85,15 +86,15 @@ This bundle adds new files and changes only the README download block, so the me
 ## Environments and tests
 
 - Cloud session: the SessionStart hook in `.claude/settings.json` runs `.claude/cloud-setup.sh` (CPU env `wcd-cpu`,
-  about 90 s on first start). See `docs/claude/CLOUD_SETUP.md` for network domains and what the VM cannot run.
+  roughly 70-100 s on first start; it also sets the repo-local git identity). See `docs/claude/CLOUD_SETUP.md` for network domains and what the VM cannot run.
 - Thread guards for every run: `KMP_AFFINITY=disabled OMP_NUM_THREADS=1 NUMBA_NUM_THREADS=1 MKL_THREADING_LAYER=SEQUENTIAL`,
-  `PYTHONPATH=src`.
+  `PYTHONPATH=src` (relative: run commands from the repo root).
 - CPU tiers (measured 2026-10-16 with `wcd-cpu`): `python -m pytest -q tests/prereg tests/stage tests/analysis`
   (283 passed, 2 skipped); `python -m pytest -q tests/scvi tests/jhpce tests/test_legacy_retired.py tests/test_gate_task_split.py`
   (168 passed, 16 skipped).
 - Workstation-only tiers: `tests/wcd_vae` (env `wcd-gpu`), `tests/scoring` and `tests/x13` (data, R/kBET, env `wcd-kbet`).
   Specs: `envs/README.md` (canonical exact specs are `cluster/envspec/`).
-- Before calling code done: `python scripts/check_tests.py --base <commit before your change> --src scripts` exits 0.
+- Before calling code done, from the repo root: `python scripts/check_tests.py --base <commit before your change> --src scripts -- tests/prereg tests/stage tests/analysis tests/scvi tests/jhpce tests/test_legacy_retired.py tests/test_gate_task_split.py` exits 0 (cloud form; a bare `scripts/check_tests.py` collects `tests/wcd_vae`, which needs the workstation `wcd-gpu` env). Workstation form: the full `tests/` suite.
 
 ## Machines and data
 
@@ -111,6 +112,7 @@ Data products, sizes and how each is regenerated: `docs/claude/DATA_LOCATIONS.md
 | where | what |
 |---|---|
 | `docs/claude/STATUS.md` | resume point, next steps, pending decisions, in-flight work at hand-over |
+| `docs/claude/LAUNCH_SINKHORN_STAGE1.md`, `docs/claude/FIRST_PROMPT.md` | independent launch review with the stage-1 command sequence; the session starter prompt |
 | `docs/claude/notes/` | 166 project memory rows condensed by topic, each bullet with its source id (`README.md` indexes them) |
 | `.claude/rules/` | user's working rules (answers, decisions, integrity, code changes, git, compute) |
 | `.claude/agents/` | 12 specialist subagents (rigor-reviewer, external-referee and auditor on opus; others sonnet); map in `README.md` |
