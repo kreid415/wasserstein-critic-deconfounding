@@ -711,7 +711,7 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
     pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), True, None, id="S1-allow-dirty-accepted"),
 ])
 # test-reason: only test of the dirty-checkout and no-commit refusals (all other stage tests pass --allow-dirty)
-def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, where, plan, edit, allow_dirty, refusal):
+def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, monkeypatch, where, plan, edit, allow_dirty, refusal):
     """SI-85 (the user's decision of 2026-10-15, rule A of the code re-check, finding CF-R03): a divergence record (the
     file a fit writes when its training loss becomes non-finite), like a latent (the saved embedding), must name its
     commit and come from a clean checkout; the start-up check refuses one that does not, unless --allow-dirty is given.
@@ -746,6 +746,12 @@ def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, wh
         assert rc == 0, out + err
     else:
         assert rc == rs.EXIT_PREFLIGHT and all(f"{f}: {refusal}" in err for f in files), out + err
+        # the check at the end of a run (write_views -> file_states -> Outputs.state -> status / latent) is the same call as the
+        # start-up one; with the start-up check switched off it marks the same files invalid and the gate fails (RC-m10)
+        monkeypatch.setattr(rs.Stage, "preflight", lambda self, launching: {})
+        rc = rs.main([a for a in st.args("--no-score", "--report-only") if allow_dirty or a != "--allow-dirty"])
+        out, err = capsys.readouterr()
+        assert rc == rs.EXIT_GATE and "invalid" in out + err, out + err
 
 
 def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
