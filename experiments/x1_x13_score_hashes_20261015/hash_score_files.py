@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SHA-256 list of every existing X1 and X13 score file (user decision SI-79, 2026-10-15; status records added 2026-10-16).
+"""SHA-256 list of every existing X1 and X13 score file (user decision SI-79, 2026-10-15; status records and attempt logs added 2026-10-16).
 
 Reads each selected file in binary mode only to hash it; never decodes, parses or prints file
 contents, so no score value is shown (SI-78: checks that print only counts or flags do not count
@@ -45,6 +45,8 @@ def kind_of(rel):
         return "sealed"
     if "status" in parts[:-1] and name.endswith(".json"):      # OUT/status/<tag>.json: the divergence and
         return "status_record"                                 # nonfinite_latent records the stage runner reads (SI-79, 2026-10-16)
+    if parts[-2:-1] == ["attempts"] and name.endswith(".jsonl") and rel.startswith(("tier12_v2/X1_local/", "jhpce_tier12/fillers_x1_x13/")):
+        return "attempt_log"                                   # per-attempt runner logs, local X1 and fillers (SI-90, 2026-10-16)
     if rel.startswith("tier12_v2/logs/") and name.startswith("X1"):
         return "runner_log"
     if parts[0] == "jhpce_tier12" and len(parts) == 3 and parts[1] == "logs":

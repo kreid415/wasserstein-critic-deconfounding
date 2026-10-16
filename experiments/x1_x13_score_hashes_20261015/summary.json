@@ -1,10 +1,12 @@
 {
  "counts": {
+  "X1_local/attempt_log": 28,
   "X1_local/ledger": 2,
   "X1_local/runner_log": 1,
   "X1_local/runner_record": 1,
   "X1_local/score": 19,
   "X1_local/scoring_log": 20,
+  "fillers/attempt_log": 250,
   "fillers/ledger": 11,
   "fillers/runner_log": 4,
   "fillers/runner_record": 3,
@@ -22,6 +24,13 @@
   "x13_cpu_test/scoring_log": 12
  },
  "counts_by_group_kind_task_date_ny": [
+  {
+   "date_ny": "2026-10-12",
+   "files": 28,
+   "group": "X1_local",
+   "kind": "attempt_log",
+   "task": "immune"
+  },
   {
    "date_ny": "2026-10-12",
    "files": 2,
@@ -56,6 +65,62 @@
    "group": "X1_local",
    "kind": "scoring_log",
    "task": "immune"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 50,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "atac_large"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 42,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-12",
+   "files": 8,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "immune_hum_mou"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 24,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 26,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "lung"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 50,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "pancreas"
+  },
+  {
+   "date_ny": "2026-10-06",
+   "files": 15,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "sim2"
+  },
+  {
+   "date_ny": "2026-10-07",
+   "files": 35,
+   "group": "fillers",
+   "kind": "attempt_log",
+   "task": "sim2"
   },
   {
    "date_ny": "2026-10-06",
@@ -380,9 +445,9 @@
    "task": "atac_small"
   }
  ],
- "csv_sha256": "fc748a5129120fc285c37494fd576c71b9f56c58fc901e00d652e08e72d5303b",
+ "csv_sha256": "23a8534dae1a8782f1d5cbc8d9336d721f4aee2b10381da0dd8434c7dbd6a2ec",
  "data_root": "/home/kendall/experiment_data/wasserstein-critic-deconfounding",
- "files": 851,
+ "files": 1129,
  "filler_score_files_per_pass_and_date_ny": {
   "pass A": {
    "2026-10-06": 1,
@@ -393,7 +458,7 @@
    "2026-10-07": 61
   }
  },
- "hashed_at_utc": "2026-10-16T18:11:45Z",
+ "hashed_at_utc": "2026-10-16T20:08:07Z",
  "identity_check_files_per_kind_and_date_ny": {
   "comparison": {
    "2026-10-13": {
@@ -417,5 +482,5 @@
    }
   }
  },
- "script_sha256": "ea2008b3ea7559b72b7440f233862cc94f3c7478bfe9c7047584571b09d49226"
+ "script_sha256": "030f6ce1b7bc96b95898101cd03bade6f412fdf0373334f630c42143f09284de"
 }
