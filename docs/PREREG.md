@@ -19,7 +19,7 @@ Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_g
 | R4-x1 | — | X1 scored | follow-up `lam` = matched_lo / matched / matched_hi | `freeze_matched_lambda.py --stage x1` |
 | X3, X6, X7, X8, X12 | seeds 10–12 (SI-26) | R4-x1 | | |
 
-Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress; 250 of them already exist, and part of their scores (section 9, entry of 2026-10-14 on the disclosure). A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
+Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress; 250 of them already exist, and part of those 250 are already scored (section 9, entry of 2026-10-14 on the disclosure). A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
 
 ## 1. Definitions shared by all rules
 
