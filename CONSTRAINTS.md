@@ -538,20 +538,20 @@
 - notebook: NB-20261014-11
 
 ## SI-78 · active · process
-- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores).
-- source: "Every X1 and X13 score, any arm (Recommended)" (user, ask_user answer to "What counts as having 'examined' an X1 result?", 2026-10-15)
+- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores). Only a person reading a value counts; a value shown to an AI agent is disclosed, not examined (user, 2026-10-16).
+- source: "Every X1 and X13 score, any arm (Recommended)" (user, ask_user answer to "What counts as having 'examined' an X1 result?", 2026-10-15); "No, people only" (user, ask_user answer to "From now on, does an X1 or X13 score value shown to an AI agent count as 'examined' under SI-78?", 2026-10-16)
 - added: 2026-10-15
 - keywords: examined, blinding, X1 score, X13 score, freeze
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
-- notebook: NB-20261015-02
+- notebook: NB-20261015-02, NB-20261016-14
 
 ## SI-79 · active · process
-- rule: Record SHA-256 hashes of every existing X1 and X13 score file (hashing reads bytes and shows no value) and the date GitHub shows for the tag prereg-tier12-v3 as an outside time stamp; commit the hash list and state it in PREREG.
-- source: "Record hashes and the tag's GitHub date (Recommended)" (user, ask_user answer to "Should we record a fingerprint (a SHA-256 hash) of every existing X1 and X13 score file?", 2026-10-15)
+- rule: Record SHA-256 hashes of every existing X1 and X13 score file (hashing reads bytes and shows no value) and the date GitHub shows for the tag prereg-tier12-v3 as an outside time stamp; commit the hash list and state it in PREREG. Status records (divergence and nonfinite_latent records) of every X1 and X13 group are hashed too (user, 2026-10-16).
+- source: "Record hashes and the tag's GitHub date (Recommended)" (user, ask_user answer to "Should we record a fingerprint (a SHA-256 hash) of every existing X1 and X13 score file?", 2026-10-15); "Count-only tally (Recommended)" (user, ask_user answer to "may a script print only the total per status (no arm, no score) for the missing 8?", 2026-10-16)
 - added: 2026-10-15
 - keywords: hash, SHA-256, score files, time stamp, tag date
 - files: docs/PREREG.md
-- notebook: NB-20261015-03
+- notebook: NB-20261015-03, NB-20261016-16
 
 ## SI-80 · active · method
 - rule: The agent's proposals in docs/ANALYSIS_SPEC.md are approved as rules: section 2.3 (not-evaluable rule), section 5 (marginal declarations; Holm over the six primary results for the descriptive Wilcoxon companion only), section 8 (leave-one-family-out transfer rule), section 9 (best-of-k placement against standard tools), section 10 (width of the range of good strengths), the section 11 sensitivity analyses that no decision names, and section 15 (implementation details). Parts that implement the rigour-review designs asked separately at the same review (the zero-spread exclusion in sections 2.3 and 4, question 1; the t-based sign-table limits in section 15 and the other designs of question 2) follow the user's answers to those questions.
@@ -562,12 +562,12 @@
 - notebook: NB-20261015-04
 
 ## SI-81 · active · process
-- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2, and each such decision is listed with the results (clause confirmed by the user, 2026-10-16). (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script (user, 2026-10-16).
-- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15); "Keep, add to ledger (Recommended)" and "Promise only (Recommended)" (user, ask_user answers on (b) and (c), 2026-10-16)
+- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2, and each such decision is listed with the results (clause confirmed by the user, 2026-10-16). (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script (user, 2026-10-16). No default outcome is registered for (a) and (b); PREREG names the case-by-case decision as a limitation (user, 2026-10-16).
+- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15); "Keep, add to ledger (Recommended)" and "Promise only (Recommended)" (user, ask_user answers on (b) and (c), 2026-10-16); "Keep case by case" (user, ask_user answer to "Should a Sinkhorn fit that hits the iteration cap, or a fit hitting the zero-NMI case, count as a failed fit and collapse by default?", 2026-10-16)
 - added: 2026-10-15
 - keywords: NMI-0, NMI, iteration cap, no-pair, unreached, reporting script
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
-- notebook: NB-20261015-05, NB-20261016-11, NB-20261016-12
+- notebook: NB-20261015-05, NB-20261016-11, NB-20261016-12, NB-20261016-15
 
 ## SI-82 · active · method
 - rule: PAPER_PLAN's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau) are all reported, labelled not pre-registered, and used for no conclusion (exploratory).
@@ -578,12 +578,12 @@
 - notebook: NB-20261015-06
 
 ## SI-83 · active · method
-- rule: A dataset whose leave-one-seed-out standard error is below 0.000001 is kept in the combined analysis with its standard error raised to 0.000001, instead of being left out as not evaluable (zero_spread); the same applies to the paired-datasets sensitivity analysis; each dataset raised this way is listed in the report.
-- source: "Keep it; raise its standard error to the cut-off 0.000001 (Recommended)" (user, ask_user answer to "What should happen to a dataset whose run-to-run uncertainty comes out as exactly zero?", 2026-10-15); earlier in the same round: "If we have a 'certain' dataset, why would we drop it as it is performing well and this would bias the results towards the uncertain datasets" (user, 2026-10-15)
+- rule: A dataset whose leave-one-seed-out standard error is below 0.000001 is kept in the combined analysis with its standard error raised to 0.000001, instead of being left out as not evaluable (zero_spread); the same applies to the paired-datasets sensitivity analysis; each dataset raised this way is listed in the report. The number of datasets whose standard error was raised is reported next to each pooled declaration (user, 2026-10-16).
+- source: "Keep it; raise its standard error to the cut-off 0.000001 (Recommended)" (user, ask_user answer to "What should happen to a dataset whose run-to-run uncertainty comes out as exactly zero?", 2026-10-15); earlier in the same round: "If we have a 'certain' dataset, why would we drop it as it is performing well and this would bias the results towards the uncertain datasets" (user, 2026-10-15); "Report the count (Recommended)" (user, ask_user answer to "Should each pooled declaration report how many datasets had their zero standard error raised to 1e-6 (SI-83)?", 2026-10-16)
 - added: 2026-10-15
 - keywords: zero_spread, zero spread, standard error, floor, S_MIN, cut-off
 - files: scripts/analysis_x1.py, docs/ANALYSIS_SPEC.md
-- notebook: NB-20261015-16
+- notebook: NB-20261015-16, NB-20261016-17
 
 ## SI-84 · active · method
 - rule: Approved: the log-spaced 201-point grid for the between-dataset spreads (AN-01), the solve-based formula for the overall difference, recomputing b0, b_common, b* and the low-signal flag from the same rows and stopping on a mismatch (AN-03), t-based sign-table limits (AN-06), and the per-run sensitivity limited to P1 and the local-versus-global test (AN-05); the specification states where the grid is accurate and that the sign-table limits are approximate.
