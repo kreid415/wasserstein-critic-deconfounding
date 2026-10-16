@@ -562,12 +562,12 @@
 - notebook: NB-20261015-04
 
 ## SI-81 · active · process
-- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2. (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs.
-- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15)
+- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2, and each such decision is listed with the results (clause confirmed by the user, 2026-10-16). (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script (user, 2026-10-16).
+- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15); "Keep, add to ledger (Recommended)" and "Promise only (Recommended)" (user, ask_user answers on (b) and (c), 2026-10-16)
 - added: 2026-10-15
 - keywords: NMI-0, NMI, iteration cap, no-pair, unreached, reporting script
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
-- notebook: NB-20261015-05
+- notebook: NB-20261015-05, NB-20261016-11, NB-20261016-12
 
 ## SI-82 · active · method
 - rule: PAPER_PLAN's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau) are all reported, labelled not pre-registered, and used for no conclusion (exploratory).
@@ -594,12 +594,12 @@
 - notebook: NB-20261015-17
 
 ## SI-85 · active · process
-- rule: The stage runner refuses a Sinkhorn divergence record that carries no git commit or was made from a checkout with uncommitted changes, as it refuses such results (code re-check CF-R03, rule A; runner-made nonfinite_latent records stay accepted); one test covers the refusals for records and results together.
-- source: "Refuse them, as for results (Recommended)" (user, ask_user answer to "Should the stage runner refuse a Sinkhorn 'divergence record' that lacks the code version, or that was made from code with uncommitted changes?", 2026-10-15)
+- rule: The stage runner refuses a divergence record of any arm (user, 2026-10-16) that carries no git commit or was made from a checkout with uncommitted changes, as it refuses such results (code re-check CF-R03, rule A; runner-made nonfinite_latent records stay accepted); one test covers the refusals for records and results together.
+- source: "Refuse them, as for results (Recommended)" (user, ask_user answer to "Should the stage runner refuse a Sinkhorn 'divergence record' that lacks the code version, or that was made from code with uncommitted changes?", 2026-10-15); "Every arm (Recommended)" (user, ask_user answer to "Should the stage runner refuse a divergence record (the file saying a fit failed) with no code version for every arm, or only for Sinkhorn?", 2026-10-16)
 - added: 2026-10-15
 - keywords: divergence record, git_sha, git_dirty, uncommitted, run_stage
 - files: scripts/run_stage.py, tests/stage/test_run_stage.py, tests/stage/fake_env.py
-- notebook: NB-20261015-18
+- notebook: NB-20261015-18, NB-20261016-09
 
 ## SI-86 · active · method
 - rule: prereg_rules.power_report restarts its root search at 0.01 when the search from 1.0 fails; every result that works today stays bit-identical; applied before the tag (documents re-check DOC-R12).
@@ -624,3 +624,11 @@
 - keywords: examined, displayed, shown to the agent, identity check, audit, SI-78
 - files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
 - notebook: NB-20261015-25
+
+## SI-89 · active · process
+- rule: The stage runner refuses a latent that names no git commit (no git_sha in its config), as it refuses a divergence record without one.
+- source: "Refuse it (Recommended)" (user, ask_user answer to "Should the stage runner also refuse a latent (a fitted embedding) that names no git commit?", 2026-10-16)
+- added: 2026-10-16
+- keywords: latent, git_sha, run_stage, provenance
+- files: scripts/run_stage.py, tests/stage/test_run_stage.py
+- notebook: NB-20261016-10

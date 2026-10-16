@@ -382,8 +382,8 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   The rule scripts see scores only, so prereg_rules refuses only a Sinkhorn score row made at c88cce3. The commit of a
   divergence record is checked by the stage runner's start-up check (the run_stage preflight) only: it reads the
   commit of every latent and of every divergence record, refuses the stage in report-only runs too, and, by the user's
-  decision SI-85 of 2026-10-15, also refuses a divergence record that carries no commit or was made from a checkout
-  with uncommitted changes (a nonfinite_latent record that the runner writes itself stays accepted). Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
+  decision SI-85 of 2026-10-15, also refuses a divergence record of any arm (user, 2026-10-16) that carries no commit or was made from a checkout
+  with uncommitted changes (a nonfinite_latent record that the runner writes itself stays accepted), and, by SI-89 (2026-10-16), a latent that names no commit. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
   a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
   (lesson RR-01).
 - **2026-10-13, Sinkhorn arm corrected; its pilot fits will be redone in rule order before X1 (final review findings

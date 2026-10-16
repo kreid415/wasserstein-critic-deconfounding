@@ -93,7 +93,7 @@ SI-78). (Q1's options and reasons: Appendix A.1.)
   whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); only the two arms of the P1 contrast, the
   reference and the discriminator, can do this. The number of such cells for each arm, next to that arm's best batch score M in
   the R4 record, and the no-pair training-step counts (CF-06) are tabulated by a reporting script written after the runs, not by
-  `scripts/analysis_x1.py` (user decision SI-81 (c), 2026-10-15; re-check finding AN-R15). The analysis record keeps each cell's
+  `scripts/analysis_x1.py` (user decision SI-81 (c), 2026-10-15; re-check finding AN-R15); the tag freezes this promise, not the script (user, 2026-10-16). The analysis record keeps each cell's
   reading status for the two arms (`p1.status`: `bracketed`, `unreached_low`, `unreached_high` or `no_points`) and the R4 record keeps M
   (`targets.<cell>.M`, all six arms), so the script only counts and pairs them and changes no result.
 - Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large (`prereg_rules.REAL_TASKS`), in 4 families
