@@ -1,0 +1,866 @@
+{
+ "35f15d5f-52a7-4675-a7bd-23adccc80955": {
+  "frame_id": "35f15d5f-52a7-4675-a7bd-23adccc80955",
+  "agent_name": "RUNNER_ENGINEER",
+  "name": "Code fixes",
+  "wall_s": 5654,
+  "status": "completed",
+  "structured_output": {
+   "items": [
+    {
+     "id": "CF-01",
+     "verified": true,
+     "action": "fixed",
+     "commits": [
+      "d169bf8"
+     ],
+     "checked": "Read the code at 973a97d: the mmd_ref wrapper (scripts/scvi_adversarial_plan.py:231), the plain call (:369), the importance-weighted call (:371), the record threshold (scripts/fit_paper_config.py:504-506) and the single existing check (tests/scvi/test_baseline_guard.py:248-252); all as the finding says. Ran the reviewer's three planted bugs (R01a: the importance-weighted call stops passing the counter; R01b: the mmd_ref wrapper stops forwarding it; R01c: the record is written only for a count above 1) on 973a97d: 3 of 3 survived (98 passed, 16 skipped each).",
+     "evidence": "The existing one-batch fit in test_resolved_plan_known_answers now runs for mmd, mmd_ref, sinkhorn and importance-weighted mmd, and each case also checks a count of exactly 1 (no new test function; the name stays because the lead's mutants.tsv names it). Same planted bugs on the final commit: 3 of 3 killed; two extra bugs of mine (C01d plain call = the lead's G01_plan_no_stats, C01e sinkhorn) killed; lead's mutate.sh 11 of 11 killed. Report section 3.1; logs/mut_cf01_before.json, final_mut_R01.json, final_mut_cf.json."
+    },
+    {
+     "id": "CF-02",
+     "verified": true,
+     "action": "fixed",
+     "commits": [
+      "b757932"
+     ],
+     "checked": "Read scripts/run_stage.py at 973a97d: the start-up check collects the commits of existing latents and scores only (lines 659-663); the final one-commit check reads the ledger's git_sha column, filled from the latent only (lines 1135, 1166-1167). The real fitter writes git_sha into its divergence record (record_divergence passes provenance(), scripts/fit_paper_config.py:264-272 and 514-521). Reproduced the gap with the reviewer's probe at 973a97d: rerun exit 0 with '[gate] PASS: 2/2 final', in a normal and a --report-only run.",
+     "evidence": "scripts/run_stage.py, 9 lines added and 3 removed in three places: the start-up check also passes the record's commit to the SI-54 refusal; the ledger git_sha falls back to the record's commit (read by the final check and summary['latent_git_shas']); one docstring sentence. Tests: a third case 'status' of test_sinkhorn_output_at_the_pre_fix_commit_is_refused, and a diverged non-Sinkhorn row in test_si54_old_commit_counts_as_the_tag_in_the_gate. The reviewer's probe on the final commit: exit 4 with the SI-54 refusal (normal and --report-only). Planted bugs C02a, C02b, C02c killed; control C02d (equivalent change) survives as intended. Reviewer's probes/import_closure.py REPO c3fd92d HEAD: in the fit closure only scripts/run_stage.py changed; scorer, cluster helpers and src/: none; no Python file imports run_stage.py; the identity proof ran fit_paper_config.py and score_scib_native.py directly (fit_identity.sh:18, score_identity.sh:17), so it stands. Report section 3.2 and appendix A; logs/final_import_closure.txt, si54_status_gap_before_after.txt."
+    },
+    {
+     "id": "CF-03",
+     "verified": true,
+     "action": "partly_fixed",
+     "commits": [
+      "f969a11"
+     ],
+     "checked": "Read scripts/fit_paper_config.py:55-62 and tests/scvi/test_runner_and_manifest_missing_arms.py:53-84 at 973a97d: the keys of EXTRA_ARMS were pinned, but the loop ran over the table's own arms, so deleting an arm failed nothing. Reproduced with planted bugs at 973a97d: 3 of 3 arm removals survived.",
+     "evidence": "The existing assertion now compares the whole EXTRA_ARMS table with the 11 head-training arms written out as literal sets (no new test; fit_paper_config.py untouched). Removal bugs R05c (reference no longer accepts adv_width/adv_lr), C03b (barycenter_sn, bary_warm_iter), C03c (reference, sampler): survived before, killed after; an added-arm bug (C03d) was killed before and after. Not done, as instructed: the README row count (documents track). Report section 3.3."
+    },
+    {
+     "id": "CF-05",
+     "verified": true,
+     "action": "partly_fixed",
+     "commits": [
+      "5244cf7"
+     ],
+     "checked": "Ran git 2.43.0 bundle experiments (cf05_bundle_test.sh): a clone takes only the branches and tags that the bundle lists, and a tag resolves only if the bundle lists it. With the repository's prereg_rules.equivalent_commits (cf05_tag_resolution.py): tag absent leaves c88cce3 and the tag as two commits, present makes them one; a Sinkhorn row at c88cce3 is refused in both cases. Both comments are inaccurate as the reviewer says.",
+     "evidence": "Comment-only changes: cluster/jhpce/local_rehearsal.sh (4 comment lines added, one corrected) and cluster/jhpce/prod_fit_job.sh (line 26 reworded). Both scripts are identical to their 973a97d versions once comments are removed; bash -n passes. Not done (not assigned): the tag in the X1 bundle command (experiments/X1_jhpce/x1_jhpce_command.py:83-85, known item G-17) and the raw comparison latent_git_shas_match_head (cluster/jhpce/prod_helpers.py:365). Report section 3.4; logs/cf05_bundle_refs.txt, cf05_tag_resolution.txt."
+    },
+    {
+     "id": "CF-08",
+     "verified": true,
+     "action": "fixed",
+     "commits": [
+      "1e2bbe1"
+     ],
+     "checked": "Read src/wcd_vae/wcd/alignment.py:224-225 and 249-257: sinkhorn_batch_others passes no max_iter, so the function's default is in force, while the test read only the constant. Ran the function at scale 1e30 (error inf) and scale 1 (error 0.0637, also 'after 1 iterations'): the old pattern matches both. Planted bugs R21c (default becomes 50,000, constant stays 500,000) and C08b (huge-latent row fed an ordinary latent) both survived at 973a97d.",
+     "evidence": "In test_sinkhorn_matches_converged_reference an added assertion that inspect.signature(sinkhorn_divergence_weighted).parameters['max_iter'].default equals alignment.SINKHORN_MAX_ITER; the huge-latent row now matches 'marginal error inf .* after 1 iterations'. Both planted bugs killed on the final commit; with fl_mutation_check the old pattern accepts the ordinary-latent message (vacuous), the new one rejects it. test_divergences_v2: 25 passed before and after. Report section 3.5; logs/cf08_messages.json."
+    },
+    {
+     "id": "CF-10",
+     "verified": true,
+     "action": "partly_fixed",
+     "commits": [
+      "324eb83"
+     ],
+     "checked": "ruff 0.14.0 (rules F, E9) at 973a97d: 28 findings tree-wide; the four in changed files are three in scripts/fit_paper_config.py (lines 24, 286, 287; left unchanged as instructed, the identity proof depends on it) and one in tests/test_legacy_retired.py. Recorded the lint tool: fl_lint of the fail-loud-pipelines skill, version 1.0, 26 rules. Reproduced the review's 10 src-tier check_tests warnings with --base 6b4aefc on the final commit (identical test list); with --base 973a97d there are none.",
+     "evidence": "Removed the unused 'import shutil' from tests/test_legacy_retired.py. ruff tree-wide 28 -> 27; the reviewer's four findings (in two files) 4 -> 3. fl_lint on the 8 changed files: 0 findings, 2 suppressions (as at 973a97d). Not done: the 22 other unused-import findings outside the fit closure; a copy of fl_lint is not committed (lead's decision); the reviewer's single combined check_tests run (scvi-tools exists only in scvi-api, scib only in wcd-gpu). Report section 3.6; logs/final_ruff_*.txt, fl_lint_final.json, final_ct_*_base6b4aefc.log."
+    }
+   ],
+   "patches_artifact_version_id": "7710df50-9b51-47f3-9733-1b3fba00d649",
+   "report_artifact_version_id": "fa1b46f9-cff0-48d8-a6d5-df83ce0e1e14",
+   "gates": "Final commit 324eb83 (branch cf-fixes on 973a97d; CPU only, one thread). check_tests.py --base 973a97d: scripts tier (tests/scvi tests/jhpce tests/prereg tests/stage tests/test_legacy_retired.py) exit 0, 359 passed, 18 skipped, 0 WARN, 0 FAIL, 'check_tests: OK'; src tier (tests/wcd_vae, env wcd-gpu) exit 0, 172 passed, 0 WARN, OK. With the reviewer's base 6b4aefc: scripts tier 418 passed, 18 skipped, 0 WARN, OK; src tier 172 passed with the review's 10 warnings (identical list; tool artefact, tool unchanged). tests/stage 66 passed, 1 skipped (973a97d: 65, 1); tests/scvi 98 passed, 16 skipped (unchanged); tests/scvi with the prepared data folder, read only: 113 passed, 1 skipped; tests/wcd_vae/test_divergences_v2.py 25 passed (unchanged); tests/test_legacy_retired.py + tests/jhpce + tests/prereg 195 passed, 1 skipped. Planted bugs: 14 of 15 killed (the survivor is the control C02d); the lead's mutate.sh 11 of 11 killed. ruff F,E9 clean on the 6 changed .py files (tree-wide 28 -> 27); fl_lint 0 findings on the 8 changed files; bash -n and py_compile pass. Import closure c3fd92d..HEAD: only scripts/run_stage.py changed in the fit closure; scorer and cluster helpers none. The saved patches, applied with git am to 973a97d, give tree e0cfe884369d, identical to the branch (commit ids differ).",
+   "open_questions": [
+    "Should a divergence record without a git_sha be refused at start-up instead of skipped? The real fitter always writes it; only the test stand-in does not; refusing is stricter than the reviewer asked and would also apply to latents without one.",
+    "docs/PREREG.md (SI-54 paragraph, line 258 at 973a97d) says run_stage.py reads scorer_git_sha and the latents' git_sha; the documents track should add divergence records. The ledger's git_sha column now also takes the record's commit, so summary['latent_git_shas'] can list it.",
+    "Remove the other 22 unused-import/variable findings outside the fit closure (15 files: other scripts, three test files, legacy/, handoff/, experiments/) in a separate commit? Tree-wide ruff has 27 findings in 18 files; 5 of them are in scripts/fit_paper_config.py or src/ and stay as they are. Commit a copy, or the version and rule list, of fl_lint (version 1.0, 26 rules)?",
+    "Parts with other owners: CF-05 (tag in the X1 bundle command, experiments/X1_jhpce/x1_jhpce_command.py:83-85 / G-17; latent_git_shas_match_head compares raw commits, cluster/jhpce/prod_helpers.py:365) and the CF-03 README row count (1,908 occurrences versus 382 distinct rows).",
+    "Which base should the final record of check_tests.py use? --base 973a97d (or each tier on its own tests) is clean; --base 6b4aefc prints the review's 10 tier-artefact warnings in the src tier alone."
+   ]
+  },
+  "deviations": [
+   "The ponytail skill that the user's rules ask to load is not in this agent's skill catalogue (search_skills prefix empty); I applied the fewest-tests rule through check_tests.py and kept every change to the smallest set of lines.",
+   "Assigned parts only: CF-03 without the README count; CF-05 only the two comments; CF-10 only one unused import removed (tests/test_legacy_retired.py; 1 of 28 tree-wide findings), the 3 in scripts/fit_paper_config.py left by instruction, 22 others in 15 other files left, fl_lint not committed.",
+   "Data-dependent tests ran only for tests/scvi (113 passed, 1 skipped, prepared data folder read-only); the opt-in end-to-end stage test (real fitter, scorer, R) was not run; the identity proof was not repeated (argued from the import closure); no GPU and no cluster run.",
+   "Extra runs and shortcuts: src-tier check_tests run although no src line changed; the lead's mutate.sh ran in a clone of the final commit, not a worktree; an earlier gate round on the pre-tidy commit 906f0cc is superseded by reruns on 324eb83 and not reported.",
+   "No notebook entries were written (task rule); decisions the lead may log are listed in report section 6."
+  ],
+  "artifacts_created": [
+   {
+    "artifact_id": "53357bee-6981-4dc1-92e9-83581d73c43e",
+    "version_id": "7710df50-9b51-47f3-9733-1b3fba00d649",
+    "filename": "cf_patches.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 8690
+   },
+   {
+    "artifact_id": "6686473a-ee36-4cdf-9a8c-019a8944ab4d",
+    "version_id": "9d1abecf-583a-47fe-8c4a-3c21fd0f64a7",
+    "filename": "build_cf_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 21724
+   },
+   {
+    "artifact_id": "88c16c1a-ec5b-4b40-a808-cd523be8eb54",
+    "version_id": "d815fc62-a260-4b36-b0bf-eb1e3df38e18",
+    "filename": "code_findings.json",
+    "content_type": "application/json",
+    "size_bytes": 10535
+   },
+   {
+    "artifact_id": "62150dd4-db34-4746-a8fb-09c0ef046973",
+    "version_id": "181f241a-eb90-48be-b994-767df98ab0e0",
+    "filename": "reference_adv_rows_output.txt",
+    "content_type": "text/plain",
+    "size_bytes": 124
+   },
+   {
+    "artifact_id": "3698944c-7760-403b-8643-3bdf40e4d40f",
+    "version_id": "6f80df5b-1b0b-4689-8e9e-4454e55226b6",
+    "filename": "cf08_messages.json",
+    "content_type": "application/json",
+    "size_bytes": 202
+   },
+   {
+    "artifact_id": "1c27fc5c-c6fb-421f-96dc-bccf51223c43",
+    "version_id": "331b2f50-a007-4f54-bacb-6c7e3fe59ac7",
+    "filename": "fit_paper_config.py",
+    "content_type": "text/x-python",
+    "size_bytes": 33591
+   },
+   {
+    "artifact_id": "92d89c18-1e68-4755-95d4-3a25ca8a70f4",
+    "version_id": "f37fed1d-c7f9-4d1e-9304-4b7d051b35c8",
+    "filename": "mut_cf01_before.json",
+    "content_type": "application/json",
+    "size_bytes": 670
+   },
+   {
+    "artifact_id": "4d76f491-7462-49f1-915e-abc46d2b0bba",
+    "version_id": "0499f13e-3068-4157-88c4-cd698e428fb7",
+    "filename": "mut_cf0308_before.json",
+    "content_type": "application/json",
+    "size_bytes": 1355
+   },
+   {
+    "artifact_id": "90e8b5ec-518d-4d8d-8b22-a143c05dbc41",
+    "version_id": "51c2238c-51bb-404b-8567-02aa61bd5523",
+    "filename": "final_mut_R01.json",
+    "content_type": "application/json",
+    "size_bytes": 904
+   },
+   {
+    "artifact_id": "1239f328-b20f-47bb-a6f5-fd27ca8ab2e4",
+    "version_id": "f35748f9-eb1b-47fc-9abf-317d79010150",
+    "filename": "final_mut_cf.json",
+    "content_type": "application/json",
+    "size_bytes": 3790
+   },
+   {
+    "artifact_id": "071bb5df-5d34-4f2c-a368-87736f966ca5",
+    "version_id": "58592b34-c45c-41de-8b44-97a019611536",
+    "filename": "final_lead_mutants.tsv",
+    "content_type": "text/tab-separated-values",
+    "size_bytes": 550
+   },
+   {
+    "artifact_id": "30fc124b-93c5-4145-b10a-97bb7d66fe45",
+    "version_id": "70390868-75d2-4935-bb5e-b27477ba5ed7",
+    "filename": "si54_status_gap_before_after.txt",
+    "content_type": "text/plain",
+    "size_bytes": 982
+   },
+   {
+    "artifact_id": "da296605-2356-42f1-80ad-3448736a05c2",
+    "version_id": "346a03c2-5590-4c88-857d-0617409c4cc6",
+    "filename": "final_import_closure.txt",
+    "content_type": "text/plain",
+    "size_bytes": 3070
+   },
+   {
+    "artifact_id": "44b3a689-4d56-4d30-9572-ed286b36ee6a",
+    "version_id": "4c80a9fc-fdf5-4066-ab3c-f85b1c55a877",
+    "filename": "cov_version.txt",
+    "content_type": "text/plain",
+    "size_bytes": 125
+   },
+   {
+    "artifact_id": "104b38be-bff2-4e1c-8638-72133c2d0b0d",
+    "version_id": "0cd008d5-20a7-4e6d-b69f-50c6cff467b5",
+    "filename": "final_closure_evidence.txt",
+    "content_type": "text/plain",
+    "size_bytes": 1921
+   },
+   {
+    "artifact_id": "92ae4cc7-b8bf-40df-8e5e-d30f9879ccd9",
+    "version_id": "7bca30de-36d9-4cb0-8c8f-4f1ee2825162",
+    "filename": "final_run_stage_c3fd92d_vs_973a97d.txt",
+    "content_type": "text/plain",
+    "size_bytes": 133
+   },
+   {
+    "artifact_id": "1c7ea2d0-cc51-46fc-bb1f-35c9b46e6448",
+    "version_id": "f2f8518a-0f62-42ad-ab47-ffa6cab3278a",
+    "filename": "final_no_importers.txt",
+    "content_type": "text/plain",
+    "size_bytes": 111
+   },
+   {
+    "artifact_id": "5e07f76d-334a-405c-b300-558f1a96e405",
+    "version_id": "df0e7906-edb0-49e3-929b-0e3063e15ba6",
+    "filename": "cf05_bundle_refs.txt",
+    "content_type": "text/plain",
+    "size_bytes": 745
+   },
+   {
+    "artifact_id": "c82cd906-0569-46dd-aa72-3a0cd55c0045",
+    "version_id": "714496cc-e205-43a5-a5d7-ca977cfe26a3",
+    "filename": "final_1e615eb_vs_973a97d.txt",
+    "content_type": "text/plain",
+    "size_bytes": 135
+   },
+   {
+    "artifact_id": "636b4427-b7fc-4dae-aad2-df59e5aa09d1",
+    "version_id": "629d8b1e-858b-4b0e-acbb-5bf4e76dd819",
+    "filename": "ruff_version.txt",
+    "content_type": "text/plain",
+    "size_bytes": 12
+   },
+   {
+    "artifact_id": "7502bb3d-9215-471b-b61c-87cb210c361f",
+    "version_id": "c5d64925-c698-4e51-84f3-5f78e1013d30",
+    "filename": "ruff_FE9_973a97d_tree.txt",
+    "content_type": "text/plain",
+    "size_bytes": 2309
+   },
+   {
+    "artifact_id": "a3430f62-f54a-4bba-bb51-afd0e9122f75",
+    "version_id": "173af785-c11c-4160-ac37-0cf9ed3dad4c",
+    "filename": "final_ruff_FE9_tree.txt",
+    "content_type": "text/plain",
+    "size_bytes": 2237
+   },
+   {
+    "artifact_id": "9fd5d9e2-aa57-45af-ab68-e2bb0e2c2445",
+    "version_id": "057f1ce7-face-4449-b0a7-18f1de7b30e1",
+    "filename": "final_ruff_four_files.txt",
+    "content_type": "text/plain",
+    "size_bytes": 575
+   },
+   {
+    "artifact_id": "eb0386df-e948-4098-9317-12cffad6dc0c",
+    "version_id": "e9c9854b-eb1c-4fe9-bdfd-fb2912733798",
+    "filename": "final_ruff_changed_py.txt",
+    "content_type": "text/plain",
+    "size_bytes": 250
+   },
+   {
+    "artifact_id": "b3011109-3fab-4fff-8e31-da844bf019ce",
+    "version_id": "24ca1a9d-33b1-42b3-b58e-a86d468a2eda",
+    "filename": "final_syntax.txt",
+    "content_type": "text/plain",
+    "size_bytes": 372
+   },
+   {
+    "artifact_id": "a866649e-580b-43e0-8058-474c0b6bbb38",
+    "version_id": "b9cfd8fc-50ab-421d-a46d-a7ed5a8c0800",
+    "filename": "fl_lint_final.json",
+    "content_type": "application/json",
+    "size_bytes": 605
+   },
+   {
+    "artifact_id": "cab47498-d10c-4533-8cf9-dc948f610bb1",
+    "version_id": "36400e31-9f52-4d8e-b972-3b66ce9a9071",
+    "filename": "final_ct_src_warnings_vs_review.txt",
+    "content_type": "text/plain",
+    "size_bytes": 847
+   },
+   {
+    "artifact_id": "20ed63dd-5beb-408f-9d0e-c3c3d3e1c0e7",
+    "version_id": "f83cbb7b-1b0e-477c-a10e-67f5d392d9b2",
+    "filename": "cf_mutate.py",
+    "content_type": "text/x-python",
+    "size_bytes": 6413
+   },
+   {
+    "artifact_id": "18f6b736-9a57-4a88-af9c-8f6b6594aeb8",
+    "version_id": "e829fa1d-8c34-4b31-b751-a38f1fa48e79",
+    "filename": "cf05_bundle_test.sh",
+    "content_type": "text/x-sh",
+    "size_bytes": 1552
+   },
+   {
+    "artifact_id": "5a2cb37c-04d2-4ece-a784-7feccf72b647",
+    "version_id": "6daa841a-9c2b-4f71-8eb0-c303d7ed4e30",
+    "filename": "cf05_tag_resolution.py",
+    "content_type": "text/x-python",
+    "size_bytes": 1410
+   },
+   {
+    "artifact_id": "1cb1a57b-1a3f-4935-9855-73e344418161",
+    "version_id": "d7606e8a-fc4c-482e-8b8f-6abeef284812",
+    "filename": "cf_evidence.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 44342
+   },
+   {
+    "artifact_id": "88937ad8-82e1-4994-87ba-4b00ee7acebc",
+    "version_id": "7ad0ec63-5132-402a-8ccc-b095fa76abc3",
+    "filename": "assemble_evidence.py",
+    "content_type": "text/x-python",
+    "size_bytes": 1233
+   },
+   {
+    "artifact_id": "243273b7-1187-4970-9311-4e01a2561d05",
+    "version_id": "64474c17-b40c-4a2a-a8b5-4cf109b2f410",
+    "filename": "report_template.md",
+    "content_type": "text/markdown",
+    "size_bytes": 31044
+   },
+   {
+    "artifact_id": "2ad8f9bc-f946-4125-80bb-393b5912395d",
+    "version_id": "94a73123-eecb-41a3-8881-8b1fa46d12c5",
+    "filename": "CF_FIXES_REPORT.md",
+    "content_type": "text/markdown",
+    "size_bytes": 42086
+   },
+   {
+    "artifact_id": "250fd677-9b84-437b-87ff-88d2e53e182c",
+    "version_id": "628fffec-a405-4f55-b579-52538e2d8552",
+    "filename": "CF_FIXES_REPORT.receipt.txt",
+    "content_type": "text/plain",
+    "size_bytes": 4485
+   },
+   {
+    "artifact_id": "1cb1a57b-1a3f-4935-9855-73e344418161",
+    "version_id": "5a10b655-d89e-4f42-b4da-5c706e6c7753",
+    "filename": "cf_evidence.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 44337
+   },
+   {
+    "artifact_id": "6686473a-ee36-4cdf-9a8c-019a8944ab4d",
+    "version_id": "d6502034-e7ae-4764-9b45-8899710cf85e",
+    "filename": "build_cf_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 21731
+   },
+   {
+    "artifact_id": "243273b7-1187-4970-9311-4e01a2561d05",
+    "version_id": "fc3642d1-7d95-46ad-b386-f90597c6cbf3",
+    "filename": "report_template.md",
+    "content_type": "text/markdown",
+    "size_bytes": 31050
+   },
+   {
+    "artifact_id": "2ad8f9bc-f946-4125-80bb-393b5912395d",
+    "version_id": "fa1b46f9-cff0-48d8-a6d5-df83ce0e1e14",
+    "filename": "CF_FIXES_REPORT.md",
+    "content_type": "text/markdown",
+    "size_bytes": 42092
+   },
+   {
+    "artifact_id": "250fd677-9b84-437b-87ff-88d2e53e182c",
+    "version_id": "9b23eccd-1832-408c-898a-b6dbec7b4abd",
+    "filename": "CF_FIXES_REPORT.receipt.txt",
+    "content_type": "text/plain",
+    "size_bytes": 4485
+   }
+  ],
+  "versions_omitted": 4,
+  "_completion_bullets": [
+   "Fixed CF-01, CF-02, CF-08; partly fixed CF-03, CF-05, CF-10 as assigned (6 commits)",
+   "Closed the SI-54 gap for divergence records; identity proof argued to stand",
+   "Ran all gates on the final commit (check_tests exit 0, no warnings)",
+   "Saved patches, report and evidence archive"
+  ]
+ },
+ "e9b32baf-712b-458c-83b5-9f4f7cc35bff": {
+  "frame_id": "e9b32baf-712b-458c-83b5-9f4f7cc35bff",
+  "agent_name": "MANUSCRIPT_WRITER",
+  "name": "Documents",
+  "wall_s": 6203,
+  "status": "completed",
+  "structured_output": {
+   "items": [
+    {
+     "id": "DOC-01",
+     "verified": true,
+     "checked": "NB-20261012-04/-05 (X1 started 12:40 and stopped 16:36: 19 scored, 1 fitted but not scored, 1,097 still to fit); NB-20261014-21 (audit of chat records: by file name 17 adversarial-arm rows on immune, conditioned decoder, seed 0 [discriminator 6, pooled 5, reference 6] and 2 plain rows); NB-20261013-12/-16/-40 (one X1 latent rescored by script, equality only). I opened no X1 file.",
+     "action": "partly_fixed",
+     "commits": [
+      "0ccbb57"
+     ],
+     "evidence": "PREREG section 9: new entry of 2026-10-14 (what ran, what was scored, what the audit covers and cannot show); entry heading now says the analyses 'will be frozen before any X1 adversarial-arm score is examined'; 'examined' defined as a proposal; PAPER_PLAN section 5 points to the entry. Open: the user confirms whether anyone read a value; approves the definition; ANALYSIS_SPEC lines 10-11 and 40 (lead)."
+    },
+    {
+     "id": "DOC-02",
+     "verified": true,
+     "checked": "SI-57 text; counts from the manifests: 180 A1 + 18 R1-extension + 36 A3 = 234 Sinkhorn fits before the fix.",
+     "action": "fixed",
+     "commits": [
+      "03a01b2"
+     ],
+     "evidence": "PREREG Sinkhorn entry: the redo in rule order (SI-57) with 'will be'; the 18, 36 and 234 are the pre-fix counts and may change."
+    },
+    {
+     "id": "DOC-03",
+     "verified": true,
+     "checked": "tag prereg-tier12-v2 resolves to c88cce3; decision times of SI-51 to SI-77 from notebook/INDEX.md; commit times from git log; R4-a1 record committed 2026-10-10 (dae54b0), R2/R3 record 2026-10-12 (cea50ca); A2/A3 runner ended 2026-10-11.",
+     "action": "fixed",
+     "commits": [
+      "02a45fc"
+     ],
+     "evidence": "PREREG line 3 (status of version 2 and version 3), line 5 (file list adds ANALYSIS_SPEC.md, analysis_x1.py, tests/analysis, EQUIVALENT_COMMITS.json), section 9 lead-in, and an 8-row table: decided, committed, data that existed, result changed."
+    },
+    {
+     "id": "DOC-04",
+     "verified": true,
+     "checked": "SI-56, SI-66, NB-20261014-14/-15, f3c3415; R4-a1 record flags immune|1 (b0 0.6382, b_common 0.6570, gap 0.0188) and sim1|1 (0.8120, 0.8189, 0.0069); re-ran prereg_rules.decide_binary on the stored R2/R3 cells with the SI-66 marking (the unmarked run reproduces the record): R2 12/12 (-0.0014) -> 9/12 (-0.0042); R3 17/20 (+0.0010) -> 13/20 (-0.0014, 14 needed); both keep their defaults.",
+     "action": "partly_fixed",
+     "commits": [
+      "3e2e92f"
+     ],
+     "evidence": "PREREG entry on low-signal blocks (decided 2026-10-13, implemented 2026-10-14; both flagged blocks; the record predates the rule; 'exist' instead of 'still fitted'). Open: keep the Sinkhorn A3 refits and the R2/R3 re-run (user); ANALYSIS_SPEC section 2.5 (lead)."
+    },
+    {
+     "id": "DOC-05",
+     "verified": true,
+     "checked": "scripts/analysis_x1.py:479-482 (six primary results); prereg_rules N_ENDPOINTS = 4 (record stores 0.0125); smallest exact two-sided Wilcoxon p for 6 tasks = 0.03125.",
+     "action": "fixed",
+     "commits": [
+      "78bde1a"
+     ],
+     "evidence": "PREREG section 5 (bracketed amendment), entry (d) and PAPER_PLAN section 5: first threshold 0.05/6 = 0.0083 in the frozen analysis and 0.0125 in the stored record; the companion cannot reject at the Holm-adjusted level in either version."
+    },
+    {
+     "id": "DOC-06",
+     "verified": true,
+     "checked": "docs/prereg/r1_record.json and the trajectory figures (sigma_c with and without trajectory); which figures come from pre-fix Sinkhorn fits.",
+     "action": "partly_fixed",
+     "commits": [
+      "6e051bb"
+     ],
+     "evidence": "PREREG I091 entry: 'the frozen X1 grids stand for every arm except Sinkhorn', Sinkhorn figures labelled pre-fix, proposed names docs/prereg/{r1_record,r4_a1_record,r2r3_record}_sinkhorn_redo.json. Open: names (user); ANALYSIS_SPEC lines 55-56 (lead)."
+    },
+    {
+     "id": "DOC-07",
+     "verified": true,
+     "checked": "reproduced r1_record.json power (sigma 0.0298, tau 0.1094) to 1e-8 with a new script, then dropped the sim1 blocks.",
+     "action": "partly_fixed",
+     "commits": [
+      "fa2d4fb"
+     ],
+     "evidence": "PREREG entry (c) and PAPER_PLAN Power bullet. Six tasks: SE 0.045, minimal detectable effect 0.131, power 0.104; without sim1: SE 0.0236, minimal detectable effect 0.068, power 0.182; equivalence unreachable in all four cases. New files: experiments/final_review_amendments_20261013/power_without_sim1.py and results/power_without_sim1.json. Open: ANALYSIS_SPEC section 2.2 (lead)."
+    },
+    {
+     "id": "DOC-08",
+     "verified": true,
+     "checked": "CONSTRAINTS.md: SI-55 covers the grid edge only; SI-68 to SI-77 are the user's decisions for the X1 analyses; ANALYSIS_SPEC sections 2.3, 5, 8, 9 to 11 and 15 are proposals.",
+     "action": "partly_fixed",
+     "commits": [
+      "96eab10"
+     ],
+     "evidence": "PREREG and PAPER_PLAN: SI-55 narrowed to part (a); only SI-68 to SI-77 called user decisions; Holm over six, the transfer rule and equal k labelled proposals pending the diff review. Open: record the user's approvals as new ledger entries after the diff review; ANALYSIS_SPEC lines 6-9 and 187 (lead)."
+    },
+    {
+     "id": "DOC-09",
+     "verified": true,
+     "checked": "manifest of record (6,930 rows; per-experiment counts; 480 X1 barycenter rows); TASKS in build_paper_manifest.py against docs/prepped_fingerprints_scib.json; CONSTRAINTS SI-02, SI-03, SI-14, SI-18.",
+     "action": "fixed",
+     "commits": [
+      "14be8e7"
+     ],
+     "evidence": "PAPER_PLAN: dated 'superseded' notes at sections 4 and 7; [dropped: SI-02] on five dataset rows; decisions 4 and 5 closed; the pointer's marker count ('seven statements, eight markers') verified by grep; the scaling sensitivities marked as not covered by ANALYSIS_SPEC."
+    },
+    {
+     "id": "DOC-11",
+     "verified": true,
+     "checked": "definitions checked against CONSTRAINTS.md, docs/review_final/REVIEW_FINAL.md, notebook entries, PREREG sections 1 to 5, PAPER_PLAN 3.1 and 3.2, and alignment.py.",
+     "action": "partly_fixed",
+     "commits": [
+      "b3a5e20"
+     ],
+     "evidence": "PREREG section 9: glossary (9 label rows, 26 term rows), each entry heading says what its findings and decisions are, guards entry rewritten as a list, 'penalty-strength family' versus 'dataset family', block versus cell versus single cell; PAPER_PLAN note glossed. ANALYSIS_SPEC not touched (lead)."
+    },
+    {
+     "id": "DOC-12",
+     "verified": true,
+     "checked": "no tag prereg-tier12-v3 (NB-20261014-19); no tracked file or notebook entry for the Sinkhorn redo; the diff review (SI-52) has not happened.",
+     "action": "partly_fixed",
+     "commits": [
+      "e84fad0"
+     ],
+     "evidence": "PREREG: a status line (done with date and commit, or planned) at the start of each 2026-10-13 and 2026-10-14 entry; 'will be' for unfinished steps in PREREG and PAPER_PLAN. Older entries are frozen in version 2 and carry none. ANALYSIS_SPEC lines 10 and 248 (lead)."
+    },
+    {
+     "id": "DOC-14",
+     "verified": true,
+     "checked": "SI-61 and SI-65 text in CONSTRAINTS.md.",
+     "action": "fixed",
+     "commits": [
+      "139369e"
+     ],
+     "evidence": "PREREG: the user decides each NMI-0 case and it is listed with the results; a cap hit stops the stage until the user decides whether it is recorded as a failed fit (counted in P2). Both are labelled proposals."
+    },
+    {
+     "id": "DOC-15",
+     "verified": true,
+     "checked": "fit_identity_c3fd92d.csv flags only (63 rows, 59 of 59 non-Sinkhorn identical, 4 Sinkhorn differ, 0 non-zero exits); NB-20261013-39 (fits), NB-20261013-40 (scores); git diff c3fd92d..973a97d over src/ and the fit and score import closure is empty.",
+     "action": "fixed",
+     "commits": [
+      "8284fda"
+     ],
+     "evidence": "docs/EQUIVALENT_COMMITS.json: evidence list of objects naming the c3fd92d files and notebook entries, plus key valid_for_a_candidate_commit_if; PREREG SI-54 entry. tests/prereg 131 passed, 1 skipped; tests/stage 65 passed, 1 skipped."
+    },
+    {
+     "id": "DOC-19",
+     "verified": true,
+     "checked": "3,076 validation minibatches = 2,808 final + 192 early + 76 training-mode; gradient-norm ratios A1 2.00, A3 2.27, R1 extension 14.4 (cosine 0.28; 204 of 216 finite); denominators of the no-pair shares from the manifest.",
+     "action": "partly_fixed",
+     "commits": [
+      "412413d"
+     ],
+     "evidence": "PREREG and PAPER_PLAN wording. Not recomputed by me (taken from the documents review): the no-pair expectations (25.9 of 27, 14%, 4.5%, 0.6%) and the F7 ratios. NB-20261013-03 says 236 captures; the correct figure is 268 (192 + 76): needs a notebook CORRECTION entry (lead)."
+    },
+    {
+     "id": "CF-03",
+     "verified": true,
+     "checked": "ran lam_audit.py: 1,908 occurrences (1428/240/240) over 8 files; 382 distinct tags (302/40/40); manifest of record 322 (242/40/40); the 60 extra tags are X3 `none` rows of the first manifest, re-tagged under SI-41.",
+     "action": "partly_fixed",
+     "commits": [
+      "2871c5f"
+     ],
+     "evidence": "README row G-05 and the evidence row say what each number counts; lam_audit.py prints the three counts; results/lam_audit.txt regenerated. Not done: pinning the EXTRA_ARMS value sets in tests/scvi (code track)."
+    },
+    {
+     "id": "CF-04",
+     "verified": true,
+     "checked": "ran prereg_rules.equivalent_commits on synthetic commit lists in the patched tree: a whole input at one third commit, Sinkhorn included, is accepted; a Sinkhorn row at c88cce3 raises PreregError; with the tag absent from the checkout an old-commit/other-commit mix stays mixed.",
+     "action": "fixed",
+     "commits": [
+      "12d6f20"
+     ],
+     "evidence": "PREREG SI-54 entry and docs/EQUIVALENT_COMMITS.json `meaning` state both limits; the evidence list names the c3fd92d files."
+    },
+    {
+     "id": "CF-06",
+     "verified": true,
+     "checked": "grep over src, scripts, experiments and cluster outside tests: no_pair appears only in src/wcd_vae/wcd/alignment.py (the counter, stats['no_pair']) and scripts/fit_paper_config.py:504-506 (writes no_pair_steps into the plan record); nothing reads no_pair_steps.",
+     "action": "fixed",
+     "commits": [
+      "7d22d68"
+     ],
+     "evidence": "PREREG: the counts will be tabulated by arm, task and experiment by a short reporting script written after the runs (proposal). The script itself is not written."
+    },
+    {
+     "id": "CF-07",
+     "verified": true,
+     "checked": "prereg_rules.decide_binary on the stored cells with and without the SI-66 marking (see DOC-04).",
+     "action": "fixed",
+     "commits": [
+      "5485b85"
+     ],
+     "evidence": "PREREG: the pilot R2/R3 counts come from the frozen c88cce3 record; the current code reports 9 of 12 and 13 of 20 for the same inputs."
+    }
+   ],
+   "patches_artifact_version_id": "061b61b4-63de-4e63-9990-51241af83104",
+   "report_artifact_version_id": "30dd365f-0a7b-4399-9754-7d9629e237df",
+   "gates": "On the patched tree (HEAD b3a5e20 of the private clone): python -m pytest -q tests/prereg 131 passed, 1 skipped (34.00 s); python -m pytest -q tests/stage 65 passed, 1 skipped (123.76 s). git am of the 18 patches in a fresh clone at 973a97d applies cleanly and gives a tree identical to the private clone (also re-tested from the extracted tarball). Claim gate: 39 text checks and 44 readbacks of committed records pass; receipt saved as DOC_FIXES.receipt.txt; doc_numbers.json regenerated from the patched tree is identical. Reference check on the added lines: 25 commits, 14 notebook entries, 34 ledger entries and 30 paths exist; 4 paths absent by design (three proposed Sinkhorn-redo record names, one notebook file pattern). Prose scan: 8,359 words, 48/50, 6 hard hits, all en dashes in the existing name P1-P4 or empty table cells. Rendering: markdown-it and pandoc 3.12 convert PREREG.md, PAPER_PLAN.md and the README without warnings. The report passed the document build gate (pandoc 3.12, no warnings; source sha256 f160f2eab5ed) and the prose scan (4,646 words, 0 findings); saved copies of all four files are byte-identical to the built files. Standing-instruction output check: 0 violations; scope check: 8 changed files, all in the allowed set, none of the forbidden files touched. Tag prereg-tier12-v3 was not made and nothing was pushed.",
+   "open_questions": [
+    "Did anyone read an X1 adversarial-arm score value? Nineteen early X1 rows were scored on 2026-10-12 and one was rescored in the identity checks; the record audit found no value displayed or analysed but cannot rule out that a score file was opened. PREREG lists this as open; I did not write that nobody read a value.",
+    "Do you approve the definition of 'examined' for an X1 score (a value read by a person or entered into an analysis script; checks that print only counts or flags do not count)? PREREG labels it a proposal until you answer.",
+    "Does decision SI-75 (collapse rates plus a formal critic-versus-discriminator comparison, 5-point margin) stand? Its premise quoted 8 of 45 discriminator runs with the unconditioned decoder; the recount is 8 of 54 (NB-20261014-22), moving one difference from +0.7 to +3.7 points. Both are inside the margin.",
+    "Keep the Sinkhorn A3 refits and the R2/R3 re-run that SI-57 requires? The immune block with the conditioned decoder is flagged low-signal and the Sinkhorn redo cannot clear that flag, so R2 and R3 keep their defaults whatever A2 and A3 show.",
+    "Who decides a case where scib finds normalised mutual information of 0 at every clustering resolution (SI-65), and how is an iteration-cap hit (SI-61) classified? PREREG proposes: you decide each NMI-0 case; a cap hit stops the stage until you decide whether it counts as a failed fit (which P2 counts).",
+    "Do you approve the names of the redone Sinkhorn records: docs/prereg/r1_record_sinkhorn_redo.json, r4_a1_record_sinkhorn_redo.json and r2r3_record_sinkhorn_redo.json? The frozen records stay unchanged.",
+    "Should the scaling sensitivities of PAPER_PLAN section 5 (leave-one-method-out rescaling, z-score aggregation, composite without silhouette metrics, rank stability) be locked in ANALYSIS_SPEC? They have no counterpart there today; PAPER_PLAN marks them as a question for the diff review.",
+    "Do you approve the agent's proposals as new ledger entries before the tag is made: ANALYSIS_SPEC section 2.3 (not-evaluable rule), section 5 (Holm over the six primary results, first threshold 0.05/6 = 0.0083), section 8 (leave-one-dataset-family-out transfer rule), sections 9 to 11 and section 15?"
+   ]
+  },
+  "deviations": [
+   "Edited the existing lam_audit.py (and regenerated results/lam_audit.txt) for CF-03, and added a new script power_without_sim1.py with its results JSON for DOC-07; both are outside the four files the task named.",
+   "Opened no blinded path (X1_local, jhpce_tier12, review_sealed, X1 logs, score_identity files); of fit_identity_c3fd92d.csv I read only the flag columns.",
+   "Did not recompute the numbers taken from the documents review and the notebook (no-pair expectations 25.9 of 27, 14%, 4.5%, 0.6%; F7 ratios; the P2 recount of 8 of 54); they are quoted with their source.",
+   "The ponytail skill is not in my skill catalogue, so I could not load it.",
+   "Parts of findings that sit in ANALYSIS_SPEC.md, CONSTRAINTS.md, the notebook or the tests were left to the lead and the code track (findings marked partly fixed); report sections 5 and 6 give the wording.",
+   "CF-06 is fixed in the text only (the no-pair reporting script is not written); older 2026-10-03 and 2026-10-04 PREREG entries carry no status line because version 2 froze them; DOC-11 glosses of D-09 and I056 are limited to what the entries show."
+  ],
+  "artifacts_created": [
+   {
+    "artifact_id": "c732cb95-d63a-4dfc-b558-00b214208856",
+    "version_id": "061b61b4-63de-4e63-9990-51241af83104",
+    "filename": "doc_patches.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 58421
+   },
+   {
+    "artifact_id": "0595618e-cc08-4578-b0c4-7a872c857862",
+    "version_id": "1cecdc33-dc90-4b50-bb2c-a4748a1a18b3",
+    "filename": "doc_fix_tools.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 61569
+   },
+   {
+    "artifact_id": "5d2795b0-2e6a-496d-bfc0-0a15fa2db484",
+    "version_id": "f67e9680-5df1-452f-bffa-1b7ce5c548da",
+    "filename": "DOC_FIXES_REPORT.md",
+    "content_type": "text/markdown",
+    "size_bytes": 29100
+   },
+   {
+    "artifact_id": "aa2e753f-d28e-4d9b-96e6-78cc365cc51d",
+    "version_id": "a63c1567-5da6-4e58-9c98-32c25f204320",
+    "filename": "DOC_FIXES.receipt.txt",
+    "content_type": "text/plain",
+    "size_bytes": 10202
+   },
+   {
+    "artifact_id": "c46f4642-1f42-4485-af0d-11a17d82c4c9",
+    "version_id": "01fe5cd1-0283-48c2-a707-27ad15dc04c6",
+    "filename": "doc_numbers_check.json",
+    "content_type": "application/json",
+    "size_bytes": 4736
+   },
+   {
+    "artifact_id": "9c1e4847-6522-4196-9ecb-ee703fecb860",
+    "version_id": "52a427ff-6daf-44f3-807f-2556dd87e72c",
+    "filename": "items_full.json",
+    "content_type": "application/json",
+    "size_bytes": 12008
+   },
+   {
+    "artifact_id": "2abf9e71-36b8-4c61-a8bb-26b8aad25e68",
+    "version_id": "d251cc04-e504-40d1-b704-764dbbf4d881",
+    "filename": "report_data.json",
+    "content_type": "application/json",
+    "size_bytes": 1104
+   },
+   {
+    "artifact_id": "f52d7034-c8a9-498e-8f45-386e0da09a71",
+    "version_id": "1111342d-e6ee-47d1-92d3-d7f19c552bb5",
+    "filename": "claim_check.py",
+    "content_type": "text/x-python",
+    "size_bytes": 9752
+   },
+   {
+    "artifact_id": "7a36358b-1f6b-4aae-abdc-86b3b95bd595",
+    "version_id": "dfae8194-9725-47e1-bb56-ea1b8b408a01",
+    "filename": "PREREG.md",
+    "content_type": "text/markdown",
+    "size_bytes": 70133
+   },
+   {
+    "artifact_id": "a6a7440f-5814-4931-a6fe-b728e6f39243",
+    "version_id": "21de17fb-14fc-40fc-8d5c-474b72ac944e",
+    "filename": "PAPER_PLAN.md",
+    "content_type": "text/markdown",
+    "size_bytes": 35570
+   },
+   {
+    "artifact_id": "fc144574-0618-460f-889a-6f7c2dcd61e0",
+    "version_id": "063bd7be-464b-4c9f-8740-edc634c3313a",
+    "filename": "README.md",
+    "content_type": "text/markdown",
+    "size_bytes": 3450
+   },
+   {
+    "artifact_id": "11595a4a-7f6d-4f25-b9f6-470dc149ea59",
+    "version_id": "b74bcdca-9401-42fe-975c-5ac5a12c8f68",
+    "filename": "power_without_sim1.json",
+    "content_type": "application/json",
+    "size_bytes": 1198
+   },
+   {
+    "artifact_id": "363d79bb-34ee-482b-97c1-363dd5fd1e95",
+    "version_id": "3fee1fff-0547-4123-933a-2c0de08ed4ce",
+    "filename": "r1_record.json",
+    "content_type": "application/json",
+    "size_bytes": 384376
+   },
+   {
+    "artifact_id": "82b23128-6394-45c4-b732-6092184250b4",
+    "version_id": "435385dc-33d3-4f5e-b231-38590365c7a1",
+    "filename": "r4_a1_record.json",
+    "content_type": "application/json",
+    "size_bytes": 284535
+   },
+   {
+    "artifact_id": "75b3f7ea-37f1-4d9f-aed2-5750c760c37f",
+    "version_id": "aa03bb60-c50a-40c8-8c06-51b014c99770",
+    "filename": "r2r3_record.json",
+    "content_type": "application/json",
+    "size_bytes": 379985
+   },
+   {
+    "artifact_id": "c46f4642-1f42-4485-af0d-11a17d82c4c9",
+    "version_id": "f931ad65-0e7f-4cc9-890e-b48be1598c75",
+    "filename": "doc_numbers_check.json",
+    "content_type": "application/json",
+    "size_bytes": 4736
+   },
+   {
+    "artifact_id": "82357e2d-1acf-4940-9aee-0252a7f4658a",
+    "version_id": "94a26d5c-5954-4abd-8ae6-a63c56359586",
+    "filename": "lam_audit.txt",
+    "content_type": "text/plain",
+    "size_bytes": 527
+   },
+   {
+    "artifact_id": "51bfbac9-f7f3-48e2-b0d8-b33e0c1b92ab",
+    "version_id": "6acee6f3-3213-4187-9630-d33610879d17",
+    "filename": "build_paper_manifest.py",
+    "content_type": "text/x-python",
+    "size_bytes": 24075
+   },
+   {
+    "artifact_id": "1e65d1ae-241a-4fb0-a599-d2d5addafbe0",
+    "version_id": "27b09b5f-1b46-4403-9fbf-2acf58e4e8a0",
+    "filename": "added_lines.txt",
+    "content_type": "text/plain",
+    "size_bytes": 51894
+   },
+   {
+    "artifact_id": "bc198fde-9268-4e90-b583-8c8c75ed93c2",
+    "version_id": "5a3926ee-18c7-4203-a7c1-73f3c2977fe1",
+    "filename": "build_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 18653
+   },
+   {
+    "artifact_id": "e73c0fac-2579-4395-b2ba-bde43c6c2e56",
+    "version_id": "4fa60620-b9d1-491d-9c4a-b3961224f5df",
+    "filename": "build_report_data.py",
+    "content_type": "text/x-python",
+    "size_bytes": 14936
+   },
+   {
+    "artifact_id": "11595a4a-7f6d-4f25-b9f6-470dc149ea59",
+    "version_id": "a68a3951-e1a2-42d4-923a-bad21b81ce2f",
+    "filename": "power_without_sim1.json",
+    "content_type": "application/json",
+    "size_bytes": 1198
+   },
+   {
+    "artifact_id": "b4c4a01d-366e-4b5f-b2e3-4417e8ed6f7f",
+    "version_id": "1394f98c-7d1e-4762-9004-171e75deb4cd",
+    "filename": "gates_py.json",
+    "content_type": "application/json",
+    "size_bytes": 140
+   },
+   {
+    "artifact_id": "363d79bb-34ee-482b-97c1-363dd5fd1e95",
+    "version_id": "08346f57-3ae9-4e02-9833-35c728d85d7b",
+    "filename": "r1_record.json",
+    "content_type": "application/json",
+    "size_bytes": 384376
+   },
+   {
+    "artifact_id": "9c1e4847-6522-4196-9ecb-ee703fecb860",
+    "version_id": "391674e6-3a10-4394-b307-12ea34cdc520",
+    "filename": "items_full.json",
+    "content_type": "application/json",
+    "size_bytes": 12008
+   },
+   {
+    "artifact_id": "2abf9e71-36b8-4c61-a8bb-26b8aad25e68",
+    "version_id": "fdd10f7c-6297-41a7-8e8e-8e93244d8e9d",
+    "filename": "report_data.json",
+    "content_type": "application/json",
+    "size_bytes": 1104
+   },
+   {
+    "artifact_id": "438ea0b7-b4de-4d49-951d-0d16662e59bf",
+    "version_id": "af696f24-f787-49b8-8abd-4c71f77fe3c6",
+    "filename": "inputs_index.json",
+    "content_type": "application/json",
+    "size_bytes": 1653
+   },
+   {
+    "artifact_id": "0da5d6d1-39a4-42d2-ad79-bd3c38eeae67",
+    "version_id": "ef5bf73b-2599-40c5-89c5-12b6f22ce580",
+    "filename": "make_doc_numbers.py",
+    "content_type": "text/x-python",
+    "size_bytes": 12763
+   },
+   {
+    "artifact_id": "82b23128-6394-45c4-b732-6092184250b4",
+    "version_id": "d5abe989-36d0-40be-b92c-11c68d13e345",
+    "filename": "r4_a1_record.json",
+    "content_type": "application/json",
+    "size_bytes": 284535
+   },
+   {
+    "artifact_id": "75b3f7ea-37f1-4d9f-aed2-5750c760c37f",
+    "version_id": "3cba1dc3-2bd3-4fee-86ce-a816536105c0",
+    "filename": "r2r3_record.json",
+    "content_type": "application/json",
+    "size_bytes": 379985
+   },
+   {
+    "artifact_id": "55b073dd-f134-4e40-8587-97a7f4919fe7",
+    "version_id": "c26a09d0-3dbe-42ca-b947-649d0b5e9899",
+    "filename": "a1_extension_r1_round1.tsv",
+    "content_type": "text/tab-separated-values",
+    "size_bytes": 5303
+   },
+   {
+    "artifact_id": "3e29fadf-f0ff-4d98-b720-8761b6d1e0b4",
+    "version_id": "b1c75be4-1615-4241-9b5f-b454fc720329",
+    "filename": "fit_identity_c3fd92d.csv",
+    "content_type": "text/csv",
+    "size_bytes": 3921
+   },
+   {
+    "artifact_id": "7ebd3029-a92e-4fdc-968c-d17f0f3b047f",
+    "version_id": "4394d598-1f85-4432-89a9-d5e46c4abe84",
+    "filename": "doc_numbers.json",
+    "content_type": "application/json",
+    "size_bytes": 4736
+   },
+   {
+    "artifact_id": "f52d7034-c8a9-498e-8f45-386e0da09a71",
+    "version_id": "3a3e3c8b-d76b-4169-ba85-e01e42c01d17",
+    "filename": "claim_check.py",
+    "content_type": "text/x-python",
+    "size_bytes": 9752
+   },
+   {
+    "artifact_id": "ce7f7699-26dd-49fd-9f59-aab429afb8cf",
+    "version_id": "7adb1f7c-5a10-4e38-90fe-9e59b2ce4912",
+    "filename": "edit_lib.py",
+    "content_type": "text/x-python",
+    "size_bytes": 5933
+   },
+   {
+    "artifact_id": "0595618e-cc08-4578-b0c4-7a872c857862",
+    "version_id": "e93ef2bd-1974-4f59-a55c-919ffd94115c",
+    "filename": "doc_fix_tools.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 61751
+   },
+   {
+    "artifact_id": "5d2795b0-2e6a-496d-bfc0-0a15fa2db484",
+    "version_id": "30dd365f-0a7b-4399-9754-7d9629e237df",
+    "filename": "DOC_FIXES_REPORT.md",
+    "content_type": "text/markdown",
+    "size_bytes": 29311
+   },
+   {
+    "artifact_id": "bc198fde-9268-4e90-b583-8c8c75ed93c2",
+    "version_id": "21333fd0-eb72-4877-9be1-26110cac6647",
+    "filename": "build_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 18864
+   }
+  ],
+  "versions_omitted": 3,
+  "_completion_bullets": [
+   "Fixed or partly fixed 18 findings in 18 commits (patches 0001 to 0018); none rebutted",
+   "Reconciled 322 versus 382 manifest tags and the power numbers against committed records",
+   "Ran both test suites (131 and 65 passed) and applied the patches cleanly in a fresh clone",
+   "Wrote the report with 8 user questions and the proposed ANALYSIS_SPEC wording"
+  ]
+ }
+}

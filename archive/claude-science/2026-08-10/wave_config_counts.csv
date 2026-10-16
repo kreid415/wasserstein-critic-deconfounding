@@ -1,0 +1,7 @@
+dataset,configs,worker_hours,E8_configs,n_batches
+pancreas,180,26.7,48,9
+sim2,150,21.9,18,4
+lung,132,17.4,0,2
+immune,150,12.6,18,4
+sim1,162,7.0,30,6
+atac_small,144,4.1,12,3

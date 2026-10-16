@@ -1,0 +1,10 @@
+{
+ "rule": "SI-54 (CONSTRAINTS.md, NB-20261013-08); tag name SI-60 (NB-20261013-28)",
+ "meaning": "Fits and scores made at `commit` are result-identical to those made at `tag` for every arm except `not_for_arms`; rule scripts and run_stage.py read `commit` as the tag's commit for those arms when rows mix commits, and refuse rows of `not_for_arms` at `commit`. No rescoring.",
+ "tag": "prereg-tier12-v3",
+ "commit": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+ "commit_ref": "prereg-tier12-v2",
+ "not_for_arms": ["sinkhorn"],
+ "evidence": ["experiments/integration_checks_20261013/results/fit_identity.csv",
+              "experiments/integration_checks_20261013/results/score_identity.csv"]
+}

@@ -1,0 +1,5 @@
+z_dim,method,ilisi,clisi,asw_batch,ari
+128,critic,0.372,0.029,0.83,0.409
+128,discriminator,0.425,0.017,0.891,0.61
+256,critic,0.402,0.034,0.828,0.429
+256,discriminator,0.415,0.017,0.89,0.613

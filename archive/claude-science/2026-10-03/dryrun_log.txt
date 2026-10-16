@@ -1,0 +1,27 @@
+== run_stage.py --dry-run --experiments A1 --tasks atac_small immune sim1
+[18:57:19] [stage] A1__atac_small+immune+sim1: 1098 rows {'needs_fit': 1098}; to run: 1098 fits, up to 1098 scores; out /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/review/outputs/dryrun/out_A1
+exit=0; refused_rows=0
+== run_stage.py --dry-run --experiments X1 --tasks pancreas
+[stage] REFUSED: preflight refused:
+  X1_pancreas_discriminator_lg1_c1_s0_4c5771f2: placeholder(s) ["lam='g1'", "adv_input='A2'", "zstd='A3'"]: resolve the rule first (docs/PREREG.md section 0)
+  X1_pancreas_discriminator_lg2_c1_s0_918ef0d1: placeholder(s) ["lam='g2'", "adv_input='A2'", "zstd='A3'"]: resolve the rule first (docs/PREREG.md section 0)
+  X1_pancreas_discriminator_lg3_c1_s0_a3c8e66c: placeholder(s) ["lam='g3'", "adv_input='A2'", "zstd='A3'"]: resolve the rule first (docs/PREREG.md section 0)
+exit=4; refused_rows=360
+== run_stage.py --dry-run --experiments X13 --tasks pancreas
+[stage] REFUSED: preflight refused:
+  X13_pancreas_harmony_l0_c0_s0_b0c1589b: placeholder(s) ["adv_input='na'"]: resolve the rule first (docs/PREREG.md section 0)
+  X13_pancreas_harmony_l0.5_c0_s0_a421c91e: placeholder(s) ["adv_input='na'"]: resolve the rule first (docs/PREREG.md section 0)
+  X13_pancreas_harmony_l1_c0_s0_1bf71b2a: placeholder(s) ["adv_input='na'"]: resolve the rule first (docs/PREREG.md section 0)
+exit=4; refused_rows=16
+== run_stage.py --dry-run --experiments X3 --tasks pancreas
+[stage] REFUSED: preflight refused:
+  X3_pancreas_discriminator_lmatched_lo_c1_s10_9f1a8938: placeholder(s) ["lam='matched_lo'"]: resolve the rule first (docs/PREREG.md section 0)
+  X3_pancreas_discriminator_lmatched_hi_c1_s10_34178f62: placeholder(s) ["lam='matched_hi'"]: resolve the rule first (docs/PREREG.md section 0)
+  X3_pancreas_reference_lmatched_lo_c1_s10_606668da: placeholder(s) ["lam='matched_lo'"]: resolve the rule first (docs/PREREG.md section 0)
+exit=4; refused_rows=192
+== run_stage.py --dry-run --experiments A2 --tasks atac_small
+[stage] REFUSED: preflight refused:
+  A2_atac_small_discriminator_la1_matched_lo_c1_s100_50452958: placeholder(s) ["lam='a1_matched_lo'"]: resolve the rule first (docs/PREREG.md section 0)
+  A2_atac_small_discriminator_la1_matched_c1_s100_de5da10b: placeholder(s) ["lam='a1_matched'"]: resolve the rule first (docs/PREREG.md section 0)
+  A2_atac_small_discriminator_la1_matched_hi_c1_s100_31782c10: placeholder(s) ["lam='a1_matched_hi'"]: resolve the rule first (docs/PREREG.md section 0)
+exit=4; refused_rows=54

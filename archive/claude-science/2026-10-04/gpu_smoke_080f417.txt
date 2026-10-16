@@ -1,0 +1,44 @@
+A1_atac_small_none_l0_c1_s100_8d38e2a3 exit 0
+A1_atac_small_discriminator_l10_c1_s100_10d7da82 exit 0
+A1_atac_small_reference_l10_c1_s100_b95922a7 exit 0
+A1_atac_small_pooled_l10_c1_s100_96186f42 exit 0
+A1_atac_small_barycenter_l10_c1_s100_a1e1f0be exit 0
+A1_atac_small_mmd_l10_c1_s100_2096ec70 exit 0
+A1_atac_small_sinkhorn_l10_c1_s100_44c0f3e6 exit 0
+A1_atac_small_none_l0_c0_s100_70bf3a6a exit 0
+A1_atac_small_discriminator_l10_c0_s100_a2c281cd exit 0
+A1_atac_small_reference_l10_c0_s100_8a31dbdb exit 0
+A1_atac_small_pooled_l10_c0_s100_651979e4 exit 0
+A1_atac_small_barycenter_l10_c0_s100_ac964568 exit 0
+A1_atac_small_mmd_l10_c0_s100_3d92df46 exit 0
+A1_atac_small_sinkhorn_l10_c0_s100_7984a5ea exit 0
+X1_pancreas_none_l0_c1_s0_d18f6091 exit 0
+X1_pancreas_scvi_adv_l0_c1_s0_33c0327c exit 0
+X1_pancreas_none_l0_c0_s0_444f86ab exit 0
+X13_pancreas_scanvi_l0_c1_s0_554f502a exit 0
+X13_pancreas_sysvi_l1_c1_s0_33389778 exit 0
+X15_immune_none_l0_c1_s10_131e05f7 exit 0
+X15_immune_discriminator_lmatched_lo_c1_s10_110b5c1a exit 0
+X3_pancreas_discriminator_lmatched_lo_c1_s10_b718eb54 exit 0
+A1_atac_small_none_l0_c1_s100_8d38e2a3 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp None None iw None draw None
+A1_atac_small_discriminator_l10_c1_s100_10d7da82 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+A1_atac_small_reference_l10_c1_s100_b95922a7 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_pooled_l10_c1_s100_96186f42 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_barycenter_l10_c1_s100_a1e1f0be NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_mmd_l10_c1_s100_2096ec70 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+A1_atac_small_sinkhorn_l10_c1_s100_44c0f3e6 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+A1_atac_small_none_l0_c0_s100_70bf3a6a NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp None None iw None draw None
+A1_atac_small_discriminator_l10_c0_s100_a2c281cd NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+A1_atac_small_reference_l10_c0_s100_8a31dbdb NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_pooled_l10_c0_s100_651979e4 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_barycenter_l10_c0_s100_ac964568 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp True 10.0 iw None draw None
+A1_atac_small_mmd_l10_c0_s100_3d92df46 NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+A1_atac_small_sinkhorn_l10_c0_s100_7984a5ea NVIDIA GeForce RTX 3080 finite True n_cells 11270 kl 400 gp False None iw None draw None
+X1_pancreas_none_l0_c1_s0_d18f6091 NVIDIA GeForce RTX 3080 finite True n_cells 16382 kl 400 gp None None iw None draw None
+X1_pancreas_scvi_adv_l0_c1_s0_33c0327c NVIDIA GeForce RTX 3080 finite True n_cells 16382 kl 400 gp None None iw None draw None
+X1_pancreas_none_l0_c0_s0_444f86ab NVIDIA GeForce RTX 3080 finite True n_cells 16382 kl 400 gp None None iw None draw None
+X13_pancreas_scanvi_l0_c1_s0_554f502a NVIDIA GeForce RTX 3080 finite True n_cells 16382 kl 400 gp None None iw None draw None
+X13_pancreas_sysvi_l1_c1_s0_33389778 NVIDIA GeForce RTX 3080 finite True n_cells 16382 kl 0 gp None None iw None draw None
+X15_immune_none_l0_c1_s10_131e05f7 NVIDIA GeForce RTX 3080 finite True n_cells 33506 kl 2 gp None None iw None draw None
+X15_immune_discriminator_lmatched_lo_c1_s10_110b5c1a NVIDIA GeForce RTX 3080 finite True n_cells 33506 kl 2 gp False None iw None draw None
+X3_pancreas_discriminator_lmatched_lo_c1_s10_b718eb54 NVIDIA GeForce RTX 3080 finite True n_cells 14409 kl 400 gp False None iw 9 draw nested_v1

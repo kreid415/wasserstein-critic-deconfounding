@@ -1,0 +1,55 @@
+cites,date,doi,title,type
+scIB-E,2025-11-20,https://doi.org/10.1186/s13059-025-03869-z,Benchmarking deep learning methods for biologically conserved single-cell integration,article
+scIB-E,2026-02-20,https://doi.org/10.64898/2026.02.17.706490,Geometric-aware and interpretable deep learning for single-cell batch correction via explicit disentanglement and optimal transport,preprint
+scIB-E,2026-06-07,https://doi.org/10.1016/j.microc.2026.118654,Quantitative benchmarking of batch effects correction methods for single-cell metabolomics,article
+scIB-E,2026-08-11,https://doi.org/10.1016/j.clim.2026.110760,"scRNA+VDJ-seq in SLE: Insights into autoreactive T and B cell subsets, features, and therapeutic applications",article
+scIB-E,2026-01-01,https://doi.org/10.1016/j.procs.2026.08.249,A Comparative Study of Deep Learning and Machine Learning Approaches for Viral Transcriptomic Classification and Alcohol-Associated Hepatocellular Carcinoma,conference-paper
+scIB-E,2026-10-05,https://doi.org/10.1038/s41576-026-01015-4,Decoding epithelial–mesenchymal transitions with multi-omics,review
+sysVI,2026-09-24,https://doi.org/10.1038/s41592-026-03212-9,ResolVI: addressing noise and bias in spatial transcriptomics,article
+sysVI,2026-01-05,https://doi.org/10.1038/s41587-025-02950-z,Revealing a coherent cell-state landscape across single-cell datasets with CONCORD,article
+sysVI,2025-11-04,https://doi.org/10.1038/s44321-025-00330-3,Benchmarking porcine pancreatic ductal organoids for drug screening applications,article
+sysVI,2026-08-26,https://doi.org/10.1038/s41586-026-10964-z,Aberrant excitatory neuronal ERBB4 promotes Alzheimer’s disease pathology,article
+sysVI,2026-01-01,https://doi.org/10.1093/gigascience/giag075,From the brain cell atlas to precision neurology: a review of the application of AI-driven multi-omics in brain science,article
+sysVI,2026-06-02,https://doi.org/10.64898/2026.06.01.729224,Prenatal assembly of functional cortical circuits,preprint
+sysVI,2026-02-04,https://doi.org/10.3389/fimmu.2026.1761476,Integrated single-cell and transcriptomic profiling identifies machine-learning–based pyroptosis biomarkers in IBD,article
+sysVI,2026-04-01,https://doi.org/10.1016/j.retram.2026.103588,A survey on artificial intelligence use for myeloma and lymphoma management,article
+sysVI,2026-06-10,https://doi.org/10.1177/15578666261457147,Cell Type Prediction for Single-Cell RNA Sequencing Utilizing Unsupervised Domain Adaptation and Semi-Supervised Learning,article
+sysVI,2026-06-22,https://doi.org/10.64898/2026.06.17.732980,An Integrated muti-omics cell atlas of the human trabecular meshwork and ciliary body,preprint
+sysVI,2026-07-28,https://doi.org/10.3390/cimb48080768,RNA Sequencing Technologies in Acute Lymphoblastic Leukemia: A Comparative Technical Review,article
+sysVI,2026-08-06,https://doi.org/10.1145/3770855.3818917,scHelix: Asymmetric Dual-Stream Integration via Explicit Gene-Level Disentanglement,conference-paper
+sysVI,2026-08-15,https://doi.org/10.1007/s40142-026-00265-2,Olfactory Neurogenesis and Esthesioneuroblastoma: Lessons from Single-Cell Transcriptomics,article
+sysVI,2026-08-17,https://doi.org/10.64898/2026.08.11.743858,Integration of proteomic data from cell lines and tumors,preprint
+sysVI,2026-08-01,https://doi.org/10.1016/j.jpha.2026.101777,Agentic Spatial Digital Twins in Pharmacology: Decoding 4D Drug Response Dynamics within the Tissue Microenvironment,article
+sysVI,2026-10-12,https://doi.org/10.3389/fimmu.2026.1981010,Functional single-cell omics in gynecological cancers immunotherapy: from heterogeneity dissection to clinical translation,article
+scCRAFT,2026-03-16,https://doi.org/10.1371/journal.pcbi.1014008,A benchmark of semi-supervised scRNA-seq integration methods in real-world scenarios,article
+scCRAFT,2025-03-10,https://doi.org/10.1101/2025.03.05.641743,Single-cell-level condition-related signal estimation with batch effect removal through neural discrete representation learning,preprint
+scCRAFT,2025-08-27,https://doi.org/10.1101/2025.08.23.671952,A Benchmark of Semi-Supervised scRNA-seq Integration Methods in Real-World Scenarios,preprint
+scCRAFT,2025-11-13,https://doi.org/10.1101/2025.11.12.688061,Topology Matters: The Trade-off Between Wasserstein Critics and Discriminators for Single-Cell Data Integration,preprint
+scCRAFT,2026-06-11,https://doi.org/10.64898/2026.06.07.730754,Robust semi-supervised scRNA-seq integration from virtual adversarial learning,preprint
+scCRAFT,2026-08-19,https://doi.org/10.1093/bib/bbag485,Single-cell-level perturbation-induced and condition-related signal estimation with batch effect removal using NDreamer,article
+ResPAN,2024-07-23,https://doi.org/10.1007/s11427-023-2561-0,"Single-cell omics: experimental workflow, data analyses and applications",article
+ResPAN,2023-07-10,https://doi.org/10.3390/math11143055,Recent Advances in Generative Adversarial Networks for Gene Expression Data: A Comprehensive Review,article
+ResPAN,2026-03-23,https://doi.org/10.1002/advs.202514490,Evaluating the Utilities of Foundation Models in Single‐Cell Data Analysis,article
+ResPAN,2026-01-30,https://doi.org/10.1016/j.patter.2025.101431,Embeddings from language models are good learners for single-cell data analysis,article
+ResPAN,2024-12-30,https://doi.org/10.1002/pmic.202400100,Computational Methods for Data Integration and Imputation of Missing Values in Omics Datasets,article
+ResPAN,2024-01-13,https://doi.org/10.22192/ijamr.2024.11.01.009,Developing GANs for Synthetic Medical ImagingData: Enhancing Training and Research,article
+ResPAN,2023-12-18,https://doi.org/10.1186/s13059-023-03129-y,scNAT: a deep learning method for integrating paired single-cell RNA and T cell receptor sequencing profiles,article
+ResPAN,2024-02-22,https://doi.org/10.1371/journal.pcbi.1011880,A novel batch-effect correction method for scRNA-seq data based on Adversarial Information Factorization,article
+ResPAN,2025-08-30,https://doi.org/10.1016/j.canlet.2025.218012,Mapping the tumor immune landscape: single-cell RNA sequencing in cancer immunotherapy,article
+ResPAN,2024-11-13,https://doi.org/10.1093/bib/bbae626,CosGeneGate selects multi-functional and credible biomarkers for single-cell analysis,article
+ResPAN,2025-12-12,https://doi.org/10.1002/advs.202518949,Artificial Intelligence Revolution in Transcriptomics: From Single Cells to Spatial Atlases,article
+ResPAN,2024-10-19,https://doi.org/10.1016/j.compbiolchem.2024.108261,Batch effects correction in scRNA-seq based on biological-noise decoupling autoencoder and central-cross loss,article
+ResPAN,2025-04-04,https://doi.org/10.1038/s42003-025-07988-y,Partially characterized topology guides reliable anchor-free scRNA-integration,article
+ResPAN,2026-03-16,https://doi.org/10.1371/journal.pcbi.1014008,A benchmark of semi-supervised scRNA-seq integration methods in real-world scenarios,article
+ResPAN,2023-10-12,https://doi.org/10.21203/rs.3.rs-3376641/v1,Evaluating the Utilities of Large Language Models in Single-cell Data Analysis,preprint
+ResPAN,2024-03-27,https://doi.org/10.21203/rs.3.rs-4014784/v1,scELMo: Embeddings from Language Models are Good Learners for Single-cell Data Analysis,preprint
+ResPAN,2024-01-01,https://doi.org/10.1007/978-981-97-6703-8_6,Emerging Topics and Future Directions,book-chapter
+ResPAN,2026-06-02,https://doi.org/10.1038/s41467-026-72666-4,scMEDAL: interpretable single-cell transcriptomics analysis with batch effect visualization via deep mixed-effects autoencoder,article
+ResPAN,2026-08-15,https://doi.org/10.1038/s41540-026-00799-9,RobustCell: a model attack-defense framework for robust transcriptomic data analysis,article
+ResPAN,2025-03-10,https://doi.org/10.1101/2025.03.05.641743,Single-cell-level condition-related signal estimation with batch effect removal through neural discrete representation learning,preprint
+ResPAN,2025-05-01,https://doi.org/10.1093/bib/bbaf247,An order-preserving batch-effect correction method based on a monotonic deep learning framework,article
+ResPAN,2025-08-27,https://doi.org/10.1101/2025.08.23.671952,A Benchmark of Semi-Supervised scRNA-seq Integration Methods in Real-World Scenarios,preprint
+ResPAN,2025-11-13,https://doi.org/10.1101/2025.11.12.688061,Topology Matters: The Trade-off Between Wasserstein Critics and Discriminators for Single-Cell Data Integration,preprint
+ResPAN,2025-12-19,https://doi.org/10.1109/tcbbio.2025.3646228,GALA: Integrating Weighted Graph Walks and Latent-Space Adversarial Training for Single-Cell Batch Alignment,article
+ResPAN,2025-03-05,https://doi.org/10.70675/482f57a1z38ebz48aezb43ez84185dba8d1e,Statistical Learning for Single-Cell Data Analysis in Oncology,dissertation
+ResPAN,2026-08-19,https://doi.org/10.1093/bib/bbag485,Single-cell-level perturbation-induced and condition-related signal estimation with batch effect removal using NDreamer,article

@@ -1,0 +1,57 @@
+{
+  "env": {
+    "KMP_AFFINITY": "disabled",
+    "OMP_NUM_THREADS": "1",
+    "PYTHONPATH": "src",
+    "NUMBA_NUM_THREADS": "1",
+    "MKL_THREADING_LAYER": "SEQUENTIAL"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(**/tier12*/**)",
+      "Read(**/review_sealed/**)",
+      "Read(**/planted_key.json)",
+      "Bash(git push --force:*)",
+      "Bash(git tag -d:*)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12*/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/x13_cpu_baselines_*/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/review/identity_*/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/review/out/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/review/verify/**)",
+      "Read(//home/kendall/experiment_data/wasserstein-critic-deconfounding/review_sealed/**)",
+      "Read(**/failures.csv)",
+      "Read(**/attempts/**)",
+      "Bash(git add -A:*)",
+      "Bash(git add .:*)",
+      "Bash(git add --all:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git push * --delete *)",
+      "Bash(git push * :refs/tags/*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 900,
+            "command": "if [ \"$CLAUDE_CODE_REMOTE\" = true ]; then bash \"$CLAUDE_PROJECT_DIR\"/.claude/cloud-setup.sh || echo \"CLOUD SETUP FAILED: env wcd-cpu missing; see docs/claude/CLOUD_SETUP.md\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

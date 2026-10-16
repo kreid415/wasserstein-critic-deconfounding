@@ -1,0 +1,22 @@
+entry,statement,checked_against,result
+A1 restart entry,"code check had 14 findings: 0 critical, 3 high, 3 medium, 8 low",first-review code_review_findings.csv,correct
+A1 restart entry,A1 training code unchanged apart from an optional KL warm-up argument used only by X15,"git diff 129142b..080f417: scvi_adversarial_plan.py +9 lines (n_epochs_kl_warmup, passed only when not None); src/ unchanged",correct
+A1 restart entry,"latents bit-identical to the tag for 7 arms x 2 decoders (14/14; atac_small, 1 epoch, CPU)",a1_fit_identity.sh re-run by the reviewer (tag worktree vs 080f417),"correct: 14/14, max|dz| = 0"
+A1 restart entry,fixed scorer identical on two A1 rows and one immune fit (15/15 columns each),experiments/fix_score_fit_regression/results/*.compare.csv (scorer unchanged since 5750bb4) + reviewer re-score of a 4th latent,correct; 4th latent also 15/15
+A1 restart entry,202 A1 fits made at prereg-tier12-v1 (2026-10-03 17:07 to 2026-10-04 09:27 EDT) stay on disk unused,"tier12/A1: 202 latents, 202 score files, 0 status; latent mtimes 17:17:59 to 09:13:36 EDT; tier12_v2 absent",consistent
+A1 restart entry,no A1 metric value informed any decision,not verifiable from files (process statement),not checked
+X3 entry,"dose-100 sizes atac_small 8,402, pancreas 14,409, sim2 17,872, immune_hum_mou 20,000; every dose the same size",check_x3_nested_v1.py on prepped obs with the fitter's x3_draw,correct
+X3 entry,"doses exactly nominal, nested and maximally overlapping; weights restore each batch's dose-0 composition exactly","same check: nesting, overlap formula, per-type round(), weighted counts == K0",correct (nominal up to per-type rounding)
+X3 entry,all 828 X3 tags change,manifest diff tagged vs v3,correct
+subset PCR entry,X3 pancreas dose 0: PCR_batch 0.573 (all-feature) vs 0.000 (HVG),"pcr_reference.csv tag ..._31994c65 = deplete_pct 50, uncorrected HVG-PCA latent; reviewer re-run",incorrect label: 0.573 is dose 50; dose 0 = 0.560 vs 0.000 (RR-02)
+subset PCR entry,"full-data scoring (A1, A2, A3, X1) unchanged",code diff + A1 re-score 15/15,correct
+provenance entry,"every score row records SHA, cleanliness, host, CPU model, SIMD, NUMBA_CPU_NAME, versions; runner and rules refuse mixed/missing provenance","score_scib_native.py, run_stage.py, prereg_rules.py at 080f417; tests",correct
+provenance entry,flags are reported with every R1 and R4 input,grep for consumers of the flag columns,not implemented (RR-03)
+pairing entry,minibatch order shared only within an arm and with head-free arms,first-review minibatch fingerprints (0/5 vs 5/5),consistent
+declared differences entry,"critic/discriminator steps, scANVI epochs, SysVI warm-up",code + resolved plan in GPU smoke,correct
+Scanorama entry,"97,861 cells; knn 20 1,843 s / 10.5 GB; knn 80 7,457 s / 23.2 GB; knn 160 > 8 h, 43.9 GB",tier12/x13_scanorama_timing/scanorama_timing.csv (read only); prepped obs,"correct; knn 80 memory is the main-process column (tree column 21.56 GB, which PRODUCTION_JOB.md quotes)"
+SI-45 entry,"default half fitted at an edge_unresolved neighbour on A1 seeds, then R2/R3 as written","prereg_rules.default_half_extensions, freeze_matched_lambda, decide_a2_a3, tests",correct
+X15 entry,"last-epoch KL weight 0.23 / 0.20 / 0.595 / 0.61 (stock), 0.998 for 400-epoch tasks; complete: 0.996 immune, 0.989 atac_large","scvi-tools 1.4.2 _compute_kl_weight (epoch / n_epochs while epoch < n): 93/400, 81/400, 238/400, 245/400, 399/400; 238/239, 93/94",correct
+X15 entry,84 fits; 12 stock rows equal X6 rows (fitted separately),manifest v3 rows; equality with extra normalised,correct (exactly the 12 rows of docs/x15_stock_equal_followups.csv)
+manifest entry,"v3: 6,930 rows, sha256 6efbe422...; vs tagged: 828 X3 re-tagged, 8 knn160->2, 84 X15 added; A1, A2, A3, X1 and all other rows byte-identical",rebuild with the stated command + row diff,"correct (6,010 shared rows identical, same order)"
+sections 1-8 / ledger,no contradiction,"PREREG sec 8, CONSTRAINTS SI-41..46",one stale sec 8 sentence (RR-05); SI-41..46 agree with code and manifest

@@ -1,0 +1,46 @@
+{
+ "immune_hum_mou": [
+  {
+   "ct": "18",
+   "n": 289,
+   "dropped": 220,
+   "drop_frac": 0.761,
+   "name": "T cells"
+  },
+  {
+   "ct": "15",
+   "n": 21928,
+   "dropped": 8571,
+   "drop_frac": 0.391,
+   "name": "Neutrophils"
+  },
+  {
+   "ct": "4",
+   "n": 182,
+   "dropped": 43,
+   "drop_frac": 0.236,
+   "name": "Eosinophil progenitor cell"
+  },
+  {
+   "ct": "3",
+   "n": 3136,
+   "dropped": 466,
+   "drop_frac": 0.149,
+   "name": "CD8+ T cells"
+  },
+  {
+   "ct": "0",
+   "n": 4965,
+   "dropped": 638,
+   "drop_frac": 0.128,
+   "name": "B cells"
+  },
+  {
+   "ct": "14",
+   "n": 3047,
+   "dropped": 129,
+   "drop_frac": 0.042,
+   "name": "NKT cells"
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+id,fix,mutant,result,failing_test,pytest_tail
+M33_mmd_unfixed,I033,mmd_batch_others branch reverted,KILLED,test_no_pair_of_batches_gives_differentiable_zero[mmd_batch_others],"1 failed, 19 deselected in 21.46s"
+M33_mmdref_unfixed,I033,mmd_reference branch reverted,KILLED,test_no_pair_of_batches_gives_differentiable_zero[<lambda>],"1 failed, 2 passed, 19 deselected in 30.07s"
+M33_sinkhorn_unfixed,I033,sinkhorn branch reverted,KILLED,test_no_pair_of_batches_gives_differentiable_zero[sinkhorn_batch_others],"1 failed, 1 passed, 19 deselected in 23.35s"
+M33_disconnected_graph,I033,zero with a graph NOT connected to z (requires_grad leaf),KILLED,test_no_pair_of_batches_gives_differentiable_zero[sinkhorn_batch_others],"1 failed, 1 passed, 19 deselected in 27.80s"
+M33_equiv_sum,I033,equivalent form z.sum()*0.0 (should survive),SURVIVED,,"3 passed, 19 deselected in 19.76s"
+M34_overwrite,I034,last inner step only (inner = d_loss.detach()),KILLED,test_nonfinite_inner_critic_step_raises,"1 failed, 12 deselected, 3 warnings in 24.73s"
+M34_omit_loss,I034,sum omits loss_d,KILLED,test_nonfinite_inner_critic_step_raises,"1 failed, 12 deselected, 3 warnings in 9.95s"
+M34_omit_gp,I034,sum omits gp,SURVIVED,,"1 passed, 12 deselected, 3 warnings in 23.22s"
+M34_first_only,I034,only the first inner step enters the sum,SURVIVED,,"1 passed, 12 deselected, 3 warnings in 25.50s"
+M34_last_two_only,I034,only the last two inner steps enter the sum,KILLED,test_nonfinite_inner_critic_step_raises,"1 failed, 12 deselected, 3 warnings in 17.29s"
+M34_not_passed,I034,inner computed but not passed to _nf_check,KILLED,test_nonfinite_inner_critic_step_raises,"1 failed, 12 deselected, 3 warnings in 14.02s"
+M34_equiv_nodetach,I034,equivalent: accumulate without detach (should survive),SURVIVED,,"1 passed, 12 deselected, 3 warnings in 14.71s"
+M42_row_not_passed,I042,main() calls check_extra without the row (unread-setting refusal never runs in production),SURVIVED,,"96 passed, 16 skipped, 225 warnings in 397.78s (0:06:37)"
+M42_check_extra_call_removed,I042,main() never calls check_extra at all,SURVIVED,,"96 passed, 16 skipped, 225 warnings in 271.73s (0:04:31)"
+M42_call_removed_with_data,I042,main() never calls check_extra; data-dependent tests run with PREPPED_DIR,SURVIVED,,33 passed in 90.54s (0:01:30)
+M50_names_only,I050,check cell names only,KILLED,test_full_length_latent_must_list_the_prepped_cells_in_order,"1 failed, 4 passed, 117 warnings in 88.17s (0:01:28)"
+M50_celltype_only,I050,check cell types only,KILLED,test_full_length_latent_must_list_the_prepped_cells_in_order,"1 failed, 4 passed, 117 warnings in 86.11s (0:01:26)"
+M50_set_equality,I050,names compared as sets (order ignored),KILLED,test_full_length_latent_must_list_the_prepped_cells_in_order,"1 failed, 4 passed, 117 warnings in 77.74s (0:01:17)"
+M50_before_subset_reindex,I050,I050 check removed entirely,KILLED,test_full_length_latent_must_list_the_prepped_cells_in_order,"1 failed, 4 passed, 117 warnings in 76.06s (0:01:16)"
+M50_check_before_reindex3,I050,check relocated before the subset re-indexing (refuses legit subset latents),KILLED,test_subsample_pcr_reference_is_the_all_feature_pca_of_the_subset,"1 failed, 1 passed, 25 warnings in 37.04s"
+M50_full_length_path_only,I050,check runs on the full-length path only (the review's wording); subset latents unchecked,SURVIVED,,"10 passed, 214 warnings in 96.28s (0:01:36)"
+M51_guard_dropped,I051,kBET zero-call guard removed entirely,KILLED,test_kbet_without_r_calls_is_recorded_only_when_scib_forced_every_label,"1 failed, 5 passed, 141 warnings in 57.41s"
+M51_old_guard,I051,pre-fix guard restored (any finite kBET with zero calls refused),KILLED,test_kbet_without_r_calls_is_recorded_only_when_scib_forced_every_label,"1 failed, 5 passed, 118 warnings in 56.34s"
+M51_weak_guard,I051,guard raises only above kBET 0.5,SURVIVED,,"10 passed, 214 warnings in 111.36s (0:01:51)"
+M94_stage_no_model_check,I094,run_stage: model.pt check removed,KILLED,test_latent_without_model_or_history_is_refused,"1 failed, 19 passed in 89.38s (0:01:29)"
+M94_stage_no_history,I094,run_stage: 'history' no longer required,KILLED,test_latent_without_model_or_history_is_refused,"1 failed, 19 passed in 83.19s (0:01:23)"
+M94_stage_model_for_cpu_rows,I094,run_stage: model.pt demanded for CPU baseline rows too,KILLED,test_cpu_rows_run_on_cpu_lanes,"1 failed, 37 passed in 151.41s (0:02:31)"
+M94_harvest_no_check,I094,harvest_files: model check removed,KILLED,test_harvest_files_refuses_a_gpu_latent_without_its_model,"1 failed, 34 passed in 305.19s (0:05:05)"
+M94_harvest_no_cpu_exemption,I094,harvest_files: CPU baselines also need a model,KILLED,test_harvest_files_refuses_a_gpu_latent_without_its_model,"1 failed, 34 passed in 280.14s (0:04:40)"
+M8_off_by_one,I008,clock = chain_position x (...) (no +1),KILLED,test_chained_job_clock_covers_every_job_up_its_chain,1 failed in 0.61s
+M8_wall_only,I008,"chain scales the walltime only, not the queue allowance",KILLED,test_chained_job_clock_covers_every_job_up_its_chain,1 failed in 0.34s
+M8_ignore_chain,I008,chain position accepted but ignored (previous clock),KILLED,test_chained_job_clock_covers_every_job_up_its_chain,1 failed in 0.71s
+M8_no_validation,I008,chain-position/after-slurm-job consistency check removed,KILLED,test_chained_job_clock_covers_every_job_up_its_chain,1 failed in 0.08s
+M8_weak_validation,I008,only negative positions refused,KILLED,test_chained_job_clock_covers_every_job_up_its_chain,1 failed in 0.27s

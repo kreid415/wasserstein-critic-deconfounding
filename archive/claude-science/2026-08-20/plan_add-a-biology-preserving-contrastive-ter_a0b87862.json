@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "created_at": "2026-08-20T01:13:55.577Z",
+  "task_summary": "Add a biology-preserving contrastive term to the Wasserstein barycenter and test whether it beats harmony",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Implement the biology-preserving loss",
+      "delegations": [
+        {
+          "name": "Contrastive loss",
+          "steps": [
+            {
+              "title": "Design the within-batch-cluster triplet loss",
+              "description": "Add a triplet/contrastive term on the latent z supervised by within-batch Leiden pseudo-clusters (scCRAFT's supervision signal — uses no external cell-type labels, so it is inference-valid). Compute per-batch cluster IDs once per epoch; anchor/positive = same cluster, negative = different cluster within the batch. This is the mechanism data.py:118 records as removed in the scCRAFT strip."
+            },
+            {
+              "title": "Wire it into the barycenter generator step",
+              "description": "Add the term to all_loss = loss_vae - lam*loss_da + beta*loss_contrast at training.py:238, guarded so it only fires for the barycenter formulation and only when beta>0. Thread a tunable `contrast_coef` (default 0.0) through train_model -> train_integration_model -> train_one -> evaluate_config, with a --contrast-coef CLI flag on run_formulations.py."
+            },
+            {
+              "title": "Apply the collision-safety discipline and test",
+              "description": "Record contrast_coef in the result row; add it to the embedding tag (suffix off at 0.0) and the resume key so a beta sweep never overwrites the beta=0 latents. Add a regression test pinning the tag/row behavior, and confirm the full suite stays green (defaults leave every existing experiment byte-identical)."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Prototype and sweep beta on pancreas",
+      "delegations": [
+        {
+          "name": "Beta sweep",
+          "steps": [
+            {
+              "title": "Sweep contrast weight at the winning recipe",
+              "description": "At the winning barycenter recipe (LDVAE_uncond, lam=0.2, kl=5e-4, z_dim=128), pancreas, seed 0, sweep contrast_coef across a small grid (e.g. 0, 0.1, 0.5, 1, 2). Stub-verify dispatch first. Measure whether NMI/ARI rise toward harmony (0.92/0.95 on pancreas in our harness) and whether batch mixing holds."
+            },
+            {
+              "title": "Decide whether the mechanism works before scaling",
+              "description": "Compute the scIB composite (shared metric set, cell_cycle excluded) for each beta and compare to harmony 0.530 and scVI 0.519 on pancreas. If the contrastive term does not move NMI/ARI, stop and report — the mechanism did not transfer; do not spend compute on immune."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Confirm on immune and compare to baselines",
+      "delegations": [
+        {
+          "name": "Immune + comparison",
+          "steps": [
+            {
+              "title": "Run the best beta on immune",
+              "description": "Take the best contrast_coef from pancreas, run it on immune (the hard dataset) at the same recipe, seed 0. Verify the gain generalizes rather than being pancreas-specific, the failure mode of every earlier lever this session."
+            },
+            {
+              "title": "Assemble the head-to-head vs harmony",
+              "description": "Compute scIB overall for barycenter+contrastive vs harmony, scVI, and the plain tuned barycenter on both datasets (shared metric set). Build a publication-grade figure, save the results table and embeddings as artifacts, commit the code and manifests. State plainly whether harmony is beaten and under the single-seed/two-dataset caveat."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    }
+  ],
+  "desired_outputs": [
+    "Within-batch-cluster contrastive/triplet loss added to the barycenter generator path, tunable weight (default 0), collision-safe and tested",
+    "Beta sweep on pancreas at the winning barycenter recipe showing whether NMI/ARI move toward harmony",
+    "scIB comparison of the best barycenter+contrastive config vs harmony/scVI on pancreas and immune (shared metric set), saved as artifacts",
+    "Committed code + manifests so the result is reproducible"
+  ],
+  "feasibility": {
+    "confidence": "medium",
+    "rationale": "scCRAFT's own table shows its edge over harmony is almost entirely NMI/ARI (+0.11 each), the exact axis this project's E5 analysis attributes to a within-batch-cluster triplet loss — so the mechanism is well-identified. Uncertainty: prototyping is single-dataset/single-seed at first, a triplet term on our barycenter is not identical to scCRAFT's full architecture so gap-closing is not guaranteed, and adding this loss reintroduces the auxiliary-loss confound the controlled study was built to remove (a paper-framing decision, kept off-by-default in code)."
+  }
+}

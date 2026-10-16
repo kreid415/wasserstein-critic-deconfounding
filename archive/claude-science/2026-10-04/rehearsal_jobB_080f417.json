@@ -1,0 +1,46 @@
+{
+ "exit": 2,
+ "fingerprints": {
+  "lines": 0,
+  "ok": 0
+ },
+ "inputs": null,
+ "job": "jobB",
+ "local_versions_vs_l40s": {
+  "cudnn": [
+   92000,
+   91002
+  ],
+  "local_cuda_available": false,
+  "local_gpu": null,
+  "local_record_exit": 0,
+  "modules": {
+   "torch": [
+    "2.13.0+cu130",
+    "2.13.0+cu126"
+   ]
+  },
+  "torch_cuda": [
+   "13.0",
+   "12.6"
+  ]
+ },
+ "logs": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_jobB/scratch/prod/job_990001/logs",
+ "planned": null,
+ "problems": null,
+ "runner_line": null,
+ "sha": "080f417a8a8011c1a33699ee1c81547beca2774e",
+ "stage_key": null,
+ "stage_key_record": {},
+ "stderr_tail": [
+  "FATAL: tests/scvi failed on this node at 080f417a8a8011c1a33699ee1c81547beca2774e"
+ ],
+ "stdout": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_jobB/job_stdout.txt",
+ "tests_scvi": "2 failed, 108 passed, 1 skipped in 181.52s (0:03:01)",
+ "versions_check": {
+  "gpu": "NVIDIA L40S (rehearsal stub)",
+  "ok": true,
+  "problems": [],
+  "torch": "2.13.0+cu126"
+ }
+}

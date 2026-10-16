@@ -1,0 +1,104 @@
+{
+ "lung": {
+  "n_cells": 32472,
+  "n_kept_min_genes300": 29256,
+  "top_dropped_celltypes": {
+   "15": 0.3,
+   "0": 0.247,
+   "14": 0.24,
+   "8": 0.196,
+   "10": 0.193,
+   "13": 0.167
+  },
+  "n_ct_fully_dropped": 0,
+  "nonint_cells": 22771,
+  "nonint_by_batchkey": {
+   "0": 22771
+  },
+  "nonint_by_batch": {
+   "3": 3763,
+   "5": 3229,
+   "11": 2410,
+   "10": 2406,
+   "4": 2379,
+   "1": 1988,
+   "6": 1845,
+   "7": 1454
+  },
+  "n_levels_batch": 16
+ },
+ "immune_hum_mou": {
+  "n_cells": 97861,
+  "n_kept_min_genes300": 86933,
+  "top_dropped_celltypes": {
+   "18": 0.761,
+   "15": 0.391,
+   "4": 0.236,
+   "3": 0.149,
+   "0": 0.128,
+   "14": 0.042
+  },
+  "n_ct_fully_dropped": 0,
+  "nonint_cells": 1022,
+  "nonint_by_batchkey": {
+   "0": 1022
+  },
+  "nonint_by_batch": {
+   "22": 1022
+  },
+  "n_levels_batch": 23,
+  "nonint_by_chemistry": {
+   "2": 1022
+  },
+  "n_levels_chemistry": 5,
+  "nonint_by_study": {
+   "7": 1022
+  },
+  "n_levels_study": 8
+ },
+ "immune": {
+  "n_cells": 33506,
+  "n_kept_min_genes300": 33506,
+  "top_dropped_celltypes": {
+   "0": 0.0,
+   "1": 0.0,
+   "10": 0.0,
+   "11": 0.0,
+   "12": 0.0,
+   "13": 0.0
+  },
+  "n_ct_fully_dropped": 0,
+  "nonint_cells": 1022,
+  "nonint_by_batchkey": {
+   "1": 1022
+  },
+  "nonint_by_batch": {
+   "9": 1022
+  },
+  "n_levels_batch": 10,
+  "nonint_by_study": {
+   "4": 1022
+  },
+  "n_levels_study": 5
+ },
+ "pancreas": {
+  "n_cells": 16382,
+  "n_kept_min_genes300": 16382,
+  "top_dropped_celltypes": {
+   "0": 0.0,
+   "1": 0.0,
+   "10": 0.0,
+   "11": 0.0,
+   "12": 0.0,
+   "13": 0.0
+  },
+  "n_ct_fully_dropped": 0,
+  "nonint_cells": 5419,
+  "nonint_by_batchkey": {
+   "1": 2285,
+   "7": 1492,
+   "0": 1004,
+   "2": 638
+  }
+ }
+}

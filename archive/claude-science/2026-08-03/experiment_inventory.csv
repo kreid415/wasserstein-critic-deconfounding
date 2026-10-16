@@ -1,0 +1,10 @@
+exp,name,harness,design,status,why
+E1,λ_adv Pareto sweep,run_experiment.py --experiment E1,"2 heads × 10 λ × 3 seeds, one backbone",RERUN,"valid data covers only a 4-pt λ subset {0,.05,.2,.5} on NB_uncond; full 10-pt grid exists only for conditioned NB (adversary inert). No PAGA, no saved embeddings."
+E2,Backbone / conditioning generality,run_experiment.py --experiment E2,8 backbones × 2 heads × 3 seeds @ λ=0.2,RERUN (PAGA only),"results VALID and complete (288 configs, 6 datasets). Missing paga_spearman + embeddings; headline claim needs restating at dataset level."
+E3,External baselines,run_baselines.py,"harmony, scanorama, scVI, scANVI, combat",RERUN,"last run in the scCRAFT era; never re-run on native backbones, so not comparable to current numbers."
+E4,Reference-design sweep,run_reference.py,"fixed_ref0..N + rotating + joint + discriminator, ×3 seeds",RERUN,completed on the CONDITIONED backbone where the adversary was inert — all arms collapsed to the same value. Invalid.
+E5,Biological readouts,run_biology.py,"5 readouts (marker preservation, per-type purity, rare retention, confusion, label transfer)",VALID,24/24 complete on unconditioned backbones; unanalysed. PAGA not applicable (own readouts).
+E6,Batch support overlap,support_overlap.py,3 model-free overlap measures in PCA space,VALID,"model-free — does not depend on any trained model, so the conditioning bug cannot affect it."
+E8,Multi-batch scaling,run_experiment.py --experiment E8,"2 heads × 3 seeds @ λ=0.2, varying --batch-count",RERUN,ran on conditioned backbone; adversary inert. Excludes 2-batch datasets by design.
+E9,Critic formulation comparison,run_formulations.py,reference / pooled / barycenter / discriminator × 3 seeds,RERUN,conditioned backbone; all 4 arms collapsed to ASW_batch≈0.95. Invalid.
+CV+NB,Per-dataset 5-fold CV + Nadeau-Bengio,hyperparameter_search.py (needs 3 patches),"5 outer × 3 inner folds, NB-corrected paired t per dataset",NEW,the fix for the n=6 significance problem; blocked on threading backbone+registry+probe metrics.

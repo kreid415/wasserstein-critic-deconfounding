@@ -1,0 +1,2 @@
+tag,n_cells,n_cells_prepped,n_features,n_hvg,pcr_before_all_features,pcr_before_hvg,PCR_batch_scorer,PCR_batch_all_feature_reference,PCR_batch_hvg_reference,scorer_equals_all_feature,scorer_equals_hvg
+X3_pancreas_none_l0_c1_s10_ebe9903e,14409,16382,19093,2000,0.4802914834147457,0.19058747948954644,,0.5603497454252219,0.0,False,False

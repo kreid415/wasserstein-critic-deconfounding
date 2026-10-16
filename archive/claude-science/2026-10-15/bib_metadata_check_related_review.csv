@@ -1,0 +1,52 @@
+key,type,source_checked,authors,title,venue_vol_issue_pages,year,doi_or_url,remark
+lopez2018deep,article,Crossref /works/10.1038/s41592-018-0229-2,"5, match",match,match,match,resolves to the named work (title match),
+gayoso2022python,article,Crossref /works/10.1038/s41587-021-01206-w,"29, match",match,match,match,resolves to the named work (title match),29 authors match Crossref
+luecken2022benchmarking,article,Crossref /works/10.1038/s41592-021-01336-8,"11, match",match,match,match,resolves to the named work (title match),authors as printed by the journal (initials after the first)
+goodfellow2014generative,inproceedings,NeurIPS proceedings BibTeX (-Bibtex.bib),"8, match",match,match,match,URL returns the named work,
+arjovsky2017wasserstein,inproceedings,PMLR page citation_* tags,"3, match",match,match,match,URL returns the named work,
+gulrajani2017improved,inproceedings,NeurIPS proceedings BibTeX (-Bibtex.bib),"5, match",match,match,match,URL returns the named work,
+ganin2016domain,article,JMLR page citation_* tags + JMLR PDF + arXiv,"8, 1 misspelled",match,match,match,URL returns the named work,author 'Mario March' should be 'Mario Marchand' (REL-01)
+shen2018wasserstein,article,Crossref /works/10.1609/aaai.v32i1.11784,"4, match",match,match,match,resolves to the named work (title match),no pages (Crossref has none; AAAI page unreachable) (REL-13)
+wang2021imap,article,Crossref /works/10.1186/s13059-021-02280-8,"6, match",match,match,match,resolves to the named work (title match),
+amodio2019exploring,article,Crossref /works/10.1038/s41592-019-0576-7,"16, match",match,match,match,resolves to the named work (title match),
+yi2025benchmarking,article,Crossref /works/10.1186/s13059-025-03869-z,"6, match",match,match,match,resolves to the named work (title match),
+hrovatin2025integrating,article,Crossref /works/10.1186/s12864-025-12126-3,"8, match",match,match,match,resolves to the named work (title match),
+zhao2019learning,inproceedings,PMLR page citation_* tags,"4, match",match,match,match,URL returns the named work,'Remi Tachet Des Combes' = PMLR spelling (REL-13)
+wu2019domain,inproceedings,PMLR page citation_* tags,"4, match",match,match,match,URL returns the named work,
+lucic2018gans,inproceedings,NeurIPS proceedings BibTeX (-Bibtex.bib),"5, match",match,match,match,URL returns the named work,Lucic/Lu{\v{c}}i{\'c} spelling differs from kurach2019large (REL-13)
+kurach2019large,inproceedings,PMLR page citation_* tags,"5, match",match,match,match,URL returns the named work,Lucic/Lu{\v{c}}i{\'c} spelling differs from lucic2018gans (REL-13)
+maan2024characterizing,article,Crossref /works/10.1038/s41587-023-02097-9,"6, match",match,match,match,resolves to the named work (title match),
+gretton2012kernel,article,JMLR page citation_* tags,"5, match",match,match,match,URL returns the named work,
+cuturi2013sinkhorn,inproceedings,NeurIPS proceedings BibTeX (-Bibtex.bib),"1, match",match,match,match,URL returns the named work,
+feydy2019interpolating,inproceedings,PMLR page citation_* tags,"6, match",match,match,match,URL returns the named work,
+cuturi2014fast,inproceedings,PMLR page citation_* tags,"2, match",match,match,match,URL returns the named work,
+flamary2021pot,article,JMLR page citation_* tags,"22, match",match,match,match,URL returns the named work,
+korsunsky2019fast,article,Crossref /works/10.1038/s41592-019-0619-0,"10, match",match,match,match,resolves to the named work (title match),
+hie2019efficient,article,Crossref /works/10.1038/s41587-019-0113-3,"3, match",match,match,match,resolves to the named work (title match),
+xu2021probabilistic,article,Crossref /works/10.15252/msb.20209620,"6, match",match,match,match,resolves to the named work (title match),article number MSB20209620 = Crossref value (journal prints e9620)
+buttner2019test,article,Crossref /works/10.1038/s41592-018-0254-1,"5, match",match,match,match,resolves to the named work (title match),year 2019 = print year (online 2018)
+corani2017time,article,Crossref /works/10.1007/s10994-017-5641-9,"5, match",match,match,match,resolves to the named work (title match),key does not match the title (Statistical comparison of classifiers...); cited nowhere (REL-12)
+clopper1934use,article,Crossref /works/10.1093/biomet/26.4.404,"2, match",match,match,match,resolves to the named work (title match),
+shree2023scdreamer,article,Crossref /works/10.1038/s41467-023-43590-8,"3, match",match,match,match,resolves to the named work (title match),
+lotfollahi2020conditional,article,Crossref /works/10.1093/bioinformatics/btaa800,"4, match",match,match,match,resolves to the named work (title match),issue 'Supplement 2' = Crossref Supplement_2
+wang2019bermuda,article,Crossref /works/10.1186/s13059-019-1764-6,"7, match",match,match,match,resolves to the named work (title match),
+cao2022unified,article,Crossref /works/10.1038/s41467-022-35094-8,"4, match",match,match,match,resolves to the named work (title match),
+shaham2017removal,article,Crossref /works/10.1093/bioinformatics/btx196,"7, match",match,match,match,resolves to the named work (title match),
+leek2010tackling,article,Crossref /works/10.1038/nrg2825,"9, match",match,match,match,resolves to the named work (title match),
+tung2017batch,article,Crossref /works/10.1038/srep39921,"7, match",match,match,match,resolves to the named work (title match),
+goh2022batch,article,Crossref /works/10.1016/j.tibtech.2022.02.005,"3, match",match,match,match,resolves to the named work (title match),
+yu2024assessing,article,Crossref /works/10.1186/s13059-024-03401-9,"4, match",match,match,match,resolves to the named work (title match),
+dincer2020adversarial,article,Crossref /works/10.1093/bioinformatics/btaa796,"3, match",match,match,match,resolves to the named work (title match),issue 'Supplement 2' = Crossref Supplement_2
+he2025partially,article,Crossref /works/10.1038/s42003-025-07988-y,"4, match",match,match,match,resolves to the named work (title match),
+wang2022respan,article,Crossref /works/10.1093/bioinformatics/btac427,"3, match",match,match,match,resolves to the named work (title match),
+wang2023integrating,article,Crossref /works/10.3390/ijms24065502,"4, match",match,match,match,resolves to the named work (title match),
+tran2020benchmark,article,Crossref /works/10.1186/s13059-019-1850-9,"7, match",match,match,match,resolves to the named work (title match),
+ritchie2015limma,article,Crossref /works/10.1093/nar/gkv007,"7, match",match,match,match,resolves to the named work (title match),page e47 equals Crossref e47-e47
+johnson2007adjusting,article,Crossref /works/10.1093/biostatistics/kxj037,"3, match",match,match,match,resolves to the named work (title match),year 2007 = print year (online 2006)
+haghverdi2018batch,article,Crossref /works/10.1038/nbt.4091,"4, match",match,match,match,resolves to the named work (title match),
+stuart2019comprehensive,article,Crossref /works/10.1016/j.cell.2019.05.031,"10, match",match,match,match,resolves to the named work (title match),pages 1888-1902.e21 match
+reid2025topology,misc,Crossref /works/10.1101/2025.11.12.688061,"3, match",match,preprint: no venue fields,match,resolves to the named work (title match),prints no DOI; title/version to confirm (REL-06)
+arjovsky2017towards,inproceedings,arXiv record 1701.04862 (OpenReview page not readable),"2, match",match,vol/pages n/a; venue not re-checked,match,arXiv eprint 1701.04862 resolves to it; OpenReview URL not re-checked,'Leon' vs 'L{\'e}on'; ICLR 2017 venue and OpenReview URL not re-checked (REL-13)
+luecken2025defining,article,Crossref /works/10.1038/s41587-025-02694-w,54 of 55 (group author missing),match,match,match,resolves to the named work (title match),group author 'Open Problems Jamboree Members' omitted (REL-13)
+mescheder2018training,inproceedings,PMLR page citation_* tags,"3, match",match,match,match,URL returns the named work,
+miyato2018spectral,inproceedings,arXiv record and PDF header,"4, match",match,match,match,URL returns the named work,ICLR 2018 per arXiv comment; text read in arXiv v1

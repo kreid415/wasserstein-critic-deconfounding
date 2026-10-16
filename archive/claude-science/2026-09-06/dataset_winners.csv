@@ -1,0 +1,9 @@
+dataset,winner,scIB,batch,bio,runner_up,ru_scIB,margin
+pancreas,Harmony,0.539,0.537,0.54,scVI,0.537,0.002
+immune,JS-disc*,0.585,0.554,0.605,scVI,0.563,0.022
+lung,JS-disc*,0.539,0.536,0.541,Harmony,0.518,0.021
+sim1,Harmony,0.628,0.539,0.688,scVI,0.626,0.002
+sim2,scVI,0.474,0.489,0.464,W-critic*,0.381,0.093
+atac_small,W-critic*,0.557,0.566,0.55,JS-disc*,0.541,0.015
+immune_hum_mou,JS-disc*,0.427,0.455,0.409,scVI,0.42,0.007
+atac_large,W-critic*,0.543,0.547,0.54,OT/IPM*,0.539,0.004

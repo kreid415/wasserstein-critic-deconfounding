@@ -1,0 +1,4 @@
+score,n_pairs,critic,disc,delta,wilcoxon_p,critic_wins_%
+scib_overall,459,0.4216,0.3572,0.0644,1.93e-30,75.2
+batch_correction,459,0.5081,0.5057,0.0024,1.48e-02,56.9
+bio_conservation,459,0.3639,0.2582,0.1057,1.26e-30,75.8

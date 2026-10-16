@@ -1,0 +1,101 @@
+{
+  "version": 4,
+  "created_at": "2026-08-26T02:10:00.000Z",
+  "task_summary": "Reproducible final benchmark: all formulations + all baselines × all datasets, fixed a-priori λ grid, both decoders, 3 seeds, GPU — regenerated from one manifest",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Provision from base",
+      "delegations": [
+        {
+          "name": "Setup",
+          "steps": [
+            {
+              "title": "Restore all 8 datasets + verify checksums",
+              "description": "Finish the background re-download of all 8 datasets (6 light + atac_large 85k + cross-species 98k), verify md5s against the recorded values, prep each into the scoring-ready h5ad (counts layer + batch/celltype keys) via the harness load_task. These raw inputs + committed code are the ONLY things the final run may depend on — no prior latent, scored row, or probe result is reused."
+            },
+            {
+              "title": "Measure GPU per-epoch cost (scheduling only) + re-verify bit-identity on GPU",
+              "description": "On the GPU scvi env (scvi-api, CUDA torch 2.13), run 5-epoch timing probes per arm on a small/medium/98k dataset to derive s/epoch(n_obs) — used ONLY to schedule and size the run, never to choose λ or configs. Same cell re-runs the seeded λ=0 adversary=none vs stock LinearSCVI bit-identity gate on GPU (document the GPU-side tolerance), keeping the upstreamable guarantee intact. Confirm 98k cells fit in 10GB VRAM at batch=512."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Declare the fixed λ grid (a-priori, committed)",
+      "delegations": [
+        {
+          "name": "Grid",
+          "steps": [
+            {
+              "title": "Declare one fixed log-spaced λ grid per formulation family",
+              "description": "Pre-register (in a committed manifest, before any sweep result exists) a single fixed λ grid applied identically to every dataset/decoder/seed. Two families because their loss-injection scales differ by a MEASURABLE, documented factor — the adversarial arms (discriminator + W1 critics) enter via λ·fool-loss; the critic-free arms (MMD, Sinkhorn) add the divergence directly (~an order of magnitude larger λ). The grid spans 0 → past-saturation on a log scale (e.g. adversarial {0, 5, 20, 50, 150}; critic-free {0, 50, 200, 500, 1500}), wide enough that each dataset's peak falls INSIDE the grid rather than being tuned to it. The rescaling rationale is derived from the scVI sum-loss magnitude (a reproducible property of the objective), NOT from any past probe or immune result — document the derivation in the manifest header. ALSO pre-register (in the same header, before any result exists) ONE single λ per formulation family to be used for the secondary baseline-comparison table, so that summary number is not selected on the data it reports."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Full sweep from scratch (adversarial + all baselines, all datasets)",
+      "delegations": [
+        {
+          "name": "Adversarial sweep",
+          "steps": [
+            {
+              "title": "Run the full adversarial matrix on GPU",
+              "description": "6 formulations × 8 datasets × 2 decoders × the fixed λ grid × 3 seeds, on the GPU scvi env, one config per job with its own tag-encoded output file (no monolithic tasks — heavy datasets timeout otherwise), latents to durable storage. Resume-safe driver, rows==latents invariant checked. Every config trained fresh from the committed code + fixed seed; no prior latent reused."
+            }
+          ]
+        },
+        {
+          "name": "All baselines from scratch",
+          "steps": [
+            {
+              "title": "Re-run every baseline on all 8 datasets",
+              "description": "harmony / scanorama / PCA / scVI / LinearSCVI / Seurat, re-run FROM SCRATCH on all 8 datasets × 5 seeds (not the heavy-two fill — the existing light-6 baseline rows are NOT reused, so the whole benchmark comes from this single run), scored through the identical full_metric_suite. Two-stage where needed (prep in harness env → fit in method env → score in kBET env), matching the adversarial scoring path exactly."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    },
+    {
+      "name": "Score + analyze + figures",
+      "delegations": [
+        {
+          "name": "Analysis",
+          "steps": [
+            {
+              "title": "Score every config through full_metric_suite",
+              "description": "Score all adversarial + all baseline configs in the kBET env (per-config, timeout-guarded), project scIB convention (0.4 batch + 0.6 bio, cLISI negated), assemble the full curve CSV with per-metric values. Every scored row is from THIS run."
+            },
+            {
+              "title": "Frontier-dominance analysis (no per-method λ selection) + 5-seed CIs",
+              "description": "PRIMARY result is selection-free: for each (dataset, decoder) plot the full scIB λ-response CURVE per formulation with 5-seed mean ± CI bands, and test whether the discriminator curve dominates the W1-critic and OT curves across the entire λ range (curve-level comparison — no post-hoc best-λ pick, which would be winner's-curse biased since the max is taken over ~5 λ). SECONDARY summary table only: compare each method at a SINGLE PRE-REGISTERED λ (declared in the manifest before results exist, per formulation family — NOT this run's argmax) against baselines via mean-rank across datasets + paired tests, explicitly labelled 'pre-registered λ' so no operating point is chosen on the data being reported."
+            },
+            {
+              "title": "Build publication figures + FINAL_RESULTS.md",
+              "description": "Primary figure: per-(dataset,decoder) λ-response CURVES per formulation with 5-seed CI bands, showing discriminator-curve dominance across the λ range (peak demonstrably inside the fixed grid). Secondary figure/table: baseline comparison at the pre-registered λ with mean-rank + CIs, explicitly labelled. Written benchmark narrative with every claim traced to a curve or the pre-registered-λ table + CI + the one committed manifest — no claim rests on a data-selected operating point. Commit all scripts + the manifest; save figures/tables/report as artifacts. State the single-command regeneration path."
+            }
+          ]
+        }
+      ],
+      "id": "phase-3"
+    }
+  ],
+  "desired_outputs": [
+    "scvi_final_manifest.tsv — the ONE committed manifest (fixed λ grid, all formulations + baselines × 8 datasets × 2 decoders × 5 seeds) that regenerates the entire benchmark from raw data + code",
+    "scvi_final_full_curve.csv — every adversarial config scored through full_metric_suite, project scIB convention, all from this run",
+    "scvi_final_baselines.csv — all 6 baselines on all 8 datasets × 5 seeds, re-run from scratch (no light-6 reuse)",
+    "scvi_final_lambda_curves.png — PRIMARY: per-(dataset,decoder) λ-response curves per formulation on the fixed grid, 5-seed CI bands, showing discriminator-curve dominance (selection-free)",
+    "scvi_final_ranking.png — SECONDARY: baseline comparison at the PRE-REGISTERED λ (not this run's argmax), mean-rank + 5-seed CIs, all 8 datasets, both decoders",
+    "FINAL_RESULTS.md — consolidated benchmark narrative, every claim traced to a config + CI, with the single-command regeneration path"
+  ],
+  "feasibility": {
+    "confidence": "medium",
+    "rationale": "Infrastructure is proven (GPU scvi-tools env, bit-identical adversary plan, per-config scoring). Making it reproducible-from-base — fixed a-priori λ grid applied to every dataset, all baselines re-run from scratch, nothing reused — increases the compute (~1600-2300 worker-h: 6 formulations × 8 datasets × 2 decoders × ~5 λ × 5 seeds, plus 6 baselines × 8 datasets × 5 seeds, incl. two 85k/98k-cell sets and O(n²) critic-free arms) but removes every selection-on-past-data and stitched-benchmark objection. GPU per-epoch cost and VRAM headroom on 98k cells are measured in Phase 0 before the full launch, so the total may shift ±30%."
+  }
+}

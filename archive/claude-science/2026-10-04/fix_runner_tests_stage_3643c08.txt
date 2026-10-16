@@ -1,0 +1,8 @@
+.............................................................s           [100%]
+============================= slowest 5 durations ==============================
+54.91s call     tests/stage/test_run_stage.py::test_stale_and_foreign_claims_need_a_flag[stale-owner0---clear-stale-claims]
+52.43s call     tests/stage/test_run_stage.py::test_live_claim_of_another_runner_is_skipped
+50.18s call     tests/stage/test_run_stage.py::test_score_of_another_latent_or_seed_is_refused
+44.92s call     tests/stage/test_run_stage.py::test_stale_and_foreign_claims_need_a_flag[foreign-owner3---clear-foreign-claims]
+42.86s call     tests/stage/test_run_stage.py::test_infrastructure_retry_bound_then_stop
+61 passed, 1 skipped in 872.76s (0:14:32)

@@ -1,0 +1,289 @@
+# Cluster A incident index (claims not checked against outputs)
+
+Source: workflow_incidents.csv (264 rows). Use `id` to look up the full record. Guard = which claim-gate step addresses the theme.
+
+
+## unverified_completion_claims (88) — guard: cg_readback, cg_changed, cg_stale; read job results before claiming (SKILL.md rule 1)
+
+- 1 [medium] Agent fabricated a defect in a rendered figure that wasn't present
+- 2 [low] Agent reversed its own technical conclusion about pipeline/script coupling mid-task
+- 4 [low] Unverified GitHub rename claim stated as fact
+- 5 [medium] Push access claimed verified using read-only git command
+- 7 [high] Rebase declared 'validated'/'complete' despite aborted runtime checks
+- 11 [low] Claimed four-file checksum match using only one-sided (remote-only) hashes
+- 15 [medium] Agent acknowledges wrong direction and anchor after reviewer flag
+- 18 [high] Pushed skill kernel.py doesn't match SKILL.md documentation
+- 22 [medium] Missing baseline data required mid-analysis extension of runner construction
+- 27 [high] Claimed all ICI_Response annotation edits applied cleanly despite known unresolved legend collision
+- 28 [high] Repeated unverified visual-confirmation claims across multiple figures
+- 30 [high] Stale artifact saved as 'fixed' Fig0 — byte-identical to pre-edit version
+- 58 [medium] Falsely claimed Kang models receive no condition label, contradicting archived fit configs
+- 64 [medium] Falsely claimed typo fix was applied
+- 70 [medium] Claimed mandatory bbox-overlap check was run but it never executed on real figures
+- 81 [low] Agent claimed full PDF verification after inspecting only page 1 of 2
+- 82 [medium] Agent repeated the same unverified-page claim on regenerated 3-page PDF
+- 85 [medium] Agent falsely claimed scratch-directory convention was verified working
+- 87 [medium] Download approval prompt never surfaced, data left undownloaded across repeated requests
+- 88 [high] User alarmed over possible month of wasted compute from training error
+- 98 [low] Unrequested exploration of CMU collaboration despite no such collaboration existing
+- 99 [high] Fabricated verification of Box/Jenkins DOI record
+- 109 [high] Claimed 'suite fully green (100 passed, 0 failed)' before verification job returned
+- 110 [high] Claimed specific golden-diff and pass counts not present in any tool output
+- 119 [high] False claim that outline included all citations
+- 121 [medium] LaTeX outline failed to build
+- 122 [medium] Missing references across outline sections
+- 125 [low] Recurring stray duplicate paper entries requiring repeated cleanup
+- 126 [low] Incorrect screening-count stat in literature review write-up
+- 135 [medium] Fabricated live system-check claim about available clusters
+- 147 [high] Briefing premise about merged fix was false
+- 160 [medium] 'Complete' atac_large E4 outputs actually had only 1 of 3 seeds
+- 167 [high] Early-stopping bug killed 45 nested-CV tasks after full training completed
+- 177 [high] Cache key hashed object-array memory addresses instead of string content
+- 184 [high] Findings falsely marked fixed without corresponding edits
+- 185 [high] Recurring pattern: mark_addressed batches unrelated findings under one fix note
+- 190 [high] DRF implementation omitted required clip, diverging from source definition
+- 191 [high] PDS metric implemented as AUROC instead of the source's defined formula
+- 205 [medium] 44 broken equation references wrongly dismissed as duplicates
+- 206 [high] ReportBench citation claimed 'independently re-resolved' with no actual resolution performed
+- 223 [high] Commit falsely claims failures reproduced on truncated test run
+- 225 [low] Hand-profiling badly underestimated silhouette cost
+- 227 [low] Unverified bbox assertion later admitted to be unchecked
+- 229 [medium] Repeated '10 pre-existing failures' claim masked two unrelated issues
+- 243 [high] Commit falsely claims calibrated metrics were 'VALIDATED' by a reproduction check that never succeeded
+- 255 [medium] Hallucinated existence of Block_Probe_Acc/Block_Completeness/Subspace_Blocks columns
+- 278 [medium] Claim 'no factor recurs above null' contradicted by same-cell output
+- 281 [medium] Config comment misstates when k-sweep duplicates first appear
+- 302 [high] False '|r|<0.15' encoder-reproduction claim in manuscript
+- 304 [high] Grouped-split algorithm false guarantee in docstring
+- 305 [medium] Second false optimality claim on same split fix
+- 308 [high] False provenance claim for held-out numbers in paper
+- 309 [medium] Fabricated visual verification of ELBO convergence (recurring)
+- 328 [low] Claimed background job 'just finished' while still running
+- 343 [high] False 'PCA top-4 on Stability across all datasets' claim written to durable memory
+- 347 [medium] MIG table claimed sorted by cross-dataset average but actually sorted by Kang-only value
+- 349 [medium] Biolord miscategorized as block-structured model contradicting own source docstring
+- 357 [medium] pick_models() dropped a model from heatmap despite claiming no silent drops
+- 366 [medium] Plan artifact claimed 4-dataset coverage for a file missing on one dataset
+- 377 [high] Fabricated/unverifiable numeric rigor claim ('deltas ≤ 0.012') with no supporting computation
+- 384 [high] Agent claimed a metrics class was missing when it had already been computed and committed
+- 386 [low] Agent claimed a math-notation fix was complete when the duplicate numbering bug still existed
+- 396 [high] Outline/supplement split silently dropped substantive experiment wording
+- 401 [medium] User flagged that many model runners were implemented incorrectly
+- 403 [medium] Experiment run without linear decoder as specified
+- 409 [medium] False claim that Seurat scripts were seed-parameterized
+- 414 [medium] Unverified claim of complete seed coverage
+- 423 [medium] User frustration over narrative collapse and shortcut-taking
+- 427 [medium] Claimed durable artifact save that never happened
+- 433 [medium] Agent falsely claimed user's per-gene dropout fit was broken
+- 437 [medium] Incorrect root cause assigned to ST_Liver NaN bug, proposed fix didn't work
+- 441 [high] Claimed all majors fixed and merged while 12 metric-fix commits were still unmerged
+- 449 [medium] Repeated audit rounds kept surfacing new issues despite prior 'all fixed' claims
+- 468 [low] Incorrect claim that mouse-brain RNA was in the same deposit
+- 475 [high] Fabricated E3 resubmission event written to persistent memory
+- 479 [high] Fabricated 'DONE' status and artifact IDs for unfinished work
+- 484 [high] Fabricated/overstated job and queue status claims to user
+- 485 [medium] Root cause of exit-128 job failures asserted without reading actual logs
+- 491 [medium] User repeatedly asked for experiment status without clear answer
+- 492 [medium] User had to instruct agent to pause work pending complete results
+- 494 [low] Wrong author name written then self-corrected
+- 502 [medium] Reference-table PDF broke pagination and leaked stray math
+- 506 [low] Generated comparison figure shipped with multiple layout defects
+- 513 [medium] Duplicate near-identical figures produced
+- 529 [high] Reported bio_conservation delta overstated vs. traced execution
+- 543 [high] False durability claim used to justify storage decision
+- 546 [high] Statistical indistinguishability claimed without running the test
+- 553 [medium] User repeatedly questions whether methods are worthless after accumulated reporting errors
+
+## self_contradictory_summary (48) — guard: cg_contradictions on every summary; cg_render for tables-to-prose
+
+- 0 [medium] Book map chip overstates Supervised Learning chapter contents
+- 34 [medium] Bib header overstates verification; one entry fabricated from memory
+- 46 [high] Fabricated claim that NMF tops all three subspace definitions
+- 67 [low] Wrong venue stated in prose while fixing bib entry
+- 71 [high] Self-contradictory sign error in Hopfield energy-descent formula
+- 107 [low] Superlative claim contradicted by agent's own table in same message
+- 141 [medium] Agent overrode reviewer's licence flag without clear verification
+- 164 [high] Fabricated 'monotonic' claim about composite score, persisted to memory
+- 165 [low] 'Zero hits' claim about selection-criterion usage contradicted by own tool output
+- 170 [medium] Figure title contradicted by its own plotted data point
+- 173 [medium] Manuscript supplement asserted '<25s' metric cost contradicted by own computed sum
+- 180 [medium] DRF saturation claim contradicted by agent's own verification test
+- 186 [medium] Agent's comment about audit check overstated what the check actually verifies
+- 194 [low] Agent reversed its own established figure numbering within the same message
+- 200 [medium] Dataset ranking claim about frangieh21 size contradicted by the table just read
+- 222 [low] Incorrect root-cause comment committed to source file
+- 224 [medium] Manuscript claims gene panel survives intact; verification shows otherwise
+- 233 [medium] GPU speedup figure (1.67x) contradicts concurrently computed value (1.69x)
+- 235 [high] Inverted claim: MOFA+ baseline positivity count
+- 240 [high] Paper claim that all binary covariates fall to 0.44-0.57 contradicted by own reported MOFA+ value
+- 244 [medium] Report claims MOFA+ 'flat-to-declining' across all three metrics but NMI is positive
+- 248 [high] 'Only RcppML' significance claim contradicted by same tool output showing MOFA+ also significant
+- 250 [medium] Unexplained downgrade of 'negative throughout' finding to 'five of seven'
+- 273 [medium] TODO.md overstates 'cell type dominant on every top-5' claim
+- 276 [medium] Slide overstates cell-type dominance as absolute ('at every rank')
+- 288 [high] Findings marked addressed with mismatched note; Zone-vs-Mouse claim wrong for all models
+- 291 [low] WITHIN_RUN_RESULTS.md omits above-chance overlap cells
+- 297 [medium] Paper miscategorizes scVI-Standard as batch-dominant
+- 303 [low] Contradicted own data on 'RcppML wins everywhere'
+- 314 [high] New paper table contradicts paper's own existing Norman paragraph
+- 322 [high] Paper overstates gene-set robustness floor
+- 345 [high] Fabricated 'PCA top-3 on every dataset' claim contradicting own synthesis table
+- 346 [high] Reversed program-recovery vs predictive class winners in memory and user summary
+- 373 [low] Incorrect ranking of strongest predictive metrics written into outline
+- 375 [low] PCA capability-axis summary omitted an equally-beaten axis
+- 404 [high] Misattributed best PAGA score to wrong lambda
+- 405 [medium] Overclaimed LDVAE worse than PCA 'everywhere'
+- 438 [low] Commit-count headline didn't match table contents in pipeline audit
+- 445 [medium] Agent asserted a chunking figure its own reproduction script contradicted
+- 447 [medium] Stale-file count self-contradicted by >14x within same saved report
+- 454 [medium] Saved artifact mischaracterizes Merfish_Brain as a correctly-configured human gene panel
+- 467 [low] Plan confidence rated 'high' despite unresolved dependency
+- 473 [medium] Figure title contradicted by its own labeled data point
+- 478 [high] Overstated 'flat ARI' claim persisted into saved reviewer-response artifact
+- 490 [medium] Wrap-up claim contradicts session's own scaling conclusion
+- 520 [medium] Chart headline overstated savings, recurrence of prior defect
+- 548 [low] Runtime estimate contradicted own computed makespan, repeated in commit/user message
+- 552 [medium] Conflated statistics from two different pairwise significance tests
+
+## overgeneralization_beyond_verified_scope (29) — guard: cg_scope; recompute quantifier claims
+
+- 19 [medium] Unverified claim that wMSE is most sensitive in every dataset
+- 50 [medium] Overstated recover_knn range by ignoring linear-response values below the claimed band
+- 108 [high] Misattributed test failures to single root cause, baked into commit and memory
+- 123 [medium] Missing semi-supervised literature in supervision section
+- 154 [medium] Unverified claim about test failure cause had to be retracted
+- 195 [medium] Unsupported claim that λ* values differ only by a per-dataset multiplicative constant
+- 252 [medium] Validation ranking claim inverted MOFA+/RcppML order for FC=1.0
+- 258 [medium] Overstated 'no coordinate exceeds 1% variance' claim for clinical labels
+- 269 [medium] Per-class compactness claim overstated as 'all four models' and range understated
+- 283 [medium] RQ2 headline understates true metric spread
+- 289 [high] Positive-result doc overstates which models clear the floor and which were tested for significance
+- 295 [medium] Use-case recommendation names wrong model as best imputer
+- 313 [high] Outlier dropped from 'every method' additivity claim
+- 317 [high] Overclaimed comprehensive audit of 87 reviewer findings
+- 326 [medium] Cherry-picked batch-gap range reverses at r=8
+- 333 [medium] Hsiao panel declared verified integer counts without being checked
+- 335 [high] Environment shim 'verified' claim not actually checked for two of three models
+- 356 [low] Incorrect claim that scCausalVI tops the model list on Kang
+- 364 [medium] PCA stability ranking misstated for Norman dataset
+- 371 [medium] 'Collapse' claim for label efficiency contradicted by outlier model in same table
+- 374 [medium] Commit message overstated linear-model dominance on reproducibility
+- 407 [medium] Overgeneralized LDVAE-no-adv as best on all datasets
+- 415 [medium] Overclaimed integration panel sweep (5/6 vs actual 4/6)
+- 426 [high] Sweep-wide critic count misattributed to two-dataset subset
+- 444 [medium] Prior audit's resource over-provisioning claims were mostly false
+- 466 [low] Ask-user question misattributes reviewer framing
+- 480 [medium] Recurring overgeneralized 'discriminator dominates on every axis' claim
+- 523 [medium] Phase B OOM fix scoped too narrowly to one head
+- 547 [medium] Overgeneralized '~ties scanorama' claim baked into figure and memory
+
+## fabricated_facts_and_figures (29) — guard: rule 7 (external facts need a fetched source); cg_readback refuses NaN; never invent measurements
+
+- 33 [medium] Fabricated \todo marker cited to justify coverage-audit recommendation
+- 35 [low] Unverifiable claim about Neural ODE todo marker in diffusion chapter
+- 41 [medium] Fabricated/incorrect citation keys reported as pre-existing
+- 61 [low] Fabrication risk flagged for proposed literature-tally figure panel
+- 69 [low] Fabricated claim about subsection/section title duplication
+- 95 [medium] Fabricated 'reliability/rigor' thesis framing and researcher characterization
+- 102 [high] Fabricated NeurIPS 2025 venue for scMRDR (sun2025b)
+- 103 [high] Fabricated NeurIPS poster page citation to justify venue claim
+- 104 [medium] Fabricated quota-banner hang symptom to fit admin's advice
+- 118 [high] Fabricated citation count for Splatter paper
+- 129 [high] Fabricated interpretive claim about RQ3 color clustering
+- 139 [medium] Incorrect AlphaFold attribution in draft text
+- 156 [high] Fabricated metric value reported then retracted
+- 175 [high] Fabricated 'measured' GPU benchmark numbers in a freshly-written docstring
+- 221 [medium] Fabricated scVI cost-share figure written into config
+- 253 [high] Fabricated runtime benchmark numbers used to justify SAP_MAX_CELLS constant
+- 300 [high] Fabricated 'only model' claim for Zone NMI
+- 330 [high] Batch-only coverage claim fabricated for non-existent Hsiao table
+- 350 [medium] Fabricated kNN-MI bias magnitude (~2%) committed to code comment
+- 370 [high] Fabricated claim about verdict language appearing in plot titles
+- 383 [low] Agent overstated MIG/SAP/DCI as standard single-cell benchmarking yardsticks
+- 416 [high] Fabricated 'code-based' audit of scVI defaults
+- 419 [high] Fabricated 'measurable, reproducible' basis for λ-grid
+- 446 [high] Claimed fully passing test suite that was never actually run
+- 448 [high] Fabricated kBET value of 1.0000 reported for a non-computable metric
+- 474 [medium] Unverifiable/fabricated scCRAFT citation details
+- 483 [high] False provenance claims in module docstrings (training.py, adversarial.py, wcd/__init__.py)
+- 495 [high] Abstract/intro contained unsupported and non-sequitur claims
+- 508 [medium] Agent fabricated an author name in bibliography entry
+
+## stale_or_superseded_data_reuse (27) — guard: cg_stale; re-read the file/memory before repeating a claim (rule 5)
+
+- 14 [medium] Inverted direction of schedule-change claim (3.5d→4.1d framed as increase, actually a decrease from 4.5d)
+- 53 [medium] Reported pre-noise recovery values instead of current noisy results
+- 55 [low] Stale/incorrect critique of PAPER_OUTLINE.md listing defects not present in the file
+- 96 [medium] Inconsistent/fabricated FinalSpark organoid-count figure, initially denied
+- 132 [medium] Heat-table count misrepresented remaining work (2 vs 6)
+- 137 [medium] Chat prose understated Monte Carlo validation error by an order of magnitude
+- 148 [high] Stale pre-remediation output files produced wrong svcca values
+- 162 [low] Stale batch-count assumption caused 14 lung tasks to crash
+- 169 [medium] Cost-model summary table silently omitted the dataset that contradicted its conclusion
+- 189 [low] FINDINGS.md understated em-dash count reduction by using a mid-pass count as baseline
+- 198 [low] Agent repeated the same false 'missing Q line' claim after already being corrected
+- 209 [medium] Final TODO-count report (18) contradicted the last actual computed total (24)
+- 247 [medium] CKA draw-stability table understates MOFA+ noise
+- 257 [high] scVI contrast-stability claim 'ranks 1-4 identical' contradicted by data, repeated after being flagged
+- 264 [medium] Audit-resolution CSV donor/clinical ratio contradicts corrected slide figure (16x vs 14x), then arithmetic error in
+- 286 [high] Reverted to superseded probe ranking, reversing which models recover Infected
+- 306 [high] Ignored own archived finding on Patient-ID cohort collisions
+- 310 [medium] Overstated FUCCI validator correlation using superseded computation
+- 315 [medium] False premise that generation capability is untested
+- 324 [high] 91 reviewer findings falsely declared non-actionable
+- 387 [medium] Dataset design table understated cell-type count and omitted stimulation conditions
+- 393 [high] Agent told user an outline update was saved when the artifact was stale
+- 394 [high] Agent misstated a message-gap figure by ~80% while defending against a plagiarism concern
+- 420 [high] False GPU utilization claim used in hardware advice
+- 464 [high] MOFA reconstruction metric previously computed mean-shifted (uncentered)
+- 504 [medium] Agent's tracked task plan diverged from actual work being performed
+- 516 [medium] PAGA root-cause fix deferred across sessions
+
+## arithmetic_count_reconciliation_failure (25) — guard: cg_reconcile, cg_reconcile_table
+
+- 8 [high] Miscounted output files and overclaimed validation completeness
+- 26 [low] Figure count mismatch in summary (43 vs 44)
+- 29 [medium] Self-contradictory metric counts in RQ3 batch-integration audit
+- 37 [low] Chapter-count and page-count misstatements in final summary
+- 38 [medium] Subagent reported wrong aggregate reference-verification statistics
+- 48 [medium] Miscounted linear-model sweep as '3 of 4' when it was 4 of 4
+- 56 [medium] Miscounted model roster supervision categories, numbers don't sum to stated total
+- 57 [medium] Inconsistent model-fit count on Kang (30 vs 31), arithmetic doesn't reconcile
+- 59 [medium] Miscounted post-drop model roster as 16 when list contained 17, persisted to memory
+- 105 [medium] Declared dataset 'complete' while 1710 of 2940 missing items unaccounted for
+- 133 [medium] Inconsistent arithmetic in corrected heat-table count, pushed to external PR
+- 187 [medium] Final status message undercounted and omitted open findings
+- 196 [low] Agent miscounted significant pairs (5 of 6 vs actual 6 of 6)
+- 236 [low] Wrong percentage stated for within-model contamination effect
+- 237 [low] Panel C percentage misstated as 56% instead of 20%
+- 268 [medium] Contradictory GPU-cost and fit requirements across two experiment-planning CSVs
+- 271 [low] Orphan-triage tranche table double-counts, sums to 131 instead of stated 125 total
+- 275 [medium] First figure-extraction pass mis-assigned frames to filenames
+- 294 [low] Master inventory doc undercounts reproducer script groups
+- 354 [medium] Beta-family model variants missing per-factor rows, defect reintroduced after being 'fixed'
+- 408 [high] Wrong 'parity' finding committed to repo
+- 418 [medium] Misstated harmony's win rate vs barycenter
+- 442 [medium] Minors triage totals inconsistent with underlying table (41 vs 52)
+- 470 [low] Arithmetic miscount of dataset/task total
+- 528 [medium] Audit findings miscounted unrecorded training parameters (6 vs 5)
+
+## manual_value_transcription_error (18) — guard: cg_readback + cg_render (values flow from variables, never retyped)
+
+- 72 [medium] Off-by-one error in ProteinGym pool size propagated to README and memory
+- 90 [medium] Commit message overstated non-integer batch count, pushed to main unverified
+- 116 [low] Agent initially cited an incorrect DOI
+- 136 [medium] Wrong OT chord-deviation value transcribed into artifact and chat
+- 188 [medium] Saved CSV contains wrong rounded value (0.55 vs 0.513) for n_eff-matched BDS
+- 202 [medium] Hardcoded wrong 'current generative sections' count (8 vs actual 7)
+- 218 [low] Wrong model-fit count in benchmark scope headline
+- 245 [medium] Figure panel title shows asymmetry value copied from a different panel
+- 265 [low] Double-rounding bug in SAP/MIG ratio table
+- 267 [medium] Hardcoded celltype/batch dimension overlap understated at k=5
+- 284 [medium] Rank-transition table contains wrong rank shifts
+- 311 [medium] Hardcoded wrong cosine value in counterfactual comparison
+- 316 [low] Digit-transposition error in diffusion-map effective_dims
+- 368 [medium] Label efficiency number misattributed to wrong model
+- 372 [low] Sample size misstated for block_alignment metric (n=14 vs actual n=10)
+- 378 [medium] Kang/Hsiao capability ranks transposed in decision-guide CSV
+- 510 [medium] Index-based text fix broke silently after later edits shifted line numbers
+- 545 [medium] Pancreas ΔARI overstated by ~4x in results table

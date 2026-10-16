@@ -1,0 +1,9 @@
+prereg	wcd-gpu	tests/prereg	rc=0	31s	84 passed, 212 warnings in 28.64s
+stage	wcd-gpu	tests/stage	rc=0	96s	26 passed, 1 skipped in 95.36s (0:01:35)
+wcd_vae	wcd-gpu	tests/wcd_vae	rc=0	120s	159 passed, 66 warnings in 117.32s (0:01:57)
+x13_wcdgpu	wcd-gpu	tests/x13	rc=5	8s	1 skipped in 6.24s
+x13_wcdkbet	wcd-kbet	tests/x13	rc=0	489s	13 passed, 12 warnings in 487.55s (0:08:07)
+scoring	wcd-kbet	tests/scoring	rc=0	59s	4 passed, 129 warnings in 56.33s
+scvi	scvi-api	tests/scvi	rc=0	101s	72 passed, 1 skipped, 162 warnings in 98.01s (0:01:38)
+stage_e2e	wcd-gpu	tests/stage/test_run_stage_e2e.py	rc=0	115s	1 passed in 114.26s (0:01:54)
+DONE

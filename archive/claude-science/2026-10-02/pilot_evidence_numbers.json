@@ -1,0 +1,24 @@
+{
+ "sigma_d_paired": 0.0479,
+ "seed_resid_corr_mean": 0.144,
+ "seed_resid_corr_median": 0.261,
+ "stock_vs_lam0_cond": 0.0909,
+ "ref_l1_minus_lam0": {
+  "overall": 0.0111,
+  "batch": 0.1507,
+  "bio": -0.0821
+ },
+ "disc_l1_minus_lam0": {
+  "overall": 0.0059,
+  "batch": 0.0119,
+  "bio": 0.0017
+ },
+ "graph_conn_range": [
+  0.9716,
+  0.991
+ ],
+ "composite_shift_per_0p005_graphconn": 0.0206,
+ "worst_case_7graph": 0.0304,
+ "immune_in_hum_mou_overlap": "33506/33506",
+ "atac_small_in_large_overlap": "3618/11270"
+}

@@ -1,0 +1,9 @@
+task,n_batches,n_labels,min_batches_per_label,isolated,warn,labels_lt10,labels_lt90,kbet_untested
+atac_large,11,7,4,"Cerebellar Granule Cells(4241 cells,4b)",,,,
+atac_small,3,7,1,"Cerebellar Granule Cells(1347 cells,1b)",,,,Cerebellar Granule Cells
+immune,10,16,3,"CD10+ B cells(207 cells,3b);Erythrocytes(1502 cells,3b);Erythroid progenitors(463 cells,3b);Monocyte progenitors(428 cells,3b)",,,,
+immune_hum_mou,23,19,1,"T cells(289 cells,1b)",,,,T cells
+lung,16,17,4,"Type 1(424 cells,4b)",,,Ionocytes(46),
+pancreas,9,14,4,"t_cell(7 cells,4b)",,t_cell(7),macrophage(79);mast(42);epsilon(32);schwann(25);t_cell(7),t_cell
+sim1,6,7,2,"Group7(204 cells,2b)",,,,
+sim2,16,4,5,"Group1(4807 cells,5b)",,,,

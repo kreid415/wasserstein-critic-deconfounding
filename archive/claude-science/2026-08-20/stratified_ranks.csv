@@ -1,0 +1,8 @@
+,pancreas,immune,lung,sim1,sim2,atac_small
+bary LDVAE_unc,4.0,3.0,6.0,3.0,2.0,1.0
+bary LDVAE,3.0,4.0,4.0,4.0,3.0,3.0
+LDVAE no-adv,5.0,5.0,7.0,7.0,4.0,5.0
+PCA,7.0,7.0,5.0,6.0,7.0,2.0
+Seurat,1.0,2.0,1.0,5.0,1.0,6.0
+harmony,2.0,1.0,2.0,1.0,6.0,4.0
+scanorama,6.0,6.0,3.0,2.0,5.0,7.0

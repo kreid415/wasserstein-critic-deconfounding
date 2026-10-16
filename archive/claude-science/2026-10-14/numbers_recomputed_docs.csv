@@ -1,0 +1,39 @@
+id,quantity,quoted_in,quoted,recomputed,status,in_documents,how
+N01,"Power, six real tasks: standard error",PREREG.md:246; PAPER_PLAN.md:192,0.045,0.0450,reproduced,True,recompute_power.py
+N02,"Minimum detectable effect at 80% power, six tasks",PREREG.md:246-247,0.131,0.1307,reproduced,True,recompute_power.py
+N03,"Power at a 0.02 difference, six tasks",PREREG.md:247,0.104,0.1044,reproduced,True,recompute_power.py
+N04,Four families: minimum detectable effect and power,PREREG.md:247; PAPER_PLAN.md:192,0.182 and 0.088,0.1818 and 0.0878,reproduced,True,recompute_power.py
+N05,Within-block SD and between-task SD,PREREG.md:248,0.030 and 0.109,0.0298 and 0.1094,"reproduced, wording issue",True,recompute_power.py (not the power of frozen P1: DOC-07)
+N06,"Smallest exact two-sided Wilcoxon p, six datasets","PREREG.md:106, :251",0.031,0.03125,reproduced,True,recompute_power.py
+N07,"Holm first threshold, four tests","PREREG.md:106, :251; PAPER_PLAN.md:184",0.0125,0.0125,"reproduced, wording issue",True,recompute_power.py (spec and code use six: DOC-05)
+N08,"Holm first threshold, six tests (spec section 15, analysis_x1.py)",ANALYSIS_SPEC.md:271-272,(number not quoted),0.00833,reviewer addition (not quoted),True,recompute_power.py
+N09,"Power without sim1 (final review I073): SE, minimum detectable effect, power",(not in the amendments),(not quoted),"0.0236, 0.0684, 0.182",reviewer addition (not quoted),True,recompute_power.py
+N10,"Bio-noise SD ratio with / without trajectory, immune conditioned, six arms",PREREG.md:232-235,3.3 to 5.4,3.30 to 5.41,reproduced,True,r1_without_trajectory.py at 018c8f1; i091_summary.py
+N11,delta_c range at n = 3,PREREG.md:235,0.10 to 0.13,0.102 to 0.127,reproduced,True,i091_summary.py
+N12,Conditioned families whose R1 grid changes without trajectory,PREREG.md:235-238,"3 change, 5 unchanged","3 change, 5 unchanged","reproduced, wording issue",True,re-run CSV identical to committed (Sinkhorn part from discarded fits: DOC-06)
+N13,Pilot: plain-scVI biology score range per cell,ANALYSIS_SPEC.md:120,0.67 to 0.90,0.6658 to 0.8966,reproduced,True,recompute_pilot_ranges.py
+N14,"Pilot: change in biology score, all 300 points",ANALYSIS_SPEC.md:121,-0.59 to +0.23,-0.5904 to +0.2310,"reproduced, wording issue",True,"recompute_pilot_ranges.py (Sinkhorn excluded, unstated: DOC-17)"
+N15,Pilot: middle half of the 300 points,ANALYSIS_SPEC.md:121,-0.09 to 0.00,-0.0936 to +0.0047,reproduced,True,recompute_pilot_ranges.py
+N16,"Pilot: per-cell middle half, extreme cells",ANALYSIS_SPEC.md:121,-0.19 to +0.09,-0.1877 to +0.0904,reproduced,True,recompute_pilot_ranges.py
+N17,X1 manifest rows,ANALYSIS_SPEC.md:50,"3,000","3,000",reproduced,True,misc_counts.py
+N18,Sinkhorn pilot fits,PREREG.md:274,234 = 180 + 18 + 36,180 + 18 + 36 = 234,"reproduced, wording issue",True,misc_counts.py (rule order: DOC-02)
+N19,Discriminator rows with n_critic = 1,PREREG.md:243-244,every row,"1,191 rows, all n_critic 1",reproduced,True,misc_counts.py
+N20,"X6 pooled-critic rows at 1, 5, 10 steps",PREREG.md:244-245,"1, 5, 10","27 rows each at 1, 5 and 10",reproduced,True,misc_counts.py
+N21,Sinkhorn validation minibatches,PREREG.md:278-279,"3,076","3,076 (atac_small 1,180, immune 1,068, sim1 828)",reproduced,True,misc_counts.py (committed CSV)
+N22,Batches in the validation tasks,PREREG.md:279,"3, 10 and 6","3, 10 and 6",reproduced,True,check_task_facts.py
+N23,float32 accuracy criterion,PREREG.md:272-274,"met on the 598 hardest, failed on all 3,076","SI-58 accuracy criterion met by float32: 598 hardest: yes, all 3,076: NO",reproduced,True,committed summary read (not re-run)
+N24,Sinkhorn constants,PREREG.md:267-269,"tolerance 1e-4, cap 500,000, float64","1e-4, 500000, torch.float64",reproduced,True,misc_counts.py (alignment.py)
+N25,Fit identity at c3fd92d,PREREG.md:282-283,59 of 59 non-Sinkhorn identical,59 of 59 non-Sinkhorn identical; 0 of 4 Sinkhorn identical,reproduced,True,misc_counts.py (committed CSV)
+N26,Score identity at c3fd92d,PREREG.md:283-284,"7 of 7 latents, 32 columns",7 of 7 latents identical in 32 columns,"reproduced, wording issue",True,misc_counts.py (flags only; citation NB-39 vs NB-40: DOC-15)
+N27,Fit or scoring code changed between c3fd92d and 1e615eb,(supports PREREG.md:257),(not quoted),empty unchanged,reviewer addition (not quoted),True,misc_counts.py (git diff)
+N28,Commit hashes cited in section 9 that exist,PREREG.md section 9,all,14 of 14,reproduced,True,"misc_counts.py, commit_dates.py"
+N29,Immune cells inside immune_hum_mou,ANALYSIS_SPEC.md:57-58,"all 33,506","33,506 of 33,506",reproduced,True,check_task_facts.py
+N30,Cells shared by atac_small and atac_large,ANALYSIS_SPEC.md:58-59,"3,618","3,618",reproduced,True,check_task_facts.py
+N31,No-pair minibatches: X7 pancreas reference-anchored MMD,PREREG.md:287-288,expected,"27 fits, 25.9 expected to hit",reproduced,True,recompute_g01.py (model)
+N32,No-pair minibatches: X7 sim1 reference-anchored MMD,PREREG.md:287-288,expected,18 of 18 fits,reproduced,True,recompute_g01.py (model)
+N33,"No-pair minibatches 'rarely': X3 atac_small, X8 sim2, X1 sim1 (share of fits)",PREREG.md:288-289,rarely,"14%, 4.5%, 0.6%","reproduced, wording issue",True,recompute_g01.py (model; DOC-19)
+N34,R2 and R3 decisions with and without SI-66,PREREG.md:307 ('keep the defaults'),defaults kept,"R2 12/12 to 9/12 evaluable, R3 17/20 to 13/20; no switch in either case","reproduced, wording issue",True,si66_effect.py (own re-implementation; DOC-04)
+N35,Blocks flagged low-signal in the frozen R4-a1 record,PREREG.md:304-305,"immune/conditioned: b0 0.6382, b_common 0.6570",immune|1 0.6382 / 0.6570 (difference 0.0188); sim1|1 0.8120 / 0.8189 (difference 0.0069); other four blocks not flagged,"reproduced, wording issue",True,misc_counts.py (r4_a1_record.json; sim1|1 omitted: DOC-04)
+N36,"Manifest rows of arms none, scanvi, scvi_adv with lam = 0",guard review G-05 (not in the amendments),"1,908","1,428 + 240 + 240 counted across 8 files; 322 distinct rows in the manifest of record","reproduced, wording issue",False,lam_audit.py re-run; misc_counts.py (DOC-19)
+N38,"Early and train-mode captures in the Sinkhorn validation (12 x 234 = 2,808 final minibatches plus captures)",notebook NB-20261013-03 (not in the three documents),236,"192 + 76 = 268 (final 2,808; total 3,076)",not reproduced as quoted,False,misc_counts.py (DOC-19)
+N37,Pilot collapse counts put to the user (SI-75 question),"question text, not in the documents","reference 10/54, 15/54; discriminator 8/45, 17/54; +0.7 and -3.7 points","reproduce only without the R1 extension rows; with them discriminator 8/54 and difference +3.7 points (conditioned unchanged, -3.7)",not reproduced as quoted,False,recompute_p2_pilot_counts.py (DOC-17)

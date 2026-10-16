@@ -1,0 +1,123 @@
+{
+  "version": 3,
+  "created_at": "2026-10-02T20:30:48.520Z",
+  "task_summary": "Prepare and launch the Tier 1+2 rerun on local RTX 3080 + JHPCE",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Build and specify (parallel)",
+      "delegations": [
+        {
+          "name": "Prereg rules",
+          "steps": [
+            {
+              "title": "Draft the four pre-registered decision rules",
+              "description": "Write PREREG.md: A1 → 6-point λ grid per arm family; A2 → X1 adversary input (mean vs sample); A3 → X1 standardisation (off vs on); X1 → matched λ (lo/mid/hi) for follow-ups. Each rule is a deterministic function of scored results, with ties and failures defined."
+            },
+            {
+              "title": "Implement rule scripts with tests",
+              "description": "freeze_a1_grid.py, decide_a2_a3.py, freeze_matched_lambda.py read scored CSVs and write frozen manifests; unit tests on synthetic score tables; fail loudly on missing or NaN scores."
+            },
+            {
+              "title": "Restore A2/A3 as pilots before X1",
+              "description": "Builder: A2/A3 take matched λ from A1 and reuse A1 fits for their mean / standardisation-off halves; X1's adversary input and standardisation come from the A2/A3 rules."
+            }
+          ]
+        },
+        {
+          "name": "Missing arms",
+          "steps": [
+            {
+              "title": "Specify the four missing pieces from sources",
+              "description": "Write specs grounded in the primary papers: R1 penalty for the discriminator (Mescheder et al. 2018), reference-anchored discriminator for X7, per-batch stratified minibatch sampler for X8, importance-weighted control for X3. Specs go to the user for sign-off before coding."
+            },
+            {
+              "title": "Implement and test the signed-off arms",
+              "description": "Add the arms to the training plan and runner with unit tests (gradient checks, sampler balance, weight correctness) and a bit-identity check that existing arms are unchanged."
+            },
+            {
+              "title": "Build the X13 CPU baselines runner",
+              "description": "Harmony, Scanorama and PCA (10 dims, tool default 50 as sensitivity) on scIB's normalised X, writing latents in the same npz format for the same scorer."
+            }
+          ]
+        },
+        {
+          "name": "JHPCE setup",
+          "steps": [
+            {
+              "title": "Build and verify the JHPCE environment",
+              "description": "Env on JHPCE per the host notes (torch cu124 for driver 555, scvi-tools 1.4.2, POT, scib), built in a shared-partition job; record versions; data on /fastscratch per the storage rule."
+            },
+            {
+              "title": "Stage the eight prepped scIB tasks",
+              "description": "Regenerate the prepped files on-cluster with prep_scib_task.py from the scIB figshare sources (input upload caps at 1 GB per file) and verify md5/shape against the local copies."
+            },
+            {
+              "title": "Cross-host gate and task split",
+              "description": "Run identical configs on local and one pinned JHPCE GPU model; compare latents and scIB scores within a stated tolerance; measure JHPCE 8-lane throughput; assign whole tasks to each host to balance wall time."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Pilots",
+      "delegations": [
+        {
+          "name": "Pilot launch",
+          "steps": [
+            {
+              "title": "Preflight the pilot launch",
+              "description": "Load experiment-preflight with the single-cell pack; check manifest vs intended settings, matched tuning across arms, keys, split; write PREFLIGHT.md; launch only on GO."
+            },
+            {
+              "title": "Run and score A1, A2, A3",
+              "description": "Launch on the split hosts with the fail-loud runner; track with a run-status board; score every latent with scIB-native scoring; harvest results durably."
+            },
+            {
+              "title": "Apply the pilot rules and freeze X1",
+              "description": "Run the A1/A2/A3 rule scripts, commit and tag the frozen X1 manifest, and report the chosen grids and settings to you before X1 starts."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Main runs",
+      "delegations": [
+        {
+          "name": "Main launch",
+          "steps": [
+            {
+              "title": "Preflight and launch X1",
+              "description": "Preflight the frozen X1 manifest (GO required), then launch on both hosts split by task; monitor via the status board; score and harvest as tasks complete."
+            },
+            {
+              "title": "Freeze matched λ and run follow-ups",
+              "description": "After X1 is scored, run freeze_matched_lambda.py, preflight, and launch the follow-ups (X3, X6, X7, X8, X12, X13 incl. CPU baselines); score and harvest."
+            },
+            {
+              "title": "Verify completeness of the benchmark",
+              "description": "Status board shows every manifest unit done and valid (finite latent, scored row); list failures/divergences explicitly; commit the scored tables and provenance."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    }
+  ],
+  "desired_outputs": [
+    "PREREG.md + scripts: pre-registered rules (A1 → per-arm λ grid, A2 → X1 adversary input, A3 → X1 standardisation, X1 → matched λ), committed and tagged before the runs they govern",
+    "Implemented and tested missing pieces: X6 discriminator+R1, X7 reference-discriminator, X8 stratified per-batch sampler, X3 importance-weighted control, X13 CPU baselines runner",
+    "JHPCE environment + staged scIB data + cross-host gate report (local vs JHPCE on identical configs) and the task split",
+    "PREFLIGHT.md with GO verdict before each launch",
+    "A1/A2/A3 latents + scIB-native scores; frozen X1 manifest",
+    "X1 + follow-up latents + scores, harvested durably; run status board"
+  ],
+  "feasibility": {
+    "confidence": "medium",
+    "rationale": "Three pieces (X3 importance-weighted control, X7 reference-discriminator, X6 R1 discriminator) still need specifications you sign off before they are built, and local vs JHPCE results can differ numerically, so the cross-host gate may change the task split. Compute is ~24 local GPU-days at the measured 8-lane throughput, less with JHPCE GPUs in parallel."
+  }
+}

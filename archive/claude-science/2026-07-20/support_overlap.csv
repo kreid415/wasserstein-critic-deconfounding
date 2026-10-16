@@ -1,0 +1,17 @@
+n_batches,chance_acc,batch_clf_bal_acc,separability_norm,knn_cross_batch_frac,pairwise_mmd2_mean,dataset,balanced,modality,batch_key,n_obs,role
+9,0.1111111111111111,0.902648301307869,0.8904793389713526,0.0966528303422455,93.62363624572754,pancreas,False,rna,tech,16382,"easy baseline (known: distinct cell-type variation, well-separated)"
+9,0.1111111111111111,0.9188631790735312,0.9087210764577224,0.0713443120766176,95.73280080159503,pancreas,True,rna,tech,11416,"easy baseline (known: distinct cell-type variation, well-separated)"
+4,0.25,0.9871576608812782,0.9828768811750376,0.0410045961917268,143.50845845540366,immune,False,rna,chemistry,33506,harder real task; chemistry batch effect (original headline)
+4,0.25,0.9282747979323748,0.9043663972431664,0.026926523297491,129.2410348256429,immune,True,rna,chemistry,8928,harder real task; chemistry batch effect (original headline)
+2,0.5,0.9975999225309968,0.995199845061994,0.0034876036824355,80.58921813964844,lung,False,rna,protocol,29256,cross-protocol (drop-seq vs 10x)
+2,0.5,0.9982918457355312,0.9965836914710626,0.0039796118408155,78.06658172607422,lung,True,rna,protocol,20404,cross-protocol (drop-seq vs 10x)
+2,0.5,0.9995680277220432,0.9991360554440862,1.6104356228359765e-05,246.8303985595703,immune_hum_mou,False,rna,species,86933,CROSS-SPECIES = clean disjoint-support test (R1.major.2). batch_key=species (Human/Mouse); alt batch_key='batch'(23) or 'chemistry'(5) available for multibatch scaling
+2,0.5,0.9998119223842598,0.9996238447685196,1.3103461185676042e-05,260.7833557128906,immune_hum_mou,True,rna,species,53421,CROSS-SPECIES = clean disjoint-support test (R1.major.2). batch_key=species (Human/Mouse); alt batch_key='batch'(23) or 'chemistry'(5) available for multibatch scaling
+6,0.1666666666666666,0.9878463558189609,0.9854156269827528,0.0131051775922404,16.38670234680176,sim1,False,rna,Batch,12097,"GROUND-TRUTH batch+bio (Splatter). 6 batches, 7 groups. For R2.6 direct over-correction proof"
+6,0.1666666666666666,0.998586564938704,0.9983038779264448,0.0205444020199531,16.730479749043784,sim1,True,rna,Batch,8119,"GROUND-TRUTH batch+bio (Splatter). 6 batches, 7 groups. For R2.6 direct over-correction proof"
+4,0.25,0.8760947298146232,0.8347929730861643,0.0,26.181625366210938,sim2,False,rna,Batch,19318,"GROUND-TRUTH, nested (4 batches x 4 sub-batches, 4 groups). Hierarchical batch structure"
+4,0.25,0.8760947298146232,0.8347929730861643,0.0,26.181625366210938,sim2,True,rna,Batch,19318,"GROUND-TRUTH, nested (4 batches x 4 sub-batches, 4 groups). Hierarchical batch structure"
+3,0.3333333333333333,0.788107784638158,0.682161676957237,0.1182770723041672,513.8130035400391,atac_large,False,atac,batchname,84813,MODALITY generalization (R3.minor.1). Mouse brain scATAC gene-activity. alt batch_key='batchname_all'(11) for multibatch
+3,0.3333333333333333,0.7681366515314125,0.6522049772971188,0.1123260355127504,504.4404652913411,atac_large,True,atac,batchname,80572,MODALITY generalization (R3.minor.1). Mouse brain scATAC gene-activity. alt batch_key='batchname_all'(11) for multibatch
+3,0.3333333333333333,0.9378408893701852,0.9067613340552776,0.1668737060041407,469.2895050048828,atac_small,False,atac,batchname,11270,smaller ATAC replicate
+3,0.3333333333333333,0.9271986894548062,0.8907980341822092,0.1723571500554268,450.4537607828776,atac_small,True,atac,batchname,9923,smaller ATAC replicate

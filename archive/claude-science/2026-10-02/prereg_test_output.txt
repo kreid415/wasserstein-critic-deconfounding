@@ -1,0 +1,72 @@
+######## suite_wcd_gpu.log
+# repo@d5b367f wcd-gpu: PYTHONPATH=$(pwd)/src pytest -q tests --ignore=tests/scvi --ignore=tests/x13 -rs
+........................................................................ [ 29%]
+........................................................................ [ 59%]
+........................................................................ [ 88%]
+...........................                                              [100%]
+=============================== warnings summary ===============================
+tests/prereg/test_cli_e2e.py: 132 warnings
+tests/prereg/test_manifest_design.py: 7 warnings
+tests/prereg/test_rules.py: 73 warnings
+tests/wcd_vae/test_adversarial_engages.py::test_discriminator_head_learns_batch_from_separable_latent
+tests/wcd_vae/test_adversarial_engages.py: 4 warnings
+tests/wcd_vae/test_metrics.py: 8 warnings
+tests/wcd_vae/test_backbones.py: 21 warnings
+tests/wcd_vae/test_backbones.py: 21 warnings
+tests/wcd_vae/test_formulations.py: 5 warnings
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[reference]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[pooled]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[barycenter]
+tests/wcd_vae/test_formulations.py::test_barycenter_has_no_learnable_anchors
+tests/wcd_vae/test_formulations.py::test_reference_only_has_no_anchors
+tests/wcd_vae/test_metrics.py::test_resolution_cache_uses_igraph_with_matched_iterations
+=========================== short test summary info ============================
+SKIPPED [1] tests/scoring/test_kbet_determinism.py:15: rpy2 is not installed (kBET runs in the wcd-kbet env)
+243 passed, 1 skipped, 278 warnings in 78.08s (0:01:18)
+exit=0
+######## suite_scvi_api.log
+# repo@d5b367f scvi-api: WCD_SRC=$(pwd)/src PREPPED_DIR=/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib pytest -q tests/scvi -rs
+......................s............................                      [100%]
+=============================== warnings summary ===============================
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 15 warnings
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[True]
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[False]
+=========================== short test summary info ============================
+SKIPPED [1] tests/scvi/test_adversarial_plan_v2.py:65: scvi-tools disables its classifier without batch conditioning
+50 passed, 1 skipped, 132 warnings in 42.42s
+exit=0
+######## suite_wcd_kbet.log
+# repo@d5b367f wcd-kbet: R_HOME=/home/kendall/.claude-science/conda/envs/wcd-kbet/lib/R R_LIBS=.../Rlib_kbet PREPPED_DIR=/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib pytest -q tests/x13 tests/scoring -rs
+..........                                                               [100%]
+=============================== warnings summary ===============================
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama]
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama]
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py: 12 warnings
+tests/scoring/test_kbet_determinism.py: 12 warnings
+tests/scoring/test_kbet_determinism.py: 42 warnings
+tests/scoring/test_kbet_determinism.py: 18 warnings
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py: 30 warnings
+10 passed, 133 warnings in 112.33s (0:01:52)
+exit=0

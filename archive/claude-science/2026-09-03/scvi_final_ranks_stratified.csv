@@ -1,0 +1,25 @@
+dec,method,category,rank_all12,rank_unsup
+lin,scvi,unsup. baseline,3.75,2.75
+lin,pooled,adversarial (W-critic),5.0,4.0
+lin,discriminator,adversarial (JS),5.38,4.38
+lin,reference,adversarial (W-critic),5.5,4.5
+lin,harmony,unsup. baseline,6.5,5.5
+lin,mmd,adversarial (OT/IPM),7.12,6.12
+lin,barycenter,adversarial (W-critic),7.75,6.75
+lin,scanorama,unsup. baseline,8.31,7.31
+lin,sinkhorn,adversarial (OT/IPM),8.5,7.5
+lin,none,control (λ=0),9.5,8.5
+lin,unintegrated,unsup. baseline,9.69,8.69
+lin,scanvi,semi-supervised (uses labels),1.0,
+nl,scvi,unsup. baseline,3.88,2.88
+nl,discriminator,adversarial (JS),5.12,4.12
+nl,barycenter,adversarial (W-critic),5.75,4.75
+nl,mmd,adversarial (OT/IPM),5.88,4.88
+nl,reference,adversarial (W-critic),6.5,5.5
+nl,harmony,unsup. baseline,6.62,5.62
+nl,pooled,adversarial (W-critic),7.25,6.25
+nl,sinkhorn,adversarial (OT/IPM),8.5,7.5
+nl,scanorama,unsup. baseline,8.56,7.56
+nl,none,control (λ=0),9.38,8.38
+nl,unintegrated,unsup. baseline,9.56,8.56
+nl,scanvi,semi-supervised (uses labels),1.0,

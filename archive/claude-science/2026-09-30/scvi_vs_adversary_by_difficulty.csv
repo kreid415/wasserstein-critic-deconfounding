@@ -1,0 +1,9 @@
+dataset,category,ceiling,scVI,bestADV,bestADV_cfg,adv_gain,bestCRIT,crit_gain,disc_div
+immune_hum_mou,cross-species,0.451,0.4205,0.451,discriminator/lin@50,0.0306,0.4296,0.0091,22
+sim2,simulation,0.474,0.474,0.4694,sinkhorn/lin@1500,-0.0046,0.4292,-0.0448,0
+atac_large,ATAC,0.5531,0.5037,0.5531,barycenter/lin@20,0.0494,0.5531,0.0494,33
+lung,real RNA,0.5558,0.5063,0.5558,discriminator/lin@20,0.0495,0.5287,0.0224,0
+pancreas,real RNA,0.5571,0.537,0.5571,discriminator/lin@50,0.0202,0.5356,-0.0013,0
+atac_small,ATAC,0.5638,0.5331,0.5638,reference/lin@5,0.0307,0.5638,0.0307,0
+immune,real RNA,0.5847,0.563,0.5847,discriminator/nl@20,0.0217,0.5637,0.0007,0
+sim1,simulation,0.6283,0.626,0.6244,barycenter/nl@50,-0.0016,0.6244,-0.0016,0

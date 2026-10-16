@@ -1,0 +1,36 @@
+task,dose,declared_batch,declared_type,h0,dropped,kept,kept_fraction
+atac_small,0,Fang et al. - CEMBA180305_2B,Excitatory Neurons,1577,0,1577,1.0
+atac_small,0,Fang et al. - CEMBA180305_2B,Inhibitory Neurons,591,0,591,1.0
+atac_small,50,Fang et al. - CEMBA180305_2B,Excitatory Neurons,1577,788,789,0.5003
+atac_small,50,Fang et al. - CEMBA180305_2B,Inhibitory Neurons,591,296,295,0.4992
+atac_small,80,Fang et al. - CEMBA180305_2B,Excitatory Neurons,1577,1262,315,0.1997
+atac_small,80,Fang et al. - CEMBA180305_2B,Inhibitory Neurons,591,473,118,0.1997
+atac_small,95,Fang et al. - CEMBA180305_2B,Excitatory Neurons,1577,1498,79,0.0501
+atac_small,95,Fang et al. - CEMBA180305_2B,Inhibitory Neurons,591,561,30,0.0508
+atac_small,100,Fang et al. - CEMBA180305_2B,Excitatory Neurons,1577,1577,0,0.0
+atac_small,100,Fang et al. - CEMBA180305_2B,Inhibitory Neurons,591,591,0,0.0
+immune_hum_mou,0,MCA_BM_2,Neutrophils,1751,0,1751,1.0
+immune_hum_mou,0,MCA_BM_2,Monocyte progenitors,597,0,597,1.0
+immune_hum_mou,50,MCA_BM_2,Neutrophils,1751,876,875,0.4997
+immune_hum_mou,50,MCA_BM_2,Monocyte progenitors,597,298,299,0.5008
+immune_hum_mou,80,MCA_BM_2,Neutrophils,1751,1401,350,0.1999
+immune_hum_mou,80,MCA_BM_2,Monocyte progenitors,597,478,119,0.1993
+immune_hum_mou,95,MCA_BM_2,Neutrophils,1751,1663,88,0.0503
+immune_hum_mou,95,MCA_BM_2,Monocyte progenitors,597,567,30,0.0503
+immune_hum_mou,100,MCA_BM_2,Neutrophils,1751,1751,0,0.0
+immune_hum_mou,100,MCA_BM_2,Monocyte progenitors,597,597,0,0.0
+sim2,0,Batch3Sub1,Group1,1349,0,1349,1.0
+sim2,50,Batch3Sub1,Group1,1349,674,675,0.5004
+sim2,80,Batch3Sub1,Group1,1349,1079,270,0.2001
+sim2,95,Batch3Sub1,Group1,1349,1282,67,0.0497
+sim2,100,Batch3Sub1,Group1,1349,1349,0,0.0
+pancreas,0,inDrop3,alpha,994,0,994,1.0
+pancreas,0,inDrop3,acinar,741,0,741,1.0
+pancreas,50,inDrop3,alpha,994,497,497,0.5
+pancreas,50,inDrop3,acinar,741,370,371,0.5007
+pancreas,80,inDrop3,alpha,994,795,199,0.2002
+pancreas,80,inDrop3,acinar,741,593,148,0.1997
+pancreas,95,inDrop3,alpha,994,944,50,0.0503
+pancreas,95,inDrop3,acinar,741,704,37,0.0499
+pancreas,100,inDrop3,alpha,994,994,0,0.0
+pancreas,100,inDrop3,acinar,741,741,0,0.0

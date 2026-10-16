@@ -1,0 +1,6 @@
+task,fits_old,gpu_lane_hours_old,score_cpu_hours_old,fits_new,gpu_lane_hours_new,score_cpu_hours_new,gpu_lane_hours_change
+atac_small,207.0,45.61,10.52,207.0,34.28,7.84,-11.33
+immune_hum_mou,207.0,88.78,18.67,207.0,88.78,18.67,0.0
+pancreas,207.0,68.13,15.29,207.0,59.94,13.45,-8.19
+sim2,207.0,82.73,18.03,207.0,76.67,16.68,-6.06
+X3 total,828.0,285.25,62.52,828.0,259.67,56.65,-25.58
