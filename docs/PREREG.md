@@ -559,8 +559,8 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   or X13 score: no, nobody read a value (NB-20261015-15). The audit made later that day (NB-20261015-22; its method
   and results are in the README of experiments/x1_x13_score_hashes_20261015/) found two displays of values:
   - On 2026-10-02, before the first tag prereg-tier12-v1, the output of a sub-agent's tool call showed all metrics of
-    the six X13 runner-test runs on atac_small (Harmony, Scanorama and PCA test configurations, which are not
-    registered rows). NB-20261002-10 and the notebook page of 2026-10-02 also record run-to-run differences of NMI,
+    six test fits (Harmony d10 and d50, Scanorama d10 and d100, PCA d10 and d50) from one of the two X13 runner-test
+    runs on atac_small (test configurations, which are not registered rows). NB-20261002-10 and the notebook page of 2026-10-02 also record run-to-run differences of NMI,
     ARI and iLISI and a kBET value from these tests.
   - On 2026-10-13, before 17:13, the scorer identity check printed in the lead agent's session the old and new values
     of two metrics, PCR_batch (the principal-component-regression batch score) and cell-cycle conservation, for one X1
