@@ -4,7 +4,7 @@
 
 **Working title (proposal):** *Wasserstein critics versus discriminators for adversarial batch correction: a controlled, budget-matched comparison on scVI.* The original title "Topology Matters" should go: nothing topological was measured (R2.3, R1.minor.1).
 
-**Sources:** original submission {{artifact:9d87cbf0-0080-45a8-a897-d4f02ec3b0dd}}; recovered decision letter with all 17 comments [BIOINF-2026-1434_decision_letter.txt]({{artifact:80d0fc2d-d3b1-4c9f-aa5e-f74dfac313cf}}); manuscript audit [original_manuscript_audit.md]({{artifact:0c9e00ea-b555-4cea-9a99-d04d4c2e56f8}}), [original_manuscript_claims_audit.csv]({{artifact:6c946526-684e-4e4b-9306-95c648230aae}}), [reviewer_comment_map.csv]({{artifact:eaabff29-bdcc-42c1-87da-73859e022bcc}}); methods/rigour review [rigour_review.md]({{artifact:281d44ff-8cbd-4adc-8169-0ac3051347d2}}); code review [code_review_5709a98_findings.csv]({{artifact:4eeb2df8-32dc-4935-98fe-1e2e33a6c964}}); earlier code audit [code_audit_findings.csv]({{artifact:5f4b1715-a22c-4ec1-b8b2-6bbf0417b094}}); counts pilot [counts_pilot_summary.csv]({{artifact:6f937ff2-fb9f-4cc6-b33a-939b86907831}}).
+**Sources:** original submission `Topology_Matters.zip`; recovered decision letter with all 17 comments `BIOINF-2026-1434_decision_letter.txt`; manuscript audit `original_manuscript_audit.md`, `original_manuscript_claims_audit.csv`, `reviewer_comment_map.csv`; methods/rigour review `rigour_review.md`; code review `code_review_5709a98_findings.csv`; earlier code audit `code_audit_findings.csv`; counts pilot `counts_pilot_summary.csv` (these source files are kept with the project, outside this repository).
 
 ---
 
@@ -212,7 +212,7 @@ redesign, before any X1 result is examined (SI-68, whose own words the user conf
 |---|---|
 | λ not commensurable across objectives; "curve dominance" at matched nominal λ is not selection-free | Frontier endpoints (bio at matched batch removal, hypervolume); λ-curves descriptive only |
 | Divergence confounded with gradient penalty, update budget and target design | Discriminator at 1 step in the core (SI-01); update budget varied for the pooled critic in X6 (1, 5, 10 steps); X6 factorial; X7 target factorial (amended 2026-10-13, D-01) |
-| Composition shift uncontrolled; "balanced" ≠ independent | X3 dose-response on composition-matched subsamples; d_JS(Y) as a covariate everywhere (measured 0.15–0.44 across tasks, [composition_shift_by_dataset.csv]({{artifact:824c0218-4cb8-450d-a667-8c5ef961aae7}})) |
+| Composition shift uncontrolled; "balanced" ≠ independent | X3 dose-response on composition-matched subsamples; d_JS(Y) as a covariate everywhere (measured 0.15–0.44 across tasks, `composition_shift_by_dataset.csv`) |
 | iLISI is label-agnostic and rewards cross-type mixing | Within-label vs cross-label decomposition; full metric suite; no iLISI-only claims |
 | Batch-count "decay" partly a metric ceiling and composition change | Ceiling-normalised iLISI; fixed total cells and composition across V |
 | K=2 tasks make reference choice irrelevant | Reference analyses on K ≥ 3 only; state the equivalence |
