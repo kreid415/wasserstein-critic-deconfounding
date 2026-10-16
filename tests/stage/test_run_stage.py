@@ -696,6 +696,8 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
 @pytest.mark.parametrize("where, plan, edit, allow_dirty, refusal", [
     pytest.param("latent", "diverge", lambda c: c.update(git_dirty=True), False,
                  "fitted from a dirty or unknown checkout (git_dirty=True)", id="latent-git_dirty-true"),
+    pytest.param("latent", "diverge", lambda c: c.pop("git_sha"), False,
+                 "the latent names no git_sha", id="latent-without-git_sha"),
     pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), False,
                  "fitted from a dirty or unknown checkout (git_dirty=True)", id="S1-record-git_dirty-true"),
     pytest.param("status", "diverge", lambda c: c.update(git_dirty=None), False,
@@ -717,7 +719,8 @@ def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, wh
     accepted; S1 git_dirty true, S2 git_dirty null and S3 no git_sha, refused; S4 the runner's own nonfinite_latent
     record (a commit, no clean flag), accepted; S5 a nonfinite_latent record without a commit, refused. Records of two
     arms are used, one that is not Sinkhorn (v1) and the Sinkhorn arm (s1): the rule asks no arm. Every other stage test
-    passes --allow-dirty, and the refusal of a latent from a dirty checkout had no test before.
+    passes --allow-dirty, and the refusal of a latent from a dirty checkout had no test before. SI-89 (the user, 2026-10-16): a latent without a
+    commit is refused too (case latent-without-git_sha).
     The runner is called as a function inside the test (not as a separate program) with --report-only, which runs the
     start-up and final checks only, so the outcome does not depend on this repository's own checkout being clean."""
     st = Stage(tmp_path, [_row("n1"), _row("v1"), _row("s1", arm="sinkhorn")], plan={"v1": plan, "s1": plan})

@@ -425,6 +425,8 @@ class Outputs:
             device = cfg.get("gpu")
         if cfg.get("git_dirty") is not False and not self.allow_dirty:
             raise InvalidOutput(f"{p}: fitted from a dirty or unknown checkout (git_dirty={cfg.get('git_dirty')})")
+        if not cfg.get("git_sha"):                       # SI-89: a latent names its commit, like a divergence record
+            raise InvalidOutput(f"{p}: the latent names no git_sha")
         bad = ~np.isfinite(z)
         return dict(finite=not bool(bad.any()), n_nonfinite=int(bad.sum()), n_cells_nonfinite=int(bad.any(1).sum()),
                     shape=list(z.shape), sha256=sha256_file(p), git_sha=cfg.get("git_sha"), device=device,
