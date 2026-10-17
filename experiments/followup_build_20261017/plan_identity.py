@@ -22,6 +22,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CHUNK = 8   # rows per worker process
 
 
 def run(*cmd, env=None):   # pragma: no cover - subprocess launcher, used by execute()
@@ -64,10 +65,13 @@ def execute(a, out, lines, tags):   # pragma: no cover - runs the checkouts' fit
     open(f"{out}/tags.txt", "w").write("\n".join(tags) + "\n")
     open(f"{out}/control_tags.txt", "w").write("\n".join(tags[:a.control]) + "\n")
     open(f"{out}/exit_codes.txt", "w").close()
-    for label, checkout, manifest in (("old", a.old, "manifest.tsv"), ("new", a.new, "manifest.tsv"),
-                                      ("old2", a.old, "control_manifest.tsv")):
-        if run(f"{HERE}/nofit_worker.py", checkout, label, out, f"{out}/{manifest}", f"{out}/exit_codes.txt", env=env):
-            print(f"WARNING: worker {label} reported failed rows; the comparison below fails them", file=sys.stderr)
+    for label, checkout, manifest, n in (("old", a.old, "manifest.tsv", len(tags)), ("new", a.new, "manifest.tsv", len(tags)),
+                                         ("old2", a.old, "control_manifest.tsv", a.control)):
+        for start in range(0, n, CHUNK):      # a fresh process per CHUNK rows: one process for all rows ran out of memory
+            if run(f"{HERE}/nofit_worker.py", checkout, label, out, f"{out}/{manifest}", f"{out}/exit_codes.txt",
+                   str(start), str(start + CHUNK), env=env):
+                print(f"WARNING: worker {label} rows {start}-{start + CHUNK - 1} failed or died; the comparison below "
+                      f"fails the rows without exit code 0", file=sys.stderr)
     rc_control = run(f"{HERE}/identity_compare.py", out, "plan_identity_control.csv", "--labels", "old", "old2",
                      "--tags", f"{out}/control_tags.txt", "--steps-zero")
     rc = run(f"{HERE}/identity_compare.py", out, "plan_identity.csv", "--steps-zero")

@@ -1,0 +1,4 @@
+tag,rc_old,rc_new,arrays_identical,max_abs_diff,config_identical,config_differs_at,history_identical,model_identical,steps_old,steps_new
+X1_sim2_none_l0_c0_s0_7c6426ec_idmeanz0,0,0,True,0.0,True,,True,True,0,0
+X1_sim2_none_l0_c1_s0_b40bea0b_idmeanz0,0,0,True,0.0,True,,True,True,0,0
+X1_sim2_pooled_lg1_c0_s0_1ed94bc4_idmeanz0,0,0,True,0.0,False,/plan/fit/critic_betas[1];/plan/fit/optimizers[1]/param_groups[0]/betas[1],True,True,0,0

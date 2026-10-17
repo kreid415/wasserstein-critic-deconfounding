@@ -6,9 +6,10 @@ training plan, optimisers, saved config, latent, model file) except that the Lig
 limit_train_batches=0, limit_val_batches=0, num_sanity_val_steps=0: the training plan and its optimisers are created
 and configured, but no minibatch is run, so the saved latent is the seeded initial network's and the saved config holds
 the resolved plan. The number of optimiser steps each trainer took is written to OUT/steps.txt (must be 0).
-One process per checkout (imports once); every row runs in its own try block and its exit code goes to
-EXIT_CODES as "<label> <tag> <code>". Nothing here reads a score.
-Usage: nofit_worker.py CHECKOUT LABEL OUT_DIR ROWS_TSV EXIT_CODES   (env: PREPPED_DIR)
+One process per chunk of rows (plan_identity.py gives 8 rows per process: on the real sim2 data a single process
+running all rows was killed after 20 rows, twice, with no traceback, probably out of memory); every row runs in its
+own try block and its exit code goes to EXIT_CODES as "<label> <tag> <code>". Nothing here reads a score.
+Usage: nofit_worker.py CHECKOUT LABEL OUT_DIR ROWS_TSV EXIT_CODES [START STOP]   (env: PREPPED_DIR; rows START..STOP-1)
        nofit_worker.py --make-synthetic PATH   (stand-in sim2 input for a run without the real prepped data)
 """
 import os
@@ -38,7 +39,7 @@ def make_synthetic(path):   # pragma: no cover - runs only in the SYNTHETIC mode
     a.write_h5ad(path)
 
 
-def main(checkout, label, out, rows, exit_codes):   # pragma: no cover - patches the trainer process-wide; exercised by the recorded plan_identity run
+def main(checkout, label, out, rows, exit_codes, start=0, stop=None):   # pragma: no cover - patches the trainer process-wide; exercised by the recorded plan_identity run
     checkout = os.path.abspath(checkout)
     os.environ.update(CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", NUMBA_NUM_THREADS="1",
                       KMP_AFFINITY="disabled", PYTHONWARNINGS="ignore", WCD_SRC=f"{checkout}/src", MANIFEST=rows,
@@ -60,10 +61,10 @@ def main(checkout, label, out, rows, exit_codes):   # pragma: no cover - patches
         steps.append(int(self.global_step))
         return res
     _trainer.Trainer.__init__, _trainer.Trainer.fit = init0, fit0
-    tags = pd.read_csv(rows, sep="\t", comment="#", dtype=str).tag.tolist()
+    tags = pd.read_csv(rows, sep="\t", comment="#", dtype=str).tag.tolist()[int(start):None if stop is None else int(stop)]
     os.makedirs(f"{out}/out_{label}", exist_ok=True)
     failed = 0
-    with open(f"{out}/out_{label}/steps.txt", "w") as fs, open(exit_codes, "a") as fc:
+    with open(f"{out}/out_{label}/steps.txt", "a") as fs, open(exit_codes, "a") as fc:
         for t in tags:
             os.environ["TAG"] = t
             del steps[:]
@@ -89,4 +90,4 @@ if __name__ == "__main__":   # pragma: no cover - entry point
     if sys.argv[1] == "--make-synthetic":
         make_synthetic(sys.argv[2])
     else:
-        main(*sys.argv[1:6])
+        main(*sys.argv[1:8])

@@ -44,7 +44,10 @@ file changes.
 (`nofit_worker.py` builds the trainer with `limit_train_batches=0`): the model, training plan and optimisers are built as in a
 real fit, so the saved config holds the resolved plan, and the seeded initial latent and initial weights are compared too.
 It makes a setting change visible that a 1-epoch latent could hide. Same pass criteria as 1-4 above, plus zero optimiser
-steps at both commits; OLD is run twice on the first 5 rows as the determinism control. About 10 s per row per checkout.
+steps at both commits; OLD is run twice on the first 5 rows as the determinism control. About 20-30 s per row per
+checkout on the real data (loading dominates), so roughly an hour for 119 row-runs on a busy single core; run it under
+`nohup` or `tmux`. Rows run 8 per worker process, because one process for all rows was killed after 20 rows (twice, no
+traceback, probably out of memory).
 ```
 D=/home/kendall/experiment_data/wasserstein-critic-deconfounding; PY=/home/kendall/.claude-science/conda/envs/scvi-api/bin/python
 M=<commit to be tagged, after all follow-up branches are merged>
