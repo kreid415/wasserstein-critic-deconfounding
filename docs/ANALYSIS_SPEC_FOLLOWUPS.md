@@ -415,7 +415,10 @@ section 1.5); no declaration and no change to any X1 conclusion. The 12 stock-wa
   enumeration (section 1.9); known answers (jackknife of a mean = SD/sqrt(3),
   least-squares slope, iLISI ceiling 0.6 for shares 1/4 and 3/4, coverage, bio window, a constant predictor); a planted-effect world
   run end to end through `main` in which every follow-up's endpoint recovers its planted value (X3 slope contrast -0.10 declared
-  below; X6 divergence +0.05 declared above; X7 association slope +0.2 and depleted-level contrasts -0.2/3 and -0.4/3 against the control; X8 P3 slope -0.02 per doubling; X12 factor A
+  below; X6 divergence +0.07 declared above, with JS+SN given different biology under the two optimisers so the confirmatory
+  subtrahend is pinned (own-optimiser contrast +0.05); X7 association slope +0.2, and depleted-level contrasts against the control
+  whose planted size changes along lambda, so the reading at b\* and the fixed-`matched` fallback have different known values;
+  X8 P3 slope -0.01 and -0.03 on the two chains, mean -0.02 per doubling; Holm over 12 with 11 p-values missing; X12 factor A
   effect 0.06 with the other main effects and interactions near 0, declared above; X15 null) and the not-evaluable paths
   (low-signal, unreached, fewer than 3 references, a run without paired seeds, a failed run, collapse at the 0.10 bound); a null
   world in which no confirmatory result declares a direction; the count table built from prepped h5ad files and from obs;
