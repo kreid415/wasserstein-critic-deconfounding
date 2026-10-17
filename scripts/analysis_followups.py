@@ -528,13 +528,15 @@ def x12(out, targets):
 
 
 # ---------------------------------------------------------------------------------------------- X15
-def x15(out):
+def x15(out, targets):
     o = prepare(out, "X15")
     P._require(set(o.kl) == {"stock", "complete"}, f"X15 warm-up values {sorted(set(o.kl))}")
-    res, pools = {}, {}
+    res, pools, batch = {}, {}, {}
     for t, c in sorted(EXPECTED["X15"]):
         r = o[(o.task == t) & (o.cond_i == c)]
         v = {}
+        for (kl, a, lv), g in r[r.arm != "none"].groupby(["kl", "arm", "level"]):   # I048: achieved B - b* of every point
+            batch[f"{t}|{c}|{kl}|{a}|{lv}"] = mean(seed_values(g, "B"), FU_SEEDS) - targets[f"{t}|{c}"]["bstar"]
         for kl in ("stock", "complete"):
             z = r[(r.arm == "none") & (r.kl == kl)]
             P._require((z.status == "ok").all(), f"X15 {t}|{kl}: lambda=0 fits failed")
@@ -559,17 +561,17 @@ def x15(out):
     for key in {k for _, _, k in res}:
         tasks = [t for t, _ in EXPECTED["X15"]]
         pools[f"{key}|1"] = pooled({t: res[(t, 1, key)] for t in tasks}, tasks)
-    return dict(cells={f"{t}|{c}|{k}": v for (t, c, k), v in res.items()}, pooled=pools)
+    return dict(cells={f"{t}|{c}|{k}": v for (t, c, k), v in res.items()}, B_minus_bstar=batch, pooled=pools)
 
 
 # ---------------------------------------------------------------------------------------------- record
 CONFIRMATORY = [f"X3|slope_contrast|{c}|{lv}" for c in (0, 1) for lv in FIXED] + [f"X6|divergence|{c}" for c in (0, 1)] + \
-               [f"X7|association_discriminator_ref|{c}" for c in (0, 1)] + [f"X8|ref_dis|iLISI_cn|{c}" for c in (0, 1)]
+               [f"X7|depleted_discriminator_ref|{c}" for c in (0, 1)] + [f"X8|ref_dis|iLISI_cn|{c}" for c in (0, 1)]
 
 
 def analyse(out, targets, counts):
     res = dict(X3=x3(out), X6=x6(out, targets), X7=x7(out, targets, counts), X8=x8(out, counts),
-               X12=x12(out, targets), X15=x15(out))
+               X12=x12(out, targets), X15=x15(out, targets))
     p = [res[k.split("|")[0]]["pooled"][k.split("|", 1)[1]]["wilcoxon_p"] for k in CONFIRMATORY]
     have = [i for i, x in enumerate(p) if x is not None]
     adj = A.holm([p[i] for i in have]) if have else []

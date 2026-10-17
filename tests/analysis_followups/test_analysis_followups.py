@@ -245,6 +245,7 @@ def test_planted_effects(records):  # test-reason: each follow-up's endpoint rec
         assert x12["cells"][f"{t}|{c}|{lv}"]["sign"]["n_above"] == 8 and x12["cells"][f"{t}|{c}|{lv}"]["sign"]["sign_stable"]
     assert x12["pooled"]["A|1|matched_lo"]["declaration"] == "above"
     assert all(abs(v["d"]) < 0.005 for v in rec["X15"]["cells"].values())
+    assert len(rec["X15"]["B_minus_bstar"]) == 2 * 2 * 3 * 2 and all(abs(v - 0.05) < 0.03 for v in rec["X15"]["B_minus_bstar"].values())
     assert set(rec["confirmatory"]) == set(F.CONFIRMATORY) and rec["n_confirmatory"] == 10
     assert rec["confirmatory"]["X8|ref_dis|iLISI_cn|1"]["declaration"] == "inconclusive"   # two real datasets cannot declare
 
