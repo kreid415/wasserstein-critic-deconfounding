@@ -18,6 +18,8 @@ SWAPPABLE adversary on the latent of any scvi module (SCVI / LinearSCVI). Arms:
     mmd_ref         MMD of each batch to the reference batch (reference anchoring without W1; X7)
     <critic>_sn     spectral-norm Lipschitz variant of a critic (gradient penalty dropped)
     discriminator_sn  spectral-normalised discriminator (Lipschitz control on the JS arm; X6)
+    discriminator_sn_critic_opt  discriminator_sn trained with the critic's Adam settings (lr critic_lr, betas
+                    critic_betas) instead of the classifier's (X6, SI-98: JS versus W1 differing in the divergence only)
     discriminator_r1  discriminator + R1 penalty on each cell's one-vs-rest log-odds, gamma = r1_gamma
                     (Mescheder et al. 2018 Eq. 9; X6; docs/SPECS_missing_arms.md section 1, SI-22)
     discriminator_ref reference-anchored JS: binary heads 'batch k vs reference', class-balanced
@@ -56,6 +58,7 @@ from fit_outcome import NonFiniteLossError   # scripts/fit_outcome.py; scripts/ 
 _CRITIC_FORMULATIONS = ("reference", "reference_fixed", "pooled", "barycenter")
 _CRITIC_FREE = ("mmd", "sinkhorn", "mmd_ref")
 _JS_ARMS = ("discriminator", "discriminator_ref")
+_CRITIC_OPT_ARMS = {"discriminator_sn_critic_opt": "discriminator_sn"}   # SI-98: arm -> the arm it is parsed as
 _ARMS = ("none", "scvi_adv") + _JS_ARMS + _CRITIC_FORMULATIONS + _CRITIC_FREE
 _IW_ARMS = ("discriminator", "reference", "pooled", "mmd")   # X3 arms with importance weights (SI-25)
 _SAMPLERS = (None, "stratified")
@@ -161,7 +164,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
                  wcd_src_root=None, n_domains=None, adv_batch_slot="batch",
                  critic_lr=1e-4, critic_betas=(0.0, 0.9), adv_hidden=128, disc_lr=1e-3,
                  bary_warm_iter=None, r1_gamma=None, iw_table=None, **kwargs):
-        base, sn, r1 = _parse_adversary(adversary)
+        base, sn, r1 = _parse_adversary(_CRITIC_OPT_ARMS.get(adversary, adversary))
         # options that belong to specific arms are consumed by those arms or refused (no silent no-ops)
         if r1 and r1_gamma is None:
             raise ValueError(f"{adversary} needs r1_gamma (docs/SPECS_missing_arms.md section 1)")
@@ -180,6 +183,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         super().__init__(module, **kwargs)
         self._nf_step, self._nf_terms = -1, {}     # non-finite-loss guard: current step index, extra terms (scvi_adv)
         self.adversary, self.adversary_base, self.spectral_norm = adversary, base, sn
+        self._critic_optimiser = adversary in _CRITIC_OPT_ARMS
         self.r1 = bool(r1)
         self.r1_gamma = None if r1_gamma is None else float(r1_gamma)
         self._iw_table = None if iw_table is None else torch.as_tensor(iw_table, dtype=torch.float32)
@@ -254,7 +258,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         if self.is_critic_free:
             return [opt_g]
         params_d = filter(lambda p: p.requires_grad, self._wcd_head.parameters())
-        if self.is_critic:
+        if self.is_critic or self._critic_optimiser:
             opt_d = torch.optim.Adam(params_d, lr=self.critic_lr, betas=self.critic_betas)
         else:
             opt_d = torch.optim.Adam(params_d, lr=self.disc_lr, eps=0.01, weight_decay=self.weight_decay)
@@ -393,7 +397,9 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         inner = z_d.new_zeros(())          # sum of every inner step's loss: non-finite if any one was (final review I034)
         for _ in range(self.adv_steps):
             if self.is_critic:
-                loss_d, gp = self._head(z_d, batch_index, target, with_gp=True, weights=w)
+                # final review I036: a spectral-norm critic has no gradient penalty, so none is computed (it also
+                # advanced the spectral-norm power iteration of the discarded penalty pass)
+                loss_d, gp = self._head(z_d, batch_index, target, with_gp=not self.spectral_norm, weights=w)
             elif self.adversary_base == "discriminator_ref":     # X7 (SI-23)
                 loss_d, _ = self._dl.reference_js_losses(self._wcd_head(z_d, None), batch_index, self.reference_batch)
                 gp = z_d.new_zeros(())

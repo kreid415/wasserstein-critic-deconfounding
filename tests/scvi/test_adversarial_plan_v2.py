@@ -57,14 +57,39 @@ def test_none_is_bit_identical_to_stock_scvi():
     assert np.array_equal(z_stock, z_plan), float(np.abs(z_stock - z_plan).max())
 
 
-@pytest.mark.parametrize("arm", ["discriminator", "discriminator_sn", "reference", "reference_fixed", "pooled",
-                                 "barycenter", "mmd", "mmd_ref", "sinkhorn", "pooled_sn", "scvi_adv"])
+@pytest.mark.parametrize("arm", ["discriminator", "discriminator_sn", "discriminator_sn_critic_opt", "reference",
+                                 "reference_fixed", "pooled", "barycenter", "mmd", "mmd_ref", "sinkhorn", "pooled_sn",
+                                 "scvi_adv"])
 @pytest.mark.parametrize("conditioned", [True, False])
 def test_every_arm_trains_finite(arm, conditioned):
     if arm == "scvi_adv" and not conditioned:
         pytest.skip("scvi-tools disables its classifier without batch conditioning")
     z, model = plan.fit_adversarial_scvi(_toy(), "batch", conditioned=conditioned, **_kw(arm), **COMMON)
     assert z.shape == (600, 4) and np.isfinite(z).all()
+
+
+@pytest.mark.parametrize("arm,lr,betas,penalty", [
+    ("discriminator_sn", 1e-3, (0.9, 0.999), False),             # classifier Adam (scvi-tools)
+    ("discriminator_sn_critic_opt", 1e-4, (0.0, 0.9), False),    # SI-98: the critic's Adam settings
+    ("pooled", 1e-4, (0.0, 0.9), True),                          # gradient-penalty critic: penalty computed (positive control)
+    ("pooled_sn", 1e-4, (0.0, 0.9), False)])                     # final review I036: spectral-norm critic, no penalty pass
+def test_discriminator_optimiser_and_gradient_penalty_calls(arm, lr, betas, penalty, monkeypatch):   # test-reason: optimiser settings and penalty calls, which no other test reads
+    seen = {"opt": None, "gp": []}
+    orig_conf, orig_head = plan.WassersteinAdversarialTrainingPlan.configure_optimizers, plan.WassersteinAdversarialTrainingPlan._head
+
+    def conf(self):
+        opts = orig_conf(self)
+        seen["opt"] = (opts[1].defaults["lr"], tuple(opts[1].defaults["betas"]))
+        return opts
+
+    def head(self, z, batch_index, target, with_gp, weights=None):
+        seen["gp"].append(with_gp)
+        return orig_head(self, z, batch_index, target, with_gp, weights)
+
+    monkeypatch.setattr(plan.WassersteinAdversarialTrainingPlan, "configure_optimizers", conf)
+    monkeypatch.setattr(plan.WassersteinAdversarialTrainingPlan, "_head", head)
+    plan.fit_adversarial_scvi(_toy(), "batch", conditioned=True, **_kw(arm), **COMMON)
+    assert seen["opt"] == (lr, betas) and (True in seen["gp"]) == penalty, seen
 
 
 def test_argument_guards():

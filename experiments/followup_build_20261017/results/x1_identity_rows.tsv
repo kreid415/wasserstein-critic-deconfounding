@@ -1,0 +1,55 @@
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+X1_sim2_barycenter_lg1_c0_s0_1a97e316_idmeanz0	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c0_s0_1a97e316_idmeanz1	X1	sim2	scib	barycenter	10	5	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c0_s0_1a97e316_idsamplez0	X1	sim2	scib	barycenter	10	5	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c0_s0_1a97e316_idsamplez1	X1	sim2	scib	barycenter	10	5	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c1_s0_437e2b65_idmeanz0	X1	sim2	scib	barycenter	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c1_s0_437e2b65_idmeanz1	X1	sim2	scib	barycenter	10	5	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c1_s0_437e2b65_idsamplez0	X1	sim2	scib	barycenter	10	5	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_barycenter_lg1_c1_s0_437e2b65_idsamplez1	X1	sim2	scib	barycenter	10	5	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	"{""bary_iter"": 10}"
+X1_sim2_discriminator_lg1_c0_s0_7912667f_idmeanz0	X1	sim2	scib	discriminator	10	1	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c0_s0_7912667f_idmeanz1	X1	sim2	scib	discriminator	10	1	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c0_s0_7912667f_idsamplez0	X1	sim2	scib	discriminator	10	1	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c0_s0_7912667f_idsamplez1	X1	sim2	scib	discriminator	10	1	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c1_s0_148fda4d_idmeanz0	X1	sim2	scib	discriminator	10	1	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c1_s0_148fda4d_idmeanz1	X1	sim2	scib	discriminator	10	1	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c1_s0_148fda4d_idsamplez0	X1	sim2	scib	discriminator	10	1	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_discriminator_lg1_c1_s0_148fda4d_idsamplez1	X1	sim2	scib	discriminator	10	1	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c0_s0_f16199b0_idmeanz0	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c0_s0_f16199b0_idmeanz1	X1	sim2	scib	mmd	10	0	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c0_s0_f16199b0_idsamplez0	X1	sim2	scib	mmd	10	0	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c0_s0_f16199b0_idsamplez1	X1	sim2	scib	mmd	10	0	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c1_s0_807034bb_idmeanz0	X1	sim2	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c1_s0_807034bb_idmeanz1	X1	sim2	scib	mmd	10	0	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c1_s0_807034bb_idsamplez0	X1	sim2	scib	mmd	10	0	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_mmd_lg1_c1_s0_807034bb_idsamplez1	X1	sim2	scib	mmd	10	0	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_none_l0_c0_s0_7c6426ec_idmeanz0	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_none_l0_c1_s0_b40bea0b_idmeanz0	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c0_s0_1ed94bc4_idmeanz0	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c0_s0_1ed94bc4_idmeanz1	X1	sim2	scib	pooled	10	5	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c0_s0_1ed94bc4_idsamplez0	X1	sim2	scib	pooled	10	5	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c0_s0_1ed94bc4_idsamplez1	X1	sim2	scib	pooled	10	5	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c1_s0_a29051b3_idmeanz0	X1	sim2	scib	pooled	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c1_s0_a29051b3_idmeanz1	X1	sim2	scib	pooled	10	5	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c1_s0_a29051b3_idsamplez0	X1	sim2	scib	pooled	10	5	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_pooled_lg1_c1_s0_a29051b3_idsamplez1	X1	sim2	scib	pooled	10	5	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c0_s0_5555a838_idmeanz0	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c0_s0_5555a838_idmeanz1	X1	sim2	scib	reference	10	5	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c0_s0_5555a838_idsamplez0	X1	sim2	scib	reference	10	5	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c0_s0_5555a838_idsamplez1	X1	sim2	scib	reference	10	5	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c1_s0_d073c44d_idmeanz0	X1	sim2	scib	reference	10	5	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c1_s0_d073c44d_idmeanz1	X1	sim2	scib	reference	10	5	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c1_s0_d073c44d_idsamplez0	X1	sim2	scib	reference	10	5	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_reference_lg1_c1_s0_d073c44d_idsamplez1	X1	sim2	scib	reference	10	5	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X13_sim2_scanvi_l0_c1_s0_131a8300_idmeanz0	X13	sim2	scib	scanvi	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_scvi_adv_l0_c1_s0_e9ee3db7_idmeanz0	X1	sim2	scib	scvi_adv	0	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c0_s0_891cfd6d_idmeanz0	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c0_s0_891cfd6d_idmeanz1	X1	sim2	scib	sinkhorn	10	0	mean	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c0_s0_891cfd6d_idsamplez0	X1	sim2	scib	sinkhorn	10	0	sample	0	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c0_s0_891cfd6d_idsamplez1	X1	sim2	scib	sinkhorn	10	0	sample	1	0	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c1_s0_6759b562_idmeanz0	X1	sim2	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c1_s0_6759b562_idmeanz1	X1	sim2	scib	sinkhorn	10	0	mean	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c1_s0_6759b562_idsamplez0	X1	sim2	scib	sinkhorn	10	0	sample	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg1_c1_s0_6759b562_idsamplez1	X1	sim2	scib	sinkhorn	10	0	sample	1	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}
+X13_sim2_sysvi_l1_c1_s0_177ef55d_idmeanz0	X13	sim2	scib	sysvi	10	0	mean	0	1	SCVI	10	1	128	zinb	128	1	0.9	0	auto	{}

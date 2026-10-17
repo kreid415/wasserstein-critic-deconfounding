@@ -37,7 +37,7 @@ REQUIRED = ["tag", "experiment", "task", "counts", "arm", "lam", "n_critic", "ad
             "train_size", "seed", "reference", "extra"]
 ADVERSARIAL = {"discriminator", "discriminator_sn", "reference", "reference_fixed", "pooled", "pooled_sn",
                "barycenter", "barycenter_sn", "reference_sn", "mmd", "mmd_ref", "sinkhorn",
-               "discriminator_r1", "discriminator_ref"}
+               "discriminator_r1", "discriminator_ref", "discriminator_sn_critic_opt"}
 CPU_BASELINES = ("harmony", "scanorama", "pca")   # X13 CPU rows: scripts/run_cpu_baselines.py (SI-34..SI-36)
 # every key of a row's `extra` must be consumed here; anything else is refused (fail-loud R4)
 EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
@@ -52,7 +52,8 @@ KL_WARMUP = ("stock", "complete")
 # not read by the arm's fit and must keep these values (sysVI ignores likelihood: it is Gaussian; scANVI and sysVI
 # are always batch-conditioned; none, scvi_adv and scANVI never read lam, which sysVI reads as its cycle weight:
 # guard review G-05).
-_NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1", "reference",
+_NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_sn_critic_opt", "discriminator_ref",
+                 "discriminator_r1", "reference",
                  "reference_fixed", "reference_sn", "pooled", "pooled_sn", "barycenter", "barycenter_sn"}
 EXTRA_ARMS = {"adv_width": _NETWORK_ARMS, "adv_lr": _NETWORK_ARMS, "bary_iter": {"barycenter", "barycenter_sn"},
               "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler": {"reference", "pooled"}}
@@ -67,6 +68,15 @@ UNREAD_SETTINGS = {"none": _NO_LAM, "scvi_adv": _NO_LAM, "scanvi": {**_NO_LAM, "
 X3_DRAW = "nested_v1"
 X3_PERMUTATION_SEED = 40_000
 X3_SPEC_KEYS = {"kind", "batch", "types", "deplete_pct", "n_cells", "draw"}
+# X8 (SI-94): a batches spec with draw=X8_DRAW takes `cells_per_batch` cells from each of n_batches batches, the batches of
+# subset s being the first V of ONE random order of the eligible batches (so the V=2 set lies inside V=4, 8 and 16), and
+# each batch contributing the same cells at every V. A spec without `draw` is the earlier per-V draw (x8_draw_v3 below),
+# kept so that the v3 manifest's X8 rows still resolve; the v4 manifest uses X8_DRAW only.
+X8_DRAW = "nested_chain_v1"
+X8_SPEC_KEYS = {"kind", "n_batches", "subset", "n_cells", "cells_per_batch", "draw"}
+# X7 depleted-reference arm (SI-96): kind 'reference_composition' is an X3 composition spec (same x3_draw) whose depleted
+# batch IS the row's reference batch; deplete_pct is 100, so each listed type is removed from the reference entirely.
+SUBSAMPLE_COMPOSITION_KINDS = ("composition", "reference_composition")
 
 
 def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
@@ -76,8 +86,12 @@ def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
     fixed for every dose) and the reference must not be the depleted batch (SI-31)."""
     names = sorted(map(str, batches))
     comp = bool(subsample_spec) and subsample_spec.get("kind") == "composition"
+    ref_comp = bool(subsample_spec) and subsample_spec.get("kind") == "reference_composition"
     if comp and (value == "auto" or value.isdigit()):
         raise ValueError(f"{tag}: an X3 composition row must name its reference batch (SI-31), got {value!r}")
+    if ref_comp and value != str(subsample_spec["batch"]):     # also refuses 'auto' and an index
+        raise ValueError(f"{tag}: X7 depleted-reference row: reference {value!r} must be the depleted batch "
+                         f"{subsample_spec['batch']!r} (SI-96)")
     if value == "auto":
         return str(select())
     if value.isdigit():
@@ -190,6 +204,10 @@ def subsample(adata, spec, seed, return_info=False):
     # The subsample depends on the design cell (task, V, subset, dose) only, never on the training
     # seed, so every arm and seed of one design cell sees the same cells.
     obs = adata.obs
+    if spec["kind"] == "batches" and spec.get("draw") == X8_DRAW:
+        if return_info:
+            raise ValueError("return_info is defined for composition subsamples only")
+        return adata[x8_draw(obs, spec)].copy()
     if spec["kind"] == "batches":
         rng = np.random.default_rng(30_000 + 100 * spec["subset"] + spec["n_batches"])
         sizes = obs["batch"].value_counts()
@@ -203,12 +221,38 @@ def subsample(adata, spec, seed, return_info=False):
         if return_info:
             raise ValueError("return_info is defined for composition subsamples only")
         return adata[np.sort(idx)].copy()
-    if spec["kind"] == "composition":
+    if spec["kind"] in SUBSAMPLE_COMPOSITION_KINDS:
         idx, info = x3_draw(obs, spec)
         if return_info:
             return adata[idx].copy(), info
         return adata[idx].copy()
     raise ValueError(spec)
+
+
+def x8_draw(obs, spec):
+    """X8 cells of one design cell (SI-94), draw 'nested_chain_v1'. per = spec['cells_per_batch'] cells from each of V =
+    spec['n_batches'] batches, at every V. Eligible batches = those with at least per cells (the same list for every V).
+    Subset s is one chain: a random order of the eligible batches (default_rng(20000 + 100 * s)); its V batches are the
+    first V of that order, so the 2-batch set lies inside the 4-batch set inside the 8- and 16-batch sets. Batch b
+    contributes the same cells at every V and in every arm and seed: per cells chosen by default_rng([30000, s, rank of
+    b among the eligible batches]). The two subsets are two independent chains. Returns sorted row indices into obs."""
+    unknown = sorted(set(spec) - X8_SPEC_KEYS)
+    if unknown:
+        raise KeyError(f"X8 batches spec has keys x8_draw does not consume: {unknown}")
+    v, s, per = int(spec["n_batches"]), int(spec["subset"]), int(spec["cells_per_batch"])
+    if int(spec["n_cells"]) != v * per:
+        raise ValueError(f"X8 spec n_cells={spec['n_cells']} must equal n_batches x cells_per_batch = {v * per}")
+    bat = obs["batch"].astype(str).values
+    sizes = obs["batch"].astype(str).value_counts()
+    ok = sorted(sizes[sizes >= per].index)
+    if len(ok) < 16:
+        raise ValueError(f"only {len(ok)} batches have >= {per} cells; the V=16 set needs 16")
+    order = np.random.default_rng(20_000 + 100 * s).permutation(len(ok))
+    pick = [ok[i] for i in order[:v]]
+    idx = np.sort(np.concatenate([
+        np.random.default_rng([30_000, s, ok.index(b)]).choice(np.where(bat == b)[0], per, replace=False)
+        for b in pick]))
+    return idx
 
 
 def x3_draw(obs, spec):
@@ -312,7 +356,7 @@ def main():
 
     a = ad.read_h5ad(os.path.join(os.environ["PREPPED_DIR"], f"{r['task']}__{r['counts']}.h5ad"))
     iw_weights, iw_keep, sub_info = None, None, None
-    if "subsample" in extra and extra["subsample"].get("kind") == "composition":
+    if "subsample" in extra and extra["subsample"].get("kind") in SUBSAMPLE_COMPOSITION_KINDS:
         a, sub_info = subsample(a, extra["subsample"], seed, return_info=True)
         if "iw" in extra:
             iw_weights, iw_keep = depletion_oracle_weights(a, extra["subsample"], sub_info)
