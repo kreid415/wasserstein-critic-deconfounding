@@ -1,4 +1,6 @@
-# X1 cluster part: submission plan (prepared 2026-10-12, not submitted)
+# X1 cluster part: submission plan (prepared 2026-10-12, retargeted to prereg-tier12-v3 on 2026-10-17, not submitted)
+
+**Retarget notes (2026-10-17).** (1) The design file sha256 and the five run-list sha256 values in this document are those of the PRE-REDO v2-era files; the Sinkhorn redo (SI-57) changes the R1/R4/R2-R3 decisions, so the resolved X1 design file and the run lists are rebuilt after stage 2 (experiments/sinkhorn_redo_stage2/PLAN.md, step X) and the builder prints the new hashes; the command block below is an example of the format only. (2) Predicted GPU-days use the pre-fix cost model; the corrected Sinkhorn arm costs about 1.45x to 2.8x its pre-fix time per fit (NB-20261013-11, stage-1 preflight), so the Sinkhorn share of the 8.5 GPU-days must be re-estimated. (3) Open: harness time limits 384 h and 576 h are unverified (G-15); the L40S cross-host GPU gate (CR2-01, cluster/jhpce/gate_gpu.sh) must be re-run at v3; the bundle given to the builder must hold 10a1ca5 (tag prereg-tier12-v3).
 
 Status: preflight GO (experiments/X1/PREFLIGHT.md, 46 items: 32 pass, 14 not applicable, 0 fail). Waiting for your go.
 
@@ -22,15 +24,15 @@ Harness clock (`run_timeout_s`, counted from submission, so it includes waiting 
 Jobs 1 and 2: 192 h (8 days). Jobs 3 and 4: 384 h (16 days; builder `--chain-position 1 --after-slurm-job <id of job 1 or 2>`). Job 5: 576 h (24 days; `--chain-position 2 --after-slurm-job <id of job 4>`).
 
 ## What each job checks before it fits anything (tagged job script cluster/jhpce/prod_fit_job.sh)
-1. The checkout is the tag prereg-tier12-v2 (c88cce3) and clean.
+1. The checkout is the tag prereg-tier12-v3 (10a1ca5) and clean.
 2. Exactly one L40S is visible, and the fit environment matches its recorded package versions.
 3. tests/scvi pass on that node, including the test that lambda = 0 is bit-identical to stock scVI.
 4. The design file and the run list match their SHA-256 sums; every listed run is an X1 run of that dataset.
 5. A concurrency slot is free, the 8 prepped datasets match their fingerprints, no live job holds the same runs, and the runner's dry run plans 360 fits.
 
 ## Code and inputs
-- Code: the tag prereg-tier12-v2 (c88cce3), unchanged. This differs from my earlier description ("a new git tag"). PREREG sec 7 requires every stage to be fitted and scored from the one tagged commit,
-  and the 75 X1 baseline fits already made on JHPCE are at c88cce3. Fits from a new commit would trip the runner's mixed-commit check.
+- Code: the tag prereg-tier12-v3 (10a1ca5), unchanged (retargeted from v2 on 2026-10-17). PREREG sec 7 requires every stage to be fitted and scored from the one tagged commit.
+  The 75 X1 baseline fits already made on JHPCE are at c88cce3 (v2): SI-54 (docs/EQUIVALENT_COMMITS.json) reads that commit as the v3 tag for every arm except Sinkhorn, so they stay valid; Sinkhorn output at c88cce3 is refused.
   So the X1 design file and each job's run list travel as job inputs, copied next to the checkout and checked by SHA-256 inside the job.
 - Design file: manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv (sha256 7c2fe8679631c882...). Run lists: experiments/X1_jhpce/tags/x1_jhpce_<dataset>.tags (360 runs each, 60 per method).
 - Builder experiments/X1_jhpce/x1_jhpce_command.py: refuses any commit other than the tag, a walltime over 3 days, or uncommitted inputs.
@@ -57,9 +59,9 @@ mkdir -p "$JOBDIR/x1_inputs"
 printf "%s  %s\n" 7c2fe8679631c882abf6a4d020c6c3ba7f327261903bf47fc968e6cf80feaf85 paper_manifest_stock_pilot_u5_b10_v3.x1.tsv 743bb8d9a40b17670dd389b7ac6b849bf1bb6e7c4cbd689366805fc23ab10d87 x1_jhpce_immune_hum_mou.tags | sha256sum -c --quiet
 cp paper_manifest_stock_pilot_u5_b10_v3.x1.tsv x1_jhpce_immune_hum_mou.tags "$JOBDIR/x1_inputs/"
 git clone -q --no-checkout "$PWD/wcd.bundle" "$JOBDIR/repo"
-git -C "$JOBDIR/repo" -c advice.detachedHead=false checkout -q c88cce3c569e9de47f2d65c6794ca3890637786a
+git -C "$JOBDIR/repo" -c advice.detachedHead=false checkout -q 10a1ca5874fbcdc033b148525b5e71d866306bdb
 rc=0
-bash "$JOBDIR/repo/cluster/jhpce/prod_fit_job.sh" --expected-sha c88cce3c569e9de47f2d65c6794ca3890637786a --stage x1_jhpce --tags-file ../x1_inputs/x1_jhpce_immune_hum_mou.tags --tags-sha256 743bb8d9a40b17670dd389b7ac6b849bf1bb6e7c4cbd689366805fc23ab10d87 --manifest ../x1_inputs/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv --manifest-sha256 7c2fe8679631c882abf6a4d020c6c3ba7f327261903bf47fc968e6cf80feaf85 --experiments X1 --tasks immune_hum_mou --fit-lanes 8 --fit-timeout-s 28800 --max-attempts 2 --guard-margin-s 2700 || rc=$?
+bash "$JOBDIR/repo/cluster/jhpce/prod_fit_job.sh" --expected-sha 10a1ca5874fbcdc033b148525b5e71d866306bdb --stage x1_jhpce --tags-file ../x1_inputs/x1_jhpce_immune_hum_mou.tags --tags-sha256 743bb8d9a40b17670dd389b7ac6b849bf1bb6e7c4cbd689366805fc23ab10d87 --manifest ../x1_inputs/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv --manifest-sha256 7c2fe8679631c882abf6a4d020c6c3ba7f327261903bf47fc968e6cf80feaf85 --experiments X1 --tasks immune_hum_mou --fit-lanes 8 --fit-timeout-s 28800 --max-attempts 2 --guard-margin-s 2700 || rc=$?
 for f in "$JOBDIR/logs/job_summary.json" "$JOBDIR/harvest.json"; do [ ! -f "$f" ] || cp "$f" .; done   # KB-sized; the harvest stays on fastscratch
 ls -l .
 exit "$rc"

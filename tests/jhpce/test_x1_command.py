@@ -24,6 +24,9 @@ def test_chained_job_clock_covers_every_job_up_its_chain(tmp_path, capsys):
     for extra in (["--chain-position", "2"], ["--after-slurm-job", "444"], ["--chain-position", "-1"]):
         with pytest.raises(SystemExit, match="exactly when"):
             b.main(["--task", "pancreas", "--bundle", "none", *extra])
+    with pytest.raises(SystemExit, match="prereg-tier12-v3"):                  # the v2 commit is no longer accepted (SI-54)
+        b.main(["--task", "pancreas", "--bundle", "none", "--expected-sha", "c88cce3c569e9de47f2d65c6794ca3890637786a"])
+    assert b.TAG_SHA == "10a1ca5874fbcdc033b148525b5e71d866306bdb"
     clone, bundle = tmp_path / "clone", tmp_path / "wcd.bundle"      # a bundle of the tag, as rehearse_x1_job.sh makes
     subprocess.run(["git", "clone", "-q", "--no-checkout", ROOT, str(clone)], check=True)
     subprocess.run(["git", "-C", str(clone), "update-ref", "refs/heads/x", b.TAG_SHA], check=True)

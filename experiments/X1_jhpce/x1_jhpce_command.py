@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""Submit plan (JSON) of one X1 JHPCE fit job (one task): the tagged job body at prereg-tier12-v2, X1 inputs beside it.
+"""Submit plan (JSON) of one X1 JHPCE fit job (one task): the tagged job body at prereg-tier12-v3, X1 inputs beside it.
 
-PREREG sec 7 (re-review, 2026-10-04): every stage is fitted and scored from one worktree pinned at the tag
-prereg-tier12-v2. The tag's cluster/jhpce/prod_command.py only knows the two filler jobs, and the X1 manifest
+PREREG sec 7 (re-review, 2026-10-04; retargeted to v3 on 2026-10-17, SI-54): every stage is fitted and scored from one
+worktree pinned at the tag prereg-tier12-v3 (10a1ca5; non-Sinkhorn outputs made at c88cce3 count as v3). The tag's cluster/jhpce/prod_command.py only knows the two filler jobs, and the X1 manifest
 (R1/R4-a1/R2/R3-resolved, committed on main) is not in the tag. So this builder writes the same submit command as
 prod_command.py (same Slurm lines, bundle clone + checkout of the tag, cluster/jhpce/prod_fit_job.sh of the tag) with
 one addition: the X1 manifest and the job's tags file are staged as job inputs and copied to $JOBDIR/x1_inputs/, beside
@@ -20,7 +20,7 @@ import shlex
 import subprocess
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TAG_SHA = "c88cce3c569e9de47f2d65c6794ca3890637786a"                     # prereg-tier12-v2
+TAG_SHA = "10a1ca5874fbcdc033b148525b5e71d866306bdb"                     # prereg-tier12-v3
 MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv"
 TAGS_DIR = "experiments/X1_jhpce/tags"
 TASKS = ("atac_large", "immune_hum_mou", "lung", "pancreas", "sim2")
@@ -71,7 +71,7 @@ def main(argv=None):
     if a.chain_position < 0 or (a.after_slurm_job is None) != (a.chain_position == 0):
         raise SystemExit("--after-slurm-job is given exactly when --chain-position > 0 (the jobs before this one)")
     if a.expected_sha != TAG_SHA:
-        raise SystemExit(f"--expected-sha must be prereg-tier12-v2 ({TAG_SHA}): PREREG sec 7 pins every stage to the tag")
+        raise SystemExit(f"--expected-sha must be prereg-tier12-v3 ({TAG_SHA}): PREREG sec 7 pins every stage to the tag")
     if a.after_slurm_job is not None and not re.fullmatch(r"[0-9]+", a.after_slurm_job):
         raise SystemExit(f"--after-slurm-job {a.after_slurm_job!r}: a numeric Slurm job id")
     if not WALL_RE.match(a.walltime) or wall_s(a.walltime) > 3 * 86400:
@@ -126,7 +126,7 @@ def main(argv=None):
                                     {"src": os.path.join(REPO, tags_rel), "dst": tags_name}],
                             outputs=["job_summary.json", "harvest.json", "slurm-*.out"], run_timeout_s=rt,
                             intent=(f"JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), {a.cpus} CPU {a.mem}, wall {a.walltime}: "
-                                    f"X1 fits {a.task} ({n_tags} rows: X1 adversarial arms) at prereg-tier12-v2 "
+                                    f"X1 fits {a.task} ({n_tags} rows: X1 adversarial arms) at prereg-tier12-v3 "
                                     f"{a.expected_sha[:10]}, fit only, harvest on fastscratch"
                                     + (f"; starts after Slurm job {a.after_slurm_job} ends" if a.after_slurm_job else "")
                                     + f"; harness clock {rt / 3600:g} h")))
