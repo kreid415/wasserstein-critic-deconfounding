@@ -15,6 +15,7 @@ Usage (env with pandas, numpy, scipy; scvi-api has them):
   python stage2_rules.py r4a1   ... (same) --r1-record OUT_R1/r1_record.json
   python stage2_rules.py r2r3   ... (same) --r4a1-record OUT_R4/r4_a1_record.json
   python stage2_rules.py plan-fits --manifest M --experiments A2 A3 [--tasks T ...] [--old-dir D] --out-tags FILE
+  python stage2_rules.py diff-records --old OLD.json --new NEW.json --out CHANGES.json   (decisions only, SI-87 list)
 Exit status of r1 / r4a1: 0 = frozen, 3 = extension needed (a normal outcome: see the extension manifest in OUT),
 anything else = error. plan-fits: 0 = tags file written.
 """
@@ -157,6 +158,27 @@ def plan_fits(a):
     return 0
 
 
+def decisions(rec):
+    """Flat {key: value} of the decisions in an R1, R4-a1 or R2/R3 record: grids and flags, windows, the two switches."""
+    if rec["rule"] == "R1":
+        return {f"R1 {k} {f}": v[f] for k, v in rec["families"].items() for f in ("status", "x1_grid", "flags") if f in v}
+    if rec["rule"] == "R4":
+        return {f"R4a1 {k} {f}": c[f] for k, c in rec["cells"].items() for f in ("lo", "matched", "hi", "flags")}
+    return {"R2R3 adv_input": rec["adv_input"], "R2R3 zstd": rec["zstd"],
+            **{f"R2R3 {r} choice": rec["decisions"][r]["choice"] for r in ("R2", "R3")}}
+
+
+def diff_records(a):
+    old, new = (decisions(json.load(open(p))) for p in (a.old, a.new))
+    keys = sorted(set(old) | set(new))
+    ch = [dict(key=k, old=old.get(k), new=new.get(k)) for k in keys if old.get(k) != new.get(k)]
+    sink = [c for c in ch if "sinkhorn" in c["key"]]
+    with open(a.out, "w") as f:
+        json.dump(dict(n_compared=len(keys), changed=ch, n_changed=len(ch), n_changed_non_sinkhorn=len(ch) - len(sink)), f, indent=1)
+    print(f"[diff-records] {len(keys)} decisions compared, {len(ch)} changed, {len(ch) - len(sink)} of them not Sinkhorn")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -178,8 +200,12 @@ def main(argv=None):
     p.add_argument("--tasks", nargs="+", default=None)
     p.add_argument("--old-dir", action="append", default=[])
     p.add_argument("--out-tags", required=True)
+    p = sub.add_parser("diff-records")
+    p.add_argument("--old", required=True)
+    p.add_argument("--new", required=True)
+    p.add_argument("--out", required=True)
     a = ap.parse_args(argv)
-    return plan_fits(a) if a.cmd == "plan-fits" else run_rule(a)
+    return {"plan-fits": plan_fits, "diff-records": diff_records}.get(a.cmd, run_rule)(a)
 
 
 if __name__ == "__main__":  # pragma: no cover  (entry point; main() is exercised by the tests)

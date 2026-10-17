@@ -149,3 +149,23 @@ def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
         return
     with pytest.raises(SystemExit, match=match):
         S2.main(argv)
+
+
+def test_diff_records_lists_changed_decisions_and_separates_non_sinkhorn(tmp_path):
+    rec = os.path.join(synth.ROOT, "docs", "prereg", "r4_a1_record.json")
+    out = str(tmp_path / "same.json")
+    assert S2.main(["diff-records", "--old", rec, "--new", rec, "--out", out]) == 0
+    assert json.load(open(out))["n_changed"] == 0
+    r = json.load(open(rec))
+    k_mmd = next(k for k in r["cells"] if k.endswith("|mmd"))
+    k_sk = next(k for k in r["cells"] if k.endswith("|sinkhorn"))
+    r["cells"][k_mmd]["matched"] = 123.0
+    r["cells"][k_sk]["hi"] = 456.0
+    new = str(tmp_path / "new.json")
+    json.dump(r, open(new, "w"))
+    assert S2.main(["diff-records", "--old", rec, "--new", new, "--out", out]) == 0
+    got = json.load(open(out))
+    assert got["n_changed"] == 2 and got["n_changed_non_sinkhorn"] == 1 and got["changed"][0]["new"] in (123.0, 456.0)
+    r1, r23 = (os.path.join(synth.ROOT, "docs", "prereg", n) for n in ("r1_record.json", "r2r3_record.json"))
+    for p in (r1, r23):                                   # the R1 and R2/R3 record layouts are readable too
+        assert S2.main(["diff-records", "--old", p, "--new", p, "--out", out]) == 0 and json.load(open(out))["n_compared"] > 0
