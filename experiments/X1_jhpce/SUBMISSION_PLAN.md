@@ -2,7 +2,7 @@
 
 **Retarget notes (2026-10-17).** (1) The design file sha256 and the five run-list sha256 values in this document are those of the PRE-REDO v2-era files; the Sinkhorn redo (SI-57) changes the R1/R4/R2-R3 decisions, so the resolved X1 design file and the run lists are rebuilt after stage 2 (experiments/sinkhorn_redo_stage2/PLAN.md, step X) and the builder prints the new hashes; the command block below is an example of the format only. (2) Predicted GPU-days use the pre-fix cost model; the corrected Sinkhorn arm costs about 1.45x to 2.8x its pre-fix time per fit (NB-20261013-11, stage-1 preflight), so the Sinkhorn share of the 8.5 GPU-days must be re-estimated. (3) Open: harness time limits 384 h and 576 h are unverified (G-15); the L40S cross-host GPU gate (CR2-01, cluster/jhpce/gate_gpu.sh) must be re-run at v3; the bundle given to the builder must hold 10a1ca5 (tag prereg-tier12-v3).
 
-Status: preflight GO (experiments/X1/PREFLIGHT.md, 46 items: 32 pass, 14 not applicable, 0 fail). Waiting for your go.
+**Status: NO-GO until the Sinkhorn redo's stage 2 has run and a new X1 preflight (pre-launch check) has passed.** The earlier preflight GO (experiments/X1/PREFLIGHT.md, 46 items: 32 pass, 14 not applicable, 0 fail) covered the pre-redo design file and does not carry over. The builder enforces this: `x1_jhpce_command.py` refuses while its constant `DESIGN_SHA` is empty, and afterwards refuses any design file whose sha256 differs from it (set `MANIFEST` and `DESIGN_SHA` in PLAN.md step X; `tests/jhpce/test_x1_command.py`). No submission is requested.
 
 ## The 5 jobs (1,800 fits = the six adversarial methods x 6 strengths x 5 seeds x 2 decoders on each dataset)
 
@@ -35,7 +35,7 @@ Jobs 1 and 2: 192 h (8 days). Jobs 3 and 4: 384 h (16 days; builder `--chain-pos
   The 75 X1 baseline fits already made on JHPCE are at c88cce3 (v2): SI-54 (docs/EQUIVALENT_COMMITS.json) reads that commit as the v3 tag for every arm except Sinkhorn, so they stay valid; Sinkhorn output at c88cce3 is refused.
   So the X1 design file and each job's run list travel as job inputs, copied next to the checkout and checked by SHA-256 inside the job.
 - Design file: manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv (sha256 7c2fe8679631c882...). Run lists: experiments/X1_jhpce/tags/x1_jhpce_<dataset>.tags (360 runs each, 60 per method).
-- Builder experiments/X1_jhpce/x1_jhpce_command.py: refuses any commit other than the tag, a walltime over 3 days, or uncommitted inputs.
+- Builder experiments/X1_jhpce/x1_jhpce_command.py: refuses any commit other than the tag, a walltime over 3 days, uncommitted inputs, an empty `DESIGN_SHA`, or a design file that does not match it. `rehearse_x1_job.sh` calls the builder, so it refuses too until `DESIGN_SHA` is set.
 - Rehearsal experiments/X1_jhpce/rehearse_x1_job.sh: all 5 jobs passed locally (2026-10-12; tests/scvi 110 passed, dry run 360 fits each).
 
 ## After each job

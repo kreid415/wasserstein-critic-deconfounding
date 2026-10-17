@@ -22,6 +22,10 @@ import subprocess
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TAG_SHA = "10a1ca5874fbcdc033b148525b5e71d866306bdb"                     # prereg-tier12-v3
 MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv"
+# DESIGN_SHA is EMPTY ON PURPOSE (as MAN_SHA in experiments/X1_local/run_X1_local.sh): MANIFEST above is the PRE-REDO X1 design
+# (Sinkhorn grid and R2/R3 decisions before the redo, SI-51/SI-57). After stage 2 (experiments/sinkhorn_redo_stage2/PLAN.md step X)
+# point MANIFEST at the resolved file and put its sha256 here; the builder refuses until it equals the committed file's.
+DESIGN_SHA = ""
 TAGS_DIR = "experiments/X1_jhpce/tags"
 TASKS = ("atac_large", "immune_hum_mou", "lung", "pancreas", "sim2")
 STAGE = "x1_jhpce"
@@ -68,6 +72,9 @@ def main(argv=None):
     ap.add_argument("--chain-position", type=int, default=0,
                     help="number of jobs before this one in its dependency chain (0: starts at submission)")
     a = ap.parse_args(argv)
+    if not re.fullmatch(r"[0-9a-f]{64}", DESIGN_SHA):
+        raise SystemExit("DESIGN_SHA is not set: the X1 design file is the pre-redo one until the Sinkhorn redo's stage 2 has "
+                         "resolved it (PLAN.md step X); set MANIFEST and DESIGN_SHA, then rebuild the run lists")
     if a.chain_position < 0 or (a.after_slurm_job is None) != (a.chain_position == 0):
         raise SystemExit("--after-slurm-job is given exactly when --chain-position > 0 (the jobs before this one)")
     if a.expected_sha != TAG_SHA:
@@ -86,6 +93,8 @@ def main(argv=None):
     tags_rel = f"{TAGS_DIR}/x1_jhpce_{a.task}.tags"
     man_b, tags_b = committed(MANIFEST), committed(tags_rel)
     man_sha, tags_sha = hashlib.sha256(man_b).hexdigest(), hashlib.sha256(tags_b).hexdigest()
+    if man_sha != DESIGN_SHA:
+        raise SystemExit(f"{MANIFEST} has sha256 {man_sha}, not the pinned DESIGN_SHA {DESIGN_SHA}")
     n_tags = sum(1 for l in tags_b.decode().splitlines() if l.split("#", 1)[0].strip())
     man_name, tags_name = os.path.basename(MANIFEST), os.path.basename(tags_rel)
     args = ["--expected-sha", a.expected_sha, "--stage", STAGE, "--tags-file", f"../x1_inputs/{tags_name}",
