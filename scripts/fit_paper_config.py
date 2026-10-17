@@ -37,7 +37,7 @@ REQUIRED = ["tag", "experiment", "task", "counts", "arm", "lam", "n_critic", "ad
             "train_size", "seed", "reference", "extra"]
 ADVERSARIAL = {"discriminator", "discriminator_sn", "reference", "reference_fixed", "pooled", "pooled_sn",
                "barycenter", "barycenter_sn", "reference_sn", "mmd", "mmd_ref", "sinkhorn",
-               "discriminator_r1", "discriminator_ref"}
+               "discriminator_r1", "discriminator_ref", "discriminator_sn_critic_opt"}
 CPU_BASELINES = ("harmony", "scanorama", "pca")   # X13 CPU rows: scripts/run_cpu_baselines.py (SI-34..SI-36)
 # every key of a row's `extra` must be consumed here; anything else is refused (fail-loud R4)
 EXTRA_KEYS = {"subsample", "adv_width", "adv_lr", "bary_iter", "bary_warm_iter",
@@ -52,7 +52,8 @@ KL_WARMUP = ("stock", "complete")
 # not read by the arm's fit and must keep these values (sysVI ignores likelihood: it is Gaussian; scANVI and sysVI
 # are always batch-conditioned; none, scvi_adv and scANVI never read lam, which sysVI reads as its cycle weight:
 # guard review G-05).
-_NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1", "reference",
+_NETWORK_ARMS = {"discriminator", "discriminator_sn", "discriminator_sn_critic_opt", "discriminator_ref",
+                 "discriminator_r1", "reference",
                  "reference_fixed", "reference_sn", "pooled", "pooled_sn", "barycenter", "barycenter_sn"}
 EXTRA_ARMS = {"adv_width": _NETWORK_ARMS, "adv_lr": _NETWORK_ARMS, "bary_iter": {"barycenter", "barycenter_sn"},
               "bary_warm_iter": {"barycenter", "barycenter_sn"}, "sampler": {"reference", "pooled"}}
@@ -67,6 +68,18 @@ UNREAD_SETTINGS = {"none": _NO_LAM, "scvi_adv": _NO_LAM, "scanvi": {**_NO_LAM, "
 X3_DRAW = "nested_v1"
 X3_PERMUTATION_SEED = 40_000
 X3_SPEC_KEYS = {"kind", "batch", "types", "deplete_pct", "n_cells", "draw"}
+# X8 (SI-94): a batches spec with draw=X8_DRAW takes `cells_per_batch` cells from each of n_batches batches, the batches of
+# subset s being the first V of ONE random order of the eligible batches (so the V=2 set lies inside V=4, 8 and 16), and
+# each batch contributing the same cells at every V. A spec without `draw` is the earlier per-V draw (x8_draw_v3 below),
+# kept so that the v3 manifest's X8 rows still resolve; the v4 manifest uses X8_DRAW only.
+X8_DRAW = "nested_chain_v1"
+X8_SPEC_KEYS = {"kind", "n_batches", "subset", "n_cells", "cells_per_batch", "draw"}
+# X7 depleted-reference arm (SI-96): kind 'reference_composition' with draw=X7_DRAW removes the listed cell types from the
+# row's reference batch and thins the reference to ONE cell count n_reference per task (the cells it keeps at the deepest
+# level), so the reference has the same size at every level; no other batch is touched (x7_draw).
+X7_DRAW = "reference_fixed_v1"
+X7_PERMUTATION_SEED = 50_000
+X7_SPEC_KEYS = {"kind", "batch", "types", "n_reference", "n_cells", "draw"}
 
 
 def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
@@ -76,8 +89,12 @@ def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
     fixed for every dose) and the reference must not be the depleted batch (SI-31)."""
     names = sorted(map(str, batches))
     comp = bool(subsample_spec) and subsample_spec.get("kind") == "composition"
+    ref_comp = bool(subsample_spec) and subsample_spec.get("kind") == "reference_composition"
     if comp and (value == "auto" or value.isdigit()):
         raise ValueError(f"{tag}: an X3 composition row must name its reference batch (SI-31), got {value!r}")
+    if ref_comp and value != str(subsample_spec["batch"]):     # also refuses 'auto' and an index
+        raise ValueError(f"{tag}: X7 depleted-reference row: reference {value!r} must be the depleted batch "
+                         f"{subsample_spec['batch']!r} (SI-96)")
     if value == "auto":
         return str(select())
     if value.isdigit():
@@ -190,6 +207,10 @@ def subsample(adata, spec, seed, return_info=False):
     # The subsample depends on the design cell (task, V, subset, dose) only, never on the training
     # seed, so every arm and seed of one design cell sees the same cells.
     obs = adata.obs
+    if spec["kind"] == "batches" and spec.get("draw") == X8_DRAW:
+        if return_info:
+            raise ValueError("return_info is defined for composition subsamples only")
+        return adata[x8_draw(obs, spec)].copy()
     if spec["kind"] == "batches":
         rng = np.random.default_rng(30_000 + 100 * spec["subset"] + spec["n_batches"])
         sizes = obs["batch"].value_counts()
@@ -203,12 +224,70 @@ def subsample(adata, spec, seed, return_info=False):
         if return_info:
             raise ValueError("return_info is defined for composition subsamples only")
         return adata[np.sort(idx)].copy()
+    if spec["kind"] == "reference_composition":
+        if return_info:
+            raise ValueError("return_info is defined for composition subsamples only")
+        return adata[x7_draw(obs, spec)].copy()
     if spec["kind"] == "composition":
         idx, info = x3_draw(obs, spec)
         if return_info:
             return adata[idx].copy(), info
         return adata[idx].copy()
     raise ValueError(spec)
+
+
+def x8_draw(obs, spec):
+    """X8 cells of one design cell (SI-94), draw 'nested_chain_v1'. per = spec['cells_per_batch'] cells from each of V =
+    spec['n_batches'] batches, at every V. Eligible batches = those with at least per cells (the same list for every V).
+    Subset s is one chain: a random order of the eligible batches (default_rng(20000 + 100 * s)); its V batches are the
+    first V of that order, so the 2-batch set lies inside the 4-batch set inside the 8- and 16-batch sets. Batch b
+    contributes the same cells at every V and in every arm and seed: per cells chosen by default_rng([30000, s, rank of
+    b among the eligible batches]). The two subsets are two independent chains. Returns sorted row indices into obs."""
+    unknown = sorted(set(spec) - X8_SPEC_KEYS)
+    if unknown:
+        raise KeyError(f"X8 batches spec has keys x8_draw does not consume: {unknown}")
+    v, s, per = int(spec["n_batches"]), int(spec["subset"]), int(spec["cells_per_batch"])
+    if int(spec["n_cells"]) != v * per:
+        raise ValueError(f"X8 spec n_cells={spec['n_cells']} must equal n_batches x cells_per_batch = {v * per}")
+    bat = obs["batch"].astype(str).values
+    sizes = obs["batch"].astype(str).value_counts()
+    ok = sorted(sizes[sizes >= per].index)
+    if len(ok) < 16:
+        raise ValueError(f"only {len(ok)} batches have >= {per} cells; the V=16 set needs 16")
+    order = np.random.default_rng(20_000 + 100 * s).permutation(len(ok))
+    pick = [ok[i] for i in order[:v]]
+    idx = np.sort(np.concatenate([
+        np.random.default_rng([30_000, s, ok.index(b)]).choice(np.where(bat == b)[0], per, replace=False)
+        for b in pick]))
+    return idx
+
+
+def x7_draw(obs, spec):
+    """X7 cells of one depleted-reference design cell (SI-96), draw 'reference_fixed_v1'. Every cell of the other batches
+    is kept. The reference batch spec['batch'] loses every cell of the types in spec['types'] (its rarest types, by the
+    rule of build_paper_manifest.X7_DEPLETED) and the rest is thinned, without replacement, to exactly
+    spec['n_reference'] cells: the first n_reference cells of the remaining ones in the order of one fixed permutation
+    of the batch (default_rng(X7_PERMUTATION_SEED)). n_reference is the number of cells the reference keeps at the deepest
+    level, so every level reaches it and the reference has the same size at every level; spec['n_cells'] is the total
+    kept. Returns sorted row indices into obs."""
+    unknown = sorted(set(spec) - X7_SPEC_KEYS)
+    if unknown:
+        raise KeyError(f"reference_composition spec has keys x7_draw does not consume: {unknown}")
+    if spec.get("draw") != X7_DRAW:
+        raise ValueError(f"reference_composition needs draw={X7_DRAW!r}, got {spec.get('draw')!r}")
+    b, types, n_ref = str(spec["batch"]), [str(t) for t in spec["types"]], int(spec["n_reference"])
+    bat, ct = obs["batch"].astype(str).values, obs["celltype"].astype(str).values
+    ref = np.where(bat == b)[0]
+    absent = sorted(set(types) - set(ct[ref]))
+    if len(set(types)) != len(types) or absent:     # an empty list is the level-0 control: nothing removed, same thinning
+        raise ValueError(f"types must be distinct and present in batch {b!r}; absent: {absent}")
+    if int(spec["n_cells"]) != n_ref + len(obs) - len(ref):
+        raise ValueError(f"n_cells={spec['n_cells']} must equal n_reference + the other batches' {len(obs) - len(ref)} cells")
+    order = ref[np.random.default_rng(X7_PERMUTATION_SEED).permutation(len(ref))]
+    keep = order[~np.isin(ct[order], types)]
+    if len(keep) < n_ref:
+        raise ValueError(f"batch {b!r} keeps only {len(keep)} cells after removing {types}; n_reference={n_ref}")
+    return np.sort(np.concatenate([np.where(bat != b)[0], keep[:n_ref]]))
 
 
 def x3_draw(obs, spec):

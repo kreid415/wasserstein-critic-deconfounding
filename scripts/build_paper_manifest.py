@@ -43,6 +43,16 @@ the X1 fit (column reuses_x1 in the summary). In the pilot design no follow-up r
 --design shared (costing alternative without A1): X1 runs the 10-point LAMBDA_GRID for every arm and
 A2/A3 come after X1, with X1-matched lambdas and their mean / off halves taken from X1 rows.
 
+Follow-up design (--followup-design): 'v3' (default) is the manifest of record at tag prereg-tier12-v3. 'v4' applies the
+user's decisions of 2026-10-17 (CONSTRAINTS.md SI-93..SI-98) to X3, X6, X7, X8, X12 only; every other row is unchanged:
+  SI-93  X3/X6/X7/X8/X12 also run with the unconditioned decoder (cond 0; X15 stays conditioned); X3's oracle-weighted
+         rows too (per-cell weights, scvi_adversarial_plan._iw_cell_vector);
+  SI-94  X8: every batch contributes N//16 cells at every V = 2/4/8/16 (N = X8_TOTAL), batch sets nested, two chains;
+  SI-95  X7: lambda window matched_lo / matched / matched_hi (X8 keeps one lambda);
+  SI-96  X7: depleted-reference arm on pancreas and sim1 (X7_DEPLETED);
+  SI-98  X6: arm discriminator_sn_critic_opt (spectral-norm JS discriminator, critic Adam settings), lo / matched / hi.
+SI-97 (X12 as a 16-run 2^(5-1) design) is the existing flag --x12-runs 16.
+
 Usage: python scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 \\
            --bary-iter 10 --out scripts/paper_manifest.tsv
 """
@@ -109,6 +119,29 @@ X15_KL_WARMUP = ["stock", "complete"]
 # X8: total cells fixed per task, equal cells per batch; the largest N for which V = 2 still has
 # >= 3 eligible batches and V = 16 has >= 16 (batch sizes in prepped_scib, 2026-10-02)
 X8_TOTAL = {"immune_hum_mou": 16000, "lung": 6000, "sim2": 3000}
+X8_DRAW = "nested_chain_v1"   # = fit_paper_config.X8_DRAW (SI-94); design v4 only: cells per batch = X8_TOTAL // 16 at every V
+FOLLOWUP_DESIGNS = ("v3", "v4")
+# X7 depleted-reference arm (SI-96), design v4. Rule fixed in advance (user answer 2026-10-17: rarest types first): the
+# task's reference batch is the dose-0 automatic choice (select_reference_batch; as X3_TARGETS). Level 'two_thirds' /
+# 'one_third' keeps round(c * 2/3) / round(c * 1/3) of the reference's c cell types (c = types present in it) by removing,
+# entirely, its RAREST types (count ascending, ties by name). The reference is then thinned without replacement to ONE
+# size n_reference per task = the cells it keeps at the deeper level, so it has the same size at both levels; all other
+# batches are untouched (fit_paper_config.x7_draw). n_cells = n_reference + the other batches' cells. Level 'none' (SI-96,
+# lead decision 2026-10-17: "keep its size") removes no type and is thinned to the same n_reference by the same permutation:
+# the same-size control, so the contrast between levels differs in coverage only. Read from
+# prepped_scib/<task>__scib.h5ad (2026-10-17); tests/scvi/test_followup_v4.py re-derives every entry when PREPPED_DIR is set.
+X7_DRAW = "reference_fixed_v1"   # = fit_paper_config.X7_DRAW
+X7_DEPLETED = {   # task: (reference batch, n_reference, n_cells, {level: types removed from the reference})
+    "pancreas": ("inDrop1", 1572, 16017, {
+        "none": [],
+        "two_thirds": ["t_cell", "schwann", "mast", "epsilon", "macrophage"],
+        "one_third": ["t_cell", "schwann", "mast", "epsilon", "macrophage", "activated_stellate", "gamma",
+                      "quiescent_stellate", "acinar"]}),
+    "sim1": ("Batch5", 1005, 11341, {
+        "none": [],
+        "two_thirds": ["Group2", "Group7"],
+        "one_third": ["Group2", "Group7", "Group4", "Group3", "Group6"]}),
+}
 
 
 def scvi_epochs(n):
@@ -150,7 +183,11 @@ def cpu_row(task, arm, knob, value, dims):
                 max_epochs=0, train_size=0, seed=0, reference="auto", extra=json.dumps({"knob": knob} if knob else {}))
 
 
-def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
+def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8, followup_design="v3"):
+    if followup_design not in FOLLOWUP_DESIGNS:
+        raise ValueError(f"followup_design must be one of {FOLLOWUP_DESIGNS}, got {followup_design!r}")
+    v4 = followup_design == "v4"
+    fu_conds = [True, False] if v4 else [True]     # decoders of X3 / X6 / X7 / X8 / X12 (SI-93); X15 is conditioned only
     R = []
     grid = LAMBDA_GRID if design == "shared" else FAMILY_GRID
     a2_tasks, a2_arms = ["atac_small", "immune"], ["discriminator", "reference", "pooled"]
@@ -211,33 +248,49 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
     if set(FOLLOWUP_SEEDS) & (set(range(max(5, uncond_seeds))) | {A1_SEED0 + i for i in range(pilot_seeds)}):
         raise ValueError(f"follow-up seeds {FOLLOWUP_SEEDS} overlap the X1 or A1 seeds")
     # ---- X7: every batch as reference (K >= 3): reference W1, fixed-reference W1, MMD to reference
+    x7_lams = ["matched_lo", "matched", "matched_hi"] if v4 else ["matched"]     # SI-95: X7 gets the lambda window
     for t in ["pancreas", "sim1", "atac_small"]:
-        for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], FOLLOWUP_SEEDS):
-            R.append(row("X7", t, arm, "matched", s, True, bb, reference=str(ref)))
-        # reference JS (docs/SPECS_missing_arms.md section 2, CONSTRAINTS.md SI-23): one adversary step
-        for ref, s in itertools.product(range(TASKS[t][1]), FOLLOWUP_SEEDS):
-            R.append(row("X7", t, "discriminator_ref", "matched", s, True, bb, reference=str(ref), n_critic=1))
+        for cond, lam in itertools.product(fu_conds, x7_lams):
+            for ref, arm, s in itertools.product(range(TASKS[t][1]), ["reference", "reference_fixed", "mmd_ref"], FOLLOWUP_SEEDS):
+                R.append(row("X7", t, arm, lam, s, cond, bb, reference=str(ref)))
+            # reference JS (docs/SPECS_missing_arms.md section 2, CONSTRAINTS.md SI-23): one adversary step
+            for ref, s in itertools.product(range(TASKS[t][1]), FOLLOWUP_SEEDS):
+                R.append(row("X7", t, "discriminator_ref", lam, s, cond, bb, reference=str(ref), n_critic=1))
+    if v4:
+        # depleted-reference arm (SI-96): the same four arms, the reference batch fixed and its types removed
+        for t, (ref, n_ref, n, levels) in X7_DEPLETED.items():
+            for cond, lam, (level, types), arm, s in itertools.product(
+                    fu_conds, x7_lams, levels.items(), ["reference", "reference_fixed", "mmd_ref", "discriminator_ref"],
+                    FOLLOWUP_SEEDS):
+                ex = json.dumps(dict(subsample=dict(kind="reference_composition", batch=ref, types=types,
+                                                    n_reference=n_ref, n_cells=n, draw=X7_DRAW)))
+                R.append(row("X7", t, arm, lam, s, cond, bb, n_cells=n, extra=ex, reference=ref,
+                             **({"n_critic": 1} if arm == "discriminator_ref" else {})))
     # ---- X8: number of batches V at fixed total cells and equal cells per batch
     for t, n in X8_TOTAL.items():
-        for V, sub, s in itertools.product([2, 4, 8, 16], [0, 1], FOLLOWUP_SEEDS):
-            ex = json.dumps(dict(subsample=dict(kind="batches", n_batches=V, subset=sub, n_cells=n)))
+        for cond, V, sub, s in itertools.product(fu_conds, [2, 4, 8, 16], [0, 1], FOLLOWUP_SEEDS):
+            if v4:   # SI-94: N // 16 cells from every batch at every V; n_cells = the cells actually drawn
+                per = n // 16
+                spec = dict(kind="batches", n_batches=V, subset=sub, n_cells=V * per, cells_per_batch=per, draw=X8_DRAW)
+            else:
+                spec = dict(kind="batches", n_batches=V, subset=sub, n_cells=n)
+            ex = json.dumps(dict(subsample=spec))
             for arm in ["none", "discriminator", "mmd", "reference", "pooled"]:
-                R.append(row("X8", t, arm, 0 if arm == "none" else "matched", s, True, bb, n_cells=n, extra=ex))
+                R.append(row("X8", t, arm, 0 if arm == "none" else "matched", s, cond, bb, n_cells=spec["n_cells"], extra=ex))
             # critics also with the per-batch stratified sampler (SPECS section 3, SI-24)
-            ex_s = json.dumps(dict(subsample=dict(kind="batches", n_batches=V, subset=sub, n_cells=n),
-                                   sampler="stratified"))
+            ex_s = json.dumps(dict(subsample=spec, sampler="stratified"))
             for arm in ["reference", "pooled"]:
-                R.append(row("X8", t, arm, "matched", s, True, bb, n_cells=n, extra=ex_s))
+                R.append(row("X8", t, arm, "matched", s, cond, bb, n_cells=spec["n_cells"], extra=ex_s))
     # ---- X3 (tier 2): composition-shift dose-response
     for t, (b, types, ref) in X3_TARGETS.items():
         if ref == b or ref.isdigit():
             raise ValueError(f"X3 {t}: reference {ref!r} must be a batch name other than the depleted batch")
         n = X3_N[t]
-        for dose, s in itertools.product([0, 50, 80, 95, 100], FOLLOWUP_SEEDS):
+        for cond, dose, s in itertools.product(fu_conds, [0, 50, 80, 95, 100], FOLLOWUP_SEEDS):
             ex = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose, n_cells=n,
                                                 draw=X3_DRAW)))
-            R.append(row("X3", t, "none", 0, s, True, bb, n_cells=n, extra=ex, reference=ref))
-            R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex, reference=ref)
+            R.append(row("X3", t, "none", 0, s, cond, bb, n_cells=n, extra=ex, reference=ref))
+            R += [row("X3", t, a, lam, s, cond, bb, n_cells=n, extra=ex, reference=ref)
                   for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
             # oracle importance-weighted control (SPECS section 4, SI-25): weights restore the dose-0 composition
             # (fit_paper_config.depletion_oracle_weights); at dose 0 every weight is 1 (= the unweighted rows above)
@@ -245,21 +298,25 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
             if dose in (50, 80, 95):
                 ex_iw = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose,
                                                        n_cells=n, draw=X3_DRAW), iw="depletion_oracle"))
-                R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw, reference=ref)
+                R += [row("X3", t, a, lam, s, cond, bb, n_cells=n, extra=ex_iw, reference=ref)
                       for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
     # ---- X6 (tier 2): divergence x Lipschitz control x update budget (pooled = symmetric target)
-    for t, s, (arm, k), lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,
-                                                 [("discriminator", 1), ("discriminator_sn", 1), ("pooled", 1), ("pooled", 5),
-                                                  ("pooled", 10), ("pooled_sn", 1), ("pooled_sn", 5)],
-                                                 ["matched_lo", "matched", "matched_hi"]):
-        R.append(row("X6", t, arm, lam, s, True, bb, n_critic=k))
+    x6_arms = [("discriminator", 1), ("discriminator_sn", 1), ("pooled", 1), ("pooled", 5), ("pooled", 10),
+               ("pooled_sn", 1), ("pooled_sn", 5)]
+    if v4:   # SI-98: spectral-norm JS discriminator trained with the critic's Adam settings (lr 1e-4, betas (0, 0.9))
+        x6_arms.append(("discriminator_sn_critic_opt", 1))
+    for cond, t, s, (arm, k), lam in itertools.product(fu_conds, ["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,
+                                                       x6_arms, ["matched_lo", "matched", "matched_hi"]):
+        R.append(row("X6", t, arm, lam, s, cond, bb, n_critic=k))
     # JS + R1 penalty, gamma 10, one adversary step (SPECS section 1, SI-22)
-    for t, s, lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS, ["matched_lo", "matched", "matched_hi"]):
-        R.append(row("X6", t, "discriminator_r1", lam, s, True, bb, n_critic=1, extra=json.dumps(dict(r1_gamma=10))))
+    for cond, t, s, lam in itertools.product(fu_conds, ["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,
+                                             ["matched_lo", "matched", "matched_hi"]):
+        R.append(row("X6", t, "discriminator_r1", lam, s, cond, bb, n_critic=1, extra=json.dumps(dict(r1_gamma=10))))
     # ---- X12 (tier 2): 5 two-level factors. 8 runs = 2^(5-2), generators D = AB, E = AC (resolution III:
     #      main effects aliased with two-factor interactions). 16 runs = 2^(5-1), E = ABCD (resolution V).
-    for t, s, run, arm, lam in itertools.product(["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS, range(x12_runs),
-                                                 ["discriminator", "reference"], ["matched_lo", "matched_hi"]):
+    for cond, t, s, run, arm, lam in itertools.product(fu_conds, ["atac_small", "immune", "pancreas"], FOLLOWUP_SEEDS,
+                                                       range(x12_runs), ["discriminator", "reference"],
+                                                       ["matched_lo", "matched_hi"]):
         A, B, C = run & 1, (run >> 1) & 1, (run >> 2) & 1
         if x12_runs == 8:
             D, E = A ^ B, A ^ C
@@ -267,7 +324,7 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
             D = (run >> 3) & 1
             E = A ^ B ^ C ^ D
         ex = json.dumps(dict(factorial_run=run, adv_width=[32, 128][B], adv_lr=[1e-4, 1e-3][C]))
-        R.append(row("X12", t, arm, lam, s, True, bb, extra=ex, n_latent=[10, 30][A],
+        R.append(row("X12", t, arm, lam, s, cond, bb, extra=ex, n_latent=[10, 30][A],
                      batch_size=[128, 512][D], decoder=["SCVI", "LinearSCVI"][E]))
     # ---- X15 (SI-44, PAPER_PLAN N8): KL warm-up sensitivity, conditioned decoder: lambda=0 and discriminator / pooled
     #      critic / MMD at the matched lo / hi lambda x FOLLOWUP_SEEDS x {stock 400-epoch warm-up, warm-up that
@@ -308,6 +365,8 @@ def main():
     ap.add_argument("--pilot-seeds", type=int, default=3)
     ap.add_argument("--uncond-seeds", type=int, default=5, help="seeds of the unconditioned X1 block (plan: 5)")
     ap.add_argument("--x12-runs", type=int, choices=[8, 16], default=8, help="X12 fractional factorial size (plan: 8)")
+    ap.add_argument("--followup-design", choices=FOLLOWUP_DESIGNS, default="v3",
+                    help="'v3' = the manifest of record; 'v4' = the 2026-10-17 follow-up decisions SI-93..SI-96, SI-98 (docstring)")
     ap.add_argument("--bary-iter", type=int, default=None,
                     help="barycenter: cold fixed-point iterations per step, init = minibatch cells (default 10)")
     ap.add_argument("--bary-warm-iter", type=int, default=None,
@@ -315,11 +374,12 @@ def main():
     a = ap.parse_args()
     global BARY_WARM_ITER, BARY_ITER
     BARY_WARM_ITER, BARY_ITER = a.bary_warm_iter, a.bary_iter
-    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs))
+    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs, a.followup_design))
     fit = [r for r in R if not r["reuses_x1"]]
     with open(a.out, "w") as f:
         f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}, uncond_seeds={a.uncond_seeds}, "
-                f"x12_runs={a.x12_runs}, bary_iter={a.bary_iter or 10}, bary_warm_iter={a.bary_warm_iter}; "
+                f"x12_runs={a.x12_runs}, " + (f"followup_design={a.followup_design}, " if a.followup_design != "v3" else "") +
+                f"bary_iter={a.bary_iter or 10}, bary_warm_iter={a.bary_warm_iter}; "
                 f"lambda grid {LAMBDA_GRID}; 'g*' = per-family "
                 f"grid from A1; 'matched*' lambdas are "
                 f"resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted "

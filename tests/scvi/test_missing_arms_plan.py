@@ -5,7 +5,7 @@
 1. discriminator_r1, discriminator_ref, the stratified sampler and importance-weighted arms train to finite
    latents (conditioned and, where defined, unconditioned).
 2. Guards: r1_gamma required for *_r1 and refused elsewhere; one adversary step only; reference required;
-   importance weights refused for unconditioned models, for arms outside X3, and for incomplete tables;
+   importance weights refused for arms outside X3 and for incomplete or negative tables (conditioned and not);
    unknown samplers refused.
 3. discriminator_r1 and discriminator_ref take one adversary step per generator step.
 4. The stratified sampler feeds the training step exactly 128 / V cells per batch, ceil(n_train / 128) times
@@ -14,6 +14,7 @@
 6. Importance weights equal to 1 reproduce the unweighted fit (pooled and mmd bit for bit on CPU; the
    discriminator and reference critic to float tolerance, their weighted means use a different summation).
 """
+import itertools
 import math
 import os
 import sys
@@ -71,6 +72,8 @@ def _kw(arm, **over):
     ("pooled", False, {"sampler": "stratified"}),
     ("discriminator", True, {"iw_weights": _iw()}), ("reference", True, {"iw_weights": _iw()}),
     ("pooled", True, {"iw_weights": _iw()}), ("mmd", True, {"iw_weights": _iw()}),
+    ("discriminator", False, {"iw_weights": _iw()}), ("reference", False, {"iw_weights": _iw()}),      # SI-93
+    ("pooled", False, {"iw_weights": _iw()}), ("mmd", False, {"iw_weights": _iw()}),
 ])
 def test_new_arms_train_finite(arm, conditioned, opts):
     z, model = plan.fit_adversarial_scvi(_toy(), "batch", conditioned=conditioned, **_kw(arm, **opts), **COMMON)
@@ -92,12 +95,13 @@ def test_new_arm_guards():
     for kw, msg in cases:
         with pytest.raises(ValueError, match=msg):
             plan.fit_adversarial_scvi(a, "batch", conditioned=True, **kw, **COMMON)
-    with pytest.raises(ValueError, match="conditioned"):
-        plan.fit_adversarial_scvi(a, "batch", conditioned=False, **_kw("pooled", iw_weights=_iw()), **COMMON)
-    incomplete = _iw()
+    incomplete, negative = _iw(), _iw(val=-1.0)
     del incomplete["b2"]["t1"]
-    with pytest.raises(ValueError, match="lacks"):
-        plan.fit_adversarial_scvi(a, "batch", conditioned=True, **_kw("pooled", iw_weights=incomplete), **COMMON)
+    for conditioned in (True, False):
+        with pytest.raises(ValueError, match="lacks"):
+            plan.fit_adversarial_scvi(a, "batch", conditioned=conditioned, **_kw("pooled", iw_weights=incomplete), **COMMON)
+    with pytest.raises(ValueError, match="finite and >= 0"):
+        plan.fit_adversarial_scvi(a, "batch", conditioned=False, **_kw("pooled", iw_weights=negative), **COMMON)
 
 
 @pytest.mark.parametrize("arm", ["discriminator_r1", "discriminator_ref"])
@@ -159,18 +163,53 @@ def test_labels_slot_changes_no_latent():
 def test_unit_importance_weights_reproduce_the_unweighted_fit():
     cfgs = []
     for arm in ["pooled", "mmd", "discriminator", "reference"]:
-        for iw in (None, "ones"):
-            c = dict(arm=arm, cond=True, adv_input="mean", zstd=False, model="SCVI")
+        for iw, cond in itertools.product((None, "ones"), (True, False)):      # unconditioned too (SI-93)
+            c = dict(arm=arm, cond=cond, adv_input="mean", zstd=False, model="SCVI")
             if iw:
                 c["iw"] = iw
-            c["key"] = f"{arm}|{iw}"
+            c["key"] = f"{arm}|{iw}|{cond}"
             cfgs.append(c)
     with tempfile.TemporaryDirectory() as tmp:
         z = bi.run_version(ROOT, cfgs, os.path.join(tmp, "z.npz"))
     errors = [k for k in z if k.endswith("::error")]
     assert not errors, {k: str(z[k]) for k in errors}
-    for arm in ["pooled", "mmd"]:
-        bi.compare(z[f"{arm}|None"], z[f"{arm}|ones"])                    # bit for bit
-    for arm in ["discriminator", "reference"]:
-        assert np.allclose(z[f"{arm}|None"], z[f"{arm}|ones"], rtol=0, atol=1e-4), \
-            float(np.abs(z[f"{arm}|None"] - z[f"{arm}|ones"]).max())
+    for arm, cond in itertools.product(["pooled", "mmd"], (True, False)):
+        bi.compare(z[f"{arm}|None|{cond}"], z[f"{arm}|ones|{cond}"])      # bit for bit
+    for arm, cond in itertools.product(["discriminator", "reference"], (True, False)):
+        assert np.allclose(z[f"{arm}|None|{cond}"], z[f"{arm}|ones|{cond}"], rtol=0, atol=1e-4), \
+            float(np.abs(z[f"{arm}|None|{cond}"] - z[f"{arm}|ones|{cond}"]).max())
+
+
+def test_unconditioned_weights_equal_the_conditioned_weights_of_the_same_cells():   # test-reason: the two paths give the same numbers per cell, a value check no fit test makes
+    a = _toy()
+    s = a.copy()
+    s.X = s.layers["counts"].copy()
+    scvi.model.SCVI.setup_anndata(s, batch_key="batch", labels_key="celltype")
+    m = scvi.model.SCVI(s, n_latent=4)
+    reg = lambda k: np.asarray(m.adata_manager.get_from_registry(k)).ravel().astype(int)    # noqa: E731
+    table = torch.as_tensor(plan._build_iw_table(m, _iw(), "celltype", s, "batch"), dtype=torch.float32)
+    cond = table[reg(scvi.REGISTRY_KEYS.BATCH_KEY), reg(scvi.REGISTRY_KEYS.LABELS_KEY)].numpy()    # conditioned path
+    vec = plan._iw_cell_vector(a, _iw(), "batch", "celltype")                                       # unconditioned path
+    known = np.where((a.obs.batch == "b1") & (a.obs.celltype == "t0"), 2.0, 1.0).astype(np.float32)
+    assert np.array_equal(vec, cond) and np.array_equal(vec, known) and 0 < (vec == 2.0).sum() < len(vec)
+    assert not np.array_equal(plan._iw_cell_vector(a, _iw(val=3.0), "batch", "celltype"), cond)   # a different table is rejected
+
+
+def test_importance_weights_change_the_unconditioned_loss(monkeypatch):   # test-reason: the weights reach the minibatch and change the fit; finite-latent tests cannot see a dead weight
+    seen = []
+    orig = plan.WassersteinAdversarialTrainingPlan._iw_weights
+
+    def spy(self, batch, batch_index):
+        w = orig(self, batch, batch_index)
+        seen.append(w.detach().cpu().numpy())
+        return w
+
+    monkeypatch.setattr(plan.WassersteinAdversarialTrainingPlan, "_iw_weights", spy)
+    z_u, _ = plan.fit_adversarial_scvi(_toy(), "batch", conditioned=False, **_kw("discriminator"), **COMMON)
+    assert not seen                                                         # no weights, no weight lookups
+    z_w, model = plan.fit_adversarial_scvi(_toy(), "batch", conditioned=False,
+                                           **_kw("discriminator", iw_weights=_iw()), **COMMON)
+    w = np.concatenate(seen)
+    assert set(np.unique(w)) == {1.0, 2.0}                                  # the minibatches carry the weights
+    assert not np.array_equal(z_u, z_w)                                     # and they change the training
+    assert "iw_cell" not in model.adata_manager.data_registry              # the extra field is removed again

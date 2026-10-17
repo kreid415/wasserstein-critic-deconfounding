@@ -70,7 +70,8 @@ def test_extra_keys_are_consumed_or_refused():
         "scanvi": ["adv_input", "cond", "decoder", "lam", "n_critic", "zstd"],
         "sysvi": ["adv_input", "cond", "decoder", "likelihood", "n_critic", "zstd"],
         **{a: ["n_critic"] for a in ("mmd", "mmd_ref", "sinkhorn")}}
-    heads = {"discriminator", "discriminator_sn", "discriminator_ref", "discriminator_r1",       # the arms that train
+    heads = {"discriminator", "discriminator_sn", "discriminator_sn_critic_opt", "discriminator_ref",
+             "discriminator_r1",                                                                  # the arms that train
              "reference", "reference_fixed", "reference_sn", "pooled", "pooled_sn",              # an adversary head
              "barycenter", "barycenter_sn"}
     # likewise the arms of every key (rigour review CF-03: a deleted arm only shortened the loop below)
