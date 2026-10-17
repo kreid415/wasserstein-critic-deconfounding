@@ -3,14 +3,14 @@ Run in the scvi env: WCD_SRC=src [PREPPED_DIR=<prepped_scib>] python -m pytest -
 (the optimiser and no-penalty checks of SI-98 / I036 are in tests/scvi/test_adversarial_plan_v2.py).
 
 1. The v4 manifest differs from v3 in X3 / X6 / X7 / X8 / X12 only; row counts per experiment and decoder; X3's oracle-weighted
-   rows are conditioned only; X8 draws N // 16 cells per batch; the depleted-reference rows name the depleted batch; the new
+   rows under both decoders; X8 draws N // 16 cells per batch; the depleted-reference rows name the depleted batch; the new
    X6 arm resolves its lambda from the discriminator (BASE_ARM). The v3 manifest fails the same checks.
 2. X12's 16 runs are a resolution V design: all 5 main effects and 10 two-factor interactions are mutually orthogonal; the
    8-run design (D = AB, E = AC) is rejected by the same check.
 3. x8_draw: V * N // 16 cells, equal cells per batch, batches and cells nested from V = 2 to 16, two different chains,
    ineligible (small) batches never drawn. The earlier per-V draw is rejected by the same nesting check.
-4. X7 depleted reference: x3_draw removes the listed types from the reference batch, N cells remain, the reference must be
-   the depleted batch. With PREPPED_DIR: X7_DEPLETED and the X8 batch eligibility are re-derived from the prepped files.
+4. X7 depleted reference: x7_draw removes the listed types from the reference batch and thins it to n_reference cells at
+   every level, other batches untouched; bad specs refused; the reference must be the depleted batch. With PREPPED_DIR: X7_DEPLETED and the X8 batch eligibility are re-derived from the prepped files.
 """
 import json
 import os
@@ -47,12 +47,12 @@ def _check_v4(m, v3):
     out = ~m.experiment.isin(CHANGED)
     assert m.tag[out].tolist() == v3.tag[~v3.experiment.isin(CHANGED)].tolist()
     got = m[m.experiment.isin(CHANGED + ["X15"])].groupby(["experiment", "cond"]).size().to_dict()
-    assert got == {("X3", "1"): 828, ("X3", "0"): 540, ("X6", "1"): 243, ("X6", "0"): 243, ("X7", "1"): 792,
+    assert got == {("X3", "1"): 828, ("X3", "0"): 828, ("X6", "1"): 243, ("X6", "0"): 243, ("X7", "1"): 792,
                    ("X7", "0"): 792, ("X8", "1"): 504, ("X8", "0"): 504, ("X12", "1"): 576, ("X12", "0"): 576,
                    ("X15", "1"): 84}, got
     assert not m.tag.duplicated().any()
     iw = m.extra.str.contains('"iw"')
-    assert (m.cond[iw] == "1").all() and iw.sum() == 288
+    assert iw.sum() == 576 and (m.cond[iw].value_counts() == 288).all()      # weighted rows under both decoders
     x8 = m[m.experiment == "X8"]
     for r in x8.itertuples():
         sp = _spec(r)
@@ -63,6 +63,11 @@ def _check_v4(m, v3):
     dep = x7[x7.extra.str.contains("reference_composition")]
     assert len(dep) == 288 and set(dep.arm) == {"reference", "reference_fixed", "mmd_ref", "discriminator_ref"}
     assert all(r.reference == _spec(r)["batch"] for r in dep.itertuples())
+    for r in dep.itertuples():
+        ref, n_ref, n, levels = bpm.X7_DEPLETED[r.task]
+        sp = _spec(r)
+        assert (sp["draw"], sp["n_reference"], sp["n_cells"], r.max_epochs) == (fpc.X7_DRAW, n_ref, n, str(bpm.scvi_epochs(n)))
+        assert sp["types"] in levels.values()
     assert set(x7.lam) == {"matched_lo", "matched", "matched_hi"}
     new = m[m.arm == "discriminator_sn_critic_opt"]
     assert len(new) == 54 and set(new.n_critic) == {"1"} and set(new.lam) == {"matched_lo", "matched", "matched_hi"}
@@ -73,7 +78,7 @@ def _check_v4(m, v3):
 
 def test_v4_manifest_design():
     v3, v4 = _build("v3"), _build("v4", runs=16)
-    assert bpm.X8_DRAW == fpc.X8_DRAW
+    assert (bpm.X8_DRAW, bpm.X7_DRAW) == (fpc.X8_DRAW, fpc.X7_DRAW)
     _check_v4(v4, v3)
     with pytest.raises(AssertionError):                       # the checker rejects v3 itself
         _check_v4(v3, v3)
@@ -156,18 +161,33 @@ def test_x8_draw_is_nested_with_equal_cells_per_batch():
 
 
 def test_x7_depleted_reference_spec():
-    sizes = {(b, f"t{j}"): 10 + 20 * j for b in ("ref", "o1", "o2") for j in range(5)}
+    sizes = {("ref", f"t{j}"): 40 + 20 * j for j in range(5)}                       # 40, 60, 80, 100, 120 = 400 cells
+    sizes.update({(b, f"t{j}"): 30 for b in ("o1", "o2") for j in range(5)})         # 300 other cells
     a = _obs(sizes)
-    spec = dict(kind="reference_composition", batch="ref", types=["t4", "t3"], deplete_pct=100, n_cells=150, draw=fpc.X3_DRAW)
-    sub, info = fpc.subsample(a, spec, 0, return_info=True)
-    assert sub.n_obs == 150 and info["per_type"]["t4"]["kept"] == 0
-    left = sub.obs[sub.obs.batch == "ref"].celltype
-    assert not left.isin(["t3", "t4"]).any() and left.nunique() == 3
+    rare = {"two_thirds": ["t0", "t1"], "one_third": ["t0", "t1", "t2"]}              # rarest first; keeps 3 and 2 types
+    n_ref = 220                                                                      # 100 + 120: the deeper level's cells
+    spec = lambda t: dict(kind="reference_composition", batch="ref", types=t, n_reference=n_ref,  # noqa: E731
+                          n_cells=n_ref + 300, draw=fpc.X7_DRAW)
+    for level, types in rare.items():
+        sub = fpc.subsample(a, spec(types), 0)
+        ref = sub.obs[sub.obs.batch == "ref"]
+        assert sub.n_obs == 520 and len(ref) == n_ref and not ref.celltype.isin(types).any()
+        assert (sub.obs.batch != "ref").sum() == 300 and sub.obs_names.is_unique          # other batches untouched
+    deep = fpc.subsample(a, spec(rare["one_third"]), 0)
+    assert set(deep.obs[deep.obs.batch == "ref"].celltype) == {"t3", "t4"}               # all kept cells of t3, t4
+    for bad, exc, msg in [(dict(n_reference=300, n_cells=600), ValueError, "keeps only"),
+                          (dict(types=["t0", "zz"]), ValueError, "present"), (dict(n_cells=5), ValueError, "must equal"),
+                          (dict(draw="nested_v1"), ValueError, "needs draw"), (dict(extra_key=1), KeyError, "does not consume")]:
+        with pytest.raises(exc, match=msg):                                              # known-bad specs
+            fpc.subsample(a, {**spec(rare["one_third"]), **bad}, 0)
+    with pytest.raises(ValueError, match="composition"):
+        fpc.subsample(a, spec(rare["one_third"]), 0, return_info=True)
     names = ["o1", "o2", "ref"]
-    assert fpc.resolve_reference("t", "ref", names, spec) == "ref"
+    sp = spec(rare["one_third"])
+    assert fpc.resolve_reference("t", "ref", names, sp) == "ref"
     for bad in ("auto", "1", "o1"):                        # not the depleted batch: known-bad inputs
         with pytest.raises(ValueError, match="must be the depleted batch"):
-            fpc.resolve_reference("t", bad, names, spec)
+            fpc.resolve_reference("t", bad, names, sp)
 
 
 @needs_env("PREPPED_DIR")
@@ -181,16 +201,16 @@ def test_x7_depleted_table_and_x8_eligibility_follow_the_rules():   # test-reaso
     def obs_of(task):
         with h5py.File(os.path.join(os.environ["PREPPED_DIR"], f"{task}__scib.h5ad"), "r") as f:
             return ad.io.read_elem(f["obs"])[["batch", "celltype"]].astype(str)
-    for task, (ref, n, levels) in bpm.X7_DEPLETED.items():
+    for task, (ref, n_ref, n, levels) in bpm.X7_DEPLETED.items():
         obs = obs_of(task)
         assert str(data.select_reference_batch(ad.AnnData(obs=obs), "batch", "celltype")) == ref
         cnt = obs[obs.batch == ref].celltype.value_counts()
-        order = sorted(cnt.index, key=lambda c: (-cnt[c], c))
+        order = sorted(cnt.index, key=lambda c: (cnt[c], c))                       # rarest first, ties by name
         c = len(order)
         want = {"two_thirds": order[:c - round(c * 2 / 3)], "one_third": order[:c - round(c / 3)]}
         assert levels == want, task
-        nonhit = {k: len(obs) - int(((obs.batch == ref) & obs.celltype.isin(t)).sum()) for k, t in levels.items()}
-        assert n == min(nonhit.values()) and n <= nonhit["two_thirds"], task
+        kept = {k: int(cnt.sum() - cnt[t].sum()) for k, t in levels.items()}
+        assert n_ref == min(kept.values()) and n == n_ref + len(obs) - int(cnt.sum()), task
     for task, total in bpm.X8_TOTAL.items():
         sizes = obs_of(task).batch.value_counts()
         assert (sizes >= total // 16).sum() >= 16, task

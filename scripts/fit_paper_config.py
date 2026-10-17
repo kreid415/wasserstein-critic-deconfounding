@@ -74,9 +74,12 @@ X3_SPEC_KEYS = {"kind", "batch", "types", "deplete_pct", "n_cells", "draw"}
 # kept so that the v3 manifest's X8 rows still resolve; the v4 manifest uses X8_DRAW only.
 X8_DRAW = "nested_chain_v1"
 X8_SPEC_KEYS = {"kind", "n_batches", "subset", "n_cells", "cells_per_batch", "draw"}
-# X7 depleted-reference arm (SI-96): kind 'reference_composition' is an X3 composition spec (same x3_draw) whose depleted
-# batch IS the row's reference batch; deplete_pct is 100, so each listed type is removed from the reference entirely.
-SUBSAMPLE_COMPOSITION_KINDS = ("composition", "reference_composition")
+# X7 depleted-reference arm (SI-96): kind 'reference_composition' with draw=X7_DRAW removes the listed cell types from the
+# row's reference batch and thins the reference to ONE cell count n_reference per task (the cells it keeps at the deepest
+# level), so the reference has the same size at every level; no other batch is touched (x7_draw).
+X7_DRAW = "reference_fixed_v1"
+X7_PERMUTATION_SEED = 50_000
+X7_SPEC_KEYS = {"kind", "batch", "types", "n_reference", "n_cells", "draw"}
 
 
 def resolve_reference(tag, value, batches, subsample_spec=None, select=None):
@@ -221,7 +224,11 @@ def subsample(adata, spec, seed, return_info=False):
         if return_info:
             raise ValueError("return_info is defined for composition subsamples only")
         return adata[np.sort(idx)].copy()
-    if spec["kind"] in SUBSAMPLE_COMPOSITION_KINDS:
+    if spec["kind"] == "reference_composition":
+        if return_info:
+            raise ValueError("return_info is defined for composition subsamples only")
+        return adata[x7_draw(obs, spec)].copy()
+    if spec["kind"] == "composition":
         idx, info = x3_draw(obs, spec)
         if return_info:
             return adata[idx].copy(), info
@@ -253,6 +260,34 @@ def x8_draw(obs, spec):
         np.random.default_rng([30_000, s, ok.index(b)]).choice(np.where(bat == b)[0], per, replace=False)
         for b in pick]))
     return idx
+
+
+def x7_draw(obs, spec):
+    """X7 cells of one depleted-reference design cell (SI-96), draw 'reference_fixed_v1'. Every cell of the other batches
+    is kept. The reference batch spec['batch'] loses every cell of the types in spec['types'] (its rarest types, by the
+    rule of build_paper_manifest.X7_DEPLETED) and the rest is thinned, without replacement, to exactly
+    spec['n_reference'] cells: the first n_reference cells of the remaining ones in the order of one fixed permutation
+    of the batch (default_rng(X7_PERMUTATION_SEED)). n_reference is the number of cells the reference keeps at the deepest
+    level, so every level reaches it and the reference has the same size at every level; spec['n_cells'] is the total
+    kept. Returns sorted row indices into obs."""
+    unknown = sorted(set(spec) - X7_SPEC_KEYS)
+    if unknown:
+        raise KeyError(f"reference_composition spec has keys x7_draw does not consume: {unknown}")
+    if spec.get("draw") != X7_DRAW:
+        raise ValueError(f"reference_composition needs draw={X7_DRAW!r}, got {spec.get('draw')!r}")
+    b, types, n_ref = str(spec["batch"]), [str(t) for t in spec["types"]], int(spec["n_reference"])
+    bat, ct = obs["batch"].astype(str).values, obs["celltype"].astype(str).values
+    ref = np.where(bat == b)[0]
+    absent = sorted(set(types) - set(ct[ref]))
+    if not types or len(set(types)) != len(types) or absent:
+        raise ValueError(f"types must be distinct, non-empty and present in batch {b!r}; absent: {absent}")
+    if int(spec["n_cells"]) != n_ref + len(obs) - len(ref):
+        raise ValueError(f"n_cells={spec['n_cells']} must equal n_reference + the other batches' {len(obs) - len(ref)} cells")
+    order = ref[np.random.default_rng(X7_PERMUTATION_SEED).permutation(len(ref))]
+    keep = order[~np.isin(ct[order], types)]
+    if len(keep) < n_ref:
+        raise ValueError(f"batch {b!r} keeps only {len(keep)} cells after removing {types}; n_reference={n_ref}")
+    return np.sort(np.concatenate([np.where(bat != b)[0], keep[:n_ref]]))
 
 
 def x3_draw(obs, spec):
@@ -356,7 +391,7 @@ def main():
 
     a = ad.read_h5ad(os.path.join(os.environ["PREPPED_DIR"], f"{r['task']}__{r['counts']}.h5ad"))
     iw_weights, iw_keep, sub_info = None, None, None
-    if "subsample" in extra and extra["subsample"].get("kind") in SUBSAMPLE_COMPOSITION_KINDS:
+    if "subsample" in extra and extra["subsample"].get("kind") == "composition":
         a, sub_info = subsample(a, extra["subsample"], seed, return_info=True)
         if "iw" in extra:
             iw_weights, iw_keep = depletion_oracle_weights(a, extra["subsample"], sub_info)

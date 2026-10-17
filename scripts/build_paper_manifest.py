@@ -45,8 +45,8 @@ A2/A3 come after X1, with X1-matched lambdas and their mean / off halves taken f
 
 Follow-up design (--followup-design): 'v3' (default) is the manifest of record at tag prereg-tier12-v3. 'v4' applies the
 user's decisions of 2026-10-17 (CONSTRAINTS.md SI-93..SI-98) to X3, X6, X7, X8, X12 only; every other row is unchanged:
-  SI-93  X3/X6/X7/X8/X12 also run with the unconditioned decoder (cond 0; X15 stays conditioned; X3's oracle-weighted rows
-         are conditioned only: the weights need the labels slot, which an unconditioned model uses for the batch);
+  SI-93  X3/X6/X7/X8/X12 also run with the unconditioned decoder (cond 0; X15 stays conditioned); X3's oracle-weighted
+         rows too (per-cell weights, scvi_adversarial_plan._iw_cell_vector);
   SI-94  X8: every batch contributes N//16 cells at every V = 2/4/8/16 (N = X8_TOTAL), batch sets nested, two chains;
   SI-95  X7: lambda window matched_lo / matched / matched_hi (X8 keeps one lambda);
   SI-96  X7: depleted-reference arm on pancreas and sim1 (X7_DEPLETED);
@@ -121,21 +121,22 @@ X15_KL_WARMUP = ["stock", "complete"]
 X8_TOTAL = {"immune_hum_mou": 16000, "lung": 6000, "sim2": 3000}
 X8_DRAW = "nested_chain_v1"   # = fit_paper_config.X8_DRAW (SI-94); design v4 only: cells per batch = X8_TOTAL // 16 at every V
 FOLLOWUP_DESIGNS = ("v3", "v4")
-# X7 depleted-reference arm (SI-96), design v4. Rule fixed in advance (brief docs/followup_design_decisions_20261017.md,
-# Q4): the task's reference batch is the dose-0 automatic choice (select_reference_batch; as X3_TARGETS). Level
-# 'two_thirds' / 'one_third' keeps round(c * 2/3) / round(c * 1/3) of the reference's c cell types (c = types present in
-# it) by removing, entirely (deplete_pct 100), the reference's most abundant types (count order, ties by name); the cells
-# are drawn and refilled by x3_draw, SI-41's nested draw, to one cell count N per task (the larger level's dose-100
-# size: the cells left once every type of the deeper level is removed). Read from prepped_scib/<task>__scib.h5ad
-# (2026-10-17); tests/scvi/test_followup_v4.py re-derives every entry when PREPPED_DIR is set.
-X7_DEPLETED = {   # task: (reference batch, N, {level: types removed from the reference})
-    "pancreas": ("inDrop1", 14487, {
-        "two_thirds": ["beta", "alpha", "delta", "endothelial", "ductal"],
-        "one_third": ["beta", "alpha", "delta", "endothelial", "ductal", "acinar", "quiescent_stellate", "gamma",
-                      "activated_stellate"]}),
-    "sim1": ("Batch5", 10530, {
-        "two_thirds": ["Group1", "Group5"],
-        "one_third": ["Group1", "Group5", "Group6", "Group3", "Group4"]}),
+# X7 depleted-reference arm (SI-96), design v4. Rule fixed in advance (user answer 2026-10-17: rarest types first): the
+# task's reference batch is the dose-0 automatic choice (select_reference_batch; as X3_TARGETS). Level 'two_thirds' /
+# 'one_third' keeps round(c * 2/3) / round(c * 1/3) of the reference's c cell types (c = types present in it) by removing,
+# entirely, its RAREST types (count ascending, ties by name). The reference is then thinned without replacement to ONE
+# size n_reference per task = the cells it keeps at the deeper level, so it has the same size at both levels; all other
+# batches are untouched (fit_paper_config.x7_draw). n_cells = n_reference + the other batches' cells. Read from
+# prepped_scib/<task>__scib.h5ad (2026-10-17); tests/scvi/test_followup_v4.py re-derives every entry when PREPPED_DIR is set.
+X7_DRAW = "reference_fixed_v1"   # = fit_paper_config.X7_DRAW
+X7_DEPLETED = {   # task: (reference batch, n_reference, n_cells, {level: types removed from the reference})
+    "pancreas": ("inDrop1", 1572, 16017, {
+        "two_thirds": ["t_cell", "schwann", "mast", "epsilon", "macrophage"],
+        "one_third": ["t_cell", "schwann", "mast", "epsilon", "macrophage", "activated_stellate", "gamma",
+                      "quiescent_stellate", "acinar"]}),
+    "sim1": ("Batch5", 1005, 11341, {
+        "two_thirds": ["Group2", "Group7"],
+        "one_third": ["Group2", "Group7", "Group4", "Group3", "Group6"]}),
 }
 
 
@@ -253,12 +254,12 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8, follow
                 R.append(row("X7", t, "discriminator_ref", lam, s, cond, bb, reference=str(ref), n_critic=1))
     if v4:
         # depleted-reference arm (SI-96): the same four arms, the reference batch fixed and its types removed
-        for t, (ref, n, levels) in X7_DEPLETED.items():
+        for t, (ref, n_ref, n, levels) in X7_DEPLETED.items():
             for cond, lam, (level, types), arm, s in itertools.product(
                     fu_conds, x7_lams, levels.items(), ["reference", "reference_fixed", "mmd_ref", "discriminator_ref"],
                     FOLLOWUP_SEEDS):
                 ex = json.dumps(dict(subsample=dict(kind="reference_composition", batch=ref, types=types,
-                                                    deplete_pct=100, n_cells=n, draw=X3_DRAW)))
+                                                    n_reference=n_ref, n_cells=n, draw=X7_DRAW)))
                 R.append(row("X7", t, arm, lam, s, cond, bb, n_cells=n, extra=ex, reference=ref,
                              **({"n_critic": 1} if arm == "discriminator_ref" else {})))
     # ---- X8: number of batches V at fixed total cells and equal cells per batch
@@ -290,10 +291,10 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8, follow
             # oracle importance-weighted control (SPECS section 4, SI-25): weights restore the dose-0 composition
             # (fit_paper_config.depletion_oracle_weights); at dose 0 every weight is 1 (= the unweighted rows above)
             # and at dose 100 the depleted pairs are empty, so IW rows at 50 / 80 / 95 only
-            if dose in (50, 80, 95) and cond:     # the weights need the labels slot: conditioned models only (SI-93)
+            if dose in (50, 80, 95):
                 ex_iw = json.dumps(dict(subsample=dict(kind="composition", batch=b, types=types, deplete_pct=dose,
                                                        n_cells=n, draw=X3_DRAW), iw="depletion_oracle"))
-                R += [row("X3", t, a, lam, s, True, bb, n_cells=n, extra=ex_iw, reference=ref)
+                R += [row("X3", t, a, lam, s, cond, bb, n_cells=n, extra=ex_iw, reference=ref)
                       for a, lam in itertools.product(["discriminator", "reference", "pooled", "mmd"], ["matched_lo", "matched_hi"])]
     # ---- X6 (tier 2): divergence x Lipschitz control x update budget (pooled = symmetric target)
     x6_arms = [("discriminator", 1), ("discriminator_sn", 1), ("pooled", 1), ("pooled", 5), ("pooled", 10),

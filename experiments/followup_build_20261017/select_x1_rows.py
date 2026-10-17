@@ -1,7 +1,8 @@
 """Rows for the X1 fit-identity check of the follow-up build (SI-93..SI-98): one X1 or X13 neural-baseline row for every
 combination of arm, decoder conditioning, adversary input (mean / sample) and standardisation (0 / 1) that X1 can take
 once its placeholders (lambda g1..g6, adv_input A2, zstd A3) are resolved, on the smallest task, lambda 10 for adversarial
-arms, max_epochs 1. Reads the v3 manifest (design rows only, no scores). Tags get a suffix naming the combination.
+arms, max_epochs 1 (53 rows, scANVI and sysVI included), plus the four conditioned oracle-weighted X3 rows (sim2, dose 50;
+the weight code around this path changed). Reads the v3 manifest (design rows only, no scores). Tags get a suffix naming the combination.
 Usage: python select_x1_rows.py OUT.tsv
 """
 import itertools
@@ -28,8 +29,18 @@ for arm, cond in sorted(set(zip(m.arm, m.cond))):
         r["adv_input"], r["zstd"], r["max_epochs"] = adv, z, "1"
         r["tag"] = f"{src['tag']}_id{adv}z{z}"
         out.append(r)
+# conditioned oracle-weighted X3 rows (SI-93 changes the weight code around this path; it must stay identical): one per
+# weighted arm, smallest X3 task, dose 50, seed 10, lambda 10
+w3 = m3 = pd.read_csv(V3, sep="\t", comment="#", dtype=str, keep_default_na=False)
+w3 = w3[(w3.experiment == "X3") & (w3.task == "sim2") & (w3.cond == "1") & w3.extra.str.contains('"iw"')
+        & w3.extra.str.contains('"deplete_pct": 50') & (w3.seed == "10") & (w3.lam == "matched_lo")]
+assert sorted(w3.arm) == ["discriminator", "mmd", "pooled", "reference"], sorted(w3.arm)
+for _, r in w3.iterrows():
+    r = r.copy()
+    r["lam"], r["max_epochs"], r["tag"] = "10", "1", f"{r['tag']}_idweighted"
+    out.append(r)
 d = pd.DataFrame(out)
-assert d.tag.is_unique and len(d) > 40, len(d)
+assert d.tag.is_unique and len(d) == 57, len(d)
 with open(sys.argv[1], "w") as f:
     f.write(head)
     d.to_csv(f, sep="\t", index=False)

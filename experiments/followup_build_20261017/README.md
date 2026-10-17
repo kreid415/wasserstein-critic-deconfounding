@@ -20,7 +20,7 @@ WCD_SRC=src PYTHONPATH=. PREPPED_DIR=<prepped_scib> python scripts/check_tests.p
 ```
 C=/home/kendall/.claude-science/conda/envs; D=/home/kendall/experiment_data/wasserstein-critic-deconfounding
 # worktrees: OLD = D/code/wcd_prereg-tier12-v3 (tag checkout, in use by the stage-1 run: make a second checkout), NEW = candidate commit
-python select_x1_rows.py results/x1_identity_rows.tsv          # 53 rows: every X1 arm x decoder x adv_input x zstd + scanvi, sysvi
+python select_x1_rows.py results/x1_identity_rows.tsv          # 57 rows: every X1 arm x decoder x adv_input x zstd + scanvi, sysvi + 4 conditioned weighted X3 rows
 PREPPED_DIR=$D/prepped_scib FIT_PY=$C/scvi-api/bin/python bash fit_identity.sh OLD NEW OUT results/x1_identity_rows.tsv 4
 ```
 `fit_identity.sh` exits 1 unless every row gives equal latents with exit code 0 at both commits. Scoring code is untouched

@@ -29,7 +29,9 @@ Options (docs/SPECS_missing_arms.md; each off unless given):
     sampler='stratified'  per-batch stratified training minibatches (X8; section 3, SI-24)
     iw_weights            oracle importance weights per (batch, cell type), self-normalised in every
                           average of the adversarial objective (X3: discriminator, reference, pooled,
-                          mmd; section 4, SI-25). Conditioned models only (cell types use the labels slot).
+                          mmd; section 4, SI-25). A conditioned model reads them from a (batch, cell type) table
+                          through its labels slot; an unconditioned model (batch in the labels slot) reads the same
+                          numbers from a per-cell column registered as an extra data field (_IW_CELL_KEY; SI-93).
 
 Settings that change the science are REQUIRED arguments (no silent defaults): adv_input
 ('mean' = posterior mean, 'sample' = posterior sample z), n_critic (critic steps per generator
@@ -58,6 +60,7 @@ from fit_outcome import NonFiniteLossError   # scripts/fit_outcome.py; scripts/ 
 _CRITIC_FORMULATIONS = ("reference", "reference_fixed", "pooled", "barycenter")
 _CRITIC_FREE = ("mmd", "sinkhorn", "mmd_ref")
 _JS_ARMS = ("discriminator", "discriminator_ref")
+_IW_CELL_KEY = "iw_cell"   # per-cell importance weight, an extra data field of an unconditioned model (SI-93)
 _CRITIC_OPT_ARMS = {"discriminator_sn_critic_opt": "discriminator_sn"}   # SI-98: arm -> the arm it is parsed as
 _ARMS = ("none", "scvi_adv") + _JS_ARMS + _CRITIC_FORMULATIONS + _CRITIC_FREE
 _IW_ARMS = ("discriminator", "reference", "pooled", "mmd")   # X3 arms with importance weights (SI-25)
@@ -163,16 +166,17 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
                  adv_input=None, zstd=False, bary_support=None, bary_iter=10, bary_weights="equal",
                  wcd_src_root=None, n_domains=None, adv_batch_slot="batch",
                  critic_lr=1e-4, critic_betas=(0.0, 0.9), adv_hidden=128, disc_lr=1e-3,
-                 bary_warm_iter=None, r1_gamma=None, iw_table=None, **kwargs):
+                 bary_warm_iter=None, r1_gamma=None, iw_table=None, iw_cell=False, **kwargs):
         base, sn, r1 = _parse_adversary(_CRITIC_OPT_ARMS.get(adversary, adversary))
         # options that belong to specific arms are consumed by those arms or refused (no silent no-ops)
         if r1 and r1_gamma is None:
             raise ValueError(f"{adversary} needs r1_gamma (docs/SPECS_missing_arms.md section 1)")
         if not r1 and r1_gamma is not None:
             raise ValueError(f"r1_gamma is only used by *_r1 arms, got it for {adversary!r}")
-        if iw_table is not None:
+        if iw_table is not None or iw_cell:
             if adversary not in _IW_ARMS:
                 raise ValueError(f"importance weights are defined for {_IW_ARMS} only, got {adversary!r}")
+        if iw_table is not None:
             if adv_batch_slot != "batch":
                 raise ValueError("importance weights need a batch-conditioned model (cell types use the labels slot)")
         if base == "scvi_adv":
@@ -187,6 +191,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.r1 = bool(r1)
         self.r1_gamma = None if r1_gamma is None else float(r1_gamma)
         self._iw_table = None if iw_table is None else torch.as_tensor(iw_table, dtype=torch.float32)
+        self._iw_cell, self._iw_on = bool(iw_cell), iw_table is not None or bool(iw_cell)
         self._dl = None
         self.is_critic = base in _CRITIC_FORMULATIONS
         self.is_critic_free = base in _CRITIC_FREE
@@ -224,7 +229,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         self.bary_support, self.bary_iter, self.bary_weights = bary_support, int(bary_iter), bary_weights
         src_root = wcd_src_root or os.environ.get("WCD_SRC")
         Discriminator, _critic, align_mod, bary_mod = _load_wcd_heads(src_root)
-        if self.r1 or base == "discriminator_ref" or self._iw_table is not None:
+        if self.r1 or base == "discriminator_ref" or self._iw_on:
             self._dl = _load_wcd_module(src_root, "wcd_vae.wcd.discriminator_losses", "discriminator_losses.py")
         self._bary_fn = bary_mod.batch_barycenter_support
         n_batch = int(n_domains) if n_domains is not None else int(self.module.n_batch)
@@ -274,7 +279,10 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         return (z - m) / s
 
     def _iw_weights(self, batch, batch_index):
-        """Per-cell importance weights w[b_i, y_i] from the (batch, cell type) table (X3, SI-25)."""
+        """Per-cell importance weights w[b_i, y_i] (X3, SI-25): from the (batch, cell type) table of a conditioned model, or
+        from the per-cell column of an unconditioned one (_iw_cell_vector: the same numbers)."""
+        if self._iw_cell:
+            return batch[_IW_CELL_KEY].float().reshape(-1)     # finite and >= 0 by construction
         labels = batch[REGISTRY_KEYS.LABELS_KEY].long().squeeze(-1)
         w = self._iw_table.to(batch_index.device)[batch_index, labels]
         if not bool(torch.isfinite(w).all()):
@@ -365,7 +373,7 @@ class WassersteinAdversarialTrainingPlan(AdversarialTrainingPlan):
         loss_vae = scvi_loss.loss
         self.compute_and_log_metrics(scvi_loss, self.train_metrics, "train")
         self._log("z_rms", mu.pow(2).mean().sqrt())
-        w = None if self._iw_table is None else self._iw_weights(batch, batch_index)
+        w = self._iw_weights(batch, batch_index) if self._iw_on else None
 
         if self.is_critic_free:
             (opt_g,) = [self.optimizers()]
@@ -480,6 +488,21 @@ def _make_stratified_splitter(src_root):
     return StratifiedDataSplitter
 
 
+def _iw_cell_vector(a, iw_weights, batch_key, label_key):
+    """[n_obs] float32 weight w[batch_i, cell type_i] in obs order: the numbers a conditioned model reads from
+    _build_iw_table, for the unconditioned model (SI-93). iw_weights = {batch: {cell type: w}} must cover every
+    (batch, cell type) pair present in the data; every weight finite and >= 0."""
+    w = {(str(b), str(c)): float(v) for b, row in iw_weights.items() for c, v in row.items()}
+    bad = sorted(k for k, v in w.items() if not (np.isfinite(v) and v >= 0))
+    if bad:
+        raise ValueError(f"iw weights must be finite and >= 0; bad for {bad[:3]}")
+    pairs = list(zip(a.obs[batch_key].astype(str), a.obs[label_key].astype(str)))
+    missing = sorted({p for p in pairs if p not in w})
+    if missing:
+        raise ValueError(f"iw_weights lacks {len(missing)} (batch, cell type) pairs present in the data, e.g. {missing[:3]}")
+    return np.asarray([w[p] for p in pairs], dtype=np.float32)
+
+
 def _build_iw_table(model, iw_weights, iw_label_key, a, batch_key):
     """[n_batch, n_labels] table of importance weights in scvi's code order. iw_weights = {batch: {cell type: w}}
     must cover every (batch, cell type) pair present in the data."""
@@ -514,8 +537,9 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
     """Fit one scvi model + adversary. Every design setting is a required keyword; the backbone
     settings default to scvi-tools' own defaults (n_layers=1, n_hidden=128, zinb, train_size=0.9).
     Options (off unless given; docs/SPECS_missing_arms.md): r1_gamma (discriminator_r1), sampler='stratified'
-    (training minibatches stratified by batch), iw_weights {batch: {cell type: w}} (X3 importance weights,
-    conditioned models only; cell types from obs[iw_label_key] enter through scvi's labels slot),
+    (training minibatches stratified by batch), iw_weights {batch: {cell type: w}} (X3 importance weights;
+    conditioned model: cell types from obs[iw_label_key] enter through scvi's labels slot; unconditioned model (SI-93):
+    a per-cell weight column, registered as an extra data field and removed again after training),
     n_epochs_kl_warmup (X15, SI-44: KL warm-up length in epochs; None = not passed, scvi-tools' default 400).
     Returns (posterior-mean latent [n, n_latent], trained model)."""
     import scvi
@@ -527,8 +551,6 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
         raise ValueError(f"model_name must be 'SCVI' or 'LinearSCVI', got {model_name!r}")
     if sampler not in _SAMPLERS:
         raise ValueError(f"sampler must be one of {_SAMPLERS}, got {sampler!r}")
-    if iw_weights is not None and not conditioned:
-        raise ValueError("importance weights need a batch-conditioned model (the labels slot holds the batch otherwise)")
     scvi.settings.seed = seed
     a = adata.copy()
     a.X = a.layers["counts"].copy()
@@ -540,12 +562,18 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
         Model.setup_anndata(a, batch_key=batch_key)
         slot = "batch"
     else:
+        if iw_weights is not None:      # SI-93: the labels slot holds the batch, so the weights ride in an extra column
+            a.obs[_IW_CELL_KEY] = _iw_cell_vector(a, iw_weights, batch_key, iw_label_key)
         Model.setup_anndata(a, labels_key=batch_key)
         slot = "labels"
     if model_name == "SCVI":
         model = Model(a, n_latent=n_latent, n_layers=n_layers, n_hidden=n_hidden, gene_likelihood=gene_likelihood)
     else:   # LinearSCVI: n_layers applies to the encoder only
         model = Model(a, n_latent=n_latent, n_layers=n_layers, n_hidden=n_hidden, gene_likelihood=gene_likelihood)
+    iw_cell = iw_weights is not None and not conditioned
+    if iw_cell:
+        from scvi.data.fields import NumericalObsField
+        model.adata_manager.register_new_fields([NumericalObsField(_IW_CELL_KEY, _IW_CELL_KEY)])
     if isinstance(reference_batch, str):
         mapping = list(model.adata_manager.get_state_registry(slot).categorical_mapping)
         reference_batch = mapping.index(reference_batch)
@@ -556,7 +584,9 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
                        wcd_src_root=(wcd_src_root or os.environ.get("WCD_SRC")),
                        critic_lr=critic_lr, critic_betas=critic_betas, adv_hidden=adv_hidden, disc_lr=disc_lr,
                        bary_warm_iter=bary_warm_iter, r1_gamma=r1_gamma,
-                       iw_table=(None if iw_weights is None else _build_iw_table(model, iw_weights, iw_label_key, a, batch_key)))
+                       iw_table=(_build_iw_table(model, iw_weights, iw_label_key, a, batch_key)
+                                 if iw_weights is not None and conditioned else None),
+                       iw_cell=iw_cell)
     if n_epochs_kl_warmup is not None:
         if int(n_epochs_kl_warmup) != n_epochs_kl_warmup or int(n_epochs_kl_warmup) < 1:
             raise ValueError(f"n_epochs_kl_warmup must be a positive integer, got {n_epochs_kl_warmup!r}")
@@ -568,7 +598,12 @@ def fit_adversarial_scvi(adata, batch_key, *, adversary, d_coef, n_critic, refer
             strat_registry_key=(REGISTRY_KEYS.BATCH_KEY if slot == "batch" else REGISTRY_KEYS.LABELS_KEY))
     model.train(max_epochs=max_epochs, batch_size=batch_size, early_stopping=False, train_size=train_size,
                 enable_progress_bar=False, plan_kwargs=plan_kwargs, **train_kwargs)
-    return _posterior_mean(model), model
+    z = _posterior_mean(model)
+    if iw_cell:     # keep the saved model loadable without the weight column: drop the extra data field again
+        manager = model.adata_manager
+        manager.fields = [f for f in manager.fields if f.registry_key != _IW_CELL_KEY]
+        del manager._registry["field_registries"][_IW_CELL_KEY]
+    return z, model
 
 
 def _posterior_mean(model):
