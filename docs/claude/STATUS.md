@@ -27,7 +27,7 @@ JHPCE X1 (cluster part, 1,800 fits), follow-ups X3/X6/X7/X8/X12/X15, the X1 anal
 ## 2. Next steps, in order
 
 1. Orient (any machine, minutes). `git fetch --all --tags`; confirm `prereg-tier12-v3` -> 10a1ca5; read notebook pages from
-   2026-10-16 onward; read `CONSTRAINTS.md` (active rules SI-01..SI-92). The notebook and ledger helpers are ported: `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, `nb_index`,
+   2026-10-16 onward; read `CONSTRAINTS.md` (active rules SI-01..SI-98). The notebook and ledger helpers are ported: `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, `nb_index`,
    `nb_check`; `nb_check('.')` verified all 249 entries and their hash chain at 1ad44cb) and
    `.claude/skills/standing-instructions/kernel.py` (`si_add`, `si_retire`, `si_link`). Append entries only through them;
    never edit old entries.

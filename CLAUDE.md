@@ -20,7 +20,7 @@ Built on 2026-10-16 from the Claude Science project (memory, notebook, ledger, p
 1. `git fetch --all --tags`, then `git log --oneline -15 origin/final-review-fixes`: other sessions may have pushed.
 2. Read `docs/claude/STATUS.md` (resume point and ordered next steps), then the newest page in `notebook/`.
    Where they differ, the notebook and git log are newer.
-3. Read the active rules in `CONSTRAINTS.md` that bear on the task (ledger SI-01..SI-92; user's standing rules with
+3. Read the active rules in `CONSTRAINTS.md` that bear on the task (ledger SI-01..SI-98; user's standing rules with
    their sources). Never contradict an active rule; when the user states a new rule, add it there (helper:
    `.claude/skills/standing-instructions/kernel.py`, `si_add`).
 
