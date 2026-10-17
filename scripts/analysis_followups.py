@@ -329,6 +329,7 @@ def x7(out, targets, counts):
         cov = {ref: coverage(counts, t, "full", names[int(ref)]) for ref in refs}
         bio = {k: (None if tg["bstar_low_signal"] else read_bstar(p, tg["bstar"], FU_SEEDS)) for k, p in pts.items()}
         cell = {f"{f}|{ref}": dict(bio_at_bstar=bio[(f, ref)], status=bstar_status(pts[(f, ref)], tg["bstar"]),
+                                   n_failed=sum(p[3] for p in pts[(f, ref)]),
                                    fixed_matched=at_level(pts[(f, ref)], nat[(nat.arm == f) & (nat.reference == ref)],
                                                           "matched", tg["bstar"]), **cov[ref])
                 for f, ref in pts}
@@ -499,6 +500,7 @@ def x12(out, targets):
                 bv = {a: seed_values(x, "B") for a, x in g.items()}
                 paired = [cv["reference"][s] - cv["discriminator"][s] for s in FU_SEEDS if s in cv["reference"] and s in cv["discriminator"]]
                 per_run[run] = dict(d=float(np.mean(paired)) if paired else None, n=len(paired),
+                                    n_failed={a: int((x.status == "failed").sum()) for a, x in g.items()},
                                     dB=None if not bv["reference"] or not bv["discriminator"] else
                                     mean(bv["reference"], FU_SEEDS) - mean(bv["discriminator"], FU_SEEDS),
                                     B_minus_bstar={a: None if not bv[a] else mean(bv[a], FU_SEEDS) - tg["bstar"] for a in bv})
@@ -533,7 +535,7 @@ def x12(out, targets):
 def x15(out, targets):
     o = prepare(out, "X15")
     P._require(set(o.kl) == {"stock", "complete"}, f"X15 warm-up values {sorted(set(o.kl))}")
-    res, pools, batch = {}, {}, {}
+    res, pools, batch, coll = {}, {}, {}, {}
     for t, c in sorted(EXPECTED["X15"]):
         r = o[(o.task == t) & (o.cond_i == c)]
         v = {}
@@ -545,7 +547,9 @@ def x15(out, targets):
             v[(kl, "none", "0")] = seed_values(z)
             for a in X15_ARMS:
                 for lv in FIXED:
-                    v[(kl, a, lv)] = seed_values(r[(r.arm == a) & (r.kl == kl) & (r.level == lv)])
+                    g = r[(r.arm == a) & (r.kl == kl) & (r.level == lv)]
+                    v[(kl, a, lv)] = seed_values(g)
+                    coll[f"{t}|{c}|{kl}|{a}|{lv}"] = collapse_rate(runs_vs_zero(g, v[(kl, "none", "0")]))
 
         def interaction(a, b, lv):
             def stat(keep):
@@ -563,7 +567,7 @@ def x15(out, targets):
     for key in {k for _, _, k in res}:
         tasks = [t for t, _ in EXPECTED["X15"]]
         pools[f"{key}|1"] = pooled({t: res[(t, 1, key)] for t in tasks}, tasks)
-    return dict(cells={f"{t}|{c}|{k}": v for (t, c, k), v in res.items()}, B_minus_bstar=batch, pooled=pools)
+    return dict(cells={f"{t}|{c}|{k}": v for (t, c, k), v in res.items()}, B_minus_bstar=batch, collapse=coll, pooled=pools)
 
 
 # ---------------------------------------------------------------------------------------------- record

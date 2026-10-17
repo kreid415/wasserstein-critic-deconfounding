@@ -135,8 +135,8 @@ and used for no conclusion. Secondary results are declared with the same rule an
 As ANALYSIS_SPEC section 6 and SI-75: a run collapses when it failed or when its C is at least 0.10 below the C of the same seed's
 lambda = 0 run of the same design point (same dose, same subset, same warm-up), within 1e-9. Rates with Clopper-Pearson 95%
 intervals and failure counts are reported: X3 per arm, strength and dose; X8 per arm and sampler over all V and subsets; X15 per
-warm-up. X6, X7 and X12 have no lambda = 0 rows on seeds 10-12, so only failure counts are reported for them (labelled "failure
-rate", not "collapse rate"); a lambda = 0 anchor from X1 seeds would mix seeds and is not used. **Agent default.** No pooled
+warm-up. X6, X7 and X12 have no lambda = 0 rows on seeds 10-12, so only failure counts are reported for them (X6 per point, X7 per arm
+and reference over its window, X12 per arm and run; labelled failures, not collapses); a lambda = 0 anchor from X1 seeds would mix seeds and is not used. **Agent default.** No pooled
 collapse comparison is registered for the follow-ups (P2's pooled comparison is an X1 result).
 
 ### 1.9 Names the analysis assumes (to reconcile with the build track, branch `followup-build`)
@@ -376,7 +376,7 @@ section 1.5); no declaration and no change to any X1 conclusion. The 12 stock-wa
   (low-signal, unreached, fewer than 3 references, a run without paired seeds, a failed run, collapse at the 0.10 bound); a null
   world in which no confirmatory result declares a direction; refusals of six departures from the design; no overwrite.
 - Command (repo root, env scvi-api): `python scripts/check_tests.py --base c241af6 --src scripts -- tests/analysis_followups`
-  (about 1.5 minutes; printed OK at cd11830, the last code change of this branch: 10 passed).
+  (about 1.5 minutes; on 2026-10-17 it printed OK on the last code change of this branch, the commit that adds the X15 collapse table: 10 passed).
 - Lock: this file, the script and the tests are frozen by the follow-up code tag, after reconciliation with the build track's names
   (section 1.9) and before R4-x1. A PREREG section 9 amendment (written by the lead with the build track's) points to this file.
 
