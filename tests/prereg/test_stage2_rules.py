@@ -110,3 +110,42 @@ def test_rule_order_r1_extension_then_r4a1_then_r2r3(stage2):
     assert S2.main(args(s, "r2r3", "r23", [m4], olds2, news2, "--r4a1-record", os.path.join(t, "r4", "r4_a1_record.json"))) == 0
     rec = json.load(open(os.path.join(t, "r23", "step.json")))
     assert rec["exit_code"] == 0 and rec["n_old_sinkhorn_skipped"] == s["n_sk"] + len(sk)     # A1 and A2/A3 pre-fix files
+
+
+@pytest.mark.parametrize("case, match", [("duplicate_manifest", "duplicate manifest tags"), ("wrong_commit", "expected"),
+                                         ("dirty_checkout", "uncommitted"), ("no_failures_csv", "does not exist"),
+                                         ("failure_in_two_folders", "more than one folder"), ("no_rows", "no manifest rows")])
+def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
+    s, t = stage2, stage2["t"]
+    one = ["v2/A1"], ["v3/A1_sinkhorn"]
+    if case == "duplicate_manifest":
+        argv = args(s, "r1", f"x_{case}", [s["man"], s["man"]], *one)
+    elif case == "wrong_commit":
+        argv = args(s, "r1", f"x_{case}", [s["man"]], *one)
+        argv[argv.index("--expect-commit") + 1] = "0" * 40
+    elif case == "no_failures_csv":
+        os.makedirs(os.path.join(t, "v3", "empty"))
+        argv = args(s, "r1", f"x_{case}", [s["man"]], *one[:1], ["v3/empty"])
+    elif case == "failure_in_two_folders":
+        tag = s["M"][(s["M"].experiment == "A1") & (s["M"].arm == "discriminator")].tag.iloc[0]
+        for d in ("f1", "f2"):
+            os.makedirs(os.path.join(t, "v3", d))
+            pd.DataFrame([dict(tag=tag, status="diverged", detail="synthetic")]).to_csv(os.path.join(t, "v3", d, "failures.csv"), index=False)
+        argv = args(s, "r1", f"x_{case}", [s["man"]], [], ["v3/f1", "v3/f2"])
+    elif case == "no_rows":
+        with pytest.raises(SystemExit, match=match):
+            S2.main(["plan-fits", "--manifest", s["man"], "--experiments", "A1", "--tasks", "no_such_task", "--out-tags", os.path.join(t, "none.tags")])
+        assert S2.main(["plan-fits", "--manifest", s["man"], "--experiments", "A1", "--tasks", "immune", "--out-tags", os.path.join(t, "immune.tags")]) == 0
+        return
+    else:
+        readme = os.path.join(s["checkout"], "README.md")
+        old = open(readme).read()
+        open(readme, "a").write("\nuncommitted\n")
+        try:
+            with pytest.raises(SystemExit, match=match):
+                S2.main(args(s, "r1", f"x_{case}", [s["man"]], *one))
+        finally:
+            open(readme, "w").write(old)
+        return
+    with pytest.raises(SystemExit, match=match):
+        S2.main(argv)

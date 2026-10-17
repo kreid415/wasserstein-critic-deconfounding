@@ -182,5 +182,5 @@ def main(argv=None):
     return plan_fits(a) if a.cmd == "plan-fits" else run_rule(a)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover  (entry point; main() is exercised by the tests)
     sys.exit(main())
