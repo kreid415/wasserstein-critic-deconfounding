@@ -1,0 +1,74 @@
+{
+ "rebuilt_command": "python3 scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 --bary-iter 10 --out <tmp>",
+ "rebuilt_sha256": "6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24",
+ "committed_v3_sha256": "6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24",
+ "tagged_v1_sha256": "c0244ea4fd76ea05628060c69034d8947e5e4b338cb5e9952de166614a416afb",
+ "rows_v1": 6846,
+ "rows_v3": 6930,
+ "shared_rows_byte_identical": 6010,
+ "shared_rows_same_order": true,
+ "only_v1": {
+  "X3": 828,
+  "X13": 8
+ },
+ "only_v3": {
+  "X3": 828,
+  "X15": 84,
+  "X13": 8
+ },
+ "per_experiment_v1_v3": {
+  "A1": [
+   1098,
+   1098
+  ],
+  "A2": [
+   108,
+   108
+  ],
+  "A3": [
+   180,
+   180
+  ],
+  "X1": [
+   3000,
+   3000
+  ],
+  "X12": [
+   288,
+   288
+  ],
+  "X13": [
+   408,
+   408
+  ],
+  "X15": [
+   0,
+   84
+  ],
+  "X3": [
+   828,
+   828
+  ],
+  "X6": [
+   216,
+   216
+  ],
+  "X7": [
+   216,
+   216
+  ],
+  "X8": [
+   504,
+   504
+  ]
+ },
+ "x13_changed": "scanorama knn 160 -> 2 on all 8 tasks",
+ "x3_changed": "n_cells -> dose-100 size, draw nested_v1; all other columns equal",
+ "header_diff": "only the row count in the comment (6846 -> 6930)",
+ "jhpce_tags": {
+  "jobA": 100,
+  "jobB": 150,
+  "union_equals_prefreeze_X1_X13_GPU_rows_of_5_tasks": true,
+  "placeholders": 0
+ }
+}

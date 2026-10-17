@@ -1,0 +1,184 @@
+{
+ "labels_identity": {
+  "SCVI": 0.0,
+  "LinearSCVI": 0.0
+ },
+ "none_vs_stock": {
+  "SCVI_cond": 0.0
+ },
+ "determinism": {
+  "reference": 0.0,
+  "discriminator": 0.0
+ },
+ "barycenter": {
+  "0.01": {
+   "z_rms": 1.637411117553711,
+   "z_centroid_norm": 3.7225899696350098,
+   "anchor_rms_final": 0.011700472794473171,
+   "anchor_spread_final": 0.011347436346113682,
+   "anchor_to_z_centroid": 3.7140536308288574,
+   "anchor_grad_abs_mean_median": 4.818813249585219e-05,
+   "anchor_step_abs_mean_median": 4.726251290776418e-06,
+   "n_logged": 36,
+   "trace": [
+    {
+     "epoch": 0,
+     "anchor_rms": 0.009863593615591526,
+     "anchor_centroid_norm": 0.0043091303668916225,
+     "anchor_step_abs_mean": 7.132741188797809e-07,
+     "anchor_grad_abs_mean": 7.144713890738785e-06
+    },
+    {
+     "epoch": 1,
+     "anchor_rms": 0.010172558017075062,
+     "anchor_centroid_norm": 0.004728015046566725,
+     "anchor_step_abs_mean": 4.535410880635027e-06,
+     "anchor_grad_abs_mean": 4.7603927669115365e-05
+    },
+    {
+     "epoch": 2,
+     "anchor_rms": 0.010485876351594925,
+     "anchor_centroid_norm": 0.005484689958393574,
+     "anchor_step_abs_mean": 4.728362455352908e-06,
+     "anchor_grad_abs_mean": 4.817574154003523e-05
+    },
+    {
+     "epoch": 3,
+     "anchor_rms": 0.010764000006020069,
+     "anchor_centroid_norm": 0.006380577106028795,
+     "anchor_step_abs_mean": 4.895724941889057e-06,
+     "anchor_grad_abs_mean": 4.8895042709773406e-05
+    },
+    {
+     "epoch": 4,
+     "anchor_rms": 0.01105488184839487,
+     "anchor_centroid_norm": 0.007291195448487997,
+     "anchor_step_abs_mean": 4.772734882863006e-06,
+     "anchor_grad_abs_mean": 4.82510331494268e-05
+    },
+    {
+     "epoch": 5,
+     "anchor_rms": 0.011365510523319244,
+     "anchor_centroid_norm": 0.00819105003029108,
+     "anchor_step_abs_mean": 4.769561201101169e-06,
+     "anchor_grad_abs_mean": 4.958572026225738e-05
+    }
+   ]
+  },
+  "1.0": {
+   "z_rms": 0.7662830352783203,
+   "z_centroid_norm": 0.42398834228515625,
+   "anchor_rms_final": 0.14095909893512726,
+   "anchor_spread_final": 0.1333330273628235,
+   "anchor_to_z_centroid": 0.3120720684528351,
+   "anchor_grad_abs_mean_median": 0.004049552138894796,
+   "anchor_step_abs_mean_median": 0.0002641584724187851,
+   "n_logged": 36,
+   "trace": [
+    {
+     "epoch": 0,
+     "anchor_rms": 0.009879632852971554,
+     "anchor_centroid_norm": 0.004481959622353315,
+     "anchor_step_abs_mean": 6.276892963796854e-05,
+     "anchor_grad_abs_mean": 0.0007144713308662176
+    },
+    {
+     "epoch": 1,
+     "anchor_rms": 0.031009618192911148,
+     "anchor_centroid_norm": 0.034625519067049026,
+     "anchor_step_abs_mean": 0.0002951938658952713,
+     "anchor_grad_abs_mean": 0.004747044760733843
+    },
+    {
+     "epoch": 2,
+     "anchor_rms": 0.054820191115140915,
+     "anchor_centroid_norm": 0.07601183652877808,
+     "anchor_step_abs_mean": 0.0002748485712800175,
+     "anchor_grad_abs_mean": 0.004247968550771475
+    },
+    {
+     "epoch": 3,
+     "anchor_rms": 0.07709308713674545,
+     "anchor_centroid_norm": 0.10794160515069962,
+     "anchor_step_abs_mean": 0.00026409453130327165,
+     "anchor_grad_abs_mean": 0.004117689095437527
+    },
+    {
+     "epoch": 4,
+     "anchor_rms": 0.09854794293642044,
+     "anchor_centroid_norm": 0.1275434046983719,
+     "anchor_step_abs_mean": 0.00025780260330066085,
+     "anchor_grad_abs_mean": 0.003933086525648832
+    },
+    {
+     "epoch": 5,
+     "anchor_rms": 0.11984599381685257,
+     "anchor_centroid_norm": 0.13888001441955566,
+     "anchor_step_abs_mean": 0.00025854803971014917,
+     "anchor_grad_abs_mean": 0.004016894847154617
+    }
+   ]
+  },
+  "30.0": {
+   "z_rms": 0.20861725509166718,
+   "z_centroid_norm": 0.2559034526348114,
+   "anchor_rms_final": 0.21970143914222717,
+   "anchor_spread_final": 0.2194148749113083,
+   "anchor_to_z_centroid": 0.24964825809001923,
+   "anchor_grad_abs_mean_median": 0.1106688417494297,
+   "anchor_step_abs_mean_median": 0.000410092223319225,
+   "n_logged": 36,
+   "trace": [
+    {
+     "epoch": 0,
+     "anchor_rms": 0.01000162772834301,
+     "anchor_centroid_norm": 0.005655957851558924,
+     "anchor_step_abs_mean": 0.0005466979928314686,
+     "anchor_grad_abs_mean": 0.02143413946032524
+    },
+    {
+     "epoch": 1,
+     "anchor_rms": 0.07147890329360962,
+     "anchor_centroid_norm": 0.02955157496035099,
+     "anchor_step_abs_mean": 0.0008957963436841965,
+     "anchor_grad_abs_mean": 0.1312442570924759
+    },
+    {
+     "epoch": 2,
+     "anchor_rms": 0.13802872598171234,
+     "anchor_centroid_norm": 0.034460581839084625,
+     "anchor_step_abs_mean": 0.0007750267395749688,
+     "anchor_grad_abs_mean": 0.11042075604200363
+    },
+    {
+     "epoch": 3,
+     "anchor_rms": 0.18517474830150604,
+     "anchor_centroid_norm": 0.036798328161239624,
+     "anchor_step_abs_mean": 0.00042620193562470376,
+     "anchor_grad_abs_mean": 0.11474032700061798
+    },
+    {
+     "epoch": 4,
+     "anchor_rms": 0.20034383237361908,
+     "anchor_centroid_norm": 0.03818298131227493,
+     "anchor_step_abs_mean": 0.00029166750027798116,
+     "anchor_grad_abs_mean": 0.11373670399188995
+    },
+    {
+     "epoch": 5,
+     "anchor_rms": 0.21150963008403778,
+     "anchor_centroid_norm": 0.03651867061853409,
+     "anchor_step_abs_mean": 0.00030736494227312505,
+     "anchor_grad_abs_mean": 0.10426314175128937
+    }
+   ]
+  }
+ },
+ "seconds": 221.2,
+ "versions": {
+  "scvi": "1.4.2",
+  "torch": "2.13.0+cu130",
+  "cuda": true,
+  "gpu": "NVIDIA GeForce RTX 3080"
+ }
+}

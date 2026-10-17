@@ -1,0 +1,91 @@
+{
+ "exit": 0,
+ "fingerprints": {
+  "lines": 8,
+  "ok": 8
+ },
+ "inputs": {
+  "counts": {
+   "atac_large/none": 10,
+   "atac_large/scanvi": 5,
+   "atac_large/scvi_adv": 5,
+   "atac_large/sysvi": 30,
+   "immune_hum_mou/none": 10,
+   "immune_hum_mou/scanvi": 5,
+   "immune_hum_mou/scvi_adv": 5,
+   "immune_hum_mou/sysvi": 30
+  },
+  "manifest_sha256": "6efbe422c8f09f9884001a84f7d7b363506f435803d238280e00bbb7b7e1cf24",
+  "n_tags": 100,
+  "ok": true,
+  "problems": [],
+  "tags_sha256": "d5da370a4d0cbbe7504c81ac47c5e8003b83730b4c2c92bc9be1050b28cf82d1"
+ },
+ "job": "jobA",
+ "local_versions_vs_l40s": {
+  "cudnn": [
+   92000,
+   91002
+  ],
+  "local_cuda_available": false,
+  "local_gpu": null,
+  "local_record_exit": 0,
+  "modules": {
+   "torch": [
+    "2.13.0+cu130",
+    "2.13.0+cu126"
+   ]
+  },
+  "torch_cuda": [
+   "13.0",
+   "12.6"
+  ]
+ },
+ "logs": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/prod/job_990001/logs",
+ "planned": {
+  "ledger": {
+   "csv": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.csv",
+   "done": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.done",
+   "json": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.json"
+  },
+  "n_cpu_fits": 0,
+  "n_fits": 100,
+  "n_rows": 100,
+  "out_dir": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13",
+  "states": {
+   "needs_fit": 100
+  }
+ },
+ "problems": [],
+ "runner_line": "[11:06:06] [stage] X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c: 100 rows {'needs_fit': 100}; to run: 100 fits (no scoring); out /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13",
+ "sha": "080f417a8a8011c1a33699ee1c81547beca2774e",
+ "stage_key": "X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c",
+ "stage_key_record": {
+  "ledger": {
+   "csv": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.csv",
+   "done": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.done",
+   "json": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13/ledger/X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c.json"
+  },
+  "log": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/prod/job_990001/logs/dryrun.log",
+  "n_cpu_fits": 0,
+  "n_fits": 100,
+  "n_rows": 100,
+  "n_stage_lines": 1,
+  "ok": true,
+  "out_dir": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/scratch/tier12/fillers_x1_x13",
+  "problems": [],
+  "stage_key": "X1+X13__atac_large+immune_hum_mou__tags-d5da370a4d0c",
+  "states": {
+   "needs_fit": 100
+  }
+ },
+ "stderr_tail": [],
+ "stdout": "/home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/b075e19b-9609-4a04-9387-18247178d6a7/rr/out/rehearsal_tagfix_jobA/job_stdout.txt",
+ "tests_scvi": "110 passed, 1 skipped in 159.76s (0:02:39)",
+ "versions_check": {
+  "gpu": "NVIDIA L40S (rehearsal stub)",
+  "ok": true,
+  "problems": [],
+  "torch": "2.13.0+cu126"
+ }
+}

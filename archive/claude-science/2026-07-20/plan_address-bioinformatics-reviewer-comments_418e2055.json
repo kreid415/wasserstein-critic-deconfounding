@@ -1,0 +1,161 @@
+{
+  "version": 3,
+  "created_at": "2026-07-20T01:47:11.993Z",
+  "task_summary": "Address Bioinformatics reviewer comments: narrow claims + new experiments across VAE backbones",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Phase 1 — Foundation & reframing",
+      "delegations": [
+        {
+          "name": "Data & environment",
+          "steps": [
+            {
+              "title": "Acquire benchmark datasets (scIB + ATAC)",
+              "description": "Obtain from the scIB Figshare deposit (12420968), which already contains all needed RNA tasks: the 3 originals (Immune_ALL_human, human_pancreas_norm_complexBatch, Lung_atlas_public) PLUS Tier-1 additions: human+mouse cross-species immune (Immune_ALL_hum_mou) as the clean disjoint-support case (R1.major.2), the two scIB simulation tasks (ground-truth batch+bio structure, for R2.6), and mouse brain RNA (4th real tissue). Also pull mouse brain ATAC (gene-activity) for the modality-generalization claim (R3.minor.1). Try the direct Figshare API; if headless download is blocked, request network access or ask the user to stage files on a cluster. Verify batch/celltype obs keys per task and record them in a dataset registry consumed by all experiments."
+            },
+            {
+              "title": "Reproduce baseline pipeline on cluster",
+              "description": "Install the wcd_vae package and dependencies (scib, scanpy, scvi-tools) in a conda env on dsai/Rockfish. Run a short smoke test of prep_data + train_integration_model (critic and discriminator) on one dataset to confirm the pipeline reproduces before scaling experiments. Add an ATAC branch to prep_data (skip HVG selection and per-batch scaling, which are not standard for ATAC; operate on gene-activity scores) so the mouse-brain ATAC task runs through the same training/eval stack. Register per-dataset batch/celltype keys centrally."
+            },
+            {
+              "title": "Separate authored code from upstream scCRAFT",
+              "description": "Refactor src/wcd_vae into scCRAFT/ (upstream He et al., NOTICE + original license, minimal edits: Encoder/Decoder/VAE, triplet loss, clustering, reparameterize) and a new self-contained wcd/ package holding the authored contribution: critic.py (ReferenceWassersteinLoss, gradient_penalty, multi_class_gradient_penalty), adversarial.py (Discriminator critic/discriminator dispatch), backbones.py (alternative VAE backbones for E2), training.py (_prepare_tensors, _sample_epoch_indices, _train_batch, train loop), evaluation.py (numba LISI + metric suite), data.py, hyperparameter.py. Grounded in the symbol-level diff (code_provenance.csv: 9 NEW / 6 MODIFIED / 2 IDENTICAL). Keep __init__ re-export shims so existing scripts/tests import unchanged; run tests + a smoke train before any experiment. Both adversarial heads import backbones through one interface so backbone-agnosticism is structural, strengthening the generality claim."
+            }
+          ]
+        },
+        {
+          "name": "Disjoint-support & metric audit",
+          "steps": [
+            {
+              "title": "Quantify batch support overlap (E6/Theme F)",
+              "description": "For each dataset in balanced and unbalanced settings, quantify batch support overlap in PCA/latent space (e.g. batch-classifier accuracy, kNN cross-batch fraction, MMD). Establish whether the disjoint-support premise motivating the Wasserstein objective actually holds, addressing R1.major.2. Include the cross-species immune task (expected genuinely disjoint support) and the scIB simulations (known ground-truth overlap) as positive/negative controls that calibrate the overlap metrics."
+            },
+            {
+              "title": "Set up full metric suite harness",
+              "description": "Wrap the existing iLISI/cLISI/ASW-batch/ASW-celltype/ARI/graph-conn/PAGA metrics into a single reusable evaluation function returning both local and global metrics, so all downstream experiments (E1-E8) report the complete suite rather than iLISI alone (addresses R1.minor.1)."
+            }
+          ]
+        },
+        {
+          "name": "Manuscript reframing",
+          "steps": [
+            {
+              "title": "Narrow claims & fix notation (E0)",
+              "description": "Scope every claim to the evidence its experiment produces, not a blanket 'this implementation only' retreat: existence of the trade-off (supportable on scCRAFT now) stays; generality across architectures is stated at exactly the level E2 establishes; universality across all integration methods is permanently capped (E3 contextualizes but does not license it). Fix notation for NB reconstruction loss, cosine similarity loss, and discriminator cross-entropy loss per R1.minor.3, matching the implemented log_nb_positive / normalized-cosine / V-way CrossEntropy. Produce a tracked-changes list for the manuscript."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Phase 2 — Core experiments (parallel)",
+      "delegations": [
+        {
+          "name": "Pareto front",
+          "steps": [
+            {
+              "title": "E1 λ_adv Pareto-front analysis",
+              "description": "New scripts/pareto_experiments.py bypassing the nested-CV selection logic. Sweep d_coef (=lambda_adv) over {0,0.01,0.02,0.05,0.1,0.2,0.35,0.5,0.75,1.0} for both critic and discriminator, 3 datasets x balanced/unbalanced, at 3 seeds single-split. Compute the explicit Pareto-optimal set of integration (iLISI/ASW-batch) vs conservation (cLISI/ARI/graph-conn); test whether lowering lambda_adv moves the critic onto the discriminator's frontier or the critic curve dominates (R2.2, R3.3)."
+            }
+          ]
+        },
+        {
+          "name": "Architectures",
+          "steps": [
+            {
+              "title": "E2 implement alternative backbones",
+              "description": "Introduce a backbone abstraction (src/wcd_vae/scCRAFT/backbones.py) exposing forward(x,x_raw,ec,warmup)->(reconst_loss,kl,z,x_tilde) so _train_batch is untouched. Attach both the standard discriminator and the reference-Wasserstein critic, byte-for-byte fixed, to FOUR backbones: (A) scVI-style NB VAE without triplet/cosine/batch-pathway, (B) vanilla Gaussian VAE (MSE on log-norm X), (C) ZINB VAE (zero-inflated NB decoder), and (D) scCRAFT reference. Validate each with a smoke run + gradient-flow assertion (z.grad non-None through the critic) before scaling."
+            },
+            {
+              "title": "E2 architecture & capacity sweep",
+              "description": "Run BOTH adversarial heads (discriminator and reference-Wasserstein critic, held byte-for-byte fixed) on all four backbones = 8 configs per dataset, at 3-seed single-split, plus a latent-dim {10,30,50,256} and encoder-depth (+-1 layer) sweep on scCRAFT (R3.2). Determine whether the mixing-vs-conservation trade-off is objective-driven (reproduces across backbones) or architecture-specific (flips) - the result sets E0's final generality tier."
+            }
+          ]
+        },
+        {
+          "name": "External baselines",
+          "steps": [
+            {
+              "title": "E3 run external integration baselines",
+              "description": "Run Harmony, scVI, scANVI, Scanorama, and unintegrated PCA on all three datasets with the same full metric suite, contextualizing the adversarial methods against widely adopted approaches (R3.1, R2.4)."
+            }
+          ]
+        },
+        {
+          "name": "Reference design",
+          "steps": [
+            {
+              "title": "E4 isolate reference-based formulation",
+              "description": "Compare fixed-largest-reference (current) vs random-rotating-reference (redraw reference_batch_idx per epoch) vs a new AllPairsWassersteinLoss joint critic (sum head differences over all batch pairs, with matching gradient penalty). Sweep reference_batch 0..V-1 and correlate iLISI/ARI against reference batch size and cell-type coverage. 3-seed single-split. Separates reference-design failures from the Wasserstein objective (R2.5, R1.minor.1)."
+            },
+            {
+              "title": "E8 strengthened multibatch scaling",
+              "description": "Rerun the batch-count scaling experiment (2..N batches) reporting the full metric suite for both methods, not iLISI alone, to properly support or revise the claim that critic performance degrades with batch count (R1.minor.1)."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Phase 3 — Biological validation",
+      "delegations": [
+        {
+          "name": "Biological validation",
+          "steps": [
+            {
+              "title": "E5 direct biological over-correction analysis",
+              "description": "On the best models from Phase 2, compute marker-gene preservation (per-cell-type DE before/after integration), per-cell-type neighborhood purity, rare-cell-type retention, a cell-type confusion/collapse matrix identifying which cell types collapse, and label-transfer accuracy (R2.6, R2.3, R1.minor.2, R3.minor.2). Use the scIB simulation tasks (ground-truth batch and biological structure) to show directly which true structure the critic destroys, converting the over-correction claim from metric-inferred to ground-truth-verified."
+            }
+          ]
+        },
+        {
+          "name": "Local-global synthesis",
+          "steps": [
+            {
+              "title": "E6 local-vs-global metric decomposition",
+              "description": "Systematically decompose local (iLISI/kBET/graph-conn) vs global (ASW-batch/PCR) metrics for critic vs discriminator and connect the iLISI-vs-ASW-batch mismatch to the collapse mechanism, addressing R1.major.1 as a mechanistic clue rather than a loose end."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    },
+    {
+      "name": "Phase 5 — Synthesis & response",
+      "delegations": [
+        {
+          "name": "Synthesis",
+          "steps": [
+            {
+              "title": "Produce publication figures",
+              "description": "Assemble final figures: Pareto fronts, architecture-generalization comparison, external-baseline table, biological-validation panels, local-global decomposition, and multibatch scaling — applying consistent publication styling."
+            },
+            {
+              "title": "Write point-by-point reviewer response",
+              "description": "Draft a response document addressing every reviewer comment with a pointer to the specific experiment/figure/text change that resolves it, plus practical when-to-use-which guidance (R3.3). Integrate narrowed claims and notation fixes into the manuscript. Re-run only the final selected operating points (per method/dataset) at full 5x3 nested CV for the manuscript's headline table; sweeps stay at 3-seed single-split."
+            }
+          ]
+        }
+      ],
+      "id": "phase-4"
+    }
+  ],
+  "desired_outputs": [
+    "Point-by-point reviewer response document (markdown) mapping each comment to evidence",
+    "E1 λ_adv Pareto-front results (CSV) + figure per dataset (Immune, Pancreas, Lung, cross-species immune, 2 simulations, mouse-brain RNA, mouse-brain ATAC) for critic vs discriminator",
+    "E2 architecture-generalization results (CSV) + figure across 4 backbones (scCRAFT/scVI-NB/Gaussian/ZINB) with both adversarial heads",
+    "E3 external-baseline comparison table (Harmony/scVI/scANVI/Scanorama/unintegrated) + figure",
+    "E4 reference-design isolation results (fixed vs rotating vs joint critic) + reference-coverage analysis",
+    "E5 biological-validation outputs: marker preservation, per-cell-type purity, rare-cell retention, cell-type confusion, label transfer",
+    "E6 local-vs-global metric decomposition + per-dataset batch support-overlap characterization",
+    "E8 strengthened multibatch scaling results with full metric suite",
+    "Updated manuscript figures and revised text with narrowed claims and notation fixes"
+  ],
+  "feasibility": {
+    "confidence": "high",
+    "rationale": "The codebase, metrics, and two GPU clusters are all in place, and the authored code separates cleanly from upstream scCRAFT (verified by symbol-level diff). Dataset breadth expands from 3 to ~8 tasks (all RNA additions and the ATAC task come from the same scIB Figshare deposit already used, so no new data source), directly answering R2.4/R1.major.2/R2.6/R3.minor.1. Atlas-scale runs remain dropped; scale limits addressed by manuscript scoping. Main uncertainty: Figshare download is cookie-gated headless and may need network access or manual staging; the ATAC task needs a prep_data branch (no HVG/scaling)."
+  }
+}

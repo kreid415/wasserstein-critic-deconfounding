@@ -1,0 +1,6 @@
+cluster,account,resource,used,allocated,unit,remaining,pct_used,status
+Rockfish,gsteino1,CPU,24957.5,25000.0,core-hours,42.5,99.8,near limit
+Rockfish,gsteino1_bigmem,CPU,0.0,2500.0,core-hours,2500.0,0.0,available
+Rockfish,gsteino1_gpu,CPU,4505.6,5000.0,core-hours,494.4,90.1,near limit
+Rockfish,gsteino1_gpu,GPU,338.4,416.7,GPU-hours,78.3,81.2,available
+DSAI,gsteino1,CPU,61848.8,50000.0,core-hours,-11848.8,123.7,EXHAUSTED

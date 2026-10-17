@@ -1,0 +1,18 @@
+module,symbol,provenance,target_after_refactor
+networks.py,ReferenceWassersteinLoss,NEW (yours),wcd/critic.py
+networks.py,gradient_penalty,NEW (yours),wcd/critic.py
+networks.py,multi_class_gradient_penalty,NEW (yours),wcd/critic.py
+networks.py,Discriminator (critic-flag head),MODIFIED (yours: critic dispatch),wcd/adversarial.py
+networks.py,Encoder / Decoder / VAE,"MODIFIED (yours: warmup, x_raw, NB)","scCRAFT/ (backbone, NOTICE header)"
+networks.py,log_nb_positive / CrossEntropy,MODIFIED (near-upstream),scCRAFT/
+networks.py,reparameterize_gaussian,IDENTICAL (upstream),scCRAFT/
+model.py,_prepare_tensors,NEW (yours),wcd/training.py
+model.py,_sample_epoch_indices (stratified),NEW (yours),wcd/training.py
+model.py,_train_batch (adversarial step),NEW (yours),wcd/training.py
+model.py,SCIntegrationModel / train_model / train_integration_model,MODIFIED (yours: reference+critic loop),wcd/training.py
+model.py,obtain_embeddings,MODIFIED (near-upstream),scCRAFT/
+utils.py,create_triplets / count_labels_per_batch,MODIFIED (near-upstream),scCRAFT/
+utils.py,weights_init_normal / set_seed / multi_resolution_cluster,IDENTICAL (upstream),scCRAFT/
+metrics.py,compute_simpson_numba / compute_lisi / ilisi_graph / clisi_graph,NEW (yours: numba reimpl),wcd/evaluation.py
+data.py,prep_data,NEW (yours),wcd/data.py
+hyperparameter.py,run_comprehensive_nested_cv + helpers,NEW (yours),wcd/hyperparameter.py

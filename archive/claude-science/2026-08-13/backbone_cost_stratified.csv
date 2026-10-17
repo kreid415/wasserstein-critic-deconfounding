@@ -1,0 +1,17 @@
+head,backbone,n_configs,datasets,median_epochs,median_s_per_epoch,median_train_s,max_train_s,median_ari,sufficient_n
+critic,Gaussian,4,"immune,lung,sim1",315.0,7.385,2527.8,4667.2,0.0194,True
+critic,NB_uncond,3,immune,190.0,9.645,1832.5,1974.6,0.0002,True
+critic,Poisson,3,"immune,lung",160.0,8.969,1472.0,1704.1,0.0003,True
+critic,ZINB_uncond,3,immune,140.0,9.839,1377.4,1730.3,0.0002,True
+critic,ZINB,3,immune,110.0,9.431,1039.8,1508.9,0.0757,True
+critic,NB,75,"immune,lung,pancreas",150.0,8.902,919.5,2407.4,0.085,True
+critic,LDVAE_uncond,3,immune,70.0,9.53,584.1,667.1,0.1689,True
+critic,LDVAE,3,immune,60.0,9.177,575.8,595.6,0.1557,True
+discriminator,LDVAE_uncond,7,"immune,lung,pancreas",190.0,0.841,159.8,366.6,0.0275,True
+discriminator,ZINB_uncond,6,"immune,lung,pancreas",185.0,0.883,153.3,243.9,0.1656,True
+discriminator,LDVAE,6,"immune,lung,pancreas",175.0,0.683,112.8,211.5,0.1416,True
+discriminator,NB_uncond,6,"immune,lung,pancreas",150.0,0.64,85.8,277.5,0.0588,True
+discriminator,Gaussian,6,"immune,lung,pancreas",130.0,0.571,81.0,153.0,0.0117,True
+discriminator,Poisson,6,"immune,lung,pancreas",140.0,0.565,77.9,179.1,0.017,True
+discriminator,ZINB,6,"immune,lung,pancreas",100.0,0.901,76.4,245.0,0.0015,True
+discriminator,NB,111,"immune,lung,pancreas",90.0,0.847,66.2,229.3,0.0266,True

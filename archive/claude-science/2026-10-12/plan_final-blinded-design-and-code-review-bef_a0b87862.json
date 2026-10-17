@@ -1,0 +1,155 @@
+{
+  "version": 3,
+  "created_at": "2026-10-12T20:36:37.726Z",
+  "task_summary": "Final blinded design and code review before X1 publication runs",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Blinded copy",
+      "delegations": [
+        {
+          "name": "Bug planter",
+          "steps": [
+            {
+              "title": "Check Codex and its models",
+              "description": "Run the Codex quick test (codex_canary.py --auto) on cs-local and list the models the account offers. Confirm gpt-6.1-sol at its highest reasoning setting (max if offered, else xhigh) and gpt-6-astra at max for escalation. If the quick test fails, stop and tell the user; no silent fallback to Claude-only."
+            },
+            {
+              "title": "Plant 15 realistic errors in a repo copy",
+              "description": "A planter sub-agent on claude-opus-5-5 clones the tag c88cce3 plus main cd295d1 into a separate review copy. It plants about 15 errors spread over design documents, losses, training, the design-file mapping, metrics, rules, the runner and cluster scripts. They are committed as one ordinary-looking commit so they are not identifiable from history."
+            },
+            {
+              "title": "Seal the key",
+              "description": "Write the list of planted errors, with locations, outside the review copy. Return only its SHA-256, so the lead can later prove the list was not changed. No artifact or message names the errors."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Independent reviews",
+      "delegations": [
+        {
+          "name": "Scope",
+          "steps": [
+            {
+              "title": "Inventory and coverage",
+              "description": "Prompt Part 0 on the review copy, by a claude-opus-5-5 reviewer: label every file; run all probes (every arm incl. X13, scoring, rules, manifest builder, runner, job rehearsal) under coverage.py on CPU. Write the inventory CSV and the coverage report for the other tracks. A Codex gpt-6.1-sol reviewer (highest reasoning, read-only) builds its own inventory independently for comparison."
+            }
+          ]
+        },
+        {
+          "name": "Design",
+          "steps": [
+            {
+              "title": "Research design review",
+              "description": "Prompt Part A for every stage (pilots, rules, X1, X13, follow-ups) and every claim in the revision documents. Two independent reviewers who do not see each other's work: claude-opus-5-5 and Codex gpt-6.1-sol at its highest reasoning."
+            }
+          ]
+        },
+        {
+          "name": "Model code",
+          "steps": [
+            {
+              "title": "Losses, training, data path",
+              "description": "Prompt Part B items 1, 1b, 2, 3 and 9: derive every loss from its source, check each design-file column takes effect, check seed pairing and the lambda=0 identity, and run 1-epoch probes. Independent pair: claude-opus-5-5 and Codex gpt-6.1-sol (highest reasoning)."
+            }
+          ]
+        },
+        {
+          "name": "Metrics",
+          "steps": [
+            {
+              "title": "Scoring and aggregation",
+              "description": "Prompt Part B item 4: each metric against scib 1.1.7 and the design, the B/C aggregates and NaN handling, re-scoring stored latents, and tiny cell types. Independent pair: claude-opus-5-5 and Codex gpt-6.1-sol (highest reasoning)."
+            }
+          ]
+        },
+        {
+          "name": "Pipeline",
+          "steps": [
+            {
+              "title": "Rules, design files, runner, cluster",
+              "description": "Prompt Part B items 5-8, 10, 11 and environments: re-implement R1-R4 from the text and compare with the records; rebuild the experiment matrix; runner gates and failure handling; every job check traced to code; earlier CR findings. Independent pair: claude-opus-5-5 and Codex gpt-6.1-sol (highest reasoning)."
+            }
+          ]
+        },
+        {
+          "name": "Cross-check",
+          "steps": [
+            {
+              "title": "Flag high-impact areas during the run",
+              "description": "The lead reads each track's interim output as it lands and lists areas where an error would change a published conclusion or invalidate finished stages. Candidates: the adversary losses and gradient penalty; seed pairing; the B/C aggregates; R1-R4 and b*; failure handling; any area where the Claude and Codex reviewers disagree or one found what the other missed. Each area is listed with its reason."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Escalated checks",
+      "delegations": [
+        {
+          "name": "Claude escalation",
+          "steps": [
+            {
+              "title": "Fable double-check of flagged areas",
+              "description": "A claude-fable-5-1 reviewer re-checks each flagged high-impact area from scratch, blind to the earlier reviewers' findings on it, with executed evidence."
+            }
+          ]
+        },
+        {
+          "name": "Codex escalation",
+          "steps": [
+            {
+              "title": "Astra double-check of flagged areas",
+              "description": "Codex gpt-6-astra at max reasoning (read-only) re-checks the same flagged areas, blind to all earlier findings."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1b"
+    },
+    {
+      "name": "Reconcile",
+      "delegations": [
+        {
+          "name": "Lead",
+          "steps": [
+            {
+              "title": "Unblind and score the reviewers",
+              "description": "Open the sealed key and check its hash. Count the planted errors each track and each model caught (Claude vs Codex, base vs escalated). Audit the reviewers' logs for any access to the key or to other tracks' work."
+            },
+            {
+              "title": "Verify every real finding",
+              "description": "Reproduce each finding that is not a planted error by executing a test, a known-answer check or a probe, on the real repository. Settle disagreements between reviewers the same way."
+            },
+            {
+              "title": "Re-review missed areas",
+              "description": "For each planted error missed, re-review its area with a fresh reviewer (escalated models); repeat until all planted errors are caught or explained."
+            },
+            {
+              "title": "Report and redo-cost estimate",
+              "description": "Write the final findings and the fixes needed. For each fix, give its consequence under PREREG sec 7: new tag, and which stages (A1-A3, rules, fillers) need refitting or rescoring. Give the user the GO/NO-GO and stop for sign-off; apply no fix before then."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    }
+  ],
+  "desired_outputs": [
+    "REVIEW_design_and_code.md per track and per reviewer, with findings tables",
+    "traceability matrix CSV (design statement -> code -> evidence)",
+    "file inventory and line-coverage report",
+    "list of flagged high-impact areas with reasons, and the escalated double-check results",
+    "planted-bug catch-rate report by track and model",
+    "reconciled final findings list with verified evidence and redo-cost estimate per fix",
+    "final GO / NO-GO summary for the user"
+  ],
+  "feasibility": {
+    "confidence": "medium",
+    "rationale": "No review can guarantee that every error is found; the planted-bug catch rate measures how much is missed. Claude sub-agents cannot be given a reasoning-effort setting (only the model), and blinding relies on instructions plus a later audit of the reviewers' logs."
+  }
+}

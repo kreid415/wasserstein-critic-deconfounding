@@ -1,0 +1,4 @@
+input,cond,discriminator_gridmean,discriminator_loso,pooled_gridmean,pooled_loso,reference_gridmean,reference_loso
+new,0,0.6349,0.6572,,,,
+new,1,0.5883,0.6405,0.5072,0.5226,0.521,0.6457
+old,0,0.6467,0.7116,0.507,0.6487,0.526,0.6592

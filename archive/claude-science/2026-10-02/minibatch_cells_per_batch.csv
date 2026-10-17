@@ -1,0 +1,27 @@
+dataset,key,V,batch_size,smallest_batch,smallest_n,exp_cells_smallest_per_step,P_zero_smallest,ref,exp_cells_ref_per_step,P_zero_ref
+pancreas,tech,9,128,fluidigmc1,638,5.0,0.0062,inDrop1,15.1,0.0
+pancreas,tech,9,512,fluidigmc1,638,19.9,0.0,inDrop1,60.5,0.0
+immune,chemistry,4,128,smart-seq2,1022,3.9,0.019,v2_10X,49.4,0.0
+immune,chemistry,4,512,smart-seq2,1022,15.6,0.0,v2_10X,197.6,0.0
+lung,protocol,2,128,drop-seq,9701,38.2,0.0,10x v2,89.8,0.0
+lung,protocol,2,512,drop-seq,9701,153.0,0.0,10x v2,359.0,0.0
+immune_hum_mou,species,2,128,Human,33506,43.8,0.0,Mouse,84.2,0.0
+immune_hum_mou,species,2,512,Human,33506,175.3,0.0,Mouse,336.7,0.0
+sim1,Batch,6,128,Batch6,957,10.1,0.0,Batch5,18.6,0.0
+sim1,Batch,6,512,Batch6,957,40.5,0.0,Batch5,74.5,0.0
+sim2,Batch,4,128,Batch4,4798,31.8,0.0,Batch1,31.8,0.0
+sim2,Batch,4,512,Batch4,4798,127.2,0.0,Batch1,127.4,0.0
+atac_small,batchname,3,128,10x Genomics,3618,41.1,0.0,Cusanovich et al.,44.3,0.0
+atac_small,batchname,3,512,10x Genomics,3618,164.4,0.0,Cusanovich et al.,177.3,0.0
+atac_large,batchname,3,128,10x Genomics,3667,5.5,0.0035,Cusanovich et al.,26.3,0.0
+atac_large,batchname,3,512,10x Genomics,3667,22.1,0.0,Cusanovich et al.,105.3,0.0
+immune_scIB10,batch,10,128,Villani,1022,3.9,0.019,Oetjen_A,9.9,3.4e-05
+immune_scIB10,batch,10,512,Villani,1022,15.6,0.0,Oetjen_A,39.5,0.0
+lung_scIB16,batch,16,128,3,462,1.8,0.1597,3,1.8,0.159738
+lung_scIB16,batch,16,512,3,462,7.3,0.0007,3,7.3,0.000651
+immune_hum_mou_scIB23,batch,23,128,MCA_PB_4,196,0.3,0.7737,Oetjen_A,3.4,0.032454
+immune_hum_mou_scIB23,batch,23,512,MCA_PB_4,196,1.0,0.3583,Oetjen_A,13.5,1e-06
+sim2_scIB16,SubBatch,16,128,Batch3Sub4,485,3.2,0.0386,Batch4Sub2,11.1,9e-06
+sim2_scIB16,SubBatch,16,512,Batch3Sub4,485,12.9,0.0,Batch4Sub2,44.4,0.0
+atac_large_scIB11,batchname_all,11,128,Cusanovich et al. - Cerebellum_62216,2321,3.5,0.0287,Cusanovich et al. - WholeBrainA_62816,5.0,0.006389
+atac_large_scIB11,batchname_all,11,512,Cusanovich et al. - Cerebellum_62216,2321,14.0,0.0,Cusanovich et al. - WholeBrainA_62816,19.8,0.0

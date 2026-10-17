@@ -1,0 +1,497 @@
+{
+ "lit_review": {
+  "frame_id": "42ff8020-ebed-4250-80ae-9076e0ad2c0a",
+  "deviations": [
+   "Full text was not available for 4 keys: maan2024characterizing, lotfollahi2020conditional and goh2022batch were checked against the abstract only (closed access), and clopper1934use against metadata only (no abstract deposited); gayoso2022python was checked against metadata plus its opening paragraph.",
+   "For 8 keys the text read was a preprint or arXiv version, not the publisher version: arjovsky2017towards (arXiv v1, because the OpenReview PDF returned HTTP 403), shen2018wasserstein (arXiv v4), amodio2019exploring, dincer2020adversarial and wang2022respan (bioRxiv), shaham2017removal (arXiv), corani2017time (arXiv accepted manuscript) and luecken2025defining (Research Square preprint).",
+   "The July key Stegle2015-gr (the 'sample age' claim) was dropped without being checked, and the July sentence linking batch effects to sequencing technology was narrowed to replicate-level batch effects (Tung 2017); no other July citation was carried beyond what the fragments use.",
+   "The gap search was 4 OpenAlex queries (52 works since 2024) plus 1 web search, so the gap is a search-based absence, not an exhaustive one.",
+   "The word count is 1,195 prose words, counted without source tags or pending markers and with each citation counted as one token; the rendered sections run to 1,668 words.",
+   "The bib field verified = {2026-10-14 via doi|url} gives the date the metadata was retrieved; the claim checks finished on 2026-10-15.",
+   "The seed key corani2017time was kept although the naming convention would give corani2017statistical."
+  ],
+  "fragments_tar": "9ea19432-50a3-410b-a0cf-3fa761e81bcf",
+  "refs_bib": "a848c9d0-7cbe-4cde-af4e-91bad244f536",
+  "evidence_md": "d22794a5-3196-47b0-8461-4aaee248a796",
+  "keys": [
+   {
+    "key": "lopez2018deep",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41592-018-0229-2",
+    "used_for": "scVI: ZINB model conditioned on the batch annotation, low-dimensional Gaussian latent",
+    "where_checked": "Results, model paragraph (\"The distribution is conditioned on the batch annotation b_n\"; \"z_n is a low dimensional vector of Gaussians\"); abstract; text: PMC full text",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "gayoso2022python",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41587-021-01206-w",
+    "used_for": "names scvi-tools (method naming only)",
+    "where_checked": "metadata + opening paragraph (correspondence); implementation facts read in scvi-tools 1.4.2 source instead; text: publisher text closed; abstract/first paragraph via Unpaywall record",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "luecken2022benchmarking",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41592-021-01336-8",
+    "used_for": "scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics; scoring = batch removal vs conservation of biological variation; outputs are graph, embedding or corrected matrix",
+    "where_checked": "p1 (abstract; introduction: \"14 metrics ... remove batch effects while conserving biological variation\"; \"integrated graph, a joint embedding or a corrected feature matrix\"); text: publisher PDF (hybrid OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "goodfellow2014generative",
+    "verified": true,
+    "doi_or_url": "https://proceedings.neurips.cc/paper_files/paper/2014/hash/f033ed80deb0234979a61f95710dbe25-Abstract.html",
+    "used_for": "minimax objective; at the optimal discriminator C(G) = -log 4 + 2 JSD (discriminator targets JS); non-saturating heuristic",
+    "where_checked": "p3 (Eq. 1; saturation paragraph: \"train G to maximize log D(G(z))\"), p5 (Theorem 1, Eq. 6); text: NeurIPS 2014 proceedings PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "arjovsky2017wasserstein",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v70/arjovsky17a.html",
+    "used_for": "Theorem 1 (W continuous; differentiable a.e. for locally Lipschitz g under Assumption 1; false for JS and KL); Example 1 (parallel lines: W = |theta|, JS = log 2); Kantorovich-Rubinstein dual of W1",
+    "where_checked": "p3 (Theorem 1, Example 1), p4 (Eq. 2, 1-Lipschitz dual), p5 (critic trained to optimality; JS saturation); text: PMLR v70 PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "arjovsky2017towards",
+    "verified": true,
+    "doi_or_url": "https://openreview.net/forum?id=Hk4_qw5xe",
+    "used_for": "Thms 2.1-2.2 (perfect discriminator, zero gradient, disjoint supports or non-aligned manifolds); Thm 2.4 (vanishing gradients for log(1-D)); -log D \"doesn't necessarily suffer from vanishing gradients\" but Thm 2.6 gives a Cauchy-distributed (infinite mean and variance) gradient; Thm 3.1 (continuous noise makes the distributions absolutely continuous)",
+    "where_checked": "p3 (Thm 2.1), p5 (Thm 2.2), p6 (Thm 2.4), p7 (-log D paragraph, Thm 2.5), p8 (Thm 2.6), p9 (Thm 3.1, Corollary 3.1); text: arXiv 1701.04862v1 (\"Under review as a conference paper at ICLR 2017\"); the OpenReview PDF returned HTTP 403, so the camera-ready was not read",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "gulrajani2017improved",
+    "verified": true,
+    "doi_or_url": "https://proceedings.neurips.cc/paper_files/paper/2017/hash/892c3b1c6dccd52936e27cbd0ff683d6-Abstract.html",
+    "used_for": "WGAN-GP: penalise the critic gradient norm at random interpolates, a soft version of the 1-Lipschitz constraint, instead of weight clipping",
+    "where_checked": "p1 (abstract, contributions), p4 (Sec. 4, \"soft version of the constraint\", Eq. 3); text: NeurIPS 2017 proceedings PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "ganin2016domain",
+    "verified": true,
+    "doi_or_url": "https://jmlr.org/papers/v17/15-239.html",
+    "used_for": "DANN: features discriminative for the task and indiscriminate with respect to domain shift, via a gradient reversal layer against a domain classifier",
+    "where_checked": "p1 (abstract), p2 (domain classifier description); text: JMLR PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "shen2018wasserstein",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1609/aaai.v32i1.11784",
+    "used_for": "WDGRL: domain critic estimates the empirical Wasserstein distance between source and target representations; feature extractor minimises it adversarially; gradient penalty",
+    "where_checked": "p1 (abstract), p2 (DANN as the classifier baseline), p3 (Eqs. 5-6, gradient penalty); text: arXiv 1707.01217v4 (comment: AAAI 2018); AAAI page not reachable from the sandbox",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "wang2021imap",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s13059-021-02280-8",
+    "used_for": "iMAP: adversarial losses optimised via WGAN-GP; one dataset is the anchor, not corrected",
+    "where_checked": "p17 (Methods: discriminator, \"adversarial losses are optimized via the WGAN-GP\"), p14 (Discussion: \"one dataset is specified as the anchor\"); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "amodio2019exploring",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41592-019-0576-7",
+    "used_for": "SAUCIE: MMD penalty on an internal layer aligning batches to a reference batch",
+    "where_checked": "p5 (MMD correction on an internal layer), p26-27 (Sec. 4.1.3: V_ref reference batch; MMD zero only for equal distributions); text: bioRxiv preprint text (via Semantic Scholar); published version not open",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "yi2025benchmarking",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s13059-025-03869-z",
+    "used_for": "scIB-E: level-1 batch losses GAN, HSIC, orthogonal projection, MIM, reverse backpropagation (gradient reversal), reverse cross-entropy in the scVI framework (scANVI for levels 2-3); Ray Tune weights; no Wasserstein, MMD, maximum mean, optimal transport or Sinkhorn term (0 occurrences of each in the full text)",
+    "where_checked": "p4 (level definitions, loss list), p5 and p26 (Ray Tune, immune dataset), p16-18 (GAN Eq. 1; RBP gradient reversal; RCE); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "hrovatin2025integrating",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s12864-025-12126-3",
+    "used_for": "sysVI: cVAE with VampPrior and cycle-consistency; adversarial alignment (cVAE+ADV, GLUE) mixes unrelated cell types with unbalanced proportions, especially at higher correction strength (Kappa)",
+    "where_checked": "p1 (abstract), p4 (Results and Fig. 2 legend), p5 (VampPrior and cycle-consistency); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "zhao2019learning",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v97/zhao19a.html",
+    "used_for": "Theorem 4.3: eps_S + eps_T >= 1/2 (d_JS(D_S^Y, D_T^Y) - d_JS(D_S^Z, D_T^Z))^2 when d_JS(Y) >= d_JS(Z); binary hypotheses; Remark: with different label marginals, minimising d_JS(Z) and the source error increases the target error",
+    "where_checked": "p2 (hypotheses h: X -> {0,1}; \"the better the objective, the larger the target error\"), p7 (Lemma 4.8, Theorem 4.3, Remark, Corollary 4.1); text: PMLR v97 PDF (numbering matches arXiv v2)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "wu2019domain",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v97/wu19f.html",
+    "used_for": "standard choices of D (domain classifier/JS, Wasserstein, MMD) are zero only for identical distributions; Proposition 3.1: E_S = D = 0 implies E_T >= |rho_S - rho_T| (binary labels); relaxed alignment proposed",
+    "where_checked": "p1 (abstract), p3 (Sec. 2 list of D; Sec. 3, Proposition 3.1); text: PMLR v97 PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "lucic2018gans",
+    "verified": true,
+    "doi_or_url": "https://proceedings.neurips.cc/paper_files/paper/2018/hash/e46de7e1bcaaced9a54f1e9d0d2f800d-Abstract.html",
+    "used_for": "most models reach similar scores with enough hyperparameter optimisation and random restarts; no tested algorithm consistently outperforms the non-saturating GAN",
+    "where_checked": "p1 (abstract); text: NeurIPS 2018 proceedings PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "kurach2019large",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v97/kurach19a.html",
+    "used_for": "non-saturating loss sufficiently stable across datasets and hyperparameters; spectral normalisation consistently improves sample quality, gradient penalty helps in some cases with no clear trend; NS loss + SN as defaults",
+    "where_checked": "p1 (contributions), p5-6 (Sec. 3 observations), p8 (Sec. 6 Conclusions); text: PMLR v97 PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "maan2024characterizing",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41587-023-02097-9",
+    "used_for": "imbalance (cell types present, cells per type, proportions) changed clustering, cell-type classification, differential expression and marker annotation, query mapping and trajectory inference across five integration methods (2,600 experiments); balanced clustering metrics",
+    "where_checked": "abstract (PubMed 38429430 via Europe PMC); text: abstract only: no open full text (Unpaywall, Semantic Scholar, PMC, Crossref TDM all negative)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "gretton2012kernel",
+    "verified": true,
+    "doi_or_url": "https://jmlr.org/papers/v13/gretton12a.html",
+    "used_for": "MMD = largest difference in expectations over the unit ball of an RKHS; kernel two-sample tests (method naming)",
+    "where_checked": "p1 (abstract); text: JMLR PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "cuturi2013sinkhorn",
+    "verified": true,
+    "doi_or_url": "https://proceedings.neurips.cc/paper_files/paper/2013/hash/af21d0c97db2e27e13572cbf59eb343d-Abstract.html",
+    "used_for": "entropic regularisation of OT, solved by Sinkhorn matrix scaling (method naming)",
+    "where_checked": "p1 (abstract); text: NeurIPS 2013 proceedings PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "feydy2019interpolating",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v89/feydy19a.html",
+    "used_for": "Sinkhorn divergence S_eps interpolates between OT (eps -> 0) and MMD (eps -> infinity); the autocorrelation terms remove the entropic bias (debiasing)",
+    "where_checked": "p1-2 (Sec. 1, Eq. 4), p3 (\"The entropic bias\"); text: PMLR v89 PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "cuturi2014fast",
+    "verified": true,
+    "doi_or_url": "https://proceedings.mlr.press/v32/cuturi14.html",
+    "used_for": "algorithms for the Wasserstein barycenter of empirical measures (method naming)",
+    "where_checked": "p1 (abstract); text: PMLR v32 PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "flamary2021pot",
+    "verified": true,
+    "doi_or_url": "https://jmlr.org/papers/v22/20-451.html",
+    "used_for": "POT: open-source Python optimal-transport toolbox (method naming)",
+    "where_checked": "p1 (abstract); text: JMLR PDF",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "korsunsky2019fast",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41592-019-0619-0",
+    "used_for": "Harmony: shared embedding in which cells group by cell type rather than dataset-specific conditions (method naming)",
+    "where_checked": "abstract (PubMed 31740819); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "hie2019efficient",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41587-019-0113-3",
+    "used_for": "Scanorama: identifies and merges shared cell types among all pairs of datasets (method naming)",
+    "where_checked": "abstract (PubMed 31061482); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "xu2021probabilistic",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.15252/msb.20209620",
+    "used_for": "scANVI: semi-supervised variant of scVI using cell-state annotations (method naming)",
+    "where_checked": "abstract (PubMed 33491336); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "buttner2019test",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41592-018-0254-1",
+    "used_for": "kBET: k-nearest-neighbour batch-effect test (method naming; methods track) [methods track; not cited in the framing fragments]",
+    "where_checked": "abstract (PubMed 30573817); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "corani2017time",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1007/s10994-017-5641-9",
+    "used_for": "Bayesian hierarchical model for comparing two methods over multiple data sets; posterior probabilities of practical equivalence or difference; rope (-0.01, 0.01) as default (methods track) [methods track; not cited in the framing fragments]",
+    "where_checked": "p1 (abstract), p2 (rope); text: metadata from Crossref; text from arXiv 1609.08905 (accepted manuscript); key name does not follow the convention (see notes)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "clopper1934use",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/biomet/26.4.404",
+    "used_for": "exact (Clopper-Pearson) binomial confidence limits (method naming; methods track) [methods track; not cited in the framing fragments]",
+    "where_checked": "metadata only (Biometrika 26(4):404-413); no abstract deposited; the title names the method; text: metadata only",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "shree2023scdreamer",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41467-023-43590-8",
+    "used_for": "scDREAMER: adversarial VAE trained with ELBO and a Bhattacharyya loss; batch classifier trained adversarially with cross-entropy",
+    "where_checked": "p2 (Results overview); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "lotfollahi2020conditional",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/bioinformatics/btaa800",
+    "used_for": "trVAE: MMD across conditions in the decoder layer that follows the bottleneck",
+    "where_checked": "abstract (Results paragraph); text: abstract only: no open full text found (publisher HTTP 403)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "wang2019bermuda",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s13059-019-1764-6",
+    "used_for": "BERMUDA: MMD between clusters across batches; combines batches with different compositions if one cell type is shared by a pair of batches",
+    "where_checked": "p2 (Background, final paragraph); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "cao2022unified",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41467-022-35094-8",
+    "used_for": "uniPort: coupled VAE plus minibatch unbalanced OT",
+    "where_checked": "p1 (abstract), p2 (Introduction); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "shaham2017removal",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/bioinformatics/btx196",
+    "used_for": "MMD-ResNet: residual network trained to minimise the MMD between a source and a target batch; several sources calibrated to a single target",
+    "where_checked": "abstract; p2 (Introduction); text: text from arXiv 1610.04181 (OA copy listed by Unpaywall)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "leek2010tackling",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/nrg2825",
+    "used_for": "batch effects arise from laboratory conditions, reagent lots and personnel; they mislead when correlated with the outcome",
+    "where_checked": "abstract; text: PMC full text retrieved; abstract passage used",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "tung2017batch",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/srep39921",
+    "used_for": "scRNA-seq (Fluidigm C1): substantial variation between separately processed technical replicates; design recommendations",
+    "where_checked": "p1 (abstract), p4 (confounded-design analysis); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "goh2022batch",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1016/j.tibtech.2022.02.005",
+    "used_for": "batch effects remain relevant, and harder, for single-cell data",
+    "where_checked": "abstract (PubMed 35282901); text: abstract only: no open full text",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "yu2024assessing",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s13059-024-03401-9",
+    "used_for": "definition of batch effects (conditions over time, labs, machines, pipelines); misleading if uncorrected, hinder discovery if over-corrected",
+    "where_checked": "p1 (abstract, Introduction); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "dincer2020adversarial",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/bioinformatics/btaa796",
+    "used_for": "AD-AE: autoencoder plus an adversary trained to predict the confounder; confounders include technical artefacts and uninteresting biological variables such as age",
+    "where_checked": "published abstract; p1 of the bioRxiv text; text: abstract of the published version + bioRxiv full text (published PDF not open)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "he2025partially",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s42003-025-07988-y",
+    "used_for": "scCRAFT: reconstruction loss, multi-domain GAN discriminator (cross-entropy), dual-resolution triplet loss to counter over-correction amid heterogeneous cell distributions",
+    "where_checked": "p1 (abstract), p2 (over-correction under heterogeneous compositions), p10 (Methods: multi-domain GAN); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "wang2022respan",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/bioinformatics/btac427",
+    "used_for": "ResPAN: WGAN combined with random-walk mutual-nearest-neighbour pairing and fully skip-connected autoencoders",
+    "where_checked": "published abstract; p1 of the bioRxiv text; text: abstract of the published version + bioRxiv full text",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "wang2023integrating",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.3390/ijms24065502",
+    "used_for": "IMAAE: anchor batch (built or chosen); adversarial matching of the latent to N(0,I); gradient penalty on interpolates and generator loss -E[D] (WGAN-GP form); uses known labels; \"lack of constraints\" with sparse anchors (Fig. 11a); plain GAN under-corrects with three or more batches (Fig. 11b); 0 occurrences of \"Wasserstein\" and \"WGAN\"",
+    "where_checked": "abstract; Introduction; Sec. 2.3.1-2.3.2 (prior, loss functions); Results text on Fig. 11; text: PMC full text",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "luecken2025defining",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/s41587-025-02694-w",
+    "used_for": "at least four batch-integration benchmarks used different datasets and metrics and suggested different optimal methods; Open Problems standardises tasks",
+    "where_checked": "p7 of the preprint text; text: metadata from the journal DOI; text from the Research Square preprint rs-4181617 (OA copy listed by Unpaywall); journal full text closed",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "tran2020benchmark",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1186/s13059-019-1850-9",
+    "used_for": "14 methods, five scenarios (including non-identical cell types); Harmony, LIGER and Seurat 3 recommended",
+    "where_checked": "abstract (PDF p1); text: publisher PDF (gold OA)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "ritchie2015limma",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/nar/gkv007",
+    "used_for": "limma: linear models can adjust for batch effects; removeBatchEffect removes systematic batch variation",
+    "where_checked": "sections on linear modelling and the removeBatchEffect function; text: PMC full text",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "johnson2007adjusting",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1093/biostatistics/kxj037",
+    "used_for": "ComBat: parametric and non-parametric empirical Bayes batch adjustment, robust in small samples (method naming)",
+    "where_checked": "abstract (PubMed 16632515); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "haghverdi2018batch",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1038/nbt.4091",
+    "used_for": "MNN: batch correction from mutual nearest neighbours (method naming)",
+    "where_checked": "abstract (PubMed 29608177); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "stuart2019comprehensive",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1016/j.cell.2019.05.031",
+    "used_for": "Seurat anchors: integration across scRNA-seq technologies and modalities (method naming)",
+    "where_checked": "abstract (PubMed 31178118); text: metadata + abstract (method naming rule)",
+    "reason_if_unverified": ""
+   },
+   {
+    "key": "reid2025topology",
+    "verified": true,
+    "doi_or_url": "https://doi.org/10.1101/2025.11.12.688061",
+    "used_for": "earlier public preprint of this study (\"Topology Matters\"); its backbone (scCRAFT) is read from the July submission text",
+    "where_checked": "Crossref metadata (posted-content, 2025-11); abstract; backbone sentence: Topology_Matters.zip oup-authoring-template.tex:142; text: metadata + abstract (bioRxiv full text: HTTP 429)",
+    "reason_if_unverified": ""
+   }
+  ],
+  "framing_conflicts": [
+   {
+    "claim": "Under label (composition) shift, alignment with any proper divergence forces errors, and tighter alignment forces more (Zhao 2019 Thm 4.3; Wu 2019)",
+    "source": "docs/PAPER_PLAN.md section 2 (Framing), \"Theory\" bullet",
+    "finding": "Zhao 2019 Thm 4.3 (PMLR p7) is stated for binary hypotheses with the JS distance on the representation; \"tighter forces more\" holds in JS-distance terms only. For any divergence the error is forced only at exact alignment (a distance that is zero only for identical distributions), which is Wu 2019 Prop. 3.1 (PMLR p3), also for binary labels. The outline words it this way."
+   },
+   {
+    "claim": "scIB-E compares GAN, HSIC, orthogonality and MI losses in scVI/scANVI",
+    "source": "docs/PAPER_PLAN.md section 2; rigour_review.md A.6",
+    "finding": "scIB-E level 1 has six losses: GAN, HSIC, orthogonal projection, MIM, reverse backpropagation (gradient reversal) and reverse cross-entropy (Genome Biol 26:398, p4); levels 2-3 add label-aware losses in scANVI. The absence of W1, MMD and OT is confirmed (0 occurrences of Wasserstein, MMD, maximum mean, optimal transport, Sinkhorn in the full text). The outline lists all six."
+   },
+   {
+    "claim": "In GANs the loss is second-order to tuning and regularisation (Lucic 2018; Kurach 2019)",
+    "source": "docs/PAPER_PLAN.md section 2",
+    "finding": "Lucic 2018 (p1) supports: similar scores with enough tuning and restarts; no algorithm consistently beats the non-saturating GAN. Kurach 2019 supports: the non-saturating loss is stable; spectral normalisation consistently helps; the gradient penalty has no clear trend (p5). Neither paper ranks the loss below regularisation in those words, and both are image-GAN studies. The outline states the findings, not \"second-order\"."
+   },
+   {
+    "claim": "The JS-vs-W1 premise becomes a tested hypothesis",
+    "source": "docs/PAPER_PLAN.md section 3, Introduction item 2",
+    "finding": "SI-68 (user decision, 2026-10-14) makes the premise check R0 exploratory, with no confirmed or refuted claim. The ledger wins; the outline says the premise is examined, not tested."
+   },
+   {
+    "claim": "Defensible gap: no budget-matched JS vs W1 vs MMD/OT comparison on a stock scVI backbone trained on real counts",
+    "source": "docs/PAPER_PLAN.md section 2",
+    "finding": "SI-15 fits the scIB files as distributed (the counts layer as scIB fed scVI; no strict-count main run), so \"trained on real counts\" is dropped. The rest of the gap holds as a search-based absence; re-searched 2026-10-15 (4 OpenAlex queries from 2024 on, 52 works, and 1 web search): no such comparison found."
+   },
+   {
+    "claim": "scVI's adversary trains on reparameterised posterior samples, so continuous noise removes the disjoint-support condition (Arjovsky & Bottou 2017 Thm 3.1)",
+    "source": "rigour_review.md A.3 and RI-12; code_methods_reviews.json",
+    "finding": "True for the stock scvi-tools adversary (arm scvi_adv runs AdversarialTrainingPlan unchanged; z = inference_outputs[\"z\"], scvi-tools 1.4.2 _trainingplans.py:689; Encoder rsample, _base_components.py:304-305). The authored arms use the posterior mean by default (SI-19; scripts/scvi_adversarial_plan.py:359), which adds no noise; the R2 switch to samples is pending. The manifest of record lists adv_input = mean for the 40 X1 scvi_adv rows, a value that arm does not read."
+   },
+   {
+    "claim": "The theory covers the saturating loss; the bounded fool loss is not covered automatically",
+    "source": "original_manuscript_claims_audit.csv C01; rigour_review.md RI-12",
+    "finding": "Confirmed and sharpened: for two batches the fool loss (scripts/scvi_adversarial_plan.py:292-298) is the label-flipped non-saturating loss; Arjovsky & Bottou Thms 2.4-2.6 assume a fixed data distribution and a moving generator, whereas every batch latent moves here."
+   },
+   {
+    "claim": "IMAAE employs a Wasserstein-based adversarial autoencoder to tackle scenarios where cell types are disjoint across batches",
+    "source": "July submission (Topology_Matters.zip) oup-authoring-template.tex:139; 08f1e3c copy :137",
+    "finding": "The IMAAE text never uses \"Wasserstein\" or \"WGAN\" (0 occurrences, PMC full text); its losses have WGAN-GP form (gradient penalty on interpolates, generator loss -E[D]); it matches the latent to N(0,I), uses an anchor batch and known cell labels. Audit C24 flagged the attribution; re-confirmed."
+   },
+   {
+    "claim": "Batch effects arise from the sequencing technology utilized (Tung 2017)",
+    "source": "July submission oup-authoring-template.tex:128",
+    "finding": "Tung 2017 studies separately processed technical replicates on one platform (Fluidigm C1), not sequencing technologies; cited in the outline only for replicate-level batch effects."
+   },
+   {
+    "claim": "Integration methods can be broadly categorized into statistical, geometric and deep generative models (Luecken 2022)",
+    "source": "July submission oup-authoring-template.tex:137",
+    "finding": "scIB (p1) groups integration outputs as a graph, a joint embedding or a corrected feature matrix; the three-way taxonomy is the authors' own organisation and is kept without citing scIB for it."
+   },
+   {
+    "claim": "Confounders are complicated by biological covariates such as sample age (Stegle 2015)",
+    "source": "July submission oup-authoring-template.tex:128",
+    "finding": "Not checked (Stegle 2015 not retrieved); dropped. AD-AE (Dincer 2020, abstract) names age as an uninteresting biological confounder and is cited instead."
+   },
+   {
+    "claim": "Cite scCRAFT only as the earlier backbone",
+    "source": "docs/PAPER_PLAN.md section 3 (Related work) vs project memory of the July-August revision (\"no scCRAFT mention anywhere in the main tex\")",
+    "finding": "The two instructions conflict; neither is a ledger entry. related.tex keeps one scCRAFT-backbone line marked \\pending{...}{your decision}; scCRAFT is also cited as related work (adversarial loss plus triplet loss)."
+   },
+   {
+    "claim": "To our knowledge, the barycenter has not previously been used as a learnable, end-to-end alignment target inside an adversarial critic",
+    "source": "08f1e3c manuscript_tm/oup-authoring-template/oup-authoring-template.tex:140 (August revision, commit a6510bb)",
+    "finding": "A 'first'-type claim; PAPER_PLAN section 2 drops 'first' claims. Not carried; listed in the intro's commented drop list."
+   },
+   {
+    "claim": "Seed-list key corani2017time (Bayesian comparison of classifiers)",
+    "source": "shared context seed list; ANALYSIS_SPEC section 5 and PAPER_PLAN section 5 cite \"Corani 2017\"",
+    "finding": "The convention gives corani2017statistical for Corani et al. 2017 (Machine Learning 106:1817-1837); \"time\" is the first title word of Benavoli, Corani, Demsar & Zaffalon 2017 (JMLR, \"Time for a change\"). The entry is kept under the seed key, pointing to Corani et al. 2017, so the methods track resolves; rename in both tracks together if wanted."
+   }
+  ],
+  "notes": "Word count 1195 = prose words of intro.tex (760) + related.tex (435) with comments, \\src{} and \\pending{}{} annotations removed and each citation counted as one token; the rendered text of sections 1-2, including source tags, pending markers and author-year citations, is 1668 words. Conventions: literature lines carry \\citep keys (claims checked in the source text, evidence.md); project lines carry \\src{} (ledger SI-nn, file:line at 08f1e3c, scvi-tools 1.4.2 source, manifest, decision letter); no \\unverified keys remain in the text. Not locked and marked \\pending: the decomposition framing itself (PAPER_PLAN section 2 has no ledger entry), adversary input R2 and standardisation R3 (re-run after the Sinkhorn refit, SI-57), X3/X6 analyses and the X7 redesign (SI-68), all X1/X13 outcomes, and whether the main text names scCRAFT. R0 is written as exploratory (SI-68), not as a tested hypothesis. Code facts used: discriminator arm = scvi-tools fool loss at 1 step (scripts/scvi_adversarial_plan.py:8-9, 292-298); authored arms use the posterior mean by default (SI-19; :359); the stock scvi-tools arm scvi_adv runs AdversarialTrainingPlan unchanged and so sees posterior samples (scvi-tools 1.4.2 _trainingplans.py:689; Encoder rsample _base_components.py:304-305), although the manifest of record (sha256 prefix 6efbe422c8f09f98, 6,930 rows, checked) lists adv_input=mean for its 40 X1 rows, a value that arm does not read. refs.bib: 49 entries = 34 seed keys + 15 framing keys; Crossref BibTeX for 35 DOIs (no retraction or correction notices), PMLR/NeurIPS/JMLR/OpenReview BibTeX for 14 non-DOI papers (PMLR access was granted for this); ASCII, capitals and acronyms braced; years set to the print issue for luecken2022benchmarking, buttner2019test, johnson2007adjusting. Seed key corani2017time is kept (pointing to Corani et al. 2017, Machine Learning) although the convention gives corani2017statistical; rename in both tracks together if wanted. Watch item, not cited: a 2026 bioRxiv method (iDLC) combining a WGAN-GP discriminator with a Sinkhorn regulariser surfaced in the gap search; it is a method, not a controlled comparison. PAPER_PLAN section 2 was re-checked at all 13 commits touching docs/PAPER_PLAN.md from 589277b to 08f1e3c: identical (sha256 prefix 44cdf208a2bbc07c), which answers the open Reviewer warning that only the endpoints had been diffed (finding b9f2fdf8; mark_addressed is not available in this kernel)."
+ },
+ "rigour_review": {
+  "frame_id": "26a76d5e-2e8e-45f0-867b-07c8dd273108",
+  "first_report": "eef1e505-33a8-47df-9633-9df9f21ee501",
+  "first_verdict": "PASS_WITH_FIXES (6 blockers, 16 fixes, 19 notes)",
+  "recheck_report": "bcbe7b6b-c015-4007-8ec5-d5b41ffbdd1c",
+  "recheck_verdict": "PASS (5 notes, applied by lead)"
+ },
+ "methods_track": {
+  "frame_id": "18cb312f-1ccb-4601-9667-fa5e05e461a7",
+  "fragments_v2": "e0037fd8-3936-4d4d-9f7c-fee9610c55e7",
+  "lock_audit_v2": "222250a4-08f1-4ad0-a936-3ce3bac9c71a",
+  "applied_fixes": "7206dcd8-7573-4c85-bed8-1c63aee44719"
+ }
+}

@@ -1,0 +1,298 @@
+# Lab notebook: 2026-10-02
+
+## NB-20261002-01 · 2026-10-02T18:18:56-04:00 · DECISION · X6
+**X6 spec signed off (SI-18)**
+- author: user
+- decision: X6 discriminator_r1: one-vs-rest R1 penalty (gamma/2) mean_i ||grad_z D_{b_i}(z_i)||^2 with D_k = l_k - log sum_{j!=k} exp(l_j), at every minibatch cell, gamma = 10, in the discriminator step only, 1 discriminator step per generator step
+- alternatives: One-vs-rest R1 with gamma grid {1, 10} (54 fits)
+- rationale: user sign-off of docs/SPECS_missing_arms.md (X6); recorded as SI-18; source: "One-vs-rest R1, gamma 10 (Recommended)" (ask_user answer to "X6 discriminator_r1: how should the R1 penalty (Mescheder et al. 2018, Eq. 9) be defined for our K-way batch classifier, and with which gamma?", 2026-10-02)
+- decided by: user
+- links: repo@ebb554b; docs/SPECS_missing_arms.md; CONSTRAINTS.md
+<!-- sha256=6205b30b35b6064df310cb090094c76cba1799732fe86da99b75730283152efa prev=0000000000000000000000000000000000000000000000000000000000000000 -->
+
+## NB-20261002-02 · 2026-10-02T18:18:56-04:00 · DECISION · X7
+**X7 spec signed off (SI-19)**
+- author: user
+- decision: X7 discriminator_ref (reference JS): per-batch binary heads 'batch k vs reference', class-balanced cross-entropy, non-saturating generator loss with labels flipped on both sides, reference cells not detached, 1 discriminator step per generator step
+- alternatives: Minimax (saturating) generator loss
+- rationale: user sign-off of docs/SPECS_missing_arms.md (X7); recorded as SI-19; source: "Non-saturating, labels flipped (Recommended)" (ask_user answer to "X7 discriminator_ref ("reference JS"): which generator loss?", 2026-10-02)
+- decided by: user
+- links: repo@a8c6e15; docs/SPECS_missing_arms.md; CONSTRAINTS.md
+<!-- sha256=444daa900392512fe111429a531b844df64fa5235e0f838438c7a9cf7c7f4ab7 prev=6205b30b35b6064df310cb090094c76cba1799732fe86da99b75730283152efa -->
+
+## NB-20261002-03 · 2026-10-02T18:18:56-04:00 · DECISION · X8
+**X8 spec signed off (SI-20)**
+- author: user
+- decision: X8 stratified sampler for the critic arms only (reference, pooled): 128/V cells per batch per minibatch, without replacement per batch, epoch = ceil(n_train/128) steps, fit fails when a batch has fewer training cells than its quota
+- alternatives: Stratified sampler for all four X8 adversarial arms (288 fits)
+- rationale: user sign-off of docs/SPECS_missing_arms.md (X8); recorded as SI-20; source: "Critics only: reference, pooled (Recommended)" (ask_user answer to "X8 stratified sampler: which arms get it?", 2026-10-02)
+- decided by: user
+- links: repo@45556fa; docs/SPECS_missing_arms.md; CONSTRAINTS.md
+<!-- sha256=71b38ae06c50154f68074b7c1fe4a7772687189c2d9c2a6459c7daecb1a608d2 prev=444daa900392512fe111429a531b844df64fa5235e0f838438c7a9cf7c7f4ab7 -->
+
+## NB-20261002-04 · 2026-10-02T18:18:56-04:00 · DECISION · X3
+**X3 spec signed off (SI-21)**
+- author: user
+- decision: X3 oracle importance weights undo the induced depletion: target = each batch's pre-depletion composition, w = 1/keep-fraction for depleted-type cells of the depleted batch and 1 otherwise, same weights in discriminator, reference, pooled and MMD, self-normalised in adversary and generator steps, doses 50/80/95 only
+- alternatives: Full composition matching, pairwise per head (reference, pooled, MMD; all 5 doses; 360 fits)
+- rationale: user sign-off of docs/SPECS_missing_arms.md (X3); recorded as SI-21; source: "Undo the induced depletion (Recommended)" (ask_user answer to "X3 oracle importance-weighted control: which target composition?", 2026-10-02)
+- decided by: user
+- links: repo@e106925; docs/SPECS_missing_arms.md; CONSTRAINTS.md
+<!-- sha256=6fcc52244e8a9c5c464835d66b6ff879d27d220245056e4afcea9809b315e656 prev=71b38ae06c50154f68074b7c1fe4a7772687189c2d9c2a6459c7daecb1a608d2 -->
+
+## NB-20261002-05 · 2026-10-02T18:46:11-04:00 · EXPERIMENT · X-bench
+**Step-cost benchmark of the missing arms on immune (single lane)**
+- author: agent
+- aim: ms per optimiser step of discriminator_r1, discriminator_ref, reference/pooled + stratified sampler, discriminator/reference/pooled/mmd + IW, for the cost model
+- plan: experiments/bench_missing_arms_step_cost/bench_manifest.tsv: 12 arms (8 new + 4 controls) x 3 interleaved repeats x {3, 1} epochs = 72 fits via fit_paper_config.py; ms/step = (t3 - t1)/(2 spe) (cost_model.measure); median repeat appended to docs/throughput_rtx3080_stock_backbone.csv
+- where: local RTX 3080, env scvi-api, OMP_NUM_THREADS=1, outputs in /home/kendall/experiment_data/wasserstein-critic-deconfounding/bench_missing_arms_step_cost/run1
+- preflight: experiments/bench_missing_arms_step_cost/PREFLIGHT.md: GO (46 items, 15 pass, 31 n/a)
+- happened: launched 2026-10-02 ~18:43 local, entry written while it runs
+- links: repo@fb70b1d; experiments/bench_missing_arms_step_cost/PREFLIGHT.md
+<!-- sha256=23b74c3db3754026c214e53515475392cbd0c2f1e40262a9b5d0793c4f71476b prev=6fcc52244e8a9c5c464835d66b6ff879d27d220245056e4afcea9809b315e656 -->
+
+## NB-20261002-06 · 2026-10-02T18:46:11-04:00 · RESULT · X-code
+**Existing arms bit-identical to 8cda6de after the missing-arm changes**
+- author: agent
+- ran: scripts/check_arm_bitidentity.py --base 8cda6de (CPU, 1 thread, synthetic 600 cells x 60 genes, 3 batches, 2 epochs, seed 0)
+- observed: 34 of 34 configurations identical, max|dz| over all = 0.0 (15 base arms x cond/uncond, scvi_adv cond only, + sample/zstd/LinearSCVI variants)
+- detection power: fl_mutation_check: a 0.025% MMD bandwidth change gives max|dz| 2.4e-07 and a 1e-4 relative fool-loss change 7.5e-07, both caught; one-ulp, NaN and shape changes caught by the comparator
+- links: repo@1669786; scripts/check_arm_bitidentity.py; docs/bitidentity_existing_arms.csv
+<!-- sha256=ed83c7cc496f576dfbb432fc8064b8da8e0bcccc97c8719efed1ac3a24879cab prev=23b74c3db3754026c214e53515475392cbd0c2f1e40262a9b5d0793c4f71476b -->
+
+## NB-20261002-07 · 2026-10-02T19:15:26-04:00 · ISSUE · X-bench
+**Step-cost benchmark run1 contaminated by CPU contention (PF-16 fail)**
+- author: agent
+- problem: 7 of 12 arms exceed the 25% repeat-spread limit (pf_check_timing_repeats); repeat 2 (last ~10 min) ran while other workloads kept 8-13 of 12 CPU cores busy (host stats 23:04-23:14 UTC); pooled_stratified rep 2 has an inflated 1-epoch time (21.1 s) giving an artefactual 21.2 ms/step
+- impact: run1 medians (appended to docs/throughput_rtx3080_stock_backbone.csv, all repeats in docs/throughput_missing_arms_repeats.csv) are provisional; same-session controls vs the existing CSV: discriminator 12.71 vs 11.65, mmd 11.65 vs 12.71, pooled 46.19 vs 34.96, reference 47.03 vs 47.03 ms/step
+- next: re-measure on a quiet machine with a load gate (wait for <= 3 busy cores and 0% GPU before each fit) and control/new pairs run back to back; replace the appended rows only from a passing PF-16
+- links: repo@745eb52; docs/throughput_missing_arms_repeats.csv; experiments/bench_missing_arms_step_cost/PREFLIGHT.md
+- refs: NB-20261002-05
+<!-- sha256=864a3e1cd67c7cafcde275172884145afd08ccebf03bc92e7e4ee02231c7edb0 prev=ed83c7cc496f576dfbb432fc8064b8da8e0bcccc97c8719efed1ac3a24879cab -->
+
+## NB-20261002-08 · 2026-10-02T19:40:08-04:00 · RESULT · X-bench
+**Step-cost run1 of the missing arms on immune (provisional)**
+- author: agent
+- ran: 72 fits (experiments/bench_missing_arms_step_cost/bench_manifest.tsv) via run_bench.py; summarise.py (cost_model.measure)
+- observed: median ms/step of 3 repeats: discriminator_r1 14.62 ms (range 13.14-14.83, control-ratio estimate 12.04); discriminator_ref 16.53 ms (range 15.89-19.92, control-ratio estimate 16.18); reference_stratified 46.4 ms (range 42.8-47.46, control-ratio estimate 45.46); pooled_stratified 30.51 ms (range 21.19-36.23, control-ratio estimate 25.55); discriminator_iw 13.08 ms (range 12.38-28.27, control-ratio estimate 13.32); reference_iw 50.23 ms (range 41.82-65.42, control-ratio estimate 53.35); pooled_iw 36.92 ms (range 35.28-60.28, control-ratio estimate 30.92); mmd_iw 12.38 ms (range 11.21-28.5, control-ratio estimate 13.51)
+- status: PROVISIONAL: PF-16 fails for 7 of 12 arms (CPU contention, NB-20261002-07); 8 median rows appended to docs/throughput_rtx3080_stock_backbone.csv; all repeats docs/throughput_missing_arms_repeats.csv; summary docs/throughput_missing_arms_summary.csv
+- links: repo@fe4ec94; docs/throughput_missing_arms_summary.csv; docs/throughput_rtx3080_stock_backbone.csv
+- refs: NB-20261002-05, NB-20261002-07
+<!-- sha256=e29e090b473df2f825b782b6532099963ba5095edf46287b448d886f2e059e77 prev=864a3e1cd67c7cafcde275172884145afd08ccebf03bc92e7e4ee02231c7edb0 -->
+
+## NB-20261002-09 · 2026-10-02T19:40:08-04:00 · RESULT · X13
+**X13 CPU baselines runner on atac_small: format accepted by the scIB-native scorer**
+- author: agent
+- ran: scripts/run_cpu_baselines.py --task atac_small (commit 7a4e0f3, env wcd-kbet) -> 6 latents (pca d10/d50, harmony d10/d50, scanorama d10/d100); scripts/score_scib_native.py on each
+- observed: 6 of 6 latents written in the prepped cell order and scored with 0 failures; all 11 embedding metrics finite in all 6 rows (cell-cycle not computed for ATAC by the scorer's rule)
+- where: /home/kendall/experiment_data/wasserstein-critic-deconfounding/x13_cpu_baselines_atac_small_test/run2_committed
+- links: repo@fcd3baa; scripts/run_cpu_baselines.py; tests/x13/test_cpu_baselines.py
+<!-- sha256=6912dd576434f3e4e03bc01b1149f450801b642de842c76c8b4fb219cfbef6d5 prev=e29e090b473df2f825b782b6532099963ba5095edf46287b448d886f2e059e77 -->
+
+## NB-20261002-10 · 2026-10-02T19:40:08-04:00 · ISSUE · X13
+**Harmony (scib -> harmony-pytorch) and kBET are not reproducible run to run on this machine**
+- author: agent
+- problem: two runs of run_cpu_baselines.py on atac_small: harmony d50 latents differ (max|dz| 0.114, mean 0.0015, rms z 1.17; NMI -0.024, ARI -0.019, iLISI -0.012), harmony d10, PCA and Scanorama identical; harmonize reruns on identical input differ by up to 5.7e-06 within a process. kBET differs by up to 0.0047 on identical latents (other 10 metrics identical)
+- impact: X13 assumes deterministic CPU methods run once; Harmony is not deterministic here; kBET has a run-to-run noise floor in score_scib_native.py
+- next: decide (user/lead) whether Harmony is run once, repeated, or pinned to one thread (harmonize n_jobs=1, a change from scib's call), and whether kBET gets a fixed R seed; not changed here
+- links: repo@582312c; /home/kendall/experiment_data/wasserstein-critic-deconfounding/x13_cpu_baselines_atac_small_test
+- refs: NB-20261002-09
+<!-- sha256=fb8f6baf6ccd8a81aa52ff0d004d98212f542241c1fc69b7932bfbb00dc5a88d prev=6912dd576434f3e4e03bc01b1149f450801b642de842c76c8b4fb219cfbef6d5 -->
+
+## NB-20261002-11 · 2026-10-02T19:40:08-04:00 · NOTE · X13
+**harmony-pytorch 0.1.7 installed into env wcd-kbet**
+- author: agent
+- text: scib 1.1.7 scib.integration.harmony imports harmony-pytorch (its docstring names 0.1.7); the env had only harmonypy 2.0.0. Installed with pip --no-deps (torch, numpy, pandas, psutil, threadpoolctl, scikit-learn already present); the JHPCE baseline/scoring env needs the same package
+- links: repo@63cc257
+<!-- sha256=6c85fb0c9aa46c04fd266fec0ff4ea0c5071a70948986b0c86f02e08efb8fedb prev=fb8f6baf6ccd8a81aa52ff0d004d98212f542241c1fc69b7932bfbb00dc5a88d -->
+
+## NB-20261002-12 · 2026-10-02T19:40:19-04:00 · ISSUE · X3
+**X3 design: auto reference changes with dose; sim2 depletion removes a whole batch**
+- author: agent
+- problem: reference='auto' (max cell-type entropy on the cells used) changes with dose: atac_small WholeBrainA_62216 (0-80) -> CEMBA180305_2B (95, 100); pancreas inDrop1 (0) -> inDrop3 (50, 80) -> inDrop1 (95, 100). sim2 Batch3Sub1 holds only the two depleted types (Group1 1446, Group2 484), so X3 changes its size, not its composition, and at dose 100 it disappears (K 16 -> 15). The matrix calls X3 subsamples composition-matched; at dose 0 they keep the natural composition
+- impact: the reference arm's dose-response mixes reference identity with dose; the sim2 dose axis is a batch-size axis
+- next: lead/user decision (not changed here): e.g. fix the X3 reference to the dose-0 auto reference; choose sim2 depletion types that leave the batch non-empty
+- links: repo@98c1196; docs/SPECS_missing_arms.md; docs/x3_iw_weight_profile.csv
+<!-- sha256=d885ceaea31e3999666860ff7f7a7c454edd811f9cc922a7740e225b16863710 prev=6c85fb0c9aa46c04fd266fec0ff4ea0c5071a70948986b0c86f02e08efb8fedb -->
+
+## NB-20261002-13 · 2026-10-02T19:40:19-04:00 · ISSUE · X1
+**Matched lambda for arms absent from X1**
+- author: agent
+- problem: discriminator_r1, discriminator_ref, the stratified critics and the IW arms carry 'matched*' lambda placeholders, but they have no X1 curve of their own (as discriminator_sn, pooled_sn, reference_fixed and mmd_ref already)
+- impact: scripts/freeze_matched_lambda.py (pre-registration, branch prereg-rules) must state the lambda source for these arms before X3/X6/X7/X8 can be frozen
+- next: prereg rule; proposed default: inherit the parent arm's matched lambda (discriminator for the JS variants, the same critic for the stratified and IW rows)
+- links: repo@9d23c42; scripts/build_paper_manifest.py
+<!-- sha256=5177746e5395712d98504fde2a26e690a42824874a992c422510a461a5a949c3 prev=d885ceaea31e3999666860ff7f7a7c454edd811f9cc922a7740e225b16863710 -->
+
+## NB-20261002-14 · 2026-10-02T19:50:01-04:00 · RESULT · X13
+**X13 Harmony test: the theta-2.5 negative control was ineffective; replaced**
+- author: agent
+- ran: mutation check of the negative controls in tests/x13/test_cpu_baselines.py::test_harmony_matches_scib on the 2-batch toy (harmonize, default settings as reference output)
+- observed: max|dz| vs the reference output: theta 2.5 (default 2) 1e-05, below 100x the rerun tolerance (1e-4), so the old control assertion failed although the code was right; theta 0 1.82, shuffled batch column 3.30, uncorrected PCA 3.21. Controls now: shuffled batch column and uncorrected PCA. X13 suite: 6 passed
+- commit: 2c9f3d6
+- links: repo@2c9f3d6; NB-20261002-09
+<!-- sha256=650481dcd87bface73cfbca64f97522fa5481184f5b4e593b81fbe31bad58a72 prev=5177746e5395712d98504fde2a26e690a42824874a992c422510a461a5a949c3 -->
+
+## NB-20261002-15 · 2026-10-02T19:52:54-04:00 · CORRECTION · X6
+**X6 sign-off ledger id SI-18 -> SI-22**
+- author: agent
+- corrects: NB-20261002-01
+- was: recorded as SI-18
+- correct: SI-22; branch prereg-rules commit 0c3ca24 (2026-10-02 18:18:07 -0400) assigned SI-18..SI-21 to its rules R1-R4 one minute before sign-off commit 6c46d68; rule text unchanged; renumbering commit cb652d1
+- links: repo@cb652d1
+<!-- sha256=c18d6fb660aa43dc22abeecd107752d3ca33a98d67b2682158dc73ca0587a42a prev=650481dcd87bface73cfbca64f97522fa5481184f5b4e593b81fbe31bad58a72 -->
+
+## NB-20261002-16 · 2026-10-02T19:52:54-04:00 · CORRECTION · X7
+**X7 sign-off ledger id SI-19 -> SI-23**
+- author: agent
+- corrects: NB-20261002-02
+- was: recorded as SI-19
+- correct: SI-23; branch prereg-rules commit 0c3ca24 (2026-10-02 18:18:07 -0400) assigned SI-18..SI-21 to its rules R1-R4 one minute before sign-off commit 6c46d68; rule text unchanged; renumbering commit cb652d1
+- links: repo@4710bce
+<!-- sha256=ded82c607457e825380da821a8cff4d30995b8ce6d00232c82085de78a3d08af prev=c18d6fb660aa43dc22abeecd107752d3ca33a98d67b2682158dc73ca0587a42a -->
+
+## NB-20261002-17 · 2026-10-02T19:52:54-04:00 · CORRECTION · X8
+**X8 sign-off ledger id SI-20 -> SI-24**
+- author: agent
+- corrects: NB-20261002-03
+- was: recorded as SI-20
+- correct: SI-24; branch prereg-rules commit 0c3ca24 (2026-10-02 18:18:07 -0400) assigned SI-18..SI-21 to its rules R1-R4 one minute before sign-off commit 6c46d68; rule text unchanged; renumbering commit cb652d1
+- links: repo@675eada
+<!-- sha256=5a39b18fb816c7f19bc761f93f1e0afa5a96555756e94dcf547e3a7e80acda8a prev=ded82c607457e825380da821a8cff4d30995b8ce6d00232c82085de78a3d08af -->
+
+## NB-20261002-18 · 2026-10-02T19:52:54-04:00 · CORRECTION · X3
+**X3 sign-off ledger id SI-21 -> SI-25**
+- author: agent
+- corrects: NB-20261002-04
+- was: recorded as SI-21
+- correct: SI-25; branch prereg-rules commit 0c3ca24 (2026-10-02 18:18:07 -0400) assigned SI-18..SI-21 to its rules R1-R4 one minute before sign-off commit 6c46d68; rule text unchanged; renumbering commit cb652d1
+- links: repo@fcbca75
+<!-- sha256=76173347fc7a4401720ed29fd96a713c100e7de3a88aef6e9da8d00ffb594c36 prev=5a39b18fb816c7f19bc761f93f1e0afa5a96555756e94dcf547e3a7e80acda8a -->
+
+## NB-20261002-19 · 2026-10-02T19:56:47-04:00 · ISSUE · X6/X7
+**Merge with prereg-rules: R4 has no base arm for discriminator_r1 / discriminator_ref**
+- author: agent
+- problem: trial merge of missing-arms (600ddb4) with prereg-rules (2e4f24d) in a detached worktree: only CONSTRAINTS.md conflicts (resolved by appending SI-22..SI-25 after SI-18..SI-21); merged manifest = 6,061 prereg rows unchanged + the 513 new rows (6,574, no duplicate tags); prereg suite 65 passed, 4 errors at setup (prereg-rules alone: 69 passed): prereg_rules.PreregError 'arms [discriminator_r1, discriminator_ref] have no base arm in prereg_rules.BASE_ARM'
+- impact: R4 cannot assign a matched lambda to the X6 and X7 rows after the merge (fails loudly); tests/scvi/test_runner_and_manifest_missing_arms.py::test_manifest_adds_exactly_the_signed_off_rows compares against 8cda6de and fails on the merged tree because prereg-rules changed the base rows
+- next: user / lead decides which matched lambda discriminator_r1 and discriminator_ref inherit (BASE_ARM entries); at merge, set the test's BASE to the prereg-rules side
+- links: repo@600ddb4; NB-20261002-13
+<!-- sha256=c97ea6b3805c77b855000db365b0ee3691b9fb28bcb87c011947aafbabae4d00 prev=76173347fc7a4401720ed29fd96a713c100e7de3a88aef6e9da8d00ffb594c36 -->
+
+## NB-20261002-20 · 2026-10-02T19:56:47-04:00 · NOTE
+**Accidental local merge reverted before push**
+- author: agent
+- text: a trial-merge shell script whose cd failed ran 'git merge prereg-rules' in the main worktree and committed 30cbedf on local missing-arms; reset to 600ddb4 (its first parent) before any push; the remote branch was at 9aca3ca throughout. Trial merges since then run in a detached worktree with set -e and a pwd check
+- links: repo@fd6d388
+<!-- sha256=d95ecc7a4c70515c48c26041929cd4a66d4e0cfd8170561f2d187903b83b2c59 prev=c97ea6b3805c77b855000db365b0ee3691b9fb28bcb87c011947aafbabae4d00 -->
+
+## NB-20261002-21 · 2026-10-02T22:31:31-04:00 · DECISION
+**Follow-ups X3/X6/X7/X8/X12 on fresh seeds 10-12 (SI-26)**
+- author: user
+- decision: Fresh seeds for all lambda-matched follow-ups: X3, X6, X7, X8 and X12 use seeds 10-12, disjoint from X1 (0-4) and A1/A2/A3 (100-102), so no follow-up cell reuses an X1 fit that chose its matched lambda; X13 is not lambda-matched and keeps seeds 0-4
+- alternatives:
+  - Reuse X1 fits (current)
+- rationale: user instruction, recorded in CONSTRAINTS.md as SI-26; source: "Fresh seeds for all follow-ups (Recommended)" (user, ask_user answer to "The matched λ for the follow-ups is chosen from X1 seed-means (seeds 0–4), and the follow-ups run on seeds 0–2. ... These reuse the X1 fits that chose that λ, so they are biased toward the target batch score b*. Which seeds should the follow-ups use?", 2026-10-02/03)
+- decided by: user
+- happened: user answered by ask_user on 2026-10-02/03 (lead's record); entry written 2026-10-03
+- links: repo@bad210a; docs/PREREG.md section 4; scripts/build_paper_manifest.py; scripts/freeze_matched_lambda.py
+<!-- sha256=06e8d686ed8b66f9778bfe47c2023f0c1614faa8b2b6d022c4ccc7156c208b5f prev=d95ecc7a4c70515c48c26041929cd4a66d4e0cfd8170561f2d187903b83b2c59 -->
+
+## NB-20261002-22 · 2026-10-02T22:31:31-04:00 · DECISION
+**A2/A3 on both decoders, one pooled R2/R3 decision (SI-27)**
+- author: user
+- decision: A2/A3 also run with the unconditioned decoder, one pooled decision: the same R2/R3 rule over task x arm x decoder cells (A2 12, A3 20; at least 8 and 14 evaluable), the sign criterion checked per task x decoder; the unconditioned default halves are A1 unconditioned fits
+- alternatives:
+  - Conditioned only (current)
+  - Add it, separate decision per decoder
+- rationale: user instruction, recorded in CONSTRAINTS.md as SI-27; source: "Add it, one pooled decision (Recommended)" (user, ask_user answer to "A2 (posterior mean vs sample) and A3 (standardisation off vs on) run only with the conditioned decoder, but their decisions set both X1 blocks. Should A2/A3 also run with the unconditioned decoder?", 2026-10-02/03)
+- decided by: user
+- happened: user answered by ask_user on 2026-10-02/03 (lead's record); entry written 2026-10-03
+- links: repo@1ec6c51; docs/PREREG.md section 3; scripts/decide_a2_a3.py; scripts/build_paper_manifest.py
+<!-- sha256=d1e667f87bfa6c988690f2b9ff2d78a7274f6349d380cb9e24ab3aab0435b3c0 prev=06e8d686ed8b66f9778bfe47c2023f0c1614faa8b2b6d022c4ccc7156c208b5f -->
+
+## NB-20261002-23 · 2026-10-02T22:31:31-04:00 · DECISION
+**Trajectory conservation joins the bio score (SI-28)**
+- author: user
+- decision: Include trajectory conservation in the bio score (score_scib_native.BIO_METRICS), as scIB does: computed where the prepped file has obs dpt_pseudotime (immune, immune_hum_mou), NaN and skipped elsewhere
+- alternatives:
+  - Leave it out
+- rationale: user instruction, recorded in CONSTRAINTS.md as SI-28; source: "Include trajectory (Recommended)" (user, ask_user answer to "scIB includes trajectory conservation in the bio score (scib-reproducibility plotSingleTaskRNA.R, group_bio; scIB computed it for its two immune tasks). Our scorer computes it for immune and immune_hum_mou but leaves it out of the bio aggregate. Should it be included? No Tier 1+2 results are scored yet.", 2026-10-02/03)
+- decided by: user
+- happened: user answered by ask_user on 2026-10-02/03 (lead's record); entry written 2026-10-03
+- links: repo@dfd2c72; docs/PREREG.md section 1; scripts/score_scib_native.py; experiments/metric_bio_trajectory/
+<!-- sha256=1ed0f73c04920bce6c3f05fbfc953dcbd053c2856d8c9b0fa3f00c67232818d3 prev=d1e667f87bfa6c988690f2b9ff2d78a7274f6349d380cb9e24ab3aab0435b3c0 -->
+
+## NB-20261002-24 · 2026-10-02T22:31:31-04:00 · DECISION
+**Cluster job submissions need the user's explicit go (SI-29)**
+- author: user
+- decision: Every cluster job submission (JHPCE: setup, tests, benchmarks, experiments) needs the user's explicit go; show what will run, where and for how long first. Local runs do not need a go but are reported.
+- alternatives:
+  - Every submission, incl. tests
+  - Experiment fits only
+- rationale: user instruction, recorded in CONSTRAINTS.md as SI-29; source: "only cluster jobs" (user, free-text answer to "Should every job submission need your explicit \"go\" from now on, recorded as a standing rule in CONSTRAINTS.md?", 2026-10-03; wording from the offered option "Every submission, incl. tests" restricted to cluster jobs)
+- decided by: user
+- happened: user answered by ask_user on 2026-10-02/03 (lead's record); entry written 2026-10-03
+- links: repo@c6e8abf; CONSTRAINTS.md
+<!-- sha256=a9d25bef7b7babfa91ae81b85d705f8a62f52613e88fba2066f661bb38762bde prev=1ed0f73c04920bce6c3f05fbfc953dcbd053c2856d8c9b0fa3f00c67232818d3 -->
+
+## NB-20261002-25 · 2026-10-02T22:46:19-04:00 · DECISION · metric_bio_trajectory
+**kBET is scored with a fixed R seed (KBET_SEED, default 0)**
+- author: agent
+- decision: score_scib_native.py sets R's RNG with set.seed(KBET_SEED) immediately before every R kBET call and writes kbet_seed and kbet_r_calls per row; the PAPER_PLAN sec 5 measurement-SD step varies KBET_SEED; prereg rule scripts reject unseeded score files and mixed seeds
+- alternatives: leave kBET unseeded and absorb its sampling noise (up to 0.0047 on identical latents, NB-20261002-10) into the measurement SD
+- rationale: identical latents must give identical scores so that arm differences are not kBET resampling; the seed stays an explicit, recorded factor of the measurement-SD step
+- decided by: lead agent instruction (2026-10-03), answering the kBET question of NB-20261002-10; the Harmony question there stays open
+- links: repo@8c008e1; repo@820d17e; scripts/score_scib_native.py; docs/PREREG.md sec 1
+- refs: NB-20261002-10
+<!-- sha256=63f040abc96badc913cba5d27ddc7ae5c964a6dc797a907ce8736af5f898702b prev=a9d25bef7b7babfa91ae81b85d705f8a62f52613e88fba2066f661bb38762bde -->
+
+## NB-20261002-26 · 2026-10-02T22:46:19-04:00 · RESULT · metric_bio_trajectory
+**kBET is identical when the same latent is scored twice**
+- author: agent
+- ran: pytest tests/scoring/test_kbet_determinism.py in wcd-kbet (R kBET 0.99.6, scib 1.1.7) at 820d17e; toy 540 cells, 3 batches x 3 cell types, 8-d latent; 4 passed in 31.37 s
+- observed: KBET_SEED 0 twice: kBET 0.0209333333333333 both times, 3 seeded R calls each; seeds 1 and 2: 0.0208 and 0.0228; the scorer without set.seed (mutant): 0.0193333333333333 and 0.0210666666666666 on the same latent; every other metric identical across all six scorings (iLISI 0.1581122726190252)
+- meaning: the run-to-run kBET noise of NB-20261002-10 is removed for a fixed seed; the seed is live, so the identity is not an artefact of a deterministic input
+- links: repo@541dc2a; experiments/metric_bio_trajectory/kbet_determinism_toy.json; repo@8c008e1
+- refs: NB-20261002-10
+<!-- sha256=eeeb96059dc8eefcbcd1392f878ac2b94edeffec438079847edddb89a7d61608 prev=63f040abc96badc913cba5d27ddc7ae5c964a6dc797a907ce8736af5f898702b -->
+
+## NB-20261002-27 · 2026-10-02T22:46:19-04:00 · RESULT · metric_bio_trajectory
+**Trajectory conservation changes the bio score only on the trajectory tasks**
+- author: agent
+- ran: experiments/metric_bio_trajectory/check_bio_trajectory.py (bad210a) and the PF-12 known-answer check of the prereg bio score C
+- observed: C = unscaled mean of the task's bio metrics reproduced on 6 known-answer cases (immune, immune_hum_mou: 8 metrics, 0.45; pancreas, lung: 7, 0.40; atac_small, sim2: 6, 0.35); scib_overall bio score, max abs change from adding trajectory: immune 0.14285714285714285, pancreas 1.1102230246251565e-16
+- meaning: trajectory enters only where obs dpt_pseudotime exists (immune, immune_hum_mou), as in scIB's group_bio
+- links: repo@c182d9f; experiments/metric_bio_trajectory/check_bio_trajectory.json; repo@bad210a
+- refs: NB-20261002-23
+<!-- sha256=eac63fa1795d3126235ab5c4dfebf5e34598b85b899a985b299e163abf6141da prev=eeeb96059dc8eefcbcd1392f878ac2b94edeffec438079847edddb89a7d61608 -->
+
+## NB-20261002-28 · 2026-10-02T22:46:19-04:00 · DECISION · metric_bio_trajectory
+**Preflight GO for the scorer metric change (trajectory, seeded kBET)**
+- author: agent
+- decision: GO: BIO_METRICS += trajectory and seeded kBET in score_scib_native.py; experiment-preflight 46 items, 13 pass, 33 n/a, 0 blocking, 0 major fails
+- alternatives: NO-GO until a scored Tier 1+2 fit exists (none is scored yet; no fits were run for this change)
+- rationale: PF-12 known answers reproduced (6 cases); SC-22 scIB sources cited (plotSingleTaskRNA.R lines 45-46 and 142-143 at 3afbffd367; scib-pipeline metrics.py lines 201-205); SC-19 unseeded score files rejected; SC-20 no fallback in the scorer
+- decided by: agent, by the preflight verdict; metric choice by the user (SI-28)
+- links: repo@e39742d; experiments/metric_bio_trajectory/PREFLIGHT.md; repo@c9a6460
+- refs: NB-20261002-23
+<!-- sha256=0dcea2f4fecab0360b40211a96ef3dd508dfcb69deb0e077cc8ccfca2a8f6557 prev=eac63fa1795d3126235ab5c4dfebf5e34598b85b899a985b299e163abf6141da -->
+
+## NB-20261002-29 · 2026-10-02T22:46:19-04:00 · RESULT · wall_time
+**Wall time v2, stock backbone: 6,718 fits, 26.2 d on 8 lanes**
+- author: agent
+- ran: scripts/wall_time_report.py --backbone stock at 5c4b089 (builder of bad210a); baseline: the same script on merged main e3051e4
+- observed: pilot/5/10: 6,718 fits, 2,375 GPU lane-h, 26.2 d (31.2 d conservative) vs main 6,574 fits, 2,327 lane-h, 25.7 d (30.6 d); only A2 (54 to 108 fits) and A3 (90 to 180) changed; fresh follow-up seeds change no count; the 8 arms with provisional step costs carry 513 fits and 159 GPU lane-h (7%)
+- meaning: the unconditioned A2/A3 pilots add 144 fits and 0.5 d; the docs committed at e3051e4 were stale (6,061 fits)
+- links: repo@8125c89; docs/WALL_TIME.md; docs/wall_time_designs.csv; docs/wall_time_by_experiment.csv; repo@5c4b089
+- refs: NB-20261002-08, NB-20261002-22
+<!-- sha256=04ae10f81acf6074f6295691cd3786f4c3fe07b714d89b1bee65c2bb4d75c002 prev=0dcea2f4fecab0360b40211a96ef3dd508dfcb69deb0e077cc8ccfca2a8f6557 -->
+
+## NB-20261002-30 · 2026-10-02T22:56:41-04:00 · RESULT · prereg_v2
+**prereg-v2 test suites pass on a fresh clone (d5b367f)**
+- author: agent
+- ran: fresh clone of origin/prereg-v2 at d5b367f: wcd-gpu pytest tests --ignore=tests/scvi --ignore=tests/x13; scvi-api pytest tests/scvi (WCD_SRC, PREPPED_DIR); wcd-kbet pytest tests/x13 tests/scoring (R_HOME, R_LIBS, PREPPED_DIR)
+- observed: wcd-gpu 243 passed, 1 skipped (tests/scoring: rpy2 not installed); scvi-api 50 passed, 1 skipped (scvi-tools disables its classifier without batch conditioning); wcd-kbet 10 passed. The first run at a6e4075 failed tests/scvi/test_runner_and_manifest_missing_arms.py::test_manifest_adds_exactly_the_signed_off_rows, which required every 2e4f24d row unchanged: the SI-26 seed move (follow-ups on seeds 10-12) removes the seed 0-2 rows
+- meaning: the test now applies the signed-off changes (SI-26 seed move, SI-27 one unconditioned A2/A3 row per conditioned row) and still requires every other base row unchanged; builder mutants with X12 on seeds 0-2 or A2/A3 conditioned-only fail it
+- links: repo@d5b367f; repo@d5b367f; tests/scvi/test_runner_and_manifest_missing_arms.py
+- refs: NB-20261002-21, NB-20261002-22
+<!-- sha256=72d8b7b51ffeff4685a64243affb5fba85dc3fb2774fd338d04580476ab25b73 prev=04ae10f81acf6074f6295691cd3786f4c3fe07b714d89b1bee65c2bb4d75c002 -->

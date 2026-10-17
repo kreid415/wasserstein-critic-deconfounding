@@ -1,0 +1,1505 @@
+{
+ "analysis": {
+  "frame_id": "c7059f6d-a1b6-4842-afad-d8fe319313d3",
+  "status": "completed",
+  "verdict": "PASS_WITH_FIXES",
+  "report_version_id": "fc10b264-370f-4274-acf1-b863bac6ffbc",
+  "evidence_version_id": "4fc04d2a-1c2e-481c-bb7e-5157820f755f",
+  "deviations": [
+   "Data: only synthetic inputs on the real design plus the A1 pilot (3 seeds, 10-point grid, Sinkhorn dropped, 6 cells); no real X1 or X13 score was opened or used; one synthetic world per dry-run variant (the first review's seeds).",
+   "Numerics not exhaustive: 38 hand-built, 20 threshold-adjacent and 400 random sets (my own generator).",
+   "The random battery used a coarse reference (panels 1.0 wide, 8 nodes); only the 18 sets above 1e-6 were re-evaluated with the finest (panels 0.25, 16 nodes), so errors of about 2e-7 or less in that battery may be the reference's own error.",
+   "50-digit runs covered 7 headline sets with a coarser integration (panel 1.5) and were not converged for strongly spread data (3.9e-5), so not used there.",
+   "Per-dataset posteriors (theta_t) were not independently recomputed; the simulation figures in spec section 16 items 1 and 3 (first review's simulations) were not repeated.",
+   "Lead's planted-error run repeated with 4 slots instead of 6; my 24 planted errors are a chosen set, not exhaustive; survivor effect sizes measured on 218 synthetic sets only.",
+   "tests/stage run only for coverage (check_tests); tests/scvi, tests/jhpce and legacy tiers not run; code and documents tracks not reviewed (other re-checkers).",
+   "The tag prereg-tier12-v3 was created only in a private clone to test SI-54; clones used instead of worktrees.",
+   "Process cap (4) exceeded once for about one minute (5 processes); one job was interrupted and restarted.",
+   "First check_tests run polluted by an untracked virtual environment inside my clone (852 spurious warnings); re-run clean, and the reported lines are from the clean runs.",
+   "ponytail-review skill not available to this profile: the change-size checklist was applied by hand.",
+   "No literature search was run; no novelty claim is made."
+  ],
+  "finding_checks": [
+   {
+    "id": "AN-01",
+    "status": "closed",
+    "fix_commits": "8b90d79 (code, tests, spec); 6aaa3ac (numerics)",
+    "evidence": "Log-spaced 201-point grid, weight tau (scripts/analysis_x1.py:28-31, 163-167). First review's case at prior 0.2: P(Delta>0.01) old 0.9489 (inconclusive), now 0.9757 (above); my independent reference 0.9757, error 1.9e-12. Largest error in declaration probabilities against my reference: 3.83e-13 (s about 1e-4), 1.13e-9 (s just above 1e-6), 1.24e-7 (single dataset), 6.62e-7 (strong heterogeneity, prior 0.1); 0 declaration changes in 400 random + 38 hand-built + 20 threshold sets. check_pool_numerics.py re-run: outputs byte-identical (240 worlds, 1.99e-6, 0 mismatches).",
+    "remaining": "Accuracy falls to 1e-5..3e-4 when the data spread exceeds about 4-5 prior scales (grid ends at 5 scales; AN-R10); the lead's reference shares the code's algebra (AN-R11)."
+   },
+   {
+    "id": "AN-02",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "zero_spread rule (analysis_x1.py:454-455; pool guard :153-157). Old code aborted with no record on 3 synthetic inputs (collapsed area, identical P1, identical local readings); 08f1e3c finishes all (exit 0, 26-28 s) listing zero_spread; the 4-of-5-readings path (m=4, s=0.0) ends in the same rule. Pilot A1: 18 s values, smallest 3.19e-4 = 319 x S_MIN, none below 1e-4, none excluded.",
+    "remaining": "Pairs sensitivity can abort when both datasets of a family have s in [1e-6, ~1.7e-6) (AN-R01); S_MIN boundary and the s==0 test unpinned by tests (AN-R06); exclusion-versus-floor is the user's decision at the diff review."
+   },
+   {
+    "id": "AN-03",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "r4_stage recompute (analysis_x1.py:369-378): tolerance 1e-9 absolute on b0, b_common, b*; flag exact. Full-size synthetic runs: b*+0.03, b_common=0.99, flag true, flag false, b0+2e-9, b*+2e-9, b_common-only +0.01 all refused (1.4 s); b*+5e-10 and a non-compared field accepted; valid record with a low-signal cell accepted; valid record built with 240 extension rows (b* moved in 2 of 16 cells) accepted only when the extension manifest and scores are passed.",
+    "remaining": "Usage line and spec section 14 omit the extension manifests (AN-R03); tests do not pin the tolerance, b_common alone or extension rows that move b* (AN-R07)."
+   },
+   {
+    "id": "AN-04",
+    "status": "partly",
+    "fix_commits": "8b90d79; 6aaa3ac",
+    "evidence": "run_mut.py re-run with 4 slots: 54 of 57 caught; of the first review's 10 uncaught errors 9 are now caught (M13 only through an error building the end-to-end fixture, the grid check at analysis_x1.py:66); M24 (GRID_N 101) survives with M28 and N11. My own 24 planted errors: 11 caught, 13 survive (O02, O07-O12, O16, O18, O20, O22-O24).",
+    "remaining": "M24 still uncaught (effect 1.1e-5 up to 3 prior scales, 8.5e-3 beyond); 13 surviving own errors (AN-R06 to AN-R09, AN-R14)."
+   },
+   {
+    "id": "AN-05",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "Spec 15.11 now reads per-run reading for P1 and local-global only. Full-size sensitivity diff: per_run changes per-dataset and pooled P1/local, no area number; drop_failed reaches the area (31 per-dataset area numbers differ); corner_zero changes the area only.",
+    "remaining": "none"
+   },
+   {
+    "id": "AN-06",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "t(0.975, m-1) at analysis_x1.py:460; independent pandas recomputation of all 30 sign rows: 0 mismatches (m=5, t=2.776); planted O15 (m-2) caught by test_end_to_end.",
+    "remaining": "Limits stay approximate (jackknife s of a non-smooth statistic); the constant for a cell with 4 readings is unpinned (O23, AN-R09)."
+   },
+   {
+    "id": "AN-07",
+    "status": "closed",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 16 item 1 states that s comes from 4-5 readings and is treated as known; its simulation figures restate the first review's simulation, which I did not repeat.",
+    "remaining": "referee point only"
+   },
+   {
+    "id": "AN-08",
+    "status": "closed",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 16 item 2 states the dependence on the six-point grid; its 0.011 matches the first review's pilot file (atac_small, decoder 1: -0.01104).",
+    "remaining": "referee point only"
+   },
+   {
+    "id": "AN-09",
+    "status": "closed",
+    "fix_commits": "8b90d79 (spec 15.1); 56febe4 (spec section 1, b* after extension rounds)",
+    "evidence": "Spec 15.1 decides it: the R4 record is compared with r4_stage run on the same rows, extension rows included; the six-point curves exclude them (spec section 1 lines 68-71). Demonstrated with 240 synthetic extension rows that moved b* in 2 of 16 cells (immune_hum_mou|1 0.65438 to 0.66363; lung|1 0.72087 to 0.72165).",
+    "remaining": "Spec section 1 lines 58-59 still says the analysis never recomputes (AN-R02); the by-arm count of cells whose six points never reach b*, promised at section 1 lines 68-71, is not produced (AN-R15)."
+   },
+   {
+    "id": "AN-10",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "analysis_x1.py:374 requires plain-scVI seeds == [0,1,2,3,4]; refusal test passes; planted O14 (subset check) caught; the X1 manifest has 80 plain-scVI rows (8 tasks x 2 decoders x 5 seeds).",
+    "remaining": "none"
+   },
+   {
+    "id": "AN-11",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "Rows sorted by tag (analysis_x1.py:521). Full-size synthetic input with manifest, scores and failures shuffled: primary and sensitivity JSON identical (0 differences); without the sort (planted N11) 7,864 numbers differ by at most 3.2e-15 and no label differs.",
+    "remaining": "No test of row order: N11 and O16 survive (AN-R14)."
+   },
+   {
+    "id": "AN-12",
+    "status": "closed",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 16 item 3 states the independence assumption for P2 intervals; its coverage figures restate the first review's simulation (not repeated).",
+    "remaining": "referee point only"
+   },
+   {
+    "id": "AN-13",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "configs and failed_runs added (analysis_x1.py:415-419, 431-434); recomputed from the raw rows with pandas: 192 (arm, cell) rows, 0 mismatches; spec 15.9 states it.",
+    "remaining": "Failed-run total unpinned by tests (O18; AN-R09)."
+   },
+   {
+    "id": "AN-14",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "gap flag (analysis_x1.py:338-341); independent recomputation of 96 windows (lams, best, gap): 0 mismatches, 4 flagged; planted O19 caught by test_window.",
+    "remaining": "An interior configuration whose runs all failed is invisible to the flag (AN-R13); gap beyond the first interior point unpinned (O20; AN-R09)."
+   },
+   {
+    "id": "AN-15",
+    "status": "closed",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 16 item 6 states the independence assumption of the pairs sensitivity; its 41% figure checked (1 against sqrt(2)/2).",
+    "remaining": "AN-R01 is a different problem in the same path"
+   },
+   {
+    "id": "AN-16",
+    "status": "closed",
+    "fix_commits": "4af5069 and documents track (DOC-05, DOC-09, DOC-13)",
+    "evidence": "Analysis statements checked: PAPER_PLAN:180 says seven statements marked eight times (8 '[replaced:' markers counted); PREREG:106 and spec section 5 (lines 165-166) give Holm's first threshold 0.0125 for four tests and 0.05/6 = 0.0083 for six; the spec status paragraph states draft until the diff review.",
+    "remaining": "The status paragraph names ff88666 and 858101b instead of 8b90d79 (AN-R05)."
+   },
+   {
+    "id": "AN-17",
+    "status": "closed",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 16 item 4 (last sentence) places the local-versus-global question outside the six primary results and their Holm family.",
+    "remaining": "none"
+   },
+   {
+    "id": "AN-18",
+    "status": "partly",
+    "fix_commits": "56febe4",
+    "evidence": "Spec section 14 (lines 266-269) gives commands and the checkout rule; the SI-54 tag requirement is confirmed (mixed-commit input refused without the tag, accepted with it, 27.6 s). But check_tests as written prints FAIL scripts/run_stage.py [662, 663] at 08f1e3c (OK at 8b90d79; OK with --src scripts/analysis_x1.py; OK with tests/stage added: 259 passed, 2 skipped), and the analysis usage line is refused when R4 extension rows exist.",
+    "remaining": "AN-R03 (analysis command), AN-R04 (test command)."
+   }
+  ],
+  "claims": [
+   {
+    "claim": "tests/analysis plus tests/prereg pass at 08f1e3c (62 + 131 collected; 193 passed, 1 skipped)",
+    "status": "confirmed",
+    "evidence": "pytest tests/analysis tests/prereg: 193 passed, 1 skipped in 89 s (env scvi-api, thread settings, WCD_SRC=src)."
+   },
+   {
+    "claim": "check_tests.py --base 973a97d --src scripts -- tests/analysis tests/prereg is OK at 8b90d79 (193 passed, 1 skipped)",
+    "status": "confirmed",
+    "evidence": "Re-run in a clean clone: 'check_tests: OK (every changed --src line and branch is tested; no redundant new tests)'."
+   },
+   {
+    "claim": "The same check_tests command is OK at 08f1e3c (spec section 14 run command)",
+    "status": "wrong",
+    "evidence": "Prints 'FAIL scripts/run_stage.py: changed lines never run: [662, 663]' (CF-02, code track); no WARN, nothing about analysis_x1.py. OK with --src scripts/analysis_x1.py, and OK with tests/stage added (259 passed, 2 skipped, 6 min)."
+   },
+   {
+    "claim": "check_pool_numerics.py reproduces summary.json and the README tables (review case 0.97570 above vs old 0.94891; 240 random sets, largest difference 2.0e-06, no declaration differs)",
+    "status": "confirmed",
+    "evidence": "Clean clone, 4 m 16 s: every output file byte-identical to the committed one; 240 worlds, max error 1.993e-6 (8.46e-7 against the reference cut at 5 scales), 0 declaration mismatches, smallest s 1.02e-6; M24 1.5e-5, M28 2.0e-6."
+   },
+   {
+    "claim": "The reference in check_pool_numerics.py is independent of the code under test",
+    "status": "partly",
+    "evidence": "reference() uses the same solve with A for Delta and the same V-based weights over the spreads; the 40-digit table is independent but covers only the mean and variance of Delta given the spreads. My own reference (block algebra, Gauss-Legendre in log tau, long double and 50-digit) agrees with the code."
+   },
+   {
+    "claim": "Pooled probabilities are within 1e-6 of the truth (target) with no changed declaration",
+    "status": "partly",
+    "evidence": "Against my reference: 3.83e-13 (s about 1e-4), 1.13e-9 (s just above 1e-6), 1.24e-7 (single dataset), 6.62e-7 (strong heterogeneity, prior 0.1); the 385 of 400 random sets with spread of at most 3 prior scales: at most 1.03e-6. Not met for strongly spread data: 1.62e-4 to 2.86e-4 at prior 0.05, 5.16e-5 at spreads of 5-8 prior scales. 0 declaration changes in 458 sets."
+   },
+   {
+    "claim": "The half-normal prior mass left out beyond 5 prior scales is about 6e-7",
+    "status": "confirmed",
+    "evidence": "5.7e-7 per spread (1.1e-6 for two); relative mass left by the 1e-15 floor about 1e-9 at s = 1e-6."
+   },
+   {
+    "claim": "Double precision is verified down to S_MIN = 1e-6",
+    "status": "confirmed",
+    "evidence": "Guard lowered and compared with 50-digit arithmetic: s_min 1e-6 -> 2.8e-10 (family) / 1.1e-9 (independent); 1e-7 -> 9.1e-10 / 2.0e-7; 1e-8 -> 2.1e-6 / 1.2e-7."
+   },
+   {
+    "claim": "1e-6 is about 300 times below the smallest pilot s and excludes no pilot cell",
+    "status": "confirmed",
+    "evidence": "A1 pilot (3 seeds, 10-point grid, Sinkhorn dropped): 18 s values, smallest 3.19e-4 (local, immune, decoder 1) = 319 x S_MIN; 2 below 1e-3, none below 1e-4; no pilot area is zero."
+   },
+   {
+    "claim": "Every path to s = 0 or tiny s ends in zero_spread and is recorded",
+    "status": "partly",
+    "evidence": "Collapsed area, identical P1, identical local readings (s 5e-17..1.8e-16 in 15 of 16 cells, 0.0 in one) and 4-of-5 readings (m=4, s=0.0) all end in zero_spread; the pairs sensitivity can abort when both datasets of a family have s in [1e-6, 1.7e-6): A.combine(...,[1.2e-6]*2,'pairs',...) is refused (AN-R01)."
+   },
+   {
+    "claim": "R4 recompute refuses a tampered record (b*, b_common, flag) at tolerance 1e-9",
+    "status": "confirmed",
+    "evidence": "Full-size synthetic runs: b*+0.03, b_common 0.99, flag changed both ways, b0+2e-9, b*+2e-9, b_common-only +0.01 all refused in 1.4 s; b*+5e-10 and a non-compared field accepted."
+   },
+   {
+    "claim": "No false refusal on a valid record made by the real r4_stage path (with extension rows, with a low-signal cell)",
+    "status": "partly",
+    "evidence": "Low-signal cell: accepted. Extension rows (240 synthetic rows moving b* in 2 of 16 cells): accepted only with the extension manifest and scores passed; with the base manifest named in the usage line the run is refused for immune_hum_mou|1 (AN-R03)."
+   },
+   {
+    "claim": "Plain-scVI seeds must be exactly 0-4",
+    "status": "confirmed",
+    "evidence": "analysis_x1.py:374; refusal test; planted O14 caught; 80 plain-scVI rows in the X1 manifest."
+   },
+   {
+    "claim": "Sign-table limits are d -/+ t(0.975, m-1) s (AN-06)",
+    "status": "confirmed",
+    "evidence": "30 rows recomputed independently, 0 mismatches (m = 5, t = 2.776)."
+   },
+   {
+    "claim": "Input rows sorted by tag give records independent of row order (AN-11)",
+    "status": "confirmed",
+    "evidence": "Full-size input shuffled: 0 numeric or label differences in the 4.16 MB record; without the sort 7,864 numbers differ by <= 3.2e-15."
+   },
+   {
+    "claim": "Best-of-k records configurations and failed runs (AN-13)",
+    "status": "confirmed",
+    "evidence": "192 (arm, cell) rows recomputed from raw rows: 0 mismatches."
+   },
+   {
+    "claim": "Window gap flag (AN-14) marks windows that span a point below the bound",
+    "status": "partly",
+    "evidence": "96 windows recomputed: 0 mismatches, 4 flagged; an interior configuration whose runs all failed is not flagged (AN-R13)."
+   },
+   {
+    "claim": "The planted-error run catches 54 of 57 errors",
+    "status": "confirmed",
+    "evidence": "run_mut.py re-run with 4 slots: 54 killed; survivors M24, M28, N11; 9 of the first review's 10 uncaught errors now caught."
+   },
+   {
+    "claim": "Two of the three missed errors change no reported value by more than 2e-5",
+    "status": "partly",
+    "evidence": "M24 1.1e-5 and M28 1.3e-6 on sets with spread up to 3 prior scales (the lead's 240 worlds: 1.5e-5, 2.0e-6); for strongly spread data M24 changes a probability by up to 8.5e-3 and M28 by 2.8e-4; no declaration flips."
+   },
+   {
+    "claim": "The third missed error (N11, no sort) only reorders floating-point sums",
+    "status": "confirmed",
+    "evidence": "Full-size shuffled run without the sort: 7,864 numbers differ by <= 3.2e-15, no label differs."
+   },
+   {
+    "claim": "The tests catch errors planted in the new code",
+    "status": "partly",
+    "evidence": "Of 24 errors I planted (grid end/spacing, A solves, S_MIN comparisons and value, R4 tolerance/b_common/seeds/extension rows, t df, sort key, failed counts, gap flag), 11 are caught and 13 survive."
+   },
+   {
+    "claim": "Every rule in ANALYSIS_SPEC sections 0-16 is implemented as written",
+    "status": "partly",
+    "evidence": "Mismatches: section 1 lines 58-59 'never recomputes' (AN-R02); section 15.7 and status paragraph stale (AN-R05); section 4 s >= 1e-6 not applied to the pairs average (AN-R01); section 1 lines 68-71 by-arm count not produced (AN-R15). Everything else read against the code agrees."
+   },
+   {
+    "claim": "The run commands of spec section 14 work as written",
+    "status": "partly",
+    "evidence": "Test command prints FAIL at 08f1e3c (AN-R04); analysis usage line is refused when R4 extension rows exist and names a superseded R1 record (AN-R03); the SI-54 tag requirement is correct."
+   },
+   {
+    "claim": "Full-size dry run at 08f1e3c runs to the end and differs from 1e615eb only where intended",
+    "status": "confirmed",
+    "evidence": "Synthetic main input (3,000 X1 + 408 X13 rows): exit 0, 30.4 s (old 24.5 s), 205 MB, 4.16 MB record; 4,320 new keys; exactly one label differs (sensitivity prior 0.2, pooled local, decoder 0: inconclusive -> above, the AN-01 case); primary declarations identical."
+   },
+   {
+    "claim": "AN-16 analysis statements (Holm threshold, marker count, status line) are now right",
+    "status": "confirmed",
+    "evidence": "PAPER_PLAN:180, PREREG:106 and 342-343, spec lines 165-166; status paragraph states draft (stale commit names: AN-R05)."
+   },
+   {
+    "claim": "Spec section 16 figures (0.011 ten-point shift, 41% pair SE, 5 vs 1 critic steps, 80 plain-scVI rows)",
+    "status": "confirmed",
+    "evidence": "0.011 matches the first review's pilot file (-0.01104); 41% is arithmetic; X1 manifest: reference, pooled, barycenter 5 steps, discriminator 1, others 0; 80 plain-scVI rows."
+   },
+   {
+    "claim": "Spec section 16 items 1 and 3 simulation figures (conservative pooled interval; coverage 0.91-1.00)",
+    "status": "not_checkable",
+    "evidence": "They restate the first review's simulations, which I did not repeat."
+   },
+   {
+    "claim": "Per-dataset posteriors (theta_t) in the pooled record are accurate",
+    "status": "not_checkable",
+    "evidence": "Not compared with an independent computation; same formulas as before the fixes, only the grid under them changed."
+   },
+   {
+    "claim": "Behaviour of the analysis on the real X1 and X13 scores",
+    "status": "not_checkable",
+    "evidence": "Blinded by the hard rules; every run used synthetic inputs on the real design or the A1 pilot."
+   }
+  ],
+  "new_findings": [
+   {
+    "id": "AN-R01",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:229-232; scripts/analysis_x1.py:156-157; scripts/analysis_x1.py:454-455; docs/ANALYSIS_SPEC.md:141-143",
+    "problem": "In the pairs sensitivity the pair's standard error sqrt(s1^2 + s2^2)/2 can fall below S_MIN although each dataset's s passed the rule. `pool` then refuses and the whole run aborts with no record.",
+    "evidence": "`A.combine(['atac_small','atac_large'], [0.02,0.02], [1.2e-6]*2, 'pairs', 0.1, 0.01)` is refused with PreregError; each s of 1.42e-6 or more is accepted; family and independent structures accept 1e-6 (`logs/small_demos.txt`). Trigger: both datasets of a family have s between 1e-6 and about 1.7e-6.",
+    "suggested_fix": "Apply the S_MIN rule to the averaged s too (list the family as `zero_spread` in that sensitivity), or check pair s before calling `pool`; add one parameter row to the existing pairs test."
+   },
+   {
+    "id": "AN-R02",
+    "severity": "fix",
+    "location": "docs/ANALYSIS_SPEC.md:58-59; scripts/analysis_x1.py:369-378; docs/ANALYSIS_SPEC.md:278-285",
+    "problem": "The spec says the analysis \"never recomputes\" b0, b_common, b* and the low-signal flag; the code recomputes all four with `r4_stage` and refuses on a difference, as section 15.1 says.",
+    "evidence": "Spec text at 08f1e3c; tamper runs T1 to T8 (section 4.4).",
+    "suggested_fix": "Replace the clause with: the analysis reads them from the record and refuses unless `prereg_rules.r4_stage` gives the same values from the same rows (section 15.1)."
+   },
+   {
+    "id": "AN-R03",
+    "severity": "fix",
+    "location": "scripts/analysis_x1.py:6-9; docs/ANALYSIS_SPEC.md:266-269; docs/ANALYSIS_SPEC.md:62-69",
+    "problem": "The usage line and section 14 give one `--manifest` and `docs/prereg/r1_record.json`. When R4 added extension rows the extension manifest and scores must be passed as well, otherwise a valid record is refused with a message that does not name the cause. Section 1 says the redone Sinkhorn R1 record is the one to pass, and that its non-Sinkhorn grids are checked against `r1_record.json` first: that check is a procedure, not code.",
+    "evidence": "Synthetic run with 240 extension rows that move b* in 2 of 16 cells: both manifests and all scores accepted (28 s); base manifest only refused for immune_hum_mou, decoder 1 (1.4 s); record built without extension rows refused (`dry_runs/ext_runs`). `docs/prereg/r1_record_sinkhorn_redo.json` does not exist at 08f1e3c.",
+    "suggested_fix": "State in the usage line and section 14: pass every R4 extension manifest as a further `--manifest` and its scores with `--scores`, and the failures file that covers all rows; name the redone R1 record; say who checks its non-Sinkhorn grids. Make the refusal print the recomputed and recorded values of the four quantities for the cell."
+   },
+   {
+    "id": "AN-R04",
+    "severity": "fix",
+    "location": "docs/ANALYSIS_SPEC.md:266-269; scripts/run_stage.py:662-663",
+    "problem": "The test command of section 14 prints `FAIL scripts/run_stage.py: changed lines never run: [662, 663]` at 08f1e3c, so the user cannot reach the OK the section implies. The lines are the CF-02 change (code track), covered by `tests/stage`.",
+    "evidence": "Same command at 8b90d79: OK. At 08f1e3c: `--src scripts/analysis_x1.py` gives OK (193 passed, 1 skipped); adding `tests/stage` gives OK (259 passed, 2 skipped, 6 min). Logs `logs/log_check_tests_*.txt`.",
+    "suggested_fix": "Give the base and the source in section 14: `--base 973a97d --src scripts/analysis_x1.py -- tests/analysis tests/prereg`, or add `tests/stage` to the list and say it takes 6 minutes."
+   },
+   {
+    "id": "AN-R05",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:312; docs/ANALYSIS_SPEC.md:11-13",
+    "problem": "Section 15.7 says local is evaluable \"exactly when it is for P1\"; since AN-02 zero_spread is decided per endpoint, so local can drop out while P1 stays. The status paragraph names ff88666 and 858101b as the code commits; the fixes are in 8b90d79.",
+    "evidence": "Identical-local-readings input: all local cells `zero_spread`, pooled local n = 0, P1 evaluable (section 4.3).",
+    "suggested_fix": "Reword 15.7 (\"evaluable for P1 and with s >= 1e-6 on the local reading\") and update the commit names."
+   },
+   {
+    "id": "AN-R06",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:454-455; scripts/analysis_x1.py:31; scripts/analysis_x1.py:156-157; tests/analysis/test_analysis_x1.py:497",
+    "problem": "The zero_spread rule is tested only with exact zeros. Planted changes survive: `>=` to `>` in `pool` (O07), `<` to `<=` (O08), S_MIN 1.5e-6 (O09), and `s == 0` instead of `s < S_MIN` (O10), which would abort the identical-readings input again. Open question for the user at the diff review: exclusion below s = 1e-6, as written, or a floor tied to the other datasets' s (section 4.9, design 3).",
+    "evidence": "`results/own_mut_results.json`; O10 on the full-size identical-local input exits after 3 s with no record.",
+    "suggested_fix": "Extend the existing zero-spread case with s = 1e-6 (accepted), 0.9e-6 (excluded) and 1e-16 (excluded)."
+   },
+   {
+    "id": "AN-R07",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:369-378; tests/analysis/test_analysis_x1.py:447-453; tests/analysis/test_analysis_x1.py:606-610",
+    "problem": "Tests tamper b0 by 0.01, b* by 0.03 and the flag only. Surviving planted errors: tolerance 1e-3 (O11), b_common not compared (O12), recompute ignoring extension rows (O24). The fixture's extension row does not move b*.",
+    "evidence": "Section 4.4: the real code refuses b_common alone (T8) and accepts 5e-10 (T4a), 2e-9 refused (T4b).",
+    "suggested_fix": "In the existing refusal test add a b_common-only change and a 2e-9 change on b*; move the fixture's extension point to the arm that sets b_common (barycenter, atac_small, decoder 0) and give it a batch score high enough to raise b_common, so that b* shifts."
+   },
+   {
+    "id": "AN-R08",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:28-31; tests/analysis/test_analysis_x1.py:168; tests/analysis/test_analysis_x1.py:233",
+    "problem": "The grid floor and size are unpinned: TAU_FLOOR 1e-9 (O02) changes probabilities by up to 6.77e-5; GRID_N 151 (O22) and 101 (M24) survive.",
+    "evidence": "Section 4.6 (effects of survivors).",
+    "suggested_fix": "Add one known-answer case with s of 1e-6 to 3e-6 (the committed 40-digit values are available in `precision_mpmath.csv`) and compare at 1e-8."
+   },
+   {
+    "id": "AN-R09",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:415-419; scripts/analysis_x1.py:431-434; scripts/analysis_x1.py:338-341; scripts/analysis_x1.py:460",
+    "problem": "Three added outputs are only partly pinned: the failed-run total (O18 uses the largest count), the gap flag beyond the first interior point (O20), and the t quantile for a cell with 4 readings (O23).",
+    "evidence": "Section 4.6; my independent recomputation of the full-size record found no mismatch (section 4.5).",
+    "suggested_fix": "One fixture cell with two failed configurations; one window with a low point deep inside; one sign-table cell with 4 readings (add to the existing end-to-end or window test)."
+   },
+   {
+    "id": "AN-R10",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:303-306; docs/ANALYSIS_SPEC.md:263-266; scripts/analysis_x1.py:29; experiments/analysis_numerics_20261014/README.md:29-33",
+    "problem": "The accuracy statements (\"within 2e-6\", \"no reported value by more than 2e-5\") hold on the 240 synthetic worlds and for data spread up to about three prior scales. Beyond that the code's error is 1e-5 to 3e-4 (prior 0.05 or 0.1; section 4.2), and the surviving planted errors M24 and M28 change a probability by up to 8.5e-3 and 2.8e-4.",
+    "evidence": "Truncation scan and random battery (section 4.2); no declaration changed anywhere.",
+    "suggested_fix": "Add the domain to the two sentences (\"for data spread up to three prior scales\"), or switch to a graded Gauss-Legendre grid and re-run `check_pool_numerics.py`."
+   },
+   {
+    "id": "AN-R11",
+    "severity": "note",
+    "location": "experiments/analysis_numerics_20261014/check_pool_numerics.py:35",
+    "problem": "The reference in the numerical check uses the same A-solve and V-based weights as the code, on a finer grid; the independent 40-digit table covers only the posterior mean and variance for given spreads. A shared algebra error would not show. My independent implementation agrees (section 4.2).",
+    "evidence": "Code reading; `scripts/ref_pool.py`, `ref_mp.py`, `validate_algebra.py`.",
+    "suggested_fix": "State in the README what the reference shares with the code; optionally add an independent weight check (the block algebra in `ref_pool.py` is 60 lines)."
+   },
+   {
+    "id": "AN-R12",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:130-143; scripts/analysis_x1.py:215-234",
+    "problem": "With the family structure, one evaluable dataset cannot reach a declaration (ceiling about 0.82) and two cannot either (about 0.94); three need d of about 0.03 to 0.08, depending on s. Conditioned-decoder cells that are low-signal drop out, so this can happen in the real run.",
+    "evidence": "`scripts/ceilings2.py`, `results/ceilings2.json`: all datasets equal, d up to 0.5, s from 1e-6 to 0.01, prior 0.1.",
+    "suggested_fix": "Say in the spec that with fewer than three evaluable datasets a decoder's pooled result is inconclusive by construction, and keep reporting n beside each declaration (it already is)."
+   },
+   {
+    "id": "AN-R13",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:338-341",
+    "problem": "The gap flag looks only at configurations that have at least one successful run: a lambda between the window's ends whose runs all failed is invisible, so `gap` is false and the width spans it.",
+    "evidence": "Window demo: points at lambda 1 and 10 with an empty point between: lams [1, 10], gap False; with a low (not failed) interior point gap True (`logs/small_demos.txt`).",
+    "suggested_fix": "Count a configuration with no successful run as an interior point that is not in the window, or add `n_all_failed_between` to the record."
+   },
+   {
+    "id": "AN-R14",
+    "severity": "note",
+    "location": "scripts/analysis_x1.py:521; docs/ANALYSIS_SPEC.md:140; tests/analysis/test_analysis_x1.py:441-465",
+    "problem": "No test shuffles the input rows; removing the sort (N11) and sorting by lambda instead of tag (O16) both survive. The effect of the sort is at the 3e-15 level on the full-size record, so it matters only for the \"digit for digit\" wording.",
+    "evidence": "Shuffle runs, section 4.5: 7,864 numbers differ without the sort, largest 3.2e-15.",
+    "suggested_fix": "In the existing end-to-end test compare the record built from a shuffled copy of the rows (about 1 extra second), or soften the sentence to \"identical declarations and numbers identical to 1e-12\"."
+   },
+   {
+    "id": "AN-R15",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:68-71; scripts/analysis_x1.py:108",
+    "problem": "The spec says that when an arm's six registered points never reach b*, the cell is not evaluable and \"the report gives the number of such cells by arm, next to that arm's best batch score in the R4 record\". The analysis record keeps the per-cell, per-arm status (`p1.status`) and the R4 record keeps the arms' best batch scores (`targets.*.M`), but no field or script produces the count or the pairing.",
+    "evidence": "Full-size synthetic record: `cells.*.p1` has bio, crossings, d, m, mode, readings, reason, s, status and no count by arm appears in `primary` or `sensitivity`; `unreached` occurs only at `analysis_x1.py:108`; the R4 record's `targets['lung|0']` carries `M` for the six arms.",
+    "suggested_fix": "Add a field (arm to number of unreached cells, with M) to the record, or say in the spec that a reporting script written after the run tabulates it, as PREREG:431 does for the no-pair counts. Question for the lead: is such a script part of what the tag freezes?"
+   }
+  ],
+  "checks_run": [
+   "pytest tests/analysis tests/prereg at 08f1e3c (193 passed, 1 skipped); tests/analysis collect-only at 1e615eb (53) and 08f1e3c (62)",
+   "check_tests.py --base 973a97d --src scripts -- tests/analysis tests/prereg at 8b90d79 (OK) and 08f1e3c (FAIL run_stage.py 662-663); narrowed --src scripts/analysis_x1.py (OK); with tests/stage (OK, 259 passed, 2 skipped)",
+   "experiments/analysis_numerics_20261014/check_pool_numerics.py re-run in a clean clone (outputs byte-identical)",
+   "Independent pooled-model reference (block closed form, Gauss-Legendre in log tau, long double and 50-digit mpmath), validated against direct 50-digit n x n solves; compared with the code on 38 hand-built sets, 20 threshold-adjacent sets and 400 random sets",
+   "Truncation scan (spread of d 1-8 prior scales, priors 0.05 and 0.1) and S_MIN scan (guard lowered to 1e-7 and 1e-8) against 50-digit arithmetic; the first review's failing case against my reference at three prior scales",
+   "Full-size synthetic dry runs (3,000 X1 + 408 X13 rows, real design, R4 record from the real r4_stage) at 08f1e3c and 1e615eb: main, rows shuffled, collapsed area, identical P1, identical local, low-signal, SI-54 mixed commits with and without tag; one cProfile run",
+   "R4 tamper battery (9 changes) and 240 synthetic R4 extension rows through the real r4_stage path (3 input combinations)",
+   "Independent pandas recomputation of sign-table limits (30 rows), best-of-k configs and failed_runs (192 rows), lambda windows (96); sensitivity wiring diff for 8 sensitivities",
+   "A1 pilot standard errors (18 values) with the frozen read_p1 and read_area; direct call for the four-of-five-readings path",
+   "run_mut.py re-run (57 planted errors, 4 slots); 24 own planted errors against tests/analysis; effect sizes of survivors on 218 synthetic sets",
+   "Declaration ceilings by number of evaluable datasets (ceilings.py, ceilings2.py) and pairs-structure demo near S_MIN (small_demos.py)",
+   "Spec sections 0-16 read against code and tests at 08f1e3c; record keys checked against the spec's 'reported' statements; change-size review of 60 changed code lines, 142 changed test lines and the spec diff"
+  ],
+  "artifacts_created": [
+   {
+    "artifact_id": "c5792a03-6f9b-4b84-b144-b72fdeb90548",
+    "version_id": "04b9013f-9f21-4b3d-ab81-aa6b01165105",
+    "filename": "REPORT_recheck_analysis_20261014.md",
+    "content_type": "text/markdown",
+    "size_bytes": 69983
+   },
+   {
+    "artifact_id": "158c14f0-f1dc-4f20-8f8b-3a836629537d",
+    "version_id": "2450daf7-fc52-4d88-9d54-0d389b42e4f6",
+    "filename": "recheck_analysis_evidence_20261014.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 4141182
+   },
+   {
+    "artifact_id": "238d2697-cdab-45ef-9566-09ae04b5ab03",
+    "version_id": "250cf2ed-a67f-4f02-b12e-dfe4de6b5ac1",
+    "filename": "make_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 76549
+   },
+   {
+    "artifact_id": "4396a891-6323-41e9-8d95-30957052e7bc",
+    "version_id": "f2352a9c-0ed9-40ba-ab0d-d8508d01909d",
+    "filename": "facts.json",
+    "content_type": "application/json",
+    "size_bytes": 36779
+   },
+   {
+    "artifact_id": "862d217b-f7b8-4874-a5f2-b3202bfa0b30",
+    "version_id": "5431b426-102c-4fa6-9c63-0651da9c5032",
+    "filename": "dry_diff_facts.json",
+    "content_type": "application/json",
+    "size_bytes": 5455
+   },
+   {
+    "artifact_id": "dbeaddba-d225-457e-9211-293466c97eba",
+    "version_id": "9b8a3faf-f637-434d-bbdf-813036f38300",
+    "filename": "review_case_independent.json",
+    "content_type": "application/json",
+    "size_bytes": 832
+   },
+   {
+    "artifact_id": "43dcafd6-8446-469b-b1fa-300fc28fbe38",
+    "version_id": "c31b1c87-cbc0-4883-a348-a612b9dcdd28",
+    "filename": "ceilings.json",
+    "content_type": "application/json",
+    "size_bytes": 1994
+   },
+   {
+    "artifact_id": "16f566f0-594f-43fb-b23e-d88c82087e40",
+    "version_id": "00255b49-54a0-4d0d-8133-400278d2e1ac",
+    "filename": "ceilings2.json",
+    "content_type": "application/json",
+    "size_bytes": 8213
+   },
+   {
+    "artifact_id": "a698b4db-381f-49ed-80f9-96493abbe3e4",
+    "version_id": "3ce49694-1f3e-4b1d-8cf5-a105d610a249",
+    "filename": "lead_mutation_rerun_4slots.json",
+    "content_type": "application/json",
+    "size_bytes": 13546
+   },
+   {
+    "artifact_id": "48568948-811d-4abb-b2a2-8ea5970a06cc",
+    "version_id": "233c1313-a2c5-4714-b8ba-aa94d48c2733",
+    "filename": "check_pool_numerics_rerun_summary.json",
+    "content_type": "application/json",
+    "size_bytes": 3288
+   },
+   {
+    "artifact_id": "d285e438-4ca2-4775-9283-d47bc8f7f77d",
+    "version_id": "a8efd9be-7c41-43ae-9076-bc69fdf9a89a",
+    "filename": "ext_info.json",
+    "content_type": "application/json",
+    "size_bytes": 1687
+   },
+   {
+    "artifact_id": "5fc8c847-ae1a-4d20-8cef-1203d9aa73d4",
+    "version_id": "5e994d33-be79-497a-8741-2908d359952b",
+    "filename": "sens_diff_new.json",
+    "content_type": "application/json",
+    "size_bytes": 1441
+   },
+   {
+    "artifact_id": "c5792a03-6f9b-4b84-b144-b72fdeb90548",
+    "version_id": "fc10b264-370f-4274-acf1-b863bac6ffbc",
+    "filename": "REPORT_recheck_analysis_20261014.md",
+    "content_type": "text/markdown",
+    "size_bytes": 70071
+   },
+   {
+    "artifact_id": "158c14f0-f1dc-4f20-8f8b-3a836629537d",
+    "version_id": "4fc04d2a-1c2e-481c-bb7e-5157820f755f",
+    "filename": "recheck_analysis_evidence_20261014.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 4141181
+   },
+   {
+    "artifact_id": "238d2697-cdab-45ef-9566-09ae04b5ab03",
+    "version_id": "460d82de-9a0c-4fb2-bc3c-46e99a531f10",
+    "filename": "make_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 76549
+   }
+  ]
+ },
+ "code": {
+  "frame_id": "7cca0c41-02de-466b-b3ec-bed7bde85f0a",
+  "status": "completed",
+  "verdict": "PASS_WITH_FIXES",
+  "report_version_id": "51d41a48-1090-4891-acfa-b692c19c302b",
+  "evidence_version_id": "8f06d9c7-787a-4727-b853-7a4175b548f7",
+  "deviations": [
+   "Skills fl_lint, ponytail and ponytail-review are not in my catalogue: the fix report's fl_lint claims (version 1.0, 26 rules, 0 findings, 2 suppressions) are not checkable by me; the change-size review used the checklist text of the task.",
+   "The identity proof was not refitted (the closure and hunk analysis is not ambiguous). The identity CSV files, the sealed folders and all X1 folders and logs were not opened; the identity proof's counts (59/59, 4/4, 7/7) are quoted from the task.",
+   "decide_a2_a3.py was run on the recorded pilot inputs with a temporary equivalence list that excludes no arm (the committed list refuses the pilot's c88cce3 Sinkhorn rows by design), as the first review did.",
+   "SI-54 scenarios use the tests/stage fakes for fitter and scorer with the commits rewritten in the outputs; the real fitter appears only as one forced-divergence record and in the end-to-end stage test.",
+   "Planted bugs are my own text replacements (8 + 5 + 6 bugs and one equivalent control) plus the first review's 3 and the lead's 11; the 105 table changes of CF-03 were applied in place to the imported table, not to the file. This is not an exhaustive mutation analysis.",
+   "The other-base evaluation of check_tests.py re-uses saved coverage from the same test selection and a three-tier merge computed by my own script (not the repository's tool); the scoring tier ran only tests/scoring with --base 5cb75c0.",
+   "Runs beyond the task: tests with the prepared data folder, the end-to-end stage test, tests/scoring, the 'other' group in wcd-gpu, and three CF-R03 probes on private clones (rule validation, cost on tests/stage, the untested dirty-latent rule).",
+   "No consolidated rigor_ledger.json exists in this project, so I wrote the ledger entries (CF-01..CF-10 re-checked, CF-R01..CF-R05 new) as rigor_ledger_entries_recheck_code_20261014.json in the docs track's convention for the lead to merge. No prior-work (novelty) search was run: this track reviews project-internal code fixes and claims no new method.",
+   "CPU only, one thread per library, at most four test runs at once; no GPU, no cluster job, no Codex."
+  ],
+  "finding_checks": [
+   {
+    "id": "CF-01",
+    "status": "closed",
+    "fix_commits": "b82bf49",
+    "evidence": "Ran in a clone at 08f1e3c: first review's planted bugs R01a/b/c 3 of 3 killed (by test_resolved_plan_known_answers); lead's mutate.sh 11 of 11 killed; my own 8 planted bugs (counter saturates at 1, counts twice, mmd_ref/sinkhorn/mmd stop counting, weighted mask keeps a batch with nothing to compare, plain call drops the counter, record needs two steps) 8 of 8 killed. Critic-free adversaries are exactly mmd, sinkhorn, mmd_ref (scripts/scvi_adversarial_plan.py:57); importance weights exist only for mmd (:60), so the four calls in the test cover every reachable path.",
+    "remaining": "none (the n == 1 case tests the threshold `if n:` at scripts/fit_paper_config.py:505, not a training run with exactly one no-pair step)"
+   },
+   {
+    "id": "CF-02",
+    "status": "closed",
+    "fix_commits": "8351999",
+    "evidence": "Real run_stage.py, 25 scenarios x 2 modes (50 runs, tag created locally, later commit made): 0 differ from an independent restatement of SI-54. Sinkhorn divergence record at c88cce3 refused at start-up with and without the tag, in normal and --report-only runs (P1-04, P2-02); non-Sinkhorn record at a third commit refused at the final check (P2-04). My planted bugs: 4 of 5 killed, survivor M02f contrived, equivalent control survived. Real fitter (forced divergence on CPU): status record has git_sha (08f1e3c = clone HEAD) and git_dirty; record_divergence and provenance() byte-identical at c88cce3 and 08f1e3c; run_stage.record_nonfinite copies the latent's git_sha (scripts/run_stage.py:962-967). Record with no git_sha: skipped by both checks, accepted (P2-03, P2-15).",
+    "remaining": "Open question for the user, see CF-R03: recommend refusing a record without git_sha (and a diverged record from a dirty or unknown checkout)."
+   },
+   {
+    "id": "CF-03",
+    "status": "closed",
+    "fix_commits": "38f5149",
+    "evidence": "In-place change of every arm in every EXTRA_ARMS value set (28 deletions, 77 additions): caught before the fix 1 of 28 and 8 of 77, after the fix 28 of 28 and 77 of 77. lam_audit.py re-run: 1908 / 382 / 322, identical to the committed results/lam_audit.txt."
+   },
+   {
+    "id": "CF-04",
+    "status": "closed",
+    "fix_commits": "f4b3b8f",
+    "evidence": "Both limits in docs/PREREG.md:367-372 and docs/EQUIVALENT_COMMITS.json ('meaning') are what the code does: P2-06 (Sinkhorn latent fitted at c88cce3, rescored at the tag) refused by the runner only; P2-10 (whole stage at one third commit) accepted. Machine-read fields of EQUIVALENT_COMMITS.json unchanged since c3fd92d; no code reads evidence/meaning.",
+    "remaining": "Wording note CF-R04 (prereg_rules sees scores only)."
+   },
+   {
+    "id": "CF-05",
+    "status": "closed",
+    "fix_commits": "0110b63",
+    "evidence": "Toy bundles with git 2.43.0: a clone gets the branches and tags the bundle lists and no other ref; a tag resolves only if listed. Both new comments say this; the two scripts differ from their 973a97d versions in comments only (bash -n passes, comment-stripped diff identical). The repository's two bundle commands list only refs/heads/rehearsal-tmp-$$.",
+    "remaining": "Deferred by plan and written down: listing the tag in the X1 bundle command is the post-tag step G-17 (experiments/guard_followups_20261013/README.md:16, notebook/2026-10-13.md:160, docs/PREREG.md:375; x1_jhpce_command.py:23 still pins TAG_SHA to c88cce3). latent_git_shas_match_head (cluster/jhpce/prod_helpers.py:365) stays a raw comparison, recorded as non-gating in notebook/2026-10-13.md:361."
+   },
+   {
+    "id": "CF-06",
+    "status": "closed",
+    "fix_commits": "8703cee",
+    "evidence": "Outside tests, docs and notebook the key no_pair_steps is mentioned only at scripts/fit_paper_config.py:506 (the record writer); nothing reads it. PREREG now says a reporting script will tabulate it after the runs."
+   },
+   {
+    "id": "CF-07",
+    "status": "closed",
+    "fix_commits": "d50348b",
+    "evidence": "decide_a2_a3.py of 08f1e3c run on the recorded pilot inputs (1434 of 1434 located by SHA-256; temporary equivalence list excluding no arm): R2 9/12, R3 13/20 evaluable; frozen record R2 12/12, R3 17/20; flags-cleared control reproduces the frozen record; choices unchanged (mean / off); X1 manifest byte-identical to the one written by the old code."
+   },
+   {
+    "id": "CF-08",
+    "status": "closed",
+    "fix_commits": "ca6dee0",
+    "evidence": "Planted bugs: default max_iter literal 50,000, constant 50,000, huge-latent row given an ordinary latent, cross solve stopping on an infinite error: all 4 killed; production caller sinkhorn_batch_others passing max_iter=50000 and one symmetric solve capped at 1,000 survive (4 of 6 killed). The comment at tests/wcd_vae/test_divergences_v2.py:140 cites SI-59 (retired); live decision is SI-61.",
+    "remaining": "Follow-on note CF-R02 (cap in force at the call sites not pinned)."
+   },
+   {
+    "id": "CF-09",
+    "status": "closed",
+    "fix_commits": "8b90d79",
+    "evidence": "test_pool_brute_force passes in wcd-gpu (NumPy 1.26.4, 2 cases) and scvi-api (NumPy 2.4.6, 2 cases); the 'other' group of run_all_suites.sh in wcd-gpu: 396 passed; no call of np.trapezoid remains."
+   },
+   {
+    "id": "CF-10",
+    "status": "partly",
+    "fix_commits": "2405cd1",
+    "evidence": "import shutil removed from tests/test_legacy_retired.py (outside the fit/score closure); scripts/fit_paper_config.py unchanged. ruff 0.14.0 F/E9 at 08f1e3c: 28 findings (23 F401, 4 F841, 1 F541), same count at 973a97d (28): the removed shutil is offset by a new F841 in experiments/analysis_numerics_20261014/check_pool_numerics.py:153 (commit 6aaa3ac); same with ruff 0.11.13; 4633 under the repository's own ruff configuration. Both check_tests.py tiers print OK at base 973a97d.",
+    "remaining": "fl_lint is not in the repository and its version/rule count are only in the fix report (the notes mention fl_lint in 14 lines, none with a version); an outside reader can reproduce ruff and check_tests runs but cannot check any 'fl_lint: 0 findings'. 'Run check_tests once with both test sets' is impossible (scvi imports only in scvi-api, scib only in wcd-gpu). See CF-R01."
+   }
+  ],
+  "claims": [
+   {
+    "claim": "Scripts tier at 08f1e3c with the lead's exact command: 421 passed, 18 skipped, check_tests OK (lead's value)",
+    "status": "confirmed",
+    "evidence": "Own clone, env scvi-api, base 973a97d: 421 passed, 18 skipped, 840 s, 'check_tests: OK' (logs/ct_scripts_base973a97d.log)."
+   },
+   {
+    "claim": "Src tier: 172 passed, check_tests OK (lead's value)",
+    "status": "confirmed",
+    "evidence": "Own clone, env wcd-gpu: 172 passed, 104 s, OK (logs/ct_src_base973a97d.log)."
+   },
+   {
+    "claim": "Later commits touch only docs/*.md and notebook/ (tested tree fd9c8e3 vs 08f1e3c)",
+    "status": "confirmed",
+    "evidence": "git diff fd9c8e3 08f1e3c: 5 files, 0 code or data files; tree of fd9c8e3 starts 46a2df12."
+   },
+   {
+    "claim": "CF-01: first review's planted bugs R01a/b/c each fail a named test now",
+    "status": "confirmed",
+    "evidence": "3 of 3 killed by test_resolved_plan_known_answers (logs/my_mut_R01_08f1e3c.json)."
+   },
+   {
+    "claim": "CF-01: lead's mutate.sh bugs each fail their named test",
+    "status": "confirmed",
+    "evidence": "11 of 11 KILLED at 08f1e3c (logs/mutate_sh_lead_08f1e3c.tsv)."
+   },
+   {
+    "claim": "CF-02: a Sinkhorn divergence record carrying c88cce3 is refused at the runner's start-up and final checks",
+    "status": "confirmed",
+    "evidence": "Refused at start-up in normal and --report-only runs, with and without the tag (P1-04, P2-02); the final check also reads record commits (non-Sinkhorn record at a third commit refused, P2-04; planted bug M02c killed). 0 of 25 scenarios differ from the oracle."
+   },
+   {
+    "claim": "CF-02: record_divergence writes provenance(); record_nonfinite copies the latent's git_sha",
+    "status": "confirmed",
+    "evidence": "Real fitter forced to diverge on CPU: record keys include git_sha (08f1e3c) and git_dirty; record_divergence/provenance identical at c88cce3 and 08f1e3c; scripts/run_stage.py:962-967 copies lat['git_sha']; scripts/run_cpu_baselines.py:162-166 writes its own."
+   },
+   {
+    "claim": "A divergence record with no git_sha is skipped (accepted) by both checks; the same holds for a divergence record from a dirty or unknown checkout",
+    "status": "confirmed",
+    "evidence": "Rows P2-03, P2-15 (no commit): accepted. Probe without --allow-dirty: latent with git_dirty true/absent refused at start-up; divergence record with git_dirty true/null accepted (logs: outputs/status_vs_latent_provenance_08f1e3c.txt). Recommendation (CF-R03): refuse; rule validated on clones (outputs/r03_rule_validation.json)."
+   },
+   {
+    "claim": "CF-03: deleting one arm inside an EXTRA_ARMS value set makes a test fail",
+    "status": "confirmed",
+    "evidence": "28 of 28 deletions and 77 of 77 additions caught now; before the fix 1 and 8."
+   },
+   {
+    "claim": "CF-05: the two comments match git's behaviour (git 2.43: a clone has a tag only if the bundle lists it)",
+    "status": "confirmed",
+    "evidence": "Toy bundles A-G with git 2.43.0 (outputs/cf05_bundle_check_08f1e3c.txt): branches and listed tags come along, other refs do not."
+   },
+   {
+    "claim": "CF-08: the test asserts that sinkhorn_divergence_weighted's default max_iter equals SINKHORN_MAX_ITER and that the huge-latent row matches 'marginal error inf'",
+    "status": "confirmed",
+    "evidence": "Planted bugs default literal, constant, ordinary latent in the huge row, stop on infinite error: killed. Gap: call sites not pinned (4 of 6 killed; M08c, M08d survive) -> CF-R02."
+   },
+   {
+    "claim": "CF-09: test_pool_brute_force passes in wcd-gpu (NumPy 1.26.4) and scvi-api",
+    "status": "confirmed",
+    "evidence": "wcd-gpu NumPy 1.26.4: 2; scvi-api NumPy 2.4.6: 2."
+   },
+   {
+    "claim": "CF-10: the unused import was removed only outside the fit/score import closure; fit_paper_config.py is unchanged",
+    "status": "confirmed",
+    "evidence": "Only tests/test_legacy_retired.py changed (-1 line); git diff c3fd92d 08f1e3c over scripts/fit_paper_config.py is empty."
+   },
+   {
+    "claim": "Fix report: ruff (rules F and E9) 28 findings tree-wide before, 27 after",
+    "status": "partly",
+    "evidence": "ruff 0.14.0: 28 at 973a97d and 28 at 08f1e3c (a new F841 came with commit 6aaa3ac); same count with ruff 0.11.13."
+   },
+   {
+    "claim": "Fix report: fl_lint 1.0, 26 rules, 0 findings on the 8 changed files",
+    "status": "not_checkable",
+    "evidence": "scripts/fl_lint.py is not in the repository and the skill is not in my catalogue; the repository notes give no version."
+   },
+   {
+    "claim": "Identity proof carries over: only scripts/run_stage.py changed in the fit import closure; scorer and cluster-helper closures unchanged",
+    "status": "confirmed",
+    "evidence": "probes/import_closure.py c3fd92d..08f1e3c: fit changed ['scripts/run_stage.py']; scorer NONE; cluster NONE; output identical to the lead's (06345ce). Direct git diff over src/, fit_paper_config.py, scvi_adversarial_plan.py, score_scib_native.py, fit_outcome.py, host_info.py, prereg_rules.py, run_cpu_baselines.py, build_paper_manifest.py, prod_helpers.py, pyproject, environment, conda-lock: empty."
+   },
+   {
+    "claim": "No changed line of run_stage.py since c3fd92d can change a fit or score value (only refuse a run or write provenance)",
+    "status": "confirmed",
+    "evidence": "3 hunks (+9/-3): docstring +3/-2, start-up made_at.append +2/-0, ledger git_sha fallback +4/-1; run_stage.py is run, not imported (importers: 2 test files); identity scripts call fit and score scripts directly. No refit needed."
+   },
+   {
+    "claim": "SI-54 end to end: c88cce3 and new-tag rows are accepted together for non-Sinkhorn arms only; Sinkhorn scores, latents and records must carry the new tag; an unresolved tag means a mix is refused",
+    "status": "confirmed",
+    "evidence": "25 scenarios x 2 modes, 0 differ from the oracle; rule-level 24 cases, 0 not as expected. No path accepts a wrong mix except the two documented limits and records/latents without git_sha; no valid mix refused."
+   },
+   {
+    "claim": "The two limits written in PREREG and EQUIVALENT_COMMITS.json (scorer commit only; one commit required) are what the code does",
+    "status": "confirmed",
+    "evidence": "Rows P2-06 (S latent fitted at c88cce3, rescored at the tag: refused by the runner only) and P2-10 (whole stage at a third commit: accepted)."
+   },
+   {
+    "claim": "8e01f15: lam_audit.py gives 322 / 382 / 1,908 rows",
+    "status": "confirmed",
+    "evidence": "Re-run: summed 1908, distinct 382, record 322; output identical to the committed file; the 60 extra tags are none X3 rows of the first manifest."
+   },
+   {
+    "claim": "d50348b: current code reports R2 9/12 and R3 13/20 evaluable; the frozen record has R2 12/12 and R3 17/20",
+    "status": "confirmed",
+    "evidence": "decide_a2_a3.py on the recorded inputs: R2 9/12, R3 13/20; frozen 12/12 and 17/20; both rules lose coverage with the flags, choices unchanged."
+   },
+   {
+    "claim": "06345ce: the PREREG SI-54 sentence names divergence records and says prereg_rules refuses the rule input",
+    "status": "partly",
+    "evidence": "The runner reads divergence records (confirmed). prereg_rules sees scores only: failures.csv columns (tag status detail experiment task arm lam cond seed epoch step host recorded_at) have no commit column (scripts/run_stage.py:99-100) -> CF-R04."
+   },
+   {
+    "claim": "8703cee: no code reads no_pair_steps",
+    "status": "confirmed",
+    "evidence": "Only scripts/fit_paper_config.py:506 (record writer) outside tests/docs/notebook."
+   },
+   {
+    "claim": "Triage CF-10 plan: run check_tests.py once with both test sets",
+    "status": "wrong",
+    "evidence": "Not possible: scvi-api: scvi yes, scib no; wcd-gpu: scib yes, scvi import fails (torchmetrics); the lead's two single-tier runs are the achievable record."
+   },
+   {
+    "claim": "Base 973a97d is right for the final check_tests record",
+    "status": "partly",
+    "evidence": "Right for the fixes (only 2 non-test files changed since); 1e615eb gives the same result; for 5cb75c0 the scripts tier fails (score_scib_native.py lines 200, 202, 228, 229 run only by tests/scoring; scripts/check_tests.py untested) and --src scripts omits cluster/jhpce/prod_helpers.py -> CF-R05."
+   }
+  ],
+  "new_findings": [
+   {
+    "id": "CF-R01",
+    "severity": "fix",
+    "location": "notebook/2026-10-14.md:333-358; scripts/fit_paper_config.py:24,286,287",
+    "problem": "The triage planned 'record the fail-loud lint version' (CF-10). The fix report records it (fl_lint 1.0, 26 rules, checksum start) but the repository does not: the notes mention fl_lint in 14 lines, 0 with a version, rule count or checksum. The same holds for the ruff state (28 findings for rules F and E9, 5 of them in the identity proof's code) and for why one check_tests.py run with both test sets cannot exist. G-17 and latent_git_shas_match_head are already in the notebook (2026-10-13.md:160, :361).",
+    "evidence": "outputs/evidence/fl_lint_mentions.txt, fl_lint_counts.txt; ruff_FE9_*.txt; env check (scib not in scvi-api: False; scvi not importable in wcd-gpu: False).",
+    "suggested_fix": "One notebook NOTE: fl_lint version, rule count, checksum start (from the fix report) and that the tool is not in the repository; ruff count and scope (F, E9 only; 4633 under the repo's own config); two-environment reason for two check_tests runs; the base chosen (CF-R05). Leave the 23 findings outside the identity proof's code (none in the pre-registration, none changes a result). No code change."
+   },
+   {
+    "id": "CF-R02",
+    "severity": "note",
+    "location": "tests/wcd_vae/test_divergences_v2.py:131-142; src/wcd_vae/wcd/alignment.py:224-233, 257",
+    "problem": "The CF-08 pin covers the default of sinkhorn_divergence_weighted, not the cap that the three solves receive in training. Case 1: sinkhorn_batch_others passes max_iter=50000 (training cap 50,000 instead of 500,000, SI-61): all 172 tests pass. Case 2: one of the two symmetric solves gets 1,000: all 172 pass. Both fail loudly at the cap, no wrong value.",
+    "evidence": "logs/mut_recheck_cf08.json: M08c '172 passed in 95.51s (0:01:35)', M08d '172 passed in 86.17s (0:01:26)'.",
+    "suggested_fix": "Extend the existing spy on alignment._ot_eps (line 131) to record its last argument, spy on _ot_eps_sym, and assert every recorded cap == alignment.SINKHORN_MAX_ITER (replaces the inspect.signature assertion by a stronger one). Fix the comment at :140 (SI-59 retired, SI-61 live)."
+   },
+   {
+    "id": "CF-R03",
+    "severity": "note",
+    "location": "scripts/run_stage.py:422-423, 429-440, 662-663; tests/stage/fake_env.py:89-92",
+    "problem": "A divergence record is not held to the rule that applies to a latent (open question: refuse a record without git_sha?). Without --allow-dirty: a latent with git_dirty true or absent is refused at start-up; a divergence record with git_dirty true or null, or without git_sha, is accepted. The real fitter writes both fields, so only a hand-made or copied file is affected; the runner's own and the CPU runner's nonfinite_latent records carry git_sha but no git_dirty.",
+    "evidence": "outputs/status_vs_latent_provenance_08f1e3c.json; outputs/r03_rule_validation.json (rule A = recommendation: S1-S3 refused, S0 and S4 accepted; rule N, dirty flag demanded of every record, refuses the runner-made nonfinite_latent record: refused at start-up); outputs/r03_cost_probe.json (0 / 8 / 0 stage tests fail for variants V1/V2/V3); outputs/r03_latent_dirty_probe.json (SURVIVED: 108 passed, 1 skipped in 312.26s (0:05:12)).",
+    "suggested_fix": "Answer: yes, refuse. In Outputs.status() refuse any record without git_sha and a record of status 'diverged' whose git_dirty is not false (unless --allow-dirty); do not demand git_dirty of nonfinite_latent records. Make the test fake's diverge write git_sha and git_dirty like the real fitter; one parametrized refusal test (latents and records). Launcher-only code: re-run the import-closure probe; identity proof unaffected."
+   },
+   {
+    "id": "CF-R04",
+    "severity": "note",
+    "location": "docs/PREREG.md:372-373; docs/EQUIVALENT_COMMITS.json:3",
+    "problem": "'Sinkhorn output made at c88cce3 (a score, a latent or a divergence record) is refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage' reads as if the rule scripts also see latents and records; they see scores only. Case: a divergence record of a Sinkhorn fit at c88cce3 is invisible to prereg_rules because failures.csv has no commit column; only the runner refuses it. The JSON 'meaning' names each latent's fit commit, not records.",
+    "evidence": "scripts/run_stage.py:99-100 (failures table columns: tag status detail experiment task arm lam cond seed epoch step host recorded_at); scenario rows P2-02, P2-06.",
+    "suggested_fix": "One clause in each: the rule scripts see scores only; a divergence record's commit is visible to the runner's start-up check only. PREREG is frozen with the tag, so change it before the tag or leave it."
+   },
+   {
+    "id": "CF-R05",
+    "severity": "note",
+    "location": "scripts/check_tests.py (--base, --src); lead gate pack README.txt",
+    "problem": "Open question: which base for the final check_tests record. At --base 973a97d both tiers are clean (2 non-test files changed). 1e615eb gives the same result. For 5cb75c0 (the user's diff-review base) the scripts tier fails: score_scib_native.py lines 200, 202, 228, 229 run only by tests/scoring (needs wcd-kbet and R) and scripts/check_tests.py has no test; --src scripts omits cluster/jhpce/prod_helpers.py; 6b4aefc: src tier alone prints 10 warnings for tests of the other tier.",
+    "evidence": "outputs/check_tests_other_bases.txt; outputs/check_tests_union_of_tiers.txt; logs/ct_scoring_base5cb75c0.log.",
+    "suggested_fix": "Keep 973a97d for the fixes. For the whole diff-review range run three tiers (scripts, scoring with R, src), --src scripts cluster, merge the coverage files (scripts_recheck/ct_union_eval.py) and state that check_tests.py is untested tooling."
+   }
+  ],
+  "checks_run": [
+   "git bundle verify + SHA-256 of the bundle (matches the task); private clones of branch final-review-fixes at 08f1e3c, one per run",
+   "scripts tier: check_tests.py --base 973a97d --src scripts -- tests/analysis tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py (env scvi-api, own clone)",
+   "src tier: check_tests.py --base 973a97d --src src -- tests/wcd_vae (env wcd-gpu, own clone)",
+   "git diff --stat fd9c8e3 08f1e3c (docs and notebook only)",
+   "CF-01: first review's my_mutate.py R01a/b/c; experiments/guard_followups_20261013/mutate.sh; my 8 planted bugs (scripts_recheck/mut_recheck.py)",
+   "CF-02: runner-level SI-54 matrix, 25 scenarios x 2 modes (scripts_recheck/si54_runner_matrix.py); rule-level 24-case matrix (probes/si54_scenarios.py); 5 planted bugs + 1 equivalent control; real fitter forced divergence record; end-to-end stage test with real fitter and scorer",
+   "CF-03: 105 in-place EXTRA_ARMS changes against the test at 973a97d and at 08f1e3c (scripts_recheck/cf03_extra_arms_mutants.py); lam_audit.py re-run",
+   "CF-04: PREREG/EQUIVALENT_COMMITS limits against scenario rows; machine-read fields compared with c3fd92d; grep for readers of evidence/meaning",
+   "CF-05: toy git bundles (git 2.43.0), bash -n and comment-stripped diff of the two scripts (scripts_recheck/cf05_bundle_check.sh)",
+   "CF-06: grep for no_pair_steps; CF-07: decide_a2_a3.py on the recorded pilot inputs located by SHA-256, three variants (frozen record, real flags, flags cleared) and X1 manifest comparison",
+   "CF-08: 6 planted bugs (scripts_recheck/mut_recheck.py); CF-09: test_pool_brute_force in wcd-gpu and scvi-api; 'other' group (396 tests) in wcd-gpu",
+   "CF-10: ruff F/E9 at 08f1e3c and 973a97d (ruff 0.14.0 and the conda-lock pin), repository ruff configuration; environment import check for the single-run question",
+   "Identity proof: probes/import_closure.py c3fd92d..08f1e3c; git diff over the closure files; every hunk of run_stage.py since c3fd92d; importers of run_stage.py",
+   "Other test runs: tests/scvi with the prepared data folder; end-to-end stage test (real fitter, scorer, R); tests/scoring in wcd-kbet",
+   "Other bases for check_tests (1e615eb, 6b4aefc, 5cb75c0, c88cce3) from saved coverage and a three-tier merge (scripts_recheck/ct_eval.py, ct_union_eval.py)",
+   "CF-R03: provenance probe (latent vs record, no --allow-dirty); rule validation on three clones (rules 0, A, N); cost probe on tests/stage (3 variants); probe of the existing dirty-latent refusal (tests/stage + tests/jhpce)",
+   "Saved code-reading facts (scripts_recheck/evidence_greps.sh, evidence_greps2.sh): importers, trapezoid grep, bundle commands, G-17/fl_lint mentions, diff sizes; all file:line references of the report re-read at 08f1e3c",
+   "Report rendered from results.json by render_report.py (claim-gate render; numbers not typed); claim receipt in the evidence archive"
+  ],
+  "artifacts_created": [
+   {
+    "artifact_id": "94422b12-e20f-4779-84a3-0da707ccc208",
+    "version_id": "bd1b137f-7305-4e01-8d18-1585abb96708",
+    "filename": "rigor_ledger_entries_recheck_code_20261014.json",
+    "content_type": "application/json",
+    "size_bytes": 22189
+   },
+   {
+    "artifact_id": "3a044c62-543c-410b-bc46-522e0add7e26",
+    "version_id": "8d0d6b39-fb70-4681-9da0-b3c6147ea1c6",
+    "filename": "REVIEW_CODE_RECHECK_20261014.md",
+    "content_type": "text/markdown",
+    "size_bytes": 49007
+   },
+   {
+    "artifact_id": "03a449f3-1c3b-42dc-9dbb-45643d596dd6",
+    "version_id": "a54cb903-1318-4b10-9bae-40c1c0099f6c",
+    "filename": "recheck_code_20261014_scripts_outputs.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 584296
+   },
+   {
+    "artifact_id": "6b83cb58-20f1-40e3-a80c-fcafc8edea19",
+    "version_id": "b2aef90e-4098-423e-9d9e-c596d076bb0a",
+    "filename": "mut_recheck_cf01_cf02.json",
+    "content_type": "application/json",
+    "size_bytes": 3993
+   },
+   {
+    "artifact_id": "ebb8a7d7-b1ef-43bb-b108-bc4d439714a1",
+    "version_id": "b605a546-9d5d-4a98-9e93-9a87546aac44",
+    "filename": "mut_recheck_cf08.json",
+    "content_type": "application/json",
+    "size_bytes": 1797
+   },
+   {
+    "artifact_id": "baa7d3d0-f34e-474a-b281-e5d245b8c09a",
+    "version_id": "ad098ee4-aac7-4e2e-8f58-6f013fe7109a",
+    "filename": "cf03_extra_arms_mutants.json",
+    "content_type": "application/json",
+    "size_bytes": 20950
+   },
+   {
+    "artifact_id": "3e5cc7aa-53e2-44f9-b244-f44913e92908",
+    "version_id": "8f546448-00ac-4c0b-b288-346d7dc247c2",
+    "filename": "si54_runner_matrix_08f1e3c.json",
+    "content_type": "application/json",
+    "size_bytes": 23503
+   },
+   {
+    "artifact_id": "460b341e-ca28-4fc1-b81b-5339fda1a79e",
+    "version_id": "f1747eb3-0cb7-486b-82dd-c013e63623c6",
+    "filename": "check_tests_other_bases.txt",
+    "content_type": "text/plain",
+    "size_bytes": 15699
+   },
+   {
+    "artifact_id": "4a1f95cf-80db-4325-8357-31f01f29d65a",
+    "version_id": "30541f4c-9717-474e-949b-a2c995abeae9",
+    "filename": "new_realflags_08f1e3c.json",
+    "content_type": "application/json",
+    "size_bytes": 379929
+   },
+   {
+    "artifact_id": "98986ac8-1970-4a86-8333-29ed10483b5e",
+    "version_id": "37962764-a451-4ab1-a010-07a8a6bbe62a",
+    "filename": "results.json",
+    "content_type": "application/json",
+    "size_bytes": 14451
+   },
+   {
+    "artifact_id": "3a044c62-543c-410b-bc46-522e0add7e26",
+    "version_id": "51d41a48-1090-4891-acfa-b692c19c302b",
+    "filename": "REVIEW_CODE_RECHECK_20261014.md",
+    "content_type": "text/markdown",
+    "size_bytes": 50151
+   },
+   {
+    "artifact_id": "03a449f3-1c3b-42dc-9dbb-45643d596dd6",
+    "version_id": "8f06d9c7-787a-4727-b853-7a4175b548f7",
+    "filename": "recheck_code_20261014_scripts_outputs.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 585997
+   }
+  ]
+ },
+ "docs": {
+  "frame_id": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+  "status": "completed",
+  "verdict": "PASS_WITH_FIXES",
+  "report_version_id": "04bf4aa8-1784-4f17-923d-e40c7d71a377",
+  "evidence_version_id": "900b84e4-ef46-4ea3-bd26-e101b86cbe2f",
+  "deviations": [
+   "Not re-run: the '0.011' spacing figure (ANALYSIS_SPEC.md:340) and the review-simulation coverage numbers ('0.91 to 1.00', :345; 'conservative' / 'less than 95 %', :336-338); they come from the first review's analysis track and no script for them is in the repository.",
+   "Not recomputed: the F7 Sinkhorn-to-W1 ratios (0.86-0.89, 0.53-0.77); the log is not in the repository. I only checked where they are marked provisional.",
+   "Analysis-track and code-track numbers quoted in NB-20261014-20 and -29 (34 wrong declarations in 512 stress worlds; 421 passed / 18 skipped; 172 passed) were not re-run. Of the test suite I ran only tests/prereg (131 passed, 1 skipped, in a scratch clone with the suggested power_report fix) plus test_rules_unchanged.py (9 passed) and test_provenance_rule.py (13 passed) on the unpatched clone.",
+   "Blinded material was not opened: the arm breakdown of the 19 early X1 rows and the filler-score counts (250 fits; 150 scored; the first review's 158) rely on NB-20261014-21, NB-20261007-01, NB-20261012-02 and the first review's text. The committed identity-check files in experiments/integration_checks_20261013/results were read for fit-identity counts and the score file for column names only; the identity score files under review/identity_* were not opened.",
+   "The chat-record audit of NB-20261014-21 was not repeated.",
+   "The no-pair model (03_no_pair_model.py) is the first review's script with two paths turned into arguments, so it is not an independent implementation; my independent parts are the reading of the installed scvi-tools 1.4.2 source and a Monte Carlo check of the sim1 case only. The other four figures rest on that model.",
+   "The P2 recount drops Sinkhorn rows, as the task states; Sinkhorn collapse rates were not recounted.",
+   "Pandoc rendering of the three documents (NB-20261014-32) was not re-run; only the column count of every row of the amendment table was checked.",
+   "CPU only; one private clone and one scratch clone; scripts ran one at a time (cap of 2 processes respected).",
+   "The project's rigor ledger was not edited because three re-checkers run in parallel; the new findings and status changes are provided as rigor_ledger_entries_recheck_docs_20261014.json for the lead to merge."
+  ],
+  "finding_checks": [
+   {
+    "id": "DOC-01",
+    "status": "partly",
+    "fix_commits": "43fdc04 (PREREG); 4af5069 (spec status line); 06345ce; notebook NB-20261014-21 (828f3e7)",
+    "evidence": "Disclose the 19 X1 score files of 2026-10-12 and the rescored X1 latent; define 'examined'; stop saying 'before X1 runs'. New text: PREREG.md:483-503 (the local X1 run of 2026-10-12: 19 rows scored, 1 fitted but not scored, 1,097 still to fit; 17 adversarial-arm rows, all immune, conditioned decoder, seed 0, and 2 rows of the arms none and scvi_adv; three count-only integrity checks; the rescored row X1_immune_discriminator_lg1_c1_s0_122afe99, equality only; the limit of the audit), :500-503 (definition of 'examined', marked 'not yet approved'), heading :505-506 ('will be frozen before any X1 adversarial-arm score is examined'), status :509; ANALYSIS_SPEC.md:11-15; PAPER_PLAN.md:178, :185. Checked: Counts and wording agree with NB-20261014-21 and NB-20261012-04/-05. No score file was opened (blinding).",
+    "remaining": "Disclosure is incomplete: DOC-R01 (the audit sentence is broader than the search the notebook entry describes) and DOC-R02 (earlier X1/X13 filler scores and the rescored X13 sysVI row are not disclosed; 'examined' covers adversarial arms only although SI-68 says 'an X1 result'); DOC-R14 (hash list, external time stamp). The user's confirmation that nobody read a value is correctly left open (PREREG.md:498-500)."
+   },
+   {
+    "id": "DOC-02",
+    "status": "closed",
+    "fix_commits": "3cfc3a7; table row 4 in 81e8017",
+    "evidence": "State the Sinkhorn redo in rule order (SI-57), not as a fixed list of 234 refits. New text: PREREG.md:397-413 (refit and rescore the 180 A1 fits first; then R1 with the extension rows it asks for, R4 stage a1, the A3 rows it resolves, R2 and R3 in full; the extension and A3 rows are 'not a fixed list: before the fix there were 18 and 36 of them'); table row 4 :209; :300; :313-314. Checked: Manifest of record: Sinkhorn A1 180 + R1 extension 18 + A3 36 = 234 (script 02, claim 34)."
+   },
+   {
+    "id": "DOC-03",
+    "status": "closed",
+    "fix_commits": "81e8017",
+    "evidence": "Replace 'nothing in this file is chosen after seeing data' by a status paragraph and a table of what existed when each amendment was decided. New text: PREREG.md:3 (version-3 status), :5 (file list), :154-158 (reading rule), :204-213 (table: decided / committed / data behind the decision / result changed). Checked: All 15 commit times and all 12 decision times in the table equal git log and the notebook (New York time) (script 02, claims 72-73); table has 6 columns in every row.",
+    "remaining": "Small gaps: DOC-R05 (row 5 omits SI-65; row 8 omits later code commits), DOC-R09 (the commit column does not state its time zone)."
+   },
+   {
+    "id": "DOC-04",
+    "status": "closed",
+    "fix_commits": "5227d0b; table rows 6-7 in 81e8017; d50348b",
+    "evidence": "SI-56/SI-66 entry: give both dates, name both flagged blocks, say the R2/R3 record predates the rule. New text: PREREG.md:454-482 and table rows 6-7 (:211-212): decided 2026-10-13 (SI-56 11:46, SI-66 20:53); rule code f3c3415 (R2/R3, 2026-10-14 07:50) and ff88666 (P1, 08:04); flagged blocks immune/conditioned (b0 0.6382, b_common 0.6570) and sim1/conditioned (0.8120, 0.8189); the stored R2/R3 record was made at c88cce3 before the rule. Checked: Recomputed from the stored cells (script 02): R2 12/12 evaluable, -0.0014 without the marking, 9/12, -0.0042 with it; R3 17/20, +0.0010, and 13/20 (14 needed), -0.0014; both keep their defaults; b0 and b_common of the two blocks match the R4-a1 record; Sinkhorn sets b_common in no block."
+   },
+   {
+    "id": "DOC-05",
+    "status": "closed",
+    "fix_commits": "38b65b0",
+    "evidence": "Use one Holm family size (six primary results, first threshold 0.05/6 = 0.0083) everywhere. New text: PREREG.md:342-343 (0.0125 for the four tests of section 5, 0.0083 for the six primary results), :106 (four-test value kept only where four tests are meant); PAPER_PLAN.md:196; ANALYSIS_SPEC.md section 5. Checked: 0.05/6 = 0.00833; smallest exact two-sided Wilcoxon p with six datasets = 2/2^6 = 0.03125 (scipy), above both thresholds and below 0.05."
+   },
+   {
+    "id": "DOC-06",
+    "status": "closed",
+    "fix_commits": "631cdfd",
+    "evidence": "'The frozen X1 grids stand' holds for every arm except Sinkhorn; label the pre-fix Sinkhorn figures; name the redo records. New text: PREREG.md:312-315 ('The frozen X1 grids stand for every arm except Sinkhorn'; r1_record.json 'still holds the superseded Sinkhorn grid'); names of the three redo records at :409-413, 'names proposed for the diff review'. Checked: r1_record.json has 8 grids, 6 of them non-Sinkhorn (script 02).",
+    "remaining": "Approval of the three record names is left to the user (ANALYSIS_SPEC.md:496-497 lists only the R1 record name; see DOC-R13)."
+   },
+   {
+    "id": "DOC-07",
+    "status": "closed",
+    "fix_commits": "f9ffec3; 4af5069 (spec part)",
+    "evidence": "Say which contrast the power figures belong to (six pilot blocks incl. sim1) and add the without-sim1 set. New text: PREREG.md:328-340: figures are those of the matched-lambda contrast on all six pilot blocks, including sim1 and the two low-signal blocks, not the power of the frozen P1; without-sim1 set added; recompute planned after the Sinkhorn redo. Checked: power_without_sim1.py regenerates its JSON byte for byte (sha256 0be883be...); every quoted figure matches (SE 0.045, MDE 0.131, power 0.104; four families 0.182 / 0.088; without sim1 SE 0.0236, MDE 0.068, power 0.182; four families 0.095 / 0.137; sigma 0.030 with 12 df, tau 0.109 with 4 df; without sim1 sigma 0.033 / 8 df, tau 0.056 / 2 df; sim1 share 0.6661 = 67 %).",
+    "remaining": "Risk when the power is recomputed: DOC-R12 (power_report stops with an error for some standard errors)."
+   },
+   {
+    "id": "DOC-08",
+    "status": "closed",
+    "fix_commits": "43f7386; 06345ce; 4af5069 (spec part); 3ced541",
+    "evidence": "Only SI-68 to SI-77 are user decisions; label every agent proposal; narrow SI-55 to part (a). New text: PREREG.md:319 (SI-55 for part (a)), :507, :513; ANALYSIS_SPEC.md:3-10; PAPER_PLAN.md:176-203, :217 (each replaced statement that is a proposal says 'the agent's proposal ... pending the diff review'). Checked: Compared with the ledger lines SI-55, SI-68, SI-73, SI-75, SI-77 (section 4.5 of the report).",
+    "remaining": "Two small inconsistencies: DOC-R07 and DOC-R08."
+   },
+   {
+    "id": "DOC-09",
+    "status": "closed",
+    "fix_commits": "3ced541",
+    "evidence": "PAPER_PLAN: dated 'superseded' notes for the counts, tasks, new datasets, barycenter, scaling; marker count. New text: PAPER_PLAN.md:122 and :224 ('Superseded in part, 2026-10-14'), :180 (seven statements replaced, marked eight times), :217. Checked: Eight [replaced] markers found for seven statements, as :180 says. Manifest of record counts (A1 1,098; A2 108; A3 180; X1 3,000; X3 828; X6 216; X7 216; X8 504; X12 288; X13 408; X15 84; 6,930 rows, sha256 6efbe422...) and the eight tasks' cells and batches (pancreas 16,382 / 9 ... sim2 19,318 / 16) equal the code's TASKS table, the prepped tables and the fingerprints (script 02)."
+   },
+   {
+    "id": "DOC-10",
+    "status": "closed",
+    "fix_commits": "4af5069 (spec); fixer's AN-09 text",
+    "evidence": "State that b* is computed after any extension round, and report how many arm-by-task cells are not evaluable because the six points never reach b*. New text: ANALYSIS_SPEC.md:68-71. Checked: Read against PREREG section 4 and prereg_rules.r4_stage (all rows of the stage) and the six-point rule of P1.",
+    "remaining": "A sentence two bullets earlier contradicts the code (DOC-R03)."
+   },
+   {
+    "id": "DOC-11",
+    "status": "partly",
+    "fix_commits": "fd9c8e3; 06345ce; 4af5069 (spec word list)",
+    "evidence": "Plain language (SI-67): glossary, labels explained at first use, 'penalty-strength family' vs 'dataset family', 'task-by-decoder block' vs 'cell'. New text: PREREG.md:159-200 (glossary of labels and terms), :185-187 (the two senses of 'family' and of 'cell'), :194 (R1-R4 are rules; PAPER_PLAN's R0-R5 are research questions); ANALYSIS_SPEC.md:18-27 (word list). Checked: Read every new paragraph of PREREG section 9, PAPER_PLAN section 5 and ANALYSIS_SPEC sections 0-16 as a reader without the earlier chat (section 4.9 of the report).",
+    "remaining": "DOC-R09: the spec does not say that its R0/R3/R5 differ from R1-R4; scvi_adv and X13 are not defined; the glossary row 'A1, A2, A3, X1' reads as if X1 were a pilot; 'chat record', 'By file name', 'as recommended' are not explained."
+   },
+   {
+    "id": "DOC-12",
+    "status": "closed",
+    "fix_commits": "a828f41",
+    "evidence": "Tense: 'will be' for every step not yet done; a status line at the start of each 2026-10-13 and 2026-10-14 entry. New text: PREREG.md:154-158 (rule), status lines :298-300, :320, :347-348, :456-457, :509; tag 'has not been made' (:175, :517-518); redo, R4 stage-x1 record, X1 runs and approvals written as planned; ANALYSIS_SPEC.md:11-15; PAPER_PLAN.md:178. Checked: Scanned all three documents for every step named in the task (script 07; section 4.4 of the report).",
+    "remaining": "Two slips: DOC-R10 (spec:62-67, present tense for a check that is planned and manual) and DOC-R05 (status lines name only the first code commits)."
+   },
+   {
+    "id": "DOC-13",
+    "status": "closed",
+    "fix_commits": "4af5069",
+    "evidence": "Reduce ANALYSIS_SPEC to rules; move unchosen options, reasons and open items to Appendix A. New text: ANALYSIS_SPEC.md:1-364 (rules), :365-498 (Appendix A: A.1 questions, A.2 why there is no Q8, A.3 open items). Checked: Script 01 (section 4.1 of the report): of 104 lines removed from sections 0-16 (103 non-blank), 66 reappear verbatim in Appendix A, 2 remain in the body re-wrapped, 35 are the rewritten title, status line, headings, two section-1 bullets and references; all 105 body edits read, none changes a rule; the four sensitivity variants are defined in the body; A.2 is accurate.",
+    "remaining": "A.3 is not the complete list of open items (DOC-R13)."
+   },
+   {
+    "id": "DOC-14",
+    "status": "closed",
+    "fix_commits": "6746f9f",
+    "evidence": "Say what happens at an NMI-0 case (SI-65) and at an iteration-cap hit (SI-61). New text: PREREG.md:391-396 (cap hit: neither scored nor recorded as failed, the stage stops, no registered outcome; proposal: the stage stays stopped until the user decides whether it counts as a failed fit in P2) and :444-447 (NMI of 0: scib's error kept; proposal: the user decides each case and every case is listed with the results); both labelled 'Proposal for the diff review'. Checked: Compared with SI-61 and SI-65 in CONSTRAINTS.md.",
+    "remaining": "The user's approval at the diff review (the two proposals are not in ANALYSIS_SPEC.md A.3; DOC-R13)."
+   },
+   {
+    "id": "DOC-15",
+    "status": "closed",
+    "fix_commits": "9b30d58",
+    "evidence": "EQUIVALENT_COMMITS.json must name the c3fd92d identity files, not only the first run. New text: docs/EQUIVALENT_COMMITS.json:8-13 (fit_identity_c3fd92d.csv, score_identity_c3fd92d.csv, run_c3fd92d.sh first; the 2b52542 files listed as superseded); valid_for_a_candidate_commit_if gives the pre-tag diff step; PREREG.md:355-365. Checked: JSON loads; commit_ref resolves to c88cce3c...; all evidence files exist; fit_identity_c3fd92d.csv has 63 rows, 59 of 59 non-Sinkhorn identical, 4 Sinkhorn differ; 0 files changed since c3fd92d in the criterion paths; tests/prereg/test_provenance_rule.py 13 passed. Score-identity file read for column names only."
+   },
+   {
+    "id": "DOC-16",
+    "status": "closed",
+    "fix_commits": "56febe4 (spec section 16); 4af5069",
+    "evidence": "State the limitations of the analysis next to the rules. New text: ANALYSIS_SPEC.md:332-357 (seven limitations: standard errors treated as known; P1 depends on the lambda spacing; P2 comparability and independence; no multiplicity control for the Bayesian declarations; tau_f from four families; pairs-first independence; 5 versus 1 critic steps), each saying whether a sensitivity analysis exists. Checked: Manifest: n_critic 5 for reference, pooled and barycenter, 1 for the discriminator; the update-budget control X6 exists only for the pooled critic.",
+    "remaining": "'0.011' (:340) and 'coverage 0.91 to 1.00' (:345) come from the first review's simulation; not re-run, not reproducible from the repository (DOC-R04)."
+   },
+   {
+    "id": "DOC-17",
+    "status": "closed",
+    "fix_commits": "4af5069; 44af4de (NB-20261014-22)",
+    "evidence": "Label the prior scale, corner and P2 settings 'pilot-informed'; correct the P2 premise quoted to the user. New text: ANALYSIS_SPEC.md:135 (prior scale 0.1, between-task SD 0.109 with 4 df), :182-185 (P2 margin and prior scale 'chosen after the pilot collapse rates were shown'; one quoted rate miscounted; whether SI-75 stands is an open item), :435-436 (corner; the 300 points are the 5 non-Sinkhorn arms x 6 cells x 10 lambda), :460-463 (appendix: quoted 8 of 45 is 8 of 54, difference +3.7 not +0.7); notebook/2026-10-14.md:251-258. Checked: Script 04, pilot A1 and R1-extension scores, Sinkhorn dropped, collapse = C at least 0.10 below the same seed's lambda = 0 run: without the 9 lambda 0.03 rows reference 10/54, discriminator 8/45, +0.7 points; with them 8/54, +3.7; conditioned decoder 15/54 vs 17/54, -3.7; 0 of the 9 extension rows collapsed.",
+    "remaining": "Whether SI-75 stands is left to the user (ANALYSIS_SPEC.md:184-185, :463; A.3 item 1)."
+   },
+   {
+    "id": "DOC-18",
+    "status": "partly",
+    "fix_commits": "33ab290 (NB-20261014-34)",
+    "evidence": "Annotate SI-60 (UTC date), SI-63 ('none' is an arm), SI-69 (parenthetical), SI-51 and SI-52 (narrowed by SI-57 and SI-68) without changing the user's words. New text: notebook/2026-10-14.md:401-412 (all five annotations; the ledger tool cannot hold them, which the entry says). Checked: Annotation texts match CONSTRAINTS.md. SI-60 is the only entry among SI-51 to SI-77 whose source date differs from its added date (user answered 2026-10-13 20:03 New York time = 2026-10-14 UTC). CONSTRAINTS.md is identical to the artifact given and no commit touched it since 1e615eb.",
+    "remaining": "A reader of CONSTRAINTS.md does not see the annotations and nothing in the ledger or the PREREG glossary points to NB-20261014-34. Smallest fix, if the user agrees: add NB-20261014-34 to the notebook field of SI-51, SI-52, SI-60, SI-63 and SI-69 (a field the ledger tool already renders)."
+   },
+   {
+    "id": "DOC-19",
+    "status": "closed",
+    "fix_commits": "bc9d592; 8e01f15",
+    "evidence": "Number provenance: gradient ratio, validation minibatches, no-pair shares, F7 ratios. New text: PREREG.md:384-388 (gradient-norm ratios 2.00 on A1, 2.27 on A3, 14.4 on the extension rows, median cosine 0.28, 204 of 216), :404-409 (3,076 = 2,808 + 268; 268 = 192 + 76), :427-433 ('model-based estimate ... not simulated runs'); PAPER_PLAN.md:75-77 (F7 ratios 'provisional'). Checked: Recomputed: ratios 2.000, 2.273, 14.439, cosine 0.281, 204 of 216 finite; validation_12mb.csv 2,808 / 192 / 76 / 3,076; no-pair figures (section 4.2 of the report).",
+    "remaining": "F7 ratios cannot be recomputed here (log not in the repository; DOC-R11); '3,076 from the 234 fits' is imprecise (DOC-R06); the scripts behind the numbers are not committed (DOC-R04)."
+   },
+   {
+    "id": "CF-03",
+    "status": "closed",
+    "fix_commits": "8e01f15",
+    "evidence": "(document part) README row G-05 and lam_audit.py: 322 / 382 / 1,908 with their meaning. New text: experiments/guard_followups_20261013/README.md:10: 322 rows in the manifest of record (242 none, 40 scvi_adv, 40 scANVI), 382 distinct row tags in the 8 manifests with arm and lam columns, 1,908 = the sum of the rows over the 8 files. Checked: lam_audit.py prints exactly results/lam_audit.txt; 1,908 = 1,428 + 240 + 240; the 60 extra tags are X3 'none' rows of the first manifest, all listed in docs/x3_si41_tag_map.csv."
+   },
+   {
+    "id": "CF-04",
+    "status": "closed",
+    "fix_commits": "f4b3b8f; 06345ce",
+    "evidence": "(document part) PREREG sentence on the scope of SI-54: scorer commit only; 'not at c88cce3 and one commit'. New text: PREREG.md:361-376 (the evidence is narrow; two limits of the design: score rows carry the scorer's commit, so a Sinkhorn latent fitted at c88cce3 and rescored at the tag is caught only by the runner's start-up check; 'Sinkhorn rows must carry the new tag' is enforced as 'no Sinkhorn row at c88cce3 and one commit per input'); docs/EQUIVALENT_COMMITS.json. Checked: Matches SI-54's wording and the notebook entry NB-20261014-32; code behaviour is the code track's check."
+   },
+   {
+    "id": "CF-06",
+    "status": "closed",
+    "fix_commits": "8703cee",
+    "evidence": "(document part) No-pair counts are tabulated by a reporting script after the runs; no code reads them yet. New text: PREREG.md:427-433 ('The counts will be tabulated ... by a short reporting script written after the runs. No code reads no_pair_steps yet ... proposal for the diff review'). Checked: grep over scripts/ and src/: the counter is stats['no_pair'] in src/wcd_vae/wcd/alignment.py; the only mention of no_pair_steps is the record writer scripts/fit_paper_config.py:504-506; nothing reads it back."
+   },
+   {
+    "id": "CF-07",
+    "status": "closed",
+    "fix_commits": "d50348b",
+    "evidence": "(document part) Pilot R2/R3 counts come from the frozen c88cce3 record; the current code reports the new counts. New text: PREREG.md:473-480 and table row 7 (:212). Checked: Recomputed on the stored cells: 9 of 12 and 13 of 20 with the SI-66 marking, 12 of 12 and 17 of 20 without it (script 02, claims 50-53)."
+   }
+  ],
+  "claims": [
+   {
+    "claim": "The spec at HEAD equals 4af5069, and every line removed from ANALYSIS_SPEC sections 0-16 reappears verbatim in Appendix A apart from rewritten headings, status line and references.",
+    "status": "confirmed",
+    "evidence": "Script 01: 104 lines removed (103 non-blank): 66 verbatim in Appendix A, 2 still in the body re-wrapped, 35 in neither = rewritten title, status line, headings, two section-1 bullets, references and three rewritten rule sentences (multiplicity paragraph, section 11 bullet, section 15.2), each read."
+   },
+   {
+    "claim": "No rule changed meaning in 4af5069.",
+    "status": "confirmed",
+    "evidence": "All 105 edits in the body of sections 0-16 read against the old text (script 01 lists them); the three rewritten rule sentences keep their meaning."
+   },
+   {
+    "claim": "The sensitivity variants (per-run reading, corner (b0, 0), pairs first, six independent datasets) are still defined in the body.",
+    "status": "confirmed",
+    "evidence": "Script 01: defined at sections 2.4, 3, 4, 4; section 11 lists all four."
+   },
+   {
+    "claim": "Appendix A.2 (why there is no Q8) is accurate.",
+    "status": "confirmed",
+    "evidence": "Script 01 on the first draft 6d0ca1f: 'OPEN Q7' at line 143, 'Multiplicity (proposed' at 149, 'OPEN Q9' at 153; no 'Q8' in the draft."
+   },
+   {
+    "claim": "Appendix A.3 (open items) is accurate.",
+    "status": "partly",
+    "evidence": "Its five items are accurate (ANALYSIS_SPEC.md:486-498) but it is not the complete list of what the user must decide (DOC-R13)."
+   },
+   {
+    "claim": "power_without_sim1.py regenerates its JSON byte for byte.",
+    "status": "confirmed",
+    "evidence": "Script 02, claim 1: sha256 0be883be... identical; the script's own assert reproduces docs/prereg/r1_record.json."
+   },
+   {
+    "claim": "Power figures in PREREG.md:332-337 and PAPER_PLAN.md:204 (six tasks SE 0.045, MDE 0.131, power 0.104; four families 0.182 / 0.088; without sim1 0.0236 / 0.068 / 0.182 and 0.095 / 0.137; sigma 0.030 df 12, tau 0.109 df 4; without sim1 0.033 df 8, 0.056 df 2).",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 2-15 (recomputed 0.04499, 0.13066, 0.10436, 0.18178, 0.08778, 0.02355, 0.06841, 0.18234, 0.09517, 0.13696, 0.0298, 0.1094, 0.0329, 0.0558)."
+   },
+   {
+    "claim": "sim1 supplies 0.666 (67 %) of the squared spread of the three conditioned block means.",
+    "status": "confirmed",
+    "evidence": "Script 02, claim 16: 0.6661 from r1_record.json power.blocks (-0.0236, -0.0153, 0.2245)."
+   },
+   {
+    "claim": "lam_audit.py prints exactly results/lam_audit.txt (322 / 382 / 1,908); 322 = 242 + 40 + 40; 1,908 = 1,428 + 240 + 240; the 60 extra tags are X3 none rows re-tagged under SI-41.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 17-20."
+   },
+   {
+    "claim": "Holm first threshold over six results 0.05/6 = 0.0083 (four results 0.0125); smallest exact two-sided Wilcoxon p for six datasets 2/2^6 = 0.03125.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 21-24 (scipy exact test, minimum over sign patterns)."
+   },
+   {
+    "claim": "No-pair model: X7 pancreas mmd_ref 25.92 of 27 fits expect at least one minibatch without a pair; X7 sim1 18 of 18; X3 atac_small mmd 6.673 of 48 (13.9 %); X8 sim2 mmd 1.076 of 24 (4.5 %); X1 sim1 mmd and sinkhorn 0.3615 of 60 each (0.60 %).",
+    "status": "confirmed",
+    "evidence": "Scripts 03/03b (the first review's model with paths as arguments): 25.92, 18, 6.673, 1.076, 0.3615. Sim1 independently by Monte Carlo: last minibatch of 8 cells; per-epoch probability 1.513e-5 exact against 1.48e-5 simulated (296 of 20 million draws)."
+   },
+   {
+    "claim": "Assumption of the no-pair model about scvi-tools 1.4.2: n_train = ceil(0.9 N) and the partial last minibatch is kept.",
+    "status": "confirmed",
+    "evidence": "Script 03b reads the installed source: validate_data_split sets n_train = ceil(train_size x n); DataSplitter default drop_last False; train loader shuffle=True, drop_last=self.drop_last; the project passes no drop_last; all 1,734 critic-free manifest rows have batch size 128 and train_size 0.9; the stratified sampler is used only by the reference and pooled arms."
+   },
+   {
+    "claim": "The 268 early and training-mode captures of NB-20261014-35 (192 + 76) are right and NB-20261013-03's 236 is wrong.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 25-26: validation_12mb.csv column kind: final 2,808, early 192, trainmode 76, total 3,076."
+   },
+   {
+    "claim": "'The solver was validated on 3,076 minibatches from the 234 pre-fix fits' (PREREG.md:404-409).",
+    "status": "partly",
+    "evidence": "Total right; the 192 early captures belong to 160 replay tags, none among the 234 fits; the 76 training-mode captures to 19 of them (script 02, claim 27; DOC-R06)."
+   },
+   {
+    "claim": "Gradient-norm ratios of the tagged code: 2.00 (A1), 2.27 (A3), 14.4 (R1 extension), median cosine 0.28, 204 of 216 finite.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 28-31: 2.000, 2.273, 14.439, 0.281, 204 of 216; also notebook/2026-10-13.md:31."
+   },
+   {
+    "claim": "Pilot collapse recount of NB-20261014-22: discriminator 8 of 54 with the unconditioned decoder (the nine lambda 0.03 rows are R1-extension rows, 0 of 9 collapsed); difference +3.7 points, not +0.7.",
+    "status": "confirmed",
+    "evidence": "Script 04: without extension rows reference 10/54, discriminator 8/45, +0.7; with them 8/54, +3.7; conditioned 15/54 vs 17/54, -3.7; extension rows at 0.03 and 0.01: 0 of 9 each."
+   },
+   {
+    "claim": "The F7 Sinkhorn-to-W1 ratios are marked provisional wherever they appear.",
+    "status": "partly",
+    "evidence": "PAPER_PLAN.md:75-77 marks them provisional; NB-20261014-16 (notebook/2026-10-14.md:177) gives them unqualified; the log is not in the repository, so they were not recomputed (DOC-R11)."
+   },
+   {
+    "claim": "Fixer's report on prereg_rules.power_report: the search starts at 1.0, scipy's non-central t is NaN above a non-centrality of about 38, so it fails when the standard error is below about 0.026 (without-sim1 value 0.0236).",
+    "status": "partly",
+    "evidence": "The failure is real and loud: ValueError 'The function value at x=1.0 is NaN' at se 0.02355 (script 05). The NaN is not 'above about 38': isolated values from 42.15 (df 5) and 57.24 (df 3); 7 of 230 grid pairs fail, not all se below 0.026."
+   },
+   {
+    "claim": "The power recompute after the Sinkhorn redo could hit the failure.",
+    "status": "confirmed",
+    "evidence": "Proxy standard errors from the committed blocks: 0.04499 (all six, safe), 0.02355 (without sim1: fails), 0.02741 (four blocks not flagged low-signal: safe); the redo changes the inputs, so a hit is possible (DOC-R12)."
+   },
+   {
+    "claim": "A fallback fix keeps every working result bit-identical and fixes the failing cases.",
+    "status": "confirmed",
+    "evidence": "Script 08: 8 failing cases give finite results equal to an independent start-at-0.01 search; 223 of 223 working grid points bit-identical; tests/prereg 131 passed, 1 skipped. The one-line alternative changes mde80 by 4.8e-15 to 8.9e-15 and fails test_decision_records_are_the_same[r1.json]."
+   },
+   {
+    "claim": "Status and tense: nothing is described as done that is not (Sinkhorn redo, tag, R4 stage-x1 record, X1 runs, the user's approval of any proposal).",
+    "status": "partly",
+    "evidence": "All eight status lines and every named step are written as planned or done with date and commit (script 07; PREREG.md:154-158, :175, :298-300, :320, :347-348, :456-457, :509, :517-523). Slips: ANALYSIS_SPEC.md:62-67 (DOC-R10); status lines name only the first code commits (DOC-R05)."
+   },
+   {
+    "claim": "Dates are right (New York time versus UTC).",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 71-73: 15 of 15 commit times and 12 of 12 decision times in the amendment table equal git log and the notebook (New York time); SI-60 is the only entry among SI-51 to SI-77 whose source date (UTC) differs from its added date."
+   },
+   {
+    "claim": "Only SI-68 to SI-77 are called user decisions for the X1 analyses; agent proposals are labelled.",
+    "status": "confirmed",
+    "evidence": "PREREG.md:507, :513; ANALYSIS_SPEC.md:3-10; PAPER_PLAN.md:176-203; older user decisions cited by number (SI-38, 41, 43-46, 51-58, 60-64, 66) are genuine ledger entries. Small inconsistencies: DOC-R07, DOC-R08."
+   },
+   {
+    "claim": "SI-55 is narrowed to part (a) in PREREG.",
+    "status": "confirmed",
+    "evidence": "SI-55 rule: 'X1 grid edge (I006): correct PAPER_PLAN to PREREG section 4 ...' (grid edge only); PREREG.md:319 says 'user decision SI-55 for part (a)'."
+   },
+   {
+    "claim": "SI-68's own scope ('an X1 result') is restored where PREREG and PAPER_PLAN cite it for the follow-up analyses.",
+    "status": "confirmed",
+    "evidence": "PREREG.md:521 ('SI-68, whose words are \"before anyone looks at an X1 result\", any arm'); PAPER_PLAN.md:185; NB-20261014-33."
+   },
+   {
+    "claim": "No rule in the new text is wider or narrower than the user's words in CONSTRAINTS.md.",
+    "status": "partly",
+    "evidence": "SI-68, SI-73, SI-74, SI-75, SI-77 compared with the text. Exceptions: section 4's zero_spread exclusion and CPU caveat (DOC-R08); 'equal numbers of tries' labelled a proposal although SI-68 and SI-77 decide it (DOC-R07); the transfer-lambda rule narrows 'chosen on the other datasets' to other families but is labelled the agent's proposal (spec section 8)."
+   },
+   {
+    "claim": "Disclosure: 19 X1 files, rescored latent, definition of 'examined', amendment table, late implementation of SI-66.",
+    "status": "partly",
+    "evidence": "All stated (PREREG.md:483-503, :204-213, :454-482); incomplete: DOC-R01, DOC-R02, DOC-R05."
+   },
+   {
+    "claim": "The amendment table matches the commit dates and the notebook.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 72-73 (15 of 15 and 12 of 12)."
+   },
+   {
+    "claim": "Late implementation of SI-66 (decided 2026-10-13 20:53, implemented 2026-10-14 in f3c3415 at 07:50) is disclosed.",
+    "status": "confirmed",
+    "evidence": "PREREG.md:212 (row 7), :456-457, :466."
+   },
+   {
+    "claim": "NB-20261014-20: three tracks PASS WITH FIXES, 47 findings, 20 to fix.",
+    "status": "confirmed",
+    "evidence": "First-review findings file: 18 + 10 + 19 = 47 findings; 5 + 2 + 13 = 20 with severity fix; each track verdict PASS_WITH_FIXES. The analysis-track details of that entry (for example 34 wrong declarations in 512 stress worlds) were not re-run."
+   },
+   {
+    "claim": "NB-20261014-21: 19 score files = 17 adversarial-arm rows + 2 (none, scvi_adv); the runner and scorer log only tags and timings (run_stage.py:949, score_scib_native.py:245).",
+    "status": "partly",
+    "evidence": "The logging claim is right at the commit the entry cites (828f3e7: both lines print a tag and seconds only; run_stage.py's line is now :952). The file counts are not checkable without opening the blinded folder; I relied on the text. The scope of the audit is DOC-R01."
+   },
+   {
+    "claim": "NB-20261014-22: the P2 recount.",
+    "status": "confirmed",
+    "evidence": "Script 04."
+   },
+   {
+    "claim": "NB-20261014-29: code-fix patch set (8 files, +73/-22; tree 46a2df12; test counts 421 passed, 18 skipped; 172 passed).",
+    "status": "partly",
+    "evidence": "Patch size and tree confirmed (script 02, claims 67, 69). Test counts not re-run (code track); I ran tests/prereg only (131 passed, 1 skipped in a scratch clone with the suggested fix; test_provenance_rule 13 passed on the unpatched clone)."
+   },
+   {
+    "claim": "NB-20261014-30: designs for CF-01 and CF-02 are labelled agent proposals for the diff review.",
+    "status": "confirmed",
+    "evidence": "Text of the entry ('decided by: agent ... shown to the user at the diff review'); the code consequences are the code track's."
+   },
+   {
+    "claim": "NB-20261014-31: documents patch set (8 files, +491/-131; tree 46a2df12); power JSON byte for byte; lam_audit; sim1 share 0.666 with block means 0.1111, 0.2245 and -0.0236 to -0.0037; no-pair expectations; scvi-tools assumptions.",
+    "status": "confirmed",
+    "evidence": "Script 02 claims 1, 16-20, 25, 68-69; block means from r1_record.json (0.1111, 0.2245, -0.0236, -0.0153, -0.0037, -0.0107); scripts 03/03b. The entry names scripts/recompute_g01.py as a repository path; it is not in the repository (DOC-R04)."
+   },
+   {
+    "claim": "NB-20261014-32: ANALYSIS_SPEC 365 to 498 lines; 35 other removed lines; A.2; counts; analysis_x1.py reads the grid from --r1-record and stops when a registered lambda is missing; no test reads the three documents; pandoc renders all three.",
+    "status": "partly",
+    "evidence": "Line counts, the 35 lines and A.2 confirmed (script 01); counts confirmed (script 02); analysis_x1.py reads x1_grid from the record (:392-394) and tests mention the documents only in docstrings (grep). Pandoc rendering was not re-run; I only checked that every row of the amendment table has six columns."
+   },
+   {
+    "claim": "NB-20261014-33: SI-68's scope is kept.",
+    "status": "confirmed",
+    "evidence": "Its rationale quotes SI-68 correctly (CONSTRAINTS.md SI-68 rule); PREREG and PAPER_PLAN follow it."
+   },
+   {
+    "claim": "NB-20261014-34: annotations for SI-60, SI-63, SI-69, SI-51, SI-52.",
+    "status": "confirmed",
+    "evidence": "Each annotation matches the ledger text (SI-60 date; SI-63 'none reads decoder, likelihood and cond'; SI-69 parenthetical; SI-51 'refit all 234'; SI-52 'frozen P1-P4 analysis code'). Remaining gap: DOC-18."
+   },
+   {
+    "claim": "NB-20261014-35: 268 = 192 + 76.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 25-26."
+   },
+   {
+    "claim": "The notebook hash chain is intact and the entry count is right.",
+    "status": "confirmed",
+    "evidence": "Script 06: all 186 entries verify (sha256 of the previous hash, a newline, and the entry text); INDEX.md says 186 entries, last 2026-10-14T15:50:28-04:00."
+   },
+   {
+    "claim": "Every notebook entry, ledger entry and path cited in the new text exists.",
+    "status": "partly",
+    "evidence": "Script 06: 42 notebook entries and 35 ledger entries cited, none missing; paths missing: the three proposed redo records (planned), the pattern notebook/yyyy-mm-dd.md and scripts/recompute_g01.py (DOC-R04)."
+   },
+   {
+    "claim": "CONSTRAINTS.md is unchanged since the first review.",
+    "status": "confirmed",
+    "evidence": "No commit touches it between 1e615eb and 08f1e3c; sha256 73559595... equals the artifact given."
+   },
+   {
+    "claim": "docs/EQUIVALENT_COMMITS.json is consistent with PREREG and the identity evidence.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 64-66: 63 fit rows, 59 of 59 non-Sinkhorn identical, 4 Sinkhorn differ; 0 files changed since c3fd92d in the criterion paths; commit_ref resolves to c88cce3c...; evidence files exist."
+   },
+   {
+    "claim": "Only documents changed between fd9c8e3 and HEAD outside the notebook, so the test results for tree 46a2df12 hold.",
+    "status": "confirmed",
+    "evidence": "git diff fd9c8e3..HEAD: docs/ANALYSIS_SPEC.md, docs/PAPER_PLAN.md, docs/PREREG.md; no test reads them (docstring mentions only)."
+   },
+   {
+    "claim": "Pilot ranges behind the area corner (ANALYSIS_SPEC.md:433-436): plain scVI C 0.67-0.90; shift -0.59 to +0.23; middle half -0.09 to 0.00; within each cell -0.19 to +0.09; 300 points.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 54-58: 0.666-0.897; -0.590 to 0.231; -0.094 to 0.005; -0.188 to 0.090; 300 points (A1 pilot, 5 non-Sinkhorn arms x 6 cells x 10 lambda)."
+   },
+   {
+    "claim": "R2/R3 counts on the stored cells without and with the SI-66 marking.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 50-53: 12/12, -0.0014 and 9/12, -0.0042; 17/20, +0.0010 and 13/20, -0.0014 (14 needed); both keep the defaults."
+   },
+   {
+    "claim": "Manifest counts and the eight tasks' cells and batches in PAPER_PLAN section 7 and the spec.",
+    "status": "confirmed",
+    "evidence": "Script 02, claims 32-45 (6,930 rows, sha256 6efbe422...; immune is contained in immune_hum_mou: 33,506 of 33,506; atac_small and atac_large share 3,618 barcodes)."
+   }
+  ],
+  "new_findings": [
+   {
+    "id": "DOC-R01",
+    "severity": "fix",
+    "location": "docs/PREREG.md:493-497; notebook/2026-10-14.md:238-250 (NB-20261014-21, title and 'ran:' line); docs/ANALYSIS_SPEC.md:491-492",
+    "problem": "The audit sentence is broader than the search it rests on. PREREG says that an audit of every chat record of the project 'found no display or analysis of an X1 score value'. The notebook entry it rests on states what was searched: chat records for reads of tier12_v2/X1_local/scores (12 messages), the printed output of the scripts that read them, and two log statements. X1 and X13 scores also exist in other places (the cluster filler fits scored on this machine, the outputs of the identity checks), and a search keyed on one folder cannot see a value shown from another. The audit was made by the same agent that ran the checks (author: agent).",
+    "evidence": "PREREG.md:493-497 against NB-20261014-21 'ran:'; NB-20261007-01 (150 filler score files exist); PREREG.md:358-359 (an X13 sysVI latent was rescored in the identity check).",
+    "suggested_fix": "State in PREREG what was searched, in the notebook's words, or extend the search to the other places where X1 and X13 scores exist and say so. Keep the sentence that the audit cannot show that nobody opened a file. Ask the user, or a reader who did not run the checks, to confirm."
+   },
+   {
+    "id": "DOC-R02",
+    "severity": "fix",
+    "location": "docs/PREREG.md:22, :358-359, :483-503; notebook NB-20261007-01, NB-20261012-02; CONSTRAINTS.md SI-68; docs/ANALYSIS_SPEC.md:45",
+    "problem": "The disclosure leaves out the other X1 and X13 scores that already exist. PREREG discloses the 19 local X1 rows of 2026-10-12 only. It does not say that 250 earlier fits of arms that depend on no rule (X1 arms none and scvi_adv; X13 baselines scANVI and sysVI; PREREG.md:22 lets them run first) exist and are being scored on this machine: pass B (lung, pancreas, sim2) was complete, 150 of 150 scored, on 2026-10-07 and states 'Metric values not inspected' (NB-20261007-01); pass A (atac_large, immune_hum_mou) was resumed on 2026-10-12 with 99 of 100 latents still to score (NB-20261012-02); later progress is not in the documents. The identity check also rescored one X13 sysVI latent (PREREG.md:358-359). The proposed definition of 'examined' covers X1 adversarial-arm scores only, but SI-68 says 'before anyone looks at an X1 result' (any arm), and the freeze covers the X13 analyses too (ANALYSIS_SPEC.md:45). Whether scvi_adv counts as an adversarial arm is not said, and nothing says that the 19 early rows stay X1 rows under SI-54.",
+    "evidence": "Quoted lines above. The first review (DOC-01) counted 158 filler score files by 2026-10-12; I did not recount them because the folder is blinded.",
+    "suggested_fix": "Add two or three sentences to the disclosure: how many non-adversarial X1 and X13 scores exist, when they were scored, and that their values were checked only for finiteness and provenance (NB-20261007-01). Widen 'examined' to every X1 and X13 score, or say why none, scvi_adv and X13 are outside it. State that the 19 early rows are kept (SI-54). Define scvi_adv and X13 in the glossary."
+   },
+   {
+    "id": "DOC-R03",
+    "severity": "fix",
+    "location": "docs/ANALYSIS_SPEC.md:58-59 against :281-285 (section 15.1) and scripts/analysis_x1.py:369",
+    "problem": "The analysis rules contradict themselves on whether b0, b_common and b* are recomputed. Section 1 says that b0, b_common, b* and the low-signal flag 'are read from the frozen R4 stage-x1 record ... the analysis never recomputes them'. Section 15.1 says the script refuses a record whose b0, b_common, b* or flag differs from what prereg_rules.r4_stage computes from the same X1 rows, and analysis_x1.py:369 reruns P.r4_stage for exactly that purpose (rigour review AN-03). The code does the second thing. A registered rule that says the opposite of the registered code is a trap for the first reader of the tag.",
+    "evidence": "ANALYSIS_SPEC.md:58-59 (quoted), :281-285; scripts/analysis_x1.py:369 ('the rule that wrote the record, rerun on these scores (AN-03)'). Script 07 output.",
+    "suggested_fix": "Replace the sentence at :58-59 by: the four quantities are read from the frozen R4 stage-x1 record; the analysis recomputes them from the X1 rows with prereg_rules.r4_stage and stops if they differ (section 15.1)."
+   },
+   {
+    "id": "DOC-R04",
+    "severity": "fix",
+    "location": "docs/PREREG.md:427-433; notebook NB-20261014-31 (cites scripts/recompute_g01.py, which does not exist in the repository); NB-20261014-22 and docs/ANALYSIS_SPEC.md:461-463; ANALYSIS_SPEC.md:433-436, :340, :345, :336-338; docs/PAPER_PLAN.md:75-77",
+    "problem": "Numbers in the registered documents come from scripts that are not in the repository. The project rule is that every number is regenerated by committed code. The no-pair expectations (25.9 of 27 fits, 18 of 18, about 14 %, 4.5 %, 0.6 %), the P2 recount (8 of 54, +3.7 points) and the pilot ranges of the area corner (plain scVI C 0.67 to 0.90; shifts -0.59 to +0.23; 300 points) can be reproduced only from the first review's bundle or from my scripts. The spec's '0.011' and 'coverage 0.91 to 1.00' (the first review's simulations) and the F7 ratios cannot be reproduced from the repository at all.",
+    "evidence": "06_notebook_chain_and_references.txt (paths cited and missing: scripts/recompute_g01.py plus the three proposed redo records); scripts 02, 03 and 04 of the evidence bundle reproduce the first three groups; grep of experiments/analysis_numerics_20261014 finds no coverage or spacing computation.",
+    "suggested_fix": "Commit one script and its output per group (scripts 02 to 04 of the evidence bundle can be used after a look) and cite the path beside each number. For '0.011', 'coverage 0.91 to 1.00' and the F7 ratios either commit the review's scripts or write 'from the review's simulation; not reproducible from this repository'."
+   },
+   {
+    "id": "DOC-R05",
+    "severity": "fix",
+    "location": "docs/PREREG.md:509 and table rows 5 and 8 (:210, :213); docs/ANALYSIS_SPEC.md:11-12, :359-363",
+    "problem": "Status lines and the amendment table do not name later changes to the X1 analysis code and spec. Both status lines say the specification and code were committed in 56c0762, 990d37d and ff88666, with three test gaps closed in 858101b. Since then scripts/analysis_x1.py and tests/analysis changed by 162 added and 46 removed lines, almost all in 8b90d79 (rigour-review fixes AN-01 to AN-06 and others), and the spec changed in a1d497b, 56febe4 and 4af5069; a numerical-check folder was added in 6aaa3ac. None of these is named, and the table row for the X1 analyses has no row for them. Table row 5 omits SI-65 (decided 2026-10-13 20:48), although PREREG.md:444 gives its NMI-0 rule. The spec's last paragraph still lists 'CONSTRAINTS.md (SI-01..SI-67)' as the sources checked for 'this draft', although its decisions cite SI-68 to SI-77.",
+    "evidence": "07_text_scans.txt (commits that changed the code, tests or spec since 6d0ca1f, marked 'named' or 'NOT named'); git diff --shortstat ff88666..HEAD -- scripts/analysis_x1.py tests/analysis = 2 files, +162/-46.",
+    "suggested_fix": "Say in both status lines (and in table row 8) that the code and spec were revised after the independent review (8b90d79, 6aaa3ac, 56febe4, 4af5069) and are not yet approved by the user, or that the tag, not these commit ids, fixes the registered version. Add SI-65 to row 5. Change 'SI-01..SI-67' to 'SI-01..SI-77'."
+   },
+   {
+    "id": "DOC-R06",
+    "severity": "note",
+    "location": "docs/PREREG.md:404-409; experiments/sinkhorn_fix_20261013/results/validation_12mb.csv",
+    "problem": "'3,076 minibatches from the 234 pre-fix fits' is imprecise. The total (3,076 = 2,808 + 192 + 76) and the 268 early and training-mode captures are right, but the 192 early captures carry 160 separate replay tags (untrained, epoch 2, epoch 3), none of them among the 234 fits; the 76 training-mode captures come from 19 of the 234 fits.",
+    "evidence": "Script 02, claim 27 (the only claim of the 73 not confirmed).",
+    "suggested_fix": "Write: 2,808 final-epoch minibatches from the 234 pre-fix fits (12 each), 76 training-mode minibatches from 19 of them, and 192 minibatches captured earlier in training in separate replays (160 tags)."
+   },
+   {
+    "id": "DOC-R07",
+    "severity": "note",
+    "location": "docs/PREREG.md:514-516 against docs/ANALYSIS_SPEC.md:7-10; docs/PAPER_PLAN.md:203, :217; docs/ANALYSIS_SPEC.md:214",
+    "problem": "Attribution of sections 9 to 11 and of 'equal numbers of tries' is inconsistent. PREREG calls 'sections 9 to 11' of the spec proposals; the spec itself says sections 9 and 10 and only the sensitivity analyses of section 11 that no decision names (the user decided several: SI-38, SI-69, SI-71, SI-73). Section 9 and PAPER_PLAN replace 'equal configuration counts' by 'equal k' and call this the agent's proposal, although SI-68 and SI-77 already decide 'the comparison with standard tools ... when every method gets the same number of tries'; what is the agent's is the estimator (best-of-k curves) and the family composition.",
+    "evidence": "Wording of SI-68 and SI-77 in CONSTRAINTS.md (section 4.5 of the report).",
+    "suggested_fix": "Align PREREG with the spec's list; in section 9 and PAPER_PLAN say that equal numbers of tries is the user's decision (SI-68, SI-77) and only the estimator is proposed."
+   },
+   {
+    "id": "DOC-R08",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:130-144; docs/ANALYSIS_SPEC.md:96-97",
+    "problem": "Agent's implementation choices sit under the heading 'user decision SI-73'. Section 4 is headed 'user decision SI-73', but the 201 x 201 log grid, the cap 0.5, the lower end 1e-15, the exclusion of a dataset whose standard error is below 1e-6 (reason zero_spread) and 'on a different CPU type the last digits can differ' are the agent's choices from the rigour review (AN-01, AN-02). SI-73 says the exact calculation gives results that 'reproduce digit for digit'. The zero_spread exclusion removes a dataset from 'combine the 6 real datasets' in a case the user was not asked about; it is covered by the proposal label of section 2.3 only.",
+    "evidence": "ANALYSIS_SPEC.md:136-144 against the SI-73 rule text.",
+    "suggested_fix": "Add 'details marked 'amended 2026-10-14' are the agent's proposals' under the section 4 heading, and say in SI-73's terms that digit-for-digit holds on the same input files and CPU type."
+   },
+   {
+    "id": "DOC-R09",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:18-27, :35-41, :214, :225; docs/PREREG.md:22, :195, :210, :490, :493",
+    "problem": "Plain-language slips (SI-67). (1) The spec uses R0, R3 and R5 for PAPER_PLAN's research questions next to R1 to R4 for the registered rules; the clash is explained only in PREREG.md:194, and the spec's word list does not point to it. (2) scvi_adv and X13 are not defined anywhere in the glossary, although the disclosure paragraph names them. (3) The glossary row 'A1, A2, A3, X1' begins 'Pilot experiments' and so reads as if X1 were a pilot. (4) 'chat record' and 'By file name' are not explained for an outside reader. (5) Table row 5 says 'No completed fit or score changes: 59 of 59 non-Sinkhorn fits ... identical'; these are one-epoch test refits of code paths, not the production fits (PREREG.md:355-357 says so). (6) 'all as recommended' (spec:4) means 'the option the agent recommended'. (7) The table's commit column does not state its time zone.",
+    "evidence": "Quoted lines; script 07 output.",
+    "suggested_fix": "One sentence at spec:18-27 ('R0 to R5 in sections 0, 9 and 10 are PAPER_PLAN's research questions; R1 to R4 elsewhere are the registered rules'); two glossary rows (scvi_adv, X13); split the A1-A3 and X1 row; say 'logs of the agent's working sessions on this project'; write 'one-epoch test refits' in row 5; add 'New York time' to the commit column."
+   },
+   {
+    "id": "DOC-R10",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:62-67; docs/PREREG.md:411-413",
+    "problem": "A planned manual check is written in the present tense. The spec says the Sinkhorn grid 'is re-derived', the analysis 'is given' the redone record, and the six non-Sinkhorn grids 'are checked against docs/prereg/r1_record.json first'. None has happened, and the last is a manual step: analysis_x1.py reads x1_grid from the record it is given (:392-394) and does not compare grids. PREREG.md:411-413 says 'will be checked'.",
+    "evidence": "scripts/analysis_x1.py:392-394 (grid read from --r1-record; no comparison with the frozen record).",
+    "suggested_fix": "Write 'will be re-derived', 'will be given', 'are to be checked by hand ... (the script does not compare them)'; or add the comparison to the script."
+   },
+   {
+    "id": "DOC-R11",
+    "severity": "note",
+    "location": "notebook/2026-10-14.md:177 (NB-20261014-16); docs/PAPER_PLAN.md:75-77",
+    "problem": "The F7 Sinkhorn-to-W1 ratios stand unqualified in one notebook entry and cannot be recomputed. PAPER_PLAN marks the ratios 0.86-0.89 and 0.53-0.77 'provisional' (from the Sinkhorn review log, 5 pre-fix latents with 8 minibatches each, not in the repository). The notebook entry that first wrote them into PAPER_PLAN gives them without that qualification; the notebook is append-only. Nobody has recomputed them since the first review.",
+    "evidence": "PAPER_PLAN.md:75-77; notebook/2026-10-14.md:177.",
+    "suggested_fix": "Add a one-line NOTE entry that the ratios are provisional; recompute them on the refitted latents as planned and commit the script."
+   },
+   {
+    "id": "DOC-R12",
+    "severity": "note",
+    "location": "scripts/prereg_rules.py:704-708; scripts/freeze_a1_grid.py:62; experiments/final_review_amendments_20261013/power_without_sim1.py (docstring)",
+    "problem": "power_report stops with an error for some small standard errors; the power recompute after the Sinkhorn redo could hit it. The root search for the smallest detectable effect starts at 1.0. With scipy 1.17.1, nct.cdf returns NaN at isolated large non-centralities (first at 42.15 for 5 degrees of freedom, 57.24 for 3; 447 of 39,950 tested values on 0.5 to 400 for 5 degrees of freedom), and the solver then stops with 'The function value at x=1.0 is NaN'. It is loud, not silent. It is not 'above about 38' and not for every standard error below 0.026: 7 of 230 (standard error, degrees of freedom) pairs on 0.003 to 0.06 fail (six tasks: 0.0175, 0.0185, 0.0215, 0.022, 0.0225, 0.0235; four families: 0.0165), including the without-sim1 value 0.02355. freeze_a1_grid.py:62 calls power_report on all six blocks (standard error 0.04499, safe). For the planned recompute on the blocks that are not flagged low-signal, the committed pilot blocks give a proxy of 0.02741 (outside the failing values), but the redo changes the inputs.",
+    "evidence": "05_power_report_nan_probe.txt; 08_power_report_fix_check.txt (the fix below: 8 failing cases give a finite result equal to an independent start-at-0.01 search; 223 of 223 working grid points bit-identical; tests/prereg 131 passed, 1 skipped).",
+    "suggested_fix": "Apply 08_power_report_fallback_fix.diff (a helper _mde80 that keeps the start at 1.0 and falls back to 0.01 only when the solver stops; 15 lines added, 5 removed; every result that works today stays bit-identical). The one-line alternative, 'hi = 0.01', also works but changes mde80 in the 15th digit (4.8e-15 and 8.9e-15 on the test's synthetic record) and then fails the exact-equality test test_decision_records_are_the_same[r1.json]. Add one failing standard error (for example 0.0175 with 5 degrees of freedom) to test_power_report_on_synthetic_a1. Correct 'above about 38' in the power_without_sim1.py docstring."
+   },
+   {
+    "id": "DOC-R13",
+    "severity": "note",
+    "location": "docs/ANALYSIS_SPEC.md:486-498 (A.3); docs/PREREG.md:394-396, :446-447, :480-482",
+    "problem": "No single list of everything the user is asked to decide at the diff review. A.3 lists five open items, covering six of the fix report's eight questions to the user and only the R1 record name of the three. The questions on the Sinkhorn A3 refits (PREREG.md:480-482) and on the NMI-0 and iteration-cap policies (PREREG.md:394-396, :446-447) appear only in PREREG; the names of the other two redo records only in PREREG.md:411-413.",
+    "evidence": "Fix report section 4 (eight questions) against A.3 and PREREG.",
+    "suggested_fix": "Make A.3 (or one short list in PREREG section 9) the complete list of the eight questions, each with the file and line where it is explained."
+   },
+   {
+    "id": "DOC-R14",
+    "severity": "note",
+    "location": "docs/PREREG.md:483-503; whole pre-registration",
+    "problem": "Suggestions a pre-registration auditor is likely to make. (1) The 19 early X1 score files and the filler score files can be shown to be untouched only by hashes; a committed list of their SHA-256 values would let an auditor confirm later that the files were not changed or selectively read, without revealing a value. (2) The tag and the notebook chain are both created inside the same repository by the same agent; the documents name no outside time stamp (no push date, deposit or registry entry). (3) The audit of 'no value displayed' was made by the agent that ran the checks (see DOC-R01).",
+    "evidence": "grep of the three documents for OSF, Zenodo, time stamp, push: no plan found; notebook chain verified internally (186 of 186 entries).",
+    "suggested_fix": "Record the hashes; push the tag to the project's GitHub remote (or deposit the registration) and record the remote's date next to the tag; ask the user to confirm the audit."
+   }
+  ],
+  "checks_run": [
+   "Check 1: read the triage and the first review's text for all 19 DOC findings and CF-03/-04/-06/-07; for each, located the new text with file:line at 08f1e3c (09_finding_quotes.py, plus direct reads of PREREG.md, PAPER_PLAN.md, ANALYSIS_SPEC.md, EQUIVALENT_COMMITS.json, notebook/2026-10-14.md) and checked it against the planned action.",
+   "Check 2: 01_doc13_moved_lines.py - every line removed by 4af5069 located in Appendix A or listed as rewritten; all 105 body edits read; sensitivity variants; A.2 against the first draft 6d0ca1f.",
+   "Check 3: 02_numbers.py (73 claims recomputed from committed records, manifests, prepped obs tables and pilot A1 scores); 03_no_pair_model.py and 03b_no_pair_checks.py (no-pair figures, scvi-tools 1.4.2 source, Monte Carlo for sim1); 04_p2_pilot_recount.py (P2 recount).",
+   "Check 4: 05_power_report_nan_probe.py (reproduced the NaN failure on scipy 1.17.1 and mapped it) and 08_power_report_fix_check.py (suggested fix tested on a temporary clone: bit-identical on 223 working points, 131 tests pass).",
+   "Check 5: 07_text_scans.py and reading of every status line, tag, redo, record and approval statement in the three documents for tense and dates; amendment-table times against git log (02_numbers.py, claims 71-73).",
+   "Check 6: read CONSTRAINTS.md SI-51 to SI-77 against every attribution in PREREG, PAPER_PLAN and ANALYSIS_SPEC; quoted SI-55, SI-68, SI-73, SI-75, SI-77.",
+   "Check 7: compared the disclosure paragraph, the definition of 'examined', the amendment table and the SI-66 entry with NB-20261014-21, NB-20261012-02/-04/-05, NB-20261007-01 and the first review's DOC-01 (no score file opened).",
+   "Check 8: read NB-20261014-20 to -22 and -29 to -35; recomputed or located every checkable claim; 06_notebook_chain_and_references.py (hash chain of 186 entries; commits, entries, ledger ids and paths cited in the new text).",
+   "Check 9: cross-read PREREG, PAPER_PLAN, ANALYSIS_SPEC, EQUIVALENT_COMMITS.json and CONSTRAINTS.md after all changes; looked for statements made stale by 8b90d79, 6aaa3ac, 56febe4, 4af5069 (07_text_scans.py); CONSTRAINTS.md sha256 against the artifact.",
+   "Check 10: read all new text as a reader without the earlier chat (SI-67): labels, acronyms, double uses of R-labels, tense and attribution wording.",
+   "Check 11: open-ended review for a referee or pre-registration auditor: audit scope, filler scores, external time stamp, hash list, scripts missing from the repository, completeness of the open-items list.",
+   "Re-ran all evidence scripts from a clean state with run_all.sh (2 min 12 s): every output file identical except pytest timings in 08."
+  ],
+  "artifacts_created": [
+   {
+    "artifact_id": "8276c6b0-183a-402b-8728-550bd163ee82",
+    "version_id": "e1b6ffc9-4548-4a2b-8a3a-75455a70962f",
+    "filename": "rigor_ledger_entries_recheck_docs_20261014.json",
+    "content_type": "application/json",
+    "size_bytes": 60955
+   },
+   {
+    "artifact_id": "f3c817e9-d0ad-4750-a61f-319b4a331832",
+    "version_id": "04bf4aa8-1784-4f17-923d-e40c7d71a377",
+    "filename": "RECHECK_DOCS_REPORT_20261014.md",
+    "content_type": "text/markdown",
+    "size_bytes": 58304
+   },
+   {
+    "artifact_id": "4bfb54e6-581e-40d4-bb80-1c7238ac3c68",
+    "version_id": "900b84e4-ef46-4ea3-bd26-e101b86cbe2f",
+    "filename": "recheck_docs_20261014_evidence.tar.gz",
+    "content_type": "application/gzip",
+    "size_bytes": 72131
+   },
+   {
+    "artifact_id": "61e77af8-903d-425b-9ac0-46ea4c947c92",
+    "version_id": "903b38f6-54a6-4e20-8cd0-adc47ab1b6c6",
+    "filename": "d2_new_findings.py",
+    "content_type": "text/x-python",
+    "size_bytes": 17417
+   },
+   {
+    "artifact_id": "de26e9d0-ae55-4a0e-803f-2ed90401d2b8",
+    "version_id": "ffeed434-7e53-4f9b-8bfb-e8b9030bccee",
+    "filename": "build_report.py",
+    "content_type": "text/x-python",
+    "size_bytes": 25112
+   },
+   {
+    "artifact_id": "ef6f42f4-19a4-446a-b3ba-d62a4af6b778",
+    "version_id": "9c05b6f9-bbef-4bad-a6aa-9fedd207af65",
+    "filename": "d1_finding_checks.py",
+    "content_type": "text/x-python",
+    "size_bytes": 17385
+   },
+   {
+    "artifact_id": "271512ee-0d3d-4053-8943-3d03dea46511",
+    "version_id": "da343ef9-607e-4818-8b53-e60a1061f253",
+    "filename": "d3_claims.py",
+    "content_type": "text/x-python",
+    "size_bytes": 19027
+   },
+   {
+    "artifact_id": "cf1ee038-202c-49dd-80e6-43edf9565a81",
+    "version_id": "609342b0-3db5-4b01-b495-a360795f7ba1",
+    "filename": "build_ledger_and_output.py",
+    "content_type": "text/x-python",
+    "size_bytes": 2708
+   }
+  ]
+ },
+ "_meta": {
+  "reviewed_commit": "08f1e3c39ea449677cea7e34f6201925d18f4b84",
+  "bundle_artifact_version": "2d4e2da6-2170-4989-a222-dd50764cbc45",
+  "date": "2026-10-14",
+  "profile": "RIGOR_REVIEWER",
+  "first_review_findings_version": "40b79c70-4782-43eb-ab8b-24cb05be2520"
+ }
+}

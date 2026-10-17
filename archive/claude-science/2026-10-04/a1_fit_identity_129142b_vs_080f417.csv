@@ -1,0 +1,15 @@
+tag,identical,max_abs_diff
+A1_atac_small_none_l0_c1_s100_8d38e2a3,True,0.0
+A1_atac_small_discriminator_l10_c1_s100_10d7da82,True,0.0
+A1_atac_small_reference_l10_c1_s100_b95922a7,True,0.0
+A1_atac_small_pooled_l10_c1_s100_96186f42,True,0.0
+A1_atac_small_barycenter_l10_c1_s100_a1e1f0be,True,0.0
+A1_atac_small_mmd_l10_c1_s100_2096ec70,True,0.0
+A1_atac_small_sinkhorn_l10_c1_s100_44c0f3e6,True,0.0
+A1_atac_small_none_l0_c0_s100_70bf3a6a,True,0.0
+A1_atac_small_discriminator_l10_c0_s100_a2c281cd,True,0.0
+A1_atac_small_reference_l10_c0_s100_8a31dbdb,True,0.0
+A1_atac_small_pooled_l10_c0_s100_651979e4,True,0.0
+A1_atac_small_barycenter_l10_c0_s100_ac964568,True,0.0
+A1_atac_small_mmd_l10_c0_s100_3d92df46,True,0.0
+A1_atac_small_sinkhorn_l10_c0_s100_7984a5ea,True,0.0

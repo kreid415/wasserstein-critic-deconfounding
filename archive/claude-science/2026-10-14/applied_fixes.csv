@@ -1,0 +1,45 @@
+finding_id,action,fragment_line_after,reason
+R-01,adjusted,methods.tex:65; discussion.tex:17,"Reviewer text, with the lead's wording for the count values ('count values differ between the two files (0 of 200 sampled matched pairs identical)') instead of 'gene-activity values computed separately'; discussion uses 'with different count values' instead of 're-quantified'; methods line split into four items (N-17). Own check: 11,270 of 11,270 matched on (batchname_all, barcode), cell types agree, 0 of 11,270 matched count rows identical."
+R-02,applied,legend.tex:6,"Reviewer text. Own byte comparison of docs/PREREG.md at c88cce3 and 08f1e3c confirms: s0-2, s4, s6-8 and the Disclosure paragraph identical; s3 and s5 changed; 11 of 12 s9 entries of 10-03/04 identical, the 10-03 entry carries the I091 correction."
+R-03,adjusted,methods.tex:151; methods.tex:152,"Reviewer text, except 'one latent per scorer path' (not in docs/EQUIVALENT_COMMITS.json or NB-20261013-40) left out and '(32 columns)' written as the record's 'all 32 compared columns'; split into two items (N-17)."
+R-04,applied,legend.tex:26; methods.tex:122,"Reviewer text in legend and methods; manifest X6 (arm, n_critic) counts checked."
+R-05,adjusted,methods.tex:9; methods.tex:133,"Backbone line: reviewer text. Baselines line shortened to 'scANVI adds min(10, max(2, round(E/3))) epochs after its scVI pretraining', because the Backbone line now states the shared epochs, minibatch and latent size (consistency, main-text length)."
+R-06,applied,methods.tex:110; supplement.tex:96,Reviewer text in methods and supplement (S-M15).
+R-07,adjusted,rq.tex:3,"Reviewer's locked sentence kept; the pending item shortened to 'that no X1 result has been examined' / 'the user's confirmation at the diff review (ANALYSIS_SPEC App. A.3, item 2)' to keep the main text under about 3,300 words; S-X still states the chat-record audit and the open definition of 'examined'."
+R-08,applied,legend.tex:27; legend.tex:28,Reviewer text for X7 and X8; manifest facts (18 references; X8 cells per task and V) checked.
+R-09,applied,legend.tex:35,Reviewer text.
+R-10,adjusted,rq.tex:23; rq.tex:38; rq.tex:7; rq.tex:30; rq.tex:45,"Reviewer text for rq.tex:23 and :38, except that 'PAPER_PLAN s3, R4 row;' is left out of the R4 pending text (main-text length; the rq audit row keeps it); sources added to the R0, R3 and R5 questions as given."
+R-11,applied,methods.tex:43; supplement.tex:207; supplement.tex:208,"Reviewer text in methods; in S-E2 the reviewer's cell text, with SI-66 and docs/prereg/r4_a1_record.json added to the source cells. Own read of r4_a1_record targets: immune|1 difference 0.0188 (flagged), b_common set by barycenter in 5 blocks and mmd in 1, never sinkhorn."
+R-12,adjusted,methods.tex:113; supplement.tex:97,"Main text keeps the UNDERPOWERED flag and the minimal detectable effects (0.131, 0.182) with a pointer to S-M15; the reviewer's full sentence is in S-M15, with sigma 0.0298 (12 df) and tau 0.109 (4 df) added from the same record (main-text length)."
+R-13,applied,discussion.tex:18,Reviewer text.
+R-14,adjusted,methods.tex:53; methods.tex:54,Reviewer text split into two items (N-17); 'Sinkhorn' added to the second item so that it stands alone.
+R-15,applied,supplement.tex:278; supplement.tex:260,"Reviewer text for the Harmony row and the rebuild sentence; freeze line 34 and run_cpu_baselines.py:76, :142 checked."
+R-16,applied,supplement.tex:305; supplement.tex:317,Reviewer text for both source brackets; the recommendation to commit the audit files is for the lead.
+R-17,adjusted,methods.tex:60,"Reviewer text without '; the ATAC tasks as gene-activity matrices', which the next Data line already states; the fingerprints source is kept."
+R-18,applied,supplement.tex:56,Reviewer text.
+R-19,applied,supplement.tex:179,"Reviewer's S-E1-note option (after the S-E1 table), chosen to keep the main text under about 3,300 words; manifest X3 targets and SI-41 sizes checked."
+R-20,applied,supplement.tex:75,Reviewer text; PREREG.md:98 and prereg_rules.py:59 checked.
+R-21,adjusted,supplement.tex:298; methods.tex:82,Reviewer's sentence placed in S-E6 instead of appended to methods.tex:88; the design block's pointer now includes S-E6 (main-text length).
+R-22,adjusted,supplement.tex:299; methods.tex:70,Reviewer's sentence placed in S-E6 instead of appended to methods.tex:73; the evaluation block's pointer now includes S-E6 (main-text length).
+N-01,applied,legend.tex:5,Legend only.
+N-02,applied,legend.tex:51,Legend only.
+N-03,adjusted,legend.tex:52,"Reviewer text with SI-36 added to the source (PCA once, as in methods)."
+N-04,applied,legend.tex:48,Glossary row added after 'arm'; marks the R1 gradient penalty as unrelated to rule R1.
+N-05,adjusted,legend.tex:53; legend.tex:57,"Glossary rows for CR-nn, KL warm-up, Tier 1/2, the metric names and the other abbreviations (GP, WGAN-GP, POT, OT, HVG, SD, JHPCE); spelling them out at first use in the main text declined because it would lengthen the main text."
+N-06,adjusted,methods.tex:33,'Discriminator and critics: same head architecture' at equal main-text length; 'one head per fit' left out for length (audit row records it).
+N-07,adjusted,methods.tex:29; supplement.tex:27; supplement.tex:203,Methods: 'at most 10 iterations' at equal length; supplement S-M4 and S-E2 give the stop threshold 1e-7 as written by the reviewer.
+N-08,adjusted,methods.tex:49; supplement.tex:199,"Methods: 'Discriminator: the same Adam settings, 1 step' (equal settings to the generator, CR-12) at no extra length; S-E2 row gets the reviewer's values."
+N-09,declined,methods.tex:61; discussion.tex:15,"Adds about 8 words to the main text; S-D2 already says the Villani batch is the same 1,022 cells in both immune tasks, so '18 batches' (task-batch pairs) is not wrong."
+N-10,applied,supplement.tex:60; supplement.tex:63,Supplement only.
+N-11,adjusted,methods.tex:91,Reviewer's content (tag before the first A1 fit; each record committed before its stage) reworded to the original line's length.
+N-12,applied,rq.tex:15,Source bracket only.
+N-13,declined,rq.tex:17; results.tex:15,"Adds about 25 words to rq and results; the open item on SI-75 is stated once, in methods (Statistical analysis), and SI-75 stays locked until the user decides."
+N-14,adjusted,methods.tex:25; legend.tex:49,"Methods: 'Each arm except scvi_adv adds ... to the loss, lambda fixed throughout' (one word shorter than v1); the glossary row gets the fuller wording."
+N-15,adjusted,legend.tex:30; methods.tex:123,Glossary: reviewer wording; methods: 'linear-or-default decoder' at equal length.
+N-16,declined,methods.tex:138,Adds about 6 words to the main text; S-E2 states sysVI's normalised input and Gaussian likelihood.
+N-17,applied,methods.tex:64; methods.tex:54; methods.tex:147; methods.tex:152; supplement.tex:307; supplement.tex:327; supplement.tex:329,"Split into one claim per item: methods Families/containment, Sinkhorn, hardware placement and identity lines; supplement D1-D9, the Sinkhorn disclosure and the X1-scored disclosure."
+N-18,applied,methods.tex:123,No fragment change; conflict reported (experiment matrix and the design recheck say resolution IV).
+N-19,adjusted,supplement.tex:260,"Added to the S-E5 lead-in as 'all 1,098 A1 latents and score rows' after checking every A1 latent and score file (the review sampled 61 rows)."
+GAP-09,applied,supplement.tex:76,"Review coverage gap 9 (PREREG s8, v2): S-M12 item on R1 freezing and extension rows on the task's machine; supplement only."
+LEN-1,applied,rq.tex:3,"Not a finding: rq lead-in sentence 'Each block gives the question, ...' removed to keep the main text under about 3,300 words."
+LEN-2,applied,results.tex:3,Not a finding: results lead-in sentence 'Each subsection: ...' removed for the same reason.

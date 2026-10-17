@@ -1,0 +1,369 @@
+{
+ "verdict_jhpce": "NO-GO",
+ "a1_valid": "yes",
+ "a1_rationale": "A1's fit and score paths are unchanged at 080f417: the A1 latents are bit-identical to the tag for all 7 arms x 2 decoders (14/14, re-run by the reviewer), the scorer's metric columns are identical on 4 latents (15/15 each, one re-scored here), the A1 rows of manifest v3 are byte-identical to the tagged ones (rebuild reproduces sha256 6efbe422...), run_A1.sh points at manifest v3 and the new tier12_v2/A1 (absent today; dry run 1,098 rows), all five suites pass, and the new code runs on the local GPU (24-row smoke, resolved plans as intended). No finding changes an A1 fit or score. The lead may tag prereg-tier12-v2 at 080f417 and restart A1; recommended is to tag one commit later containing only the RR-01 fix (test pinned to 129142b or tag in the bundle recipe) and the sec 9/sec 8 text corrections (RR-02, RR-03 or its implementation as reporting only, RR-05), so A1 and the JHPCE jobs share one tag, then re-run tests/scvi and the A1 identity check there. Run every stage from one worktree pinned at the tag (RR-04); commit the re-stamped A1 preflight (RR-06).",
+ "findings": [
+  {
+   "id": "RR-01",
+   "severity": "high",
+   "title": "JHPCE production job aborts on the node: tests/scvi needs tag prereg-tier12-v1, which the bundle clone does not carry",
+   "location": "tests/scvi/test_baseline_guard.py:38,63; cluster/jhpce/prod_command.py:91; cluster/jhpce/local_rehearsal.sh:40-42,97; cluster/jhpce/prod_fit_job.sh:99-100",
+   "affects_a1": false,
+   "stages_affected": [
+    "JHPCE jobA",
+    "JHPCE jobB"
+   ],
+   "description": "prod_fit_job.sh runs `pytest tests/scvi` in a repo cloned from a git bundle that holds one refs/heads ref (the rehearsal's documented recipe; prod_command.py clones `$PWD/wcd.bundle`). test_baseline_guard.py resolves the tagged fitter with `git show prereg-tier12-v1:scripts/fit_paper_config.py` (check=True). The clone has no tags, so 2 tests fail and the job exits 2 before any fit, after the queue wait (7.8 h measured for a 2-h L40S job). The lead's rehearsal (at 0a87280) predates this test.",
+   "evidence": "cluster/jhpce/local_rehearsal.sh at 080f417, both jobs: exit 2, 'FATAL: tests/scvi failed on this node', '2 failed, 108 passed, 1 skipped' (rr/out/rehearsal_jobA|B). Bundle simulation: 0 tags in clone, `git show prereg-tier12-v1:...` exit 128; `git archive eb444fe` (test_kl_warmup) works. Same rehearsal with refs/tags/prereg-tier12-v1 added to the bundle: both exit 0, tests 110 passed / 1 skipped, fingerprints 8/8, runner dry run 100 / 150 rows (keys ...__tags-d5da370a4d0c, ...__tags-91daef08ab82).",
+   "suggested_fix": "Either pin the test to the commit (git show 129142b...:scripts/fit_paper_config.py, as test_kl_warmup pins eb444fe) or bundle the tag (git bundle create wcd.bundle <ref> refs/tags/prereg-tier12-v1 [refs/tags/prereg-tier12-v2]) and change local_rehearsal.sh and the documented submit recipe to match; then re-run local_rehearsal.sh for jobA and jobB at the commit to be tagged."
+  },
+  {
+   "id": "RR-02",
+   "severity": "low",
+   "title": "PREREG sec 9 subset-PCR example names the wrong dose and omits that the latent is an uncorrected embedding",
+   "location": "docs/PREREG.md:178-179; experiments/fix_score_fit_regression/run.sh:8,54; results/X3_pancreas_none_l0_c1_s10_31994c65.pcr_reference.csv",
+   "affects_a1": false,
+   "stages_affected": [
+    "documentation (PREREG sec 9)",
+    "X3",
+    "X8"
+   ],
+   "description": "The amendment says 'X3 pancreas dose 0: PCR_batch 0.573 with the all-feature reference, 0.000 with the HVG one'. The evidence row is tag X3_pancreas_none_l0_c1_s10_31994c65, whose spec has deplete_pct 50, and the latent is the first 10 columns of the prepped HVG PCA (regress_pcr_reference.py make-latent), not a fit.",
+   "evidence": "Re-run at 080f417 (checks/check_pcr_subset_rr.sh): dose 50: scorer PCR_batch 0.573082 = all-feature reference 0.573082, HVG reference 0.0; dose 0 (tag ..._ebe9903e): all-feature 0.560350, HVG 0.0.",
+   "suggested_fix": "Reword before tagging: 'X3 pancreas, uncorrected 10-PC HVG embedding: PCR_batch 0.573 (dose 50) / 0.560 (dose 0) with the all-feature reference, 0.000 with the HVG one'."
+  },
+  {
+   "id": "RR-03",
+   "severity": "low",
+   "title": "PREREG sec 9 says the scib fallback flags are reported with every R1 and R4 input; no rule script reads them",
+   "location": "docs/PREREG.md:181-184; scripts/prereg_rules.py (outcomes, r1/r4 records); scripts/score_scib_native.py:224-233",
+   "affects_a1": true,
+   "stages_affected": [
+    "R1 record",
+    "R4-a1 record",
+    "R4-x1 record"
+   ],
+   "description": "traj_root_fallback, kbet_labels_forced_one and kbet_labels_skipped are written by the scorer, but outcomes()/r1/r4 never read them; grep finds no consumer outside the scorer, tests and notebook. The R1 record produced after the restarted A1 would therefore not carry what the frozen PREREG promises. Affects A1 only through its R1 record (reporting); no fit, score or decision value changes.",
+   "evidence": "grep -rln 'traj_root_fallback|kbet_labels_forced_one' (py/sh/md, excluding legacy): notebook/INDEX.md, notebook/2026-10-03.md, tests/stage/fake_env.py, tests/scoring/test_scorer_provenance_and_subset.py, scripts/score_scib_native.py only.",
+   "suggested_fix": "Add per-cell counts of flagged rows to the R1/R4 records (reporting only; decisions unchanged) before the tag, or reword the amendment to 'recorded in every score row'."
+  },
+  {
+   "id": "RR-04",
+   "severity": "low",
+   "title": "scorer_git_sha is repository HEAD, so any later commit (incl. notebook-only) splits a rule input; run_A1.sh invites 'v2 or later'",
+   "location": "scripts/score_scib_native.py:146-152; scripts/prereg_rules.py:73,219-238,290; scripts/run_stage.py SCORER_PROVENANCE; experiments/A1_lambda_pilot/run_A1.sh:3",
+   "affects_a1": false,
+   "stages_affected": [
+    "A2",
+    "A3",
+    "R2/R3",
+    "R4 extension rows",
+    "SI-45 rows"
+   ],
+   "description": "prereg_rules refuses a rule input whose rows differ in scorer_git_sha. R2/R3 read A1 rows (scored at the tag) together with A2/A3 rows and SI-45 / R4 extension rows scored days later. The repository receives notebook commits several times a day; scoring any of those rows from a checkout one commit later makes R2/R3 refuse until ~1,100 A1 rows are re-scored. The failure is loud (no wrong result), but the run sheet does not say how to avoid it, and run_A1.sh says 'tag prereg-tier12-v2 or later'.",
+   "evidence": "Code read at 080f417; tests/prereg/test_provenance_rule.py::test_mixed_provenance_is_refused passes (other suite 311 passed).",
+   "suggested_fix": "State in run_A1.sh and the later stage launchers that every stage runs from one worktree pinned at the tag (notebook commits from another worktree), or key provenance on a hash of the scorer files plus package versions instead of HEAD."
+  },
+  {
+   "id": "RR-05",
+   "severity": "low",
+   "title": "CR-11 remainder: PREREG sec 8 still says no runner writes the failures table",
+   "location": "docs/PREREG.md:140",
+   "affects_a1": false,
+   "stages_affected": [
+    "documentation (PREREG sec 8)"
+   ],
+   "description": "Sec 8: 'The failures table (tag, status, detail) has to be written by the fit harvester; no runner writes it yet.' run_stage.py writes OUT/failures.csv; sec 9 has no entry correcting this.",
+   "evidence": "docs/PREREG.md:140 at 080f417; run_stage.py FAILURE_COLS and failures view.",
+   "suggested_fix": "One dated line in sec 9 before the tag."
+  },
+  {
+   "id": "RR-06",
+   "severity": "low",
+   "title": "A1 PREFLIGHT.md predates v2; re-stamp before the restart (workflow gate rule)",
+   "location": "experiments/A1_lambda_pilot/PREFLIGHT.md (GO 2026-10-03, plan_sha da141677a23f99af, commit 129142b)",
+   "affects_a1": true,
+   "stages_affected": [
+    "A1 restart (preflight record)"
+   ],
+   "description": "The committed GO record cites manifest v1, tests/scvi 72 passed and out dir tier12/A1. The plan is unchanged, but evidence lines for PF-09, PF-12, PF-19, PF-20, PF-22, SC-19 and SC-20 refer to v1 artefacts. Process item for the A1 restart; no fit or score changes.",
+   "evidence": "Re-stamped record (this review, rr/preflight/experiments/A1_lambda_pilot): same plan hash, 46 items, 31 pass, 15 n/a, 0 blocking -> GO at 080f417.",
+   "suggested_fix": "Commit the re-stamped record (or an equivalent) with the tag."
+  },
+  {
+   "id": "RR-07",
+   "severity": "low",
+   "title": "harvest_local.py protects only a 'tier12' path component; the restarted A1 lives in tier12_v2/A1",
+   "location": "cluster/jhpce/harvest_local.py:182",
+   "affects_a1": false,
+   "stages_affected": [
+    "JHPCE harvest"
+   ],
+   "description": "The guard refuses --dest with a path component equal to 'tier12'. tier12_v2 is not matched, so a mistyped --dest could merge a harvest into the new A1 tree.",
+   "evidence": "Code read; run_A1.sh --out-dir $D/tier12_v2/A1.",
+   "suggested_fix": "Refuse any component starting with 'tier12' (or the A1 out dir explicitly)."
+  },
+  {
+   "id": "RR-08",
+   "severity": "low",
+   "title": "SI-45 rows overwrite --extension-manifest unconditionally",
+   "location": "scripts/freeze_matched_lambda.py:124-128; scripts/prereg_rules.py:188-202 (write_manifest os.replace)",
+   "affects_a1": false,
+   "stages_affected": [
+    "R4-a1 freeze",
+    "SI-45"
+   ],
+   "description": "At the freezing run the SI-45 default-half rows are written to --extension-manifest with os.replace. Passing the previous round's extension path (the usage shows one file per round) silently replaces that round's R4 extension manifest, which later rule calls need.",
+   "evidence": "Code read; tests/prereg/test_si45_edge_extension.py uses a fresh path.",
+   "suggested_fix": "Refuse an existing --extension-manifest path in the freezing run (or use a distinct default name for SI-45 rows)."
+  }
+ ],
+ "prior_issues_status": [
+  {
+   "id": "CR-01",
+   "state_at_tag": "fixed",
+   "evidence": "score_scib_native.py subset branch (l.187-200) no longer builds an HVG PCA; scib recomputes the all-feature PCA of the scored cells; a prepped file with uns['pca'] is refused. Re-run at 080f417: X3 pancreas dose-50 cells, uncorrected embedding: scorer PCR_batch 0.573082 == all-feature reference (HVG reference 0.0). Full-data path unchanged: stored A1 latent A1_atac_small_barycenter_l30_c0_s100 re-scored 15/15 columns identical. tests/scoring passes (x13+scoring 29 passed)."
+  },
+  {
+   "id": "CR-02",
+   "state_at_tag": "fixed",
+   "evidence": "run_stage.py --tags-file (read_tags_file, select_rows; key ...__tags-<sha12>), CPU lanes (row_kind, cpu_q, --cpu-lanes/--cpu-python, device 'cpu' + cpu_model check). Dry runs at 080f417: X13 atac_small refused without CPU lanes, 35 GPU + 16 CPU fits with --cpu-lanes 2; X1+X13 lung/pancreas/sim2 with jobB tags: 150 rows; tests/stage 62 passed (incl. real e2e)."
+  },
+  {
+   "id": "CR-03",
+   "state_at_tag": "fixed (job blocked by new RR-01)",
+   "evidence": "cluster/jhpce/prod_fit_job.sh + prod_helpers.py + prod_command.py + harvest_local.py + make_tags.py; L40S witness, env versions, tests/scvi on the node, slots, input hashes, fingerprints, claims, stop guard, harvest SHA-256. tests/jhpce 36 passed. Rehearsal at 080f417 exits 2 (RR-01); with the tag in the bundle both jobs pass (exit 0, 100 / 150 rows)."
+  },
+  {
+   "id": "CR-04",
+   "state_at_tag": "fixed",
+   "evidence": "fit_paper_config.x3_draw 'nested_v1' + realised-composition weights. checks/check_x3_nested_v1.py on the prepped obs: N per dose 8,402 / 20,000 / 14,409 / 17,872 (all doses); kept declared cells and refill nested across doses; overlap with dose 0 = N - |declared difference| at every dose; per-type kept = h0 - round(d h0); smallest kept type at dose 95: 30 / 30 / 37 / 67 (none empties); weighted (batch, type) counts equal K0 exactly at doses 50/80/95; cells with weight 0: pancreas 1-2, others 0."
+  },
+  {
+   "id": "CR-05",
+   "state_at_tag": "fixed",
+   "evidence": "Scorer writes scorer_git_sha, scorer_dirty, score_host, cpu_model, cpu_simd, numba_cpu_name, scorer_versions (score_scib_native.py:146-160); run_stage.py refuses missing/mixed SCORER_PROVENANCE in preflight and gate; prereg_rules.check_provenance (l.219-238) called in outcomes (l.290). tests/prereg/test_provenance_rule.py (7) pass. Operational caveat RR-04. Provenance: the rule-side refusal was added by the lead in commit 443b17b (2026-10-04 10:08 EDT; 'lead decision 2026-10-04', NB-20261004-08) to prereg_rules.py, which was frozen at the v1 tag and is re-frozen by the v2 tag; the change is disclosed in PREREG sec 9. The reviewer made no edit: fresh clone of origin, git status --porcelain 0 lines, prereg_rules.py blob 4c8c12c0 = 080f417:scripts/prereg_rules.py."
+  },
+  {
+   "id": "CR-06",
+   "state_at_tag": "fixed",
+   "evidence": "guarded_plan_class wraps scANVI pretraining/scANVI/sysVI plans (non-finite loss, distribution-validation errors, non-finite parameters -> NonFiniteLossError -> 'diverged'). tests/scvi/test_baseline_guard.py passes locally (bit identity vs the tagged fitter for scanvi and sysvi); GPU smoke at 080f417: X13 pancreas scanvi and sysvi exit 0, finite latents."
+  },
+  {
+   "id": "CR-07",
+   "state_at_tag": "disclosed",
+   "evidence": "PREREG sec 9 (2026-10-04, pairing wording) states shared init and split in every arm, shared minibatch order only within an arm and for head-free arms (MMD, Sinkhorn); consistent with the first review's measurement (0/5 first-epoch minibatches equal to lambda=0 for discriminator/reference/pooled/barycenter, 5/5 for MMD)."
+  },
+  {
+   "id": "CR-08",
+   "state_at_tag": "fixed (reporting promise open: RR-03)",
+   "evidence": "Score rows carry traj_root_fallback, kbet_labels_forced_one, kbet_labels_skipped from wrappers of scib's get_root, diffusion_nn and kBET_single that pass values through and check call accounting against scib 1.1.7 kbet.py:110-189 (read in the installed source). Dose-50 X3 scoring and the A1 re-score ran with the wrappers (exit 0, values identical). No rule script reports the flags (RR-03)."
+  },
+  {
+   "id": "CR-09",
+   "state_at_tag": "fixed",
+   "evidence": "resolved_plan() records optimiser, KL warm-up, adversary settings, lambda_GP and every optimizer's param groups in the latent config; check_kl_warmup fails loudly on a mismatch. GPU smoke: critics gradient_penalty True / lambda_gp 10.0, discriminator/MMD/Sinkhorn False, KL warm-up 400 (stock), 2 (X15 'complete', 2 epochs), 0 (sysVI)."
+  },
+  {
+   "id": "CR-10",
+   "state_at_tag": "fixed",
+   "evidence": "score_final_config.py, analyze_final.py, build_final_manifest.py, run_final_sweep.sh, scvi_adv_fit.py, score_parallel.sh etc. moved to legacy/ (18 of 19 legacy files carry the RETIRED guard; the 19th is not a program); tests/test_legacy_retired.py passes (other suite 311 passed)."
+  },
+  {
+   "id": "CR-11",
+   "state_at_tag": "open (partial)",
+   "evidence": "Fixed: SI-19/SI-20 annotated with the SI-27 counts; edge_unresolved case pre-registered (SI-45) and implemented (prereg_rules.default_half_extensions, freeze_matched_lambda stage a1, decide_a2_a3 refusal until rows are scored; tests/prereg/test_si45_edge_extension.py passes). Open: PREREG sec 8 l.140 still says no runner writes the failures table (RR-05)."
+  },
+  {
+   "id": "CR-12",
+   "state_at_tag": "disclosed",
+   "evidence": "PREREG sec 9 'declared differences' matches the code: critics 5 Adam steps (1e-4, betas 0/0.9) per generator step on one minibatch; discriminator 1 step (1e-3, eps 0.01, wd 1e-6); scANVI min(10, max(2, round(E/3))) extra epochs at train_size 0.9 (comment fixed in fit_baseline); SysVI without KL warm-up (resolved plan: n_epochs_kl_warmup 0 in the GPU smoke)."
+  },
+  {
+   "id": "CR-13",
+   "state_at_tag": "open (partial)",
+   "evidence": "Fixed: N8 warm-up sensitivity added as X15 (84 rows, SI-44; fitter kl_warmup setting live: plan records n_epochs_kl_warmup = max_epochs). Open: no SI-38 analysis script (no consumer in scripts/), N1 masking gap and N6 per-minibatch n_k not logged (logged keys unchanged), scib clustering grid not stated in docs. Reporting items; not blocking A1 or the JHPCE fillers."
+  },
+  {
+   "id": "CR-14",
+   "state_at_tag": "fixed",
+   "evidence": "Subset branch refuses latent cells missing from the prepped file and cells listed twice; a non-unique prepped index raises in get_indexer (score_scib_native.py:193-200); tests/scoring/test_scorer_provenance_and_subset.py passes."
+  }
+ ],
+ "checks_run": [
+  {
+   "command": "git diff --stat 4fde2b6 080f417; git diff --stat prereg-tier12-v1 080f417 -- src",
+   "result": "080f417 differs from 4fde2b6 only in docs/PREREG.md and experiments/integration_checks_20261004/; src/ unchanged since the tag"
+  },
+  {
+   "command": "run_suites_rr.sh at 080f417 (five suites, one at a time, nice 19, CUDA hidden)",
+   "result": "stage+e2e 62 passed; scvi 110 passed 1 skipped (WCD_REQUIRE_DATA=1); x13+scoring 29 passed; other 311 passed; jhpce 36 passed"
+  },
+  {
+   "command": "python3 scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 --bary-iter 10 --out <tmp>; sha256sum; row diff vs tagged manifest",
+   "result": "sha256 6efbe422...e1cf24 = committed v3; 6,930 vs 6,846 rows; only X3 (828 re-tagged), X13 (8 knn 160->2), X15 (+84) differ; 6,010 shared rows byte-identical, same order"
+  },
+  {
+   "command": "experiments/integration_checks_20261004/a1_fit_identity.sh <tag worktree> <080f417> <out> (CPU, 1 epoch, atac_small, seed 100)",
+   "result": "14/14 latents identical, max|dz| = 0"
+  },
+  {
+   "command": "score_scib_native.py at 080f417 on tier12/A1/latents/A1_atac_small_barycenter_l30_c0_s100_42d22986.npz (read only) + compare_score_rows.py vs stored score",
+   "result": "15/15 columns identical"
+  },
+  {
+   "command": "check_x3_nested_v1.py (fitter x3_draw + depletion_oracle_weights on prepped obs, 4 tasks x 5 doses)",
+   "result": "equal N 8,402/20,000/14,409/17,872; nested; overlap formula exact; min kept type at dose 95 30/30/37/67; weighted counts == K0 at 50/80/95; weight-0 cells pancreas 1-2"
+  },
+  {
+   "command": "check_pcr_subset_rr.sh (X3 pancreas uncorrected HVG-PCA latent, dose 0 and 50; scorer + regress_pcr_reference.py check)",
+   "result": "dose 50: scorer 0.573082 = all-feature, HVG 0.0; dose 0: all-feature 0.560350, HVG 0.0"
+  },
+  {
+   "command": "run_stage.py --dry-run: X13 atac_small without/with --cpu-lanes; X1+X13 jobB --tags-file; A1 (run_A1 selection); X1 pancreas",
+   "result": "refused (16 CPU rows need lanes) / 35 GPU + 16 CPU fits / 150 rows key ...__tags-91daef08ab82 / 1,098 rows needs_fit / refused (placeholders)"
+  },
+  {
+   "command": "cluster/jhpce/local_rehearsal.sh --job jobA|jobB --sha 080f417...",
+   "result": "exit 2 both: tests/scvi 2 failed (test_baseline_guard: git show prereg-tier12-v1 fails in the bundle clone), 108 passed, 1 skipped"
+  },
+  {
+   "command": "same rehearsal from a scratch copy whose bundle also holds refs/tags/prereg-tier12-v1",
+   "result": "exit 0 both: tests/scvi 110 passed 1 skipped; fingerprints 8/8; dry runs 100 rows (key ...__tags-d5da370a4d0c) and 150 rows (...__tags-91daef08ab82)"
+  },
+  {
+   "command": "bundle simulation (single refs/heads ref at 080f417, git clone, git show tag / git archive eb444fe)",
+   "result": "0 tags in clone; git show prereg-tier12-v1 exit 128; git archive eb444fe exit 0; with the tag ref in the bundle the clone has the tag"
+  },
+  {
+   "command": "gpu_smoke_080f417.sh on the local RTX 3080 (24 rows, 1-2 epochs; placeholder lambdas -> 10 in a scratch manifest)",
+   "result": "24/24 exit 0, finite latents; resolved plans: lambda_GP 10 for reference/pooled/barycenter only; KL warm-up 400 (stock), 2 (X15 complete, 2 epochs), 0 (sysVI); X3 row 14,409 cells, nested_v1, 9-batch weight table"
+  },
+  {
+   "command": "read tier12/x13_scanorama_timing/scanorama_timing.csv, tier12/A1 listings (read only)",
+   "result": "knn20 1,843.2 s 10.46 GB; knn80 7,456.6 s tree 21.56 / main 23.23 GB; knn160 timeout 8 h 43.85 GB; 202 A1 latents + 202 scores, mtimes 17:17:59-09:13:36 EDT; tier12_v2 absent"
+  },
+  {
+   "command": "tags files vs manifest v3; X15 rows vs X6 (extra normalised); KL weights from scvi-tools 1.4.2 _compute_kl_weight",
+   "result": "250 = pre-freeze X1/X13 GPU rows of 5 tasks, jobA 100 + jobB 150 disjoint, no placeholders; exactly 12 X15 stock rows equal X6 rows (= docs/x15_stock_equal_followups.csv); weights 0.2325/0.2025/0.595/0.6125/0.9975, complete 0.9958/0.9894"
+  },
+  {
+   "command": "experiment-preflight + experiment-preflight-singlecell records (workspace)",
+   "result": "JHPCE production: 46 items, 17 pass, 28 n/a, 1 fail (PF-22 = RR-01) -> NO-GO; A1 re-stamp at 080f417: 31 pass, 15 n/a, 0 blocking -> GO"
+  }
+ ],
+ "artifacts": [
+  {
+   "filename": "rereview_prereg-tier12-v2_080f417.md",
+   "version_id": "a94ecf31-9745-4130-9f94-797621bbab50"
+  },
+  {
+   "filename": "rereview_findings.csv",
+   "version_id": "7e7607c9-3b8f-46ba-9e94-0111e604fc4d"
+  },
+  {
+   "filename": "prior_issues_status_080f417.csv",
+   "version_id": "42fc77d4-e733-45cd-a8f7-60cd0d5e736e"
+  },
+  {
+   "filename": "prereg_sec9_factcheck.csv",
+   "version_id": "2298859e-09e5-45a2-acee-7d38e8eee158"
+  },
+  {
+   "filename": "PREFLIGHT_jhpce_fillers_x1_x13_prod.md",
+   "version_id": "7096f221-44ed-481f-8fec-d7fea5f24839"
+  },
+  {
+   "filename": "preflight_jhpce_fillers_x1_x13_prod.json",
+   "version_id": "f6256ee6-7ad0-4217-a7bb-72aa9a8e3975"
+  },
+  {
+   "filename": "PREFLIGHT_A1_lambda_pilot_v2_restamp.md",
+   "version_id": "79d0a942-0701-4cec-9232-ff3e3c25cbfc"
+  },
+  {
+   "filename": "preflight_A1_lambda_pilot_v2_restamp.json",
+   "version_id": "9cd68549-88a5-4ed3-8c5f-e75e3e2229a0"
+  },
+  {
+   "filename": "manifest_v3_vs_tag.json",
+   "version_id": "25aaca2e-f832-4fc6-b6f4-c02c2245eab5"
+  },
+  {
+   "filename": "run_suites_rr.sh",
+   "version_id": "99b81f20-72a5-4583-98c8-08d824173a63"
+  },
+  {
+   "filename": "check_x3_nested_v1.py",
+   "version_id": "5d42186e-a5cb-4c4c-b570-386d59411f66"
+  },
+  {
+   "filename": "check_pcr_subset_rr.sh",
+   "version_id": "290880f1-7489-43ac-8bde-be1e07203798"
+  },
+  {
+   "filename": "gpu_smoke_080f417.sh",
+   "version_id": "a8839e2e-16a8-4632-9e2d-582045923842"
+  },
+  {
+   "filename": "test_suites_summary_080f417.txt",
+   "version_id": "203de849-38d7-4ce4-9c23-0c61604f039e"
+  },
+  {
+   "filename": "x3_nested_v1_check.csv",
+   "version_id": "409390d7-d63a-4802-8ada-9cd988662a0d"
+  },
+  {
+   "filename": "pcr_reference_dose50.csv",
+   "version_id": "08267925-91d7-4fde-b67c-edfd6f9c7810"
+  },
+  {
+   "filename": "pcr_reference_dose0.csv",
+   "version_id": "9596fd4d-aa96-4fd7-9017-8006574e9eb5"
+  },
+  {
+   "filename": "a1_fit_identity_129142b_vs_080f417.csv",
+   "version_id": "539e4f9b-7c90-4422-99f2-37ffd1145d67"
+  },
+  {
+   "filename": "rehearsal_jobA_080f417.json",
+   "version_id": "81584c52-a5d1-4ef5-96ab-8fd2b18fe14c"
+  },
+  {
+   "filename": "rehearsal_jobB_080f417.json",
+   "version_id": "c2bdabdd-eab4-4eb3-b517-cee8f10d3d48"
+  },
+  {
+   "filename": "rehearsal_jobA_080f417_tag_in_bundle.json",
+   "version_id": "36e070b1-71ad-441e-a9bc-361618027446"
+  },
+  {
+   "filename": "rehearsal_jobB_080f417_tag_in_bundle.json",
+   "version_id": "17b40dc9-b423-48ae-863d-548b35df06c7"
+  },
+  {
+   "filename": "rehearsal_jobA_080f417_pytest_tests_scvi.txt",
+   "version_id": "5827b539-5d0f-4529-aef0-ee8728ab113f"
+  },
+  {
+   "filename": "rescore_A1_barycenter_l30_compare.csv",
+   "version_id": "ed38fd60-66d0-4451-8e38-e68629f954e9"
+  },
+  {
+   "filename": "gpu_smoke_080f417.txt",
+   "version_id": "bde72cc1-8e72-49f4-8eef-f76a13e9f852"
+  },
+  {
+   "filename": "rereview_output.json",
+   "version_id": "ff2927df-552d-42db-91e8-6b4c94595ca0"
+  }
+ ],
+ "not_reviewed": [
+  "cluster/jhpce/prod_helpers.py summary/stagekey/pack/claims logic line by line (covered only by the 36 jhpce simulation tests and the rehearsal)",
+  "anything on a real L40S node (nvidia-smi, env versions, Slurm, fastscratch)",
+  "gate_report.py, gate_task_split.py, x3_si41_report.py, manifest_v3_report.py changes and docs/wall_time_*",
+  "X8 subset scoring on real latents; notebook entries; manuscript",
+  "JHPCE walltime: L40S 8-lane factor 4.62 from 3-epoch immune fits applied untested to scANVI/sysVI (175 of 250 rows); covered by the 24-h request and stop guard, recorded as a caveat",
+  "no novelty or prior-work search and no literature retrieval (code re-review)"
+ ]
+}

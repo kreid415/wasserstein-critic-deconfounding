@@ -1,0 +1,147 @@
+# Proposed edits for the related_review track. NOT applied to the repository or to any supplied file.
+# Line numbers are those of paper/paper.tex and paper/refs.bib at commit add2f73 (branch paper).
+# Compile test: see report section 13. Apply from the repository root with: git apply --whitespace=nowarn proposed_edits_related_review.diff
+--- a/paper/paper.tex
++++ b/paper/paper.tex
+@@ -82,3 +82,3 @@
+ decoder & Conditioned: the decoder receives the batch label, as scVI is usually used. Unconditioned: the decoder gets no batch label, so the adversary is the only batch correction. \src{\file{scvi_adversarial_plan.py}:534, :537; \file{tests/scvi/test_adversarial_plan_v2.py}:118} \\
+-arm & One method in the comparison: none (plain scVI, strength 0); discriminator (JS, Jensen--Shannon); reference, pooled and barycenter critics (W1, Wasserstein-1); mmd (maximum mean discrepancy); sinkhorn (Sinkhorn divergence); scvi\_adv (scvi-tools' own adversary). \src{manifest; \file{scvi_adversarial_plan.py}:4--17} \\
++arm & One method in the comparison: none (plain scVI, strength 0); discriminator (JS-type, after the Jensen--Shannon form of the original GAN objective); reference, pooled and barycenter critics (W1, Wasserstein-1); mmd (maximum mean discrepancy); sinkhorn (Sinkhorn divergence); scvi\_adv (scvi-tools' own adversary). \src{manifest; \file{scvi_adversarial_plan.py}:4--17} \\
+ variant arms & Follow-up versions of an arm: discriminator\_sn and pooled\_sn (spectrally normalised), discriminator\_r1 (R1 gradient penalty of Mescheder et al., unrelated to rule R1), reference\_fixed (reference cells held fixed), discriminator\_ref and mmd\_ref (reference-anchored JS and MMD). \src{manifest; \file{scvi_adversarial_plan.py}:12--24; SI-22; SI-23} \\
+@@ -151,3 +151,3 @@
+ \item An adversarial conditional variational autoencoder (VAE) and GLUE mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+-\item scCRAFT added a triplet loss against the over-correction of its adversarial loss under heterogeneous compositions \citep{he2025partially}.
++\item scCRAFT added a triplet loss against the over-correction of its adversarial loss under heterogeneous compositions \citep{he2025partially} \pending{kept only if the main text names scCRAFT}{your decision, Related work}.
+ \item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}.
+@@ -285,4 +285,5 @@
+ \item 14 methods, five scenarios, including non-identical cell types across batches \citep{tran2020benchmark}.
+-\item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; its tasks are used here \src{SI-02}.
++\item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; eight of its 13 tasks are used here \src{SI-02; \file{docs/prepped_fingerprints_scib.json}}.
+ \item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
++\item scIB-E (extended scIB): six losses on the batch label (two adversarial, a GAN and gradient reversal; four not) in one scVI framework, then label-aware levels; weights tuned with Ray Tune (automated hyperparameter search) on the immune task \citep{yi2025benchmarking}.
+ \end{itemize}
+@@ -292,5 +293,5 @@
+ \item scVI: zero-inflated negative binomial model conditioned on batch, with a low-dimensional Gaussian latent \citep{lopez2018deep}; implemented in scvi-tools \citep{gayoso2022python}.
+-\item scANVI: semi-supervised scVI that uses cell-type labels \citep{xu2021probabilistic}.
+-\item sysVI: conditional VAE with a VampPrior and latent cycle-consistency, for substantial batch effects \citep{hrovatin2025integrating}.
+-\item trVAE: MMD on the decoder layer that follows the bottleneck \citep{lotfollahi2020conditional}.
++\item scANVI (single-cell ANnotation using Variational Inference): semi-supervised scVI that uses cell-type labels \citep{xu2021probabilistic}.
++\item sysVI: conditional VAE with a VampPrior (multimodal variational mixture of posteriors prior) and latent cycle-consistency, for substantial batch effects \citep{hrovatin2025integrating}.
++\item trVAE (transfer VAE): conditional out-of-distribution generation for unpaired data, for example perturbation response; MMD on the decoder layer that follows the bottleneck matches the conditions \citep{lotfollahi2020conditional}.
+ \end{itemize}
+@@ -299,9 +300,8 @@
+ \begin{itemize}
+-\item DANN: domain-indiscriminate features via gradient reversal against a domain classifier \citep{ganin2016domain}.
+-\item AD-AE: autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
+-\item scDREAMER: adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
+-\item scIB-E: six batch losses in one scVI framework, weights tuned with Ray Tune \citep{yi2025benchmarking}.
++\item DANN (domain-adversarial neural network): domain-indiscriminate features via gradient reversal against a domain classifier \citep{ganin2016domain}.
++\item AD-AE (adversarial deconfounding autoencoder): autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
++\item scDREAMER (single-cell deep generative integration model with adversarial classifier): adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
+ \item scvi-tools' adversarial batch classifier: fool loss weighted by one minus the KL weight (arm scvi\_adv) \src{scvi-tools 1.4.2: scvi/train/\_trainingplans.py:535, 674--695; \file{scvi_adversarial_plan.py}:175--177}.
+-\item scCRAFT: multi-domain GAN discriminator plus a dual-resolution triplet loss against over-correction \citep{he2025partially}.
+-\item scCRAFT was the backbone of the original submission and earlier preprint \citep{reid2025topology} \src{Topology\_Matters.zip: oup-authoring-template.tex:142}; stock scVI replaces it \src{SI-10} \pending{whether the main text names scCRAFT (PAPER\_PLAN \S3: only as the earlier backbone; July convention: no mention)}{your decision}.
++\item scCRAFT (single-cell batch correction and reliable anchor-free integration with partial topology): multi-domain GAN discriminator plus a dual-resolution triplet loss against over-correction \citep{he2025partially} \pending{this line and Introduction line 152 stay only if the main text names scCRAFT}{your decision, next line}.
++\item scCRAFT was the backbone of the original submission \src{Topology\_Matters.zip: oup-authoring-template.tex:142}; \pending{that the earlier preprint \citep{reid2025topology} also used it as backbone}{the preprint text is checked; it was not readable in review, but the repository README names scCRAFT as base model on 2025-11-08, before preprint v1 on 2025-11-13}; the revision uses stock scVI \src{SI-09; SI-10} \pending{whether the main text names scCRAFT (PAPER\_PLAN \S3: only as the earlier backbone; July convention: no mention)}{your decision}.
+ \end{itemize}
+@@ -310,7 +310,7 @@
+ \begin{itemize}
+-\item WDGRL: a gradient-penalised domain critic estimates the empirical W1 between source and target features, which the feature extractor minimises \citep{shen2018wasserstein}.
+-\item iMAP: adversarial losses optimised with WGAN-GP; one dataset is the uncorrected anchor \citep{wang2021imap}.
++\item WDGRL (Wasserstein distance guided representation learning): a gradient-penalised domain critic estimates the empirical W1 between source and target features, which the feature extractor minimises \citep{shen2018wasserstein}.
++\item iMAP (integration of multiple single-cell datasets by adversarial paired transfer networks): adversarial losses optimised with WGAN-GP; one dataset is the uncorrected anchor \citep{wang2021imap}.
+ \item ResPAN: WGAN with random-walk mutual-nearest-neighbour pairing and skip-connected autoencoders \citep{wang2022respan}.
+-\item IMAAE: adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
+-\item IMAAE's plain GAN under-corrected with three or more batches \citep{wang2023integrating}.
++\item IMAAE (integrating multiple single-cell datasets via an adversarial autoencoder): adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
++\item In the IMAAE paper, a GAN-only model tried at the design stage under-corrected with three or more batches (one dataset, UMAP only); the authors then used the GAN to constrain the latent space of an autoencoder \citep{wang2023integrating}.
+ \end{itemize}
+@@ -320,5 +320,5 @@
+ \item MMD: largest difference in expectations over the unit ball of a reproducing-kernel Hilbert space \citep{gretton2012kernel}.
+-\item MMD-ResNet: residual network minimising the MMD from source batches to one target batch \citep{shaham2017removal}.
+-\item SAUCIE: MMD penalty on an internal layer aligning batches to a reference batch \citep{amodio2019exploring}.
+-\item BERMUDA: MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
++\item MMD-ResNet: residual network minimising the MMD between one source batch and one target batch \citep{shaham2017removal}.
++\item SAUCIE (sparse autoencoder for unsupervised clustering, imputation and embedding): MMD penalty on an internal layer aligning batches to a reference batch \citep{amodio2019exploring}.
++\item BERMUDA (batch effect removal using deep autoencoders): MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
+ \item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
+@@ -351,3 +351,3 @@
+ \item Each arm except scvi\_adv adds $\lambda \times$ (alignment term) to the loss, $\lambda$ fixed throughout \src{\file{scvi_adversarial_plan.py}:436, :177; \file{fit_paper_config.py}:340; manifest}.
+-\item Discriminator (JS; \citealp{goodfellow2014generative}): classifies each cell's batch; the encoder minimises scvi-tools' bounded fool loss; 1 discriminator step per training step \src{SI-01; \file{scvi_adversarial_plan.py}:206, :292; manifest}.
++\item Discriminator (JS-type, after the minimax objective of \citealp{goodfellow2014generative}, stated for two distributions): classifies each cell's batch; the encoder minimises scvi-tools' bounded fool loss; 1 discriminator step per training step \src{SI-01; \file{scvi_adversarial_plan.py}:206, :292; manifest}.
+ \item Reference critic (W1; \citealp{arjovsky2017wasserstein}): one head per batch estimates W1 to a reference batch, whose cells also move; 5 critic steps \src{\file{wcd/critic.py}:72; \file{scvi_adversarial_plan.py}:421; manifest}.
+@@ -356,3 +356,3 @@
+ \item MMD (no network): squared maximum mean discrepancy (\citealp{gretton2012kernel}) of each batch to the others, fixed multi-scale Gaussian kernel \src{\file{wcd/alignment.py}:49, :109}.
+-\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\citealp{cuturi2013sinkhorn}; \citealp{feydy2019interpolating}), Euclidean cost, blur $0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{recomputed on refitted latents}.
++\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\citealp{cuturi2013sinkhorn}; \citealp{genevay2018learning}; \citealp{feydy2019interpolating}), Euclidean cost, entropic regularisation (GeomLoss ``blur'') $\epsilon = 0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{recomputed on refitted latents}.
+ \item scvi\_adv: scvi-tools' own classifier adversary (32 hidden units, weight $1 -$ KL weight), conditioned decoder only, outside rules R1--R4 \src{\file{scvi_adversarial_plan.py}:5, :177; PREREG \S3; manifest}.
+@@ -385,3 +385,3 @@
+ \begin{itemize}
+-\item Eight of the scIB benchmark's integration tasks (\citealp{luecken2022benchmarking}), no new datasets: six real (pancreas, lung, immune, immune\_hum\_mou, atac\_small, atac\_large) and two simulations (sim1, sim2) \src{SI-02; \file{build_paper_manifest.py}:54; \file{docs/prepped_fingerprints_scib.json}}; scIB's batch and label keys \src{SI-03}.
++\item Eight of the scIB benchmark's integration tasks (\citealp{luecken2022benchmarking}), no new datasets: six real (pancreas, lung, immune, immune\_hum\_mou, and the gene-activity versions of atac\_small and atac\_large) and two simulations (sim1, sim2) \src{SI-02; \file{build_paper_manifest.py}:54; \file{docs/prepped_fingerprints_scib.json}}; scIB's batch and label keys \src{SI-03}.
+ \item Fitted as distributed, with the counts layer exactly as scIB fed scVI \src{SI-15}; 18 batches in 4 tasks hold non-integer values \src{\file{docs/prepped_fingerprints_scib.json}}.
+@@ -431,3 +431,3 @@
+ \item Pooling: overall + family + task effects, prior scales 0.1 (0.05, 0.2 as sensitivity), exact calculation \src{SI-73}.
+-\item Margin 0.01; direction, practical equivalence or inconclusive at posterior probability 0.95 \src{SI-74}.
++\item Margin 0.01; direction, practical equivalence or inconclusive at posterior probability 0.95, in the region-of-practical-equivalence style of \citealp{corani2017statistical} \src{SI-74}.
+ \item P2: collapse = failed, or C at least 0.10 below the same seed's plain scVI; Clopper--Pearson intervals (\citealp{clopper1934use}); pooled critic-minus-discriminator difference (prior 0.25, margin 5 points) \src{SI-75}. \pending{whether SI-75 stands after the pilot recount (8 of 54, not 8 of 45)}{diff review}
+@@ -447,3 +447,3 @@
+ \item X3: one non-reference batch depleted of two cell types (sim2: one) at doses 0--100\%, equal cell count per dose, reference fixed at the dose-0 choice, importance-weighted control at 50, 80, 95\% \src{SI-25; SI-31--33; SI-41; manifest}. \pending{draw and weights as implemented (SI-42, lead-agent decision)}{the user's confirmation}
+-\item X6: discriminator plain, spectrally normalised (\citealp{miyato2018spectral}) or with an R1 gradient penalty ($\gamma$ 10; \citealp{mescheder2018training}); pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps \src{SI-22; manifest}.
++\item X6: discriminator plain, spectrally normalised (\citealp{miyato2018spectral}) or with an R1 gradient penalty (\citealp[Eq.~9]{mescheder2018training}; $\gamma$ 10 is this study's setting); pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps \src{SI-22; manifest}.
+ \item X12: 8-run fractional factorial, resolution III, over latent size, adversary width and learning rate, minibatch and linear-or-default decoder \src{\file{build_paper_manifest.py}:259, :269; I028}.
+@@ -591,3 +591,3 @@
+ \begin{itemize}
+-\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (POT stop threshold $10^{-7}$) with exact transport plans (POT free\_support\_barycenter; \citealp{flamary2021pot}); recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
++\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (the update of \citealp{cuturi2014fast}, Algorithm~2 with $\theta = 1$, as implemented in POT free\_support\_barycenter, \citealp{flamary2021pot}; stop threshold $10^{-7}$) with exact transport plans; recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
+ \end{itemize}
+@@ -616,3 +616,3 @@
+ \begin{itemize}
+-\item R1 penalty (X6; \citealp{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
++\item R1 penalty (X6; one-vs-rest form of \citealp[Eq.~9]{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
+ \item Spectral normalisation (X6; \citealp{miyato2018spectral}): every head layer spectrally normalised and the gradient penalty dropped \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py}:288}.
+--- a/paper/refs.bib
++++ b/paper/refs.bib
+@@ -83,3 +83,3 @@
+ @article{ganin2016domain,
+-  author = {Yaroslav Ganin and Evgeniya Ustinova and Hana Ajakan and Pascal Germain and Hugo Larochelle and Fran{\c{c}}ois Laviolette and Mario March and Victor Lempitsky},
++  author = {Yaroslav Ganin and Evgeniya Ustinova and Hana Ajakan and Pascal Germain and Hugo Larochelle and Fran{\c{c}}ois Laviolette and Mario Marchand and Victor Lempitsky},
+   title = {Domain-Adversarial Training of Neural Networks},
+@@ -342,3 +342,3 @@
+ 
+-@article{corani2017time,
++@article{corani2017statistical,
+   author = {Corani, Giorgio and Benavoli, Alessio and Dem{\v{s}}ar, Janez and Mangili, Francesca and Zaffalon, Marco},
+@@ -582,6 +582,6 @@
+ 
+-@misc{reid2025topology,
++@article{reid2025topology,
+   author = {Reid, Kendall and Stein-O'Brien, Genevieve and Guven, Erhan},
+   title = {Topology Matters: The Trade-off Between {Wasserstein} Critics and Discriminators for Single-Cell Data Integration},
+-  howpublished = {bioRxiv preprint},
++  journal = {bioRxiv},
+   year = {2025},
+@@ -592,3 +592,3 @@
+ @inproceedings{arjovsky2017towards,
+-  author = {Martin Arjovsky and Leon Bottou},
++  author = {Martin Arjovsky and L{\'e}on Bottou},
+   title = {Towards Principled Methods for Training Generative Adversarial Networks},
+@@ -603,3 +603,3 @@
+ @article{luecken2025defining,
+-  author = {Luecken, Malte D. and Gigante, Scott and Burkhardt, Daniel B. and Cannoodt, Robrecht and Strobl, Daniel C. and Markov, Nikolay S. and Zappia, Luke and Palla, Giovanni and Lewis, Wesley and Dimitrov, Daniel and Vinyard, Michael E. and Magruder, D. S. and Mueller, Michaela F. and Andersson, Alma and Dann, Emma and Qin, Qian and Otto, Dominik J. and Klein, Michal and Botvinnik, Olga Borisovna and Deconinck, Louise and Waldrant, Kai and Yasa, Sai Nirmayi and Sza{\l}ata, Artur and Benz, Andrew and Li, Zhijian and Rieck, Bastian and Ahlmann-Eltze, Constantin and da Veiga Beltrame, Eduardo and Bravo Gonz{\'a}lez-Blas, Carmen and Chen, Ann T. and DeMeo, Benjamin and Ergen, Can and Floc'hlay, Swann and Gayoso, Adam and Hicks, Stephanie and Ji, Yuge and Kleshchevnikov, Vitalii and La Manno, Gioele and Lombardo, Maximilian G. and Lopez, Romain and Righelli, Dario and Sarkar, Hirak and Svensson, Valentine and Tong, Alexander and Xing, Galen and Xu, Chenling and Bloom, Jonathan M. and Pisco, Angela Oliveira and Saez-Rodriguez, Julio and Wulsin, Drausin and Pinello, Luca and Saeys, Yvan and Theis, Fabian J. and Krishnaswamy, Smita},
++  author = {Luecken, Malte D. and Gigante, Scott and Burkhardt, Daniel B. and Cannoodt, Robrecht and Strobl, Daniel C. and Markov, Nikolay S. and Zappia, Luke and Palla, Giovanni and Lewis, Wesley and Dimitrov, Daniel and Vinyard, Michael E. and Magruder, D. S. and Mueller, Michaela F. and Andersson, Alma and Dann, Emma and Qin, Qian and Otto, Dominik J. and Klein, Michal and Botvinnik, Olga Borisovna and Deconinck, Louise and Waldrant, Kai and Yasa, Sai Nirmayi and Sza{\l}ata, Artur and Benz, Andrew and Li, Zhijian and {Open Problems Jamboree Members} and Rieck, Bastian and Ahlmann-Eltze, Constantin and da Veiga Beltrame, Eduardo and Bravo Gonz{\'a}lez-Blas, Carmen and Chen, Ann T. and DeMeo, Benjamin and Ergen, Can and Floc'hlay, Swann and Gayoso, Adam and Hicks, Stephanie and Ji, Yuge and Kleshchevnikov, Vitalii and La Manno, Gioele and Lombardo, Maximilian G. and Lopez, Romain and Righelli, Dario and Sarkar, Hirak and Svensson, Valentine and Tong, Alexander and Xing, Galen and Xu, Chenling and Bloom, Jonathan M. and Pisco, Angela Oliveira and Saez-Rodriguez, Julio and Wulsin, Drausin and Pinello, Luca and Saeys, Yvan and Theis, Fabian J. and Krishnaswamy, Smita},
+   title = {Defining and benchmarking open problems in single-cell analysis},
+@@ -639 +639,13 @@
+ }
++
++@inproceedings{genevay2018learning,
++  author = {Genevay, Aude and Peyr\'{e}, Gabriel and Cuturi, Marco},
++  title = {Learning Generative Models with {Sinkhorn} Divergences},
++  booktitle = {Proceedings of the Twenty-First International Conference on Artificial Intelligence and Statistics},
++  series = {Proceedings of Machine Learning Research},
++  volume = {84},
++  pages = {1608--1617},
++  year = {2018},
++  publisher = {PMLR},
++  url = {https://proceedings.mlr.press/v84/genevay18a.html}
++}

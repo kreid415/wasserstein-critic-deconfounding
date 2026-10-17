@@ -1,0 +1,1805 @@
+diff --git a/CONSTRAINTS.md b/CONSTRAINTS.md
+index 412da54..18a7037 100644
+--- a/CONSTRAINTS.md
++++ b/CONSTRAINTS.md
+@@ -536,3 +536,120 @@
+ - keywords: selection score, transfer lambda, best-of-k, window width, min-max, scIB weights
+ - files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
+ - notebook: NB-20261014-11
++
++## SI-78 · active · process
++- rule: A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm (not only X1 adversarial-arm scores). Of readers, only a person counts: a value shown to an AI agent is disclosed, not examined; use by an analysis script still counts as examined (user, 2026-10-16; NB-20261016-24).
++- source: "Every X1 and X13 score, any arm (Recommended)" (user, ask_user answer to "What counts as having 'examined' an X1 result?", 2026-10-15); "No, people only" (user, ask_user answer to "From now on, does an X1 or X13 score value shown to an AI agent count as 'examined' under SI-78?", 2026-10-16)
++- added: 2026-10-15
++- keywords: examined, blinding, X1 score, X13 score, freeze
++- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-02, NB-20261016-14
++
++## SI-79 · active · process
++- rule: Record SHA-256 hashes of every existing X1 and X13 score file (hashing reads bytes and shows no value) and the date GitHub shows for the tag prereg-tier12-v3 as an outside time stamp; commit the hash list and state it in PREREG. Status records (divergence and nonfinite_latent records) of every X1 and X13 group are hashed too (user, 2026-10-16).
++- source: "Record hashes and the tag's GitHub date (Recommended)" (user, ask_user answer to "Should we record a fingerprint (a SHA-256 hash) of every existing X1 and X13 score file?", 2026-10-15); "Count-only tally (Recommended)" (user, ask_user answer to "may a script print only the total per status (no arm, no score) for the missing 8?", 2026-10-16)
++- added: 2026-10-15
++- keywords: hash, SHA-256, score files, time stamp, tag date
++- files: docs/PREREG.md
++- notebook: NB-20261015-03, NB-20261016-16
++
++## SI-80 · active · method
++- rule: The agent's proposals in docs/ANALYSIS_SPEC.md are approved as rules: section 2.3 (not-evaluable rule), section 5 (marginal declarations; Holm over the six primary results for the descriptive Wilcoxon companion only), section 8 (leave-one-family-out transfer rule), section 9 (best-of-k placement against standard tools), section 10 (width of the range of good strengths), the section 11 sensitivity analyses that no decision names, and section 15 (implementation details). Parts that implement the rigour-review designs asked separately at the same review (the zero-spread exclusion in sections 2.3 and 4, question 1; the t-based sign-table limits in section 15 and the other designs of question 2) follow the user's answers to those questions.
++- source: "Approve all (Recommended)" (user, ask_user answer to "Do you approve the agent's proposals in the analysis specification (docs/ANALYSIS_SPEC.md)?", 2026-10-15)
++- added: 2026-10-15
++- keywords: proposal, not evaluable, Holm, transfer rule, best-of-k, window width, sensitivity, implementation details
++- files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
++- notebook: NB-20261015-04
++
++## SI-81 · active · process
++- rule: (a) Each case where scib finds zero normalised mutual information at every clustering resolution (SI-65) is decided by the user and listed with the results. (b) A Sinkhorn iteration-cap hit (500,000 iterations, SI-61) stops the stage until the user decides whether the fit counts as failed; failed fits count as collapses in P2, and each such decision is listed with the results (clause confirmed by the user, 2026-10-16). (c) The no-pair training-step counts (CF-06) and, per arm, the number of cells not evaluable because the arm never reaches b* (AN-R15) are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script (user, 2026-10-16). No default outcome is registered for (a) and (b); PREREG names the case-by-case decision as a limitation (user, 2026-10-16).
++- source: "Approve all three (Recommended)" (user, ask_user answer to "Do you approve three process proposals in the pre-registration?", 2026-10-15); "Keep, add to ledger (Recommended)" and "Promise only (Recommended)" (user, ask_user answers on (b) and (c), 2026-10-16); "Keep case by case" (user, ask_user answer to "Should a Sinkhorn fit that hits the iteration cap, or a fit hitting the zero-NMI case, count as a failed fit and collapse by default?", 2026-10-16)
++- added: 2026-10-15
++- keywords: NMI-0, NMI, iteration cap, no-pair, unreached, reporting script
++- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-05, NB-20261016-11, NB-20261016-12, NB-20261016-15
++
++## SI-82 · active · method
++- rule: PAPER_PLAN's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau) are all reported, labelled not pre-registered, and used for no conclusion (exploratory).
++- source: "Report all four as exploratory (Recommended)" (user, ask_user answer to "What should happen to the paper plan's four scaling checks?", 2026-10-15)
++- added: 2026-10-15
++- keywords: scaling sensitivities, z-score, leave-one-method-out, silhouette, Kendall, exploratory
++- files: docs/PAPER_PLAN.md, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-06
++
++## SI-83 · active · method
++- rule: A dataset whose leave-one-seed-out standard error is below 0.000001 is kept in the combined analysis with its standard error raised to 0.000001, instead of being left out as not evaluable (zero_spread); the same applies to the paired-datasets sensitivity analysis; each dataset raised this way is listed in the report. The number of datasets whose standard error was raised is reported next to each pooled declaration (user, 2026-10-16).
++- source: "Keep it; raise its standard error to the cut-off 0.000001 (Recommended)" (user, ask_user answer to "What should happen to a dataset whose run-to-run uncertainty comes out as exactly zero?", 2026-10-15); earlier in the same round: "If we have a 'certain' dataset, why would we drop it as it is performing well and this would bias the results towards the uncertain datasets" (user, 2026-10-15); "Report the count (Recommended)" (user, ask_user answer to "Should each pooled declaration report how many datasets had their zero standard error raised to 1e-6 (SI-83)?", 2026-10-16)
++- added: 2026-10-15
++- keywords: zero_spread, zero spread, standard error, floor, S_MIN, cut-off
++- files: scripts/analysis_x1.py, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-16, NB-20261016-17
++
++## SI-84 · active · method
++- rule: Approved: the log-spaced 201-point grid for the between-dataset spreads (AN-01), the solve-based formula for the overall difference, recomputing b0, b_common, b* and the low-signal flag from the same rows and stopping on a mismatch (AN-03), t-based sign-table limits (AN-06), and the per-run sensitivity limited to P1 and the local-versus-global test (AN-05); the specification states where the grid is accurate and that the sign-table limits are approximate.
++- source: "Approve all five (Recommended)" (user, ask_user answer to "Do you approve five design choices the agent made in the X1 analysis code after the rigour review?", 2026-10-15)
++- added: 2026-10-15
++- keywords: log grid, Gauss-Legendre, precision, recompute, t-based, sign table, per-run
++- files: scripts/analysis_x1.py, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-17
++
++## SI-85 · active · process
++- rule: The stage runner refuses a divergence record of any arm (user, 2026-10-16) that carries no git commit or was made from a checkout with uncommitted changes, as it refuses such results (code re-check CF-R03, rule A; runner-made nonfinite_latent records stay accepted); one test covers the refusals for records and results together.
++- source: "Refuse them, as for results (Recommended)" (user, ask_user answer to "Should the stage runner refuse a Sinkhorn 'divergence record' that lacks the code version, or that was made from code with uncommitted changes?", 2026-10-15); "Every arm (Recommended)" (user, ask_user answer to "Should the stage runner refuse a divergence record (the file saying a fit failed) with no code version for every arm, or only for Sinkhorn?", 2026-10-16)
++- added: 2026-10-15
++- keywords: divergence record, git_sha, git_dirty, uncommitted, run_stage
++- files: scripts/run_stage.py, tests/stage/test_run_stage.py, tests/stage/fake_env.py
++- notebook: NB-20261015-18, NB-20261016-09
++
++## SI-86 · active · method
++- rule: prereg_rules.power_report restarts its root search at 0.01 when the search from 1.0 fails; every result that works today stays bit-identical; applied before the tag (documents re-check DOC-R12).
++- source: "Apply the fix before the tag (Recommended)" (user, ask_user answer to "Should the error in the power function be fixed before the tag?", 2026-10-15)
++- added: 2026-10-15
++- keywords: power_report, power, minimal detectable effect, non-central t, NaN
++- files: scripts/prereg_rules.py, tests/prereg
++- notebook: NB-20261015-19
++
++## SI-87 · active · process
++- rule: The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place (no *_sinkhorn_redo.json names); the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo, and in the commits that froze them (they do not exist at prereg-tier12-v2, which predates them; correction NB-20261015-21); PREREG says so, and the redo's notebook entry lists every decision for the other five arms that changed.
++- source: "Overwrite; old versions kept at the tags (Recommended)" (user, ask_user answer to "Do you approve these file names for the redone Sinkhorn decision records?", 2026-10-15); first answer: "if the previous sinkhorns are not relevant, just overwrite them" (user, 2026-10-15)
++- added: 2026-10-15
++- keywords: record, r1_record, r4_a1_record, r2r3_record, sinkhorn_redo, overwrite, redo
++- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-20, NB-20261015-21
++
++## SI-88 · active · process
++- rule: The two displays of score values found by the 2026-10-15 audit (2026-10-02: all scores of six test fits from one of the two X13 runner-test runs on atac_small; 2026-10-13: PCR_batch and cell-cycle conservation of one X1 discriminator run and one X13 sysVI run in the scorer identity check) are listed in PREREG as shown to the agent only, not as examined under SI-78; the facts, dates and limits are stated in full.
++- source: "No, list them as shown to the agent only" (user, ask_user answer to "Your rule SI-78 says a score is 'examined' when a person reads its value. Should these two cases count as examined?", 2026-10-15)
++- added: 2026-10-15
++- keywords: examined, displayed, shown to the agent, identity check, audit, SI-78
++- files: docs/PREREG.md, docs/ANALYSIS_SPEC.md
++- notebook: NB-20261015-25
++
++## SI-89 · active · process
++- rule: The stage runner refuses a latent that names no git commit (no git_sha in its config), as it refuses a divergence record without one.
++- source: "Refuse it (Recommended)" (user, ask_user answer to "Should the stage runner also refuse a latent (a fitted embedding) that names no git commit?", 2026-10-16)
++- added: 2026-10-16
++- keywords: latent, git_sha, run_stage, provenance
++- files: scripts/run_stage.py, tests/stage/test_run_stage.py
++- notebook: NB-20261016-10
++
++## SI-90 · active · process
++- rule: Hash them: the attempts/*.jsonl runner logs (local X1 and fillers) go into the SI-79 hash list with the score files
++- source: NB-20261016-22
++- added: 2026-10-16
++- keywords: h, a, s, h, l, i, s, t, a, t, t, e, m, p, t, s, S, I, -, 7, 9
++- notebook: NB-20261016-22
++
++## SI-91 · active · process
++- rule: Add one test for scripts/check_tests.py (its lines no test tier runs)
++- source: NB-20261016-23
++- added: 2026-10-16
++- keywords: c, h, e, c, k, _, t, e, s, t, s, c, o, v, e, r, a, g, e
++- notebook: NB-20261016-23
++
++## SI-92 · active · collaboration
++- rule: I only want to discuss decisions that matter for the experiment. Defer others until after the experiments are launched
++- source: "I only want to discuss decisions that matter for the experiment. Defer others until after the experiments are launched" (user, 2026-10-16)
++- added: 2026-10-16
++- keywords: *
++- notebook: NB-20261016-26
+diff --git a/docs/ANALYSIS_SPEC.md b/docs/ANALYSIS_SPEC.md
+index 1cee0cb..55e9202 100644
+--- a/docs/ANALYSIS_SPEC.md
++++ b/docs/ANALYSIS_SPEC.md
+@@ -1,30 +1,50 @@
+-# Analysis specification for the X1 endpoints (draft for the diff review)
+-
+-*Status, 2026-10-14: draft until the user has reviewed the full diff of branch `final-review-fixes` (SI-52). The user
+-decided questions Q1 to Q7 and Q9 to Q11 on 2026-10-14, all as recommended (ledger SI-68 to SI-77; notebook
+-NB-20261014-01 to -05 and -07 to -11); no question was numbered Q8 (Appendix A.2). Sections 0 to 16 state the rules
+-only. The options the user did not choose, the reasons given with each question and the open items are in the
+-decision log, Appendix A (rigour review DOC-13). Details that no question covered are the agent's proposals: section
+-2.3 (the not-evaluable rule), section 5 (multiplicity), section 8 (the transfer-lambda rule; SI-77 decides only the
+-selection score), sections 9 and 10, the sensitivity analyses of section 11 that no decision names, and section 15. A
+-proposal becomes a rule only if the user approves it at the diff review, and each approval will be recorded as a new
+-ledger entry before the tag is made. After the diff review this file, `scripts/analysis_x1.py` (committed 2026-10-14,
+-ff88666; three test gaps closed in 858101b) and its known-answer tests (`tests/analysis/`) will be frozen by the tag
+-prereg-tier12-v3, which has not been made, before any X1 adversarial-arm score is examined (final review I001, D-03,
+-D-08, D-09; SI-52). "Examined" is defined, as a proposal the user has not yet approved, in PREREG section 9, entry of
+-2026-10-14. The decision rules R1-R4 (PREREG sections 2-4) do not change. Where PAPER_PLAN section 5 and this file
+-differ, this file applies; PAPER_PLAN has a dated pointer (section 13).*
++# Analysis specification for the X1 endpoints (rules; not yet frozen)
++
++*Status, 2026-10-16 (ledger SI-78 to SI-89): not yet frozen. The user is shown the final diff of branch `final-review-fixes` once more and says yes
++before the tag prereg-tier12-v3 is made (SI-52, SI-60). On 2026-10-14 the user decided questions Q1 to Q7 and Q9 to Q11, each time
++taking the option the agent recommended (ledger SI-68 to SI-77; notebook NB-20261014-01 to -05 and -07 to -11); no question was
++numbered Q8 (Appendix A.2). On 2026-10-15 the user answered the 19 questions of the diff review (ledger SI-78 to SI-87; the
++list is in PREREG section 9) and decided how the audit's findings are listed (SI-88). On 2026-10-16 the user answered the findings of the independent re-check (SI-78, SI-81 and SI-83 amended; SI-85 widened; SI-89 added). Those that concern this file: SI-78 (what "examined" means); SI-80 (the agent's proposals of section
++2.3, section 5, section 8, sections 9 and 10, the section 11 sensitivity analyses that no decision names, and section 15 are
++approved as rules; equal numbers of tries in section 9 is the user's own decision, SI-68 and SI-77, and only the best-of-k estimator
++and the composition of the method families were proposals); SI-81 (c) (a reporting script written after the runs); SI-82
++(PAPER_PLAN's four scaling checks are exploratory); SI-83 (a standard error below 1e-6 is raised to 1e-6); SI-84 (five design
++choices of the analysis code are approved and the accuracy ranges are stated); SI-87 (the Sinkhorn redo overwrites five record
++files); SI-88 (how the audit's findings are listed in PREREG). Sections 0 to 16 state the rules only. The options the user did not
++choose, the reasons given with each question and the answers of 2026-10-15 are in the decision log, Appendix A.*
++
++*The specification and `scripts/analysis_x1.py` were first committed on 2026-10-14 (56c0762, 990d37d, ff88666; three test gaps closed
++in 858101b). After the independent rigour review of 2026-10-14 they were revised in 8b90d79 (code and tests), 6aaa3ac (numerical
++checks in `experiments/analysis_numerics_20261014/`), a1d497b, 56febe4 and 4af5069 (this file), and after the independent
++re-check and the user's answers of 2026-10-15 again: the zero-spread floor (SI-83), the accuracy ranges and designs (SI-84), the record
++names (SI-87), the labels of the agent's proposals (SI-80) and the re-check fixes AN-R01 to AN-R15. The user has not approved the
++final text. The tag prereg-tier12-v3, not these commit ids, fixes the registered version: this file, the script and its known-answer
++tests (`tests/analysis/`) will be frozen by that tag, which has not been made, before any X1 or X13 score is examined (final review
++I001, D-03, D-08, D-09; SI-52).*
++
++**Examined (user decision SI-78, 2026-10-15, amended 2026-10-16).** A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm.
++Of readers, only a person counts: a value shown to an AI agent is disclosed, not examined; use by an analysis script still counts as examined (user, 2026-10-16, NB-20261016-14, NB-20261016-24); the listing of the displays found by the audits as "shown to the agent only" (SI-88; PREREG section 9) follows from this definition.
++The user states that nobody read an X1 or X13 score value (NB-20261015-15). The agent's own audit of 2026-10-14 (NB-20261014-21,
++made by the agent that ran the checks) is narrower: it searched the agent's session logs for reads of `tier12_v2/X1_local/scores`,
++the printed output of the scripts that read them and two log statements, and it cannot show that nobody opened a file. PREREG
++section 9 lists the X1 and X13 scores that already exist, the displays and automated reads found, and how they are classified (the
++displays are listed as shown to the agent only, not as examined; SI-88).
++
++*The decision rules R1-R4 (PREREG sections 2-4) do not change. Where PAPER_PLAN section 5 and this file differ, this file applies;
++PAPER_PLAN has a dated pointer (section 13).*
+ 
+ Words used below. *Run* (fit) = one model trained with one seed. *Point* = one penalty strength (lambda) of one method
+ on one task and decoder, i.e. 5 runs (seeds 0-4). *Cell* = task x decoder. *B* = batch score, *C* = biology score
+ (PREREG section 1, unscaled scIB means). *b0, c0* = mean B and C of plain scVI (lambda = 0) in the cell.
+ *b\** = the matched batch-removal target of rule R4: half-way from b0 to the batch removal that every method reaches.
+ Elsewhere the words differ: PREREG rules R2 and R3 use *cell* for a task x decoder x arm combination, and PREREG
+-section 9 calls a task x decoder pair a task-by-decoder block; a cell of the tissue is called a single cell. Labels:
++section 9 calls a task x decoder pair a task-by-decoder block; a cell of the tissue is called a single cell. R0 to R5 in
++sections 0, 9 and 10 are PAPER_PLAN's research questions; R1 to R4 elsewhere are the registered rules (PREREG sections 2-4). Labels:
+ SI-nn is entry nn of the decision ledger (CONSTRAINTS.md) and NB-yyyymmdd-nn an entry of the lab notebook; I0nn and
+ D-nn are findings of the final review of 2026-10-13 and of its recheck of the design documents; AN-nn and DOC-nn are
+-findings of the rigour review of 2026-10-14 (analysis and documents parts); Qn is a question put to the user on
+-2026-10-14 (Appendix A). PREREG section 9 has a glossary of the other labels and terms.
++findings of the rigour review of 2026-10-14 (analysis and documents parts); AN-Rnn and DOC-Rnn are findings of the independent
++re-check of the fixes (2026-10-14), fixed on 2026-10-15; Qn is a question put to the user on 2026-10-14 (Appendix A). PREREG
++section 9 has a glossary of the other labels and terms.
+ 
+ ## 0. Scope and timing (user decision SI-68, question Q1)
+ 
+@@ -45,7 +65,8 @@ findings of the rigour review of 2026-10-14 (analysis and documents parts); Qn i
+ Every analysis of X1 or X13 data is locked now, except R0 and X10, which are labelled exploratory (no confirm/refute
+ claim; the "JS gradients vanish" premise is then not claimed as shown, PAPER_PLAN section 2 "drop or soften"). The
+ follow-up analyses (X3, X6, X7, X8, X12, X15) are locked later, together with the X7/X8 design fixes, while X1 runs,
+-before R4-x1 runs and before anyone examines an X1 result. (Q1's options and reasons: Appendix A.1.)
++before R4-x1 runs and before anyone examines an X1 result (SI-68's own words; "examined" as defined in the status paragraph,
++SI-78). (Q1's options and reasons: Appendix A.1.)
+ 
+ ## 1. Inputs and shared definitions (registered; no choice)
+ 
+@@ -56,19 +77,26 @@ before R4-x1 runs and before anyone examines an X1 result. (Q1's options and rea
+ - B, C as PREREG section 1: C includes trajectory conservation on immune and immune_hum_mou (SI-28); the
+   trajectory-free C is a sensitivity analysis (SI-38, section 11).
+ - b0, b_common, b\* and `bstar_low_signal` per cell are read from the frozen R4 stage-x1 record (PREREG section 4:
+-  "The same b\* is proposed for P1"); the analysis never recomputes them.
++  "The same b\* is proposed for P1"), and the analysis refuses unless `prereg_rules.r4_stage` gives the same values from the same
++  X1 rows (section 15.1; re-check findings AN-R02, DOC-R03). It therefore needs every row that R4 used, extension rows included.
+ - Points: lambda = 0 (arm `none`) and the six registered lambda of each arm's family and decoder (`x1_grid` of the R1
+-  record given to `scripts/analysis_x1.py` with `--r1-record`). R4-x1 extension rows are not used (PREREG section 4;
+-  SI-55). For every arm except Sinkhorn the six lambda are those of `docs/prereg/r1_record.json`; the Sinkhorn grid is
+-  re-derived by R1 on the refitted Sinkhorn fits (SI-57), so the analysis is given the redone R1 record
+-  (`docs/prereg/r1_record_sinkhorn_redo.json`, name proposed for the diff review), whose six non-Sinkhorn grids are
+-  checked against `docs/prereg/r1_record.json` first (PREREG section 9, entry on the Sinkhorn arm). The script stops
+-  when a registered lambda of an arm is missing from that arm's X1 rows ("registered lambda grid is incomplete"), so a
+-  record that still holds the superseded Sinkhorn grid is refused.
++  record given to `scripts/analysis_x1.py` with `--r1-record`). R4-x1 extension rows are not used as points (PREREG section 4;
++  SI-55). For every arm except Sinkhorn the six lambda are those of `docs/prereg/r1_record.json` as it stands at tag
++  prereg-tier12-v3; the Sinkhorn grid will be re-derived by R1 on the refitted Sinkhorn fits (SI-57).
++  The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place; the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo.
++  The analysis will therefore be given `docs/prereg/r1_record.json` (user decision SI-87, 2026-10-15). The six non-Sinkhorn grids
++  of the redone record are to be checked by hand against the version at tag prereg-tier12-v3
++  (`git show prereg-tier12-v3:docs/prereg/r1_record.json`), because the script does not compare grids: it reads `x1_grid` from
++  the record it is given (re-check finding DOC-R10). The script stops when a registered lambda of an arm is missing from that
++  arm's X1 rows ("registered lambda grid is incomplete"), so a record that still holds the superseded Sinkhorn grid is refused.
+ - b\* is computed after any R4-x1 extension round: R4 takes each arm's best batch score from all of its X1 points,
+   extension points included (PREREG section 4), while P1 and the area read only the six registered points. An arm
+-  whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); the report gives the number of
+-  such cells by arm, next to that arm's best batch score in the R4 record (rigour review AN-09, DOC-10).
++  whose six points never reach b\* makes its cell not evaluable (section 2.3 (ii)); only the two arms of the P1 contrast, the
++  reference and the discriminator, can do this. The number of such cells for each arm, next to that arm's best batch score M in
++  the R4 record, and the no-pair training-step counts (CF-06) are tabulated by a reporting script written after the runs, not by
++  `scripts/analysis_x1.py` (user decision SI-81 (c), 2026-10-15; re-check finding AN-R15); the tag freezes this promise, not the script (user, 2026-10-16). The analysis record keeps each cell's
++  reading status for the two arms (`p1.status`: `bracketed`, `unreached_low`, `unreached_high` or `no_points`) and the R4 record keeps M
++  (`targets.<cell>.M`, all six arms), so the script only counts and pairs them and changes no result.
+ - Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large (`prereg_rules.REAL_TASKS`), in 4 families
+   (`TASK_FAMILY`: all 33,506 immune cells are in immune_hum_mou; atac_small and atac_large share 3,618 cells, final
+   review I073). sim1 and sim2 are reported per task and never pooled with real tasks (PAPER_PLAN section 5).
+@@ -90,11 +118,11 @@ are for the matched-lambda contrast on all six A1 pilot blocks, including the si
+ they will be recomputed with this reading and only the evaluable blocks when R4-a1 is re-run after the Sinkhorn redo
+ (rigour review DOC-07; PREREG section 9, entry of 2026-10-13, part (c)). The recomputation changes no rule.
+ 
+-**2.3 Not evaluable (the agent's proposal, for the diff review).** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
++**2.3 Not evaluable (decided 2026-10-15, SI-80).** A cell is not evaluable when (i) it is flagged `bstar_low_signal` (SI-56: b_common - b0 < 2 x
+ 0.01), (ii) either arm's curve never reaches b\*, or (iii) fewer than 4 of the 5 leave-one-seed-out readings exist
+ (section 2.4; SI-69). Not-evaluable cells are listed with their reason. Readings of low-signal
+-cells are shown in a separate table and never pooled (SI-56). For the pooled results a cell is also not evaluable when
+-its standard error is below 1e-6 (reason `zero_spread`, section 4).
++cells are shown in a separate table and never pooled (SI-56). A very small standard error is not a reason: the pooled
++model keeps the cell and raises its standard error to 1e-6 (section 4; SI-83).
+ 
+ **2.4 Contrast and its uncertainty.** d = bio@b\*(reference) - bio@b\*(discriminator).
+ 
+@@ -124,11 +152,18 @@ pooling follow sections 2.4 and 4.
+ The corner (b_ref, c_ref) is (b0, c0 - 0.10): scVI's batch score and 0.10 below scVI's biology score, the collapse
+ bound of rule R1 (PREREG section 1). Only settings that remove more batch than scVI and keep biology above the collapse
+ line add area. Pilot-informed: the corner was chosen after the ranges of B and C in the A1 pilot had been seen (A1's 5
+-non-Sinkhorn arms x 6 cells x 10 lambda = 300 points; rigour review DOC-17; the figures are in Appendix A.1, Q5).
++non-Sinkhorn arms x 6 cells x 10 lambda = 300 points; rigour review DOC-17; the figures are in Appendix A.1, Q5, and are regenerated by code in
++experiments/doc_numbers_20261015/, whose README lists each number with its script, DOC-R04).
+ Sensitivity analysis: the corner (b0, 0) (section 11). (Q5's options and reasons: Appendix A.1.)
+ 
+ ## 4. Combining datasets (user decision SI-73, Q6)
+ 
++SI-73 decides the model, its priors and an exact calculation without random sampling. The details marked "amended 2026-10-14"
++below are the agent's implementation choices made after the rigour review (the 201 x 201 grid evenly spaced in log(tau), its lower
++end 1e-15 and cap 0.5, the formula for the overall difference that solves with A, and the remark that the last digits can differ on
++a different CPU type); the user approved them on 2026-10-15 (SI-84). The floor of 1e-6 on a standard error is the user's decision
++SI-83 (2026-10-15).
++
+ Per endpoint and decoder, over the evaluable real datasets t: d_t ~ N(theta_t, s_t^2) with s_t from section 2.4
+ (treated as known), theta_t = Delta + u_family(t) + v_t, u ~ N(0, tau_f^2), v ~ N(0, tau_d^2): the arm-by-dataset term
+ the final review required (I056) and PAPER_PLAN section 5's "(1 | family/dataset)". Priors: Delta ~ N(0, 0.1^2);
+@@ -137,11 +172,24 @@ tau_f, tau_d ~ half-normal(0.1) (pilot-informed: the A1 pilot's between-task SD
+ (tau_f, tau_d), which are integrated on a 201 x 201 grid over [1e-15, 0.5]^2 with points evenly spaced in log(tau)
+ (amended 2026-10-14, rigour review AN-01: the evenly spaced grid from 0 first written here was too coarse when a
+ dataset's standard error s is below its step, and could change a declaration; section 15.4); no random sampling, so
+-results reproduce digit for digit on the same input files (rows are sorted by tag before any sum; on a different CPU
+-type the last digits can differ). A dataset enters the model only if its s is at least 1e-6; below that it is listed
+-as not evaluable for that endpoint with reason `zero_spread` (amended 2026-10-14, AN-02; for example, neither arm adds
+-any frontier area in any leave-one-seed-out repeat, so d = 0 and s = 0 exactly; the model treats s as known and cannot
+-use s = 0, and 1e-6 is the smallest s at which its double-precision computation was verified).
++results reproduce digit for digit on the same input files and the same CPU type (rows are sorted by tag before any sum, so
++their order does not matter; on a different CPU type the last digits can differ; amended 2026-10-14, SI-84).
++
++A dataset whose leave-one-seed-out standard error is below 0.000001 (1e-6) is kept, with its standard error raised to 1e-6; the same floor applies in the paired-datasets sensitivity analysis, and every raised dataset is listed in the analysis record.
++This is user decision SI-83 (2026-10-15). It replaces an exclusion of such datasets that was drafted on 2026-10-14 (rigour review
++AN-02); the user rejected the exclusion because dropping a dataset that is certain would bias the result towards the uncertain
++datasets. For example, when neither arm adds any frontier area in any leave-one-seed-out repeat, d = 0 and s = 0 exactly, and the
++dataset enters the model as d = 0 with s = 1e-6. The model treats s as known and cannot use s = 0; 1e-6 is the smallest s at which
++its double-precision computation was verified (section 15.4). In the pairs sensitivity analysis each dataset's s is raised first;
++the averaged standard error of a family, sqrt(s1^2 + s2^2) / 2, can fall below 1e-6 even then (two datasets at 1.2e-6 average to
++8.5e-7) and is raised again (re-check finding AN-R01). A standard error that is NaN, infinite or negative stops the run. The record
++lists every raised dataset or pair in the field `raised` of the pooled result (one list for each endpoint and decoder, in the
++primary analysis and in every sensitivity analysis); an entry gives `unit` (the dataset, or the family in the pairs analysis),
++`level` (`dataset` or `pair`) and `s` (its value before raising). The per-dataset sign table shows each dataset's own s, not the
++raised value. Next to each declaration the pooled result also gives the count of its `raised` list: `n_raised_datasets` (the entries of level
++`dataset`) and `n_raised_pairs` (those of level `pair`, nonzero only in the pairs analysis). Every pooled declaration is reported with
++these counts (user decision 2026-10-16, SI-83, NB-20261016-17); they are derived from `raised`, and no rule or number changes.
++
+ Reported: posterior mean and 95% interval of Delta; P(Delta < -r), P(|Delta| <= r), P(Delta > r);
+ the heterogeneity sqrt(tau_f^2 + tau_d^2); per-dataset posteriors; a per-dataset sign table with leave-one-out
+ intervals, without per-dataset significance claims (PREREG section 9, 2026-10-13 (c)). Frequentist companion: exact
+@@ -160,7 +208,7 @@ The margin (user decision SI-74, Q7) is r = 0.01, PREREG section 1's constant (d
+ P1, the area (in biology units) and the local-global split. The measurement SD may still be reported, descriptively.
+ (Q7's options and reasons: Appendix A.1.)
+ 
+-Multiplicity (the agent's proposal, for the diff review; no question covered it, Appendix A.2): each declaration is
++Multiplicity (decided 2026-10-15, SI-80; no question of 2026-10-14 covered it, Appendix A.2): each declaration is
+ made on its own posterior (marginal); the report states how many primary results were judged (P1 and the area for
+ each decoder, plus P2 for each decoder: six); the Wilcoxon companion applies Holm over all six (descriptive; final
+ review I040). Holm's first threshold is then 0.05/6 = 0.0083. With six real datasets the smallest exact two-sided
+@@ -181,7 +229,7 @@ Also a pooled reference-minus-discriminator difference: per dataset the differen
+ standard error (one collapse and one non-collapse added per arm), the section 4 model with priors scaled for
+ proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25)), margin 0.05 (5 percentage points). Pilot-informed: the
+ margin and the prior scale were chosen after the pilot collapse rates were shown, and one rate quoted with the question
+-was miscounted (Appendix A.1, Q9); whether SI-75 stands is an open item for the diff review (Appendix A.3). (Q9's
++was miscounted (Appendix A.1, Q9); the user confirmed on 2026-10-15 that SI-75 stands (NB-20261015-07). (Q9's
+ options: Appendix A.1.)
+ 
+ ## 7. Local versus global batch removal (user decision SI-76, Q10)
+@@ -197,9 +245,9 @@ The analysis is one signed question: at matched batch removal, does the critic g
+ interpolation weights); per decoder: exact two-sided sign test over the real datasets and the section 4 model with
+ r = 0.01. (Q10's options: Appendix A.1.)
+ 
+-## 8. Single-lambda tables: transfer lambda (selection score: user decision SI-77, Q11; transfer rule: the agent's proposal)
++## 8. Single-lambda tables: transfer lambda (selection score: user decision SI-77, Q11; transfer rule: decided 2026-10-15, SI-80)
+ 
+-Transfer rule (the agent's proposal, for the diff review). For each held-out real dataset, arm and decoder, the
++Transfer rule (decided 2026-10-15, SI-80). For each held-out real dataset, arm and decoder, the
+ transfer lambda is the registered point that maximises the
+ selection score S averaged over the training datasets: the real datasets of the other families (leave-one-family-out,
+ so immune and immune_hum_mou, which share cells, never choose each other's lambda; likewise atac_small and atac_large).
+@@ -211,7 +259,10 @@ The selection score (user decision SI-77, Q11) is S = 0.4 B + 0.6 C, scIB's weig
+ does not depend on which methods are compared; the same S is used in sections 9 and 10. (Q11's options: Appendix
+ A.1.)
+ 
+-## 9. Placement against standard integrators: best-of-k (R5; the agent's proposal, for the diff review)
++## 9. Placement against standard integrators: best-of-k (R5; decided 2026-10-15, SI-80)
++
++Giving every method the same number of tries is the user's decision (SI-68, SI-77). The best-of-k estimator below and the
++composition of the method families were the agent's proposals, approved as rules on 2026-10-15 (SI-80).
+ 
+ Per dataset and decoder, each method family's configurations: each adversarial arm (6 lambda), Harmony (6 theta at 10
+ PCs), Scanorama (6 knn at 10 dimensions), sysVI (6 cycle weights), and k = 1 methods (scANVI, scVI lambda = 0,
+@@ -222,7 +273,7 @@ C(N, k) with S sorted ascending, k = 1..N; families compared at equal k (final r
+ tool defaults are sensitivity points, not family members. Frontier positions: every baseline configuration's (B, C)
+ against each arm's six-point front, descriptive.
+ 
+-## 10. Lambda-window width (R3, X1 part; the agent's proposal, for the diff review)
++## 10. Lambda-window width (R3, X1 part; decided 2026-10-15, SI-80)
+ 
+ Per arm, dataset and decoder: the best point maximises mean S; the window is every point whose mean S is at least the
+ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); width = log10(largest lambda in the window)
+@@ -233,8 +284,8 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
+ 
+ - C without trajectory on immune and immune_hum_mou (SI-38) for every comparison above; b\* is unchanged (batch only).
+ - The per-run reading (section 2.4; the option of Q2 not chosen, SI-69), failure handling (points with any failed run
+-  removed, section 2.4; SI-71), the corner (b0, 0) (section 3; the agent's proposal) and the dataset structure (pairs
+-  first, and six independent datasets; section 4; the agent's proposal).
++  removed, section 2.4; SI-71), the corner (b0, 0) (section 3; decided 2026-10-15, SI-80) and the dataset structure (pairs
++  first, and six independent datasets; section 4; decided 2026-10-15, SI-80).
+ - Priors: the prior scales of the overall difference Delta and of both spreads set together to 0.05, and to 0.2, as
+   question Q6 proposed (SI-73). (Corrected 2026-10-14: this line said "half-normal scales 0.05 and 0.2", which named
+   only the spreads.)
+@@ -245,6 +296,10 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
+ Per Q1 (SI-68): P3 (X8), P4 (X7), the X3 dose-response, R3 factor effects (X6, X12) and X15, locked later with the
+ X7/X8 fixes; R0 and X10 exploratory; no measurement-SD re-score study (SI-74).
+ 
++PAPER_PLAN section 5's four scaling checks (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette
++metrics, rank stability by Kendall's tau) are reported, labelled not pre-registered, and used for no conclusion (exploratory; user
++decision SI-82, 2026-10-15). `scripts/analysis_x1.py` has no counterpart for them.
++
+ ## 13. PAPER_PLAN section 5 statements this file replaces (dated pointer added there at sign-off)
+ 
+ ROPE (Q7); failure imputation (Q4); the model formula without an arm-by-dataset term (I056); "same init and minibatch
+@@ -255,25 +310,43 @@ equal k, D-19); the undefined transfer lambda (section 8); "Holm over P1-P4" (se
+ 
+ - `scripts/analysis_x1.py`: reads the X1 manifest, scores and failures through `prereg_rules`, the frozen R1 and R4-x1
+   records and the X13 rows; writes one JSON record (inputs' SHA-256, git SHA, constants, every per-cell quantity and
+-  declaration) with `prereg_rules.write_record`; refuses incomplete inputs; no plots.
++  declaration) with `prereg_rules.write_record`; refuses incomplete inputs; no plots. When R4 added extension rows to an X1
++  grid, the extension manifests and their score directories are passed with the same options, together with one failures
++  table that covers every row (the usage line of the script says so); the script recomputes the R4 targets from those rows
++  and refuses a record whose targets differ, printing the recorded and the recomputed values (AN-R03, AN-R07). It reads the R1
++  record under the name `docs/prereg/r1_record.json`, which is also its name after the Sinkhorn redo (SI-87, section 1).
+ - Known-answer tests in `tests/analysis/`: curves with one and several crossings, unreached, low-signal and failed
+   points; the area on hand-computed point sets; the model against closed forms (tau = 0 gives the inverse-variance
+-  weighted mean) and brute-force integration; exact Wilcoxon p-values; Clopper-Pearson against `scipy.stats.binomtest`;
+-  transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity at the crossing.
+-  A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-14) catches 54 of 57 one-line
+-  errors; of the 3 it misses, two change no reported value by more than 2e-5 (measured) and the third only reorders
+-  floating-point sums (rigour review AN-04).
+-- Run commands (AN-18), from the repo root of a checkout that contains the tag prereg-tier12-v3 (inputs that mix the
+-  two equivalent commits of SI-54 resolve only there): tests `python scripts/check_tests.py --base <base> --src scripts
+-  -- tests/analysis tests/prereg` (env scvi-api plus pytest-cov); the analysis as in the usage line of
+-  `scripts/analysis_x1.py`. "Runs once" is a procedure: the script itself only refuses to overwrite an existing record.
++  weighted mean), brute-force integration and, for standard errors of 1e-6 to 3e-6, 50-digit values of five synthetic sets
++  (the registered grid constants are asserted with them; AN-R08); the floor of 1e-6 on a standard error and the list of
++  raised datasets, also for the pairs-first average (SI-83); exact Wilcoxon p-values; Clopper-Pearson against
++  `scipy.stats.binomtest`; transfer lambda with a planted best point; best-of-k against enumeration; the local-global identity
++  at the crossing; the count of configurations with no successful run between the window's ends (AN-R13); an end-to-end record
++  built from the rows in their given order and in shuffled order, which must be equal (AN-R14), and from a manifest without an
++  R4 extension row, which moves b* and is refused with the values printed (AN-R03).
++  A planted-error run (`experiments/analysis_numerics_20261014/mutation/`, 2026-10-15; its README lists every error) applies
++  73 one-line errors to `scripts/analysis_x1.py`, each alone, and the tests catch 72 of them. The one it misses, M28 (no half
++  weights at the two end points of the spread grid), changes no reported value by more than 2.0e-6 (measured on 60 synthetic
++  worlds), because both ends of the grid carry almost no weight (rigour review AN-04).
++- Run commands (AN-18, AN-R04), from the repo root of a checkout that contains the tag prereg-tier12-v3 (inputs that mix the
++  two equivalent commits of SI-54 resolve only there): tests `python scripts/check_tests.py --base 973a97d --src scripts --
++  tests/analysis tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py` (env scvi-api plus pytest-cov;
++  about 14 minutes). It requires every line and branch changed since 973a97d in `scripts/` to be run by a test; on 2026-10-15 it
++  printed OK for the changes of that day on top of the branch at 5d06a27 (429 passed, 18 skipped, 838 s), and it is run again
++  on the final tree before the tag is made. `--src` takes a directory: coverage.py reads a file path such as
++  `scripts/analysis_x1.py` as a module name and collects no data, and `check_tests.py` then either stops or prints OK from a
++  leftover `.check_tests/cov.json`, so no file path is used. A shorter list of test folders fails on the lines of the scripts it
++  leaves out: `tests/analysis tests/prereg` alone fails on `scripts/run_stage.py` lines 662 and 663, which only `tests/stage`
++  runs (AN-R04). The analysis runs as in the usage line of `scripts/analysis_x1.py`. "Runs once" is a procedure: the script
++  itself only refuses to overwrite an existing record.
+ - `scripts/check_tests.py`, fail-loud lint, notebook RESULT; to be frozen with the tag prereg-tier12-v3, which has not
+   been made.
+ 
+-## 15. Implementation details (the agent's proposals, for the diff review; 2026-10-14)
++## 15. Implementation details (decided 2026-10-15, SI-80; written 2026-10-14)
+ 
+-Writing `scripts/analysis_x1.py` needed the details below, which sections 1-11 leave open. Each is the agent's
+-proposal and goes to the user at the diff review (SI-52); none changes a decision SI-68 to SI-77.
++Writing `scripts/analysis_x1.py` needed the details below, which sections 1-11 leave open. Each was the agent's
++proposal; the user approved them as rules on 2026-10-15 (SI-80), with the designs of the rigour review as decided in SI-83 and
++SI-84; none changes a decision SI-68 to SI-77.
+ 
+ 1. Inputs. X1 and X13 rows are read as one input through `prereg_rules.outcomes`, so they must share one scorer
+    commit (after the SI-54 equivalence) and one CPU type: best-of-k compares them directly, and the same latent scores
+@@ -299,17 +372,33 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
+    double precision for small s (found while checking AN-01: the subtraction it replaces lost up to 0.2% of the
+    variance at s = 1e-4 and was unusable near s = 1e-6). The sign table's "leave-one-out intervals" are each dataset's
+    d ± t(0.975, m - 1) s, with s its leave-one-seed-out standard error from m readings (AN-06: with m = 4 or 5,
+-   d ± 1.96 s covers less than 95%). The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
+-   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it. Validation
+-   (`experiments/analysis_numerics_20261014/`, synthetic inputs): on 240 random sets of 1-6 datasets with s from 1e-6
+-   to 0.05, every probability, posterior mean and heterogeneity is within 2e-6 of a finer and wider reference rule,
+-   and no declaration differs.
++   d ± 1.96 s covers less than 95%; the limits stay approximate, because s is a jackknife standard error of a statistic that is not
++   smooth, section 16, limitation 1). The heterogeneity is reported as the posterior mean of sqrt(tau_f^2 + tau_d^2).
++   The model is fitted however few datasets are evaluable (1 or more); the number is reported with it. With fewer than
++   three evaluable datasets the pooled result is inconclusive by construction (AN-R12): with every dataset showing the same
++   difference, P(Delta > 0.01) did not exceed 0.82 with one dataset, 0.94 with two datasets of different families and 0.88
++   with two of one family, and P(|Delta| <= 0.01) did not exceed 0.15, 0.33 and 0.26, for differences up to 2 and standard
++   errors from 1e-6 to 0.01 at the prior scale 0.1 (`experiments/analysis_numerics_20261014/ceilings.json`); three datasets
++   need a difference of at least 0.03 to 0.08, depending on s, to declare a direction. Conditioned-decoder cells that are
++   low-signal drop out of the pool (section 2.3), so this can happen in the real run; each declaration keeps the number of
++   evaluable datasets beside it. Accuracy (user decision SI-84; `experiments/analysis_numerics_20261014/`, synthetic inputs):
++   on 240 random sets of 1-6 datasets with s from 1e-6 to 0.05, every probability, posterior mean and heterogeneity is
++   within 2e-6 of a finer and wider reference rule, and no declaration differs. An independent reference (closed-form
++   block algebra, Gauss-Legendre quadrature, 50-digit arithmetic; `ref_pool.py`, `ref_mp.py`) agrees with the code to 1.5e-9
++   on the ordinary sets, to 7e-7 for a single dataset, and to 2e-6 while the datasets' differences spread by at most three
++   prior scales (a standard deviation of 0.3 at the prior scale 0.1). Beyond that the error grows: for a spread of 4, 5, 6 and 8 prior
++   scales (prior scale 0.1) the largest error of a declaration probability is 1.3e-6, 1.1e-5, 2.9e-5 and 2.1e-4, and that of
++   any reported value 1.1e-5, 7.8e-5, 3.0e-4 and 2.8e-3; part of it is the posterior mass beyond 5 prior scales that the grid
++   leaves out (2.2e-5, 1.5e-4 and 3.3e-3 at a spread of 5, 6 and 8 prior scales), the rest the integration rule. No
++   declaration differed from the reference in any of these sets (`compare_with_reference.json`).
+ 5. Declarations (section 5). Holm runs over the six frequentist p values of the primary results (P1, area and P2,
+    each per decoder).
+ 6. P2 (section 6). All 6 real datasets enter the comparison: the low-signal flag concerns b\*, which P2 does not use.
+    The per-dataset difference and its standard error are both Agresti-Caffo's (rates after adding one collapse and
+    one non-collapse per arm). P2's prior scale 0.25 has no prior-sensitivity variant.
+-7. Local versus global (section 7). A dataset is evaluable exactly when it is for P1 (same crossing).
++7. Local versus global (section 7). A dataset is evaluable exactly when it is for P1: the local reading is read at the same
++   crossing, so it has the same not-evaluable reasons, and a small standard error is raised, not a reason (SI-83). The end-to-end
++   test checks that the two lists of evaluable datasets are equal (re-check finding AN-R05).
+ 8. Transfer lambda (section 8). The per-dataset best lambda (the optimistic bound) uses the same failure-free rule
+    within that dataset. When no lambda is failure-free in every training dataset, the transfer lambda is reported as
+    missing.
+@@ -322,29 +411,39 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
+ 10. Window width (section 10). The lower bound is the lower end of the two-sided 95% t interval (t at 0.975, n - 1
+     degrees of freedom) of the best point's mean; with fewer than 2 successful runs at the best point no width is
+     computed. The record flags a gap when a point between the window's smallest and largest lambda lies below the
+-    bound, so that the width spans it (AN-14).
++    bound, so that the width spans it (AN-14). A configuration whose runs all failed has no mean and is not a point of the window;
++    the record counts those that lie strictly between the window's smallest and largest lambda in `n_all_failed_between`,
++    because the width spans them although `gap` does not flag them (AN-R13).
+ 11. Sensitivity analyses (section 11). Each changes one setting and reruns everything: trajectory-free C; per-run
+     reading (P1 and local-global; the area is defined on point means only, section 3, so it has no per-run version:
+     corrected 2026-10-14, AN-05) and dropping points with a failed run (P1, area, local-global); corner (b0, 0)
+     (area); pairs-first and six independent datasets (every combined result, P2 included); prior scales 0.05 and 0.2
+     (P1, area, local-global).
+ 
+-## 16. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16)
++## 16. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16; user decision 2026-10-16: NB-20261016-15)
+ 
+ 1. Each dataset's standard error s comes from 4 or 5 leave-one-seed-out readings of a statistic that is not smooth
+-   (a curve crossing, a union of rectangles), and the pooled model treats it as known. In the review's simulation this
+-   made the pooled interval conservative and the per-dataset intervals cover less than 95%, so single-dataset statements
+-   are less certain than their intervals suggest; at the pilot's noise "practically equivalent" cannot be declared.
++   (a curve crossing, a union of rectangles), and the pooled model treats it as known. In a simulation of six synthetic
++   scenarios (`experiments/analysis_numerics_20261014/first_review/`; 20 worlds of 6 datasets and 200 replicates each) the
++   intervals d ± 1.96 s of single datasets covered the reading of the noise-free curves in 0.85 to 0.88 of the replicates, and
++   the pooled 95% interval for Delta in 0.998 to 1.000 of the pooled worlds: the pooled interval was conservative, single-dataset
++   statements are less certain than their intervals suggest, and "practically equivalent" was declared in none of the 2,640
++   pooled worlds (at the pilot's noise it cannot be declared).
+ 2. P1 is the difference of two six-point piecewise-linear curves read at b\*, so it depends on the registered lambda
+    spacing (the W1 critics' grids have one-decade gaps); in the pilot, reading one of six cells on ten points instead
+-   of six moved its difference by 0.011. No sensitivity analysis is planned.
++   of six moved its difference by 0.011 (atac_small with the conditioned decoder: reference minus discriminator 0.017 on all
++   ten pilot lambda, 0.028 on those of the registered grid; the other five cells did not move;
++   `experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.csv`). No sensitivity analysis is planned.
+ 3. P2's collapse rates are taken over each family's own six points, placed by R1 from the pilot's onset of collapse,
+    so rates are comparable across families only approximately; no sensitivity analysis is planned. The Clopper-Pearson
+    and Agresti-Caffo intervals treat the 30 runs of a cell (6 strengths x 5 seeds) as independent, although each run's
+    collapse is judged against the same seed's plain-scVI biology score, so the 6 runs of a seed share their threshold
+-   (in the review's simulation the intervals' coverage was 0.91 to 1.00).
++   (in a simulation, `first_review/p2_clustering_sim.json`, 20,000 replicates per line, the Clopper-Pearson interval covered
++   0.9995 when the runs were independent and 0.914 when each seed had one collapse threshold shared by its six strengths;
++   the Agresti-Caffo interval of a difference covered 0.949 with seeds paired between the two arms and 0.919 with
++   independent seeds).
+ 4. Each declaration is made on its own posterior, without a correction for the number of results judged (section 5,
+-   a proposal for the diff review); only the Wilcoxon companions get Holm's correction. The local-versus-global
++   decided 2026-10-15, SI-80); only the Wilcoxon companions get Holm's correction. The local-versus-global
+    question (section 7) is one signed question per decoder and lies outside the six primary results and their Holm
+    family.
+ 5. The family spread tau_f rests on four dataset families, two of them with two datasets, so its prior can dominate;
+@@ -355,8 +454,12 @@ proposal and goes to the user at the diff review (SI-52); none changes a decisio
+ 7. P1 compares the reference critic at 5 critic steps per model update with the discriminator at 1 step (X1 manifest);
+    the update-budget control (X6) exists only for the pooled critic (PREREG section 9), so P1 does not separate the
+    divergence from the extra critic steps.
++8. Iteration-cap hits of the Sinkhorn solve (500,000 iterations, PREREG SI-61) and zero-NMI cases (scib finds zero normalised
++   mutual information at every clustering resolution, SI-65) are decided by the user case by case, and no default outcome is
++   registered for either (SI-81; user, 2026-10-16, NB-20261016-15). A referee may see a decision taken after the data as
++   freedom after the data; each decision is listed with the results.
+ 
+-Sources checked for this draft: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-67),
++Sources checked for this specification: PREREG.md (sections 1-5, 9), PAPER_PLAN.md (sections 3, 5), CONSTRAINTS.md (SI-01..SI-89),
+ `scripts/prereg_rules.py` (`outcomes`, `r4_stage`, `bio_at_bstar`, `power_report`), `docs/prereg/r1_record.json` and
+ `r4_a1_record.json`, the X1 and full manifests (v3), review/rereview/design_fable/REVIEW_design_recheck.md (D-03, D-04,
+ D-06..D-10, D-18..D-20) and review/lead/verified_issues.csv (I001, I003, I038, I040, I056, I062, I067, I072, I073,
+@@ -364,8 +467,8 @@ I077, I078, I081, I084, I086, I089), revision/reviewer_response.md (E6 local/glo
+ 
+ ## Appendix A. Decision log (rigour review DOC-13, 2026-10-14)
+ 
+-The user answered Q1 to Q5 (round 1) and Q6, Q7, Q9, Q10 and Q11 (round 2) on 2026-10-14 with the recommended option
+-each time. Each question's options and reasons are quoted below from this file as it stood before the sections above
++The user answered Q1 to Q5 (round 1) and Q6, Q7, Q9, Q10 and Q11 (round 2) on 2026-10-14, each time taking the option the
++agent recommended. Each question's options and reasons are quoted below from this file as it stood before the sections above
+ were reduced to rules (commit fd9c8e3), dated corrections included. The questions as put to the user and the answers
+ are in the notebook DECISION entries named and in the ledger.
+ 
+@@ -387,7 +490,8 @@ Options:
+ [Note 2026-10-14, documents review DOC-01: 19 X1 rows had been scored on 2026-10-12, so the reason's "before any
+ X1 result exist" did not hold when the user chose. The lock is stated as "before any X1 adversarial-arm score is
+ examined" for this file (status line) and as "before anyone examines an X1 result" for the follow-up analyses
+-(section 0; SI-68's words: "before anyone looks at an X1 result"); PREREG section 9, entry of 2026-10-14.]
++(section 0; SI-68's words: "before anyone looks at an X1 result"); PREREG section 9, entry of 2026-10-14. On 2026-10-15
++SI-78 widened the status line's wording to every X1 and X13 score, of any arm.]
+ 
+ **Q2, how the five runs are combined (SI-69, NB-20261014-02).**
+ 
+@@ -433,7 +537,8 @@ Options for the corner (b_ref, c_ref):
+   add area. Reason: in the pilot (A1, seeds 100-102) plain scVI's C was 0.67-0.90 per cell, and the methods' points
+   moved C by -0.59 to +0.23 from it (the middle half of all 300 points by -0.09 to 0.00; within each cell the middle half lies inside -0.19 to +0.09;
+   corrected 2026-10-14, NB-20261014-06; pilot-informed: the 300 points are A1's 5 non-Sinkhorn arms x 6 cells x 10
+-  lambda, rigour review DOC-17). With a corner at biology 0 every
++  lambda, rigour review DOC-17; each figure is regenerated by code in experiments/doc_numbers_20261015/, whose README lists
++  the script and output, DOC-R04). With a corner at biology 0 every
+   rectangle's height carries the whole 0.67-0.90 baseline, so the area would mostly measure how far a method pushes
+   batch removal, not what it costs in biology.
+ - **B.** (b0, 0), the final review's example (D-03).
+@@ -460,7 +565,8 @@ with priors scaled for proportions (Delta ~ N(0, 0.25^2), tau ~ half-normal(0.25
+ pilot-informed: the margin and the prior scale were chosen after the pilot collapse rates were shown; the question
+ gave the unconditioned discriminator as 8 of 45 collapsed runs, which leaves out its 9 runs at lambda 0.03 from the
+ R1 extension; with them it is 8 of 54, so the unconditioned reference-minus-discriminator difference is +3.7 points,
+-not +0.7 (NB-20261014-22); whether SI-75 stands is put to the user at the diff review);
++not +0.7 (NB-20261014-22; the recount is regenerated by code in experiments/doc_numbers_20261015/, DOC-R04); whether SI-75 stands
++was put to the user at the diff review and it stands, NB-20261015-07);
+ **B** rates and intervals only, no declaration.
+ 
+ **Q10, local versus global batch removal (SI-76, NB-20261014-10).**
+@@ -481,18 +587,21 @@ the training dataset (final review D-08's example); **C** S = C.
+ 
+ No question was numbered Q8. In the first draft of this file (commit 6d0ca1f, 2026-10-13) the multiplicity rule,
+ which sits between Q7 and Q9, was already written as a proposal for the diff review rather than as a question, and
+-the later questions kept their numbers. The multiplicity rule of section 5 is therefore the agent's proposal.
+-
+-### A.3 Open items for the diff review
+-
+-1. Whether SI-75 stands. The question quoted 8 of 45 collapsed runs for the discriminator with the unconditioned
+-   decoder; the recount is 8 of 54 (NB-20261014-22), so the quoted critic-minus-discriminator difference is +3.7
+-   percentage points, not +0.7. Both are inside the 5-point margin.
+-2. The definition of "examined" (PREREG section 9, entry of 2026-10-14), and whether anyone read an X1
+-   adversarial-arm score value.
+-3. Approval of the agent's proposals: section 2.3, section 5 (multiplicity), section 8 (the transfer rule), sections
+-   9 and 10, the sensitivity analyses of section 11 that no decision names, and section 15. Each approval becomes a
+-   new ledger entry before the tag is made.
+-4. The name of the redone R1 record that section 1 gives to the analysis (`docs/prereg/r1_record_sinkhorn_redo.json`).
+-5. Whether the scaling sensitivities of PAPER_PLAN section 5 (leave-one-method-out rescaling, z-score aggregation, a
+-   composite without the silhouette metrics, rank stability) are locked here; this file has no counterpart today.
++the later questions kept their numbers. The multiplicity rule of section 5 was therefore the agent's proposal; the user
++approved it as a rule on 2026-10-15 (SI-80).
++
++### A.3 The questions of the diff review (answered 2026-10-15)
++
++No open items remain in this file. On 2026-10-15 the user answered all 19 questions of the diff review (ledger SI-78 to SI-87;
++notebook NB-20261015-02 to -20, with the correction -21), and later decided how the audit's findings are listed (SI-88,
++NB-20261015-25). PREREG section 9 has the complete list of the questions and answers, with the file and line where each is
++explained. The answers that decide something in this file:
++
++1. SI-78: what "examined" means (status paragraph). NB-20261015-15: the user states that nobody read an X1 or X13 score value.
++   SI-88: how PREREG lists the displays the audit found.
++2. SI-80: the agent's proposals are rules (sections 2.3, 5, 8, 9, 10, the unnamed sensitivity analyses of section 11, and 15).
++3. SI-81 (c): a reporting script written after the runs tabulates the per-arm counts of cells that never reach b\* (section 1).
++4. SI-82: PAPER_PLAN's four scaling checks are exploratory (section 12).
++5. SI-83: a standard error below 1e-6 is raised to 1e-6 (section 4). SI-84: five design choices of the code are approved and the
++   accuracy ranges are stated (sections 4, 14 and 15).
++6. NB-20261015-07: SI-75 stands (section 6). SI-87: the Sinkhorn redo overwrites five record files in place (section 1).
+diff --git a/docs/EQUIVALENT_COMMITS.json b/docs/EQUIVALENT_COMMITS.json
+index 7907051..473aeca 100644
+--- a/docs/EQUIVALENT_COMMITS.json
++++ b/docs/EQUIVALENT_COMMITS.json
+@@ -1,6 +1,6 @@
+ {
+  "rule": "SI-54 (CONSTRAINTS.md, NB-20261013-08); tag name SI-60 (NB-20261013-28)",
+- "meaning": "Fits and scores made at `commit` are result-identical to those made at `tag` for every arm except `not_for_arms`; rule scripts and run_stage.py read `commit` as the tag's commit for those arms when rows mix commits, and refuse rows of `not_for_arms` at `commit`. No rescoring. Limits: score rows carry the scorer's commit, not the fit's, so only the stage runner, which also reads each latent's fit commit, can see a Sinkhorn latent fitted at `commit` and rescored at `tag`; and `not_for_arms` rows are refused only at `commit`, so a stage made entirely at one other commit is not refused by this list.",
++ "meaning": "Fits and scores made at `commit` are result-identical to those made at `tag` for every arm except `not_for_arms`; rule scripts and run_stage.py read `commit` as the tag's commit for those arms when rows mix commits, and refuse rows of `not_for_arms` at `commit`. No rescoring. Limits: score rows carry the scorer's commit, not the fit's, so only the stage runner, which also reads each latent's fit commit, can see a Sinkhorn latent fitted at `commit` and rescored at `tag`; the rule scripts see scores only, so a divergence record's commit is checked by the stage runner only, which (SI-85) also refuses a record that carries no commit or was made from a checkout with uncommitted changes; and `not_for_arms` rows are refused only at `commit`, so a stage made entirely at one other commit is not refused by this list.",
+  "tag": "prereg-tier12-v3",
+  "commit": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "commit_ref": "prereg-tier12-v2",
+diff --git a/docs/PAPER_PLAN.md b/docs/PAPER_PLAN.md
+index 4aafd41..5b4d730 100644
+--- a/docs/PAPER_PLAN.md
++++ b/docs/PAPER_PLAN.md
+@@ -4,7 +4,7 @@
+ 
+ **Working title (proposal):** *Wasserstein critics versus discriminators for adversarial batch correction: a controlled, budget-matched comparison on scVI.* The original title "Topology Matters" should go: nothing topological was measured (R2.3, R1.minor.1).
+ 
+-**Sources:** original submission {{artifact:9d87cbf0-0080-45a8-a897-d4f02ec3b0dd}}; recovered decision letter with all 17 comments [BIOINF-2026-1434_decision_letter.txt]({{artifact:80d0fc2d-d3b1-4c9f-aa5e-f74dfac313cf}}); manuscript audit [original_manuscript_audit.md]({{artifact:0c9e00ea-b555-4cea-9a99-d04d4c2e56f8}}), [original_manuscript_claims_audit.csv]({{artifact:6c946526-684e-4e4b-9306-95c648230aae}}), [reviewer_comment_map.csv]({{artifact:eaabff29-bdcc-42c1-87da-73859e022bcc}}); methods/rigour review [rigour_review.md]({{artifact:281d44ff-8cbd-4adc-8169-0ac3051347d2}}); code review [code_review_5709a98_findings.csv]({{artifact:4eeb2df8-32dc-4935-98fe-1e2e33a6c964}}); earlier code audit [code_audit_findings.csv]({{artifact:5f4b1715-a22c-4ec1-b8b2-6bbf0417b094}}); counts pilot [counts_pilot_summary.csv]({{artifact:6f937ff2-fb9f-4cc6-b33a-939b86907831}}).
++**Sources:** original submission `Topology_Matters.zip`; recovered decision letter with all 17 comments `BIOINF-2026-1434_decision_letter.txt`; manuscript audit `original_manuscript_audit.md`, `original_manuscript_claims_audit.csv`, `reviewer_comment_map.csv`; methods/rigour review `rigour_review.md`; code review `code_review_5709a98_findings.csv`; earlier code audit `code_audit_findings.csv`; counts pilot `counts_pilot_summary.csv` (these source files are kept with the project, outside this repository).
+ 
+ ---
+ 
+@@ -74,8 +74,9 @@ Practical guidance for scVI users follows from the results, including the possib
+   - Sinkhorn: a debiased Sinkhorn divergence with a Euclidean (p = 1) cost at epsilon = 0.05 sqrt(2d), 0.224 for 10
+     latent dimensions. At this epsilon it is 0.86-0.89 of the exact W1 on A1-type latents and 0.53-0.77 on
+     standardised A3 latents (provisional: from the Sinkhorn review log, 5 pre-fix latents with 8 minibatches each,
+-    which is not in this repository; to be recomputed on the refitted latents), so it is not a W1 estimate (amended
+-    2026-10-14, Sinkhorn review note F7);
++    which is not in this repository, so these ratios cannot be recomputed from the repository until they are
++    recomputed on the refitted latents, as planned), so it is not a W1 estimate (amended 2026-10-14, Sinkhorn review
++    note F7);
+   - scvi-tools' own AdversarialTrainingPlan (κ = 1 − kl_weight) as the "as people use it" anchor.
+ - **3.3 Adversary input.** Posterior mean or sample, decided by pilot A2.
+ - **3.4 Training and disclosures.** Shared optimiser; adversary optimiser; inner-loop minibatch reuse; fixed λ vs the KL ramp, reporting final kl_weight per dataset (immune 0.595).
+@@ -173,16 +174,18 @@ families assumed below.*
+ 
+ ## 5. Analysis plan (pre-registration)
+ 
+-**Amended 2026-10-14 (user decisions SI-68 to SI-77 and the agent's proposals marked below; PREREG §9).** The analyses
++**Amended 2026-10-14 and 2026-10-15 (user decisions SI-68 to SI-77, and SI-80, which approved the agent's proposals marked below; PREREG §9).** The analyses
+ of X1 and X13 are specified in docs/ANALYSIS_SPEC.md and implemented by scripts/analysis_x1.py, both to be frozen by the tag
+-prereg-tier12-v3 (not yet made) before any X1 adversarial-arm score is examined ("examined" is defined in PREREG §9, entry of
+-2026-10-14, which also records the 19 X1 scores that exist from the local run of 2026-10-12); where this section
++prereg-tier12-v3 (not yet made) before any X1 or X13 score is examined ("examined" is defined in PREREG §9, entry of
++2026-10-14, which also records the X1 and X13 scores that already exist, in groups (1) to (5) of its disclosure: the 19 of the
++local run of 2026-10-12, the earlier baseline scores, the scorer identity checks, the X13 runner tests and the review probes); where this section
+ differs, the specification applies. It replaces seven statements below, marked [replaced] eight times (the ROPE and
+ the measurement-SD study carry one marker each): the ROPE (region of practical equivalence) and the measurement-SD study (the standard deviation of repeated scoring of one embedding; margin 0.01, SI-74); failure
+ imputation (failed runs are left out of P1 and the area and counted in P2, SI-71); the model formula (dataset-family and dataset terms for the arm difference, final review finding I056, SI-73); "same init and minibatch order" (PREREG §9, code check CR-07: equal seeds give equal initialisation, but not equal minibatch order, between arms with and without an adversary head); equal configuration counts (best-of-k compared at equal k, design-recheck finding D-19); the transfer λ (the single penalty strength a method uses on datasets it was not tuned on; leave-one-dataset-family-out, ANALYSIS_SPEC §8); and "Holm over P1–P4" (Holm's correction for several tests, over the six primary results, ANALYSIS_SPEC §5).
+-The replacements for equal configuration counts, the transfer λ and Holm are the agent's proposals (ANALYSIS_SPEC §9,
+-§8, §5) until the user approves them at the diff review. P3, P4 and the other follow-up analyses are specified later,
+-with the X7/X8 redesign, before any X1 result is examined (SI-68).
++Equal numbers of tries is the user's decision (SI-68, SI-77). The best-of-k estimator and the composition of the method
++families (ANALYSIS_SPEC §9), the transfer λ rule (§8) and the Holm correction (§5) were the agent's proposals; the user
++approved them on 2026-10-15 (SI-80). P3, P4 and the other follow-up analyses are specified later, with the X7/X8
++redesign, before any X1 result is examined (SI-68, whose own words the user confirmed on 2026-10-15, NB-20261015-09).
+ 
+ - **Unit of inference: the dataset.**
+   - Families enter as a random effect: immune and immune_hum_mou share all human cells; atac_small and atac_large share studies.
+@@ -193,14 +196,14 @@ with the X7/X8 redesign, before any X1 result is examined (SI-68).
+   - Bayesian hierarchical model (Corani 2017); ROPE = max(0.01, 2 × measurement SD) [replaced: margin 0.01, ANALYSIS_SPEC §5, SI-74].
+   - Measurement SD comes from re-scoring 5% of embeddings on a second machine and with different kNN/Leiden seeds [replaced: no re-scoring study, SI-74].
+   - Declare a direction if its posterior probability is ≥ 0.95, equivalence if P(ROPE) ≥ 0.95, and inconclusive otherwise.
+-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5; the agent's proposal, pending the diff review]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031. That is above Holm's first threshold in both versions (0.05/4 = 0.0125 for P1–P4; 0.05/6 = 0.0083 for the six primary results), so the companion cannot reject at the Holm-adjusted level and is reported descriptively (PREREG §5; amended 2026-10-13, D-02, and 2026-10-14).
++  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P1–P4 [replaced: Holm over the six primary results, ANALYSIS_SPEC §5; the agent's proposal, approved by the user on 2026-10-15, SI-80]. With the 6 real scIB tasks (SI-02 removed the new datasets) the smallest attainable two-sided p is 2/2⁶ = 0.031. That is above Holm's first threshold in both versions (0.05/4 = 0.0125 for P1–P4; 0.05/6 = 0.0083 for the six primary results), so the companion cannot reject at the Holm-adjusted level and is reported descriptively (PREREG §5; amended 2026-10-13, D-02, and 2026-10-14).
+ - **λ handling.**
+   - The frontier analysis needs no λ selection.
+-  - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8; the agent's proposal for the transfer rule (SI-77 decides only the selection score), pending the diff review]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
++  - Single-λ tables use nested leave-one-dataset-out "transfer λ" [replaced: leave-one-family-out, ANALYSIS_SPEC §8; the agent's proposal for the transfer rule, approved by the user on 2026-10-15, SI-80 (SI-77 decides only the selection score)]. Per-dataset oracle optima are shown only as labelled optimistic bounds.
+   - R4 extension points are used for matching only; frontier and P1 use the six pre-registered λ points per family, and an optimum at a grid edge is disclosed, not extended (PREREG §4; amended 2026-10-13, I006, SI-55).
+-- **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ. [Not covered by ANALYSIS_SPEC: its locked analyses use the unscaled selection score of SI-77, so these scaling sensitivities have no counterpart there; they stay unspecified unless the user locks them (question for the diff review).]
++- **Scaling.** One comparison set per dataset (all fixed-grid configurations, both decoders, baselines), never subsets; complete metric vectors required. Sensitivities: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics; rank stability reported as Kendall τ. [Decided 2026-10-15 (user decision SI-82): these four checks are all reported, labelled not pre-registered, and used for no conclusion (exploratory). ANALYSIS_SPEC has no counterpart for them, because its locked analyses use the unscaled selection score of SI-77.]
+ - **Failures are outcomes.** Rates are reported with Clopper–Pearson intervals. Endpoints impute the unintegrated score, with a sensitivity analysis excluding failures [replaced: failed runs left out of P1 and the area and counted in P2, SI-71]; nothing is dropped silently.
+-- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9; the agent's proposal, pending the diff review].
++- **Budget parity.** Every method family gets the same number of configurations, shown as best-of-k curves [replaced: families compared at equal k, final review D-19, ANALYSIS_SPEC §9; equal numbers of tries is the user's decision (SI-68, SI-77); the best-of-k estimator and the family composition are the agent's proposals, approved by the user on 2026-10-15, SI-80].
+ - **Power** (amended 2026-10-13, D-02; A1 estimate in docs/prereg/r1_record.json `power`, PREREG §5). The frozen design is flagged UNDERPOWERED: for P1 with D = 6 real tasks, SE 0.045, minimal detectable effect at 80 % power 0.131 and power at Δ = 0.02 0.104 (D = 4 dataset families: 0.182 and 0.088); equivalence within ±0.01 or ±0.02 is unreachable. These are the figures of the matched-lambda contrast on all six A1 pilot blocks, including the simulation sim1 and the two low-signal blocks, not of the frozen P1 (amended 2026-10-14); without sim1 the same formulas give SE 0.0236, minimal detectable effect 0.068 and power 0.182 for D = 6 (0.095 and 0.137 for D = 4), and equivalence is still unreachable (PREREG §9, entry of 2026-10-13, part (c)). σ̂ = 0.030, τ̂ = 0.109, and the A1 per-block means differ in sign (atac_small unconditioned +0.111, sim1 conditioned +0.224, the other four −0.024 to −0.004). P1 is therefore reported as the pooled posterior together with τ̂, the per-task posteriors and a per-task sign table; no equivalence claim and no per-dataset significance claims. The estimate will be recomputed, with the frozen P1 reading and only the evaluable blocks, when R4-a1 is re-run after the Sinkhorn redo (SI-57).
+ 
+ ## 6. Methodological rigour: what changes
+@@ -209,12 +212,12 @@ with the X7/X8 redesign, before any X1 result is examined (SI-68).
+ |---|---|
+ | λ not commensurable across objectives; "curve dominance" at matched nominal λ is not selection-free | Frontier endpoints (bio at matched batch removal, hypervolume); λ-curves descriptive only |
+ | Divergence confounded with gradient penalty, update budget and target design | Discriminator at 1 step in the core (SI-01); update budget varied for the pooled critic in X6 (1, 5, 10 steps); X6 factorial; X7 target factorial (amended 2026-10-13, D-01) |
+-| Composition shift uncontrolled; "balanced" ≠ independent | X3 dose-response on composition-matched subsamples; d_JS(Y) as a covariate everywhere (measured 0.15–0.44 across tasks, [composition_shift_by_dataset.csv]({{artifact:824c0218-4cb8-450d-a667-8c5ef961aae7}})) |
++| Composition shift uncontrolled; "balanced" ≠ independent | X3 dose-response on composition-matched subsamples; d_JS(Y) as a covariate everywhere (measured 0.15–0.44 across tasks, `composition_shift_by_dataset.csv`) |
+ | iLISI is label-agnostic and rewards cross-type mixing | Within-label vs cross-label decomposition; full metric suite; no iLISI-only claims |
+ | Batch-count "decay" partly a metric ceiling and composition change | Ceiling-normalised iLISI; fixed total cells and composition across V |
+ | K=2 tasks make reference choice irrelevant | Reference analyses on K ≥ 3 only; state the equivalence |
+ | Winner's curse in λ selection; pre-registered λ=20 was chosen from benchmark data | Transfer-λ rule; interior-optimum check |
+-| Unequal tuning budgets; scANVI uses labels | Equal configuration counts [superseded for best-of-k placement: families compared at equal k, ANALYSIS_SPEC §9, the agent's proposal pending the diff review]; scANVI in its own stratum |
++| Unequal tuning budgets; scANVI uses labels | Equal configuration counts [superseded for best-of-k placement: families compared at equal k, ANALYSIS_SPEC §9; equal numbers of tries is the user's decision (SI-68, SI-77), the estimator and the families are the agent's proposals approved on 2026-10-15, SI-80]; scANVI in its own stratum |
+ | scIB min–max depends on the comparison set | Raw metrics primary; one fixed set |
+ | Dataset count too small for any significance across families | Add 4 raw-count real datasets (≈ 9 real tasks, 7 families) [dropped by SI-02: six real tasks in four dataset families] |
+ | Mechanistic language | Used only for factors isolated by X3–X8 |
+diff --git a/docs/PREREG.md b/docs/PREREG.md
+index b86bf82..7fb604f 100644
+--- a/docs/PREREG.md
++++ b/docs/PREREG.md
+@@ -1,8 +1,8 @@
+ # Pre-registered decision rules for the Tier 1+2 rerun
+ 
+-*Status, 2026-10-14. Version 2 of the rules (tag `prereg-tier12-v2`, commit c88cce3, 2026-10-04) was signed off by the user on 2026-10-02 and revised with the user's answers of 2026-10-02/03 (§7). It was frozen before the restarted A1's first fit (§9), and every rule in it is a deterministic function of scored results. This file on branch `final-review-fixes` also holds a draft of version 3, the amendments of 2026-10-13 and 2026-10-14 in §9. Version 3 will be frozen by the tag `prereg-tier12-v3` (user decision SI-60) only after the user has reviewed the full diff (SI-52); that tag has not been made. The sentence "nothing in this file is chosen after seeing A1, A2, A3 or X1 data" holds for version 2 only. The version 3 amendments were decided after A1, A2 and A3 had been fitted and scored and after the local X1 run had started; the table of amendments in §9 gives, for each one, when the user decided it, the commit, the data that existed at that time and whether any result or decision changed.*
++*Status, 2026-10-16 (ledger SI-78 to SI-89). Version 2 of the rules (tag `prereg-tier12-v2`, commit c88cce3, 2026-10-04) was signed off by the user on 2026-10-02 and revised with the user's answers of 2026-10-02/03 (§7). It was frozen before the restarted A1's first fit (§9), and every rule in it is a deterministic function of scored results. This file on branch `final-review-fixes` also holds a draft of version 3, the amendments of 2026-10-13 to 2026-10-16 in §9. Version 3 will be frozen by the tag `prereg-tier12-v3` (user decision SI-60) only after the user has reviewed the full diff (SI-52); that tag has not been made. The user answered the 19 questions of that review on 2026-10-15 (list at the end of §9) and the findings of the independent re-check on 2026-10-16 (SI-78, SI-79, SI-81, SI-83, SI-85 and SI-89; amendment-table row 9). The sentence "nothing in this file is chosen after seeing A1, A2, A3 or X1 data" holds for version 2 only. The version 3 amendments were decided after A1, A2 and A3 had been fitted and scored and after the local X1 run had started and when part of the earlier X1 and X13 baseline fits already had scores (§9, entry on the disclosure); the table of amendments in §9 gives, for each one, when the user decided it, the commit, the data that existed at that time and whether any result or decision changed.*
+ 
+-Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_grid.py` (R1 and the power report), `scripts/freeze_matched_lambda.py` (R4; stages `a1` and `x1`), `scripts/decide_a2_a3.py` (R2, R3). Tests: `tests/prereg/`. Version 3 adds `docs/ANALYSIS_SPEC.md` (the X1 analyses; it holds agent proposals that the user has not yet approved), `scripts/analysis_x1.py` (their code) with its known-answer tests in `tests/analysis/`, and `docs/EQUIVALENT_COMMITS.json` (the commits declared result-identical, SI-54). Governs `scripts/build_paper_manifest.py --design pilot` (design of record, CONSTRAINTS.md SI-16).
++Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_grid.py` (R1 and the power report), `scripts/freeze_matched_lambda.py` (R4; stages `a1` and `x1`), `scripts/decide_a2_a3.py` (R2, R3). Tests: `tests/prereg/`. Version 3 adds `docs/ANALYSIS_SPEC.md` (the X1 analyses; the user approved the agent's proposals in it on 2026-10-15, SI-80), `scripts/analysis_x1.py` (their code) with its known-answer tests in `tests/analysis/`, `docs/EQUIVALENT_COMMITS.json` (the commits declared result-identical, SI-54), `experiments/doc_numbers_20261015/` (scripts that regenerate numbers quoted in these documents) and `experiments/x1_x13_score_hashes_20261015/` (the SHA-256 hash list of the existing X1 and X13 score files, SI-79). Governs `scripts/build_paper_manifest.py --design pilot` (design of record, CONSTRAINTS.md SI-16).
+ 
+ **Disclosure (for Methods).** The X1 λ ranges come from 3 of the 8 tasks (atac_small, immune, sim1), fitted on seeds 100–102, which are disjoint from every X1 seed (0–4). No A1 fit is used as an X1 fit, so every λ chosen on A1 is evaluated on fresh seeds (SI-13). Likewise the λ-matched follow-ups (X3, X6, X7, X8, X12) run on seeds 10–12, disjoint from X1 and A1, so no follow-up cell reuses an X1 fit from which its matched λ was chosen (SI-26).
+ 
+@@ -19,7 +19,7 @@ Implementation: `scripts/prereg_rules.py` (all rule logic), `scripts/freeze_a1_g
+ | R4-x1 | — | X1 scored | follow-up `lam` = matched_lo / matched / matched_hi | `freeze_matched_lambda.py --stage x1` |
+ | X3, X6, X7, X8, X12 | seeds 10–12 (SI-26) | R4-x1 | | |
+ 
+-Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress. A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
++Fits that depend on no rule (X1 arms `none` and `scvi_adv`, X13) may run while A1–A3 are in progress; 250 of them already exist, and part of those 250 are already scored (section 9, entry of 2026-10-14 on the disclosure). A row that still holds a placeholder cannot be fitted: `fit_paper_config.py` refuses a non-numeric `lam`, `int("A3")` fails for `zstd`, and the training plan refuses an `adv_input` other than `mean`/`sample`.
+ 
+ ## 1. Definitions shared by all rules
+ 
+@@ -103,7 +103,7 @@ Per task t and decoder c, on the stage's own fits (A1: A1 grid, seeds 100–102;
+ 
+ From A1, for the P1 contrast (reference critic − discriminator), per task × decoder: each arm at its R4-a1 matched λ, d_s = C_reference(s) − C_discriminator(s) per seed. σ̂ = pooled within-(task, decoder) SD of d_s; τ̂² = max(0, Var_t(mean d) − σ̂²/n) per decoder, pooled. For the fixed design (5 seeds, SI-16) with D = 6 real tasks (pancreas, lung, immune, immune_hum_mou, atac_small, atac_large; simulations are a separate family, PAPER_PLAN §5) and, conservatively, D = 4 dataset families: SE = √((τ̂² + σ̂²/5)/D); power of a one-sided posterior-probability-0.95 call (non-central t, D − 1 df) for Δ = 0.02; the minimal detectable effect at 80 %; whether the 95 % interval at Δ = 0 fits inside ±0.01 and ±0.02 (equivalence). The design is flagged UNDERPOWERED when the minimal detectable effect exceeds 0.02 or equivalence within ±0.02 is unreachable.
+ 
+-Known before any data: the frequentist companion (exact Wilcoxon on dataset means, Holm over P1–P4) cannot reject with 6 real tasks. The smallest two-sided p is 2/2⁶ = 0.031, above Holm's first threshold 0.05/4 = 0.0125. PAPER_PLAN §5 relied on 9 real tasks; SI-02 removed the new datasets. [Amended 2026-10-14: the frozen X1 analysis applies Holm over six primary results (P1, the frontier area and P2, each for both decoders), not four, so its first threshold is 0.05/6 = 0.0083. The six-test rule is the agent's proposal in docs/ANALYSIS_SPEC.md section 15, item 5, and awaits the diff review. docs/prereg/r1_record.json still stores the four-test value, 0.0125 (N_ENDPOINTS = 4 in scripts/prereg_rules.py). The smallest two-sided p, 0.031, is above both thresholds, so the companion cannot reject at the Holm-adjusted level in either version; unadjusted, 0.031 is below 0.05.]
++Known before any data: the frequentist companion (exact Wilcoxon on dataset means, Holm over P1–P4) cannot reject with 6 real tasks. The smallest two-sided p is 2/2⁶ = 0.031, above Holm's first threshold 0.05/4 = 0.0125. PAPER_PLAN §5 relied on 9 real tasks; SI-02 removed the new datasets. [Amended 2026-10-14: the frozen X1 analysis applies Holm over six primary results (P1, the frontier area and P2, each for both decoders), not four, so its first threshold is 0.05/6 = 0.0083. The six-test rule was the agent's proposal in docs/ANALYSIS_SPEC.md section 15, item 5; the user approved it on 2026-10-15 (SI-80). docs/prereg/r1_record.json still stores the four-test value, 0.0125 (N_ENDPOINTS = 4 in scripts/prereg_rules.py). The smallest two-sided p, 0.031, is above both thresholds, so the companion cannot reject at the Holm-adjusted level in either version; unadjusted, 0.031 is below 0.05.]
+ 
+ ## 6. Freeze protocol
+ 
+@@ -146,13 +146,13 @@ Each amendment is dated, states what changes and why, and is committed before th
+ amendment changes no fit. Those of 2026-10-04 change only stages that had not started, and A1 restarts from zero at
+ the tag prereg-tier12-v2, which freezes this file again before the restarted A1's first fit (section 6).
+ 
+-The amendments of 2026-10-13 and 2026-10-14 (version 3) follow a different order. Each was decided after A1, A2 and A3
++The amendments of 2026-10-13 to 2026-10-15 (version 3) follow a different order. Each was decided after A1, A2 and A3
+ had been fitted and scored and after the local X1 run had started on 2026-10-12, so "committed before the stage it
+ affects" holds for them only for the stages that have not yet run: the Sinkhorn redo, the X1 fits still to be made and
+ the single X1 analysis run. R2 and R3 had already been run once on the A2/A3 results (2026-10-12, NB-20261012-01)
+ before the rule for low-signal blocks (SI-56, SI-66) was decided; SI-57 has them run again after the Sinkhorn redo.
+ The table after the glossary lists every version 3 amendment with the data that existed when the user decided it.
+-Times are from the notebook and `git log`. Each entry dated 2026-10-13 or 2026-10-14 below starts with a status line
++Times are from the notebook and `git log`. Each entry dated 2026-10-13 to 2026-10-15 below starts with a status line
+ that says what is done, with date and commit, and what is planned; a step that has not been done is written with "will
+ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and frozen in version 2.
+ 
+@@ -174,6 +174,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+ |---|---|
+ | version 2, version 3 | Version 2 is the frozen set of rules (tag prereg-tier12-v2, commit c88cce3). Version 3 is this file with the amendments of 2026-10-13 and 2026-10-14; its tag prereg-tier12-v3 has not been made. |
+ | arm | One method in the comparison. Plain scVI (single-cell variational inference, the base model) is arm none (penalty strength 0). The six adversarial arms are discriminator, reference, pooled, barycenter, mmd and sinkhorn. |
++| scvi_adv | The anchor arm that uses scvi-tools' own adversarial training plan, the way people usually run an adversarial scVI (PAPER_PLAN section 3.2). It is not one of the six adversarial arms, and rule R2 does not govern it (section 3). |
+ | penalty strength, lambda | The weight of the batch-alignment term that an arm adds to the scVI loss. A grid is the list of strengths that are fitted; lambda = 0 is plain scVI. |
+ | discriminator, critic | The discriminator is a network trained to tell the batches apart (a Jensen-Shannon, JS, divergence). A critic is a network trained to estimate the Wasserstein-1 (W1) distance between batches: the reference critic compares each batch with a reference batch, the pooled critic with the other batches together, and the barycenter critic with a barycenter (an average distribution) of the batches. |
+ | critic-free loss | A loss computed directly from the cells' latent coordinates, with no trained network: MMD (maximum mean discrepancy), reference-anchored MMD, and Sinkhorn. |
+@@ -192,25 +193,30 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+ | bstar_low_signal | A flag on a task-by-decoder block where b_common - b0 is below 0.02, so that b\* cannot be placed reliably (SI-56). |
+ | sigma_c, delta_c, delta_min | sigma_c is the between-seed standard deviation of the change in C. delta_c is the smallest change in C that rule R1 counts as an effect, max(delta_min, 3 sigma_c / sqrt(n)) with n the number of seeds; delta_min = 0.01 is the registered smallest difference that counts (section 2, SI-74). |
+ | R1 to R4 | The four decision rules (sections 2 to 4). R1 sets each penalty-strength family's six-point grid for X1 from A1. R2 decides whether the adversary reads the posterior mean or a posterior sample, R3 whether its input is standardised, and R4 sets the matched lambdas. PAPER_PLAN uses R0 to R5 for research questions instead. |
+-| A1, A2, A3, X1 | Pilot experiments: A1 fits the penalty-strength grid, A2 tests the adversary input, A3 tests standardisation. X1 is the core experiment (8 tasks, both decoders, seeds 0 to 4). X3, X6, X7, X8, X12, X13 and X15 are follow-up experiments (section 0, PAPER_PLAN section 4). |
++| A1, A2, A3 | The three pilot experiments, run before X1 to set the rules: A1 fits the penalty-strength grid, A2 tests the adversary input, A3 tests standardisation. |
++| X1 | The main experiment, not a pilot: 8 tasks, both decoders, seeds 0 to 4, with the six adversarial arms and the arms none and scvi_adv (3,000 model fits in the manifest of record). |
++| X13 | The comparison with standard integration tools: Harmony and Scanorama (the CPU baselines), sysVI (the SysVI model of scvi-tools) and scANVI (scVI trained with cell-type labels), with plain PCA (principal component analysis) as the uncorrected reference. It is not matched on penalty strength and keeps seeds 0 to 4 (section 4). |
++| X3, X6, X7, X8, X12, X15 | Follow-up experiments that start after X1 (section 0, PAPER_PLAN section 4). |
+ | P1, P2, trade-off area | P1 is the difference in C between the reference critic and the discriminator at the target batch score b\*, one result per decoder. The trade-off area (also called frontier area) is the area between an arm's curve of C against B and the collapse line, counted only where the arm removes more batch effect than plain scVI (SI-72). P2 is how often runs collapse, that is, fail or lose 0.10 or more of C against the same seed's plain scVI run (SI-75). |
+ | Holm | Holm's step-down correction for testing several results: the smallest p-value is compared with 0.05 divided by the number of tests, the next smallest with 0.05 divided by one fewer, and so on. |
+ | power, SE, sigma, tau, D | In section 5, sigma is the between-seed standard deviation of the per-seed difference between two arms, tau is the standard deviation of the true difference between tasks, and SE is the standard error of the mean difference over tasks. Power is the probability that a call at 95 % posterior probability detects a difference of 0.02; the minimal detectable effect is the smallest difference found with 80 % power. D is the number of tasks (or dataset families) in section 5, and a difference in C at b\* in section 3. |
+-| transfer lambda, best-of-k | The transfer lambda is the single penalty strength that a method uses on datasets it was not tuned on (docs/ANALYSIS_SPEC.md section 8, a proposal). Best-of-k is the best score among k configurations; methods are compared at equal k (section 9 of that file, a proposal). |
+-| diff review, proposal | The diff review is the user's review of the full diff of branch final-review-fixes before the tag is made (SI-52). A proposal is text that the agent suggested; it becomes a rule only if the user approves it there. |
++| transfer lambda, best-of-k | The transfer lambda is the single penalty strength that a method uses on datasets it was not tuned on (docs/ANALYSIS_SPEC.md section 8; the rule was the agent's proposal, approved by the user on 2026-10-15, SI-80). Best-of-k is the best score among k configurations; methods are compared at equal k (section 9 of that file). Equal numbers of tries is the user's decision (SI-68, SI-77); the best-of-k estimator and the composition of the method families were the agent's proposals, approved on 2026-10-15 (SI-80). |
++| diff review, proposal | The diff review is the user's review of the full diff of branch final-review-fixes before the tag is made (SI-52). The user answered its 19 questions on 2026-10-15; the list is at the end of this section. A proposal is text that the agent suggested; it becomes a rule only when the user approves it. The user approved the agent's proposals in docs/ANALYSIS_SPEC.md (SI-80) and the three process proposals of this file (SI-81) on 2026-10-15. |
++| agent, lead agent, sub-agent | An agent is an AI assistant that works on this project; the lead agent is the one that coordinates the others, and a sub-agent is one that another agent starts for a single task. The user is the person who decides; decisions marked as agent decisions in this file are not the user's. |
+ 
+ **Amendments of version 3.**
+ 
+-| # | Amendment | Decided by the user (2026-10-13 and 14, New York time) | Committed | Data behind the decision | Result or decision changed? |
++| # | Amendment | Decided by the user (2026-10-13 to 15, New York time) | Committed (New York time) | Data behind the decision | Result or decision changed? |
+ |---|---|---|---|---|---|
+ | 1 | R1 depends on the trajectory through its noise estimate (I091, SI-53) | 2026-10-13 11:46 | 018c8f1 (10-13 14:46) | A1 scores (bio-score noise estimates) | No registered rule changes. R1 without trajectory is a sensitivity analysis; the frozen X1 grids stand except Sinkhorn (row 4) |
+-| 2 | PAPER_PLAN corrected to this file: grid edge (SI-55), P1 comparator, power, Holm (I006, D-01, D-02) | Grid edge (SI-55): 2026-10-13 11:46. The other corrections are not user decisions | 018c8f1 (10-13 14:46) | A1 record (power figures) | No. PAPER_PLAN text only; Holm over six results is a later proposal (row 8) |
+-| 3 | Two commits declared result-identical (SI-54; SI-60 names the tag) | SI-54: 2026-10-13 11:46. SI-60: 20:03 | 8ce5a54 (20:10), 7c32579 (20:30), b2c68c8 (20:30) | No X1 score value cited. The identity checks rescored 7 latents by script, one of them an X1 adversarial-arm latent | No |
++| 2 | PAPER_PLAN corrected to this file: grid edge (SI-55), P1 comparator, power, Holm (I006, D-01, D-02) | Grid edge (SI-55): 2026-10-13 11:46. The other corrections are not user decisions | 018c8f1 (10-13 14:46) | A1 record (power figures) | No. PAPER_PLAN text only; Holm over six results was a later proposal (row 8), approved on 2026-10-15 (SI-80) |
++| 3 | Two commits declared result-identical (SI-54; SI-60 names the tag) | SI-54: 2026-10-13 11:46. SI-60: 20:03 | 8ce5a54 (20:10), 7c32579 (20:30), b2c68c8 (20:30) | No X1 or X13 score value cited. The identity checks rescored 7 latents by script, one of them an X1 adversarial-arm latent and one an X13 sysVI latent, and printed two metrics of each (disclosure entry of 2026-10-14) | No |
+ | 4 | Sinkhorn arm corrected, its pilot fits redone in rule order (SI-51, SI-57, SI-58, SI-61, SI-62) | 2026-10-13: 07:45 (SI-51) to 20:48 (SI-61, SI-62) | 3cbaca4 (09:56), 89d5e2c (19:46); text 4d86a55 (10-14 07:54) | Pilot Sinkhorn fits (A1, A3); no X1 score cited | Yes. Sinkhorn A1, R1, R4-a1, A3 and R2/R3 results will be redone; the X1 Sinkhorn grid will change |
+-| 5 | Guards before the tag (I033, I034, I042, I050, I051, I094, I008; G-01 to G-05 and G-14) | SI-52: 2026-10-13 07:45. SI-63, SI-64: 20:48 | c4be14b (10:09) to c3fd92d (21:00) | No score cited | No completed fit or score changes: 59 of 59 non-Sinkhorn fits and 7 of 7 latents identical (NB-20261013-39, -40) |
++| 5 | Guards before the tag (I033, I034, I042, I050, I051, I094, I008; G-01 to G-05 and G-14; the NMI-0 case, SI-65; the check of divergence records in the stage runner, SI-85, widened on 2026-10-16 to every arm; the same check for a latent that names no commit, SI-89) | SI-52: 2026-10-13 07:45. SI-63, SI-64, SI-65: 20:48. SI-85: 2026-10-15 09:54, widened to every arm on 2026-10-16 (NB-20261016-09). SI-89: 2026-10-16 (NB-20261016-10) | c4be14b (10:09) to c3fd92d (21:00); SI-85: 2026-10-15, before the tag; SI-89: 4b02068 (2026-10-16), before the tag | No score cited | No completed fit or score changes: one-epoch test refits of code paths, not the production fits, give identical latents for 59 of 59 non-Sinkhorn code paths, and 7 of 7 rescored stored latents give identical scores (NB-20261013-39, -40). SI-85 and SI-89 add checks to the stage runner and change no fit or score |
+ | 6 | P1 starts at lambda = 0; low-signal blocks are not evaluable (I072, D-04, SI-56) | 2026-10-13 11:46 | Text 4d86a55 (10-14 07:54); code f3c3415 (R2/R3, 07:50) and ff88666 (P1, 08:04) | A1 and A2/A3 results; the R4-a1 record of 2026-10-10 already flagged two low-signal blocks | No. R2 and R3 keep their defaults with or without the rule |
+ | 7 | Low-signal blocks count as not evaluable in R2 and R3 (SI-66) | 2026-10-13 20:53 | f3c3415 (10-14 07:50); text 4d86a55 | A2/A3 results; R2 and R3 had been run once on them on 2026-10-12 (NB-20261012-01, cea50ca) | No. On the stored cells R2 has 9 of 12 cells evaluable (mean change -0.0042) and R3 13 of 20 (-0.0014); both keep their defaults |
+-| 8 | The X1 analyses are specified (I001, D-03, D-08, D-09; SI-68 to SI-77, plus agent proposals marked in ANALYSIS_SPEC) | SI-68 to SI-72: 2026-10-14 06:45. SI-73 to SI-77: 06:57 | 6d0ca1f (draft, 10-13 21:22), 56c0762 (06:47), 990d37d (06:58), ff88666 (08:04), de741a0 (08:48) | A1 pilot ranges and collapse rates; 19 X1 rows had been scored on 2026-10-12 and an audit of chat records found no value displayed or analysed (NB-20261014-21). The question behind SI-75 quoted 8 of 45 pilot runs for the discriminator with the unconditioned decoder; the recount is 8 of 54 (NB-20261014-22) | New rules only; nothing already frozen changes. Whether SI-75 stands is open: the quoted difference of +0.7 points is +3.7 after the recount, both inside the 5-point margin |
++| 8 | The X1 analyses are specified (I001, D-03, D-08, D-09; SI-68 to SI-77, plus the agent's proposals marked in ANALYSIS_SPEC, approved on 2026-10-15, SI-80) | SI-68 to SI-72: 2026-10-14 06:45. SI-73 to SI-77: 06:57. SI-78 to SI-82: 2026-10-15 09:37. SI-83, SI-84: 09:54 | 6d0ca1f (draft, 10-13 21:22), 56c0762 (06:47), 990d37d (06:58), a1d497b (07:42), ff88666 (08:04), de741a0 (08:48); revised after the independent review: 8b90d79 and 6aaa3ac (14:08), 56febe4 (14:12), 4af5069 (15:46); revised again on 2026-10-15 for SI-78, SI-80, SI-83 and SI-84, before the tag, and on 2026-10-16 for SI-78, SI-81 and SI-83 (4ea8560, fc5ffc8, f683b10) | A1 pilot ranges and collapse rates; 19 X1 rows had been scored on 2026-10-12, earlier X1 and X13 baseline scores existed, and three displays of values to an AI agent had occurred (X13 runner tests on 2026-10-02; two metrics of one X1 and one X13 rescore on 2026-10-13; the first row of one filler score file on 2026-10-12, found by the audit redone on 2026-10-16); the disclosure entry gives the facts, and they are listed as shown to the agent only (SI-88, SI-78 as amended 2026-10-16). The question behind SI-75 quoted 8 of 45 pilot runs for the discriminator with the unconditioned decoder; the recount is 8 of 54 (NB-20261014-22) | New rules only; nothing already frozen changes. SI-75 stands after the P2 recount (user, 2026-10-15, NB-20261015-07): for the unconditioned decoder the discriminator collapsed in 8 of 54 pilot runs, not 8 of 45, so the quoted critic-minus-discriminator difference of +0.7 points is +3.7 points, both inside the 5-point margin (experiments/doc_numbers_20261015/p2_pilot_recount.py) |
++| 9 | The user's answers of 2026-10-15 to the diff review that amend a rule or a procedure: 'examined' covers every X1 and X13 score (SI-78); a hash list of the existing score files (SI-79); the agent's proposals in ANALYSIS_SPEC are rules (SI-80); NMI-0 cases, iteration-cap hits and a reporting script after the runs (SI-81); scaling checks are exploratory (SI-82); a zero-spread dataset is kept with a floor (SI-83); five analysis designs (SI-84); the stage runner's check of divergence records (SI-85); a fallback in the power function (SI-86); the Sinkhorn redo overwrites its record files (SI-87); two displays of scores are listed as shown to the agent only (SI-88). The user's answers of 2026-10-16: SI-85 covers divergence records of every arm (NB-20261016-09); a latent that names no commit is refused (SI-89, NB-20261016-10); SI-81 (b) keeps its clause that each iteration-cap decision is listed with the results (NB-20261016-12); SI-81 (c) means the tag freezes the promise of the reporting script, not the script (NB-20261016-11); 'examined' means a person reads a value, and a value shown to an AI agent is disclosed, not examined (SI-78, NB-20261016-14); iteration-cap and NMI-0 cases stay decided case by case, with no default outcome (SI-81, NB-20261016-15); the number of datasets with a raised standard error is reported next to each pooled declaration (SI-83, NB-20261016-17); the SI-79 hash list covers the status records of every X1 and X13 group (SI-79 as amended, NB-20261016-16) and the runner attempt logs (SI-90, NB-20261016-22); the sentence of SI-78 on who counts as a reader was reworded to keep the analysis-script clause (NB-20261016-24); the number of rows of the local X1 failures.csv is counted and reported (NB-20261016-25) | SI-78 to SI-82: 2026-10-15 09:37. SI-83 to SI-87: 09:54. SI-88: 2026-10-15. Answers of 2026-10-16: NB-20261016-09 to -12, -14 to -17, -22, -24 and -25 | 2026-10-15 and 2026-10-16, before the tag; identified by ledger id | The X1 and X13 scores that existed on 2026-10-15 (entry on the disclosure) | Yes: the freeze condition covers every X1 and X13 score (SI-78); a zero-spread dataset is kept with a floor, where the draft left it out (SI-83); the power function has a fallback where it stopped with an error (SI-86); the redo overwrites its record files (SI-87). No completed fit, score or decision of R1 to R4 changes |
+ 
+ - **2026-10-03, sensitivity analysis without trajectory (user decision, SI-38).** Every X1 comparison on immune and
+   immune_hum_mou is also reported with the bio score C recomputed without trajectory conservation (C over the
+@@ -356,7 +362,9 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+   committed manifests was refitted for one epoch on CPU with one thread at both commits; the latents of 59 of 59
+   non-Sinkhorn rows are identical, and the 4 Sinkhorn rows differ, as intended (SI-51). Scores: 7 stored latents
+   (plain scVI, a pooled critic on immune, a simulation, a standardised fit, the barycenter critic, one X1 fit and one
+-  X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns. An earlier
++  X13 sysVI row) were rescored by both versions of the scorer and are identical in all 32 compared columns.
++  The X1 fit is one of the 19 early X1 rows and the X13 row is sysVI on pancreas; the check also printed two metrics
++  of each of these two rescores (section 9, entry of 2026-10-14 on the disclosure). An earlier
+   run at 2b52542 (fit_identity.csv, score_identity.csv) came before the guard follow-ups G-01 to G-05 and G-14 changed fit code and
+   is kept as history. The evidence is narrow: one fit per code path, one epoch, one latent per scorer path. It holds
+   for a later candidate commit only if that commit changes no code that a fit or a score runs. Before the tag is made,
+@@ -370,8 +378,12 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+   "Sinkhorn rows must carry the new tag" is enforced as "no Sinkhorn row at c88cce3, and one commit per input once
+   c88cce3 is read as the tag": a stage made entirely at one other commit is not refused by this list, so every stage
+   is fitted and scored from one worktree pinned at the tag (2026-10-04 entry (b)). Sinkhorn output made at c88cce3 (a score, a latent or a
+-  divergence record) is refused: prereg_rules refuses the rule input, and the run_stage preflight refuses the stage, in report-only runs
+-  too. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
++  divergence record) is refused, by different checks.
++  The rule scripts see scores only, so prereg_rules refuses only a Sinkhorn score row made at c88cce3. The commit of a
++  divergence record is checked by the stage runner's start-up check (the run_stage preflight) only: it reads the
++  commit of every latent and of every divergence record, refuses the stage in report-only runs too, and, by the user's
++  decision SI-85 of 2026-10-15, also refuses a divergence record of any arm (user, 2026-10-16) that carries no commit or was made from a checkout
++  with uncommitted changes (a nonfinite_latent record that the runner writes itself stays accepted), and, by SI-89 (2026-10-16), a latent that names no commit. Sinkhorn rows will be refitted and rescored at the tag (SI-57); no other row will be rescored. If the tag is absent from
+   a checkout, the mix stays and is refused, so a JHPCE bundle that combines rows from both commits must carry the tag
+   (lesson RR-01).
+ - **2026-10-13, Sinkhorn arm corrected; its pilot fits will be redone in rule order before X1 (final review findings
+@@ -390,9 +402,10 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+   finite latents of about 1e18 or more give +infinity and then converge a few iterations later (re-review R2-01,
+   commit 89d5e2c). A fit that reaches the cap is neither scored nor recorded as failed: the stage stops (SI-61), and a
+   rerun with the same seed and code can be expected to reach the cap again. Section 1 treats infrastructure errors as
+-  rerunnable and requires every row to end as scored or failed, so a persistent cap hit has no registered outcome.
+-  Proposal for the diff review: the stage stays stopped until the user decides whether such a fit is recorded as a
+-  failed fit (and so counted in P2), and the decision is listed with the results. The solve stays in float64 (SI-58,
++  rerunnable and requires every row to end as scored or failed, so a persistent cap hit had no registered outcome.
++  The user decided on 2026-10-15 (SI-81 (b)): the stage stays stopped until the user decides whether such a fit is
++  recorded as a failed fit; a fit recorded as failed counts as a collapse in P2, and the decision is listed with the
++  results. This is a stated limitation: no default outcome is registered for it (the user kept it case by case on 2026-10-16, SI-81, NB-20261016-15), so a referee may see each decision, taken after the data, as freedom after the data; every such decision is listed with the results. The solve stays in float64 (SI-58,
+   SI-62): float32 met the agreement criterion (worst gradient cosine at least 0.99999, relative value error at most
+   1e-4) on the 598 hardest validation minibatches, but was no faster at 128-cell minibatches and failed the value
+   criterion on all 3,076. The 180 A1 Sinkhorn fits will be refitted and rescored first, at the tag prereg-tier12-v3.
+@@ -402,15 +415,21 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+   R4-a1 on the new fits, not a fixed list: before the fix there were 18 and 36 of them, 234 rows with the 180 A1 fits
+   (the count named in SI-51), and the numbers may change (NB-20261013-09). No existing non-Sinkhorn fit is redone
+   (SI-54 entry above); non-Sinkhorn A3 rows are fitted anew only where a window moves. The power estimate of section 5
+-  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches from the 234 pre-fix fits of
+-  atac_small, immune and sim1 (3, 10 and 6 batches; review note F6): 2,808 final-epoch minibatches (12 from each fit)
+-  and 268 captured earlier in training or in training mode (192 and 76); the check will be repeated on the refitted latents
+-  before convergence is claimed for them or for the X1 tasks with more batches (up to 23, immune_hum_mou). The records
+-  of the redo will be committed beside the frozen ones, which stay unchanged (names proposed for the diff review):
+-  docs/prereg/r1_record_sinkhorn_redo.json (R1), docs/prereg/r4_a1_record_sinkhorn_redo.json (R4 stage a1) and
+-  docs/prereg/r2r3_record_sinkhorn_redo.json (R2 and R3). The six non-Sinkhorn grids of the redone R1 record will be
+-  checked against docs/prereg/r1_record.json, and docs/ANALYSIS_SPEC.md will name the redone R1 record as its source
+-  of the six registered lambda per arm.
++  will be recomputed with R4-a1. The solver was validated on 3,076 minibatches in all (review note F6;
++  experiments/doc_numbers_20261015/validation_minibatch_counts.py recomputes the counts from
++  experiments/sinkhorn_fix_20261013/results/validation_12mb.csv): 2,808 final-epoch minibatches from the 234 pre-fix
++  fits of atac_small, immune and sim1 (3, 10 and 6 batches; 12 from each fit), 76 training-mode minibatches from 19 of
++  those fits, and 192 minibatches captured earlier in training in separate replays (160 replay tags, none of them
++  among the 234 fits). The check will be repeated on the refitted latents before convergence is claimed for them or
++  for the X1 tasks with more batches (up to 23, immune_hum_mou).
++  The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place; the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo.
++  The five files were last changed by the commits 2f17f77 (r1_record.json), 03882dc (r1_record_round1.json), dae54b0
++  (r4_a1_record.json), 55e66d4 (r4_a1_record_round1.json) and cea50ca (r2r3_record.json), so those commits also hold
++  the versions before the redo. The tag prereg-tier12-v2 was made before the restarted A1 pilot ran and does not hold
++  these files. The redo's notebook entry will list every decision for the other five arms that changed. The six
++  non-Sinkhorn grids of the redone R1 record are to be checked by hand against the version at tag prereg-tier12-v3
++  (the analysis script reads the grid from the record it is given and does not compare grids), and
++  docs/ANALYSIS_SPEC.md will name the redone R1 record as its source of the six registered lambda per arm.
+ - **2026-10-13, guards before the tag (final review findings I033, I034, I042, I050, I051, I094 and I008, each
+   explained in the list below; user decisions SI-52, SI-63, SI-64; follow-ups to the independent review of the guard
+   commits, findings G-01 to G-05 and G-14).**
+@@ -424,13 +443,15 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+     cells directly, with no trained network. When a minibatch holds only one batch (for reference-anchored MMD: no
+     reference cell, or no other batch), there is nothing to compare. The loss is then a zero that keeps the gradient
+     graph, instead of stopping the fit. The fitter counts such minibatches and writes the count, no_pair_steps, into
+-    the latent's plan record when it is above zero. A model-based estimate (the guard review, reproduced by the
+-    documents review of 2026-10-14; not simulated runs) expects them in X7 reference-anchored MMD on pancreas (27
+-    fits, 25.9 expected to meet at least one) and on sim1 (all 18 fits), and in about 14% of the 48 X3 atac_small MMD
+-    fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of the 60 X1 sim1 fits of each of MMD and Sinkhorn. The counts will
+-    be tabulated by arm, task and experiment from the latents' plan records by a short reporting script written after
+-    the runs. No code reads no_pair_steps yet; the script affects no rule, so it can follow the tag (proposal for the
+-    diff review).
++    the latent's plan record when it is above zero. A model-based estimate (a calculation, not simulated runs; first
++    made in the guard review, recomputed by experiments/doc_numbers_20261015/no_pair_expectations.py from the manifest
++    of record and the prepared data, with the scvi-tools assumptions checked by no_pair_assumptions.py in the same
++    folder) expects them in X7 reference-anchored MMD on pancreas (27 fits, 25.9 expected to meet at least one) and on
++    sim1 (all 18 fits), and in about 14% of the 48 X3 atac_small MMD fits, 4.5% of the 24 X8 sim2 MMD fits and 0.6% of
++    the 60 X1 sim1 fits of each of MMD and Sinkhorn. The counts, by arm, task and experiment from the latents' plan
++    records, and, per arm, the number of cells that are not evaluable because the arm never reaches the target batch
++    score b* (docs/ANALYSIS_SPEC.md) are tabulated by a reporting script that is written after the runs (user decision
++    SI-81 (c), 2026-10-15). No code reads no_pair_steps yet; the script affects no rule, so it can follow the tag: the tag freezes this promise, not the script (SI-81 (c), user, 2026-10-16, NB-20261016-11).
+   - Failures inside the critic's training loop (I034, commit a4f4be0). The critic can be updated more than once inside
+     each training step. A loss that is not finite (not a number, NaN, or infinite) at any of these inner steps, not
+     only the last, now marks the fit as diverged.
+@@ -443,8 +464,8 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+     tested label to 1; any other result without a call to R is refused.
+   - A normalised mutual information of 0 (SI-65). Where scib 1.1.7 finds NMI, the normalised mutual information, equal
+     to 0 at every clustering resolution, it keeps no clustering, and the scorer keeps scib's loud error; the case is
+-    then decided case by case. Proposal for the diff review: the user decides each such case, and every case is listed
+-    with the results.
++    then decided case by case (SI-65, 2026-10-13). The user decided on 2026-10-15 (SI-81 (a)) that he decides each such
++    case and that every case is listed with the results. This is a stated limitation: no default outcome is registered for the NMI-0 case (the user kept it case by case on 2026-10-16, SI-81, NB-20261016-15), so a referee may see each decision, taken after the data, as freedom after the data; every such decision is listed with the results.
+   - Complete fits only (I094, commit 46d79f2). A fit counts as complete, is resumed and is harvested from the cluster
+     only if its model weights (graphics processing unit, GPU, fits) and training history are present.
+   - Job time limits (I008, commit 2b52542). Each job in a chain of cluster jobs gets a time limit of (chain position +
+@@ -477,47 +498,164 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
+   pilot R2/R3 counts quoted elsewhere come from the frozen record made at c88cce3; the current code reports the new
+   counts for the same inputs (checked 2026-10-14 by running prereg_rules.decide_binary on the record's stored cells
+   with the low-signal marking that decide_a2_a3.cells_for applies). A2 and A3 exist (all 288 rows fitted and scored;
+-  the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 still
+-  has them refitted and R2 and R3 re-run; since neither can change what X1 uses while the flag holds, whether to keep
+-  them is a question for the diff review.
+-- **2026-10-14, disclosure: part of X1 was fitted and scored before the X1 analyses were specified (finding DOC-01 of
+-  the documents review of 2026-10-14).**
+-  Status: written 2026-10-14. Open: the user's confirmation that nobody read an X1 adversarial-arm score value.
+-  The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to
+-  run X1 locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same
+-  day to wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not
+-  scored and 1,097 still needed a fit. By file name (NB-20261014-21) the 19 scored rows are 17 adversarial-arm rows,
+-  all on immune with the conditioned decoder and seed 0 (discriminator at the first to sixth registered penalty
+-  strength, pooled critic at the first to fifth, reference critic at the first to sixth), and 2 rows of the arms none
+-  and scvi_adv; section 0 lets fits that depend on no rule (the X1 arms none and scvi_adv, X13) run while A1 to A3 are
+-  in progress. An audit of every chat record of this project (NB-20261014-21, 2026-10-14) found no display or analysis
+-  of an X1 score value: three automated integrity checks read these rows (scorer provenance and versions; finite
+-  required metrics; counts of kBET zeros and R calls) and printed only counts pooled over all stages, and the runner
+-  and the scorer log only tags and timings. One of the 19 rows (arm discriminator, immune, conditioned decoder, seed
+-  0, first penalty strength; tag X1_immune_discriminator_lg1_c1_s0_122afe99) was rescored in the identity checks of
+-  2026-10-13 (NB-20261013-12, -16 and -40) and compared with its original row by script, column by column, for
+-  equality only. The audit cannot show that nobody opened a score file outside those chat records: open item for the
+-  diff review, the user confirms whether anyone read an X1 adversarial-arm score value. Proposed definition for the
+-  diff review (not yet approved): an X1 adversarial-arm score is "examined" when a value of it is read by a person or
+-  entered into an analysis script; integrity checks that print only counts or flags are not analysis scripts. "Before
+-  any X1 adversarial-arm score is examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in
+-  PAPER_PLAN section 5.
+-- **2026-10-14, the X1 analyses are specified and will be frozen before any X1 adversarial-arm score is examined
++  the runner ended on 2026-10-11); only the Sinkhorn A3 rows (36 before the fix) are to be redone (SI-57). SI-57 has
++  them refitted and R2 and R3 re-run. Neither can change what X1 uses while the flag holds, and the user decided on
++  2026-10-15 to keep every step of SI-57 in rule order all the same (NB-20261015-08).
++- **2026-10-14, disclosure: part of X1 and X13 was fitted and scored before the X1 analyses were specified (finding
++  DOC-01 of the documents review of 2026-10-14; widened on 2026-10-15 by the user's decisions SI-78, SI-79 and SI-88
++  and by findings DOC-R01, DOC-R02 and DOC-R14 of the documents re-check).**
++  Status: written 2026-10-14, revised 2026-10-15 after the user's decisions SI-78, SI-79 and SI-88 and the audit of
++  2026-10-15, and on 2026-10-16 after the independent re-check of that day, the user's answers NB-20261016-14 to -17 and
++  the audit redone on 2026-10-16. Planned: the time stamp from GitHub for the tag, after the tag is made (SI-79, below).
++  The local part of X1 was launched on 2026-10-12 (NB-20261012-04, 12:40 New York time; the user chose to run X1
++  locally) after R1, R2 and R3 were frozen, which is the registered order (section 0), and was stopped the same day to
++  wait for the final review (NB-20261012-05, 16:36). At that point 19 X1 rows were scored, 1 was fitted but not scored
++  and 1,097 still needed a fit. The local X1 ledger holds 1,125 rows: a count-only tally of its status column on
++  2026-10-16 (user decision NB-20261016-16; experiments/x1_x13_score_hashes_20261015/x1_local_status_tally.txt) gives
++  19 scored, 1,097 needing a fit and 9 pending, the 9 running jobs the runner stopped on 2026-10-12. The row recorded
++  then as fitted but not scored is, by the counts, among the 9 pending rows; the row cannot be identified without reading its tag. The record of 2026-10-12 (1,117 rows) therefore left out 8 pending rows.
++  No row has the status diverged or non-finite; this now covers the ledger and the runner record tier12_v2/X1_local/failures.csv (80 bytes, last changed 2026-10-12 16:34 New York time), whose count-only read on 2026-10-16 (user decision NB-20261016-25; experiments/x1_x13_score_hashes_20261015/x1_local_failures_count.txt) found a header with a status column and 0 data rows, so it records no failure outcome. No X1_local folder holds a status record. The 19 scored rows are kept as X1 rows: they were fitted at the tag checkout c88cce3
++  (NB-20261012-04), which SI-54 declares result-identical to the tag prereg-tier12-v3 for every arm except Sinkhorn,
++  and none of the 19 is a Sinkhorn row. Counted from the names of the score files, not from their contents
++  (NB-20261014-21), the 19 scored rows are 17 adversarial-arm rows, all on immune with the conditioned decoder and
++  seed 0 (discriminator at the first to sixth registered penalty strength, pooled critic at the first to fifth,
++  reference critic at the first to sixth), and 2 rows of the arms none and scvi_adv.
++  Fits that depend on no rule (the X1 arms none and scvi_adv, X13; section 0 lets them run while A1 to A3 are in
++  progress) also exist, and their scores are partly made. The project's compute cluster (called JHPCE in the notebook)
++  fitted 250 of them at tag prereg-tier12-v2: the X1 arms none and scvi_adv and the X13 baselines scANVI and sysVI, on
++  atac_large and immune_hum_mou (pass A, 100 fits) and on lung, pancreas and sim2 (pass B, 150 fits). Both jobs were
++  complete on 2026-10-06 (NB-20261006-01); the counts are those of the manifest of record
++  (experiments/doc_numbers_20261015/filler_fit_counts.py). Their latents are scored on this machine. Pass B was scored
++  in full, 150 of 150, by 2026-10-07; its entry says that the check was of file counts, finiteness and provenance and
++  that the metric values were not inspected (NB-20261007-01). Of pass A, 1 of 100 was scored by 2026-10-07
++  (NB-20261006-04, NB-20261007-01) and 99 were still to score when it resumed on 2026-10-12 (NB-20261012-02); it was
++  paused the same day for the final review (NB-20261012-05). The notebook records no later progress, but the hash list
++  (SI-79; counts_by_group_kind_task_date_ny in its summary.json) shows 8 pass-A score files, all on immune_hum_mou: 1
++  dated 2026-10-06 and 7 dated 2026-10-12, before the pause; no atac_large score exists. In all, 158 filler score files
++  exist: 150 of pass B and 8 of pass A (re-check finding RC-B2, 2026-10-16).
++  The SHA-256 hash of every existing X1 and X13 score file is committed in experiments/x1_x13_score_hashes_20261015/
++  (SI-79). Hashing reads a file's bytes and shows no value, so a later reader can use the list to check that no file
++  has changed since the list was made. The README of that folder groups the files and is the inventory of what exists. The list holds 1,129 files: the 851 score files, scoring logs, comparison tables, ledgers, runner records, runner logs and status records, and the 278 per-attempt runner logs (attempts/*.jsonl: 28 of the local X1 run and 250 of the fillers; SI-90, NB-20261016-22), which were added on 2026-10-16.
++  The groups, found from file names, folder names and dates only, are:
++  - (1) the 19 early X1 rows above (README group X1_local);
++  - (2) the scores of the earlier fits above (group fillers);
++  - (3) the rescoring by the scorer identity checks of 2026-10-13, in three runs (New York time, from the files'
++    modification times in the hash list: 11:56 to 12:08, 15:05 to 15:13 and 21:38 to 21:46; the third came after the
++    first commit of the X1 analysis specification at 21:22, and the audit found no display from it): 7 stored latents, among them one of the 19 early X1
++    rows (tag X1_immune_discriminator_lg1_c1_s0_122afe99) and one X13 row (sysVI on pancreas, tag
++    X13_pancreas_sysvi_l10_c1_s0_60b085ea); the old and the new scores were compared with each other and with the
++    stored row by script, column by column (NB-20261013-12, -16 and -40; group identity_check);
++  - (4) two test runs of the X13 baseline runner on atac_small on 2026-10-02, before the first tag prereg-tier12-v1,
++    each scoring 6 latents of Harmony, Scanorama and PCA (NB-20261002-09 and -10; group x13_cpu_test); they are not registered rows;
++  - (5) the probe outputs of the final pre-publication review of 2026-10-12 and 13: its probes scored 49 registered
++    configurations, each with the task, arm, penalty strength, decoder and seed of a registered X1 or X13 row, 42 from
++    fits that the reviewers made themselves on sim1, atac_small and pancreas (adversarial arms included), at the code
++    of 2026-10-12 and with training settings not yet checked, and 7 that rescore 6 real X1 baseline latents of arm
++    none. These are not the registered production fits (group review_probes; the README's sixth group, sealed, holds the 2 non-score files of review_sealed).
++  The date that GitHub shows for the tag prereg-tier12-v3 will be recorded in the notebook after the tag is made, as a
++  time stamp from outside this repository (SI-79).
++  **Definition of "examined" (user decision SI-78, 2026-10-15, amended 2026-10-16).**
++  A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm.
++  Of readers, only a person counts: a value shown to an AI agent is disclosed, not examined; use by an analysis script still counts as examined (user, 2026-10-16, NB-20261016-14, NB-20261016-24).
++  The listing of the two displays below as "shown to the agent only" (SI-88) follows from this definition.
++  For example, a check that prints how many required metrics are finite does not examine a score; a person who opens a
++  score file and reads a batch score does, and so does a script that averages scores. "Before any X1 or X13 score is
++  examined" is read in this sense in the entry below, in docs/ANALYSIS_SPEC.md and in PAPER_PLAN section 5.
++  The audit of 2026-10-14 (NB-20261014-21), made by the agent that ran the checks, searched the logs of the agent's
++  working sessions on this project for reads of tier12_v2/X1_local/scores (12 messages) and for the printed output of
++  the scripts that read them, and checked two log statements (run_stage.py and score_scib_native.py, which log only
++  tags and timings). Three automated integrity checks read the 19 rows (scorer provenance and versions; finite
++  required metrics; counts of kBET zeros and R calls) and printed only counts pooled over all stages. That audit
++  searched one folder, and NB-20261015-23 corrects its conclusion in the light of the audit of 2026-10-15 below.
++  On 2026-10-15 the user answered the question whether anyone, the agent or anyone else, had read the value of an X1
++  or X13 score: no, nobody read a value (NB-20261015-15). The audit made later that day (NB-20261015-22; its method
++  and results are in the README of experiments/x1_x13_score_hashes_20261015/ at commit 2610107) searched for 46 distinct
++  file names, all from groups (3) to (5), not for those of groups (1) and (2), and found two displays of values:
++  - On 2026-10-02, before the first tag prereg-tier12-v1, the output of a sub-agent's tool call showed all metrics of
++    six test fits (Harmony d10 and d50, Scanorama d10 and d100, PCA d10 and d50) from one of the two X13 runner-test
++    runs on atac_small (test configurations, which are not registered rows). NB-20261002-10 and the notebook page of 2026-10-02 also record run-to-run differences of NMI,
++    ARI and iLISI and a kBET value from these tests.
++  - On 2026-10-13, before 17:13, the scorer identity check printed in the lead agent's session the old and new values
++    of two metrics, PCR_batch (the principal-component-regression batch score) and cell-cycle conservation, for one X1
++    adversarial-arm run (immune, discriminator, first registered penalty strength, conditioned decoder, seed 0; one of
++    the 19 early local X1 rows) and for one X13 run (pancreas, sysVI). The first commit of the X1 analysis
++    specification (6d0ca1f) was at 21:22 that day, and the user decided its first rules on 2026-10-14. That commit was made by a different lead session, 'Draft P1-P4 Analysis Specification' (frame 9a6f1964, started 21:05; the commit call is its message 105), not by session baa34fcd, which received the display at 14:40: a search of the stored messages of 81 sessions of this project for the id 6d0ca1f found it in 28 sessions, the earliest started 21:05 that evening, and none is baa34fcd; no message body was read, so whether any value reached session 9a6f1964 through a handoff note was not checked.
++  The audit of 2026-10-15 found no value from the 49 probe score files of group (5) in 56 session transcripts or
++  26,722 review output files. Its limits: it is a pattern search of printed output; a value printed without a file,
++  folder or metric name nearby can be missed; the sessions of Codex, a second AI assistant that took part in the
++  reviews, left only output files; and what an agent read without printing cannot be known.
++  The user decided on 2026-10-15 (SI-88, NB-20261015-25) that these two displays are listed as shown to the agent only
++  and do not count as examined under SI-78. This entry gives their facts, dates and limits in full.
++  The independent re-check of 2026-10-16 (finding RC-B1, NB-20261016-13) found that the audit of 2026-10-15 had not
++  searched for groups (1) and (2) and had stopped at 2026-10-15 10:33, so the audit was redone on 2026-10-16 (commit
++  da8ee06; README and audit_displayed_values.json of experiments/x1_x13_score_hashes_20261015/). It searched for the
++  name of every file in the 851-file version of the hash list that existed then (465 distinct names; the 278 attempt logs were added to the list later and their names were not searched) and the 195 folders that hold them, in the log,
++  text, markdown and JSON files of the final review and of those folders (26,561 files), and in every stored message of
++  every session of this project active since 2026-10-02, sub-agent sessions included (68 sessions, 41,815 messages,
++  cut-off 2026-10-16 14:37:57 New York time; left out: the lead agent's session 95c88c4c of 2026-10-16 that started the audit (sub-agent 6501cf06 ran it),
++  which the repeat before the tag searches). It printed
++  counts and digit-masked lines only. Besides the two displays above it found one more:
++  - On 2026-10-12 at 23:54, before the first commit of the X1 analysis specification, a reviewer sub-agent of the final
++    review (session 'Verify cluster') printed the first 600 bytes of the first filler score file, X13 lung scANVI
++    (X13_lung_scanvi_l0_c1_s0_8e6f5009, group (2)): the NMI and ARI values in full and the first digits of ASW_label.
++  Under SI-78 as amended on 2026-10-16 (NB-20261016-14) this third display is disclosed, not examined; the user stated
++  that no person read a value (NB-20261015-15). The limits above apply. The same audit is repeated just before the tag
++  for that session and every session after this cut-off, and its result is recorded in the notebook entry that records the tag.
++- **2026-10-14, the X1 analyses are specified and will be frozen before any X1 or X13 score is examined
+   (final review finding I001, that the P1 to P4 analysis code had to be frozen before X1 scores are read;
+-  design-recheck findings D-03, D-08 and D-09; user decisions SI-68 to SI-77, and the agent's proposals named
+-  below).**
+-  Status: specification and code committed 2026-10-14 (56c0762, 990d37d, ff88666; three test gaps closed in 858101b).
++  design-recheck findings D-03, D-08 and D-09; user decisions SI-68 to SI-77, and SI-80, which approved the agent's proposals
++  named below).**
++  Status: specification and code first committed 2026-10-14 (56c0762, 990d37d, a1d497b, ff88666; three test gaps
++  closed in 858101b) and revised the same day after the independent review of 2026-10-14 (code and tests 8b90d79,
++  numerical checks 6aaa3ac, specification 56febe4 and 4af5069). On 2026-10-15 the specification, the code and the
++  tests were revised again, after the independent re-check (NB-20261015-01) and the user's answers (SI-78, SI-80,
++  SI-83, SI-84). The tag prereg-tier12-v3, not any commit named here, fixes the registered version.
+   Planned: the freeze by the tag, and the single analysis run after every X1 and X13 row is scored or failed.
+   docs/ANALYSIS_SPEC.md specifies, and scripts/analysis_x1.py implements with known-answer tests (tests/analysis/),
+   every analysis of X1 and X13 data: P1 (biology kept at equal batch removal) per decoder with the frontier (trade-off) area as co-primary, P2 (how often runs collapse, and the critic-minus-discriminator comparison), local versus global batch removal, single-lambda tables (one penalty strength per method, chosen on the other datasets: the transfer lambda), best-of-k placement (best score among k tries) against standard integrators, the width of each method's range of good penalty strengths (the lambda window) and the sensitivity analyses. The
+-  user's decisions are SI-68 to SI-77. Details that no question covered are the agent's proposals, marked as such in
+-  docs/ANALYSIS_SPEC.md; among them are its section 2.3 (the not-evaluable rule), section 5 (multiplicity: Holm over
+-  the six primary results), section 8 (the leave-one-family-out rule for the transfer lambda; SI-77 decides only the
+-  selection score), sections 9 to 11 and the implementation details of section 15. They become rules only if the user
+-  approves them at the diff review; each approval will be recorded as a new ledger entry before the tag is made. The
+-  tag prereg-tier12-v3 will freeze all of them. No X1 adversarial-arm score is to be examined (as defined in the
++  user's decisions are SI-68 to SI-77. Details that no question covered were the agent's proposals, marked as such in
++  docs/ANALYSIS_SPEC.md; the user approved them as rules on 2026-10-15 (SI-80): section 2.3 (the not-evaluable rule),
++  section 5 (marginal declarations; Holm over the six primary results, for the descriptive Wilcoxon companion only),
++  section 8 (the leave-one-family-out rule for the transfer lambda; SI-77 decides only the selection score), section 9
++  (best-of-k placement against standard tools; equal numbers of tries is the user's decision, SI-68 and SI-77, and the
++  best-of-k estimator and the composition of the method families were the agent's proposals), section 10 (the width of
++  the range of good strengths), the sensitivity analyses of section 11 that no decision names, and the implementation
++  details of section 15. The parts of the specification that carry out designs from the rigour review, asked
++  separately at the same review, follow the user's own answers: SI-83 (a dataset whose leave-one-seed-out standard
++  error is below 1e-6 is kept, with its standard error raised to 1e-6) and SI-84 (the five analysis designs). The tag
++  prereg-tier12-v3 will freeze all of them. No X1 or X13 score is to be examined (as defined in the
+   disclosure above) before the tag is made, and the script is then run once, after every X1 and X13 row is scored or
+   failed (a procedure: the script refuses to overwrite an existing record). The follow-up analyses (X3, X6, X7, X8,
+   X12, X15) are specified later, with the X7/X8 redesign, while X1 runs and before any X1 result is examined (SI-68,
+-  whose words are "before anyone looks at an X1 result", any arm); the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN
++  whose words are "before anyone looks at an X1 result", any arm; the user confirmed on 2026-10-15 that these words
++  stay, NB-20261015-09); the premise check R0 and X10 are exploratory. This entry does not change R1-R4. Where PAPER_PLAN
+   section 5 differs, the specification applies (its section 13 lists the replaced statements).
++
++- **2026-10-15, the user's answers to the 19 questions of the diff review (documents re-check finding DOC-R13).**
++  Status: all 19 questions were answered on 2026-10-15 (New York time). This list gives each question in plain words,
++  the answer, the record of the answer, and the file where the matter is explained. A record is a ledger entry (SI-nn,
++  CONSTRAINTS.md) and its notebook entry, or a notebook entry only (NB-yyyymmdd-nn, notebook/2026-10-15.md); the
++  user's own words are in the sources quoted there. Questions 15 to 18 concern code housekeeping and change no rule of
++  this file.
++
++| Q | Question | Answer | Record | Where explained |
++|-----|----------------------|------------------------------------|-------------|------------------------|
++| 1 | What should happen to a dataset whose run-to-run uncertainty comes out as exactly zero? | A dataset whose leave-one-seed-out standard error is below 0.000001 (1e-6) is kept, with its standard error raised to 1e-6; the same floor applies in the paired-datasets sensitivity analysis, and every raised dataset is listed in the analysis record. | SI-83, NB-20261015-16 | docs/ANALYSIS_SPEC.md sections 2.3 and 4 |
++| 2 | Do you approve five design choices that the agent made in the X1 analysis code after the rigour review? | Approved, all five: the log-spaced 201-point grid for the between-dataset spreads; the solve-based formula for the overall difference; recomputing b0, b_common, b* and the low-signal flag from the same rows and stopping on a mismatch; t-based limits in the sign table; the per-run sensitivity limited to P1 and the local-versus-global test. The specification states where the grid is accurate and that the sign-table limits are approximate. | SI-84, NB-20261015-17 | docs/ANALYSIS_SPEC.md sections 1, 4 and 15 |
++| 3 | Should the stage runner refuse a Sinkhorn divergence record (the file a fit writes when the Sinkhorn solve breaks down) that lacks the code version, or that was made from code with uncommitted changes? | Yes, as it refuses such results (latents and scores); a nonfinite_latent record that the runner writes itself stays accepted; one test covers the refusals for records and results together. On 2026-10-16 the user widened the rule to divergence records of every arm (NB-20261016-09) and added that a latent which names no commit is refused too (SI-89, NB-20261016-10; code at 4b02068). | SI-85, NB-20261015-18; widened on 2026-10-16 to every arm (NB-20261016-09) | this file, entry of 2026-10-13 on the two commits; scripts/run_stage.py |
++| 4 | Should the error in the power function be fixed before the tag? | Yes: prereg_rules.power_report restarts its root search at 0.01 when the search from 1.0 fails, and every result that works today stays bit-identical. | SI-86, NB-20261015-19 | this file, section 5 and the entry of 2026-10-13 on PAPER_PLAN (part (c)); scripts/prereg_rules.py |
++| 5 | What counts as having examined an X1 result? | A score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count. This applies to every X1 and X13 score, of any arm. Amended on 2026-10-16: only a person reading a value counts; a value shown to an AI agent is disclosed, not examined. | SI-78, NB-20261015-02, NB-20261016-14 | this file, entry of 2026-10-14 on the disclosure |
++| 6 | Has anyone, you or anyone else, read the value of an X1 or X13 score? | No, nobody read a value (the user's statement). | NB-20261015-15 (notebook entry only) | this file, entry of 2026-10-14 on the disclosure, which also gives the audit of 2026-10-15 and the user's decision SI-88 on its two findings |
++| 7 | Should we record a fingerprint (a SHA-256 hash) of every existing X1 and X13 score file? | Yes: the SHA-256 hash of every existing X1 and X13 score file, and, after the tag, the date that GitHub shows for the tag prereg-tier12-v3 as a time stamp from outside this repository. | SI-79, NB-20261015-03 | this file, entry of 2026-10-14 on the disclosure; experiments/x1_x13_score_hashes_20261015/ |
++| 8 | Do you approve the agent's proposals in the analysis specification (docs/ANALYSIS_SPEC.md)? | Approve all: sections 2.3, 5 (Holm over the six primary results, for the descriptive Wilcoxon companion only), 8, 9, 10, the section 11 sensitivity analyses that no decision names, and 15; the parts that implement the rigour-review designs of questions 1 and 2 follow those answers. | SI-80, NB-20261015-04 | docs/ANALYSIS_SPEC.md sections 2.3, 5, 8 to 11 and 15; this file, entry of 2026-10-14 on the X1 analyses |
++| 9 | Do you approve three process proposals in the pre-registration? | Approve all three: (a) each NMI-0 case (scib finds zero normalised mutual information at every clustering resolution, SI-65) is decided by the user and listed with the results; (b) a Sinkhorn iteration-cap hit (SI-61) stops the stage until the user decides whether the fit counts as failed, and failed fits count as collapses in P2; (c) the no-pair training-step counts and, per arm, the number of cells not evaluable because the arm never reaches b* are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script (user, 2026-10-16, NB-20261016-11). On 2026-10-16 the user also kept in (b) the clause that each iteration-cap decision is listed with the results (NB-20261016-12). | SI-81, NB-20261015-05, NB-20261016-11, NB-20261016-12 | this file, entries of 2026-10-13 on the guards (NMI-0 and no-pair counts) and on the Sinkhorn arm (iteration cap); docs/ANALYSIS_SPEC.md section 1 (cells that never reach b*) |
++| 10 | Does your decision SI-75 still stand after a recount? | It stands: P2 collapse rates plus the formal critic-versus-discriminator comparison with a 5-point margin. After the recount the discriminator with the unconditioned decoder collapsed in 8 of 54 pilot runs, not 8 of 45, so the quoted difference is +3.7 points, not +0.7. | NB-20261015-07 (notebook entry only) | this file, amendment-table row 8; docs/ANALYSIS_SPEC.md section 6; experiments/doc_numbers_20261015/p2_pilot_recount.py |
++| 11 | Should we keep two Sinkhorn redo steps that cannot change X1? | Keep them, in rule order: every step of SI-57 stays, including the A3 Sinkhorn refits and the R2/R3 re-run, although neither can change X1 while the immune block with the conditioned decoder is flagged low-signal. | NB-20261015-08 (notebook entry only) | this file, entries of 2026-10-13 on low-signal cells and on the Sinkhorn arm |
++| 12 | Do you approve these file names for the redone Sinkhorn decision records? | The Sinkhorn redo overwrites docs/prereg/r1_record.json, r1_record_round1.json, r4_a1_record.json, r4_a1_record_round1.json and r2r3_record.json in place; the versions before the redo stay at tag prereg-tier12-v3, which is made before the redo. | SI-87, NB-20261015-20, corrected by NB-20261015-21 | this file, entry of 2026-10-13 on the Sinkhorn arm |
++| 13 | What should happen to the paper plan's four scaling checks? | Report all four as exploratory: leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics and rank stability by Kendall's tau are reported, labelled not pre-registered, and used for no conclusion. | SI-82, NB-20261015-06 | docs/PAPER_PLAN.md section 5 (Scaling) |
++| 14 | Do you confirm a wording repair to the citations of your decision SI-68 (which analyses are locked when)? | Confirm: where PREREG and PAPER_PLAN cite SI-68 for the later lock of the follow-up analyses, they keep its own words 'an X1 result'; with SI-78 the remaining 'X1 adversarial-arm score' wording for the freeze is widened to every X1 and X13 score. | NB-20261015-09 (notebook entry only) | this file, entry of 2026-10-14 on the X1 analyses; docs/PAPER_PLAN.md section 5 |
++| 15 | Which starting commit should the test-coverage record use? | 973a97d for the fixes, plus a merged record of the scripts, source and scoring test runs for the whole review range from 5cb75c0. | NB-20261015-10 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
++| 16 | How should the fail-loud lint tool be recorded? | In a notebook note: the tool's source (the fail-loud-pipelines skill), its version, rule count and checksum, the ruff result and why the tests run in two environments. | NB-20261015-11 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
++| 17 | What should we do about small tidiness warnings in the code? | Leave them: no code change for the 28 ruff warnings of 08f1e3c, 23 of them outside the identity-proof code; the count goes in the note of question 16. | NB-20261015-12 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
++| 18 | Should we delete 11 old review copies of the code and two stray files? | Delete after a check: each of the 11 old review worktrees is checked for uncommitted work first, and any that has some is reported and kept; the folders and the two stray files go to the Trash through the approval prompt. | NB-20261015-13 (notebook entry only) | notebook/2026-10-15.md; housekeeping, no rule of this file |
++| 19 | Do you approve the remaining wording changes from earlier rounds? | Approved as shown in the diff: the wording of I091 (R1 depends on the trajectory score through its noise estimate, SI-53), D-01 (PAPER_PLAN's P1 comparator), D-02 (the power claim) and the format of the amendment table at the top of this section (DOC-03). | NB-20261015-14 (notebook entry only) | this file, entries of 2026-10-13 on R1 and the trajectory score and on PAPER_PLAN, and the amendment table; docs/PAPER_PLAN.md sections 3.2 and 5 |
+diff --git a/scripts/analysis_x1.py b/scripts/analysis_x1.py
+index 229f92d..2249838 100644
+--- a/scripts/analysis_x1.py
++++ b/scripts/analysis_x1.py
+@@ -1,12 +1,16 @@
+ #!/usr/bin/env python
+ """Frozen X1 analysis: matched biology, frontier area, collapse, local mixing and lambda selection,
+ with deterministic posterior pooling and the registered sensitivities (docs/ANALYSIS_SPEC.md).
+-This script must not be run on any X1 adversarial-arm score before the tag prereg-tier12-v3.
++This script must not be run on any X1 or X13 score before the tag prereg-tier12-v3 (SI-78: an analysis script that
++uses a score examines it).
+ 
+ Usage (repo root):
+   python scripts/analysis_x1.py --manifest manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv \
+-      --scores <dir> --failures <csv> --r1-record docs/prereg/r1_record.json \
++      [--manifest <each R4 extension manifest>] --scores <dir> [<each R4 extension scores dir>] \
++      --failures <csv that covers every row> --r1-record docs/prereg/r1_record.json \
+       --r4-record docs/prereg/r4_x1_record.json --out-json <analysis.json>
++The script recomputes the R4 targets from the rows it is given (prereg_rules.r4_stage) and refuses a record that
++differs: when R4 extended the X1 grids, pass the extension manifests and their scores too, or a valid record is refused.
+ """
+ import argparse
+ import itertools
+@@ -26,9 +30,10 @@ P2_MARGIN = 0.05
+ PRIOR_SCALE = 0.1
+ P2_PRIOR_SCALE = 0.25
+ GRID_N = 201
+-GRID_SPAN = 5.0
++GRID_SPAN = 5.0       # the grid ends at 5 prior scales: every reported value is within 2e-6 of a reference while the datasets' differences
++                      # spread by at most 3 prior scales; beyond that it grows (4e-5 to 3e-4 at 5 to 6 scales; SI-84, AN-R10)
+ TAU_FLOOR = 1e-15     # each spread is integrated over [TAU_FLOOR, GRID_SPAN x its prior scale], evenly in log(tau)
+-S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); below: zero_spread
++S_MIN = 1e-6          # smallest standard error pooled (double precision is verified down to it); a smaller one is raised to it (SI-83)
+ DECLARE = 0.95
+ MIN_READINGS = 4
+ X1_SEEDS = [0, 1, 2, 3, 4]
+@@ -212,11 +217,25 @@ def pool(d, s, levels, delta_scale, tau_scale, margin):
+                 delta_scale=delta_scale, tau_scale=tau_scale, margin=margin)
+ 
+ 
++def raise_s(units, s, level):
++    """SI-83: a standard error below S_MIN enters the pool as S_MIN and is listed (unit, level, its own value);
++    one that is NaN, infinite or negative stops the run."""
++    P._require(all(math.isfinite(x) and x >= 0 for x in s), "standard errors must be finite and nonnegative")
++    return [max(x, S_MIN) for x in s], [dict(unit=u, level=level, s=float(x)) for u, x in zip(units, s) if x < S_MIN]
++
++
++def raised_record(raised):
++    """The `raised` list and, next to the declaration, how many datasets (and, in the pairs analysis, families) it holds (SI-83)."""
++    return dict(raised=raised, n_raised_datasets=sum(r["level"] == "dataset" for r in raised),
++                n_raised_pairs=sum(r["level"] == "pair" for r in raised))
++
++
+ def combine(tasks, d, s, structure, scale, margin):
+     if not tasks:
+-        return dict(n=0, declaration="not_evaluable")
++        return dict(n=0, declaration="not_evaluable", **raised_record([]))
+     P._require(structure in ("family", "independent", "pairs"), f"unknown pooling structure {structure}")
+     P._require(len(tasks) == len(d) == len(s), "pool tasks, d and s must have equal lengths")
++    s, raised = raise_s(tasks, s, "dataset")
+     units = list(tasks)
+     if structure == "independent":
+         levels = [units]
+@@ -230,8 +249,10 @@ def combine(tasks, d, s, structure, scale, margin):
+             groups = [[i for i, f in enumerate(families) if f == u] for u in units]
+             d = [float(np.mean([d[i] for i in g])) for g in groups]
+             s = [math.sqrt(sum(s[i] ** 2 for i in g)) / len(g) for g in groups]
++            s, pairs = raise_s(units, s, "pair")      # sqrt(s1^2 + s2^2) / 2 can fall below S_MIN even after each s is raised
++            raised += pairs
+             levels = [units]
+-    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure)
++    return dict(pool(d, s, levels, scale, scale, margin), units=units, structure=structure, **raised_record(raised))
+ 
+ 
+ def wilcoxon_exact(d):
+@@ -320,8 +341,10 @@ def best_of_k(scores):
+ 
+ 
+ def window(points):
++    empty = [lam for lam, scores in points if not len(scores)]      # configurations with no successful run (AN-R13)
+     points = [(lam, scores) for lam, scores in points if len(scores)]
+-    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None, gap=None)
++    result = dict(status="no_points", best=None, lower=None, lams=None, width=None, n_points=None, gap=None,
++                  n_all_failed_between=None)
+     if not points:
+         return result
+     means = {lam: float(np.mean(scores)) for lam, scores in points}
+@@ -338,7 +361,8 @@ def window(points):
+     # gap: a point between the window's ends lies below the bound, so the width spans it (review AN-14)
+     return dict(status="ok", best=best, lower=float(lower), lams=lams,
+                 width=math.log10(max(lams)) - math.log10(min(lams)), n_points=len(lams),
+-                gap=any(min(lams) < lam < max(lams) and lam not in lams for lam in means))
++                gap=any(min(lams) < lam < max(lams) and lam not in lams for lam in means),
++                n_all_failed_between=sum(min(lams) < lam < max(lams) for lam in empty))     # the width spans these too
+ 
+ 
+ def dominance(config, front):
+@@ -373,9 +397,12 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
+                    f"R4 lacks b0 target for {key}")
+         P._require(sorted(zero_runs(out, task, cond)) == X1_SEEDS, f"{key}: plain-scVI seeds are not the X1 seeds 0-4")
+         got, want = r4["targets"][key], targets[key]
++        four = ("b0", "b_common", "bstar", "bstar_low_signal")
+         P._require(got["bstar_low_signal"] == want["bstar_low_signal"]
+                    and all(abs(got[k] - want[k]) <= P.TIE_TOL for k in ("b0", "b_common", "bstar")),
+-                   f"R4 targets (b0, b_common, b* or the low-signal flag) differ from these scores for {key}")
++                   f"R4 targets (b0, b_common, b* or the low-signal flag) differ from these scores for {key}: record "
++                   f"{[got[k] for k in four]}, recomputed {[want[k] for k in four]}; if R4 added extension rows, pass "
++                   "their manifest as a further --manifest and their scores with --scores")
+     P._require(value in ("C", "C_nt"), f"unknown biology value {value}")
+     out = out.assign(C=out[value])
+     x1, x13 = out[out.experiment == "X1"], out[out.experiment == "X13"]
+@@ -451,9 +478,7 @@ def analyse(out, r1, r4, fail_status, value="C", mode="mean", corner="collapse",
+                     low_signal.append(dict(task=task, d=None if endpoint == "area" else reading["d"]))
+                 elif reading.get("reason") is not None:
+                     not_evaluable.append(dict(task=task, reason=reading["reason"]))
+-                elif reading["s"] < S_MIN:          # e.g. both arms' areas 0 in every leave-one-seed-out repeat (AN-02)
+-                    not_evaluable.append(dict(task=task, reason="zero_spread"))
+-                else:
++                else:          # s below S_MIN (e.g. both arms' areas 0 in every repeat) is raised inside combine (SI-83)
+                     evaluable.append(task)
+                     d.append(reading["d"])
+                     s.append(reading["s"])
+diff --git a/scripts/prereg_rules.py b/scripts/prereg_rules.py
+index 68d6868..2258d63 100644
+--- a/scripts/prereg_rules.py
++++ b/scripts/prereg_rules.py
+@@ -671,6 +671,22 @@ def _power(delta, se, df):
+     return float(1 - stats.nct.cdf(tcrit, df, delta / se))
+ 
+ 
++def _mde80(se, df):
++    """Smallest effect detected with power 0.8: the root of power(x) - 0.8, searched upwards from 1.0. scipy's
++    non-central t is NaN at isolated large non-centralities (the effect divided by its standard error), which stops
++    the search for some small standard errors; it then restarts at 0.01 (SI-86, the user's decision of 2026-10-15).
++    A search that works from 1.0 gives the same value as before; one that fails from both starts raises."""
++    for hi in (1.0, 0.01):
++        try:
++            while _power(hi, se, df) < 0.8:
++                hi *= 2
++                _require(hi < 1e6, f"power never reaches 0.8 (se={se})")
++            return optimize.brentq(lambda x: _power(x, se, df) - 0.8, 1e-9, hi)
++        except ValueError as e:      # the power is NaN at a point of the search: try the next start
++            err = e
++    raise PreregError(f"power search failed from the starts 1.0 and 0.01 (se={se}, df={df}): {err}") from err
++
++
+ def power_report(out, r4a1):
+     """P1 contrast (reference - discriminator) at the R4-a1 matched lambda, per A1 task x decoder."""
+     blocks, var_num, var_den, by_cond = {}, 0.0, 0, {}
+@@ -701,11 +717,7 @@ def power_report(out, r4a1):
+     for label, D in (("real_tasks", len(REAL_TASKS)), ("families", len(set(TASK_FAMILY.values())))):
+         se = math.sqrt((tau ** 2 + sigma ** 2 / POWER_SEEDS) / D)
+         df = D - 1
+-        hi = 1.0
+-        while _power(hi, se, df) < 0.8:
+-            hi *= 2
+-            _require(hi < 1e6, f"power never reaches 0.8 (se={se})")
+-        mde = optimize.brentq(lambda x: _power(x, se, df) - 0.8, 1e-9, hi)
++        mde = _mde80(se, df)
+         designs[label] = dict(D=D, df=df, se=se, power_at_delta=_power(POWER_DELTA, se, df), mde80=mde,
+                               equivalence_feasible={str(h): bool(stats.t.ppf(0.975, df) * se < h) for h in EQUIV_BOUNDS})
+     p_min = 2.0 / 2 ** len(REAL_TASKS)
+diff --git a/scripts/run_stage.py b/scripts/run_stage.py
+index 6735708..5fe6fb3 100644
+--- a/scripts/run_stage.py
++++ b/scripts/run_stage.py
+@@ -51,6 +51,10 @@ any of them, so one stage cannot mix scorer commits, hosts' vector widths, numba
+ SI-54 (docs/EQUIVALENT_COMMITS.json): in scorer_git_sha and the git_sha of latents and divergence records, c88cce3
+ counts as tag prereg-tier12-v3 for every arm except sinkhorn; the preflight refuses existing Sinkhorn output (score,
+ latent or divergence record) made at c88cce3.
++SI-85 (decision of 2026-10-15): a divergence record, like a latent, must name its git commit and, unless --allow-dirty,
++come from a clean checkout; the start-up check (preflight) and the final check at the end of a run refuse one that
++does not. A nonfinite_latent record (written by this runner or by run_cpu_baselines.py) names a commit but carries no
++clean flag, and stays accepted.
+ Completion gate: exit 0 only if every selected row is final (scored, diverged or nonfinite_latent; with --no-score
+ also fitted), none is both scored and failed, none is missing and the score rows share one scorer provenance. Exit EXIT_PREFLIGHT (nothing ran), EXIT_INFRA,
+ EXIT_GATE, or 128 + signal after SIGINT / SIGTERM (running work is stopped and its claims released).
+@@ -421,6 +425,8 @@ class Outputs:
+             device = cfg.get("gpu")
+         if cfg.get("git_dirty") is not False and not self.allow_dirty:
+             raise InvalidOutput(f"{p}: fitted from a dirty or unknown checkout (git_dirty={cfg.get('git_dirty')})")
++        if not cfg.get("git_sha"):                       # SI-89: a latent names its commit, like a divergence record
++            raise InvalidOutput(f"{p}: the latent names no git_sha")
+         bad = ~np.isfinite(z)
+         return dict(finite=not bool(bad.any()), n_nonfinite=int(bad.sum()), n_cells_nonfinite=int(bad.any(1).sum()),
+                     shape=list(z.shape), sha256=sha256_file(p), git_sha=cfg.get("git_sha"), device=device,
+@@ -437,6 +443,13 @@ class Outputs:
+         diff = [c for c in FPC.REQUIRED if str(rec["row"].get(c)) != row[c]]
+         if diff:
+             raise InvalidOutput(f"{p}: recorded for other settings than the manifest row ({diff})")
++        # SI-85: a divergence record is held to the rule of a latent: it names its commit and, unless --allow-dirty,
++        # comes from a clean checkout. The clean flag is asked of 'diverged' records only: the nonfinite_latent
++        # records of this runner and of run_cpu_baselines.py carry git_sha but no git_dirty.
++        if rec["status"] == "diverged" and rec.get("git_dirty") is not False and not self.allow_dirty:
++            raise InvalidOutput(f"{p}: fitted from a dirty or unknown checkout (git_dirty={rec.get('git_dirty')})")
++        if not rec.get("git_sha"):
++            raise InvalidOutput(f"{p}: the record names no git_sha")
+         return rec
+ 
+     def score(self, row, latent_sha):
+diff --git a/tests/analysis/test_analysis_x1.py b/tests/analysis/test_analysis_x1.py
+index 08182fd..72674a4 100644
+--- a/tests/analysis/test_analysis_x1.py
++++ b/tests/analysis/test_analysis_x1.py
+@@ -1,9 +1,10 @@
+ """Known-answer tests for scripts/analysis_x1.py, the frozen X1 analysis (docs/ANALYSIS_SPEC.md section 14).
+ 
+-Synthetic inputs only: the analysis must not run on any X1 adversarial-arm score before the tag prereg-tier12-v3.
++Synthetic inputs only: the analysis must not run on any X1 or X13 score before the tag prereg-tier12-v3 (SI-78).
+ Every expected value is derived by hand (the derivation is stated next to the case) or by an independent method
+ (scipy, enumeration, brute-force integration), never by the code under test.
+ """
++import csv
+ import itertools
+ import json
+ import math
+@@ -28,6 +29,7 @@ import synth  # noqa: E402
+ SEEDS = [0, 1, 2, 3, 4]
+ X1_MANIFEST = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v3.x1.tsv")
+ R1_RECORD = os.path.join(ROOT, "docs", "prereg", "r1_record.json")
++KNOWN = os.path.join(ROOT, "experiments", "analysis_numerics_20261014", "known_answers_small_s.csv")
+ 
+ 
+ def pts(spec, fail=()):
+@@ -241,6 +243,24 @@ def test_pool_brute_force(d, s, fam, scale, declaration, grid):  # test-reason:
+     assert r["declaration"] == declaration and r["delta_scale"] == scale and r["tau_scale"] == scale
+ 
+ 
++def _known():
++    with open(KNOWN, newline="") as f:
++        return list(csv.DictReader(f))
++
++
++@pytest.mark.parametrize("row", _known(), ids=lambda row: row["name"])
++def test_pool_known_answers_small_s(row):  # test-reason: s of 1e-6 to 3e-6 against 50-digit values pins the spread grid's floor, size and span
++    """Six datasets with standard errors just above S_MIN against the independent reference of
++    experiments/analysis_numerics_20261014/known_answers_small_s.py (50-digit arithmetic, other quadrature); AN-R08."""
++    assert (A.GRID_N, A.GRID_SPAN, A.TAU_FLOOR) == (201, 5.0, 1e-15)   # the registered grid, specification section 4 (AN-R08)
++    tasks, d, s = (row[k].split(";") for k in ("tasks", "d", "s"))
++    r = A.combine(tasks, [float(x) for x in d], [float(x) for x in s], row["structure"], float(row["scale"]),
++                  float(row["margin"]))
++    assert r["raised"] == [] and min(float(x) for x in s) >= 1e-6
++    for k in ("p_above", "p_below", "p_within", "mean", "lo", "hi", "heterogeneity"):
++        close(r[k], float(row[k]), 1e-8)
++
++
+ def test_combine_structures():
+     tasks = list(P.REAL_TASKS)              # pancreas, lung, immune, immune_hum_mou, atac_small, atac_large
+     d, s = [0.03, 0.01, 0.05, 0.04, -0.01, 0.02], [0.01, 0.02, 0.015, 0.01, 0.02, 0.025]
+@@ -256,7 +276,26 @@ def test_combine_structures():
+     su = [0.01, 0.02, math.hypot(0.015, 0.01) / 2, math.hypot(0.02, 0.025) / 2]
+     assert pairs["units"] == units and pairs["n"] == 4
+     close(pairs["mean"], A.pool(du, su, [units], 0.1, 0.1, 0.01)["mean"])
+-    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable"}
++    assert A.combine([], [], [], "family", 0.1, 0.01) == {"n": 0, "declaration": "not_evaluable", "raised": [],
++                                                         "n_raised_datasets": 0, "n_raised_pairs": 0}
++
++    # SI-83: a standard error below 1e-6 enters the pool as 1e-6 and is listed with its own value; 1e-6 itself stays
++    low = [1e-6, 0.9e-6, 1e-16, 0.0, 0.01, 0.02]
++    for structure, levels in (("family", [[P.TASK_FAMILY[t] for t in tasks], tasks]), ("independent", [tasks])):
++        got, want = A.combine(tasks, d, low, structure, 0.1, 0.01), A.pool(d, [1e-6] * 4 + low[4:], levels, 0.1, 0.1, 0.01)
++        assert got["raised"] == [dict(unit=t, level="dataset", s=x) for t, x in zip(tasks[1:4], low[1:4])]
++        assert (got["n_raised_datasets"], got["n_raised_pairs"]) == (3, 0)       # the count next to the declaration (SI-83)
++        assert {k: got[k] for k in want} == want
++    # pairs: each dataset is raised first; the family's averaged sqrt(s1^2 + s2^2) / 2 is raised again when it is
++    # below 1e-6, which the averaged standard error of two datasets at 1.2e-6 is (8.5e-7; review AN-R01)
++    for s_pair, listed, averaged in (([1.2e-6, 1.2e-6], [], 1.2e-6 / math.sqrt(2)),
++                                     ([0.0, 1e-16], [("atac_small", 0.0), ("atac_large", 1e-16)], 1e-6 / math.sqrt(2))):
++        got = A.combine(["atac_small", "atac_large"], [0.02, 0.03], s_pair, "pairs", 0.1, 0.01)
++        want = A.pool([0.025], [1e-6], [["atac"]], 0.1, 0.1, 0.01)
++        assert got["raised"] == [dict(unit=u, level="dataset", s=x) for u, x in listed] + [
++            dict(unit="atac", level="pair", s=pytest.approx(averaged, abs=1e-15))]
++        assert got["n"] == 1 and {k: got[k] for k in want} == want
++        assert (got["n_raised_datasets"], got["n_raised_pairs"]) == (len(listed), 1)
+ 
+ 
+ # ---------------------------------------------------------------------------------------------
+@@ -338,13 +377,20 @@ def test_window():
+                   (10.0, [0.59, 0.60, 0.58, 0.595, 0.585]), (30.0, [0.3] * 5), (100.0, [])])
+     lower = 0.60 - stats.t.ppf(0.975, 4) * math.sqrt(0.00025 / 5)           # best mean - t x SD / sqrt(n) = 0.5804
+     assert w == dict(status="ok", best=3.0, lower=pytest.approx(lower, abs=1e-12), lams=[3.0, 10.0],
+-                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2, gap=False)
++                     width=pytest.approx(math.log10(10 / 3), abs=1e-12), n_points=2, gap=False, n_all_failed_between=0)
+     tie = A.window([(1.0, [0.5, 0.5]), (3.0, [0.5, 0.5])])                   # tie -> smaller lambda; SD 0
+     assert tie["best"] == 1.0 and tie["lams"] == [1.0, 3.0] and tie["width"] == pytest.approx(math.log10(3))
+     # lambda 3 lies below the bound between two points above it: the width spans a gap (review AN-14)
+-    gap = A.window([(1.0, [0.60, 0.62, 0.58, 0.61, 0.59]), (3.0, [0.3] * 5), (10.0, [0.59, 0.60, 0.58, 0.595, 0.585])])
+-    assert gap["lams"] == [1.0, 10.0] and gap["gap"] is True and gap["n_points"] == 2
+-    none = dict(lower=None, lams=None, width=None, n_points=None, gap=None)
++    good, other = [0.60, 0.62, 0.58, 0.61, 0.59], [0.59, 0.60, 0.58, 0.595, 0.585]
++    gap = A.window([(1.0, good), (3.0, [0.3] * 5), (10.0, other)])
++    assert gap["lams"] == [1.0, 10.0] and gap["gap"] is True and gap["n_points"] == 2 and gap["n_all_failed_between"] == 0
++    # a configuration with no successful run between the ends is counted and leaves the gap rule alone (AN-R13)
++    failed = A.window([(1.0, good), (3.0, []), (10.0, other)])
++    assert failed["lams"] == [1.0, 10.0] and failed["gap"] is False and failed["n_all_failed_between"] == 1
++    # the low point may lie deep inside the window, not next to its smallest lambda (AN-R09)
++    deep = A.window([(1.0, good), (3.0, [0.595] * 5), (10.0, [0.3] * 5), (30.0, []), (100.0, other)])
++    assert deep["lams"] == [1.0, 3.0, 100.0] and deep["gap"] is True and deep["n_all_failed_between"] == 1
++    none = dict(lower=None, lams=None, width=None, n_points=None, gap=None, n_all_failed_between=None)
+     assert A.window([(1.0, [0.5]), (3.0, [0.4, 0.45])]) == dict(none, status="no_interval", best=1.0)
+     assert A.window([(1.0, []), (3.0, [])]) == dict(none, status="no_points", best=None)
+ 
+@@ -353,7 +399,10 @@ def test_guards():  # test-reason: refusals at the function boundaries
+     with pytest.raises(P.PreregError, match="scale"):
+         A.read_area(zero(), pts(REF), pts(REF), 0.0)
+     with pytest.raises(P.PreregError, match="positive"):
+-        A.pool([0.1, 0.2], [0.01, 5e-7], [["a", "b"]], 0.1, 0.1, 0.01)      # below S_MIN (and so 0)
++        A.pool([0.1, 0.2], [0.01, 5e-7], [["a", "b"]], 0.1, 0.1, 0.01)      # pool does not raise s (combine does, SI-83)
++    for bad in (float("nan"), float("inf"), -1e-3):                          # only s in [0, S_MIN) is raised; these stop the run
++        with pytest.raises(P.PreregError, match="finite"):
++            A.combine(["a", "b"], [0.1, 0.2], [0.01, bad], "independent", 0.1, 0.01)
+     with pytest.raises(P.PreregError, match="grid"):
+         A.choose_lambda({"a": {1.0: 0.5}, "b": {3.0: 0.5}}, {"a": {1.0: 0}, "b": {3.0: 0}}, ["a", "b"])
+     row = dict(task="pancreas", status="ok", B=0.5, C=0.7, **dict.fromkeys(P.BATCH_METRICS, 0.5),
+@@ -382,6 +431,11 @@ FAIL = {("lung", "0", "discriminator", "10", "0"): "diverged",
+         **{("lung", "0", "barycenter", lam, "3"): "diverged" for lam in ("10", "100")},
+         ("atac_small", "1", "reference", "10", "2"): "diverged"}    # a failed run at a point that adds area
+ ZERO_AREA = ("lung", "1")          # every adversarial point 0.35 below in biology: neither P1 arm adds area (s = 0)
++# an R4-x1 extension point (used for matching only, never P1; SI-55) of the arm that sets b_common in atac_small, decoder 0,
++# with a batch score above its six registered points: b_common and so b* rise, so the analysis must see the row (AN-R07)
++EXT = ("atac_small", "0", "barycenter",
++       P.fmt_lam(P.lam_step(max(json.load(open(R1_RECORD))["families"]["w1|0"]["x1_grid"]), +1)))
++EXT_BUMP = 0.05
+ 
+ 
+ def _gain(r):
+@@ -390,6 +444,8 @@ def _gain(r):
+     lone = {"reference": "1", "discriminator": "0"}.get(r["arm"])
+     if (r["task"], r["cond"]) == ("atac_large", "1") and lone:
+         return 0.30 if r["seed"] == lone else 0.004        # one responding seed per P1 arm: 3 of 5 readings
++    if (r["task"], r["cond"]) == ("immune_hum_mou", "1") and r["arm"] in ("reference", "discriminator"):
++        return 0.30 if r["seed"] == "1" else 0.004         # the same responding seed for both P1 arms: 4 of 5 readings
+     return 0.30
+ 
+ 
+@@ -402,6 +458,7 @@ def world(r):
+     if r["arm"] in P.ADV_ARMS:
+         x = math.log10(float(r["lam"])) - CENTRE[(P.FAMILY_OF[r["arm"]], int(r["cond"]))]
+         B += _gain(r) * synth.sig(x / 0.3) + synth._noise("B" + r["tag"], 0.003)
++        B += EXT_BUMP if (r["task"], r["cond"], r["arm"], r["lam"]) == EXT else 0.0
+         C += -0.25 * synth.sig((x - 1) / 0.3) + BONUS.get(r["arm"], 0.0) * synth.sig(x / 0.3) + synth._noise("C" + r["tag"], 0.003)
+         C -= 0.35 if (r["task"], r["cond"]) == ZERO_AREA else 0.0
+         a = SPREAD.get(r["arm"], 0.0) * synth.sig(x / 0.3)
+@@ -444,18 +501,24 @@ def e2e(tmp_path_factory):
+     M, _ = P.read_manifest(X1_MANIFEST)
+     M = M[M.experiment.isin(["X1", "X13"])].reset_index(drop=True)
+     r1 = P.read_record(R1_RECORD, "R1")
+-    top = max(r1["families"]["mmd|0"]["x1_grid"])     # an R4-x1 extension point: matching only, never P1 (SI-55)
+-    M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task="atac_small", cond=0, arm="mmd",
+-                                                 lam=P.lam_step(top, +1))])], ignore_index=True)
++    M = pd.concat([M, P.extension_rows(M, [dict(experiment="X1", task=EXT[0], cond=int(EXT[1]), arm=EXT[2],
++                                                 lam=float(EXT[3]))])], ignore_index=True)
+     man = synth.write_tsv(M, os.path.join(tmp, "manifest.tsv"))
+-    sp, fp = synth.write_scores(*score_tables(M), os.path.join(tmp, "scores"), "x1")
++    tables = score_tables(M)
++    sp, fp = synth.write_scores(*tables, os.path.join(tmp, "scores"), "x1")
+     S, F = P.read_scores([sp])[0], P.read_failures(fp)
+-    r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, no extension
++    r4p = os.path.join(tmp, "r4x1.json")          # what freeze_matched_lambda.py --stage x1 records, with the extension row
+     P.write_record(r4p, P.r4_stage(P.outcomes(M, S, F, ["X1"]), "x1", r1, need=set()), dict(scores=[sp]))
+     args = dict(manifest=man, scores=sp, failures=fp, r1=R1_RECORD, r4=r4p, out=os.path.join(tmp, "analysis.json"))
+     assert A.main(argv(args)) == 0
++    # the same inputs with the rows of every file in another order (review AN-11, AN-R14)
++    shuf = dict(args, manifest=synth.write_tsv(M.sample(frac=1, random_state=1), os.path.join(tmp, "manifest_shuffled.tsv")),
++                out=os.path.join(tmp, "analysis_shuffled.json"))
++    shuf["scores"], shuf["failures"] = synth.write_scores(*(t.sample(frac=1, random_state=1) for t in tables),
++                                                          os.path.join(tmp, "scores_shuffled"), "x1")
++    assert A.main(argv(shuf)) == 0
+     return dict(args=args, rec=json.load(open(args["out"])), M=M, out=A.add_scores(P.outcomes(M, S, F, ["X1", "X13"])),
+-                r1=r1, r4=json.load(open(r4p)))
++                r1=r1, r4=json.load(open(r4p)), shuffled=json.load(open(shuf["out"])))
+ 
+ 
+ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects and not-evaluable bookkeeping
+@@ -467,6 +530,13 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
+     assert prim["settings"] == dict(value="C", mode="mean", corner="collapse", structure="family", scale=0.1)
+     assert len(prim["cells"]) == 16 and prim["n_primary"] == 6
+     assert set(prim["holm"]) == {f"{e}|{c}" for e in ("p1", "area", "p2") for c in (0, 1)}
++    # the same inputs with the rows of every file in another order give the same numbers (review AN-11, AN-R14)
++    assert e2e["shuffled"]["primary"] == prim and e2e["shuffled"]["sensitivity"] == rec["sensitivity"]
++    # the extension row raises the barycenter's best batch score in atac_small|0 above the other arms': b* moves, and the
++    # record is accepted only because the analysis sees the row (planted error: a recompute from registered points only)
++    reg = out[~((out.task == EXT[0]) & (out.cond == EXT[1]) & (out.arm == EXT[2]) & (out.lam == EXT[3]))]
++    plain = P.r4_stage(reg, "x1", r1, need=set())["targets"]["atac_small|0"]
++    assert r4["targets"]["atac_small|0"]["bstar"] - plain["bstar"] > 1e-5      # about 1.7e-4, against a recompute tolerance of 1e-9
+ 
+     # wiring: the record's cell values are the functions' values on the same runs
+     t, c = "pancreas", 1
+@@ -494,11 +564,18 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
+                                                  {"task": "atac_large", "reason": "readings"}]
+     assert [x["task"] for x in pooled["1"]["p1"]["low_signal"]] == ["immune"]
+     assert pooled["1"]["p1"]["declaration"] == "above" and len(pooled["1"]["p1"]["signs"]) == 4
+-    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "lung", "reason": "zero_spread"},       # review AN-02
+-                                                   {"task": "immune", "reason": "low_signal"}]
++    # lung's area is 0 in every repeat (s = 0): the dataset is kept, its s raised to 1e-6 and listed (SI-83)
++    assert pooled["1"]["area"]["not_evaluable"] == [{"task": "immune", "reason": "low_signal"}]
++    assert "lung" in pooled["1"]["area"]["tasks"] and prim["cells"]["lung|1"]["area"]["s"] == 0.0
++    assert {(c, e): v["raised"] for c in "01" for e, v in pooled[c].items() if v["raised"]} == {
++        ("1", "area"): [dict(unit="lung", level="dataset", s=0.0)]}
++    assert {(c, e): v["n_raised_datasets"] for c in "01" for e, v in pooled[c].items() if v["n_raised_datasets"]} == {("1", "area"): 1}
+     assert pooled["0"]["local"]["declaration"] == "above"
+     close(pooled["0"]["local"]["sign_test_p"], 2 / 64)
+     close(pooled["1"]["local"]["sign_test_p"], 2 / 16)
++    # a dataset is evaluable for the local reading exactly when it is for P1 (same crossing; spec section 15.7)
++    assert all(pooled[c]["local"]["tasks"] == pooled[c]["p1"]["tasks"] for c in "01")
++    assert prim["cells"]["immune_hum_mou|1"]["p1"]["m"] == 4      # a sign-table cell with 4 readings: t with 3 df (AN-R09)
+     close(pooled["0"]["p1"]["wilcoxon_p"], 2 / 64)
+     assert pooled["0"]["p2"]["declaration"] == "below" and len(pooled["0"]["p2"]["diffs"]) == 6
+     # each pooled result combines its own endpoint's cell readings with the frozen prior scales and margins (P1 0.1 and
+@@ -533,6 +610,9 @@ def test_end_to_end(e2e):  # test-reason: the record's wiring, planted effects a
+     assert bary["pancreas"]["best_lam"] in (10.0, 100.0) and bary["pancreas"]["best"]["n_fail"] == 0
+     lh = prim["cells"]["lung|0"]["best_of_k"]["harmony"]
+     assert (lh["n"], lh["configs"], lh["failed_runs"]) == (5, 6, 1)        # failures counted, not penalised (AN-13)
++    # the total over configurations, not the largest count: 4 and 2 configurations with one failed run each (AN-R09)
++    assert [(prim["cells"][f"{t}|0"]["best_of_k"]["barycenter"]["configs"],
++             prim["cells"][f"{t}|0"]["best_of_k"]["barycenter"]["failed_runs"]) for t in ("pancreas", "lung")] == [(6, 4), (6, 2)]
+     bk = prim["cells"]["sim2|0"]["best_of_k"]
+     assert {f: bk[f]["n"] for f in bk} == dict(dict.fromkeys(P.ADV_ARMS, 6), sinkhorn=5, harmony=6, scanorama=6,
+                                                  sysvi=6, scanvi=1, none=1, scvi_adv=1)
+@@ -609,6 +689,16 @@ def _rewrite(src, dst, keep):
+      "differ"),
+     (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "bstar_low_signal",
+                                     True)), "differ"),
++    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "pancreas|1", "b_common", 0.01)),
++     "differ"),                                                                 # b_common alone (AN-R07)
++    (lambda e, tmp: dict(r4=_tamper(e["args"]["r4"], os.path.join(tmp, "r4.json"), "lung|0", "bstar", 2e-9)),
++     "differ"),                                                                 # just outside the 1e-9 tolerance (AN-R07)
++    # a record made with an R4 extension row, given without that row: refused, and the message names the cause (AN-R03)
++    (lambda e, tmp: dict(manifest=_rewrite(e["args"]["manifest"], os.path.join(tmp, "m.tsv"),
++                                           lambda M: ~((M.task == EXT[0]) & (M.cond == EXT[1]) & (M.arm == EXT[2])
++                                                       & (M.lam == EXT[3])))),
++     r"for atac_small\|0: record \[[-0-9.e]+, [-0-9.e]+, [-0-9.e]+, (True|False)\], recomputed \[[-0-9.e]+, [-0-9.e]+, "
++     r"[-0-9.e]+, (True|False)\]; if R4 added extension rows"),
+     (lambda e, tmp: _without_seed(e, tmp, "4"), "X1 seeds"),                     # review AN-10
+     (lambda e, tmp: dict(out=e["args"]["out"]), "exists"),                      # never overwrite a record
+ ])
+diff --git a/tests/prereg/test_check_tests.py b/tests/prereg/test_check_tests.py
+new file mode 100644
+index 0000000..da1d54b
+--- /dev/null
++++ b/tests/prereg/test_check_tests.py
+@@ -0,0 +1,75 @@
++"""scripts/check_tests.py on a throw-away git repo: pass, uncovered change, redundant new test, --strict, failing
++tests and an unknown base ref (NB-20261016-23, SI-91). Each case builds the repo, edits it after the base commit and
++runs check_tests.main() in process (its own pytest run is a real subprocess on the throw-away repo)."""
++import runpy
++import subprocess
++import sys
++
++import check_tests
++import pytest
++
++MOD = "def f(x):\n    if x:\n        return 1\n    return 0\n\n\ndef g():\n    return {g}\n"
++TEST = (
++    "from pkg.mod import f, g\n\n\nclass TestBase:\n    def test_f(self):\n"
++    "        assert f(1) == 1 and f(0) == 0\n\n\ndef test_g():\n    assert g() == {g}\n"
++)
++BASE = {"conftest.py": "", "pkg/mod.py": MOD.format(g=5), "pkg/old.py": "OLD = 1\n", "pkg/test_inner.py": "def test_inner():\n    assert True\n", "tests/test_mod.py": TEST.format(g=5)}
++NEW_TESTS = (  # a class-level test that adds no coverage, one with a reason, one test that is not changed
++    "from pkg.mod import f\n\n\nclass TestDup:\n    def test_dup(self):\n        assert f(1) == 1\n\n"
++    "    # test-reason: documents the contract\n    def test_reasoned(self):\n        assert f(0) == 0\n\n\n"
++    "def helper():\n    return 1\n"
++)
++CASES = {  # name: (files written after the base commit, deleted files, extra args, exit code, text that must be printed)
++    "ok": ({"pkg/mod.py": MOD.format(g=6), "tests/test_mod.py": TEST.format(g=6), "tools/x.py": "X = 1\n"}, [], [], 0, ["check_tests: OK"]),
++    "uncovered": (
++        {"pkg/mod.py": MOD.format(g=6) + "\n\ndef h(x):\n    if x:\n        return 2\n    return 3\n",
++         "tests/test_mod.py": TEST.format(g=6) + "\n\ndef test_h():\n    from pkg.mod import h\n    assert h(1) == 2\n",
++         "pkg/sub/new.py": "NEW = 1\n"},
++        ["pkg/old.py"], [], 1,
++        ["FAIL pkg/mod.py: changed lines never run: [14]", "changed branches never taken", "FAIL pkg/sub/new.py: changed, but no test imports this file"],
++    ),
++    "warn": ({"tests/test_new.py": NEW_TESTS}, [], [], 0, ["WARN tests/test_new.py::TestDup::test_dup: covers no line"]),
++    "warn_strict": ({"tests/test_new.py": NEW_TESTS}, [], ["--strict"], 1, ["WARN tests/test_new.py::TestDup::test_dup"]),
++    "tests_fail": ({"tests/test_bad.py": "def test_bad():\n    assert False\n"}, [], [], 2, ["pytest exited 1"]),
++}
++
++
++def git(repo, *args):
++    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *args], cwd=repo, check=True, capture_output=True)
++
++
++def write(repo, files):
++    for name, text in files.items():
++        (repo / name).parent.mkdir(parents=True, exist_ok=True)
++        (repo / name).write_text(text)
++
++
++@pytest.mark.parametrize("case", sorted(CASES))
++def test_check_tests_verdicts(case, tmp_path, monkeypatch, capfd):
++    files, deleted, extra, code, printed = CASES[case]
++    repo = tmp_path / "repo"
++    repo.mkdir()
++    git(repo, "init", "-q")
++    write(repo, BASE)
++    git(repo, "add", "-A")
++    git(repo, "commit", "-q", "-m", "base")
++    write(repo, files)
++    for name in deleted:
++        (repo / name).unlink()
++    git(repo, "add", "-N", *[n for n in files if n != "pkg/sub/new.py"])  # pkg/sub/new.py stays untracked on purpose
++    for key in [k for k in __import__("os").environ if k.startswith(("COV_CORE", "COVERAGE"))]:
++        monkeypatch.delenv(key)  # the throw-away pytest must not write into this run's coverage data
++    monkeypatch.chdir(repo)
++    monkeypatch.setattr(sys, "argv", ["check_tests.py", "--base", "HEAD", *extra, "--src", "pkg", "--", "tests", "pkg"])
++    assert check_tests.main() == code
++    out = capfd.readouterr().out
++    for text in printed:
++        assert text in out, out[-1500:]
++
++
++def test_check_tests_unknown_base_is_refused(tmp_path, monkeypatch):
++    git(tmp_path, "init", "-q")
++    monkeypatch.chdir(tmp_path)
++    monkeypatch.setattr(sys, "argv", ["check_tests.py", "--base", "no-such-ref"])
++    with pytest.raises(SystemExit, match="base ref 'no-such-ref' not found"):
++        runpy.run_path(check_tests.__file__, run_name="__main__")  # also runs the `__main__` guard
+diff --git a/tests/prereg/test_rules.py b/tests/prereg/test_rules.py
+index 8da5a79..1ba9891 100644
+--- a/tests/prereg/test_rules.py
++++ b/tests/prereg/test_rules.py
+@@ -393,3 +393,21 @@ def test_power_report_on_synthetic_a1():
+     assert math.isclose(P._power(d["mde80"], d["se"], d["df"]), 0.8, abs_tol=1e-6)
+     assert pw["frequentist_can_reject"] is False and math.isclose(pw["wilcoxon_min_p_two_sided"], 0.03125)
+     assert pw["designs"]["families"]["D"] == 4
++
++
++# test-reason: the only test with an input on which the search from 1.0 fails (SI-86) and of the raise when both fail
++def test_mde80_restarts_at_0_01_only_when_the_search_from_1_fails():
++    """SI-86 (the user's decision of 2026-10-15 to restart the power search at 0.01 when the search from 1.0 fails).
++    With scipy 1.17.1 the non-central t (nct.cdf) is NaN (not a number) at x = 1.0 for the standard error of the pilot
++    without sim1, which stopped the search that starts at 1.0 (documents re-check of 2026-10-14, script
++    05_power_report_nan_probe.py: 7 of 230 tested standard errors). The search now restarts at 0.01 and finds the value
++    that experiments/final_review_amendments_20261013/power_without_sim1.py found with a search that starts at 0.01.
++    A design of one dataset (0 degrees of freedom) has no power: both starts fail and the search raises. The power at
++    the answer is checked with the upper-tail probability (the survival function), which has no NaN."""
++    se, df = 0.02355132223101683, 5
++    assert math.isnan(P._power(1.0, se, df))                     # the premise: the search from 1.0 cannot start here
++    mde = P._mde80(se, df)
++    assert math.isclose(mde, 0.0684067435003012, rel_tol=1e-9)
++    assert math.isclose(stats.nct.sf(stats.t.ppf(0.95, df), df, mde / se), 0.8, abs_tol=1e-9)
++    with pytest.raises(P.PreregError, match="power search failed from the starts 1.0 and 0.01"):
++        P._mde80(0.02, 0)
+diff --git a/tests/stage/fake_env.py b/tests/stage/fake_env.py
+index 49f8280..abe926f 100644
+--- a/tests/stage/fake_env.py
++++ b/tests/stage/fake_env.py
+@@ -88,7 +88,8 @@ def fit():
+         sys.exit(fit_outcome.EXIT_DIVERGED)
+     if b == "diverge":
+         fit_outcome.write_status(out, tag, "diverged", detail="non-finite training loss at epoch 3, step 41: "
+-                                 "gen_loss=inf", row=row, epoch=3, step=41, terms={"gen_loss": float("inf")})
++                                 "gen_loss=inf", row=row, epoch=3, step=41, terms={"gen_loss": float("inf")},
++                                 git_sha="fake", git_dirty=False)   # as the real fitter's provenance()
+         sys.exit(fit_outcome.EXIT_DIVERGED)
+     n, k = 30, int(row["n_latent"])
+     z = np.random.default_rng(0).normal(size=(n, k)).astype(np.float32)
+diff --git a/tests/stage/test_run_stage.py b/tests/stage/test_run_stage.py
+index 819506c..7c5cba3 100644
+--- a/tests/stage/test_run_stage.py
++++ b/tests/stage/test_run_stage.py
+@@ -682,7 +682,7 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
+             arrs = dict(d)
+         arrs["config"] = json.dumps(dict(json.loads(str(arrs["config"])), git_sha=old))
+         np.savez_compressed(p, **arrs)
+-    else:           # no latent, no score; the real fitter writes its commit into the record, the fake does not
++    else:           # no latent, no score; the record's commit (the fake writes 'fake', the real fitter its own)
+         p = os.path.join(st.out, "status", "s1.json")
+         with open(p) as f:
+             rec = json.load(f)
+@@ -693,6 +693,67 @@ def test_sinkhorn_output_at_the_pre_fix_commit_is_refused(tmp_path, where):
+         assert rc == rs.EXIT_PREFLIGHT and "existing output: ['sinkhorn'] rows at c88cce3" in log, log
+ 
+ 
++@pytest.mark.parametrize("where, plan, edit, allow_dirty, refusal", [
++    pytest.param("latent", "diverge", lambda c: c.update(git_dirty=True), False,
++                 "fitted from a dirty or unknown checkout (git_dirty=True)", id="latent-git_dirty-true"),
++    pytest.param("latent", "diverge", lambda c: c.pop("git_sha"), False,
++                 "the latent names no git_sha", id="latent-without-git_sha"),
++    pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), False,
++                 "fitted from a dirty or unknown checkout (git_dirty=True)", id="S1-record-git_dirty-true"),
++    pytest.param("status", "diverge", lambda c: c.update(git_dirty=None), False,
++                 "fitted from a dirty or unknown checkout (git_dirty=None)", id="S2-record-git_dirty-null"),
++    pytest.param("status", "diverge", lambda c: c.pop("git_sha"), False,
++                 "the record names no git_sha", id="S3-record-without-git_sha"),
++    pytest.param("status", "diverge", lambda c: None, False, None, id="S0-record-as-the-fake-fitter-writes-it"),
++    pytest.param("status", "nan", lambda c: None, False, None, id="S4-nonfinite_latent-record-of-the-runner"),
++    pytest.param("status", "nan", lambda c: c.pop("git_sha"), False,
++                 "the record names no git_sha", id="S5-nonfinite_latent-record-without-git_sha"),
++    pytest.param("status", "diverge", lambda c: c.update(git_dirty=True), True, None, id="S1-allow-dirty-accepted"),
++])
++# test-reason: only test of the dirty-checkout and no-commit refusals (all other stage tests pass --allow-dirty)
++def test_outputs_from_a_dirty_or_unknown_commit_are_refused(tmp_path, capsys, monkeypatch, where, plan, edit, allow_dirty, refusal):
++    """SI-85 (the user's decision of 2026-10-15, rule A of the code re-check, finding CF-R03): a divergence record (the
++    file a fit writes when its training loss becomes non-finite), like a latent (the saved embedding), must name its
++    commit and come from a clean checkout; the start-up check refuses one that does not, unless --allow-dirty is given.
++    Scenarios (S0 to S4 are those of the re-check, S5 is added here): S0 the record as the fake fitter writes it,
++    accepted; S1 git_dirty true, S2 git_dirty null and S3 no git_sha, refused; S4 the runner's own nonfinite_latent
++    record (a commit, no clean flag), accepted; S5 a nonfinite_latent record without a commit, refused. Records of two
++    arms are used, one that is not Sinkhorn (v1) and the Sinkhorn arm (s1): the rule asks no arm. Every other stage test
++    passes --allow-dirty, and the refusal of a latent from a dirty checkout had no test before. SI-89 (the user, 2026-10-16): a latent without a
++    commit is refused too (case latent-without-git_sha).
++    The runner is called as a function inside the test (not as a separate program) with --report-only, which runs the
++    start-up and final checks only, so the outcome does not depend on this repository's own checkout being clean."""
++    st = Stage(tmp_path, [_row("n1"), _row("v1"), _row("s1", arm="sinkhorn")], plan={"v1": plan, "s1": plan})
++    assert st.run("--no-score")[0] == 0
++    files = ["latents/n1.npz"] if where == "latent" else ["status/v1.json", "status/s1.json"]
++    for f in files:
++        p = os.path.join(st.out, f)
++        if where == "latent":
++            with np.load(p) as d:
++                arrs = dict(d)
++            cfg = json.loads(str(arrs["config"]))
++            edit(cfg)
++            np.savez_compressed(p, **dict(arrs, config=json.dumps(cfg)))
++        else:
++            with open(p) as fh:
++                rec = json.load(fh)
++            edit(rec)
++            with open(p, "w") as fh:
++                json.dump(rec, fh)
++    rc = rs.main([a for a in st.args("--no-score", "--report-only") if allow_dirty or a != "--allow-dirty"])
++    out, err = capsys.readouterr()
++    if refusal is None:
++        assert rc == 0, out + err
++    else:
++        assert rc == rs.EXIT_PREFLIGHT and all(f"{f}: {refusal}" in err for f in files), out + err
++        # the check at the end of a run (write_views -> file_states -> Outputs.state -> status / latent) is the same call as the
++        # start-up one; with the start-up check switched off it marks the same files invalid and the gate fails (RC-m10)
++        monkeypatch.setattr(rs.Stage, "preflight", lambda self, launching: {})
++        rc = rs.main([a for a in st.args("--no-score", "--report-only") if allow_dirty or a != "--allow-dirty"])
++        out, err = capsys.readouterr()
++        assert rc == rs.EXIT_GATE and "invalid" in out + err, out + err
++
++
+ def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
+     """SI-54: a non-Sinkhorn row fitted and scored at the old commit and a Sinkhorn row at the tag pass the gate
+     (latent git_sha and scorer_git_sha); the commit in a divergence record counts like a latent's (rigour review
+@@ -717,7 +778,7 @@ def test_si54_old_commit_counts_as_the_tag_in_the_gate(tmp_path, monkeypatch):
+     g = st.summary()["gate"]
+     assert g["ok"] and g["scorer_provenance"]["scorer_git_sha"] == head and st.summary()["latent_git_shas"] == sorted(
+         ["fake", head])
+-    p = os.path.join(st.out, "status", "v1.json")             # the fake fitter's divergence record carries no commit
++    p = os.path.join(st.out, "status", "v1.json")             # the fake fitter's divergence record names commit 'fake'
+     with open(p) as f:
+         rec = json.load(f)
+ 
+diff --git a/tests/wcd_vae/test_divergences_v2.py b/tests/wcd_vae/test_divergences_v2.py
+index e21d2fa..36c871a 100644
+--- a/tests/wcd_vae/test_divergences_v2.py
++++ b/tests/wcd_vae/test_divergences_v2.py
+@@ -9,7 +9,6 @@ Barycenter: reproduces a single measure, sits at the midpoint of two translated
+ its W2 objective beats using either input cloud as the target.
+ """
+ import importlib.util
+-import inspect
+ import math
+ from pathlib import Path
+ 
+@@ -127,8 +126,10 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
+     def adv(z):
+         return (z - z.mean(0, keepdim=True)) / z.std(0, unbiased=False, keepdim=True).clamp_min(1e-4) if zstd else z
+ 
+-    dtypes, ot_eps = [], alignment._ot_eps
+-    monkeypatch.setattr(alignment, "_ot_eps", lambda C, *a: dtypes.append(C.dtype) or ot_eps(C, *a))
++    dtypes, caps, ot_eps, ot_eps_sym = [], [], alignment._ot_eps, alignment._ot_eps_sym
++    monkeypatch.setattr(alignment, "_ot_eps",
++                        lambda C, *a: dtypes.append(C.dtype) or caps.append(a[-1]) or ot_eps(C, *a))
++    monkeypatch.setattr(alignment, "_ot_eps_sym", lambda C, *a: caps.append(a[-1]) or ot_eps_sym(C, *a))
+     mu = z64.float().requires_grad_(True)
+     v = sinkhorn_batch_others(adv(mu), b)
+     (g,) = torch.autograd.grad(v, mu)
+@@ -137,9 +138,11 @@ def test_sinkhorn_matches_converged_reference(case, monkeypatch):
+     v_ref, _ = ref.reference_cost(ref.cost_matrix(a64), b, 0.05 * math.sqrt(2 * a64.shape[1]), tol=1e-10)
+     (g_ref,) = torch.autograd.grad(v_ref, m64)
+     assert dtypes == [torch.float64]
+-    assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-59 (re-review R2-04)
+-    # sinkhorn_batch_others passes no max_iter, so the function's default is the cap in force (rigour review CF-08)
+-    assert inspect.signature(sinkhorn_divergence_weighted).parameters["max_iter"].default == alignment.SINKHORN_MAX_ITER
++    assert alignment.SINKHORN_MAX_ITER == 500000                   # user decision SI-61 of 2026-10-13 (SI-59 retired)
++    # the cap that each of the three solves of this production call received (one cross solve, two symmetric ones) is
++    # the constant, so a smaller default or a literal at any call site shows here (a cap of 50,000 passed by the caller,
++    # or of 1,000 by one symmetric solve, had passed every test: code re-check of 2026-10-14, finding CF-R02)
++    assert caps == [alignment.SINKHORN_MAX_ITER] * 3
+     assert abs(float(v) - float(v_ref)) < 1e-5 * abs(float(v_ref))
+     assert float((g.double() - g_ref).norm() / g_ref.norm()) < 3e-4

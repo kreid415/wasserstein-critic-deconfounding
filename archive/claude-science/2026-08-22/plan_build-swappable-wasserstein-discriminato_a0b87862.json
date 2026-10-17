@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "created_at": "2026-08-22T20:40:39.137Z",
+  "task_summary": "Build swappable Wasserstein/discriminator adversary as an upstreamable scvi-tools TrainingPlan",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Build the plan",
+      "delegations": [
+        {
+          "name": "Adversary plan",
+          "steps": [
+            {
+              "title": "Read AdversarialTrainingPlan internals fully",
+              "description": "Read the full training_step (both optimizer branches), configure_optimizers, and how kl_weight/kappa gate the adversary, so the subclass reuses scvi's manual-optimization structure exactly. Confirm the module's z is exposed in inference_outputs."
+            },
+            {
+              "title": "Port the adversary heads onto scvi z",
+              "description": "Adapt the harness's discriminator and Wasserstein-critic (reference, barycenter) heads to operate on scvi-tools' z tensor and batch_index, including the gradient penalty. Package as a swappable adversary selected by a string arg."
+            },
+            {
+              "title": "Write WassersteinAdversarialTrainingPlan",
+              "description": "Subclass AdversarialTrainingPlan: replace the Classifier with the swappable adversary, implement the critic inner-loop (disc_iter) and the generator fool-loss term as loss_vae - lambda*loss_da, gated so adversary=none degrades to stock training. Expose lambda (d_coef) and formulation as plan_kwargs."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Prove bit-identity + unconditioned",
+      "delegations": [
+        {
+          "name": "Seeded gate",
+          "steps": [
+            {
+              "title": "Seeded lambda=0 bit-identity gate",
+              "description": "Train stock LinearSCVI and the new plan with adversary=none at the same seed; assert the latents are bit-identical (max|delta|=0). This is the upstreamability guarantee and replaces the statistical reproduction gate."
+            },
+            {
+              "title": "Unconditioned LinearSCVI variant",
+              "description": "Determine how to remove the decoder batch covariate in scvi-tools (setup without batch_key, or a decoder flag) to get the unconditioned backbone where the adversary is the sole integrator; verify it trains and the adversary attaches."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Run + analyze",
+      "delegations": [
+        {
+          "name": "Immune sweep",
+          "steps": [
+            {
+              "title": "Run the immune adversarial sweep",
+              "description": "conditioned + unconditioned x reference/barycenter/discriminator x lambda{0, transition-point}, single seed, in scvi-env; score every embedding through the same full_metric_suite for comparability."
+            },
+            {
+              "title": "Assemble results + upstreamable README",
+              "description": "Table the arms x conditioning x lambda results with the lambda=0 controls; write a README documenting the plan as a drop-in scvi-tools extension and how to use it."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    }
+  ],
+  "desired_outputs": [
+    "scvi_adversarial_plan.py — WassersteinAdversarialTrainingPlan subclassing scvi-tools AdversarialTrainingPlan, with swappable adversary (none/discriminator/reference-critic/barycenter-critic) on z",
+    "A seeded bit-identity test: at lambda=0 (adversary off), the plan reproduces stock LinearSCVI latents bit-for-bit (max|delta|=0)",
+    "immune adversarial-weight results: conditioned + unconditioned x reference/barycenter/discriminator x lambda{0, transition}, scored through the same metric suite",
+    "A short README documenting the plan as an upstreamable scvi-tools extension"
+  ],
+  "feasibility": {
+    "confidence": "high",
+    "rationale": "scvi-tools ships AdversarialTrainingPlan with exactly the two-optimizer VAE-plus-adversary structure needed, degrading to stock training when the adversary is off — so seeded lambda=0 bit-identity is achievable and the extension is genuinely upstreamable. The main uncertainty is porting the Wasserstein-critic formulations (reference/barycenter, with gradient penalty) onto scvi-tools' z and manual-optimization step, and whether 'unconditioned' requires a LinearSCVI variant with the decoder batch-covariate removed."
+  }
+}

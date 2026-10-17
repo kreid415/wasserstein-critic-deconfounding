@@ -1,0 +1,169 @@
+{
+ "manifest_sha256_16": "6efbe422c8f09f98",
+ "manifest_rows": 6930,
+ "x1_rows": 3000,
+ "x1_n_critic_by_arm": {
+  "barycenter": [
+   5
+  ],
+  "discriminator": [
+   1
+  ],
+  "mmd": [
+   0
+  ],
+  "none": [
+   0
+  ],
+  "pooled": [
+   5
+  ],
+  "reference": [
+   5
+  ],
+  "scvi_adv": [
+   0
+  ],
+  "sinkhorn": [
+   0
+  ]
+ },
+ "x1_scvi_adv_rows": 40,
+ "x1_scvi_adv_adv_input": [
+  "mean"
+ ],
+ "x6_n_critic_by_arm": {
+  "discriminator": [
+   1
+  ],
+  "discriminator_r1": [
+   1
+  ],
+  "discriminator_sn": [
+   1
+  ],
+  "pooled": [
+   1,
+   5,
+   10
+  ],
+  "pooled_sn": [
+   1,
+   5
+  ]
+ },
+ "a2_tasks": [
+  "atac_small",
+  "immune"
+ ],
+ "a3_tasks": [
+  "atac_small",
+  "immune"
+ ],
+ "x3_n_cells_per_task": {
+  "atac_small": [
+   8402
+  ],
+  "immune_hum_mou": [
+   20000
+  ],
+  "sim2": [
+   17872
+  ],
+  "pancreas": [
+   14409
+  ]
+ },
+ "r4_blocks": {
+  "atac_small|0": {
+   "b0": 0.401761079435129,
+   "b_common": 0.6424186362973804,
+   "diff": 0.24065755686225138,
+   "setter": "barycenter",
+   "b_common_is_min_M": true,
+   "flagged": false
+  },
+  "atac_small|1": {
+   "b0": 0.6939108475311903,
+   "b_common": 0.7981650419234092,
+   "diff": 0.10425419439221895,
+   "setter": "barycenter",
+   "b_common_is_min_M": true,
+   "flagged": false
+  },
+  "immune|0": {
+   "b0": 0.4990703139136829,
+   "b_common": 0.5621289866826692,
+   "diff": 0.0630586727689863,
+   "setter": "barycenter",
+   "b_common_is_min_M": true,
+   "flagged": false
+  },
+  "immune|1": {
+   "b0": 0.6381673018004433,
+   "b_common": 0.6569909962526824,
+   "diff": 0.01882369445223908,
+   "setter": "barycenter",
+   "b_common_is_min_M": true,
+   "flagged": true
+  },
+  "sim1|0": {
+   "b0": 0.23229900491912522,
+   "b_common": 0.5063338132642264,
+   "diff": 0.2740348083451012,
+   "setter": "barycenter",
+   "b_common_is_min_M": true,
+   "flagged": false
+  },
+  "sim1|1": {
+   "b0": 0.8119601403099188,
+   "b_common": 0.8188775558554181,
+   "diff": 0.006917415545499295,
+   "setter": "mmd",
+   "b_common_is_min_M": true,
+   "flagged": true
+  }
+ },
+ "r4_setter_counts": {
+  "barycenter": 5,
+  "mmd": 1,
+  "sinkhorn": 0,
+  "discriminator": 0,
+  "pooled": 0,
+  "reference": 0
+ },
+ "r4_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+ "r4_status": "frozen",
+ "fingerprint_tasks": [
+  "atac_large",
+  "atac_small",
+  "immune",
+  "immune_hum_mou",
+  "lung",
+  "pancreas",
+  "sim1",
+  "sim2"
+ ],
+ "atac_source_files": {
+  "atac_large": "large_atac_gene_activity.h5ad",
+  "atac_small": "small_atac_gene_activity.h5ad"
+ },
+ "bib_entries": 52,
+ "bib_entries_with_doi": 35,
+ "cited_keys": 52,
+ "cited_not_in_bib": [],
+ "bib_not_cited": [],
+ "corani_cites": 1,
+ "non_ascii_lines": {
+  "paper.tex": 0,
+  "refs.bib": 0,
+  "evidence.md": 0
+ },
+ "sccraft_lines": {
+  "154": "naming marker",
+  "169": "no naming marker",
+  "315": "naming marker",
+  "316": "naming marker"
+ },
+ "july_mmd_sinkhorn_hits": 0
+}

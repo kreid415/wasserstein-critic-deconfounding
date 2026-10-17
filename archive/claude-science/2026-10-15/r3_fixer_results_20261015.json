@@ -1,0 +1,1979 @@
+{
+ "date": "2026-10-15",
+ "base": "5d06a27e39bd0337ac36b69f58703e26ab1e04a1",
+ "bundle_artifact_version": "8b17de10-a79c-49c8-b19c-37bceb145f21",
+ "briefs": {
+  "analysis": "a743a0ac-face-4748-9391-20ce5cf3fe76",
+  "code": "21448739-ffea-4cf7-b905-2018a7402427",
+  "docs": "4f6099c1-2629-41a0-bdd0-df5d8906445e"
+ },
+ "docs": {
+  "frame_id": "99760df9-e89c-4ea6-90ec-e8de37b5157d",
+  "status": "completed",
+  "wall_s": 4348,
+  "deviations": [
+   "Skill `ponytail` is not in this profile's catalog; I applied its smallest-change aim by hand. No unit tests were added (tests/ belongs to the other tracks); each new script asserts the documented numbers and run_all.sh is its end-to-end check.",
+   "Blinding: to find the pilot folders I listed the parent folders of the data root and of tier12_v2 (names only). I opened nothing under X1_local, jhpce_tier12, review_sealed, logs/, review/identity_*, or the X13 baseline test folder; I read only obs tables of the prepared data and the 1,098 + 36 pilot score files (A1, A1_ext_r1_round1), and never ran a rule script or analysis_x1.py on X1 or X13 scores.",
+   "Numbers about the 2026-10-15 audit and the review probes (49, 42, 7, 6, 56, 26,722; time 17:13) and the ids SI-88, NB-20261015-21, -22, -23, -25 come from the lead's messages; they are not in the clone and I could not verify them (27 of the 177 number and time rows of the claim receipt).",
+   "docs/PAPER_PLAN.md has 10 {{artifact:...}} chat links on lines 7 and 215 (since commit 589277b); the document-build source gate stops on them, so I built PAPER_PLAN with pandoc directly (no warnings) and did not change the links (outside my items; open question 2).",
+   "The README of experiments/doc_numbers_20261015 gives the SHA-256 of the 14 principal inputs and the digest of each script's input ledger; the SHA-256 of each of the 1,098 + 36 pilot score files is in results/*_inputs.csv, not in the README text.",
+   "'0.011', 'coverage 0.91 to 1.00', 'conservative' and the F7 ratios 0.86-0.89 and 0.53-0.77 were not recomputed (inputs are not in the repository); F7 is marked in PAPER_PLAN and the README, the ANALYSIS_SPEC sentences are in open_questions.",
+   "docs/ANALYSIS_SPEC.md, scripts/, tests/, CONSTRAINTS.md and notebook/ were not edited; DOC-R03, DOC-R08, DOC-R12 and the ANALYSIS_SPEC parts of DOC-R01, R02, R04, R05, R07, R09, R10 and R13 are deferred; ANALYSIS_SPEC line numbers cited are those of 5d06a27.",
+   "PREREG.md PDF (45 pages) was checked as extracted text and on 2 table pages only; a long file path in the question-10 cell runs past the right margin on page 42, and amendment-table row 8, which holds the same path, was not looked at.",
+   "I followed the lead's corrected SI-87 text (artifact b42c0723); the clone's CONSTRAINTS.md still holds the older wording. I kept 'and the decision is listed with the results' in the SI-81 (b) sentence although the ledger text omits it (open question 6).",
+   "Display 1 keeps the lead's wording 'six X13 runner-test runs' while group (4) says two test runs of six latents each (NB-20261002-09 and -10); flagged as open question 5."
+  ],
+  "structured_output": {
+   "items": [
+    {
+     "id": "DOC-R01",
+     "verified": true,
+     "checked": "base PREREG.md:485, :493-501 (audit of 'every chat record'; open item for the diff review); NB-20261014-21 (notebook/2026-10-14.md:238-243: one folder, 12 messages, printed output of the scripts that read them, two log statements); NB-20261015-15 (notebook/2026-10-15.md:166-171: user, nobody read a value)",
+     "action": "fixed",
+     "commits": [
+      "b327096"
+     ],
+     "evidence": "PREREG.md:552-556 (audit as searched), :559 (user's statement, attributed to the user); 'chat record': 0 hits; ANALYSIS_SPEC.md:491-492 is in open_questions"
+    },
+    {
+     "id": "DOC-R02",
+     "verified": true,
+     "checked": "base PREREG.md:22, :358-359, :483-503; NB-20261006-01/-04, NB-20261007-01 (150/150, values not inspected), NB-20261012-02 (99 latents to score), NB-20261012-05 (19 scored); counts from the manifest of record by filler_fit_counts.py, none from a score file",
+     "action": "fixed",
+     "commits": [
+      "b327096"
+     ],
+     "evidence": "PREREG.md:22, :518-527: 250 = 100 (pass A) + 150 (pass B); pass B 150 of 150 by 2026-10-07; pass A 1 of 100 then 99 to score; identity-check rescoring in group (3)"
+    },
+    {
+     "id": "SI-78",
+     "verified": true,
+     "checked": "CONSTRAINTS.md:540-546 and the task's S1; base definition at PREREG.md:500-503, :505, :518 used 'X1 adversarial-arm score'",
+     "action": "fixed",
+     "commits": [
+      "b327096"
+     ],
+     "evidence": "S1 word for word at PREREG.md:548 and :619 (grep -F); freeze wording says 'X1 or X13 score' in PREREG and PAPER_PLAN:179"
+    },
+    {
+     "id": "SI-79",
+     "verified": true,
+     "checked": "CONSTRAINTS.md:548-554 (hash list of every existing X1 and X13 score file; GitHub date of the tag)",
+     "action": "fixed",
+     "commits": [
+      "b327096",
+      "c97676c"
+     ],
+     "evidence": "PREREG.md:528-531 (folder experiments/x1_x13_score_hashes_20261015/, hashes only), :545 (date after the tag); line 5 lists both new folders; no file counts from the hash list"
+    },
+    {
+     "id": "DOC-R14",
+     "verified": true,
+     "checked": "finding text: (1) hashes, (2) outside time stamp, (3) audit by the same agent; (3) is covered by item A",
+     "action": "fixed",
+     "commits": [
+      "b327096"
+     ],
+     "evidence": "PREREG.md:528-531, :545, :552"
+    },
+    {
+     "id": "SI-81",
+     "verified": true,
+     "checked": "CONSTRAINTS.md:564-571 (a) NMI-0 cases, (b) iteration-cap stop, (c) reporting script; NB-20261015-05",
+     "action": "fixed",
+     "commits": [
+      "f963ea7"
+     ],
+     "evidence": "PREREG.md:404-408 (b), :446-454 (c, no-pair counts); 'proposal' and 'open' labels removed from decided items (gate 3). Kept 'and the decision is listed with the results' in (b); the ledger omits it (open question 6)"
+    },
+    {
+     "id": "SI-80",
+     "verified": true,
+     "checked": "CONSTRAINTS.md:556-563 (sections 2.3, 5, 8, 9, 10, 11, 15); notebook/2026-10-15.md NB-20261015-04",
+     "action": "fixed",
+     "commits": [
+      "57e047f"
+     ],
+     "evidence": "PREREG.md:578, :588-595 (named as SI-80 lists them); glossary row at :204; PAPER_PLAN.md:177, :186, :199, :202"
+    },
+    {
+     "id": "NB-20261015-08",
+     "verified": true,
+     "checked": "notebook/2026-10-15.md:88-98 (A3 Sinkhorn refits and R2/R3 re-run stay in rule order, SI-57)",
+     "action": "fixed",
+     "commits": [
+      "e656c90"
+     ],
+     "evidence": "PREREG.md rule-order sentences of the Sinkhorn entry (text kept in the order of SI-57)"
+    },
+    {
+     "id": "NB-20261015-07",
+     "verified": true,
+     "checked": "notebook/2026-10-15.md:76-87 (SI-75 stands; 5-point margin; 8 of 54, +3.7 not +0.7); p2_pilot_recount.py reproduces 8/54 and +3.7",
+     "action": "fixed",
+     "commits": [
+      "0460b13"
+     ],
+     "evidence": "PREREG.md:218 (row 8), :624 (question 10)"
+    },
+    {
+     "id": "NB-20261015-09",
+     "verified": true,
+     "checked": "notebook/2026-10-15.md:99-110 (SI-68 keeps its own words 'an X1 result'; equal numbers of tries is the user's decision)",
+     "action": "fixed",
+     "commits": [
+      "57e047f"
+     ],
+     "evidence": "PREREG.md:593-595; PAPER_PLAN.md:206, :220"
+    },
+    {
+     "id": "SI-82",
+     "verified": true,
+     "checked": "CONSTRAINTS.md:572-579 (four scaling checks exploratory)",
+     "action": "fixed",
+     "commits": [
+      "cd9aef8"
+     ],
+     "evidence": "PAPER_PLAN.md:204: reported, not pre-registered, used for no conclusion"
+    },
+    {
+     "id": "SI-87",
+     "verified": true,
+     "checked": "the task's S2 and the lead's corrected ledger text (artifact b42c0723: the five files do not exist at prereg-tier12-v2); clone ledger still has the older wording",
+     "action": "fixed",
+     "commits": [
+      "ef8ebcf"
+     ],
+     "evidence": "S2 word for word at PREREG.md:425 and :626; 'sinkhorn_redo': 0 hits; no sentence says prereg-tier12-v2 holds the record files"
+    },
+    {
+     "id": "DOC-R10",
+     "verified": true,
+     "checked": "finding text (tense of the hand check; the script does not compare grids); SI-18 gives 8 grids, 6 non-Sinkhorn",
+     "action": "fixed",
+     "commits": [
+      "ef8ebcf"
+     ],
+     "evidence": "PREREG.md:430-432: grids 'are to be checked by hand' against the version at tag prereg-tier12-v3; the redo's notebook entry will list every decision for the other five arms that changed"
+    },
+    {
+     "id": "DOC-R13",
+     "verified": true,
+     "checked": "questions file: 19 numbered rows; notebook/2026-10-15.md 'question n of 19'",
+     "action": "fixed",
+     "commits": [
+      "edb3d01"
+     ],
+     "evidence": "PREREG.md:613-633: 19 rows with question, answer, record, file; 19 body rows in the built HTML"
+    },
+    {
+     "id": "DOC-R04",
+     "verified": true,
+     "checked": "all numbers listed by the finding reproduced from committed files and pilot data by experiments/doc_numbers_20261015 (fresh clone, every assertion held); '0.011', 'coverage 0.91 to 1.00' and the F7 ratios cannot be recomputed from the repository",
+     "action": "fixed",
+     "commits": [
+      "9a01443",
+      "f963ea7",
+      "ef8ebcf",
+      "0460b13",
+      "c97676c"
+     ],
+     "evidence": "README.md lists each number, its document lines, script, command, environment and input digests; results/ holds 15 files, byte-identical on rerun; the ANALYSIS_SPEC sentences for '0.011' and the coverage are in open_questions (not my file)"
+    },
+    {
+     "id": "DOC-R11",
+     "verified": true,
+     "checked": "PAPER_PLAN base lines 75-77 (F7 ratios 0.86-0.89 and 0.53-0.77 marked provisional); log not in the repository",
+     "action": "fixed",
+     "commits": [
+      "2947fd2"
+     ],
+     "evidence": "PAPER_PLAN.md:75-79: provisional and cannot be recomputed from the repository until recomputed on the refitted latents"
+    },
+    {
+     "id": "DOC-R05",
+     "verified": true,
+     "checked": "git log commit times (New York time) of the 12 commit ids of rows 5 and 8; ledger decision times from notebook headers",
+     "action": "fixed",
+     "commits": [
+      "683f198"
+     ],
+     "evidence": "PREREG.md:3, :215 (row 5, SI-65 added), :218 (row 8), :219 (new row 9); ANALYSIS_SPEC parts are in open_questions"
+    },
+    {
+     "id": "SI-65",
+     "verified": true,
+     "checked": "CONSTRAINTS.md SI-65 (keep the loud NMI-0 error; decide case by case)",
+     "action": "fixed",
+     "commits": [
+      "683f198"
+     ],
+     "evidence": "PREREG.md:215 (row 5 names SI-65), question 9"
+    },
+    {
+     "id": "DOC-R06",
+     "verified": true,
+     "checked": "experiments/sinkhorn_fix_20261013/results/validation_12mb.csv via validation_minibatch_counts.py: 3,076 = 2,808 + 192 + 76; 234 fits x 12; 19 fits with training-mode minibatches; 160 replay tags none among the 234",
+     "action": "fixed",
+     "commits": [
+      "ef8ebcf",
+      "9a01443"
+     ],
+     "evidence": "PREREG.md:418-423"
+    },
+    {
+     "id": "DOC-R07",
+     "verified": true,
+     "checked": "base ANALYSIS_SPEC.md:7-10, base PAPER_PLAN.md:203, :217; SI-68, SI-77, SI-80",
+     "action": "fixed",
+     "commits": [
+      "57e047f"
+     ],
+     "evidence": "PREREG.md:588-595; PAPER_PLAN.md:206, :220; ANALYSIS_SPEC.md:214 is in open_questions"
+    },
+    {
+     "id": "DOC-R09",
+     "verified": true,
+     "checked": "items 2, 3, 4, 5, 7 against the glossary and table text at 5d06a27; items 1 and 6 are in ANALYSIS_SPEC",
+     "action": "fixed",
+     "commits": [
+      "88f56d4",
+      "683f198",
+      "b327096"
+     ],
+     "evidence": "glossary rows scvi_adv :177, X13 :198, A1-A3 :196, X1 :197; 'Counted from the names of the score files' PREREG.md:514; row 5 :215; 'New York time' in the table header"
+    },
+    {
+     "id": "CF-R04",
+     "verified": true,
+     "checked": "scripts/prereg_rules.py reads docs/EQUIVALENT_COMMITS.json; JSON loads with the same 8 keys and unchanged values except 'meaning'; tests/prereg 131 passed, 1 skipped",
+     "action": "fixed",
+     "commits": [
+      "a1b8c53"
+     ],
+     "evidence": "docs/EQUIVALENT_COMMITS.json:3 and PREREG.md:382: rule scripts see scores only; a divergence record's commit is checked by the stage runner only, which (SI-85) also refuses a record without a commit or from a checkout with uncommitted changes"
+    },
+    {
+     "id": "N: I091, D-01, D-02, DOC-03 wording",
+     "verified": true,
+     "checked": "word-level diff of every changed hunk naming them: only the requested edits (row 2 'is' to 'was' plus the SI-80 date; two clauses of row 3)",
+     "action": "fixed",
+     "commits": [],
+     "evidence": "no other change to the approved wording"
+    },
+    {
+     "id": "DOC-R03",
+     "verified": false,
+     "checked": "not checked: finding is in docs/ANALYSIS_SPEC.md and scripts/analysis_x1.py (analysis track)",
+     "action": "deferred",
+     "commits": [],
+     "evidence": "none"
+    },
+    {
+     "id": "DOC-R08",
+     "verified": false,
+     "checked": "not checked: finding is in docs/ANALYSIS_SPEC.md (analysis track)",
+     "action": "deferred",
+     "commits": [],
+     "evidence": "none"
+    },
+    {
+     "id": "DOC-R12",
+     "verified": false,
+     "checked": "not checked: finding is in scripts/prereg_rules.py power_report (code track); only the user's decision SI-86 is restated",
+     "action": "deferred",
+     "commits": [],
+     "evidence": "PREREG.md question 4 (SI-86)"
+    }
+   ],
+   "files_changed": [
+    "docs/EQUIVALENT_COMMITS.json",
+    "docs/PAPER_PLAN.md",
+    "docs/PREREG.md",
+    "experiments/doc_numbers_20261015/README.md",
+    "experiments/doc_numbers_20261015/common.py",
+    "experiments/doc_numbers_20261015/filler_fit_counts.py",
+    "experiments/doc_numbers_20261015/no_pair_assumptions.py",
+    "experiments/doc_numbers_20261015/no_pair_expectations.py",
+    "experiments/doc_numbers_20261015/p2_pilot_recount.py",
+    "experiments/doc_numbers_20261015/pilot_ranges.py",
+    "experiments/doc_numbers_20261015/results/blinding_guard.txt",
+    "experiments/doc_numbers_20261015/results/filler_fit_counts.txt",
+    "experiments/doc_numbers_20261015/results/filler_fit_counts_inputs.csv",
+    "experiments/doc_numbers_20261015/results/no_pair_assumptions.txt",
+    "experiments/doc_numbers_20261015/results/no_pair_assumptions_inputs.csv",
+    "experiments/doc_numbers_20261015/results/no_pair_expectations.txt",
+    "experiments/doc_numbers_20261015/results/no_pair_expectations_inputs.csv",
+    "experiments/doc_numbers_20261015/results/no_pair_groups.csv",
+    "experiments/doc_numbers_20261015/results/p2_pilot_recount.json",
+    "experiments/doc_numbers_20261015/results/p2_pilot_recount.txt",
+    "experiments/doc_numbers_20261015/results/p2_pilot_recount_inputs.csv",
+    "experiments/doc_numbers_20261015/results/pilot_ranges.txt",
+    "experiments/doc_numbers_20261015/results/pilot_ranges_inputs.csv",
+    "experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt",
+    "experiments/doc_numbers_20261015/results/validation_minibatch_counts_inputs.csv",
+    "experiments/doc_numbers_20261015/run_all.sh",
+    "experiments/doc_numbers_20261015/validation_minibatch_counts.py"
+   ],
+   "patches_artifact_version_id": "17a2c4ce-496a-4d82-a5cd-0304862db8c4",
+   "report_artifact_version_id": "99a615ca-1344-48cc-8e85-6432bac26153",
+   "evidence_artifact_version_id": "48f2b26e-6eb3-48b9-ab4e-a0d8a0827873",
+   "gates": "Gate 1 (claim receipt): python ev/claim_receipt.py rv inputs/DIFF_REVIEW_QUESTIONS_draft.md ev/claim_receipt at head c97676c: 126 added or changed sentences with numbers, 331 rows (151 quantities, 26 times, 101 dates, 53 labels), 0 coverage gaps; ids: SI-88 and NB-20261015-21/-22/-23/-25 absent from the clone (lead's messages), all other ids exist, 26 of 26 commit ids are commits.\nGate 2 (fresh clone made by git am, env scvi-api): bash experiments/doc_numbers_20261015/run_all.sh: exit 0, 47.8 s, 'all scripts finished; every assertion held'; git status --short of the folder afterwards: empty (all 15 result files byte-identical to the committed ones).\nGate 3: sinkhorn_redo hits in my files: 0; lines saying prereg-tier12-v2 holds the record files: none; remaining 'propos*' and 'open item' occurrences listed with reasons in the report, section 4.\nGate 4: grep -F of the task's S1, S2, S3 in docs/PREREG.md: S1 lines 548 and 619, S2 lines 425 and 626, S3 line 615 (one physical line each; strings equal to the task's text).\nGate 5: si_applicable 73 matched; si_check_output on the 4 files ok, 0 violations, 0 pattern-checkable, 24 followed / 49 not applicable (standing_instructions_verdicts.md); si_scope_check base 5d06a27: 27 changed, 27 in scope, 0 out of scope.\nGate 6: python -c json.load(docs/EQUIVALENT_COMMITS.json): ok, exit 0; WCD_SRC=src python -m pytest -q tests/prereg: 131 passed, 1 skipped in 35.04 s (also 38.33 s in the working clone at 9fa2807).\ngit am check: fresh clone of the bundle (SHA-256 0c7de7d507cba8c2e7b60760d81f30cc07b92eb2009bf91fb55b7c21dbe0915a, HEAD 5d06a27e39bd0337ac36b69f58703e26ab1e04a1), git am of 14 patches: exit 0, no conflicts; git diff --name-only 5d06a27 HEAD: 27 files, all docs/PREREG.md, docs/PAPER_PLAN.md, docs/EQUIVALENT_COMMITS.json or experiments/doc_numbers_20261015/*; files outside this set: none; tree equals the tree of the working clone (ba5345fb0af1d1194545881486da3090d60c04dc); same result when patches are taken from documents_r3_patches.tar.gz.\nBuilds: PREREG.md HTML and PDF (45 pages) from a byte-identical copy, no warnings; amendment table 9 body rows, question table 19; PAPER_PLAN.md built with pandoc, no warnings (helper source gate stops on 10 chat links on lines 7 and 215, present since 589277b).\nDeslop scan of all added prose: 50/50 (4 hard findings are en dashes inside the ranges A1-A3, P1-P4).",
+   "open_questions": [
+    "docs/ANALYSIS_SPEC.md at 5d06a27 (analysis track): :13-14 'before any X1 adversarial-arm score is examined' becomes 'before any X1 or X13 score is examined', and ':14 \"Examined\" is defined, as a proposal the user has not yet approved' becomes 'defined by user decision SI-78 (2026-10-15)'; :388-389 keep the quoted old phrase and add that SI-78 replaced it; :491-492 (A.3 item 2) closed by SI-78, the user's statement NB-20261015-15 and SI-88; :64-65 and :496 replace the name `r1_record_sinkhorn_redo.json` by S2 (the redone record overwrites docs/prereg/r1_record.json in place) and close A.3 item 4 (SI-87); :340 and :345 (and :335-337) add 'from the review's simulation; not reproducible from this repository'; :214 as in DOC-R07; the A.3 items now decided by SI-78 to SI-88 are closed. Same phrase 'X1 adversarial-arm score' in scripts/analysis_x1.py:4 and tests/analysis/test_analysis_x1.py:3.",
+    "docs/PAPER_PLAN.md lines 7 and 215 hold 10 `{{artifact:...}}` chat links (present since 589277b, 2026-10-01); replace them by file names before the tag so the source can pass the document-build gate.",
+    "Lead: the clone's CONSTRAINTS.md and notebook lack SI-88 and NB-20261015-21, -22, -23, -25, and CONSTRAINTS.md still shows the older SI-87 wording ('v2 and v3'); PREREG cites them and follows the corrected wording.",
+    "Lead: experiments/x1_x13_score_hashes_20261015/ must exist before the tag, and its README must use the groups of PREREG.md:531-544 (PREREG gives no file counts from it).",
+    "Display 1 reads 'six X13 runner-test runs' (the lead's wording, kept) while group (4) says 'two test runs ... each scoring 6 latents' (notebook NB-20261002-09 and -10); the lead should check that both describe the same six scored latents in the hash-list README.",
+    "SI-81 (b): PREREG says the cap-hit decision 'is listed with the results'; the ledger text omits that clause (it was in the approved proposal text). Drop the clause if the ledger is the authority.",
+    "PREREG question 9 points to docs/ANALYSIS_SPEC.md for the number of cells that never reach b* (finding AN-R15); check the pointer after the analysis patch.",
+    "The README of experiments/doc_numbers_20261015/ cites docs/ANALYSIS_SPEC.md lines at 5d06a27; they move when the analysis patch is applied. Refresh them then.",
+    "Other tracks: results folders are ignored by `.gitignore` (`**/results/`, `*.csv`); new result files need `git add -f`.",
+    "A background reviewer finding on the lead's conversation (id 1ef0acbd-d82d-4197-8975-929784738d81, level warn) says the audit of 2026-10-15 flagged 355 file lines, only 6 of which were shown, so 'no value from the 49 probe files in any review file' rests partly on a sample. PREREG.md:570-573 repeats the audit's result and limits as the lead gave them and does not mention the sample. If the lead classifies the 355 lines, add one clause there saying how many were read; if not, add 'not every flagged line was read'."
+   ],
+   "numbers": [
+    {
+     "number": "19",
+     "location": "PAPER_PLAN.md:180",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "six",
+     "location": "PAPER_PLAN.md:199",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "four",
+     "location": "PAPER_PLAN.md:204",
+     "source": "SI-82: four scaling checks listed (leave-one-method-out rescaling, z-score aggregation, composite without silhouettes, Kendall's tau) [CONSTRAINTS.md:573]",
+     "command": "grep -n -E 'PAPER_PLAN's four scaling checks \\(leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau\\)' CONSTRAINTS.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:3",
+     "source": "the questions file has 19 numbered rows; notebook/2026-10-15.md numbers them 'question n of 19' [DIFF_REVIEW_QUESTIONS_draft.md:32; notebook/2026-10-15.md:150]",
+     "command": "grep -c -E '^\\| [0-9]+ \\|' DIFF_REVIEW_QUESTIONS_draft.md"
+    },
+    {
+     "number": "250",
+     "location": "PREREG.md:22",
+     "source": "filler_fit_counts.py: 250 manifest rows on the five cluster-job tasks [experiments/doc_numbers_20261015/results/filler_fit_counts.txt:2]",
+     "command": "python experiments/doc_numbers_20261015/filler_fit_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "0.0125",
+     "location": "PREREG.md:106",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "4",
+     "location": "PREREG.md:106",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "four",
+     "location": "PREREG.md:106",
+     "source": "scripts/prereg_rules.py N_ENDPOINTS = 4; docs/prereg/r1_record.json stores 0.0125 (= 0.05/4) [scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:106",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:177",
+     "source": "PREREG glossary row 'arm' (unchanged) names the six; manifest has six arms besides none and scvi_adv [computed len(set(X1.arm) - {'none','scvi_adv'}) = 6]",
+     "command": "see source"
+    },
+    {
+     "number": "0",
+     "location": "PREREG.md:197",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "3,000",
+     "location": "PREREG.md:197",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "4",
+     "location": "PREREG.md:197",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "8",
+     "location": "PREREG.md:197",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:197",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "0",
+     "location": "PREREG.md:198",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "4",
+     "location": "PREREG.md:198",
+     "source": "manifest of record: X1 has 3,000 rows, 8 tasks, seeds 0 to 4, 8 arms (six adversarial arms plus none and scvi_adv) [computed [len(X1), X1.task.nunique(), sorted(X1.seed.unique()), len(set(X1.arm) - {'none','scvi_adv'})] = [3000, 8, ['0', '1', '2', '3', '4'], 6]]",
+     "command": "python -c \"import pandas as pd; m=pd.read_csv('manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv', sep='\\t', comment='#', dtype=str); x=m[m.experiment=='X1']; print(len(x), x.task.nunique(), sorted(x.seed.unique()), len(set(x.arm)-{'none','scvi_adv'}))\""
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:204",
+     "source": "the questions file has 19 numbered rows; notebook/2026-10-15.md numbers them 'question n of 19' [DIFF_REVIEW_QUESTIONS_draft.md:32; notebook/2026-10-15.md:150]",
+     "command": "grep -c -E '^\\| [0-9]+ \\|' DIFF_REVIEW_QUESTIONS_draft.md"
+    },
+    {
+     "number": "three",
+     "location": "PREREG.md:204",
+     "source": "SI-81 lists (a), (b), (c); NB-20261015-05; 'zero' belongs to the NMI-0 case wording of SI-65 [CONSTRAINTS.md:565; CONSTRAINTS.md:440]",
+     "command": "grep -n -E '\\(a\\) Each case where scib finds zero normalised mutual information.*\\(b\\).*\\(c\\)' CONSTRAINTS.md; grep -n -E 'NMI-0 edge case' CONSTRAINTS.md"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:212",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "7",
+     "location": "PREREG.md:213",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:213",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:213",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:213",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the identity check printed old and new PCR_batch and cell-cycle conservation for one X1 and one X13 run) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "09:54",
+     "location": "PREREG.md:215",
+     "source": "ledger entries SI-85..SI-85: notebook header time 2026-10-15 09:54 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "10:09",
+     "location": "PREREG.md:215",
+     "source": "commit c4be14b at 2026-10-13 10:09 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' c4be14b (TZ=America/New_York)"
+    },
+    {
+     "number": "20:48",
+     "location": "PREREG.md:215",
+     "source": "ledger entries SI-63..SI-65: notebook header time 2026-10-13 20:48 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "21:00",
+     "location": "PREREG.md:215",
+     "source": "commit c3fd92d at 2026-10-13 21:00 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' c3fd92d (TZ=America/New_York)"
+    },
+    {
+     "number": "59",
+     "location": "PREREG.md:215",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "59",
+     "location": "PREREG.md:215",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "7",
+     "location": "PREREG.md:215",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "7",
+     "location": "PREREG.md:215",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:215",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "+0.7",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "+3.7",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "06:47",
+     "location": "PREREG.md:218",
+     "source": "commit 56c0762 at 2026-10-14 06:47 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 56c0762 (TZ=America/New_York)"
+    },
+    {
+     "number": "06:57",
+     "location": "PREREG.md:218",
+     "source": "ledger entries SI-73..SI-77: notebook header time 2026-10-14 06:57 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "06:58",
+     "location": "PREREG.md:218",
+     "source": "commit 990d37d at 2026-10-14 06:58 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 990d37d (TZ=America/New_York)"
+    },
+    {
+     "number": "07:42",
+     "location": "PREREG.md:218",
+     "source": "commit a1d497b at 2026-10-14 07:42 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' a1d497b (TZ=America/New_York)"
+    },
+    {
+     "number": "08:04",
+     "location": "PREREG.md:218",
+     "source": "commit ff88666 at 2026-10-14 08:04 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' ff88666 (TZ=America/New_York)"
+    },
+    {
+     "number": "08:48",
+     "location": "PREREG.md:218",
+     "source": "commit de741a0 at 2026-10-14 08:48 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' de741a0 (TZ=America/New_York)"
+    },
+    {
+     "number": "09:37",
+     "location": "PREREG.md:218",
+     "source": "ledger entries SI-78..SI-82: notebook header time 2026-10-15 09:37 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "09:54",
+     "location": "PREREG.md:218",
+     "source": "ledger entries SI-83..SI-84: notebook header time 2026-10-15 09:54 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "14:08",
+     "location": "PREREG.md:218",
+     "source": "commit 6aaa3ac at 2026-10-14 14:08 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 6aaa3ac (TZ=America/New_York)"
+    },
+    {
+     "number": "14:12",
+     "location": "PREREG.md:218",
+     "source": "commit 56febe4 at 2026-10-14 14:12 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 56febe4 (TZ=America/New_York)"
+    },
+    {
+     "number": "15:46",
+     "location": "PREREG.md:218",
+     "source": "commit 4af5069 at 2026-10-14 15:46 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 4af5069 (TZ=America/New_York)"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:218",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "21:22",
+     "location": "PREREG.md:218",
+     "source": "commit 6d0ca1f at 2026-10-13 21:22 New York time [checked against git or notebook header]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 6d0ca1f (TZ=America/New_York)"
+    },
+    {
+     "number": "45",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "5",
+     "location": "PREREG.md:218",
+     "source": "NB-20261015-07 (SI-75: P2 collapse rates plus a comparison with a 5-point margin) [notebook/2026-10-15.md:79]",
+     "command": "grep -n -E 'SI-75 unchanged: .*5-point margin' notebook/2026-10-15.md"
+    },
+    {
+     "number": "54",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "8",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "8",
+     "location": "PREREG.md:218",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:218",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:218",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "09:37",
+     "location": "PREREG.md:219",
+     "source": "ledger entries SI-78..SI-82: notebook header time 2026-10-15 09:37 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "09:54",
+     "location": "PREREG.md:219",
+     "source": "ledger entries SI-83..SI-87: notebook header time 2026-10-15 09:54 [checked against git or notebook header]",
+     "command": "grep -n '^## NB-' notebook/2026-10-1*.md (header time of the entry named in each ledger entry)"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:219",
+     "source": "SI-84 lists five designs (201-point grid, solve-based formula, recomputation check, t-based limits, per-run sensitivity) [CONSTRAINTS.md:589]",
+     "command": "grep -n -E 'log-spaced 201-point grid.*solve-based formula.*stopping on a mismatch \\(AN-03\\), t-based sign-table limits \\(AN-06\\), and the per-run sensitivity limited to P1' CONSTRAINTS.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:219",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:366",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:366",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the identity check printed old and new PCR_batch and cell-cycle conservation for one X1 and one X13 run) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:367",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the identity check printed old and new PCR_batch and cell-cycle conservation for one X1 and one X13 run) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "3,076",
+     "location": "PREREG.md:418",
+     "source": "validation_minibatch_counts.py: 3,076 = 2,808 + 192 + 76; 2,808 from 234 pre-fix fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:1; experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:2]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "2,808",
+     "location": "PREREG.md:420",
+     "source": "validation_minibatch_counts.py: 3,076 = 2,808 + 192 + 76; 2,808 from 234 pre-fix fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:1; experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:2]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "234",
+     "location": "PREREG.md:420",
+     "source": "validation_minibatch_counts.py: 3,076 = 2,808 + 192 + 76; 2,808 from 234 pre-fix fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:1; experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:2]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "10",
+     "location": "PREREG.md:421",
+     "source": "carried unchanged from 5d06a27 (PREREG line 406); batch counts of the prepared data: atac_small 3, immune 10, sim1 6 [docs/PREREG.md@5d06a27:406; computed [batches('atac_small'), batches('immune'), batches('sim1')] = [3, 10, 6]]",
+     "command": "python -c \"import anndata; anndata.read_h5ad('<WCD_DATA>/prepped_scib/<task>__scib.h5ad', backed='r').obs['batch'].nunique()\""
+    },
+    {
+     "number": "12",
+     "location": "PREREG.md:421",
+     "source": "validation_minibatch_counts.py: 12 minibatches from each fit [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:2]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:421",
+     "source": "validation_minibatch_counts.py: 76 training-mode minibatches from 19 fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:3]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "3",
+     "location": "PREREG.md:421",
+     "source": "carried unchanged from 5d06a27 (PREREG line 406); batch counts of the prepared data: atac_small 3, immune 10, sim1 6 [docs/PREREG.md@5d06a27:406; computed [batches('atac_small'), batches('immune'), batches('sim1')] = [3, 10, 6]]",
+     "command": "python -c \"import anndata; anndata.read_h5ad('<WCD_DATA>/prepped_scib/<task>__scib.h5ad', backed='r').obs['batch'].nunique()\""
+    },
+    {
+     "number": "6",
+     "location": "PREREG.md:421",
+     "source": "carried unchanged from 5d06a27 (PREREG line 406); batch counts of the prepared data: atac_small 3, immune 10, sim1 6 [docs/PREREG.md@5d06a27:406; computed [batches('atac_small'), batches('immune'), batches('sim1')] = [3, 10, 6]]",
+     "command": "python -c \"import anndata; anndata.read_h5ad('<WCD_DATA>/prepped_scib/<task>__scib.h5ad', backed='r').obs['batch'].nunique()\""
+    },
+    {
+     "number": "76",
+     "location": "PREREG.md:421",
+     "source": "validation_minibatch_counts.py: 76 training-mode minibatches from 19 fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:3]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "160",
+     "location": "PREREG.md:422",
+     "source": "validation_minibatch_counts.py: 192 early minibatches from 160 replay tags, none among the 234 fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "192",
+     "location": "PREREG.md:422",
+     "source": "validation_minibatch_counts.py: 192 early minibatches from 160 replay tags, none among the 234 fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "234",
+     "location": "PREREG.md:423",
+     "source": "validation_minibatch_counts.py: 192 early minibatches from 160 replay tags, none among the 234 fits [experiments/doc_numbers_20261015/results/validation_minibatch_counts.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/validation_minibatch_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "23",
+     "location": "PREREG.md:424",
+     "source": "carried unchanged from 5d06a27 (PREREG line 408); batches of immune_hum_mou in the prepared data [docs/PREREG.md@5d06a27:408; computed batches('immune_hum_mou') = 23]",
+     "command": "anndata obs['batch'].nunique() of immune_hum_mou__scib.h5ad"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:426",
+     "source": "S2 names five record files; the other five arms are the six arms without Sinkhorn [CONSTRAINTS.md (lead's corrected version, artifact b42c0723):613]",
+     "command": "grep -n -E 'r1_record\\.json, r1_record_round1\\.json, r4_a1_record\\.json, r4_a1_record_round1\\.json and r2r3_record\\.json' CONSTRAINTS.md (lead's corrected version, artifact b42c0723)"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:429",
+     "source": "S2 names five record files; the other five arms are the six arms without Sinkhorn [CONSTRAINTS.md (lead's corrected version, artifact b42c0723):613]",
+     "command": "grep -n -E 'r1_record\\.json, r1_record_round1\\.json, r4_a1_record\\.json, r4_a1_record_round1\\.json and r2r3_record\\.json' CONSTRAINTS.md (lead's corrected version, artifact b42c0723)"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:429",
+     "source": "SI-18: 8 grids (4 arm families x 2 decoders), 2 of them Sinkhorn, so 6 non-Sinkhorn grids; task item F and finding DOC-R10 name the check [CONSTRAINTS.md:111; CONSTRAINTS.md:111]",
+     "command": "grep -n -E 'each with a separate 6-point grid for conditioned and unconditioned decoders \\(8 grids\\)' CONSTRAINTS.md; grep -n -E '\\{sinkhorn\\}' CONSTRAINTS.md"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:432",
+     "source": "SI-18: 8 grids (4 arm families x 2 decoders), 2 of them Sinkhorn, so 6 non-Sinkhorn grids; task item F and finding DOC-R10 name the check [CONSTRAINTS.md:111; CONSTRAINTS.md:111]",
+     "command": "grep -n -E 'each with a separate 6-point grid for conditioned and unconditioned decoders \\(8 grids\\)' CONSTRAINTS.md; grep -n -E '\\{sinkhorn\\}' CONSTRAINTS.md"
+    },
+    {
+     "number": "25.9",
+     "location": "PREREG.md:449",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "27",
+     "location": "PREREG.md:449",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:449",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "0.6%",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "14%",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "18",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "24",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "4.5%",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "48",
+     "location": "PREREG.md:450",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "60",
+     "location": "PREREG.md:451",
+     "source": "no_pair_expectations.py: 25.92 of 27; 18.00 of 18; 6.673 of 48 = 13.9 %; 1.076 of 24 = 4.5 %; 0.3615 of 60 = 0.60 % (a calculation, not simulated runs) [experiments/doc_numbers_20261015/results/no_pair_expectations.txt:44; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:45; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:46; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:47; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:48; experiments/doc_numbers_20261015/results/no_pair_expectations.txt:49]",
+     "command": "python experiments/doc_numbers_20261015/no_pair_expectations.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:512",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:514",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "17",
+     "location": "PREREG.md:515",
+     "source": "NB-20261014-21: 19 X1 score files = 17 adversarial-arm rows (discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6; immune, conditioned, seed 0) plus none and scvi_adv (2 files, counted from file names) [notebook/2026-10-14.md:243]",
+     "command": "grep -n -E '19 X1 score files exist from the local run of 2026-10-12 \\(NB-20261012-04, -05\\): 17 adversarial-arm rows \\(immune, conditioned decoder, seed 0: discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6\\), plus none and scvi_adv' notebook/2026-10-14.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:515",
+     "source": "NB-20261014-21: 19 X1 score files = 17 adversarial-arm rows (discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6; immune, conditioned, seed 0) plus none and scvi_adv (2 files, counted from file names) [notebook/2026-10-14.md:243]",
+     "command": "grep -n -E '19 X1 score files exist from the local run of 2026-10-12 \\(NB-20261012-04, -05\\): 17 adversarial-arm rows \\(immune, conditioned decoder, seed 0: discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6\\), plus none and scvi_adv' notebook/2026-10-14.md"
+    },
+    {
+     "number": "0",
+     "location": "PREREG.md:516",
+     "source": "NB-20261014-21: 19 X1 score files = 17 adversarial-arm rows (discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6; immune, conditioned, seed 0) plus none and scvi_adv (2 files, counted from file names) [notebook/2026-10-14.md:243]",
+     "command": "grep -n -E '19 X1 score files exist from the local run of 2026-10-12 \\(NB-20261012-04, -05\\): 17 adversarial-arm rows \\(immune, conditioned decoder, seed 0: discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6\\), plus none and scvi_adv' notebook/2026-10-14.md"
+    },
+    {
+     "number": "2",
+     "location": "PREREG.md:517",
+     "source": "NB-20261014-21: 19 X1 score files = 17 adversarial-arm rows (discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6; immune, conditioned, seed 0) plus none and scvi_adv (2 files, counted from file names) [notebook/2026-10-14.md:243]",
+     "command": "grep -n -E '19 X1 score files exist from the local run of 2026-10-12 \\(NB-20261012-04, -05\\): 17 adversarial-arm rows \\(immune, conditioned decoder, seed 0: discriminator lg1-lg6, pooled lg1-lg5, reference lg1-lg6\\), plus none and scvi_adv' notebook/2026-10-14.md"
+    },
+    {
+     "number": "250",
+     "location": "PREREG.md:520",
+     "source": "filler_fit_counts.py: 250 manifest rows = 100 (pass A) + 150 (pass B); NB-20261006-01: 250 fits [experiments/doc_numbers_20261015/results/filler_fit_counts.txt:2; experiments/doc_numbers_20261015/results/filler_fit_counts.txt:3; notebook/2026-10-06.md:4]",
+     "command": "python experiments/doc_numbers_20261015/filler_fit_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "100",
+     "location": "PREREG.md:521",
+     "source": "filler_fit_counts.py: 250 manifest rows = 100 (pass A) + 150 (pass B); NB-20261006-01: 250 fits [experiments/doc_numbers_20261015/results/filler_fit_counts.txt:2; experiments/doc_numbers_20261015/results/filler_fit_counts.txt:3; notebook/2026-10-06.md:4]",
+     "command": "python experiments/doc_numbers_20261015/filler_fit_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "150",
+     "location": "PREREG.md:521",
+     "source": "filler_fit_counts.py: 250 manifest rows = 100 (pass A) + 150 (pass B); NB-20261006-01: 250 fits [experiments/doc_numbers_20261015/results/filler_fit_counts.txt:2; experiments/doc_numbers_20261015/results/filler_fit_counts.txt:3; notebook/2026-10-06.md:4]",
+     "command": "python experiments/doc_numbers_20261015/filler_fit_counts.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "150",
+     "location": "PREREG.md:524",
+     "source": "NB-20261007-01: 'Filler scoring pass B complete: 150/150 scored and verified' [notebook/2026-10-07.md:4]",
+     "command": "grep -n -E 'Filler scoring pass B complete: 150/150 scored and verified' notebook/2026-10-07.md"
+    },
+    {
+     "number": "150",
+     "location": "PREREG.md:524",
+     "source": "NB-20261007-01: 'Filler scoring pass B complete: 150/150 scored and verified' [notebook/2026-10-07.md:4]",
+     "command": "grep -n -E 'Filler scoring pass B complete: 150/150 scored and verified' notebook/2026-10-07.md"
+    },
+    {
+     "number": "1",
+     "location": "PREREG.md:525",
+     "source": "NB-20261006-04: pass A had scored 1 of 100; NB-20261012-02: 99 latents to score [notebook/2026-10-06.md:30; notebook/2026-10-12.md:18]",
+     "command": "grep -n -E 'pass A had scored 1 of 100' notebook/2026-10-06.md; grep -n -E 'Pass A \\(atac_large \\+ immune_hum_mou, 99 latents to score\\)' notebook/2026-10-12.md"
+    },
+    {
+     "number": "100",
+     "location": "PREREG.md:525",
+     "source": "NB-20261006-04: pass A had scored 1 of 100; NB-20261012-02: 99 latents to score [notebook/2026-10-06.md:30; notebook/2026-10-12.md:18]",
+     "command": "grep -n -E 'pass A had scored 1 of 100' notebook/2026-10-06.md; grep -n -E 'Pass A \\(atac_large \\+ immune_hum_mou, 99 latents to score\\)' notebook/2026-10-12.md"
+    },
+    {
+     "number": "99",
+     "location": "PREREG.md:526",
+     "source": "NB-20261006-04: pass A had scored 1 of 100; NB-20261012-02: 99 latents to score [notebook/2026-10-06.md:30; notebook/2026-10-12.md:18]",
+     "command": "grep -n -E 'pass A had scored 1 of 100' notebook/2026-10-06.md; grep -n -E 'Pass A \\(atac_large \\+ immune_hum_mou, 99 latents to score\\)' notebook/2026-10-12.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:532",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:534",
+     "source": "NB-20261012-05: 19 X1 rows scored (ledger: 19 scored, 1 fitted not scored, 1,097 need fit) [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored, 1 fitted not scored, 1,097 need fit' notebook/2026-10-12.md"
+    },
+    {
+     "number": "7",
+     "location": "PREREG.md:534",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:534",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:535",
+     "source": "NB-20261013-39/-40: 59 of 59 non-Sinkhorn rows equal; 7 of 7 latents identical; carried from the text at 5d06a27 where applicable [notebook/2026-10-13.md:192; notebook/2026-10-13.md:147]",
+     "command": "grep -n -E '7 of 7 latents identical in all 32 compared columns' notebook/2026-10-13.md; grep -n -E '59 of 59 non-Sinkhorn rows give equal latents' notebook/2026-10-13.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:538",
+     "source": "NB-20261002-10: two runs of run_cpu_baselines.py on atac_small [notebook/2026-10-02.md:95]",
+     "command": "grep -n -E 'two runs of run_cpu_baselines\\.py on atac_small' notebook/2026-10-02.md"
+    },
+    {
+     "number": "6",
+     "location": "PREREG.md:539",
+     "source": "NB-20261002-09: 6 latents scored [notebook/2026-10-02.md:86]",
+     "command": "grep -n -E '6 latents \\(pca d10/d50, harmony d10/d50, scanorama d10/d100\\)' notebook/2026-10-02.md"
+    },
+    {
+     "number": "13",
+     "location": "PREREG.md:540",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "49",
+     "location": "PREREG.md:540",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "5",
+     "location": "PREREG.md:540",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "42",
+     "location": "PREREG.md:541",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "6",
+     "location": "PREREG.md:543",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "7",
+     "location": "PREREG.md:543",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files; 42 probe fits by the reviewers; 7 rescoring 6 real X1 arm-none latents); '5' is the group label, '13' the day of the month [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "12",
+     "location": "PREREG.md:553",
+     "source": "NB-20261014-21: 12 messages; run_stage.py and score_scib_native.py log statements (two) [notebook/2026-10-14.md:241]",
+     "command": "grep -n -E 'reads of tier12_v2/X1_local/scores \\(12 messages\\).*run_stage\\.py and score_scib_native\\.py log statements' notebook/2026-10-14.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:554",
+     "source": "NB-20261014-21: 12 messages; run_stage.py and score_scib_native.py log statements (two) [notebook/2026-10-14.md:241]",
+     "command": "grep -n -E 'reads of tier12_v2/X1_local/scores \\(12 messages\\).*run_stage\\.py and score_scib_native\\.py log statements' notebook/2026-10-14.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:555",
+     "source": "NB-20261014-21: three automated integrity checks read the 19 rows [notebook/2026-10-14.md:244]",
+     "command": "grep -n -E 'three automated integrity checks read these rows \\(scorer provenance and versions; finite required metrics; kBET-zero and R-call counts\\)' notebook/2026-10-14.md"
+    },
+    {
+     "number": "three",
+     "location": "PREREG.md:555",
+     "source": "NB-20261014-21: three automated integrity checks read the 19 rows [notebook/2026-10-14.md:244]",
+     "command": "grep -n -E 'three automated integrity checks read these rows \\(scorer provenance and versions; finite required metrics; kBET-zero and R-call counts\\)' notebook/2026-10-14.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:557",
+     "source": "NB-20261014-21 searched tier12_v2/X1_local/scores (one folder) [notebook/2026-10-14.md:241]",
+     "command": "grep -n -E 'reads of tier12_v2/X1_local/scores \\(12 messages\\)' notebook/2026-10-14.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:560",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:562",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (display 1: 'six X13 runner-test runs'); NB-20261002-09 records 6 latents scored [notebook/2026-10-02.md:86]",
+     "command": "grep -n -E '6 latents \\(pca d10/d50, harmony d10/d50, scanorama d10/d100\\)' notebook/2026-10-02.md"
+    },
+    {
+     "number": "17:13",
+     "location": "PREREG.md:565",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:566",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:566",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "0",
+     "location": "PREREG.md:567",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:567",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:568",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:568",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (identity-check display: before 17:13; two metrics; one X1 run, seed 0, one of the 19 early rows; one X13 run); the 19 is also in NB-20261012-05 [notebook/2026-10-12.md:46]",
+     "command": "grep -n -E 'ledger: 19 scored' notebook/2026-10-12.md"
+    },
+    {
+     "number": "21:22",
+     "location": "PREREG.md:569",
+     "source": "commit 6d0ca1f, New York time [computed commit_time('6d0ca1f') = 2026-10-13 21:22]",
+     "command": "git log -1 --format=%ad --date=format-local:'%Y-%m-%d %H:%M' 6d0ca1f (TZ=America/New_York)"
+    },
+    {
+     "number": "49",
+     "location": "PREREG.md:570",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files, 56 session transcripts, 26,722 review output files); '5' is the group label [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "5",
+     "location": "PREREG.md:570",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files, 56 session transcripts, 26,722 review output files); '5' is the group label [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "56",
+     "location": "PREREG.md:570",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files, 56 session transcripts, 26,722 review output files); '5' is the group label [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "26,722",
+     "location": "PREREG.md:571",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (49 probe files, 56 session transcripts, 26,722 review output files); '5' is the group label [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:574",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "three",
+     "location": "PREREG.md:580",
+     "source": "carried unchanged from 5d06a27 [docs/PREREG.md@5d06a27:509]",
+     "command": "grep -n -E 'three test gaps closed in 858101b' docs/PREREG.md@5d06a27"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:590",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "1e-6",
+     "location": "PREREG.md:597",
+     "source": "SI-83: standard error below 0.000001 is raised to 0.000001 [CONSTRAINTS.md:581]",
+     "command": "grep -n -E 'standard error is below 0\\.000001 is kept in the combined analysis with its standard error raised to 0\\.000001' CONSTRAINTS.md"
+    },
+    {
+     "number": "1e-6",
+     "location": "PREREG.md:597",
+     "source": "SI-83: standard error below 0.000001 is raised to 0.000001 [CONSTRAINTS.md:581]",
+     "command": "grep -n -E 'standard error is below 0\\.000001 is kept in the combined analysis with its standard error raised to 0\\.000001' CONSTRAINTS.md"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:597",
+     "source": "SI-84 lists five designs (201-point grid, solve-based formula, recomputation check, t-based limits, per-run sensitivity) [CONSTRAINTS.md:589]",
+     "command": "grep -n -E 'log-spaced 201-point grid.*solve-based formula.*stopping on a mismatch \\(AN-03\\), t-based sign-table limits \\(AN-06\\), and the per-run sensitivity limited to P1' CONSTRAINTS.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:606",
+     "source": "the questions file has 19 numbered rows; notebook/2026-10-15.md numbers them 'question n of 19' [DIFF_REVIEW_QUESTIONS_draft.md:32; notebook/2026-10-15.md:150]",
+     "command": "grep -c -E '^\\| [0-9]+ \\|' DIFF_REVIEW_QUESTIONS_draft.md"
+    },
+    {
+     "number": "19",
+     "location": "PREREG.md:607",
+     "source": "the questions file has 19 numbered rows; notebook/2026-10-15.md numbers them 'question n of 19' [DIFF_REVIEW_QUESTIONS_draft.md:32; notebook/2026-10-15.md:150]",
+     "command": "grep -c -E '^\\| [0-9]+ \\|' DIFF_REVIEW_QUESTIONS_draft.md"
+    },
+    {
+     "number": "0.000001",
+     "location": "PREREG.md:615",
+     "source": "SI-83: standard error below 0.000001 is raised to 0.000001 [CONSTRAINTS.md:581]",
+     "command": "grep -n -E 'standard error is below 0\\.000001 is kept in the combined analysis with its standard error raised to 0\\.000001' CONSTRAINTS.md"
+    },
+    {
+     "number": "1e-6",
+     "location": "PREREG.md:615",
+     "source": "SI-83: standard error below 0.000001 is raised to 0.000001 [CONSTRAINTS.md:581]",
+     "command": "grep -n -E 'standard error is below 0\\.000001 is kept in the combined analysis with its standard error raised to 0\\.000001' CONSTRAINTS.md"
+    },
+    {
+     "number": "1e-6",
+     "location": "PREREG.md:615",
+     "source": "SI-83: standard error below 0.000001 is raised to 0.000001 [CONSTRAINTS.md:581]",
+     "command": "grep -n -E 'standard error is below 0\\.000001 is kept in the combined analysis with its standard error raised to 0\\.000001' CONSTRAINTS.md"
+    },
+    {
+     "number": "201",
+     "location": "PREREG.md:616",
+     "source": "SI-84: the log-spaced 201-point grid [CONSTRAINTS.md:589]",
+     "command": "grep -n -E 'log-spaced 201-point grid' CONSTRAINTS.md"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:616",
+     "source": "SI-84 lists five designs (201-point grid, solve-based formula, recomputation check, t-based limits, per-run sensitivity) [CONSTRAINTS.md:589]",
+     "command": "grep -n -E 'log-spaced 201-point grid.*solve-based formula.*stopping on a mismatch \\(AN-03\\), t-based sign-table limits \\(AN-06\\), and the per-run sensitivity limited to P1' CONSTRAINTS.md"
+    },
+    {
+     "number": "five",
+     "location": "PREREG.md:616",
+     "source": "SI-84 lists five designs (201-point grid, solve-based formula, recomputation check, t-based limits, per-run sensitivity) [CONSTRAINTS.md:589]",
+     "command": "grep -n -E 'log-spaced 201-point grid.*solve-based formula.*stopping on a mismatch \\(AN-03\\), t-based sign-table limits \\(AN-06\\), and the per-run sensitivity limited to P1' CONSTRAINTS.md"
+    },
+    {
+     "number": "one",
+     "location": "PREREG.md:617",
+     "source": "SI-85 rule text [CONSTRAINTS.md:597]",
+     "command": "grep -n -E 'one te' CONSTRAINTS.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:617",
+     "source": "SI-54: the two commits declared equivalent (ledger) [CONSTRAINTS.md:363]",
+     "command": "grep -n -E 'Declare the two commits equivalent' CONSTRAINTS.md"
+    },
+    {
+     "number": "0.01",
+     "location": "PREREG.md:618",
+     "source": "SI-86 (NB-20261015-19): power_report restarts its root search at 0.01 when the search from 1.0 fails [CONSTRAINTS.md:605]",
+     "command": "grep -n -E 'power_report restarts its root search at 0\\.01 when the search from 1\\.0 fails' CONSTRAINTS.md"
+    },
+    {
+     "number": "1.0",
+     "location": "PREREG.md:618",
+     "source": "SI-86 (NB-20261015-19): power_report restarts its root search at 0.01 when the search from 1.0 fails [CONSTRAINTS.md:605]",
+     "command": "grep -n -E 'power_report restarts its root search at 0\\.01 when the search from 1\\.0 fails' CONSTRAINTS.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:620",
+     "source": "lead's messages to this track (2026-10-15, audit results); not verifiable in the clone (the audit found two displays; SI-88 and NB-20261015-22/-25 are not in the clone) [lead message, not verifiable in clone]",
+     "command": "see source"
+    },
+    {
+     "number": "15",
+     "location": "PREREG.md:622",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "six",
+     "location": "PREREG.md:622",
+     "source": "SI-80: Holm over the six primary results; 'item 5' and 'section 15' are labels; four-test value 0.0125 with N_ENDPOINTS = 4 (scripts/prereg_rules.py); r1_record.json stores 0.0125 [CONSTRAINTS.md:557; scripts/prereg_rules.py:52; docs/prereg/r1_record.json:9613]",
+     "command": "grep -n -E 'Holm over the six primary results' CONSTRAINTS.md; grep -n -E 'N_ENDPOINTS = 0\\.02, 5, \\(0\\.01, 0\\.02\\), 4' scripts/prereg_rules.py; grep -n -E '0\\.0125' docs/prereg/r1_record.json"
+    },
+    {
+     "number": "three",
+     "location": "PREREG.md:623",
+     "source": "SI-81 lists (a), (b), (c); NB-20261015-05; 'zero' belongs to the NMI-0 case wording of SI-65 [CONSTRAINTS.md:565; CONSTRAINTS.md:440]",
+     "command": "grep -n -E '\\(a\\) Each case where scib finds zero normalised mutual information.*\\(b\\).*\\(c\\)' CONSTRAINTS.md; grep -n -E 'NMI-0 edge case' CONSTRAINTS.md"
+    },
+    {
+     "number": "three",
+     "location": "PREREG.md:623",
+     "source": "SI-81 lists (a), (b), (c); NB-20261015-05; 'zero' belongs to the NMI-0 case wording of SI-65 [CONSTRAINTS.md:565; CONSTRAINTS.md:440]",
+     "command": "grep -n -E '\\(a\\) Each case where scib finds zero normalised mutual information.*\\(b\\).*\\(c\\)' CONSTRAINTS.md; grep -n -E 'NMI-0 edge case' CONSTRAINTS.md"
+    },
+    {
+     "number": "zero",
+     "location": "PREREG.md:623",
+     "source": "SI-81 lists (a), (b), (c); NB-20261015-05; 'zero' belongs to the NMI-0 case wording of SI-65 [CONSTRAINTS.md:565; CONSTRAINTS.md:440]",
+     "command": "grep -n -E '\\(a\\) Each case where scib finds zero normalised mutual information.*\\(b\\).*\\(c\\)' CONSTRAINTS.md; grep -n -E 'NMI-0 edge case' CONSTRAINTS.md"
+    },
+    {
+     "number": "+0.7",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "+3.7",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "45",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "5",
+     "location": "PREREG.md:624",
+     "source": "NB-20261015-07 (SI-75: P2 collapse rates plus a comparison with a 5-point margin) [notebook/2026-10-15.md:79]",
+     "command": "grep -n -E 'SI-75 unchanged: .*5-point margin' notebook/2026-10-15.md"
+    },
+    {
+     "number": "54",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "8",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "8",
+     "location": "PREREG.md:624",
+     "source": "p2_pilot_recount.py: discriminator, unconditioned decoder, 8/54 with the nine lambda 0.03 rows (8/45 without); reference minus discriminator +3.7 points (+0.7 without) [experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:8; experiments/doc_numbers_20261015/results/p2_pilot_recount.txt:4]",
+     "command": "python experiments/doc_numbers_20261015/p2_pilot_recount.py (bash experiments/doc_numbers_20261015/run_all.sh runs all; env scvi-api)"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:625",
+     "source": "question 11: the Sinkhorn A3 refits and the R2/R3 re-run (two steps) [DIFF_REVIEW_QUESTIONS_draft.md:19]",
+     "command": "grep -n -E '^\\| 11 \\| Keep the Sinkhorn A3 refits and the R2/R3 re-run' DIFF_REVIEW_QUESTIONS_draft.md"
+    },
+    {
+     "number": "four",
+     "location": "PREREG.md:627",
+     "source": "SI-82: four scaling checks listed (leave-one-method-out rescaling, z-score aggregation, composite without silhouettes, Kendall's tau) [CONSTRAINTS.md:573]",
+     "command": "grep -n -E 'PAPER_PLAN's four scaling checks \\(leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau\\)' CONSTRAINTS.md"
+    },
+    {
+     "number": "four",
+     "location": "PREREG.md:627",
+     "source": "SI-82: four scaling checks listed (leave-one-method-out rescaling, z-score aggregation, composite without silhouettes, Kendall's tau) [CONSTRAINTS.md:573]",
+     "command": "grep -n -E 'PAPER_PLAN's four scaling checks \\(leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, rank stability by Kendall's tau\\)' CONSTRAINTS.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:630",
+     "source": "NB-20261015-11 or -12: why the tests run in two environments (CF-R01) [notebook/2026-10-15.md:125]",
+     "command": "grep -n -E 'why the tests run in two environments \\(CF-R01\\)' notebook/2026-10-15.md"
+    },
+    {
+     "number": "16",
+     "location": "PREREG.md:631",
+     "source": "NB-20261015-12: 28 ruff F/E9 findings at 08f1e3c, 23 elsewhere; '16' is the question number [notebook/2026-10-15.md:136]",
+     "command": "grep -n -E 'no code change for the 28 ruff F/E9 findings at 08f1e3c \\(23 unused imports, 4 unused variables, 1 f-string without placeholder; 5 inside the identity-proof code, 23 elsewhere\\)' notebook/2026-10-15.md"
+    },
+    {
+     "number": "23",
+     "location": "PREREG.md:631",
+     "source": "NB-20261015-12: 28 ruff F/E9 findings at 08f1e3c, 23 elsewhere; '16' is the question number [notebook/2026-10-15.md:136]",
+     "command": "grep -n -E 'no code change for the 28 ruff F/E9 findings at 08f1e3c \\(23 unused imports, 4 unused variables, 1 f-string without placeholder; 5 inside the identity-proof code, 23 elsewhere\\)' notebook/2026-10-15.md"
+    },
+    {
+     "number": "28",
+     "location": "PREREG.md:631",
+     "source": "NB-20261015-12: 28 ruff F/E9 findings at 08f1e3c, 23 elsewhere; '16' is the question number [notebook/2026-10-15.md:136]",
+     "command": "grep -n -E 'no code change for the 28 ruff F/E9 findings at 08f1e3c \\(23 unused imports, 4 unused variables, 1 f-string without placeholder; 5 inside the identity-proof code, 23 elsewhere\\)' notebook/2026-10-15.md"
+    },
+    {
+     "number": "11",
+     "location": "PREREG.md:632",
+     "source": "NB-20261015-13: the 11 old review worktrees and the two untracked strays [notebook/2026-10-15.md:145]",
+     "command": "grep -n -E 'Delete the 11 old review worktrees and the two untracked strays' notebook/2026-10-15.md"
+    },
+    {
+     "number": "11",
+     "location": "PREREG.md:632",
+     "source": "NB-20261015-13: the 11 old review worktrees and the two untracked strays [notebook/2026-10-15.md:145]",
+     "command": "grep -n -E 'Delete the 11 old review worktrees and the two untracked strays' notebook/2026-10-15.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:632",
+     "source": "NB-20261015-13: the 11 old review worktrees and the two untracked strays [notebook/2026-10-15.md:145]",
+     "command": "grep -n -E 'Delete the 11 old review worktrees and the two untracked strays' notebook/2026-10-15.md"
+    },
+    {
+     "number": "two",
+     "location": "PREREG.md:632",
+     "source": "NB-20261015-13: the 11 old review worktrees and the two untracked strays [notebook/2026-10-15.md:145]",
+     "command": "grep -n -E 'Delete the 11 old review worktrees and the two untracked strays' notebook/2026-10-15.md"
+    },
+    {
+     "number": "101 date tokens",
+     "location": "PREREG.md and PAPER_PLAN.md (added or changed sentences)",
+     "source": "62 matched to an NB id, ledger id or commit cited in the same sentence; 39 matched to checked date facts (NB headers, ledger 'added' dates, commit times, PREREG entry dates)",
+     "command": "python claim_receipt/claim_receipt.py <clone> claim_receipt/DIFF_REVIEW_QUESTIONS_draft.md <out> (evidence tar)"
+    },
+    {
+     "number": "53 label tokens",
+     "location": "PREREG.md and PAPER_PLAN.md",
+     "source": "section, row, item, question and group numbers, 'version 3', 'SHA-256', 'NMI-0': labels, not measured quantities",
+     "command": "same script; rows of kind 'label' in claim_receipt.csv"
+    }
+   ]
+  }
+ },
+ "code": {
+  "frame_id": "098bf3c9-68eb-463b-a67d-2c20768a8db8",
+  "status": "completed",
+  "wall_s": 5970,
+  "deviations": [
+   "Item B's test is a new test function, not a parametrised case of the existing power test, because that test cannot take a standard error and the synthetic data cannot reach one on which the search from 1.0 fails (report section 4).",
+   "The helper _mde80 chains the scipy error into the PreregError it raises instead of the re-checker's except-continue, which lint rule FL102 flags; results and exception types are the same.",
+   "The stage test has two cases beyond the lead's list (S5 and the --allow-dirty case) and runs inside the test process with --report-only so that it does not depend on the repository's own checkout being clean.",
+   "Two `# test-reason:` comments were added to the new tests so that the fewest-tests check prints no warning.",
+   "The re-checker's r03 probe was run in its internal launching mode on a clean clone of the final head, not through its outer launcher.",
+   "A per-program import-closure script (closures_by_entry.py) was added next to the first review's unchanged closure script.",
+   "The opt-in end-to-end stage test (needs the prepared data folder) was not run.",
+   "The notebook, CONSTRAINTS.md and docs were not touched; proposed text is in report sections 10 and 11.",
+   "The ponytail and ponytail-review skills are not in this profile's catalogue, so the task's inline smallest-change rule was applied.",
+   "The re-checker's mutation script, used unchanged for item C, stops at the first failing test for M08c and M08d.",
+   "The wording of comments, docstrings and commit messages was revised after a first full run, and every check was re-run on the final head; the earlier head ee6a679 differs only in comments and docstrings."
+  ],
+  "structured_output": {
+   "items": [
+    {
+     "id": "SI-85 / CF-R03 (item A: runner refuses a divergence record without a commit or from a dirty checkout)",
+     "verified": true,
+     "checked": "At 5d06a27: scripts/run_stage.py:422-423 refuses a latent with git_dirty not false unless --allow-dirty; :429-440 (Outputs.status) checks a record's schema and manifest row only, and it is the one reader used by the start-up check, the final check, the re-check after a claim and the fit-done check; tests/stage/fake_env.py:89-92 wrote a divergence record with no git_sha and no git_dirty; scripts/fit_paper_config.py:514-520 writes **provenance() (defined :264-270), so the real record has both; no test covered :422-423 (switch-off survived 108 stage and cluster tests).",
+     "action": "fixed",
+     "commits": [
+      "8db4475"
+     ],
+     "evidence": "Outputs.status refuses a 'diverged' record whose git_dirty is not false unless --allow-dirty, and any record without git_sha (the runner's own nonfinite_latent records stay accepted); fake fitter's record now carries git_sha and git_dirty; one parametrised stage test of 8 cases (latent, S0-S5, S1 with --allow-dirty; runs inside the test process with --report-only, no --allow-dirty). Planted bugs: 10 of 10 killed (the pre-change file plus A1-A9), controls survive; formal fl_mutation_check ok (10 caught, 0 missed). The re-checker's r03 probe (unchanged) on a clean clone of the final head: S0 accepted, S1-S3 refused at start-up (exit 4), S4 accepted. Final check and the real record writer (fit_paper_config.record_divergence) probes agree. Report section 3."
+    },
+    {
+     "id": "SI-86 / DOC-R12 (item B, code part: power_report restarts its root search at 0.01 when the search from 1.0 fails)",
+     "verified": true,
+     "checked": "At 5d06a27: scripts/prereg_rules.py:704-708 starts the root search for mde80 at 1.0; power_report has one code caller (scripts/freeze_a1_grid.py:62); probe 05 of the documents re-check re-run on the final head prints the re-checker's own output (identical): with scipy 1.17.1 nct.cdf is NaN at isolated large non-centralities (first 42.15 for 5 df, 57.24 for 3 df) and the start-1.0 search raises for 7 of 230 tested (standard error, df) pairs.",
+     "action": "fixed",
+     "commits": [
+      "cd8905b"
+     ],
+     "evidence": "Helper _mde80 (prereg_rules.py:674, called at :720): the re-checker's diff, except that it chains the scipy error into the PreregError raised when both starts fail instead of except-continue (lint FL102). New test test_mde80_restarts_at_0_01_only_when_the_search_from_1_fails (a new function, not a parametrised case: the existing power test cannot take a standard error and the synthetic world cannot reach a failing one). Grid of 230 points: 223 of 223 working inputs bit-identical, 7 of 7 failing inputs now finite; largest difference to an independent survival-function search 5.67e-13; committed docs/prereg/r1_record.json power report recomputes bit-identically. Planted bugs 5 of 5 killed. Report section 4."
+    },
+    {
+     "id": "CF-R02 (item C: Sinkhorn cap test checks the cap each of the three solves receives)",
+     "verified": true,
+     "checked": "At 5d06a27: tests/wcd_vae/test_divergences_v2.py:131-142 spied on alignment._ot_eps for dtype only and pinned the default with inspect.signature (:142); src/wcd_vae/wcd/alignment.py:224-233 shows one sinkhorn_batch_others call makes three solves (one _ot_eps, two _ot_eps_sym), each taking max_iter as last argument; the comment at :140 cited SI-59 (retired).",
+     "action": "fixed",
+     "commits": [
+      "c46d68e"
+     ],
+     "evidence": "Spies on _ot_eps and _ot_eps_sym record the last argument; the test asserts caps == [SINKHORN_MAX_ITER] * 3 (replaces the inspect.signature assertion and its import); comment now cites SI-61. The re-checker's mut_recheck.py (unchanged) on the final head: M08a-M08f all killed, including M08c and M08d that survived at 08f1e3c (6 of 6); tests/wcd_vae 172 passed, 66 warnings in 92.14s (0:01:32). Report section 5."
+    },
+    {
+     "id": "DOC-R12 (item D: docstring of power_without_sim1.py)",
+     "verified": true,
+     "checked": "At 5d06a27 the docstring said scipy's non-central t is NaN 'above a non-centrality of about 38' and that the start of 1.0 is reached 'when the standard error is below about 0.026'; probe 05 shows NaN at isolated values only (first 42.15 for 5 df, 57.24 for 3 df; 7 of 230 pairs).",
+     "action": "fixed",
+     "commits": [
+      "130bfc3"
+     ],
+     "evidence": "Docstring replaced by what probe 05 shows, SI-86 named and explained; syntax tree of the rest of the file identical; script stdout and results JSON unchanged (stdout identical (clone name normalised): True | results JSON sha256 identical: True 0be883be772eb0aa). Report section 6."
+    },
+    {
+     "id": "E (identity proof: import closure and per-line statement)",
+     "verified": true,
+     "checked": "Import closure of the fit, scorer and cluster-helper programs from c3fd92d to the final head with the first review's script (unchanged), plus a per-program version; direct git diff c3fd92d..HEAD over src/, the fit and score programs, environment files; the names run_stage.py takes from prereg_rules; callers of power_report.",
+     "action": "fixed",
+     "commits": [],
+     "evidence": "No code change needed. Of the fit closure (8 files) only scripts/run_stage.py and scripts/prereg_rules.py contain changed files; scorer and cluster-helper closures: none; prereg_rules.py is not in the closure of fit_paper_config.py, scvi_adversarial_plan.py, run_cpu_baselines.py or score_scib_native.py; git diff c3fd92d..HEAD over src/, fit/score programs and environment files is empty. The changed lines can only refuse a run or write provenance (run_stage.py) or compute power for the R1 record (prereg_rules.py), never a fit or score value. Report section 7."
+    }
+   ],
+   "files_changed": [
+    "experiments/final_review_amendments_20261013/power_without_sim1.py",
+    "scripts/prereg_rules.py",
+    "scripts/run_stage.py",
+    "tests/prereg/test_rules.py",
+    "tests/stage/fake_env.py",
+    "tests/stage/test_run_stage.py",
+    "tests/wcd_vae/test_divergences_v2.py"
+   ],
+   "patches_artifact_version_id": "37424731-7c19-40a0-9c6d-f721386c9d99",
+   "report_artifact_version_id": "39659d51-7dd2-4197-a8e5-e292d6fcd21f",
+   "evidence_artifact_version_id": "768850be-15d2-439a-a462-2b030185cfaf",
+   "gates": "All on head 130bfc36f352de994ecfcc7a8b4398dbb5b95b84 (4 commits on 5d06a27e39bd0337ac36b69f58703e26ab1e04a1; CPU only, thread caps set). 1a) python -m pytest -q tests/stage tests/prereg (scvi-api, WCD_SRC=src): 206 passed, 2 skipped in 200.72s (0:03:20), exit 0. 1b) python -m pytest -q tests/wcd_vae (wcd-gpu, PYTHONPATH=src): 172 passed, 66 warnings in 92.14s (0:01:32), exit 0. 2a) scripts/check_tests.py --base 5d06a27 --src scripts -- tests/stage tests/prereg: 206 passed, 2 skipped in 329.15s (0:05:29); check_tests: OK (every changed --src line and branch is tested; no redundant new tests; base 5d06a27); FAIL/WARN lines 0; exit 0. 2b) scripts/check_tests.py --base 5d06a27 --src src -- tests/wcd_vae: 172 passed, 65 warnings in 111.46s (0:01:51); check_tests: OK (every changed --src line and branch is tested; no redundant new tests; base 5d06a27); FAIL/WARN lines 0; exit 0. Rest of the scripts tier (tests/analysis tests/scvi tests/jhpce tests/test_legacy_retired.py): 224 passed, 16 skipped, 243 warnings in 435.89s (0:07:15), exit 0; with 1a: 430 passed, 18 skipped against the lead's 421 passed, 18 skipped (9 more = 8 new stage-test cases + 1 new power test). Separate counts: tests/prereg 132 passed, 1 skipped in 37.01s; tests/stage 74 passed, 1 skipped in 176.41s (0:02:56). Planted bugs: item A 10 of 10 killed, item B 5 of 5, item C (re-checker's M08a-f) 6 of 6; controls survive; fl_mutation_check ok for all three tests. Probes: r03 rule probe matches (S0 accepted, S1-S3 refused at start-up, S4 accepted): True; probe 05 identical to the re-checker's output: True; item D: stdout identical (clone name normalised): True | results JSON sha256 identical: True 0be883be772eb0aa. fl_lint 1.0 (26 rules), fail_on=low: base 5d06a27 21 files, 0 findings; final 21 files, 0 findings, 0 suppressed. ruff F,E9 (0.14.0): 2 findings in tests/prereg/test_manifest_v3.py, same at base and final; whole repository 82 at both. Import closure: fit closure changed files = scripts/prereg_rules.py, scripts/run_stage.py; scorer and cluster helper: none. Earlier head ee6a679 ran the same checks; the final head differs only in comments, docstrings and commit messages (the syntax tree without docstrings is identical in all 5 Python files compared). GIT AM CHECK (fresh clone of the bundle, git am of the 4 patches, from the packed tarball and from the patches folder): head of my clone: 130bfc36f352de994ecfcc7a8b4398dbb5b95b84 | patches: 4 files | base of the fresh clone: 5d06a27e39bd0337ac36b69f58703e26ab1e04a1 | git am exit: 0 | files changed 5d06a27..HEAD in the fresh clone: |   experiments/final_review_amendments_20261013/power_without_sim1.py |   scripts/prereg_rules.py |   scripts/run_stage.py |   tests/prereg/test_rules.py |   tests/stage/fake_env.py |   tests/stage/test_run_stage.py |   tests/wcd_vae/test_divergences_v2.py | tree of the fresh clone: 4e289467d750997f7512945a0918254dc6096619 | tree of my clone:        4e289467d750997f7512945a0918254dc6096619 | git am from code_r3_patches.tar.gz: exit 0, same tree, 7 files.",
+   "open_questions": [
+    "SI-85 says 'Sinkhorn divergence record', but the rule implemented (rule A of the code re-check, the same as the latent rule it copies) has no arm condition and applies to divergence records of every arm; if the user meant the Sinkhorn arm only, add `and row[\"arm\"] == \"sinkhorn\"` to the two conditions at scripts/run_stage.py:447 and below and turn the test's non-Sinkhorn row (v1) to accepted (report section 10, item 1).",
+    "A latent without git_sha is still accepted (SI-85 covers divergence records only); if wanted, add a one-line refusal after the latent's clean-flag refusal (scripts/run_stage.py:422-423 at 5d06a27) and one more case in the new stage test (report section 10, item 2).",
+    "Proposed sentence for docs/PREREG.md:372-374 (documents track): 'The run_stage preflight also refuses a divergence record that names no commit or comes from a checkout with uncommitted changes, as it refuses such a latent (SI-85, the user's decision of 2026-10-15); a nonfinite_latent record is not asked for the clean flag.'",
+    "CONSTRAINTS.md (lead's file): SI-85's files: line lists scripts/run_stage.py and tests/stage/test_run_stage.py; the change also touches tests/stage/fake_env.py.",
+    "The stage test has two cases beyond the lead's list (S5: a nonfinite_latent record without git_sha is refused; and a dirty record accepted under --allow-dirty); planted bugs A9 and A6 survive without them; delete the two parameter lines to drop them.",
+    "Existing X1 outputs were not examined (blinding); if any existing X1 divergence record or latent came from a dirty checkout, the stage's start-up check will refuse it when the stage resumes, naming the file and the reason.",
+    "The new power test is tied to scipy 1.17.1's NaN behaviour on purpose: its first assertion (power at 1.0 is NaN) fails loudly if a later scipy removes the NaN.",
+    "Notebook entries are proposed in report section 11 (five entries, for the lead to enter; notebook/ is not my file).",
+    "The background reviewer holds two open warnings in the shared conversation that concern other tracks and that I did not touch or verify: a notebook note (NB-20261015-22) saying no probe-file value was found in review files although 355 flagged lines were only sampled, and the docstring of compare_with_reference.py saying 18 hand-made sets while the code builds 17."
+   ]
+  }
+ },
+ "analysis": {
+  "frame_id": "99cccdc4-c148-46bc-8ca3-ca5d19ae6bc1",
+  "status": "completed",
+  "wall_s": 12086,
+  "deviations": [
+   "AN-R04: the command in section 14 is not the one the finding and the task suggest (`--src scripts/analysis_x1.py`), because that form does not measure coverage (it stops on a clean checkout and prints a vacuous OK next to a leftover coverage file). Section 14 and acceptance check 2 use `--src scripts`; the form with base 973a97d needs the other script-tier test folders as well (the lead's list; about 14 minutes).",
+   "The ponytail skill named in the standing rules is not in this profile's skill catalog (search found no match), so its check could not be run; I applied its stated aim by hand (smallest change; no new test functions except one parametrized known-answer test with a test-reason; check_tests reports no redundant new test).",
+   "The check_tests runs of acceptance check 2 were made on clones taken before two clean-ups of the series (the line endings of two CSV outputs and the run-time field of compare_with_reference.json); scripts/analysis_x1.py and tests/analysis/test_analysis_x1.py are byte-identical in those clones and in the final tree (blob ids compared), and pytest was re-run on the final tree after `git am`.",
+   "AN-R08: the finding's premise (that precision_mpmath.csv holds 40-digit values of probabilities) is partly wrong; new 50-digit values were generated, and two cases with spread differences were added because the first three cannot separate 151 or 101 grid points from 201 at the tolerance of 1e-8.",
+   "The first review's pipeline simulation was not committed unchanged: paths, progress lines on stderr, and the family effects drawn in sorted order (the set order made two scenarios differ between processes). Its S1 and S2 pooled numbers therefore differ from the review's logs; limitation 1 quotes the committed re-run.",
+   "DOC-R04 is partly fixed: the pilot area-corner ranges and the P2 recount are cited from experiments/doc_numbers_20261015/ (documents track; not created or checked here), and the 'F7 ratios' are in docs/PAPER_PLAN.md (not my file).",
+   "DOC-R05, DOC-R09 and DOC-R13 are fixed in the specification only; PREREG.md, the notebook and PAPER_PLAN are other tracks' files.",
+   "The notebook was not written (the task excludes notebook/); the entries I would add are listed in section 7 of the report.",
+   "mutation/mutation_results_20261014.json was removed (it holds the retired exclusion rule's error by name and is replaced by mutation_results_20261015.json); it stays in the history of the clone.",
+   "The dry-run generator and runner (with the new variant ident_local_atac) are in the evidence archive, not in the repository; their outputs (full records) are not committed; two records are in the archive.",
+   "History of the private clone was rewritten several times before delivery (line endings of two CSVs via filter-branch; then fixups of the comparison output, the status paragraph, the planted-error results, the README and three docstrings); commit ids quoted in messages of this track before delivery are void; the report and the patches use the final ids.",
+   "The lead's script-tier command (429 passed, 18 skipped, 243 warnings; 14 minutes) and the planted-error run were not repeated on the final tree: their trees (084ba0155e0d, 6f4849601175) differ from it in 7 and 5 files, none under scripts/, src/ or tests/ (specification, numerics README, three script docstrings, planted-error runner and results); code and tests are byte-identical."
+  ],
+  "structured_output": {
+   "items": [
+    {
+     "id": "A: SI-83, AN-R01, AN-R06 (floor on a small standard error)",
+     "verified": true,
+     "checked": "Read the code at 5d06a27: a dataset whose leave-one-seed-out standard error s was below 1e-6 was left out of the pooled result (reason zero_spread), and `pool` refused any s below 1e-6, including the averaged s of a pair (two datasets at 1.2e-6 average to 8.5e-7). The re-check's planted errors O07 to O10 on that rule survived the tests.",
+     "action": "fixed",
+     "commits": [
+      "1897cd3",
+      "684ab3a",
+      "65c5153"
+     ],
+     "evidence": "Done: Rewrote the rule as the floor of SI-83: `raise_s` raises each dataset's s to 1e-6 and lists it (`raised`: unit, level, own s); the pairs-first sensitivity raises the averaged s again (level pair); NaN, infinite and negative s stop the run. Removed the exclusion from code, tests and specification (sections 2.3, 4, 15.7); the S3 sentence stands on one line. Evidence: Tests: floor cases in test_combine_structures (s = 1e-6, 0.9e-6, 1e-16, 0.0 against `pool` with floored s; pair cases [1.2e-6, 1.2e-6] and [0.0, 1e-16] with their raised lists), test_guards (nan, inf, negative), the end-to-end test (raised == [lung, dataset, s 0.0], the only entry). Planted errors F07 (killed by test_pool_known_answers_small_s[H2_family_0.1]), F08 (test_pool_known_answers_small_s[H2_family_0.1]), F09 (test_combine_structures), F10 (test_combine_structures), G02 (test_guards), G04 (test_combine_structures) are killed. Full-size synthetic runs: ident_local (identical local readings) exit 0 in 31.0 s, 18 pooled results list raised datasets (6 in the decoder-0 local result, 4 in decoder 1); ident_local_atac exit 0 in 36.7 s, its pairs-first local result lists 1 pair-level entry (family atac, own s 7.07e-07); main lists none."
+    },
+    {
+     "id": "B: SI-84, AN-R10 (accuracy ranges and the sign table's approximate limits)",
+     "verified": true,
+     "checked": "The statements 'within 2e-6' and 'no reported value by more than 2e-5' held on the 240 random sets and while the datasets' differences spread by at most three prior scales; beyond that the error is larger (re-check section 4.2).",
+     "action": "fixed",
+     "commits": [
+      "bd5f1ad",
+      "cf327d0",
+      "48c5aee",
+      "e401635"
+     ],
+     "evidence": "Done: Measured the code against the independent reference on the re-check's 18 uncalibrated hand-made sets and a spread scan of 1 to 8 prior scales (two prior scales). Stated the domain in specification section 15.4, in the comment at GRID_SPAN and in the numerics README; stated that the sign table's limits d +/- t s are approximate (s is a jackknife standard error of a statistic that is not smooth). The code's behaviour is unchanged. Evidence: compare_with_reference.json: largest difference over the 18 sets 2.4e-04, over the scan at 3 prior scales 1.6e-06, at 5 scales 1.1e-05 (probabilities) and 7.8e-05 (any value), at 6 scales 2.9e-05 and 3.0e-04; declarations that differ: 0 (of 32 sets). check_pool_numerics.py re-run: outputs byte-identical (240 sets: 1.99e-06)."
+    },
+    {
+     "id": "C: AN-R02 = DOC-R03 (specification section 1 against section 15.1)",
+     "verified": true,
+     "checked": "Section 1 said the analysis never recomputes b0, b_common, b* and the low-signal flag; the code recomputes them with `prereg_rules.r4_stage` and refuses a record that differs (section 15.1).",
+     "action": "fixed",
+     "commits": [
+      "10fd446",
+      "fb5cd5b"
+     ],
+     "evidence": "Done: Rewrote the sentence in section 1: the four quantities are read from the frozen R4 record, recomputed from the X1 rows, and the run stops if they differ. Evidence: The refusal tests (test_refusals) alter each recorded quantity; planted errors N14 (test_refusals[<lambda>-differ0]), O11 (test_refusals[<lambda>-differ4]), O12 (test_refusals[<lambda>-differ3]), N06a (test_refusals[<lambda>-differ1]), N06b (test_refusals[<lambda>-differ2]) are killed."
+    },
+    {
+     "id": "D: AN-R03, SI-87, DOC-R10 (R4 extension rows, record names, tense)",
+     "verified": true,
+     "checked": "A record made with R4 extension rows is refused when the extension manifests and scores are not passed, and the message did not say why; the usage line did not name them; the specification described the grid check in the present tense and did not name the record after the Sinkhorn redo.",
+     "action": "fixed",
+     "commits": [
+      "45b53c2",
+      "65c5153",
+      "10fd446",
+      "fb5cd5b"
+     ],
+     "evidence": "Done: Usage line names the extension manifests, their score directories and one failures table covering every row; the refusal prints the recorded and the recomputed b0, b_common, b* and flag and says to pass the extension rows; specification section 1 uses the future tense for the hand check of the six non-Sinkhorn grids and names docs/prereg/r1_record.json; S2 stands on one line (line 85). Evidence: test_refusals has a case that drops the extension row (the regex pins the printed values); the end-to-end fixture has an extension row that moves b* by 1.67e-4. Planted errors O24 (killed; test_end_to_end errors while the fixture is built) and G03 (test_refusals (the case whose id starts '<lambda>-for atac_small')) killed."
+    },
+    {
+     "id": "E: AN-R04 (the test command of section 14)",
+     "verified": true,
+     "checked": "Reproduced: `check_tests.py --base 973a97d --src scripts -- tests/analysis tests/prereg` fails with 'scripts/run_stage.py: changed lines never run: [662, 663]' (201 passed, 1 skipped in 181.74s (0:03:01)). The suggested `--src scripts/analysis_x1.py` collects no coverage (coverage.py reads a file path as a module name); on a clean checkout it stops with FileNotFoundError for .check_tests/cov.json, and with a leftover cov.json it prints OK without testing anything (reproduced with a function no test calls).",
+     "action": "fixed",
+     "commits": [
+      "fb5cd5b"
+     ],
+     "evidence": "Done: Section 14 now gives the lead's script-tier command `--base 973a97d --src scripts -- tests/analysis tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py` (429 passed, 18 skipped, 243 warnings in 838.39s (0:13:58), wall 14:00.72, exit 0) and explains why no file path is used. Also run: `--base 973a97d --src scripts -- tests/analysis tests/prereg tests/stage` (267 passed, 2 skipped in 387.33s (0:06:27), wall 6:28.55) and the track's own check `--base 5d06a27 --src scripts -- tests/analysis tests/prereg` (201 passed, 1 skipped in 183.03s (0:03:03), wall 3:04.24). Evidence: logs/accept/check_tests_filepath_form_vacuous_ok.txt, check_tests_directory_form_fails.txt, check_tests_base_*.log in the evidence archive. The lead was told in a mid-task message. The lead's command file (gp/lead_gates_20261014/README.txt, line 4) already uses `--src scripts`, and no tracked file of the clone uses a file path with --src (git grep)."
+    },
+    {
+     "id": "AN-R05 (local endpoint evaluable exactly when P1 is)",
+     "verified": true,
+     "checked": "Section 15.7 said the local reading is evaluable exactly when P1 is; with the old exclusion a local reading could drop out alone (the re-check's identical-local-readings input: pooled local n = 0 while P1 was evaluable). Second part of the finding: the status paragraph named ff88666 and 858101b as the code commits although the fixes are in 8b90d79.",
+     "action": "fixed",
+     "commits": [
+      "1897cd3",
+      "684ab3a",
+      "2e92c17"
+     ],
+     "evidence": "Done: With the floor no dataset drops out for a small s, so the sentence is true again; reworded section 15.7; the end-to-end test asserts that the evaluable lists of P1 and of the local reading are equal. The status paragraph now names 8b90d79 (code and tests of the first review's fixes) with the other commits of 2026-10-14. Evidence: ident_local dry run (identical local readings): the pooled local result has n = 6 datasets in decoder 0, where the re-check found n = 0 with the old exclusion; test_end_to_end asserts that the evaluable lists of P1 and of the local reading are equal."
+    },
+    {
+     "id": "AN-R07 (R4 recompute compared on b0, b_common, b*, flag)",
+     "verified": true,
+     "checked": "Tests altered b0 and the flag but not b_common alone nor b* by a small amount.",
+     "action": "fixed",
+     "commits": [
+      "45b53c2"
+     ],
+     "evidence": "Done: Added refusal cases: pancreas|1 b_common +0.01; lung|0 b* +2e-9 (just outside the 1e-9 tolerance). Evidence: Planted errors O12 (b_common not compared; test_refusals[<lambda>-differ3]) and O11 (tolerance 1e-3; test_refusals[<lambda>-differ4]) killed."
+    },
+    {
+     "id": "AN-R08 (known answers for s of 1e-6 to 3e-6)",
+     "verified": true,
+     "checked": "The premise that `precision_mpmath.csv` holds 40-digit values is partly wrong: it holds relative errors of the posterior mean and variance at grid nodes, not probabilities. A first set of three known answers killed O02 but not O22 (151 points) or M24 (101 points): the effect of the grid size is below 1e-8 when the datasets' differences are almost equal.",
+     "action": "fixed",
+     "commits": [
+      "7186f69",
+      "65c5153",
+      "a6b3be5",
+      "c72abc6"
+     ],
+     "evidence": "Done: Generated new 50-digit values with an independent reference (ref_mp.py, checked against a long double reference on its finest rule, largest difference 6.7e-10) for five synthetic sets, two of them with spread differences chosen so that 151 and 101 points move the result by more than the tolerance of 1e-8; asserted the registered grid constants in the same test. Evidence: Planted errors O02 (test_pool_known_answers_small_s[H2_family_0.1]), O22 (test_pool_known_answers_small_s[H2_family_0.1]), M24 (test_pool_known_answers_small_s[H2_family_0.1]) killed at the constants assertion; with that assertion removed in scratch clones the numbers alone still kill them (O02: H2_family_0.1; O22: H2_spread_independent_0.2, 4.9e-8 from the 50-digit value against 1.9e-10 for the code; M24: H2_spread_family_0.2, 2.7e-6) (logs/nopin_check.txt; known_answers_effects.txt)."
+    },
+    {
+     "id": "AN-R09 (failed-run total, a cell with 4 readings, a deep gap)",
+     "verified": true,
+     "checked": "Planted errors O18 (failed-run total as a maximum) and O20 (gap flag looks at the first interior point only) survived.",
+     "action": "fixed",
+     "commits": [
+      "7b0e45e",
+      "0ad06fd"
+     ],
+     "evidence": "Done: Added to the existing tests: the end-to-end test asserts the barycenter family's (configurations, failed runs) in pancreas|0 and lung|0, (6, 4) and (6, 2), and a cell with 4 readings (immune_hum_mou|1, m = 4); test_window has a deep-gap case. Evidence: O18 killed (test_end_to_end), O20 killed (test_window), O23 killed (test_end_to_end)."
+    },
+    {
+     "id": "AN-R10 (see B)",
+     "verified": true,
+     "checked": "Same finding as item B. The statements 'within 2e-6' and 'no reported value by more than 2e-5' held on the 240 random sets and while the datasets' differences spread by at most three prior scales; beyond that the error is larger (re-check section 4.2).",
+     "action": "fixed",
+     "commits": [
+      "bd5f1ad",
+      "cf327d0",
+      "48c5aee",
+      "e401635"
+     ],
+     "evidence": "Done: Measured the code against the independent reference on the re-check's 18 uncalibrated hand-made sets and a spread scan of 1 to 8 prior scales (two prior scales). Stated the domain in specification section 15.4, in the comment at GRID_SPAN and in the numerics README; stated that the sign table's limits d +/- t s are approximate (s is a jackknife standard error of a statistic that is not smooth). The code's behaviour is unchanged. Evidence: compare_with_reference.json: largest difference over the 18 sets 2.4e-04, over the scan at 3 prior scales 1.6e-06, at 5 scales 1.1e-05 (probabilities) and 7.8e-05 (any value), at 6 scales 2.9e-05 and 3.0e-04; declarations that differ: 0 (of 32 sets). check_pool_numerics.py re-run: outputs byte-identical (240 sets: 1.99e-06)."
+    },
+    {
+     "id": "AN-R11 (what the numerical reference shares with the code)",
+     "verified": true,
+     "checked": "The reference in check_pool_numerics.py uses the same solve with A and the same weights from V = A + (prior variance) 11' as the code, so an error in that algebra would not show; the 40-digit table covers only the posterior mean and variance.",
+     "action": "fixed",
+     "commits": [
+      "cf327d0",
+      "eaef4ac",
+      "48c5aee"
+     ],
+     "evidence": "Done: The README now says what each reference shares; the re-check's independent reference (closed-form block algebra, Gauss-Legendre quadrature, long double and 50-digit arithmetic) and its algebra validation are committed with outputs; the code is compared with it. check_pool_numerics.py now stops when mpmath is missing (the lint rule on swallowed failures). Evidence: validate_algebra.json: largest relative differences 1.6e-12 (log-likelihood, long double), 8.2e-42 (50 digits); compare_with_reference.json (see B); check_pool_numerics.py re-run gives byte-identical outputs (4 min)."
+    },
+    {
+     "id": "AN-R12 (few evaluable datasets cannot reach a declaration)",
+     "verified": true,
+     "checked": "Re-ran the ceilings: with all datasets equal, family structure, prior scale 0.1, margin 0.01.",
+     "action": "fixed",
+     "commits": [
+      "d0c20e3",
+      "e401635"
+     ],
+     "evidence": "Done: ceilings.py extends the re-check's script to the equivalence side and to two datasets of one family; specification section 15.4 says the pooled result is inconclusive by construction with fewer than three evaluable datasets and gives the ceilings. Evidence: ceilings.json: largest P(Delta > 0.01) 0.8232 (one dataset), 0.9410 (two, different families), 0.8783 (two, one family); no declaration reachable on the grid; three datasets need d from 0.03 to 0.08."
+    },
+    {
+     "id": "AN-R13 (all-failed configurations between the window's ends)",
+     "verified": true,
+     "checked": "A lambda between the window's ends whose runs all failed was invisible: `gap` stayed false while the width spanned it.",
+     "action": "fixed",
+     "commits": [
+      "7b0e45e",
+      "646ee39"
+     ],
+     "evidence": "Done: The window record has `n_all_failed_between` (None when there is no window; otherwise the count strictly between its ends); gap rule unchanged; specification section 15.10 says so. Evidence: test_window cases (including a failed interior configuration and a deep gap); planted error G01 killed (test_window), N09 killed (test_window)."
+    },
+    {
+     "id": "AN-R14 (input row order)",
+     "verified": true,
+     "checked": "No test shuffled the input rows; O16 (sort by lambda) and N11 (no sort) survived.",
+     "action": "fixed",
+     "commits": [
+      "0ad06fd"
+     ],
+     "evidence": "Done: The end-to-end test builds the record a second time from the same rows in shuffled order and requires equal primary and sensitivity results. Evidence: O16 killed (test_end_to_end), N11 killed (test_end_to_end). Also: the full-size record is byte-identical across processes with PYTHONHASHSEED=1, 2 and the default (sha256 prefix b58e533be8acbf96)."
+    },
+    {
+     "id": "AN-R15 and SI-81 (c) (unreached cells by arm)",
+     "verified": true,
+     "checked": "The record keeps `p1.status` per cell and arm and the R4 record keeps the arms' best batch scores, but no field or script counts the unreached cells by arm.",
+     "action": "fixed",
+     "commits": [
+      "10fd446"
+     ],
+     "evidence": "Done: Specification section 1 says that a reporting script written after the runs tabulates the count by arm next to the R4 maximum (user decision SI-81 (c)); only P1's reference and discriminator arms can be unreached; lists the status values. Evidence: Specification section 1; no code change was asked for. Open question: whether the tag freezes that script (see open questions)."
+    },
+    {
+     "id": "DOC-R01 and DOC-R02 (what 'examined' covers; what the audit searched)",
+     "verified": true,
+     "checked": "The audit sentence was broader than the search it rests on; the definition covered X1 adversarial arms only.",
+     "action": "fixed",
+     "commits": [
+      "2e92c17"
+     ],
+     "evidence": "Done: The specification states S1 (every X1 and X13 score, of any arm), the user's statement NB-20261015-15, the narrowed audit sentence (NB-20261014-21: session logs searched for reads of tier12_v2/X1_local/scores, printed output, two log statements; made by the agent that ran the checks; cannot show nobody opened a file) and points to PREREG section 9 for the disclosure; the displays found by the audit are listed there as shown to the agent only (SI-88). No counts and no claim that no value was displayed, as the lead instructed. Evidence: Specification lines 25-30 (S1 on line 25)."
+    },
+    {
+     "id": "DOC-R03",
+     "verified": true,
+     "checked": "Same finding as item C. Section 1 said the analysis never recomputes b0, b_common, b* and the low-signal flag; the code recomputes them with `prereg_rules.r4_stage` and refuses a record that differs (section 15.1).",
+     "action": "fixed",
+     "commits": [
+      "10fd446"
+     ],
+     "evidence": "Done: Rewrote the sentence in section 1: the four quantities are read from the frozen R4 record, recomputed from the X1 rows, and the run stops if they differ. Evidence: The refusal tests (test_refusals) alter each recorded quantity; planted errors N14 (test_refusals[<lambda>-differ0]), O11 (test_refusals[<lambda>-differ4]), O12 (test_refusals[<lambda>-differ3]), N06a (test_refusals[<lambda>-differ1]), N06b (test_refusals[<lambda>-differ2]) are killed."
+    },
+    {
+     "id": "DOC-R04 (numbers from scripts outside the repository)",
+     "verified": true,
+     "checked": "The specification's '0.011', 'coverage 0.91 to 1.00' and the 'conservative' statement came from the first review's scripts, which were not in the repository; the pilot ranges of the area corner and the P2 recount are in the documents track's folder.",
+     "action": "partly_fixed",
+     "commits": [
+      "f48ba02",
+      "7253c9f"
+     ],
+     "evidence": "Done: Committed the first review's pipeline simulation (6 scenarios) and P2 clustering simulation (paths changed; family effects drawn in sorted order because a set's order made two scenarios differ from process to process), and a rebuilt pilot grid-reading table (equal to the review's outcome table in all 40 columns, 918 rows); re-ran them; limitations 1 to 3 now quote the committed outputs; the pilot area-corner ranges and the P2 recount point to experiments/doc_numbers_20261015/. Evidence: Limitation 1: per-dataset coverage 0.85 to 0.88, pooled 0.998 to 1.000, no 'equivalent' in 2640 pooled worlds; limitation 2: shift 0.0110 in atac_small|1, the other five cells 0; limitation 3: 0.914 to 0.9995 (Clopper-Pearson), 0.9186 and 0.9488 (Agresti-Caffo). Not done: the 'F7 ratios' of the finding are in docs/PAPER_PLAN.md and the area-corner and recount figures are produced in the documents track's folder (not mine)."
+    },
+    {
+     "id": "DOC-R05 (status lines name later changes)",
+     "verified": true,
+     "checked": "The status paragraph named only the first commits and no later revision of the code and specification; it still listed SI-01..SI-67.",
+     "action": "partly_fixed",
+     "commits": [
+      "2e92c17",
+      "ebd88a9"
+     ],
+     "evidence": "Done: Status paragraphs list what changed since 2026-10-14 (earlier commit ids, round-3 changes by date and ledger id) and say that the tag, not commit ids, fixes the version; sources checked read SI-01..SI-88. PREREG's status line and table rows 5 and 8 belong to another track. Evidence: Specification lines 3-23 and the sources line (line 455)."
+    },
+    {
+     "id": "DOC-R07 (attribution of sections 9 to 11, equal tries)",
+     "verified": true,
+     "checked": "Section 9 called equal numbers of tries the agent's proposal; SI-68 and SI-77 already decide it.",
+     "action": "fixed",
+     "commits": [
+      "ebd88a9"
+     ],
+     "evidence": "Done: Section 9 says equal tries is the user's decision (SI-68, SI-77) and only the estimator and the family composition were proposals, approved in SI-80; sections 5, 8, 9, 10, 11 and 15 carry 'decided 2026-10-15, SI-80'. Evidence: Specification section 9 and the section headings."
+    },
+    {
+     "id": "DOC-R08 (implementation choices under the heading of SI-73)",
+     "verified": true,
+     "checked": "Section 4 is headed as the user's decision SI-73 but the grid, its cap and floor, the exclusion and the CPU remark are the agent's choices.",
+     "action": "fixed",
+     "commits": [
+      "e401635"
+     ],
+     "evidence": "Done: Added a note under section 4: the details marked 'amended 2026-10-14' were the agent's choices, approved 2026-10-15 (SI-84; the floor is SI-83); digit for digit holds on the same input files and the same CPU type. Evidence: Specification section 4."
+    },
+    {
+     "id": "DOC-R09 items 1 and 6 (glossary; 'all as recommended')",
+     "verified": true,
+     "checked": "R0 to R5 against R1 to R4 were not explained in the specification's word list; 'all as recommended' is unclear.",
+     "action": "fixed",
+     "commits": [
+      "6e148d9",
+      "2e92c17"
+     ],
+     "evidence": "Done: Added the sentence on R0-R5 against R1-R4 and the AN-Rnn and DOC-Rnn labels; 'each time taking the option the agent recommended'. Evidence: Specification glossary and Appendix A.1."
+    },
+    {
+     "id": "DOC-R10",
+     "verified": true,
+     "checked": "Same finding as item D. A record made with R4 extension rows is refused when the extension manifests and scores are not passed, and the message did not say why; the usage line did not name them; the specification described the grid check in the present tense and did not name the record after the Sinkhorn redo.",
+     "action": "fixed",
+     "commits": [
+      "10fd446"
+     ],
+     "evidence": "Done: Usage line names the extension manifests, their score directories and one failures table covering every row; the refusal prints the recorded and the recomputed b0, b_common, b* and flag and says to pass the extension rows; specification section 1 uses the future tense for the hand check of the six non-Sinkhorn grids and names docs/prereg/r1_record.json; S2 stands on one line (line 85). Evidence: test_refusals has a case that drops the extension row (the regex pins the printed values); the end-to-end fixture has an extension row that moves b* by 1.67e-4. Planted errors O24 (killed; test_end_to_end errors while the fixture is built) and G03 (test_refusals (the case whose id starts '<lambda>-for atac_small')) killed."
+    },
+    {
+     "id": "DOC-R13 (a complete list of the diff-review questions)",
+     "verified": true,
+     "checked": "Appendix A.3 listed five open items, not the questions the user answered.",
+     "action": "partly_fixed",
+     "commits": [
+      "0dab011"
+     ],
+     "evidence": "Done: A.3 now lists where each of the diff review's answers (SI-78 to SI-87, and SI-88) is used in this file and points to PREREG section 9 for the full list. Evidence: Specification Appendix A.3."
+    },
+    {
+     "id": "SI-78, SI-80, SI-81, SI-82, SI-87, SI-88 (labels and pointers)",
+     "verified": true,
+     "checked": "The specification still labelled decided items as proposals and had no pointer to the answers of 2026-10-15.",
+     "action": "fixed",
+     "commits": [
+      "2e92c17",
+      "ebd88a9",
+      "5e4436d",
+      "5133d0a",
+      "0dab011"
+     ],
+     "evidence": "Done: SI-78: S1 and the section 0 note; SI-80: decided labels; SI-81 (c): section 1; SI-82: exploratory scaling checks in section 12; SI-87: S2; SI-88: one sentence pointing to PREREG's disclosure (no counts). Evidence: grep of the committed files: no hits for zero_spread and _sinkhorn_redo; the word proposal occurs only in sentences about what the agent proposed before the user decided."
+    }
+   ],
+   "files_changed": [
+    "docs/ANALYSIS_SPEC.md",
+    "experiments/analysis_numerics_20261014/README.md",
+    "experiments/analysis_numerics_20261014/ceilings.json",
+    "experiments/analysis_numerics_20261014/ceilings.py",
+    "experiments/analysis_numerics_20261014/check_pool_numerics.py",
+    "experiments/analysis_numerics_20261014/compare_with_reference.json",
+    "experiments/analysis_numerics_20261014/compare_with_reference.py",
+    "experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.json",
+    "experiments/analysis_numerics_20261014/first_review/p2_clustering_sim.py",
+    "experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.csv",
+    "experiments/analysis_numerics_20261014/first_review/pilot_grid_reading.py",
+    "experiments/analysis_numerics_20261014/first_review/run_simulations.sh",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline.py",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_S0_null.txt",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_S1_het.txt",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_S2_effect.txt",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_S3_noisy_null.txt",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_S4_curved.txt",
+    "experiments/analysis_numerics_20261014/first_review/sim_pipeline_W1_wiggle.txt",
+    "experiments/analysis_numerics_20261014/known_answers_effects.py",
+    "experiments/analysis_numerics_20261014/known_answers_effects.txt",
+    "experiments/analysis_numerics_20261014/known_answers_small_s.csv",
+    "experiments/analysis_numerics_20261014/known_answers_small_s.py",
+    "experiments/analysis_numerics_20261014/mutation/mutants_lead.py",
+    "experiments/analysis_numerics_20261014/mutation/mutants_r3.py",
+    "experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json",
+    "experiments/analysis_numerics_20261014/mutation/run_mut.py",
+    "experiments/analysis_numerics_20261014/ref_mp.py",
+    "experiments/analysis_numerics_20261014/ref_pool.py",
+    "experiments/analysis_numerics_20261014/validate_algebra.json",
+    "experiments/analysis_numerics_20261014/validate_algebra.py",
+    "scripts/analysis_x1.py",
+    "tests/analysis/test_analysis_x1.py"
+   ],
+   "patches_artifact_version_id": "bf5f5a87-0888-4cf5-9a9d-b7ff1076c878",
+   "report_artifact_version_id": "74bd2afb-559f-433d-b982-6551164364f6",
+   "evidence_artifact_version_id": "3a279d86-838d-475f-bdd9-89f856aee152",
+   "gates": "1. python -m pytest -q tests/analysis tests/prereg, fresh clone of the bundle after `git am` of the patches: exit 0, 201 passed, 1 skipped in 115.17s (0:01:55) (baseline at 5d06a27: 193 passed, 1 skipped in 86.7 s).\n2. check_tests.py --base 5d06a27 --src scripts -- tests/analysis tests/prereg: exit 0, 201 passed, 1 skipped in 183.03s (0:03:03), wall 3:04.24, 'OK ... no redundant new tests', no WARN. check_tests.py --base 973a97d --src scripts -- tests/analysis tests/prereg tests/stage: exit 0, 267 passed, 2 skipped in 387.33s (0:06:27), wall 6:28.55, OK. The lead's script-tier command (--base 973a97d --src scripts -- tests/analysis tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py): exit 0, 429 passed, 18 skipped, 243 warnings in 838.39s (0:13:58), wall 14:00.72, OK. With only tests/analysis tests/prereg: exit 1, FAIL scripts/run_stage.py lines 662, 663 (201 passed, 1 skipped in 181.74s (0:03:01)). The file-path form `--src scripts/analysis_x1.py` is not usable (see deviation 1).\n3. planted errors: 72 of 73 killed (python run_mut.py, 4 clones, 19 min 35 s; unmutated tests: 70 passed in 84.70s (0:01:24)); all 15 acceptance errors killed; survivor M28; O02, O22, M24 also killed without the constants assertion (logs/nopin_check.txt).\n4. numerics re-runs at the final scripts: check_pool_numerics.py (4 min), ceilings.py, compare_with_reference.py (run twice), validate_algebra.py, known_answers_small_s.py (3 min), known_answers_effects.py, pilot_grid_reading.py, p2_clustering_sim.py: every committed output byte-identical (git status clean); sim_pipeline S1 and S2 repeated under other hash seeds: identical.\n5. full-size synthetic dry runs (3,408 rows each): main exit 0 29.9 s; ident_local exit 0 31.0 s (18 pooled results list raised datasets); ident_local_atac exit 0 36.7 s (pair-level raised entry in the pairs-first result); one_eval exit 0 35.4 s; main under PYTHONHASHSEED 1 and 2: byte-identical record.\n6. greps over scripts/analysis_x1.py, tests/analysis, docs/ANALYSIS_SPEC.md, experiments/analysis_numerics_20261014: zero_spread 0 hits, _sinkhorn_redo 0 hits, no claim that tag v2 holds the Sinkhorn record files, no proposal label on SI-80 or SI-81 items; no commit id of this series is cited inside a tracked file of the track.\n7. fl_lint(fail_on='medium') on the 17 changed .py/.sh files of the series (final tree 02e816bbc7da): findings at medium or above = 0; total findings listed = 0; suppressed = 0; si_scope_check (base 5d06a27): 33 files changed, 33 inside the track's paths, 0 outside; si_check_output on this report: 0 automatable rules apply (65 rules matched by keyword are manual; those that bear on this track, SI-67 plain language and SI-80, SI-82, SI-83, SI-84, were applied by hand).\ngit am: 26 patches on 5d06a27 apply cleanly to a fresh clone of the bundle (sha256 0c7de7d5...0915a); the tree equals the clone's tree 02e816bbc7da; every per-commit tree equal; files changed: only scripts/analysis_x1.py, tests/analysis/test_analysis_x1.py, docs/ANALYSIS_SPEC.md, experiments/analysis_numerics_20261014/.",
+   "open_questions": [
+    "Acceptance check 2 of the task and the re-check's suggested fix for AN-R04 use `--src scripts/analysis_x1.py`; that form does not measure coverage (deviation 1). The lead's own command file (gp/lead_gates_20261014/README.txt line 4) already uses `--src scripts` and is unaffected (my mid-task message guessed otherwise); I found no other use of the file-path form in the tracked files of the clone.",
+    "AN-R15 / SI-81 (c): does the tag freeze the reporting script that is written after the runs (docs/ANALYSIS_SPEC.md section 1, the paragraph on unreached cells)? The specification says only that such a script is written after the runs.",
+    "docs/ANALYSIS_SPEC.md cites experiments/doc_numbers_20261015/ (and its README, 'whose README lists each number with its script') at three places (the corner paragraph in section 3, the Q5 text and the Q9 text in Appendix A.1); if the folder or the README is named differently, those three sentences need the new name.",
+    "notebook/2026-10-14.md:319 and notebook/2026-10-15.md:10 quote '54 of 57' planted errors and notebook/2026-10-14.md:321 links mutation_results_20261014.json, which this series removes; the current result is 72 of 73 (README of the numerics folder). A correction entry may be wanted.",
+    "ATAC overlap wording (specification section 1 and section 16 item 6: name-based 3,618 shared cells against all 11,270 atac_small cells found in atac_large) was flagged earlier and is not one of my items; unchanged.",
+    "NB-20261015-20 in the clone still says tag v2 holds the old record files; the lead's correction NB-20261015-21 is not in the clone. My specification text uses the S2 sentence only.",
+    "M28 (no half weights at the two ends of the spread grid) still survives the tests; its effect is at most 2.0e-6 and a known answer cannot separate it from the code's own error. Accepted; killing it would need a graded grid or a different tolerance policy (a decision, not made here).",
+    "check_tests is to be run again before the tag (specification section 14 says so); decide whether the tag-time run includes tests/stage (6.5 minutes)."
+   ],
+   "planted_errors": [
+    {
+     "id": "O02",
+     "killed": true,
+     "test": "test_pool_known_answers_small_s[H2_family_0.1]",
+     "evidence": "grid floor: TAU_FLOOR 1e-15 -> 1e-9 (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json; fails first at the assertion of the registered grid constants and is also killed by the known-answer numbers alone (logs/nopin_check.txt)"
+    },
+    {
+     "id": "O11",
+     "killed": true,
+     "test": "test_refusals[<lambda>-differ4]",
+     "evidence": "R4 recompute tolerance 1e-9 -> 1e-3 (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O12",
+     "killed": true,
+     "test": "test_refusals[<lambda>-differ3]",
+     "evidence": "R4 recompute: b_common not compared (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O16",
+     "killed": true,
+     "test": "test_end_to_end",
+     "evidence": "sort key: rows sorted by lambda instead of tag (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O18",
+     "killed": true,
+     "test": "test_end_to_end",
+     "evidence": "failed-run total: max instead of sum (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O20",
+     "killed": true,
+     "test": "test_window",
+     "evidence": "gap flag: looks only at the first interior point (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O22",
+     "killed": true,
+     "test": "test_pool_known_answers_small_s[H2_family_0.1]",
+     "evidence": "grid point count 201 -> 151 (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json; fails first at the assertion of the registered grid constants and is also killed by the known-answer numbers alone (logs/nopin_check.txt)"
+    },
+    {
+     "id": "O23",
+     "killed": true,
+     "test": "test_end_to_end",
+     "evidence": "sign table: t degrees of freedom a constant 4 (right only when m = 5) (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "O24",
+     "killed": true,
+     "test": "test_end_to_end",
+     "evidence": "R4 recompute ignores the extension rows (computed on the six registered points only) (round 3); result killed, first failure kind ERROR, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "M24",
+     "killed": true,
+     "test": "test_pool_known_answers_small_s[H2_family_0.1]",
+     "evidence": "GRID_N 201 -> 101 (declaration); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json; fails first at the assertion of the registered grid constants and is also killed by the known-answer numbers alone (logs/nopin_check.txt)"
+    },
+    {
+     "id": "N11",
+     "killed": true,
+     "test": "test_end_to_end",
+     "evidence": "input rows not sorted by tag (expected equivalent at test tolerance) (lead); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "F07",
+     "killed": true,
+     "test": "test_pool_known_answers_small_s[H2_family_0.1]",
+     "evidence": "floor: '<' changed to '<=' at the threshold (s = 1e-6 listed as raised) (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "F08",
+     "killed": true,
+     "test": "test_pool_known_answers_small_s[H2_family_0.1]",
+     "evidence": "floor: threshold 1.5e-6 (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "F09",
+     "killed": true,
+     "test": "test_combine_structures",
+     "evidence": "floor applied only when s == 0 (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "F10",
+     "killed": true,
+     "test": "test_combine_structures",
+     "evidence": "floor not applied to the pair's averaged standard error (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "G01",
+     "killed": true,
+     "test": "test_window",
+     "evidence": "n_all_failed_between counts every failed configuration, not only those between the window's ends (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "G02",
+     "killed": true,
+     "test": "test_guards",
+     "evidence": "floor: NaN, infinite and negative standard errors not refused (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "G03",
+     "killed": true,
+     "test": "test_refusals (the case whose id starts '<lambda>-for atac_small')",
+     "evidence": "refusal message: recorded and recomputed values not printed (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "G04",
+     "killed": true,
+     "test": "test_combine_structures",
+     "evidence": "pairs: the family's standard error averages the datasets' own s, not the raised ones (round 3); result killed, first failure kind FAILED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json"
+    },
+    {
+     "id": "M28",
+     "killed": false,
+     "test": "none (survived all 70 tests)",
+     "evidence": "the two end points of the spread grid get weight 1 instead of 1/2 (rectangle rule in place of the trapezoid rule in log tau); the reviewer's list words it 'tau grid starts at 0 but trapezoid end weights dropped (rectangle rule)' (declaration); result SURVIVED, from experiments/analysis_numerics_20261014/mutation/mutation_results_20261015.json; largest effect on any reported value 2.0e-6 (uncaught_planted_errors in summary.json); accepted, see open question 7"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,309 @@
+diff --git a/paper/evidence.md b/paper/evidence.md
+index 3154af9..9a4ce0e 100644
+--- a/paper/evidence.md
++++ b/paper/evidence.md
+@@ -48,7 +48,6 @@ Rule for method-naming keys (marked "method naming"): metadata plus abstract.
+ - goh2022batch -- batch effects remain relevant, and harder, for single-cell data -- checked: https://doi.org/10.1016/j.tibtech.2022.02.005; abstract (PubMed 35282901); text: abstract only: no open full text
+ - yu2024assessing -- definition of batch effects (conditions over time, labs, machines, pipelines); misleading if uncorrected, hinder discovery if over-corrected -- checked: https://doi.org/10.1186/s13059-024-03401-9; p1 (abstract, Introduction); text: publisher PDF (gold OA)
+ - dincer2020adversarial -- AD-AE: autoencoder plus an adversary trained to predict the confounder; confounders include technical artefacts and uninteresting biological variables such as age -- checked: https://doi.org/10.1093/bioinformatics/btaa796; published abstract; p1 of the bioRxiv text; text: abstract of the published version + bioRxiv full text (published PDF not open)
+-- he2025partially -- scCRAFT: reconstruction loss, multi-domain GAN discriminator (cross-entropy), dual-resolution triplet loss to counter over-correction amid heterogeneous cell distributions -- checked: https://doi.org/10.1038/s42003-025-07988-y; p1 (abstract), p2 (over-correction under heterogeneous compositions), p10 (Methods: multi-domain GAN); text: publisher PDF (gold OA)
+ - wang2022respan -- ResPAN: WGAN combined with random-walk mutual-nearest-neighbour pairing and fully skip-connected autoencoders -- checked: https://doi.org/10.1093/bioinformatics/btac427; published abstract; p1 of the bioRxiv text; text: abstract of the published version + bioRxiv full text
+ - wang2023integrating -- IMAAE: anchor batch (built or chosen); adversarial matching of the latent to N(0,I); gradient penalty on interpolates and generator loss -E[D] (WGAN-GP form); uses known labels; "lack of constraints" with sparse anchors (Fig. 11a); plain GAN under-corrects with three or more batches (Fig. 11b); 0 occurrences of "Wasserstein" and "WGAN" -- checked: https://doi.org/10.3390/ijms24065502; abstract; Introduction; Sec. 2.3.1-2.3.2 (prior, loss functions); Results text on Fig. 11; text: PMC full text
+ - luecken2025defining -- at least four batch-integration benchmarks used different datasets and metrics and suggested different optimal methods; Open Problems standardises tasks -- checked: https://doi.org/10.1038/s41587-025-02694-w; p7 of the preprint text; text: metadata from the journal DOI; text from the Research Square preprint rs-4181617 (OA copy listed by Unpaywall); journal full text closed
+@@ -57,7 +56,6 @@ Rule for method-naming keys (marked "method naming"): metadata plus abstract.
+ - johnson2007adjusting -- ComBat: parametric and non-parametric empirical Bayes batch adjustment, robust in small samples (method naming) -- checked: https://doi.org/10.1093/biostatistics/kxj037; abstract (PubMed 16632515); text: metadata + abstract (method naming rule)
+ - haghverdi2018batch -- MNN: batch correction from mutual nearest neighbours (method naming) -- checked: https://doi.org/10.1038/nbt.4091; abstract (PubMed 29608177); text: metadata + abstract (method naming rule)
+ - stuart2019comprehensive -- Seurat anchors: integration across scRNA-seq technologies and modalities (method naming) -- checked: https://doi.org/10.1016/j.cell.2019.05.031; abstract (PubMed 31178118); text: metadata + abstract (method naming rule)
+-- reid2025topology -- earlier public preprint of this study ("Topology Matters"); its backbone (scCRAFT) is read from the July submission text -- checked: https://doi.org/10.1101/2025.11.12.688061; Crossref metadata (posted-content, 2025-11); abstract; backbone sentence: Topology_Matters.zip oup-authoring-template.tex:142; text: metadata + abstract (bioRxiv full text: HTTP 429)
+ 
+ ## Gap search (repeated 2026-10-15)
+ 
+@@ -89,7 +87,7 @@ Rule for method-naming keys (marked "method naming"): metadata plus abstract.
+ ## Version substitutions and limits
+ 
+ - Text read from a preprint or arXiv version because the publisher version was not open: arjovsky2017towards (arXiv v1; OpenReview PDF HTTP 403), shen2018wasserstein (arXiv v4, AAAI camera-ready per its comment), amodio2019exploring (bioRxiv), dincer2020adversarial and wang2022respan (bioRxiv, plus the published abstracts), shaham2017removal (arXiv 1610.04181), corani2017statistical (arXiv 1609.08905v3), luecken2025defining (Research Square rs-4181617).
+-- Abstract only (closed access): maan2024characterizing, lotfollahi2020conditional, goh2022batch; metadata only: clopper1934use; metadata plus opening paragraph: gayoso2022python; metadata plus abstract: reid2025topology.
++- Abstract only (closed access): maan2024characterizing, lotfollahi2020conditional, goh2022batch; metadata only: clopper1934use; metadata plus opening paragraph: gayoso2022python.
+ - Year set from the print issue where Crossref "issued" is the online date: luecken2022benchmarking (2021 -> 2022), buttner2019test (2018 -> 2019), johnson2007adjusting (2006 -> 2007).
+ - Not carried from the July bibliography: Stegle2015-gr (claim not checked; dropped); other July keys are outside this track (methods, data).
+ - Code facts cited in the fragments were read at commit 08f1e3c (scripts/scvi_adversarial_plan.py) and in the installed scvi-tools 1.4.2 source (scvi/nn/_base_components.py, scvi/train/_trainingplans.py).
+@@ -109,11 +107,25 @@ Two independent reviews of commit add2f73: Introduction track (report ff66652f-c
+ 
+ - genevay2018learning -- debiased Sinkhorn loss 2 W_eps(mu,nu) - W_eps(mu,mu) - W_eps(nu,nu) (Theorem 1, Eq. 4); entropic smoothing gives losses between OT and MMD (abstract) -- checked: https://proceedings.mlr.press/v84/genevay18a.html (citation_* meta tags: pages 1608-1617, AISTATS 2018); p1 (abstract), p3 (Theorem 1, Eq. 4); text: PMLR v84 PDF (publisher version). Also cited in src/wcd_vae/wcd/alignment.py:12.
+ - ganin2016domain -- author list corrected: Mario Marchand (JMLR PDF page 1; the JMLR landing-page metadata reads 'Mario March').
+-- reid2025topology -- title as on bioRxiv for versions 2 and 3 ('... Discriminators in Single-Cell Data Integration', bioRxiv API 2026-10-15); the Crossref record (deposited 2026-05-08) and the July manuscript read 'for'. Version 1 (2025-11-13) is titled 'Wasserstein Critics Outperform Discriminators in Adversarial Deconfounding of Gene Expression Data' (authors Reid, Guven). Entry type changed to @article (journal bioRxiv) so that plainnat prints the DOI. The preprint full text was refused (HTTP 429), so the claim that the preprint used the scCRAFT backbone is marked pending in paper.tex.
+ - luecken2025defining -- collective author 'Open Problems Jamboree Members' added (Crossref, author 26 of 55).
+ - shaham2017removal -- paper.tex now follows the published text (PMC5870543: one source replicate and one target replicate measured in different batches); the arXiv v6 sentence on calibrating several source batches to one target is not used.
+-- reid2025topology -- year 2025 is the DOI posting year (Crossref issued 2025-11-13); the cited version is 3 (2026-05-05), named in the note field.
+ - lotfollahi2020conditional -- the line now also states trVAE's purpose (out-of-distribution generation across conditions), read in the published abstract and arXiv 1910.01791v2.
+ - arjovsky2017towards -- 'L{\'e}on Bottou' spelled as in arjovsky2017wasserstein.
+ - corani2017statistical -- now cited once, for the decision rule of SI-74 (region of practical equivalence; posterior probability 0.95), checked by the review in arXiv 1609.08905v3; not cited for the pooling model of SI-73.
+ - Still abstract only after the review: goh2022batch, maan2024characterizing (also its 2022 preprint, a different version), johnson2007adjusting, stuart2019comprehensive, buttner2019test; metadata only: clopper1934use, gayoso2022python. lotfollahi2020conditional: published abstract plus arXiv 1910.01791v2 full text.
++
++
++## Coverage additions (2026-10-15)
++User decision: add all eight coverage candidates; GLUE's reference added where the Introduction names it. Checked by a literature sub-agent (full text for six; abstract only for iDLC, scStarCorrect and Portal, marked \pending in paper.tex); the lead re-read the Beaconet, IMGG, ABC, AIF, Li and GLUE full texts for the loss form of each. Portal's author field keeps the byline (Crossref lists 166 authors, the Tabula Microcebus Consortium members included).
++- jiang2026geometric -- iDLC: explicit separation of biological and technical components in a latent space; alignment by optimal-transport-regularised adversarial term, guided by high-confidence mutual-nearest-neighbour pairs -- checked: https://doi.org/10.64898/2026.02.17.706490; abstract only (bioRxiv full text not obtained: the DOI resolver and Semantic Scholar returned HTTP 429 on two attempts; no mirror tried); text: abstract returned by the fetch tool, metadata from Crossref (posted 2026-02-20). Not stated in the abstract: the adversary's divergence, any reference batch, the backbone.
++- gu2025scstarcorrect -- scStarCorrect: StarGAN-based; shared variational autoencoder conditioned on batch labels; domain-aware discriminator enforcing alignment to a fixed reference batch (one-way correction); loss terms: reconstruction, adversarial, domain classification, variational regularisation -- checked: https://doi.org/10.1109/bibm66473.2025.11356167; abstract only (IEEE full text closed: Unpaywall no OA location, Semantic Scholar no openAccessPdf, DOI resolver HTTP 202); text: abstract returned by the fetch tool, metadata from Crossref (BIBM 2025, pp. 921-926). Not stated in the abstract: the form of the adversarial loss (cross-entropy or Wasserstein).
++- xu2024beaconet -- Beaconet: corrector network in the original gene-expression space on log-scaled data; one auxiliary network W_j per batch estimates the Wasserstein distance (Kantorovich-Rubinstein dual, k-Lipschitz) between batch j and the mixture of the other batches; gradient penalty (lambda = 10, after Gulrajani et al.); reference-free, no cell-type labels or cell-pair matching -- checked: https://doi.org/10.1002/advs.202306770; abstract; Introduction (last paragraph); Experimental Section: 'Problem Formulation', 'Wasserstein distance' (Eqs. 1-2), 'Penalty term for 1-lipschitz condition', 'Algorithm of Beaconet', 'Objective Function' (Eqs. 3-8); text: PMC full text (PMC11234410), no page numbers (section and equation locators)
++- zhao2022adversarial -- Portal: unified framework of adversarial domain translation learning harmonised representations; integrates datasets across samples, platforms and data types; scales to millions of cells -- checked: https://doi.org/10.1038/s43588-022-00251-y; abstract only (publisher full text is subscription: Europe PMC marks 'Subscription required', Unpaywall returned no OA location, fetch tool found no readable copy); text: abstract from Europe PMC record, metadata from Crossref (Nat Comput Sci 2:317-330). Not stated in the abstract: the adversarial loss, any reference batch, the backbone.
++- monnier2024novel -- AIF: conditional VAE on gene expression with batch-label conditioning (MSE reconstruction, KL, cross-entropy batch classification); real/fake GAN discriminator (cross-entropy); auxiliary network predicts batch from the latent code (cross-entropy L_aux) and enters the encoder objective adversarially; at correction all cells are decoded under one batch label, the study using the most represented batch -- checked: https://doi.org/10.1371/journal.pcbi.1011880; abstract; p3 (Methods, 'Model presentation', Fig 2), p4 (loss list; discriminator C_chi; auxiliary network A_psi), p5 ('Batch effect correction'); text: PDF in PLOS Comput Biol layout (page 3 footer 'February 22, 2024 3 / 22'), retrieved through Unpaywall (HAL-hosted copy)
++- danino2024batch -- ABC: autoencoder (encoder E, decoder DC) on normalised gene counts, latent and output cell-type classifiers, batch discriminator DI = multi-class batch classifier with categorical cross-entropy (Eq. 1), autoencoder trained against it with L_ADV = -1/n sum log(1 - DI(.)_c) (Eq. 2), MSE reconstruction (Eq. 3); the discriminator predicts one of C batches, with no reference-batch designation (the word 'reference' occurs only in the 'References' heading); no variational term -- checked: https://doi.org/10.1093/bioadv/vbad186; abstract; Introduction (last paragraphs); Sec. 2.1 'The model and training process' (Eqs. 1-3, Fig. 1); text: PMC full text, no page numbers
++- wang2022imgg -- IMGG: HVG selection, PCA, mutual-nearest-neighbour search to build cross-batch connected graphs of similar cells; residual fully connected generator in the HVG space; adversarial loss 'optimized via the WGAN-GP' (critic loss E[D(fake)] - E[D(real)] + gradient penalty, Eq. 1; generator loss -E[D(fake)], Eq. 2) plus an L2 reconstruction loss (Eq. 3); target = intermediate batch synthesised per cohort (Mean, Max or Min of the cohort) instead of an anchor batch -- checked: https://doi.org/10.3390/ijms23042082; abstract; Introduction; Sec. 4 (opening paragraph), Sec. 4.3, Sec. 4.4 (Eqs. 1-3); text: PMC full text, no page numbers
++- li2022trade -- scVI (preliminary version 0.3.0) with bi-objective loss (U_n = negative ELBO, V_n = batch-effect measure on the latent z); Pareto front by Pareto multi-task learning versus scalarisation (K = 10 subproblems + 2 extreme points = 12 candidates); V_n = MINE estimate of mutual information between z and batch (neural network trained adversarially) or MMD between z|s=0 and z|s=1; surrogate scores for the candidates: batch entropy, ASW, ARI, NMI, UCA -- checked: https://doi.org/10.1186/s12859-022-05003-3; abstract; p3 (Controlling batch effect; footnote 3, scVI 0.3.0), p4 (Eqs. 2-3), p5-6 (Overview of methods; U_n = -ELBO; standardisation; 12 candidates), p6 and p19 (MINE needs adversarial training), p9 (surrogate metrics), p16-17 (Methods: MINE Eq. 8, MMD Eq. 9); text: publisher PDF (gold OA, Unpaywall)
++- cao2022multi -- GLUE: omics-specific variational autoencoders with a shared embedding dimension; guidance graph of regulatory interactions embedded by a graph variational autoencoder and used in the decoders; omics discriminator D (K-way softmax) trained with multiclass cross-entropy (Eq. 18) and opposed by the encoders; canonical adversarial alignment 'amounts to minimizing a generalized form of Jensen-Shannon divergence' (Eq. 21); within-omics batch effect handled by batch as a decoder covariate; gloss 'graph-linked embedding method' matches the title ('graph-linked embedding') and abstract ('graph-linked unified embedding') but omits the adversarial alignment -- checked: https://doi.org/10.1038/s41587-022-01284-4; abstract; PDF p2 (Fig. 1 caption and text), p3 (batch correction, Results), p11 (Methods: Eqs. 18-21, 'Batch effect correction'); text: publisher PDF (hybrid OA, Unpaywall)
++
++## Removed keys (2026-10-15, user decisions)
++- he2025partially (scCRAFT) and reid2025topology (the authors' earlier preprint) were removed from paper.tex and refs.bib: the user decided that the main text does not name scCRAFT and does not mention the earlier submission, the preprint or their pipeline defects ("only the final methods and results are written up"). Their claim checks are in this file's history at commit d556bb1.
+diff --git a/paper/paper.tex b/paper/paper.tex
+index 2ec3a63..eabf02a 100644
+--- a/paper/paper.tex
++++ b/paper/paper.tex
+@@ -108,7 +108,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
+ \item Primary comparison (P1): biology score at matched batch removal, reference critic minus discriminator, one result per decoder \src{SI-21; SI-68; SI-70}.
+ \item Main result: \pending{main result}{X1 scored and the single analysis run}
+ \item Implication: \pending{guidance for scVI users, including the case that no adversary improves on plain scVI}{X1 and X13 analysed}
+-\item Availability: code in the GitHub repository kreid415/wasserstein-critic-deconfounding \src{git remote}; \pending{tag and commit of record}{tag prereg-tier12-v3}; scIB task files with checksums [S-D2]; the earlier preprint is replaced by the next version once results exist \src{SI-07}.
++\item Availability: code in the GitHub repository kreid415/wasserstein-critic-deconfounding \src{git remote}; \pending{tag and commit of record}{tag prereg-tier12-v3}; scIB task files with checksums [S-D2].
+ \end{itemize}
+ 
+ \section{Introduction}\label{sec:intro}
+@@ -152,8 +152,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
+ \item When cell-type (label) proportions differ between two batches (domains), any one classifier applied to the shared latent space makes errors: if the label distributions are farther apart than the latent distributions, its error summed over the two batches is at least $\tfrac12\bigl(d_{JS}(\mathcal{D}^Y_S,\mathcal{D}^Y_T)-d_{JS}(\mathcal{D}^Z_S,\mathcal{D}^Z_T)\bigr)^2$, which grows as the latent distributions are aligned more tightly ($d_{JS}$: square root of the JS divergence; $\mathcal{D}^Y$, $\mathcal{D}^Z$: label and latent distributions of the two batches $S$, $T$) \citep[Thm.~4.3; binary labels]{zhao2019learning}.
+ \item Exact alignment with zero source error, under any distance that is zero only for identical distributions (a JS classifier, Wasserstein, maximum mean discrepancy (MMD)), leaves target error of at least the label-proportion gap \citep[Prop.~3.1; binary labels]{wu2019domain}.
+ \item Exact alignment under any such distance therefore costs accuracy under composition shift; whether the divergence arms over-align at the finite penalty strengths used here is a hypothesis, tested by the dose-response X3 \pending{X3 analysis}{specified during X1, before any X1 result is examined (SI-68)}.
+-\item An adversarial conditional variational autoencoder (VAE) and GLUE (a graph-linked embedding method) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+-\item scCRAFT added a triplet loss against the over-correction of its adversarial loss under heterogeneous compositions \citep{he2025partially} \pending{kept only if the main text names scCRAFT}{your decision (Related work)}.
++\item An adversarial conditional variational autoencoder (VAE) and GLUE (a graph-linked embedding method for multi-omics integration; \citealp{cao2022multi}) mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+ \item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}.
+ \end{itemize}
+ 
+@@ -168,8 +167,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
+ \begin{itemize}
+ \item Closest controlled-backbone study: scIB-E, an extension of the single-cell integration benchmark scIB, with six batch losses (GAN, Hilbert--Schmidt independence criterion (HSIC), orthogonal projection, mutual information, gradient reversal, reverse cross-entropy) in one scVI framework; no W1, optimal-transport (OT) or explicit MMD term between batch distributions (its HSIC term measures dependence between latent code and batch label) \citep{yi2025benchmarking}.
+ \item No comparison of JS, W1 and MMD or OT objectives on one stock scVI backbone was found (searches of 2026-10-15 in OpenAlex, arXiv and Europe PMC from 2017, with citation tracking and web searches; scope and limits in \file{paper/evidence.md}): a search-based absence, not an exhaustive one \src{\file{paper/evidence.md}, Gap search} \pending{search repeated}{before submission}.
+-\item Earlier comparison: our July submission compared a JS discriminator with a reference-based W1 critic on a fixed scCRAFT backbone \pending{whether the main text names scCRAFT (PAPER\_PLAN \S3: only as the earlier backbone; July convention: no mention)}{your decision}, without MMD or Sinkhorn arms \src{Topology\_Matters.zip: oup-authoring-template.tex:134, :142}; its public preprint \citep{reid2025topology} is to be replaced by the next version \src{SI-07}. \pending{statement that its results are not carried over, and the disclosure of its pipeline defects (PAPER\_PLAN \S1)}{your decision}
+-\item Reference anchoring and W1 critics already exist: a W1 critic for domain-invariant features \citep{shen2018wasserstein}, reference-anchored WGAN-GP integration \citep{wang2021imap} and MMD alignment to a reference or target batch \citep{amodio2019exploring,shaham2017removal}. \pending{whether the text states that no `first' claim is made}{your decision}
++\item Reference anchoring and W1 critics already exist: a W1 critic for domain-invariant features \citep{shen2018wasserstein}, reference-anchored WGAN-GP integration \citep{wang2021imap} and MMD alignment to a reference or target batch \citep{amodio2019exploring,shaham2017removal}.
+ \end{itemize}
+ 
+ \paragraph{Contribution.}
+@@ -209,7 +207,7 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
+ %    theoretical solution" (C21), "primary limitation is over-correction" (C22).
+ %  - IMAAE as "Wasserstein-based" and as "motivating their decision to enforce a global Gaussian prior" (C24): the IMAAE
+ %    text never uses the word Wasserstein (its loss has WGAN-GP form) and the motivation link is the July authors' reading.
+-%  - "The unbalanced scenario is known to drive severe over-correction" (C25, uncited): cite sysVI, scCRAFT and Maan 2024
++%  - "The unbalanced scenario is known to drive severe over-correction" (C25, uncited): cite sysVI and Maan 2024
+ %    for what they show, scoped to their methods; "balanced" was not composition-independent (C08 contradicted).
+ %  - July background attributions that the sources do not support (this track): batch effects from "the sequencing
+ %    technology" cited to Tung 2017 (Tung studies separately processed C1 replicates on one platform); the
+@@ -298,6 +296,7 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
+ \item scIB: 68 method and preprocessing combinations, 13 tasks, 14 metrics of batch removal and biological conservation \citep{luecken2022benchmarking}; eight of its 13 tasks are used here \src{SI-02; \file{docs/prepped_fingerprints_scib.json}}.
+ \item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
+ \item scIB-E (extended scIB): six losses on the batch label in one scVI framework (GAN, HSIC, orthogonal projection, mutual-information minimisation, gradient reversal, reverse cross-entropy), then label-aware levels in scANVI; loss weights tuned with Ray Tune (automated hyperparameter search) on the immune task \citep{yi2025benchmarking}.
++\item Li et al.: learns the whole trade-off between scVI's loss (negative evidence lower bound) and a latent-space batch measure, either a neural-network mutual-information estimate (MINE, Mutual Information Neural Estimation) or maximum mean discrepancy, by Pareto multi-task learning \citep{li2022trade}.
+ \end{itemize}
+ 
+ \paragraph{Deep generative models.}
+@@ -314,8 +313,10 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
+ \item AD-AE (adversarial deconfounding autoencoder): autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
+ \item scDREAMER (single-cell deep generative integration model with adversarial classifier): adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
+ \item scvi-tools' adversarial batch classifier: fool loss weighted by one minus the KL weight (arm scvi\_adv) \src{scvi-tools 1.4.2: scvi/train/\_trainingplans.py:535, 674--695; \file{scvi_adversarial_plan.py}:175--177}.
+-\item scCRAFT (single-cell batch correction and reliable anchor-free integration with partial topology): multi-domain GAN discriminator plus a dual-resolution triplet loss against over-correction \citep{he2025partially} \pending{kept only if the main text names scCRAFT}{your decision, next line}.
+-\item scCRAFT was the backbone of the original submission \src{Topology\_Matters.zip: oup-authoring-template.tex:142}; the revision uses stock scVI \src{SI-09; SI-10}. \pending{that the public preprint \citep{reid2025topology} used the same backbone}{preprint text read (bioRxiv refused access in review; the repository README named scCRAFT as the base model on 2025-11-08, before preprint version 1)} \pending{whether the main text names scCRAFT (PAPER\_PLAN \S3: only as the earlier backbone; July convention: no mention)}{your decision}.
++\item AIF (Adversarial Information Factorization): a conditional variational autoencoder on gene expression whose encoder is trained against an auxiliary cross-entropy classifier of batch from the latent code; cells are then decoded under one chosen batch label \citep{monnier2024novel}.
++\item ABC (Autoencoder-based Batch Correction): an autoencoder trained against a multi-class batch discriminator with categorical cross-entropy, plus cell-type classifier branches that use labels to retain biological signal; no reference batch is designated \citep{danino2024batch}.
++\item scStarCorrect: a StarGAN-based model combining a batch-conditioned variational autoencoder with a domain-aware discriminator that aligns every batch to one fixed reference batch, so correction runs one way \citep{gu2025scstarcorrect} \pending{full-text check and paragraph placement (abstract read only; IEEE closed access)}{full text obtained}.
++\item Portal: a unified framework of adversarial domain translation that learns harmonised representations of datasets, applied across samples, platforms and data types and to integration of millions of cells \citep{zhao2022adversarial} \pending{full-text check and paragraph placement (abstract read only; subscription journal)}{full text obtained}.
+ \end{itemize}
+ 
+ \paragraph{Wasserstein critics.}
+@@ -325,6 +326,8 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
+ \item ResPAN: WGAN with random-walk mutual-nearest-neighbour pairing and skip-connected autoencoders \citep{wang2022respan}.
+ \item IMAAE (integrating multiple single-cell datasets via an adversarial autoencoder): adversarial autoencoder matching the latent to $\mathcal{N}(0,I)$ with a WGAN-GP-form loss (never named Wasserstein), an anchor batch and known cell labels \citep{wang2023integrating}.
+ \item In the IMAAE paper, a GAN-only model tried at the design stage under-corrected with three or more batches (one dataset, judged from UMAP plots); the authors then used the GAN to constrain the latent space of an autoencoder \citep{wang2023integrating}.
++\item Beaconet (Batch Effect Adversarial Correction Network): corrects each batch in gene-expression space with a corrector network, trained against one Wasserstein-distance critic per batch with a gradient penalty; no reference batch is chosen \citep{xu2024beaconet}.
++\item IMGG (integrating multiple single-cell datasets through connected graphs and generative adversarial networks): a generator on highly variable genes trained with a Wasserstein GAN with gradient penalty (WGAN-GP) critic towards a synthetic intermediate target built from similar-cell cohorts matched across batches by mutual nearest neighbours \citep{wang2022imgg}.
+ \end{itemize}
+ 
+ \paragraph{Kernel and optimal-transport alignment.}
+@@ -335,7 +338,7 @@ All six research questions are open: 19 of the 3,000 X1 rows are scored (local r
+ \item BERMUDA (batch effect removal using deep autoencoders): MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
+ \item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
+ \item Entropy-regularised OT \citep{cuturi2013sinkhorn}; Sinkhorn divergences interpolate between OT and MMD \citep{genevay2018learning,feydy2019interpolating}; Wasserstein barycenters \citep{cuturi2014fast}; POT (Python Optimal Transport) library \citep{flamary2021pot}.
+-\item \pending{further single-cell methods from the review's coverage search, read at abstract level only: iDLC (optimal-transport-regularised adversarial alignment, 2026 preprint), scStarCorrect (adversarial alignment to one fixed reference batch), Beaconet (adversarial, no reference), Portal (adversarial domain translation), AIF, ABC and IMGG (adversarial), and the batch-removal versus biology trade-off curve on scVI of Li et al. 2022}{your decision on coverage; each line then checked in the full text}
++\item iDLC: separates biological and technical components in a latent space, then aligns batches with an adversarial term regularised by optimal transport, guided by mutual-nearest-neighbour cell pairs \citep{jiang2026geometric} \pending{full-text check and paragraph placement (abstract read only; bioRxiv returned HTTP 429)}{full text obtained}.
+ \end{itemize}
+ 
+ \section{Methods}
+@@ -881,20 +884,6 @@ all (scoring, CPU baselines) & local CPU & \src{SI-47; PREREG \S9, 2026-10-04 (b
+ 
+ \subsection*{S-X Disclosures}
+ \begin{enumerate}
+-\item Earlier submission and preprint: the original submission (BIOINF-2026-1434) and bioRxiv versions 1--3 used a pipeline (code at cd64f05) with nine defects, as audited \src{PAPER\_PLAN \S1; the audit of the original submission named in PAPER\_PLAN's Sources (original\_manuscript\_audit.md, \S3 items 1 and 24; a project file outside the repository)}:
+-\begin{itemize}
+-\item D1 the negative binomial likelihood fitted to log-normalised values;
+-\item D2 LISI computed on a neighbour graph mixing two unaligned PCA frames (training and test cells);
+-\item D3 a sampled latent scored instead of the posterior mean;
+-\item D4 a gradient-penalty fallback in the binary and reference-sweep runs;
+-\item D5 10 critic updates against 1 discriminator update;
+-\item D6 an unbounded discriminator generator loss;
+-\item D7 strengths selected on 40-epoch inner models but reported on 80-epoch outer models;
+-\item D8 a custom fastmath LISI;
+-\item D9 one seed, overlapping folds as replicates, and 36 uncorrected tests of which 6 survive Holm.
+-\end{itemize}
+-\item Of the original paper's 25 substantive claims, 11 were invalidated by these defects, 6 never tested, 5 partially supported and 3 contradicted by its own data; no number of its Table 2, Figures 2--5 or Table S1 is reused \src{PAPER\_PLAN \S1; original\_manuscript\_claims\_audit.csv (project file outside the repository)}.
+-\item The public preprint stays as it is and will be replaced by the next version with results \src{SI-07}.
+ \item A code check of tag prereg-tier12-v1 led to fixes before tag prereg-tier12-v2 \src{SI-40; PREREG \S9, 2026-10-04}. A1 restarted from zero at tag prereg-tier12-v2; the 202 A1 fits made at prereg-tier12-v1 stay on disk, unused, and no A1 metric value from them informed any decision \src{SI-43}.
+ \item The strength ranges of X1 come from 3 of the 8 tasks (atac\_small, immune, sim1), fitted on seeds 100--102, disjoint from X1; no A1 fit is used as an X1 fit \src{PREREG, Disclosure (for Methods); SI-13}.
+ \item Strength-grid edges: X1 tasks whose matched strength falls on a grid edge are extended by rule R4 for matching only, and edge optima are disclosed per task \src{PREREG \S8; SI-55}.
+diff --git a/paper/refs.bib b/paper/refs.bib
+index 72d5a93..ea000c2 100644
+--- a/paper/refs.bib
++++ b/paper/refs.bib
+@@ -484,18 +484,6 @@
+   verified = {2026-10-14 via doi}
+ }
+ 
+-@article{he2025partially,
+-  author = {He, Chuan and Filippidis, Paraskevas and Kleinstein, Steven H. and Guan, Leying},
+-  title = {Partially characterized topology guides reliable anchor-free {scRNA-integration}},
+-  journal = {Communications Biology},
+-  volume = {8},
+-  number = {1},
+-  pages = {561},
+-  year = {2025},
+-  doi = {10.1038/s42003-025-07988-y},
+-  verified = {2026-10-14 via doi}
+-}
+-
+ @article{wang2022respan,
+   author = {Wang, Yuge and Liu, Tianyu and Zhao, Hongyu},
+   title = {{ResPAN:} a powerful batch correction model for {scRNA-seq} data through residual adversarial networks},
+@@ -580,16 +568,6 @@
+   verified = {2026-10-14 via doi}
+ }
+ 
+-@article{reid2025topology,
+-  author = {Reid, Kendall and Stein-O'Brien, Genevieve and Guven, Erhan},
+-  title = {Topology Matters: The Trade-off Between {Wasserstein} Critics and Discriminators in Single-Cell Data Integration},
+-  journal = {bioRxiv},
+-  note = {Version 3, posted 2026-05-05},
+-  year = {2025},
+-  doi = {10.1101/2025.11.12.688061},
+-  verified = {2026-10-15 via bioRxiv API}
+-}
+-
+ @inproceedings{arjovsky2017towards,
+   author = {Martin Arjovsky and L{\'e}on Bottou},
+   title = {Towards Principled Methods for Training Generative Adversarial Networks},
+@@ -651,3 +629,109 @@
+   url = {https://proceedings.mlr.press/v84/genevay18a.html},
+   verified = {2026-10-15 via url}
+ }
++
++% Coverage additions (user decision 2026-10-15: all eight review coverage candidates; plus GLUE, named in the Introduction)
++@article{jiang2026geometric,
++  author = {Jiang, Chenghan and Zheng, Ren and Ji, Yongle and Cao, Shubin and Fang, Yanhua and Wang, Zhe and Wang, Ruoyu and Liang, Shanshan and Tao, Shuai},
++  title = {Geometric-aware and interpretable deep learning for single-cell batch correction via explicit disentanglement and optimal transport},
++  journal = {bioRxiv},
++  note = {Preprint, posted 2026-02-20},
++  year = {2026},
++  doi = {10.64898/2026.02.17.706490},
++  verified = {2026-10-15 via doi}
++}
++
++@inproceedings{gu2025scstarcorrect,
++  author = {Gu, Weizhen and Zhang, Han and Han, Mingjing},
++  title = {{scStarCorrect:} A {StarGAN}-Based Adversarial Model for Reference-Guided Batch Correction in Single-Cell {RNA-Seq} Data},
++  booktitle = {2025 IEEE International Conference on Bioinformatics and Biomedicine ({BIBM})},
++  pages = {921--926},
++  year = {2025},
++  publisher = {IEEE},
++  doi = {10.1109/bibm66473.2025.11356167},
++  verified = {2026-10-15 via doi}
++}
++
++@article{xu2024beaconet,
++  author = {Xu, Han and Ye, Yusen and Duan, Ran and Gao, Yong and Hu, Yuxuan and Gao, Lin},
++  title = {{Beaconet:} A Reference-Free Method for Integrating Multiple Batches of Single-Cell Transcriptomic Data in Original Molecular Space},
++  journal = {Advanced Science},
++  volume = {11},
++  number = {26},
++  pages = {2306770},
++  year = {2024},
++  doi = {10.1002/advs.202306770},
++  verified = {2026-10-15 via doi}
++}
++
++@article{zhao2022adversarial,
++  author = {Zhao, Jia and Wang, Gefei and Ming, Jingsi and Lin, Zhixiang and Wang, Yang and {The Tabula Microcebus Consortium} and Wu, Angela Ruohao and Yang, Can},
++  title = {Adversarial domain translation networks for integrating large-scale atlas-level single-cell datasets},
++  journal = {Nature Computational Science},
++  volume = {2},
++  number = {5},
++  pages = {317--330},
++  year = {2022},
++  doi = {10.1038/s43588-022-00251-y},
++  verified = {2026-10-15 via doi; author list = byline (Crossref first six and last two of 166 records; the rest are consortium members)}
++}
++
++@article{monnier2024novel,
++  author = {Monnier, Lily and Courn{\`e}de, Paul-Henry},
++  title = {A novel batch-effect correction method for {scRNA-seq} data based on {Adversarial Information Factorization}},
++  journal = {PLOS Computational Biology},
++  volume = {20},
++  number = {2},
++  pages = {e1011880},
++  year = {2024},
++  doi = {10.1371/journal.pcbi.1011880},
++  verified = {2026-10-15 via doi}
++}
++
++@article{danino2024batch,
++  author = {Danino, Reut and Nachman, Iftach and Sharan, Roded},
++  title = {Batch correction of single-cell sequencing data via an autoencoder architecture},
++  journal = {Bioinformatics Advances},
++  volume = {4},
++  number = {1},
++  pages = {vbad186},
++  year = {2024},
++  doi = {10.1093/bioadv/vbad186},
++  verified = {2026-10-15 via doi}
++}
++
++@article{wang2022imgg,
++  author = {Wang, Xun and Zhang, Chaogang and Zhang, Ying and Meng, Xiangyu and Zhang, Zhiyuan and Shi, Xin and Song, Tao},
++  title = {{IMGG:} Integrating Multiple Single-Cell Datasets through Connected Graphs and Generative Adversarial Networks},
++  journal = {International Journal of Molecular Sciences},
++  volume = {23},
++  number = {4},
++  pages = {2082},
++  year = {2022},
++  doi = {10.3390/ijms23042082},
++  verified = {2026-10-15 via doi}
++}
++
++@article{li2022trade,
++  author = {Li, Hui and McCarthy, Davis J. and Shim, Heejung and Wei, Susan},
++  title = {Trade-off between conservation of biological variation and batch effect removal in deep generative modeling for single-cell transcriptomics},
++  journal = {BMC Bioinformatics},
++  volume = {23},
++  number = {1},
++  pages = {460},
++  year = {2022},
++  doi = {10.1186/s12859-022-05003-3},
++  verified = {2026-10-15 via doi}
++}
++
++@article{cao2022multi,
++  author = {Cao, Zhi-Jie and Gao, Ge},
++  title = {Multi-omics single-cell data integration and regulatory inference with graph-linked embedding},
++  journal = {Nature Biotechnology},
++  volume = {40},
++  number = {10},
++  pages = {1458--1466},
++  year = {2022},
++  doi = {10.1038/s41587-022-01284-4},
++  verified = {2026-10-15 via doi}
++}

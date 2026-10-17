@@ -1,0 +1,18 @@
+CLAIM RECEIPT
+claim: Introduction of paper/paper.tex at add2f73 reviewed: 25 findings (0 blocker, 16 fix, 9 note); report, flat ledger entries and claims table written; numbers in the report read back from the result files; replacement text compiled with 0 TeX errors.
+- reconcile: counts agree: {'total': 25, 'findings': 25, 'sum(parts)': 25, 'sum(partition sizes)': 25, 'len(union(partitions))': 25, 'len(items)': 25} | in-memory
+- reconcile: counts agree: {'claims_table_rows': 44, 'claims_in_data': 44} | in-memory
+- reconcile: counts agree: {'conflicts_rows': 14, 'conflict_sources': 14} | in-memory
+- readback: report_values.json {"key": "immune1_diff"} = 0.01882369445223908 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "sim1_1_diff"} = 0.006917415545499295 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "manifest_rows"} = 6930 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "x1_rows"} = 3000 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "manifest_sha"} = "6efbe422c8f09f98" | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "gap_unique"} = 175 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "gap_forward"} = 54 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "gap_raw"} = 194 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "n_status_checked"} = 9 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "n_status_mismatch"} = 0 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "tex_errors"} = 0 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+- readback: report_values.json {"key": "undefined_citations_or_references"} = 0 | ./intro_review/report_values.json sha256:d4aa4822230a @2026-10-15T14:19:11Z
+not checked: maan2024characterizing: published full text closed; abstract (Europe PMC) and the 2022 preprint only; goh2022batch: published full text closed; abstract only; arjovsky2017towards: ICLR camera-ready (OpenReview) not opened; arXiv v1 read; saucie (Amodio 2019), dincer2020adversarial, mmd-resnet (Shaham 2017): bioRxiv or arXiv versions read, not published versions; Stegle 2015 (dropped by the literature track): not retrieved; HSIC equals MMD between joint and product of marginals (arXiv 2503.04820): seen as a search-result entry only; Con-AAE (Bioinformatics 39:btad162) and scBIOT (Research Square 10.21203/rs.3.rs-8310482/v1): not opened / title only; bioRxiv full text of the authors' own preprint 10.1101/2025.11.12.688061 (HTTP 429); July submission text read instead; Related work and Methods citation sites (parallel tracks)

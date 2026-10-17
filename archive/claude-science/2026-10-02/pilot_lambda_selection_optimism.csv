@@ -1,0 +1,5 @@
+arm,lam_insample,insample_max,loso_selected,loso_estimate,optimism,none_ctrl
+discriminator_c0,20,0.6572,"[np.int64(20), np.int64(20), np.int64(20)]",0.6572,0.0,0.6381
+discriminator_c1,1,0.6405,"[np.int64(1), np.int64(1), np.int64(1)]",0.6405,0.0,0.6346
+pooled_c1,1,0.5608,"[np.int64(100), np.int64(100), np.int64(1)]",0.5226,0.0381,0.6346
+reference_c1,1,0.6457,"[np.int64(1), np.int64(1), np.int64(1)]",0.6457,0.0,0.6346

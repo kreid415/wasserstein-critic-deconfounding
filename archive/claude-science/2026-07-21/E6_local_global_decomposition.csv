@@ -1,0 +1,5 @@
+dataset,head,ilisi,graph_conn,asw_batch,pcr,clisi,asw_celltype,ari,nmi
+immune,discriminator,0.415,0.93,0.89,0.016,0.017,0.547,0.613,0.745
+immune,critic,0.402,0.876,0.828,0.0,0.034,0.497,0.429,0.587
+pancreas,discriminator,0.45,0.952,0.927,0.029,0.005,0.685,0.931,0.899
+pancreas,critic,0.381,0.93,0.907,0.002,0.017,0.611,0.644,0.688

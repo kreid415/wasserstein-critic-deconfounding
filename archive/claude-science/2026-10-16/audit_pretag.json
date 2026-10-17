@@ -1,0 +1,915 @@
+{
+ "head": "8f223c8fcb89dbd0e27da91edde4dd2568c58bda",
+ "cutoff_new_york": "2026-10-16 16:35:57 EDT",
+ "since": "2026-10-02 00:00 New York",
+ "own_session_excluded": "d7cc219b-2a86-40fc-a7c1-dc22f304850d",
+ "sessions_in_scope": 75,
+ "sessions_searched": 74,
+ "sessions_mentioning": 71,
+ "messages_searched": 42592,
+ "messages_mentioning": 3321,
+ "messages_expected": 42592,
+ "identifiers": 565,
+ "folders": 197,
+ "listed_files": 1129,
+ "files_scanned": 26561,
+ "files_mentioning": 5736,
+ "files_scanned_outside_review": 43,
+ "flagged_files_part": {
+  "verbatim copy of committed repository file": 262,
+  "unclassified": 12,
+  "verbatim copy of committed docs": 3042,
+  "verbatim copy of committed notebook": 468,
+  "match on an ordinary word that is also a file stem (failures); no listed file named": 9,
+  "match on an ordinary word that is also a file stem (div); no listed file named": 1
+ },
+ "flagged_transcripts_part": {
+  "verbatim copy of committed repository file": 338,
+  "message older than every listed file (before 2026-10-02 19:25 New York time)": 15,
+  "match on an ordinary word that is also a file stem (failures); no listed file named": 27,
+  "match on an ordinary word that is also a file stem (nan); no listed file named": 5,
+  "unclassified": 71,
+  "known display 1 (2026-10-02, X13 runner tests on atac_small)": 6,
+  "verbatim copy of committed docs": 14,
+  "verbatim copy of committed notebook": 4,
+  "known display 3 (2026-10-12 23:54, X13_lung_scanvi_l0_c1_s0_8e6f5009, head -c 600)": 1,
+  "known display 2 (2026-10-13, scorer identity check)": 6
+ },
+ "flagged_by_class": {
+  "verbatim copy of committed repository file": 600,
+  "unclassified": 83,
+  "verbatim copy of committed docs": 3056,
+  "verbatim copy of committed notebook": 472,
+  "match on an ordinary word that is also a file stem (failures); no listed file named": 36,
+  "match on an ordinary word that is also a file stem (div); no listed file named": 1,
+  "message older than every listed file (before 2026-10-02 19:25 New York time)": 15,
+  "match on an ordinary word that is also a file stem (nan); no listed file named": 5,
+  "known display 1 (2026-10-02, X13 runner tests on atac_small)": 6,
+  "known display 3 (2026-10-12 23:54, X13_lung_scanvi_l0_c1_s0_8e6f5009, head -c 600)": 1,
+  "known display 2 (2026-10-13, scorer identity check)": 6
+ },
+ "manual_classes_files": {
+  "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line": 12
+ },
+ "manual_classes_transcripts": {
+  "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line": 42,
+  "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output": 28,
+  "CANDIDATE NEW DISPLAY": 1
+ },
+ "manual_classes": {
+  "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line": 54,
+  "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output": 28,
+  "CANDIDATE NEW DISPLAY": 1
+ },
+ "known_displays": {
+  "9c73f1c4:327": "known display 1 (2026-10-02, X13 runner tests on atac_small)",
+  "baa34fcd:554": "known display 2 (2026-10-13, scorer identity check)",
+  "4295f20e:117": "known display 3 (2026-10-12 23:54, X13_lung_scanvi_l0_c1_s0_8e6f5009, head -c 600)"
+ },
+ "new_display_found": true,
+ "candidates": [
+  {
+   "frame": "1e3cd07e-c3f0-4c44-bd4d-2ec44494417f",
+   "session": "Verify runner",
+   "msg": 45,
+   "ts_ny": "2026-10-12 23:17",
+   "id": "X13_atac_large_sysvi_l10_c1_s0_a617540b",
+   "block": "tool_result",
+   "masked": "X##_atac_large_sysvi_l##_c#_s#_a######b.npz ## ### # ### {\"fit\": {\"plan_class\": \"GuardedTrainingPlan\", \"optimizer_name\": \"Adam\", \"lr\": #.###, \"eps\": #.##, \"weight_decay\": #e-##, \"n_epochs_kl_warmup\": #, \"n_steps_kl_warmup\": #, \"ma",
+   "note": "flagged by rule: listed identifier + >= 3 decimal numbers; not a known display",
+   "auditor_reading": "Reading of the digit-masked block (3 lines around the flagged line): a file listing of the latents folder (a .npz latent file with its size columns) followed by the fit-settings JSON stored with that latent (optimizer Adam, lr, eps, weight_decay, KL warm-up and KL weight constants). The decimals on the line are training settings, not metric values; no metric name appears in the block. Listed for the lead's decision; flagged by the rule, not cleared by the auditor."
+  }
+ ],
+ "manual_review_lines": [
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/pipeline_codex/REVIEW_Pipeline.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "The stale design documents are not all equivalent to this matrix. Besides ROPE and the discriminator×## conflict, the matrix retains an obsolete X# task/batch roster and X# BMMC description; the actual authoritative rows use the n"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/pipeline_codex/codex_last_message.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "The stale design documents are not all equivalent to this matrix. Besides ROPE and the discriminator×## conflict, the matrix retains an obsolete X# task/batch roster and X# BMMC description; the actual authoritative rows use the n"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/pipeline_codex/evidence/cli_checks.txt",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "REAL_SAVED_CONFIG {\"row\": {\"tag\": \"REVIEW_sim#_reference_#epoch\", \"experiment\": \"X#\", \"task\": \"sim#\", \"counts\": \"scib\", \"arm\": \"reference\", \"lam\": \"#.#\", \"n_critic\": \"#\", \"adv_input\": \"mean\", \"zstd\": \"#\", \"cond\": \"#\", \"decoder\": \""
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/esc_rules_and_scoring_fable/REVIEW_escalated_rules_and_scoring.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "| #. Scorer vs scib #.#.# and PAPER_PLAN §#; re-scoring | **Defect (F-##, blocker for scoring)** | # stored atac_small latents re-scored with the review copy: kBET, iLISI, cLISI, ASW_label, ASW_label/batch, isolated_label_silhouet"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/esc_rules_and_scoring_fable/REVIEW_escalated_rules_and_scoring.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "| F-## | **blocker** (for any scoring, incl. resuming the local X# run) | `scripts/score_scib_native.py:###` `sc.pp.neighbors(integ, use_rep=\"X_emb\", n_neighbors=##)` | PAPER_PLAN.md:### \"`scib.metrics.metrics` is called correctly"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/design_claude/REVIEW_Design.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "| D-## | A | note | data / metrics | Behaviour on tiny types and confounded tasks. | Smallest types: pancreas t_cell #, schwann ##, epsilon ##, mast ##; lung Ionocytes ##; immune Plasma cells ###. Batch × cell-type Cramér's V: sim"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/out/metrics_claude/REVIEW_Metrics.md",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "| M-## | B# | **blocker** | scripts/score_scib_native.py:### `sc.pp.neighbors(integ, use_rep=\"X_emb\", n_neighbors=##)` | PAPER_PLAN.md:### \"scib.metrics.metrics is called correctly for embeddings (k = ## …)\". The defaults of scanp"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/verify/rules/verify_results.json",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "\"evidence\": \"`i###/probe_seeds.py` on a #,###-cell sim# subset with a stored A# latent, wrapping sc.pp.neighbors and sc.tl.leiden: env knobs read 'KBET_SEED, META, NPZ, NUMBA_CPU_NAME, OUT_CSV, PREPPED, TAG'; KBET_SEED ### and ###"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/verify/rules/verify_results.json",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "\"evidence\": \"`i###/probe_ranges_prov.py` (real A# inputs, one row edited in memory): 'NMI = -#.# -> ACCEPTED (C of edited row = #.####)', cLISI -#.#, isolated_label_silhouette -#.#, ASW_label -#.# all ACCEPTED; control 'kBET = -#."
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/verify/rules/verify_results.json",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "\"evidence\": \"`i###/labels.py` on the # prepped files: pancreas isolated label 't_cell(# cells,# batches)', also kBET-skipped; atac_small isolated 'Cerebellar Granule Cells(#### cells,# batches)' kBET-skipped in every fit; immune_h"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/verify/runner/verify_results.json",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "\"evidence\": \"Variance-share decomposition Cov(m/k, B)/Var(B) over the A# adversarial fits: PCR_batch carries #.##, #.##, #.##, #.##, #.## of B variance in #/# task x decoder blocks (#.## in sim# c#); isolated_label_F# is the large"
+  },
+  {
+   "part": "files",
+   "frame": null,
+   "file": "review/verify/design/verify.json",
+   "msg": null,
+   "ts_ny": null,
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "\"impact\": \"None on completed work. R#-R# use fixed constants (delta_min #.##, ROPE #.##), not measurement SD. The P#-P# ROPE = max(#.##, # x measurement SD) needs a separate re-score wrapper that varies kBET, neighbor and Leiden s"
+  },
+  {
+   "part": "transcripts",
+   "frame": "a0b87862-8454-468c-a2f9-6326cd1433fc",
+   "file": null,
+   "msg": 14353,
+   "ts_ny": "2026-10-02 23:25",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "GATE: {\"G#_env_equivalence\": {\"status\": \"PASS (CPU side); GPU-node tests pending\", \"fit_env\": \"## identical / ## declared torch-CUDA swaps / # unexpected; pip check clean; conda layer identical\", \"score_env\": \"### identical / # ig"
+  },
+  {
+   "part": "transcripts",
+   "frame": "a0b87862-8454-468c-a2f9-6326cd1433fc",
+   "file": null,
+   "msg": 14881,
+   "ts_ny": "2026-10-03 19:50",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "{\"status\":\"received\",\"num_notifications\":#,\"notifications\":[{\"id\":\"#b##c##e-b###-####-####-fe#cde#b#aaf\",\"sender_frame_id\":\"f#cf###f-a###-##f#-#db#-a###d###bde#\",\"recipient_frame_id\":\"a#b#####-####-###c-a#f#-####cd####fc\",\"notific"
+  },
+  {
+   "part": "transcripts",
+   "frame": "0a35ec66-5615-4a60-85a5-78043c4c3ede",
+   "file": null,
+   "msg": 415,
+   "ts_ny": "2026-10-02 22:57",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "[# weeks ago] [observed] The clean within-model lambda proof (adversary degrades local batch mixing, kBET -#.## was -#.### for NONLINEAR NB backbone) was run on backbone='NB', the NONLINEAR conditioned decoder — not linear. T…  [m"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# day ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### ra"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# days ago] [observed] SUPERSEDED BY CODE AUDIT ####-##-## (mem_###bff##c###) — do not cite: UNIFIED-LAMBDA SWEEP RESULT (####-##-##, commit ###d#c#; scored_all.csv d#####d#, FINAL_RESULTS_UNIFIED.md #fc#ac#c) claimed critics b"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] WHY-SCVI-LOOKS-BEST: scVI has the highest MEAN scIB across the # datasets (#.###) among unsupervised methods, but this lead is ENTIRELY a sim# artifact — on sim# scVI scores #.### while every other metho"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] PER-CLASS CHAMPIONS (best config by MEAN scIB across datasets, one global choice per family — less winner's-curse than per-dataset oracle): W-critic = barycenter λ### lin-dec (mean scIB #.####); JS-disc "
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] BATCH-AXIS FINDING (masked by the ##%-bio-weighted scIB composite): on the batch-removal axis (the adversary's actual job) the Wasserstein critics BEAT every baseline including label-using ones — pooled/"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] isoF# (rare/isolated-cell clustering F#) does NOT separate the methods at their operating points — all sit ~#.##-#.## and the barycenter's apparent edge over the discriminator (+#.### lin / +#.### nl) is"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] DISCRIMINATOR vs BASELINES on immune (scvi-native, single seed, scored on the project scIB convention): discriminator tops the leaderboard — nl #.### / lin #.### > scVI #.### > harmony #.### > LinearSCVI"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 557,
+   "ts_ny": "2026-10-02 22:30",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] METRIC INTERPRETATION (immune scvi-native, uncond): of the ## scIB sub-metrics, only ~# discriminate the methods here — iLISI + kBET (batch, local kNN mixing, where the discriminator wins), and ARI/NMI/i"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9c73f1c4-a415-4e42-8952-1c72c6c26abf",
+   "file": null,
+   "msg": 919,
+   "ts_ny": "2026-10-03 19:13",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "CR-##,high,PCR_batch reference differs between the full-data and subsampled scoring paths; X# changes PCR definition between dose # and doses ##-### on pancreas and sim#,\"scripts/score_scib_native.py:##-##; scripts/prep_scib_task."
+  },
+  {
+   "part": "transcripts",
+   "frame": "f5cf011f-a871-43f5-9db9-a590d731bde4",
+   "file": null,
+   "msg": 449,
+   "ts_ny": "2026-10-02 23:07",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- **kBET** is reported separately: it changes by about #.###–#.### when the same latent is re-scored on one machine."
+  },
+  {
+   "part": "transcripts",
+   "frame": "a3526fbe-bbcd-4324-92b0-9a0a26791f2e",
+   "file": null,
+   "msg": 289,
+   "ts_ny": "2026-10-03 12:32",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "{'id': '#ee###d#-####-#fe#-##fd-e######d#d#f', 'claim': \"Memory note (and later chat msg[#]) states: 'E# lambda sweep: critic ARI rises monotonically with lambda (#.## at lambda=# to #.## at lambda=#)'\", 'severity': 'low', 'eviden"
+  },
+  {
+   "part": "transcripts",
+   "frame": "a3526fbe-bbcd-4324-92b0-9a0a26791f2e",
+   "file": null,
+   "msg": 289,
+   "ts_ny": "2026-10-03 12:32",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "{'id': '##a#ad##-c##c-#f##-#a#d-##a##ece##e#', 'claim': \"Assistant states the paired scIB comparison shows bio conservation as a 'decisive' axis with Δ=#.###, contrasted against batch correction Δ=#.### (p=#.###), to justify prior"
+  },
+  {
+   "part": "transcripts",
+   "frame": "78a0eb5d-bfcc-46c6-ab54-40ca2e4301e8",
+   "file": null,
+   "msg": 11,
+   "ts_ny": "2026-10-04 18:44",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "SUPERSEDED BY CODE AUDIT ####-##-## (mem_###bff##c###) — do not cite: UNIFIED-LAMBDA SWEEP RESULT (####-##-##, commit ###d#c#; scored_all.csv d#####d#, FINAL_RESULTS_UNIFIED.md #fc#ac#c) claimed critics beat the JS discriminator o"
+  },
+  {
+   "part": "transcripts",
+   "frame": "78a0eb5d-bfcc-46c6-ab54-40ca2e4301e8",
+   "file": null,
+   "msg": 11,
+   "ts_ny": "2026-10-04 18:44",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### raw jitter moves the compos"
+  },
+  {
+   "part": "transcripts",
+   "frame": "c46f52e3-2b68-4061-9c74-cd1eb3614416",
+   "file": null,
+   "msg": 5,
+   "ts_ny": "2026-10-08 22:22",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### r"
+  },
+  {
+   "part": "transcripts",
+   "frame": "c46f52e3-2b68-4061-9c74-cd1eb3614416",
+   "file": null,
+   "msg": 5,
+   "ts_ny": "2026-10-08 22:22",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# days ago] [observed] SUPERSEDED BY CODE AUDIT ####-##-## (mem_###bff##c###) — do not cite: UNIFIED-LAMBDA SWEEP RESULT (####-##-##, commit ###d#c#; scored_all.csv d#####d#, FINAL_RESULTS_UNIFIED.md #fc#ac#c) claimed critics b"
+  },
+  {
+   "part": "transcripts",
+   "frame": "c46f52e3-2b68-4061-9c74-cd1eb3614416",
+   "file": null,
+   "msg": 5,
+   "ts_ny": "2026-10-08 22:22",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] WHY-SCVI-LOOKS-BEST: scVI has the highest MEAN scIB across the # datasets (#.###) among unsupervised methods, but this lead is ENTIRELY a sim# artifact — on sim# scVI scores #.### while every other metho"
+  },
+  {
+   "part": "transcripts",
+   "frame": "c46f52e3-2b68-4061-9c74-cd1eb3614416",
+   "file": null,
+   "msg": 5,
+   "ts_ny": "2026-10-08 22:22",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] PER-CLASS CHAMPIONS (best config by MEAN scIB across datasets, one global choice per family — less winner's-curse than per-dataset oracle): W-critic = barycenter λ### lin-dec (mean scIB #.####); JS-disc "
+  },
+  {
+   "part": "transcripts",
+   "frame": "c46f52e3-2b68-4061-9c74-cd1eb3614416",
+   "file": null,
+   "msg": 5,
+   "ts_ny": "2026-10-08 22:22",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] BATCH-AXIS FINDING (masked by the ##%-bio-weighted scIB composite): on the batch-removal axis (the adversary's actual job) the Wasserstein critics BEAT every baseline including label-using ones — pooled/"
+  },
+  {
+   "part": "transcripts",
+   "frame": "1e3cd07e-c3f0-4c44-bd4d-2ec44494417f",
+   "file": null,
+   "msg": 45,
+   "ts_ny": "2026-10-12 23:17",
+   "id": "X13_atac_large_sysvi_l10_c1_s0_a617540b",
+   "manual_class": "CANDIDATE NEW DISPLAY",
+   "masked": "X##_atac_large_sysvi_l##_c#_s#_a######b.npz ## ### # ### {\"fit\": {\"plan_class\": \"GuardedTrainingPlan\", \"optimizer_name\": \"Adam\", \"lr\": #.###, \"eps\": #.##, \"weight_decay\": #e-##, \"n_epochs_kl_warmup\": #, \"n_steps_kl_warmup\": #, \"ma"
+  },
+  {
+   "part": "transcripts",
+   "frame": "91f958ea-c1dd-4fd0-a35e-d3b85d8720f6",
+   "file": null,
+   "msg": 48,
+   "ts_ny": "2026-10-12 23:19",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "##   scIB by −#.### to +#.###); only the discriminator improves mixing. scvi's decoder-side batch"
+  },
+  {
+   "part": "transcripts",
+   "frame": "1bf840df-a9d3-47ae-a461-3eeedfb13719",
+   "file": null,
+   "msg": 23,
+   "ts_ny": "2026-10-13 01:19",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "### config () <U#### {\"row\": {\"tag\": \"A#_atac_small_sinkhorn_l#_c#_s###_a#d#e###\", \"experiment\": \"A#\", \"task\": \"atac_small\", \"counts\": \"scib\", \"arm\": \"sinkhorn\", \"lam\": \"#\", \"n_critic\": \"#\", \"adv_input\": \"mean\", \"zstd\": \"#\", \"cond"
+  },
+  {
+   "part": "transcripts",
+   "frame": "fbc85410-3656-46f0-87f2-2654ec9a1004",
+   "file": null,
+   "msg": 9,
+   "ts_ny": "2026-10-13 10:00",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "fbc85410-3656-46f0-87f2-2654ec9a1004",
+   "file": null,
+   "msg": 9,
+   "ts_ny": "2026-10-13 10:00",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] SUPERSEDED BY CODE AUDIT ####-##-## (mem_###bff##c###) — do not cite: UNIFIED-LAMBDA SWEEP RESULT (####-##-##, commit ###d#c#; scored_all.csv d#####d#, FINAL_RESULTS_UNIFIED.md #fc#ac#c) claimed critics "
+  },
+  {
+   "part": "transcripts",
+   "frame": "fbc85410-3656-46f0-87f2-2654ec9a1004",
+   "file": null,
+   "msg": 9,
+   "ts_ny": "2026-10-13 10:00",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] WHY-SCVI-LOOKS-BEST: scVI has the highest MEAN scIB across the # datasets (#.###) among unsupervised methods, but this lead is ENTIRELY a sim# artifact — on sim# scVI scores #.### while every other metho"
+  },
+  {
+   "part": "transcripts",
+   "frame": "fbc85410-3656-46f0-87f2-2654ec9a1004",
+   "file": null,
+   "msg": 9,
+   "ts_ny": "2026-10-13 10:00",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [# weeks ago] [observed] PER-CLASS CHAMPIONS (best config by MEAN scIB across datasets, one global choice per family — less winner's-curse than per-dataset oracle): W-critic = barycenter λ### lin-dec (mean scIB #.####); JS-disc "
+  },
+  {
+   "part": "transcripts",
+   "frame": "ebf81ab2-76c3-4a75-b159-6c152bb1c2ec",
+   "file": null,
+   "msg": 268,
+   "ts_ny": "2026-10-13 21:02",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P#. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two-sided p is #/#⁶ = #.###, above Holm's first threshold of #.####"
+  },
+  {
+   "part": "transcripts",
+   "frame": "9a6f1964-cabe-4419-b5d9-f386b46d37aa",
+   "file": null,
+   "msg": 8,
+   "ts_ny": "2026-10-13 21:05",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "9a6f1964-cabe-4419-b5d9-f386b46d37aa",
+   "file": null,
+   "msg": 19,
+   "ts_ny": "2026-10-13 21:05",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P#. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two-sided p is #/#⁶ = #.###, above Holm's first threshold of #.####"
+  },
+  {
+   "part": "transcripts",
+   "frame": "619cf68a-d6a1-4a4e-b383-f5cc411d72a0",
+   "file": null,
+   "msg": 31,
+   "ts_ny": "2026-10-14 06:28",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "4137e77c-9ffd-4510-944a-f9dc73e580fd",
+   "file": null,
+   "msg": 47,
+   "ts_ny": "2026-10-14 07:08",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "{\"role\": \"assistant\", \"content\": [{\"type\": \"thinking\", \"thinking\": \"\"}, {\"type\": \"thinking\", \"thinking\": \"Round #'s decisions are logged, committed, and pushed, with the updated spec linked and standing rules confirmed. Now moving"
+  },
+  {
+   "part": "transcripts",
+   "frame": "4137e77c-9ffd-4510-944a-f9dc73e580fd",
+   "file": null,
+   "msg": 162,
+   "ts_ny": "2026-10-14 07:43",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P#. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two-sided p is #/#⁶ = #.###, above Holm's first threshold of "
+  },
+  {
+   "part": "transcripts",
+   "frame": "4137e77c-9ffd-4510-944a-f9dc73e580fd",
+   "file": null,
+   "msg": 378,
+   "ts_ny": "2026-10-14 08:49",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "808e34dd-b051-468b-bde4-30046910db74",
+   "file": null,
+   "msg": 46,
+   "ts_ny": "2026-10-14 10:05",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two"
+  },
+  {
+   "part": "transcripts",
+   "frame": "808e34dd-b051-468b-bde4-30046910db74",
+   "file": null,
+   "msg": 241,
+   "ts_ny": "2026-10-14 11:06",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "Project `proj_f#d#########` (“quantify the impact of Wasserstein GANs and discriminator GANs on single-cell batch correction”; pre-registered benchmark of Wasserstein critics vs discriminator adversaries, scVI backbone, scIB metri"
+  },
+  {
+   "part": "transcripts",
+   "frame": "808e34dd-b051-468b-bde4-30046910db74",
+   "file": null,
+   "msg": 241,
+   "ts_ny": "2026-10-14 11:06",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "Arms: `none` (λ=# plain scVI), `discriminator` (js family, n_critic=#), `reference`, `pooled`, `barycenter` (w# family; n_critic #, share one grid), `mmd`, `sinkhorn`, `scvi_adv`; X## baselines harmony, scanorama, pca, sysvi, scan"
+  },
+  {
+   "part": "transcripts",
+   "frame": "808e34dd-b051-468b-bde4-30046910db74",
+   "file": null,
+   "msg": 333,
+   "ts_ny": "2026-10-14 11:23",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###:  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainab"
+  },
+  {
+   "part": "transcripts",
+   "frame": "808e34dd-b051-468b-bde4-30046910db74",
+   "file": null,
+   "msg": 354,
+   "ts_ny": "2026-10-14 11:29",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "dc1fe687-2186-46b2-b0bc-ceb238d9aecc",
+   "file": null,
+   "msg": 10,
+   "ts_ny": "2026-10-14 09:59",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "78da076e-a094-4d0a-9d8d-c19576934b0a",
+   "file": null,
+   "msg": 36,
+   "ts_ny": "2026-10-14 10:01",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P#. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two-sided p is #/#⁶ = #.###, above Holm's first threshold of #.#"
+  },
+  {
+   "part": "transcripts",
+   "frame": "78da076e-a094-4d0a-9d8d-c19576934b0a",
+   "file": null,
+   "msg": 36,
+   "ts_ny": "2026-10-14 10:01",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable "
+  },
+  {
+   "part": "transcripts",
+   "frame": "78da076e-a094-4d0a-9d8d-c19576934b0a",
+   "file": null,
+   "msg": 36,
+   "ts_ny": "2026-10-14 10:01",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P#. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two-sided p is #/#⁶ = #.###, above Holm's first threshold of #.#"
+  },
+  {
+   "part": "transcripts",
+   "frame": "78da076e-a094-4d0a-9d8d-c19576934b0a",
+   "file": null,
+   "msg": 80,
+   "ts_ny": "2026-10-14 10:08",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable two"
+  },
+  {
+   "part": "transcripts",
+   "frame": "35f15d5f-52a7-4675-a7bd-23adccc80955",
+   "file": null,
+   "msg": 12,
+   "ts_ny": "2026-10-14 13:27",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "e9b32baf-712b-458c-83b5-9f4f7cc35bff",
+   "file": null,
+   "msg": 58,
+   "ts_ny": "2026-10-14 13:28",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###  ###|   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest at"
+  },
+  {
+   "part": "transcripts",
+   "frame": "794143d3-d15a-4852-b863-d4f7cc968d23",
+   "file": null,
+   "msg": 8,
+   "ts_ny": "2026-10-14 15:18",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "794143d3-d15a-4852-b863-d4f7cc968d23",
+   "file": null,
+   "msg": 67,
+   "ts_ny": "2026-10-14 15:23",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "##   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC [-§#].-]{+§#; the agent's proposal, pending the diff review].+} With the # real scIB ta"
+  },
+  {
+   "part": "transcripts",
+   "frame": "5d857d52-e570-4a88-b55e-1dc0fdb1df37",
+   "file": null,
+   "msg": 12,
+   "ts_ny": "2026-10-14 15:50",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "### Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### raw jitter moves the co"
+  },
+  {
+   "part": "transcripts",
+   "frame": "5d857d52-e570-4a88-b55e-1dc0fdb1df37",
+   "file": null,
+   "msg": 12,
+   "ts_ny": "2026-10-14 15:50",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "### SUPERSEDED BY CODE AUDIT ####-##-## (mem_###bff##c###) — do not cite: UNIFIED-LAMBDA SWEEP RESULT (####-##-##, commit ###d#c#; scored_all.csv d#####d#, FINAL_RESULTS_UNIFIED.md #fc#ac#c) claimed critics beat the JS discriminat"
+  },
+  {
+   "part": "transcripts",
+   "frame": "5d857d52-e570-4a88-b55e-1dc0fdb1df37",
+   "file": null,
+   "msg": 12,
+   "ts_ny": "2026-10-14 15:50",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "### WHY-SCVI-LOOKS-BEST: scVI has the highest MEAN scIB across the # datasets (#.###) among unsupervised methods, but this lead is ENTIRELY a sim# artifact — on sim# scVI scores #.### while every other method collapses to ~#.##-#."
+  },
+  {
+   "part": "transcripts",
+   "frame": "5d857d52-e570-4a88-b55e-1dc0fdb1df37",
+   "file": null,
+   "msg": 12,
+   "ts_ny": "2026-10-14 15:50",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "### PER-CLASS CHAMPIONS (best config by MEAN scIB across datasets, one global choice per family — less winner's-curse than per-dataset oracle): W-critic = barycenter λ### lin-dec (mean scIB #.####); JS-disc = discriminator λ## nl-"
+  },
+  {
+   "part": "transcripts",
+   "frame": "5d857d52-e570-4a88-b55e-1dc0fdb1df37",
+   "file": null,
+   "msg": 25,
+   "ts_ny": "2026-10-14 15:51",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## remove"
+  },
+  {
+   "part": "transcripts",
+   "frame": "7cca0c41-02de-466b-b3ec-bed7bde85f0a",
+   "file": null,
+   "msg": 10,
+   "ts_ny": "2026-10-14 16:05",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "7cca0c41-02de-466b-b3ec-bed7bde85f0a",
+   "file": null,
+   "msg": 313,
+   "ts_ny": "2026-10-14 16:51",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- **Tiers (lead's exact commands, base ###a##d, own clone each):** scripts tier ### passed, ## skipped, ###.## s, check_tests OK; src tier ### passed, ###.# s, OK. fd#c#e#..##f#e#c differs only in # docs/*.md + # notebook files (#"
+  },
+  {
+   "part": "transcripts",
+   "frame": "7cca0c41-02de-466b-b3ec-bed7bde85f0a",
+   "file": null,
+   "msg": 607,
+   "ts_ny": "2026-10-14 17:21",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+   "file": null,
+   "msg": 44,
+   "ts_ny": "2026-10-14 16:07",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "-  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#]. With the # real scIB tasks (SI-## removed the new datasets) the smallest attainable "
+  },
+  {
+   "part": "transcripts",
+   "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+   "file": null,
+   "msg": 44,
+   "ts_ny": "2026-10-14 16:07",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "+  - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## rem"
+  },
+  {
+   "part": "transcripts",
+   "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+   "file": null,
+   "msg": 311,
+   "ts_ny": "2026-10-14 16:46",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "**power_report NaN (script ##, check #):** with se #.##### (D=#, df #) `power_report`'s start-#.# search raises ValueError \"function value at x=#.# is NaN\" (scipy #.##.# nct.cdf NaN at isolated non-centrality patches: first ##.## "
+  },
+  {
+   "part": "transcripts",
+   "frame": "e7f6ae28-213e-4ce2-bab8-7a7ce7b1c860",
+   "file": null,
+   "msg": 495,
+   "ts_ny": "2026-10-14 17:12",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- **Imprecise**: the NaN values of `nct.cdf` are isolated, from non-centrality ##.## (# df) and ##.## (# df) upward (### of ##,### tested values between #.# and ### for # df), not everything above ##. Of ### (standard error, degre"
+  },
+  {
+   "part": "transcripts",
+   "frame": "18cb312f-1ccb-4601-9667-fa5e05e461a7",
+   "file": null,
+   "msg": 36,
+   "ts_ny": "2026-10-14 16:14",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## "
+  },
+  {
+   "part": "transcripts",
+   "frame": "42ff8020-ebed-4250-80ae-9076e0ad2c0a",
+   "file": null,
+   "msg": 64,
+   "ts_ny": "2026-10-14 16:17",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## remove"
+  },
+  {
+   "part": "transcripts",
+   "frame": "26a76d5e-2e8e-45f0-867b-07c8dd273108",
+   "file": null,
+   "msg": 63,
+   "ts_ny": "2026-10-14 17:20",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## "
+  },
+  {
+   "part": "transcripts",
+   "frame": "17c506be-e21c-4e42-bae8-d638e83a0c14",
+   "file": null,
+   "msg": 36,
+   "ts_ny": "2026-10-15 09:03",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "[# of ###|### \\\\(SE] ...The failure is real and loud: ValueError 'The function value at x=#.# is NaN' at se #.##### (script ##). The NaN is not 'above about ##': isolated values from ##.## (df #) and ##.## (df #); # of ### grid pa"
+  },
+  {
+   "part": "transcripts",
+   "frame": "316b040f-f019-4ffa-aa0d-fb26585398b5",
+   "file": null,
+   "msg": 81,
+   "ts_ny": "2026-10-15 09:19",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "- Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## remove"
+  },
+  {
+   "part": "transcripts",
+   "frame": "d684be61-24c4-4b98-9c5d-458469d84733",
+   "file": null,
+   "msg": 21,
+   "ts_ny": "2026-10-15 10:01",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "{\"id\": \"DOC-R##\", \"severity\": \"note\", \"location\": \"scripts/prereg_rules.py:###-###; scripts/freeze_a#_grid.py:##; experiments/final_review_amendments_########/power_without_sim#.py (docstring)\", \"problem\": \"power_report stops with"
+  },
+  {
+   "part": "transcripts",
+   "frame": "99760df9-e89c-4ea6-90ec-e8de37b5157d",
+   "file": null,
+   "msg": 44,
+   "ts_ny": "2026-10-15 10:19",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "###   - Frequentist companion: exact Wilcoxon on dataset means with Holm over P#–P# [replaced: Holm over the six primary results, ANALYSIS_SPEC §#; the agent's proposal, pending the diff review]. With the # real scIB tasks (SI-## "
+  },
+  {
+   "part": "transcripts",
+   "frame": "99cccdc4-c148-46bc-8ca3-ca5d19ae6bc1",
+   "file": null,
+   "msg": 10,
+   "ts_ny": "2026-10-15 10:18",
+   "id": null,
+   "manual_class": "stored project-memory note (earlier pilot results and decisions) repeated in a prompt or tool output",
+   "masked": "- [## days ago] [observed] Scoring facts: scIB-native min-max is comparison-set dependent (counts pilot: dropping only the unintegrated row reverses uncond-disc-λ## vs cond-ref-λ#). graph_conn spans only #.####–#.####, so a #.### "
+  },
+  {
+   "part": "transcripts",
+   "frame": "098bf3c9-68eb-463b-a67d-2c20768a8db8",
+   "file": null,
+   "msg": 384,
+   "ts_ny": "2026-10-15 11:19",
+   "id": null,
+   "manual_class": "pilot (A1/A2/A3) score table or gate result, code, power-report or review text; no listed X1/X13 identifier on the line",
+   "masked": "**Checked at #d##a##.** The docstring said that scipy's non-central t returns NaN \"above a non-centrality of about ##\", reached by the start of #.# \"when the standard error is below about #.###\". Probe ## (section #) shows both ar"
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+method,n,batch,bio,overall
+harmony,6,0.4384,0.526,0.4909
+scanorama,6,0.4148,0.4841,0.4564
+unintegrated,6,0.3887,0.4643,0.4341
+critic,18,0.5864,0.1318,0.3136
+discriminator,18,0.5949,0.1184,0.309

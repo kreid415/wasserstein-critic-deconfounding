@@ -1,0 +1,5 @@
+dataset,method,ilisi,clisi,asw_batch,ari
+atac_large,critic,0.227,0.152,0.918,0.127
+atac_large,discriminator,0.223,0.125,0.9,0.158
+atac_small,critic,0.688,0.127,0.934,0.186
+atac_small,discriminator,0.461,0.101,0.901,0.186

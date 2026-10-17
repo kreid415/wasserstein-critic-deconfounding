@@ -1,0 +1,44 @@
+{
+ "lung": {
+  "total_dropped": 3216,
+  "n": 32472,
+  "top": [
+   {
+    "ct": "Type 1",
+    "n": 424,
+    "dropped": 127,
+    "drop_frac": 0.3
+   },
+   {
+    "ct": "B cell",
+    "n": 1353,
+    "dropped": 334,
+    "drop_frac": 0.247
+   },
+   {
+    "ct": "T/NK cell",
+    "n": 1797,
+    "dropped": 432,
+    "drop_frac": 0.24
+   },
+   {
+    "ct": "Lymphatic",
+    "n": 341,
+    "dropped": 67,
+    "drop_frac": 0.196
+   },
+   {
+    "ct": "Mast cell",
+    "n": 889,
+    "dropped": 172,
+    "drop_frac": 0.193
+   },
+   {
+    "ct": "Secretory",
+    "n": 2459,
+    "dropped": 411,
+    "drop_frac": 0.167
+   }
+  ]
+ }
+}

@@ -1,0 +1,198 @@
+{
+ "verdicts": [
+  {
+   "fix": "I033",
+   "verdict": "PASS_WITH_FIXES",
+   "reason": "Fixes the crash on all three arms and is bit-neutral elsewhere; but the skipped steps leave no trace in any output (G-01)."
+  },
+  {
+   "fix": "I034",
+   "verdict": "PASS_WITH_FIXES",
+   "reason": "Catches a non-finite value at every inner step (12 of 12 injections) and is bit-neutral; its test would pass two plausible partial fixes (G-02)."
+  },
+  {
+   "fix": "I042",
+   "verdict": "PASS_WITH_FIXES",
+   "reason": "Refuses them end to end through the real fitter, refuses 0 of 40,815 manifest rows, and the deliberate difference for the `none` arm is right; but no test notices if the production call is removed (G-03)."
+  },
+  {
+   "fix": "I050 + I051",
+   "verdict": "PASS",
+   "reason": "Both evidenced gaps are closed; 0 of 1,701 stored latents refused; metric columns bit-identical on 2 real latents; notes only (G-08 to G-11)."
+  },
+  {
+   "fix": "I094",
+   "verdict": "PASS",
+   "reason": "The stage gate refuses a GPU fit without its model and any latent without its history, and the harvest refuses a GPU latent without its model; 0 of 1,701 stored latents refused; every mutant killed; notes only (G-12 to G-14)."
+  },
+  {
+   "fix": "I008",
+   "verdict": "PASS",
+   "reason": "The builder now gives 192/192/384/384/576 h as the plan states; every mutant killed; notes only (G-15 to G-17)."
+  }
+ ],
+ "findings": [
+  {
+   "id": "G-01",
+   "fix": "I033",
+   "severity": "fix",
+   "location": "src/wcd_vae/wcd/alignment.py: the three `return (z * 0).sum()` lines (mmd_batch_others, mmd_reference, sinkhorn_batch_others); scripts/scvi_adversarial_plan.py critic-free branch of training_step",
+   "problem": "A minibatch in which no pair of batches can be compared now adds a zero alignment loss and a zero gradient, so the fit finishes. Nothing in the saved latent, its `config` or its loss history records how many steps were skipped (the history keeps per-epoch means of `adv_div`, which average the zeros in). Before the fix such a fit crashed, which was loud. SI-52 (user decision 52: the new guards must fail loudly and never silently change a result) is therefore only partly met: fits that never hit the case are unchanged, but a fit that does hit it used to stop and now finishes without a trace. The final review asked to 'decide and document' what an inactive minibatch contributes; the decision (zero) is written in the alignment.py module docstring and code comments, not in the methods or preregistration text. In the verifier's own crash-rate table the exposed rows are X7 reference-aligned MMD on pancreas (27 fits) and sim1 (18 fits), where nearly every fit hits it (about 0.17% and 0.30% of minibatch steps), and, rarely, X3 atac_small MMD, X8 sim2 MMD and X1 sim1 (table below). The effect on a result is probably tiny, but a referee cannot see it.",
+   "evidence": "Command: `python probes/i033_rare_batch_fit.py trees/pre` and `... trees/fix` (CPU, 1 thread, 302 cells, batch b1 has 2 cells, 3 epochs, batch size 128; a spy counts steps whose minibatch has no pair of batches). Output (logs/i033_probe_pre.jsonl, logs/i033_probe_fix.jsonl):\n\n```\nconfiguration              tag c88cce3                                                head 2b52542                                              \nmmd_rare_batch             RuntimeError: element 0 of tensors does not require\u2026       ok; 4 of 9 steps without a pair; adv_div per epoch [0.312157, 0.151128, 0.028652]\nsinkhorn_rare_batch        RuntimeError: element 0 of tensors does not require\u2026       ok; 4 of 9 steps without a pair; adv_div per epoch [0.744272, 0.350772, 0.16218]\nmmd_ref_rare_reference     RuntimeError: element 0 of tensors does not require\u2026       ok; 4 of 9 steps without a pair; adv_div per epoch [0.312157, 0.151128, 0.028652]\nmmd_ref_common_reference   RuntimeError: element 0 of tensors does not require\u2026       ok; 4 of 9 steps without a pair; adv_div per epoch [0.312157, 0.151128, 0.028652]\ncontrol_mmd_balanced       ok; 0 of 9 steps without a pair                            ok; 0 of 9 steps without a pair; adv_div per epoch [0.014997, 0.010271, 0.015002]\ncontrol_sinkhorn_balanced  ok; 0 of 9 steps without a pair                            ok; 0 of 9 steps without a pair; adv_div per epoch [0.25199, 0.206525, 0.197064]\ncontrol_pooled_rare_batch  ok; 0 of 0 steps without a pair                            ok (arm without this branch)\n```\n\nHow often this will happen on the real rows (provisional: derived by me from the verifier's per-row crash probabilities in `verify/model/p_inactive_rate.csv`, not re-simulated):\n\n| experiment | task | arm | fits | n_train | cells_in_last_minibatch | steps_per_epoch | epochs | fits_expected_to_hit_it | share_of_steps_without_pair |\n|---|---|---|---|---|---|---|---|---|---|\n| X1 | sim1 | mmd | 60 | 10888 | 8 | 86 | 400 | 0.3612 | 1.755e-07 |\n| X1 | sim1 | sinkhorn | 60 | 10888 | 8 | 86 | 400 | 0.3612 | 1.755e-07 |\n| X3 | atac_small | mmd | 48 | 7562 | 10 | 60 | 400 | 6.673 | 6.394e-06 |\n| X7 | pancreas | mmd_ref | 27 | 14744 | 24 | 116 | 400 | 25.92 | 0.001672 |\n| X7 | sim1 | mmd_ref | 18 | 10888 | 8 | 86 | 400 | 18 | 0.002993 |\n| X8 | sim2 | mmd | 24 | 2700 | 12 | 22 | 400 | 1.076 | 5.579e-06 |\n\n`fits` = fits in the group; `fits_expected_to_hit_it` = expected number of those fits with at least one step without a pair (the sum of the verifier's per-fit probabilities; at the tag each such fit stops with the crash above); `share_of_steps_without_pair` = expected share of minibatch steps without a pair, averaged over the group. The three MMD rows of the probe agree to the last digit because the toy data has two batches, for which all three losses equal the MMD between them.",
+   "suggested_fix": "Keep the zero (it is the natural value and bit-neutral for every minibatch that has a pair). Add a counter of no-pair steps that is written into the saved config only when it is greater than 0 (or one log line per fit), so outputs of fits that never hit the case stay byte-identical, and add one sentence to PREREG/methods naming the row groups that can hit it."
+  },
+  {
+   "id": "G-02",
+   "fix": "I034",
+   "severity": "fix",
+   "location": "tests/scvi/test_nonfinite_guard.py::test_nonfinite_inner_critic_step_raises",
+   "problem": "The test injects +inf into the critic loss at the first inner critic step only. Two plausible partial fixes pass it: a sum that leaves out the gradient-penalty term (`gp`), and a sum that counts only the first inner step. The pre-fix code and four other wrong variants are caught (last inner step only; sum without the loss term; last two inner steps only; sum never passed to the check). The fix itself is correct: all 12 injections below are caught.",
+   "evidence": "Command: `python probes/i034_inner_step_injection.py trees/p034` (before the fix, commit c4be14b) and `... trees/fix`. A pooled-critic fit with 5 inner critic steps per training step; at training step 3 one inner step's loss is made non-finite by adding inf, NaN or a gradient-penalty inf, or both terms are set to 3e38 so that their sum overflows; the gradients stay finite. Output (logs/i034_injection_*.jsonl):\n\n```\ninjection (value only, gradients finite)     before the fix (c4be14b)         after the fix (2b52542)         \nloss_inf@inner0                              NOT caught (fit completes)       caught: adv_inner\nloss_inf@inner2                              NOT caught (fit completes)       caught: adv_inner\nloss_inf@inner4                              caught: adv_loss                 caught: adv_inner,adv_loss\nloss_nan@inner0                              NOT caught (fit completes)       caught: adv_inner\nloss_nan@inner2                              NOT caught (fit completes)       caught: adv_inner\nloss_nan@inner4                              caught: adv_loss                 caught: adv_inner,adv_loss\ngp_inf@inner0                                NOT caught (fit completes)       caught: adv_inner\ngp_inf@inner2                                NOT caught (fit completes)       caught: adv_inner\ngp_inf@inner4                                caught: adv_gp                   caught: adv_gp,adv_inner\nsum_overflow@inner0                          NOT caught (fit completes)       caught: adv_inner\nsum_overflow@inner2                          NOT caught (fit completes)       caught: adv_inner\nsum_overflow@inner4                          NOT caught (fit completes)       caught: adv_inner\nlarge_finite@inner0                          passes (correct: no false alarm) passes (correct: no false alarm)\nlarge_finite@inner2                          passes (correct: no false alarm) passes (correct: no false alarm)\nlarge_finite@inner4                          passes (correct: no false alarm) passes (correct: no false alarm)\n```\n\n`large_finite` (1e20 in both terms) is the no-false-alarm control. Largest per-epoch mean |value| in all 1,701 stored loss histories: adv_loss 1470, adv_gp 296 (float32 maximum 3.4e38), so the new sum cannot flag a legitimate fit.\n\nTest on the code before the fix (new test copied onto c4be14b):\n\n```\n=========================== short test summary info ============================\nFAILED tests/scvi/test_nonfinite_guard.py::test_nonfinite_inner_critic_step_raises\n1 failed, 12 deselected, 3 warnings in 7.09s\n--- on 2b52542 ---\n1 passed, 12 deselected, 3 warnings in 6.23s\n```\n\nMutation check (`python probes/mutate.py ID`; one-line change to the fixed code, then the new test):\n\n```\nM34_overwrite                    KILLED    last inner step only (inner = d_loss.detach())\nM34_omit_loss                    KILLED    sum omits loss_d\nM34_omit_gp                      SURVIVED  sum omits gp\nM34_first_only                   SURVIVED  only the first inner step enters the sum\nM34_last_two_only                KILLED    only the last two inner steps enter the sum\nM34_not_passed                   KILLED    inner computed but not passed to _nf_check\nM34_equiv_nodetach               SURVIVED  equivalent: accumulate without detach (should survive)\n```",
+   "suggested_fix": "Parametrize the existing test (same lines, no new test function): inject at the first, a middle and the last inner step, and into the loss and into `gp` (for example `@pytest.mark.parametrize('step,term', [(0,'loss'), (2,'gp'), (4,'loss')])`)."
+  },
+  {
+   "id": "G-03",
+   "fix": "I042",
+   "severity": "fix",
+   "location": "scripts/fit_paper_config.py line 297 `check_extra(r[\"tag\"], arm, extra, r)  # pragma: no cover`; tests/scvi/*",
+   "problem": "The production call that makes the new refusals happen is excluded from coverage (`# pragma: no cover`, reason given: 'run by the subprocess tests ... which coverage does not see'). Running a line is not testing its effect: deleting the call, or calling it without the row (which switches off the unread-setting check), leaves the whole of tests/scvi green (96 passed, 16 skipped), and also the data-dependent tests run with PREPPED_DIR set (33 passed). The unit tests call `check_extra` directly, so nothing would notice a refactor that drops the call. The wiring is correct today: the real `fit_paper_config.py` refuses the five bad rows below at the head and fits the two legitimate rows with latents identical to the tag's; at the tag all seven rows fit.",
+   "evidence": "Mutation check on the production wiring. The first two mutants ran the full `tests/scvi` (96 passed, 16 skipped); the third ran the three test files that use real prepped data (`test_runner_and_manifest_missing_arms.py`, `test_x3_si41.py`, `test_x3_x13_design.py`) with PREPPED_DIR set and WCD_REQUIRE_DATA=1 (33 passed):\n\n```\nM42_row_not_passed               SURVIVED  main() calls check_extra without the row (unread-setting refusal never runs i\u2026\nM42_check_extra_call_removed     SURVIVED  main() never calls check_extra at all\nM42_call_removed_with_data       SURVIVED  main() never calls check_extra; data-dependent tests run with PREPPED_DIR\n```\n\nThe wiring is correct today. Command: `python probes/i042_main_e2e.py WORKDIR trees/fix trees/pre` runs the REAL `scripts/fit_paper_config.py` (CPU, 1 epoch, 1,200-cell subsample of atac_small) on seven manifest rows; output (logs/final_i042_main_e2e.jsonl):\n\n```\nrow (arm: changed setting) tag c88cce3    head 2b52542\nnone_default               fits (exit 0)  fits (exit 0)\nnone_zstd1                 fits (exit 0)  REFUSED (exit 1): E2E_none_zstd1: arm 'none' does not read ['zstd']; they must stay {'zstd': '0'}, got {'zstd': '1'}\nnone_adv_width             fits (exit 0)  REFUSED (exit 1): E2E_none_adv_width: extra keys ['adv_width'] do not apply to arm 'none'\nnone_ncritic5              fits (exit 0)  REFUSED (exit 1): E2E_none_ncritic5: arm 'none' does not read ['n_critic']; they must stay {'n_critic': '0'}, got {'n\u2026\nmmd_ncritic5               fits (exit 0)  REFUSED (exit 1): E2E_mmd_ncritic5: arm 'mmd' does not read ['n_critic']; they must stay {'n_critic': '0'}, got {'n_c\u2026\nsysvi_likelihood_nb        fits (exit 0)  REFUSED (exit 1): E2E_sysvi_likelihood_nb: arm 'sysvi' does not read ['likelihood']; they must stay {'likelihood': 'z\u2026\nnone_linear_nb_uncond      fits (exit 0)  fits (exit 0)\n```",
+   "suggested_fix": "Add one subprocess case to the existing section-6 test of tests/scvi/test_nonfinite_guard.py (it already runs fit_paper_config.py end to end): a manifest row `none` with zstd=1 must exit 1, print 'does not read', and write no latent. Then remove the pragma."
+  },
+  {
+   "id": "G-04",
+   "fix": "I042",
+   "severity": "note",
+   "location": "tests/scvi/test_runner_and_manifest_missing_arms.py::test_extra_keys_are_consumed_or_refused; scripts/fit_paper_config.py EXTRA_ARMS, UNREAD_SETTINGS",
+   "problem": "The unit test exercises 3 of the 5 EXTRA_ARMS keys (adv_lr and bary_warm_iter are never refused in a test) and 6 of the 20 UNREAD_SETTINGS entries, counting the one dictionary shared by `none` and `scvi_adv` twice; deleting any of the other entries, or `reference_fixed_sn` (a valid arm of the plan that is in neither the runner's ADVERSARIAL set nor the new network-arm set), goes unnoticed. The tables are correct today (see the unread-setting fits), so this is a regression-protection gap only.",
+   "evidence": "Command: `python probes/i042_test_table_coverage.py trees/fix` deletes one table entry at a time and re-runs the assertions of the extended unit test in-process. Output:\n\n```\n{\"EXTRA_ARMS_entries\": 5, \"EXTRA_ARMS_untested\": [\"adv_lr\", \"bary_warm_iter\"], \"UNREAD_entries\": 20, \"UNREAD_untested_count\": 14, \"UNREAD_untested\": [\"none.n_critic\", \"none.adv_input\", \"scvi_adv.n_critic\", \"scvi_adv.adv_input\", \"scanvi.n_critic\", \"scanvi.adv_input\", \"scanvi.zstd\", \"scanvi.cond\", \"sysvi.n_critic\", \"sysvi.adv_input\", \"sysvi.zstd\", \"sysvi.decoder\", \"mmd.n_critic\", \"mmd_ref.n_critic\"]}\n```",
+   "suggested_fix": "In the same test, loop over EXTRA_ARMS and UNREAD_SETTINGS themselves: for every entry assert that the changed value is refused and the default accepted."
+  },
+  {
+   "id": "G-05",
+   "fix": "I042",
+   "severity": "note",
+   "location": "scripts/fit_paper_config.py UNREAD_SETTINGS (none, scvi_adv, scanvi); scripts/scvi_adversarial_plan.py:198-199",
+   "problem": "The same defect class remains for the strength setting `lam`: the fit of `none` and `scvi_adv` gives an identical latent at lam 0 and 5, and scANVI never reads it, yet a non-zero lam on these arms is accepted. No row is affected: all 1,908 manifest rows of these three arms carry lam = 0. The plan-level silent returns named in the review (lines 198-199) are unchanged; only fit_paper_config calls fit_adversarial_scvi in production, so the runner-level check is where it matters.",
+   "evidence": "Command: `python probes/i042_lam_scvi_adv.py trees/fix` and the manifest audit. Output:\n\n```\nscvi_adv  lam 0 vs 5                           identical\nnone      lam 0 vs 5                           identical\n```\n\nlam values of these arms in all eight manifest files (logs/i042_manifest_audit_fix.json): none: 1,428 rows, lam values ['0']; scvi_adv: 240 rows, lam values ['0']; scanvi: 240 rows, lam values ['0']. scANVI: `fit_baseline` receives lam but only the sysVI branch passes it on (scripts/fit_paper_config.py, `plan_kwargs=dict(z_distance_cycle_weight=lam)`).",
+   "suggested_fix": "Add `\"lam\": \"0\"` to the unread settings of none, scvi_adv and scanvi (sysVI reads lam as z_distance_cycle_weight, so not there)."
+  },
+  {
+   "id": "G-06",
+   "fix": "I042",
+   "severity": "note",
+   "location": "scripts/run_stage.py unfittable() (preflight); scripts/fit_paper_config.py main()",
+   "problem": "The refusal runs when a fit starts, not when the stage plans. run_stage classes any uncaught fitter exception as an infrastructure error, retries it (--max-attempts 2 in the X1 job) and then stops the stage (run_stage.py header). A bad row in a future manifest (X8, X12 follow-ups) would therefore cost two attempts and stop a long job instead of being refused at its start. All 40,815 current rows pass, so there is no current impact.",
+   "evidence": "`scripts/run_stage.py` header: 'infrastructure: any other fitter / scorer failure ... retried up to --max-attempts times in this run, then the stage stops'. X1 job arguments: `--max-attempts 2` (experiments/X1_jhpce/SUBMISSION_PLAN.md, job 1 command). `check_extra` has no caller other than `main()` of fit_paper_config.py (`grep -rn check_extra scripts`). Audit of every manifest row (logs/i042_manifest_audit_fix.json): 41583 rows, 40815 evaluated (the other 768 are X13 CPU-baseline rows, which main() routes elsewhere), 0 refused.",
+   "suggested_fix": "Call `check_extra(tag, arm, extra, row)` from the stage preflight (next to `unfittable`) for every selected row."
+  },
+  {
+   "id": "G-07",
+   "fix": "I042",
+   "severity": "note",
+   "location": "docs / methods text (not code)",
+   "problem": "Left unaddressed from the review row: the 150 sysVI filler latents record row likelihood 'zinb' and decoder 'SCVI', labels sysVI does not use (it is Gaussian, SysVAE). The commit stops new rows from carrying other values; it cannot correct the existing provenance text. No commit in the range touches PAPER_PLAN or the methods text.",
+   "evidence": "`git show --stat` of the six commits lists only scripts/, src/, tests/, cluster/, experiments/X1_jhpce/ and docs/jhpce/ files. Recorded labels of the 150 sysVI filler latents are those named in the review row (I042, evidence).",
+   "suggested_fix": "State 'sysVI: Gaussian likelihood, SysVAE decoder; the likelihood/decoder columns are placeholders' in the methods and table notes."
+  },
+  {
+   "id": "G-08",
+   "fix": "I050+I051",
+   "severity": "note",
+   "location": "scripts/score_scib_native.py lines 200-203",
+   "problem": "A latent without `obs_names` or `celltype` (the legacy writers fit_stock_scvi.py and scvi_fit_pancreas.py) is now refused, as the commit message says, but with a bare KeyError ('obs_names is not a file in the archive'). Before, a latent without `celltype` was accepted, because the scorer never read that key. All 1,701 stored latents have both keys.",
+   "evidence": "The identity probe in section 4.4 contains the two legacy cases (logs/final_i050_identity.txt). After the fix:\n\n```\nlegacy_no_obs_names      -               -> REFUSED KeyError: 'obs_names is not a file in the archive'\nlegacy_no_celltype       -               -> REFUSED KeyError: 'celltype is not a file in the archive'\n```\n\nBefore the fix (tree 5f30f17) both reached scoring.",
+   "suggested_fix": "Test `\"obs_names\" in d and \"celltype\" in d` first and raise ValueError naming the writer and the missing key."
+  },
+  {
+   "id": "G-09",
+   "fix": "I050+I051",
+   "severity": "note",
+   "location": "tests/scoring/test_scorer_provenance_and_subset.py::test_full_length_latent_must_list_the_prepped_cells_in_order",
+   "problem": "The check also covers the subsample path (X3/X8) because it sits after the re-indexing; the review asked for the full-length path only. That extra strength is untested: a variant that checks the full-length path only passes all tests. Moving the check in front of the re-indexing (which would refuse every legitimate subset latent) is caught by the existing subsample test.",
+   "evidence": "Mutation check:\n\n```\nM50_names_only                   KILLED    check cell names only\nM50_celltype_only                KILLED    check cell types only\nM50_set_equality                 KILLED    names compared as sets (order ignored)\nM50_before_subset_reindex        KILLED    I050 check removed entirely\nM50_check_before_reindex3        KILLED    check relocated before the subset re-indexing (refuses legit subset latents)\nM50_full_length_path_only        SURVIVED  check runs on the full-length path only (the review's wording); subset latent\u2026\n```",
+   "suggested_fix": "Optional: add one subset latent with a swapped cell type to the existing parametrization."
+  },
+  {
+   "id": "G-10",
+   "fix": "I050+I051",
+   "severity": "note",
+   "location": "scripts/score_scib_native.py (scorer_git_sha column); scripts/prereg_rules.py check_provenance",
+   "problem": "The fixed scorer writes score rows whose metric columns, kbet_seed and kbet_r_calls are bit-identical to the tagged scorer's (2 real atac_small latents, same machine), but whose `scorer_git_sha` is the new commit. prereg_rules.check_provenance refuses a rule input that mixes scorer_git_sha values, so rows scored at c88cce3 (A1, A2/A3, fillers) and rows scored at the new tag cannot be combined in one rule input without either re-scoring the old rows (metrics will not change) or an amendment. This is a consequence of making any scorer change, not a defect of the fix.",
+   "evidence": "Command: score two stored latents (atac_small) with the tagged scorer (trees/pre) and the fixed scorer (trees/fix) on this machine, then `python scripts/compare_score_rows.py REF CAND`. Output:\n\n```\nA1_atac_small_barycenter_l3000_c0_s102_2863247f: columns that differ between the tagged and the fixed scorer: ['scorer_git_sha', 'score_seconds']; kBET=0.0486700982255099, forced labels=2, R calls=4\nA1_atac_small_none_l0_c1_s100_8d38e2a3: columns that differ between the tagged and the fixed scorer: ['scorer_git_sha', 'score_seconds']; kBET=0.3128825001300462, forced labels=0, R calls=6\n```\n\n`compare_score_rows.py` reported 15 columns compared and 0 differing for both latents (the 13 metric columns, kbet_seed, kbet_r_calls). Against the stored score row of the original run one value differs (PCR_batch 0.435987260568244 against 0.4359877709055503 on the barycenter latent): that is a difference between two runs on two machines, not a difference between the scorers. All 1,608 stored score rows carry scorer_git_sha c88cce3c (A1 1,098; R1 extension 36; R4 extension 9; A2/A3 288; X1 local 19; fillers 158; logs/audit_stored_scores.json). `scripts/prereg_rules.py` lines 219-235 (`check_provenance`) refuse a rule input that mixes values.",
+   "suggested_fix": "Decide before the tag: re-score the 1,608 stored score rows with the new scorer (metric values unchanged, provenance columns updated) or document an amendment of the mixing rule."
+  },
+  {
+   "id": "G-11",
+   "fix": "I050+I051",
+   "severity": "note",
+   "location": "scripts/score_scib_native.py (commit message note); scib 1.1.7 cluster_optimal_resolution",
+   "problem": "Documented by the author and not fixed: when NMI is exactly 0 at every resolution scib keeps no clustering and the NMI step fails on None labels (a loud error). I did not reproduce it. A fully fragmented latent that I051 now records as kBET 0 could, in principle, also hit it. The accepted I051 case (every tested label fragmented) is recorded correctly (probe a).",
+   "evidence": "Author's note in the commit message of f5ea0c3 (quoted in the finding); not reproduced. The I051 case itself (every tested label fragmented) is recorded correctly: probe (a) in section 4.4 (kBET 0.0, 0 R calls, 6 forced labels).",
+   "suggested_fix": "Keep as a known residual; if it ever occurs, record the row as a scoring failure with its reason rather than retrying it as an infrastructure error."
+  },
+  {
+   "id": "G-12",
+   "fix": "I094",
+   "severity": "note",
+   "location": "cluster/jhpce/prod_helpers.py harvest_files (SystemExit); scripts/run_stage.py Outputs.latent message",
+   "problem": "The refusal is all-or-nothing: one GPU latent without its model makes `pack` exit non-zero, prod_fit_job.sh then exits 10, and none of the job's other latents is packed; they stay on fastscratch, which is purged after 30 days. The messages say 'refit it' but not how (delete latents/<tag>.npz, its score and status files, then resume). This can only happen after a purge or a manual deletion, because the fitter saves the model before the latent becomes visible.",
+   "evidence": "`cluster/jhpce/prod_fit_job.sh` lines 221-224: `if ! \"$FIT_PY\" \"$H\" pack ... ; then echo \"FATAL: harvest pack failed ...\" >&2; exit 10`. `harvest_files` is called once for all tags of the job (`cmd_pack`). The fitter writes `model.save(...)` before `os.replace(tmp, npz)` (scripts/fit_paper_config.py end of `main`), so within a job a latent never exists without its model. The 30-day purge is stated in `docs/jhpce/GATE_JHPCE.md` (line 404) and `cluster/jhpce/env.sh`. Audit of the fixed `harvest_files` on every stored stage directory (read only; logs/final_i094_harvest_audit.jsonl):\n\n```\n{\"dir\": \"tier12_v2/A1\", \"tags\": 1098, \"files\": 5509, \"model_pt\": 1098, \"refused\": 0}\n{\"dir\": \"tier12_v2/A1_ext_r1_round1\", \"tags\": 36, \"files\": 180, \"model_pt\": 36, \"refused\": 0}\n{\"dir\": \"tier12_v2/A1_ext_r4_round1\", \"tags\": 9, \"files\": 45, \"model_pt\": 9, \"refused\": 0}\n{\"dir\": \"tier12_v2/A2A3\", \"tags\": 288, \"files\": 1440, \"model_pt\": 288, \"refused\": 0}\n{\"dir\": \"tier12_v2/X1_local\", \"tags\": 20, \"files\": 100, \"model_pt\": 20, \"refused\": 0}\n{\"dir\": \"jhpce_tier12/fillers_x1_x13\", \"tags\": 250, \"files\": 1162, \"model_pt\": 250, \"refused\": 0}\n```",
+   "suggested_fix": "Add the remedy to both messages; optionally let pack list every offending tag in one error instead of the first."
+  },
+  {
+   "id": "G-13",
+   "fix": "I094",
+   "severity": "note",
+   "location": "scripts/run_stage.py Outputs.latent; docs",
+   "problem": "From now on `models/<tag>/model.pt` must stay next to each GPU latent for as long as the stage may be re-gated (`--report-only`, resume, local scoring): deleting models after harvest to save disk (about 6.8 MB per fit, ~12 GB for X1's 1,800 fits) makes the stage refuse (exit 4). There is no opt-out flag. `history` is required as a key but an empty history passes (CPU baselines write `{}` by design).",
+   "evidence": "Stage gate on copies of 3 real A1 fits (command: `python probes/gate/i094_gate_variants.py REPO PREPPED FIT_PY LABEL`; `run_stage.py --report-only`; logs/final_i094_gate.jsonl):\n\n```\nvariant                        before (f5ea0c3)   after (2b52542)\nbaseline_real_A1_copies        gate PASS (exit 0) gate PASS (exit 0)\nmodel_dirs_removed             gate PASS (exit 0) refused (exit 4)\none_model_removed              gate PASS (exit 0) refused (exit 4)\nhistory_removed                gate PASS (exit 0) refused (exit 4)\nmodels_and_history_removed     gate PASS (exit 0) refused (exit 4)\n```\n\nAudit of all 1701 stored latents: with model.pt 1701, with the history key 1701, with a non-empty history 1701 (logs/audit_stored_latents.csv). Size of a model: 6.8 MB per fit (SUBMISSION_PLAN, measured on the filler jobs).",
+   "suggested_fix": "Say so in docs/jhpce/PRODUCTION_JOB.md and the SUBMISSION_PLAN 'After each job' section."
+  },
+  {
+   "id": "G-14",
+   "fix": "I094",
+   "severity": "note",
+   "location": "cluster/jhpce/prod_helpers.py harvest_files; commit message of 46d79f2",
+   "problem": "The commit title says the harvest requires 'every latent's history', and the review row asks for the model and the `history` key in `Outputs.state` and in `harvest_files`. The code checks `history` only in the stage rule (`Outputs.latent`); `harvest_files` checks the model only. A GPU latent that has its model but no `history` key is therefore packed (probe below), while the stage gate refuses it (exit 4), so the loud refusal comes later, at the next local gate. The current fitter always writes `history` and all 1,701 stored latents have it, so no existing or planned latent is affected.",
+   "evidence": "Command: `python probes/i094_harvest_nohistory.py trees/fix` (a copy of a real A1 latent with the `history` key removed, plus a model file; `harvest_files` of the head). Output (logs/final_i094_harvest_nohistory.json):\n\n```\n{\"tag\": \"A1_atac_small_barycenter_l0.1_c0_s100_ee1decf8\", \"device_in_config\": null, \"latent_has_history\": false, \"model_present\": true, \"result\": \"PACKED (no refusal)\", \"files\": [\"latents/A1_atac_small_barycenter_l0.1_c0_s100_ee1decf8.npz\", \"models/A1_atac_small_barycenter_l0.1_c0_s100_ee1decf8/model.pt\"]}\n```\n\nThe stage gate refuses the same defect (section 4.5 gate table, `history_removed`: exit 4). In `harvest_files` only `models/<tag>/model.pt` is tested. `cluster/jhpce/prod_fit_job.sh` runs `pack` after the runner whatever its exit code (lines 221-224), so a refused stage (exit 4) and a packed latent can coexist in one job.",
+   "suggested_fix": "Either add the one-line check for the `history` key to `harvest_files` (numpy is already imported there for the device test), or reword the commit message and PRODUCTION_JOB.md to say that the harvest checks the model only."
+  },
+  {
+   "id": "G-15",
+   "fix": "I008",
+   "severity": "note",
+   "location": "experiments/X1_jhpce/x1_jhpce_command.py run_timeout_s; experiments/X1_jhpce/SUBMISSION_PLAN.md lines 21-22",
+   "problem": "Jobs 3 to 5 now ask the harness for 384 h and 576 h; the largest value used so far is 192 h. The harness raises `TimeoutCeiling` when run_timeout_s exceeds a per-target ceiling (documented in host.compute, value not published; the review also marked this not checkable without a submission). If the ceiling is below 576 h the refusal is loud and happens at submission, but the plan gives no fallback.",
+   "evidence": "The builder output for the five jobs is the block in section 4.6 (logs/final_i008_builder.jsonl). `help(host.compute)` lists the exception `TimeoutCeiling`: 'run_timeout_s above the target's ceiling (see .limit)'. The ceiling is not given there or in the JHPCE host notes.",
+   "suggested_fix": "Add to SUBMISSION_PLAN: if the harness refuses more than 192 h, submit jobs 3-5 one at a time after their predecessor ends (clock 192 h each, as the review's alternative suggested)."
+  },
+  {
+   "id": "G-16",
+   "fix": "I008",
+   "severity": "note",
+   "location": "experiments/X1_jhpce/x1_jhpce_command.py --chain-position",
+   "problem": "The chain position is typed by the operator and cannot be checked against the job's real place in the chain (the builder rejects only inconsistent combinations). A mislabelled job 5 (`--chain-position 1`) silently gets 384 h, which is the original under-provisioning problem again for the worst case. The builder does print the clock in the approval-card intent ('harness clock 576 h'), and the plan states the three values.",
+   "evidence": "Same output as section 4.6: the clock appears in the plan (`run_timeout_s`) and at the end of the approval-card intent; the builder accepts any positive `--chain-position` together with an id.",
+   "suggested_fix": "Compare the printed clock with the SUBMISSION_PLAN values (192/192/384/384/576 h) before approving each card; optionally key the position to the task name inside the builder."
+  },
+  {
+   "id": "G-17",
+   "fix": "I008",
+   "severity": "note",
+   "location": "experiments/X1_jhpce/x1_jhpce_command.py TAG_SHA and --expected-sha; SUBMISSION_PLAN 'Code and inputs'",
+   "problem": "Outside the six fixes but an operator will meet it: the builder refuses any commit other than c88cce3 (`TAG_SHA`), and the plan says the code is 'the tag prereg-tier12-v2 (c88cce3), unchanged', because the 75 X1 baseline fits already made on JHPCE are at c88cce3 and fits from a new commit would trip the runner's mixed-commit check. The six fixes (I033 in particular, which the review required before the X1 sim1 rows run) need a new tag, so after it exists that statement, the builder constant and tests/jhpce/test_x1_command.py (which bundles TAG_SHA) are out of date, and the 75 baseline fits at c88cce3 and the new X1 fits would not share one commit.",
+   "evidence": "`grep -n \"TAG_SHA\\|expected-sha\" experiments/X1_jhpce/x1_jhpce_command.py`: line `TAG_SHA = \"c88cce3c...\"`, and the refusal `--expected-sha must be prereg-tier12-v2`. SUBMISSION_PLAN 'Code and inputs': 'Code: the tag prereg-tier12-v2 (c88cce3), unchanged'.",
+   "suggested_fix": "Re-pin TAG_SHA, the plan text and the test when the new tag is cut; decide beforehand how the 75 existing X1 baseline fits are treated (refit at the new tag or amend the one-commit rule)."
+  },
+  {
+   "id": "G-18",
+   "fix": "all (tooling)",
+   "severity": "note",
+   "location": "scripts/check_arm_bitidentity.py export_base",
+   "problem": "The repository's own before/after bit-identity gate cannot run against the tag or any later base: it exports only `scripts/scvi_adversarial_plan.py` and `src/wcd_vae/wcd/` of the base commit, but since commit b0564fb the plan imports `scripts/fit_outcome.py`, so the base fits stop with `ModuleNotFoundError: No module named 'fit_outcome'`. The script's exit code for this crash (1) is the same as for 'a difference was found'. SI-52 asks for bit-identity on non-Sinkhorn arms; with this gate it cannot be shown. I used my own driver (`probes/bitid_driver.py`, same idea, exporting the whole `scripts/` and `src/`) for section 4.1. No defect of the six fixes.",
+   "evidence": "Command: `python scripts/check_arm_bitidentity.py --base c88cce3 --out X` from the head (the same with base 1c49b9a). Output (logs/bitid_arms_vs_tag_c88cce3.log, first lines; the script then exits with code 1, the code it also uses for 'a difference was found'):\n\n```\nTraceback (most recent call last):\n  File \"<string>\", line 9, in <module>\n  File \"<tmp>/base/scripts/scvi_adversarial_plan.py\", line 54, in <module>\n    from fit_outcome import NonFiniteLossError   # scripts/fit_outcome.py; scripts/ is on sys.path for every importer\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nModuleNotFoundError: No module named 'fit_outcome'\n```\n\n`export_base` writes `scripts/scvi_adversarial_plan.py` and `src/wcd_vae/wcd/*` of the base commit into a temporary tree; the plan has imported `scripts/fit_outcome.py` since commit b0564fb (an ancestor of the tag). Used instead: `probes/bitid_driver.py` and `probes/bitid_compare.py` (same idea; whole `scripts/` and `src/` exported), results in section 4.1.",
+   "suggested_fix": "Add `scripts/fit_outcome.py` (or the whole `scripts/` directory) to the files `export_base` writes, and give the crash a different exit code from a bit difference."
+  }
+ ]
+}

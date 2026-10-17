@@ -1,0 +1,72 @@
+{
+ "commit": "c1c1d65 (runner, tests); c8da1f8 (e2e interim check, notebook) on fix-runner",
+ "mutation_provenance_gate": {
+  "check": "run_stage.py --report-only on a finished 3-row fake-env stage (scorer emulating shared interface (a))",
+  "ok": true,
+  "good_passed": true,
+  "caught": [
+   "dirty",
+   "git_sha",
+   "no_provenance",
+   "no_simd_col",
+   "numba",
+   "simd",
+   "versions"
+  ],
+  "missed": [],
+  "wrong_reason": {},
+  "control_score_host_cpu_model_differ_passes": true
+ },
+ "mutation_tags_filter": {
+  "check": "run_stage.py --dry-run --no-score with --tags-file (manifest holds a placeholder row 'ph' outside the good list)",
+  "ok": true,
+  "good_passed": true,
+  "caught": [
+   "duplicate",
+   "empty",
+   "other_experiment",
+   "placeholder_inside",
+   "two_per_line",
+   "unknown"
+  ],
+  "missed": [],
+  "wrong_reason": {}
+ },
+ "differential_vs_c9568fd": {
+  "rows": {
+   "ok1": "scored",
+   "ok2": "scored",
+   "nan": "nonfinite_latent",
+   "div": "diverged",
+   "flaky": "scored (crash, then ok)"
+  },
+  "exit_codes": [
+   0,
+   0
+  ],
+  "ledger_columns_equal": true,
+  "ledger_values_equal_excluding": [
+   "fit_started",
+   "fit_ended",
+   "fit_wall_s",
+   "score_started",
+   "score_ended",
+   "score_wall_s",
+   "claimed_by"
+  ],
+  "ledger_values_equal": true,
+  "failures_equal": true,
+  "attempt_sequences_equal": true,
+  "summary_keys_added": [
+   "cpu_lanes",
+   "row_kinds",
+   "tags_file"
+  ],
+  "summary_keys_removed": [],
+  "gate_keys_added": [
+   "mixed_scorer_provenance",
+   "scorer_provenance"
+  ],
+  "common_gate_fields_equal": true
+ }
+}

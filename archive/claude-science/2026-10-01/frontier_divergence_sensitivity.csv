@@ -1,0 +1,6 @@
+scenario,cells_crit_win,cells_crit_win_gt_0p01,cells_disc_win_gt_0p01,mean_adv,atac_large_lin,ihm_lin,frac_barycenter,frac_mmd,frac_pooled,frac_reference,frac_sinkhorn
+A as-reported (survivor means),12,9,0,0.0171,0.1139,0.0159,0.385,0.505,0.279,0.269,0.625
+B seed-matched to disc survivors,12,9,0,0.0171,0.1123,0.0161,0.387,0.509,0.279,0.271,0.63
+D drop any-diverged lambda (all arms),10,8,0,0.0137,0.0808,-0.002,0.406,0.539,0.29,0.278,0.612
+C1 diverged scored as unintegrated,11,8,0,0.0137,0.0768,-0.0017,0.394,0.516,0.303,0.293,0.641
+C2 diverged scored as worst disc run,12,9,0,0.022,0.1606,0.044,0.385,0.505,0.279,0.264,0.609

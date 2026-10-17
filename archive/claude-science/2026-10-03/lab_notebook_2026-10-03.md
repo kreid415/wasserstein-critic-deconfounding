@@ -1,0 +1,97 @@
+# Lab notebook: 2026-10-03
+
+## NB-20261003-01 · 2026-10-03T11:04:39-04:00 · DECISION · X3
+**X3 reference fixed at the dose-0 automatic choice; depleted batch non-reference**
+- author: agent
+- decision: every X3 row carries an explicit reference = select_reference_batch on the dose-0 subsample, at every dose; the depleted batch is always a non-reference batch (only atac_small changes target)
+- alternatives: automatic reference per fit (switched with dose: atac_small at 95, pancreas at 50-80); per-dose explicit references
+- rationale: a dose-dependent reference confounds the composition shift with a change of alignment target; verified 2026-10-03: dose-0 references atac_small WholeBrainA_62216 (= old depleted batch), immune_hum_mou Oetjen_A, sim2 Batch4Sub2, pancreas inDrop1
+- decided by: user via lead (ask_user 2026-10-03): "Fix reference; deplete a non-reference batch (Recommended)"
+- links: repo@878d8ea
+<!-- sha256=39d6275dc2fa6cd2b9ade6b6ca7ed64d6829765f66d0c455df997650a0876847 prev=72d8b7b51ffeff4685a64243affb5fba85dc3fb2774fd338d04580476ab25b73 -->
+
+## NB-20261003-02 · 2026-10-03T11:04:52-04:00 · DECISION · X3
+**X3 sim2: deplete only Group1 in Batch3Sub1**
+- author: agent
+- decision: sim2 X3 depletes only Group1 in Batch3Sub1 (Group1 1,446 and Group2 484 cells), so the batch stays at every dose
+- alternatives: old design: deplete Group1 and Group2 (the whole batch; batch-size shift, batch removed at dose 100)
+- rationale: depleting both types removed the entire batch: a batch-size change, not a composition shift
+- decided by: user via lead (ask_user 2026-10-03): "Deplete only Group1 (Recommended)"
+- links: repo@3a17b14
+<!-- sha256=c714afea918efec8dc50615adf568a1af06896b28840c9448030e391c0b1d1d5 prev=39d6275dc2fa6cd2b9ade6b6ca7ed64d6829765f66d0c455df997650a0876847 -->
+
+## NB-20261003-03 · 2026-10-03T11:04:52-04:00 · DECISION · X3
+**X3 atac_small target: Fang CEMBA180305_2B, Excitatory + Inhibitory Neurons**
+- author: agent
+- decision: atac_small depletes Excitatory Neurons and Inhibitory Neurons in 'Fang et al. - CEMBA180305_2B' (largest non-reference batch, 3,750 cells; 2,868 depletable)
+- alternatives: Fang: Excitatory Neurons only; 10x Genomics: Excitatory + Inhibitory
+- rationale: same criterion as the other X3 tasks (largest non-reference batch; its two most abundant types present in all 3 batches); dose 95: weight 20.1, ESS fraction 0.24
+- decided by: user (ask_user 2026-10-03): "Fang: Excitatory + Inhibitory (Recommended)"
+- links: repo@b13c1f2
+<!-- sha256=96a55187b23b6243b308d924628c3df7ef871bf2092ddc9efee4576cf6389446 prev=c714afea918efec8dc50615adf568a1af06896b28840c9448030e391c0b1d1d5 -->
+
+## NB-20261003-04 · 2026-10-03T11:04:52-04:00 · DECISION · X13
+**X13 Harmony knob: theta {0, 0.5, 1, 2, 4, 8}**
+- author: agent
+- decision: Harmony strength knob theta in {0, 0.5, 1, 2, 4, 8} at 10 PCs, each once (harmonize random_state 0, fresh process, pinned threads); 50 PCs at theta 2 as sensitivity
+- alternatives: theta {0.5, 1, 2, 3, 4, 6}; ridge lambda {0.05, 0.1, 0.25, 0.5, 1, 2}
+- rationale: Korsunsky et al. 2019 Methods Eq. 3-4: theta sets the penalty on batch-cluster dependence (theta 0 = no penalty, Eq. 2), default 2 (Methods 5.4); harmony-pytorch 0.1.7 harmonize(theta=2.0); scib 1.1.7 does not forward kwargs
+- decided by: user (ask_user 2026-10-03): "theta {0, 0.5, 1, 2, 4, 8} (Recommended)"
+- links: repo@dc79a34
+<!-- sha256=973cef3a1979ec8b02c8d3c897413423fa3e96687e70d6a9bb561cf722d3cb1f prev=96a55187b23b6243b308d924628c3df7ef871bf2092ddc9efee4576cf6389446 -->
+
+## NB-20261003-05 · 2026-10-03T11:04:52-04:00 · DECISION · X13
+**X13 Scanorama knob: knn {5, 10, 20, 40, 80, 160}**
+- author: agent
+- decision: Scanorama strength knob knn in {5, 10, 20, 40, 80, 160} at dimred 10, each once (seed 0); dimred 100 at knn 20 as sensitivity
+- alternatives: alpha {0, 0.05, 0.1, 0.2, 0.4, 0.6}; sigma {1, 3, 7, 15, 30, 60}
+- rationale: Hie et al. 2019 Methods: 20 nearest neighbours 'to identify a robust set of matches without also being overly permissive'; scanorama 1.7.4 correct(knn=20); the source has no partial-strength parameter (full kernel-weighted translation)
+- decided by: user (ask_user 2026-10-03): "knn {5, 10, 20, 40, 80, 160} (Recommended)"
+- links: repo@a00aaad
+<!-- sha256=2ed6662d582fd709627252a6171a9c6a0b4b97229daf74c5ea22ebc856276aa9 prev=973cef3a1979ec8b02c8d3c897413423fa3e96687e70d6a9bb561cf722d3cb1f -->
+
+## NB-20261003-06 · 2026-10-03T11:04:52-04:00 · DECISION · X13
+**X13 PCA: once, as the uncorrected anchor**
+- author: agent
+- decision: PCA runs once at 10 PCs (plus the 50-PC tool default as sensitivity) and is shown as the uncorrected anchor, not as a best-of-k budget curve
+- alternatives: 6 PC counts {5, 10, 15, 20, 30, 50}
+- rationale: PCA has no batch-correction knob (scIB's unintegrated embedding); varying the PC count would vary the latent dimension fixed at 10 (SI-04)
+- decided by: user (ask_user 2026-10-03): "Once, as uncorrected anchor (Recommended)"
+- links: repo@1347fb3
+<!-- sha256=648d3aecc5c7ec8e628b68b61cdff43d662eac4e66303511a73a2da596529801 prev=2ed6662d582fd709627252a6171a9c6a0b4b97229daf74c5ea22ebc856276aa9 -->
+
+## NB-20261003-07 · 2026-10-03T12:01:29-04:00 · RESULT · bench_missing_arms_step_cost
+**Step-cost run2: 11 of 12 arms within the 25% spread; mmd_iw fails PF-16**
+- author: agent
+- ran: experiments/bench_missing_arms_step_cost run2 (72 fits, frozen worktree e3051e4, 02:38-03:05 UTC; GPU idle, no other compute apps before every fit)
+- observed: median ms/step (spread): discriminator_r1 13.56 (0.109), discriminator_ref 15.47 (0.041), reference_stratified 45.97 (0.078), pooled_stratified 41.74 (0.249), discriminator_iw 13.08 (0.108), reference_iw 46.03 (0.076), pooled_iw 37.62 (0.137), mmd_iw 13.08 (0.304 > 0.25); controls discriminator 12.08, reference 46.61, pooled 43.01, mmd 12.71. Pre-declared rule (all 12 arms must pass) not met: the 8 rows stay provisional. docs/throughput_missing_arms_summary_run2.csv
+- links: repo@04291d5
+<!-- sha256=34a7d78a09aca35a0f07804419896b387df9aaf5fdc21762a41e4e824f979ff4 prev=648d3aecc5c7ec8e628b68b61cdff43d662eac4e66303511a73a2da596529801 -->
+
+## NB-20261003-08 · 2026-10-03T12:01:29-04:00 · ISSUE · bench_missing_arms_step_cost
+**Step-cost run3 stopped: external CPU load during the run**
+- author: agent
+- problem: from 15:09:22 UTC another workload kept 11.4-12.0 of 12 cores busy (5-s sampler, run3/host_load.csv; the bench's own fits used 1.3-1.6 cores); fits from mmd_iw_rep0_e1 on ran 1.3-1.5x slower; stopped after 20 of 72 fits
+- impact: no run3 timing is usable; the 8 step costs remain provisional
+- next: run4 behind an automatic quiet gate (3 x 20-s windows with < 2 busy cores and no GPU compute process, max 90 min), same protocol plus sampler
+- links: repo@01402ac; NB-20261003-07
+<!-- sha256=6985932ebbd7b51482b022dc4bfc9adf3cf9878af700c273de76673825836bca prev=34a7d78a09aca35a0f07804419896b387df9aaf5fdc21762a41e4e824f979ff4 -->
+
+## NB-20261003-09 · 2026-10-03T12:01:29-04:00 · RESULT · X13
+**X13 knob probes on atac_small (exploratory, machine under external load)**
+- author: agent
+- ran: run_cpu_baselines.embed on atac_small HVGs: Harmony theta 0 / 2 / 8 at 10 PCs (fresh process, 1 thread); Scanorama knn 5 / 20 / 160 at dimred 10; kNN(30) batch entropy normalised by log K
+- observed: Harmony batch entropy 0.558 / 0.706 / 0.731 (PCA 10: 0.282), max|dz| theta 0 vs 2 2.52, 2 vs 8 3.02, 19.5-32.6 s per fit; Scanorama 0.401 / 0.434 for knn 5 / 20 (19.6 s / 115 s); knn 160 not finished after 16.6 min (peak RSS 13.7 GB, interrupted in batch_bias). Times are inflated by the external load. On the toy, theta hardly changes Harmony at 10 PCs (2.7e-05), so the unit test checks the knob at 50 PCs
+- concern: Scanorama knn 80 / 160 may be very slow or memory-bound on the 85-98k-cell tasks (immune_hum_mou, atac_large); cost not yet measured
+- links: repo@be5299a
+<!-- sha256=b6823cf225fb7da24e6845fdb51bcc21bea40ada9bb07d2c48b08f1b15a5a81b prev=6985932ebbd7b51482b022dc4bfc9adf3cf9878af700c273de76673825836bca -->
+
+## NB-20261003-10 · 2026-10-03T12:18:53-04:00 · DECISION · bench_missing_arms_step_cost
+**Step costs: adopt run2; mmd_iw stays provisional; run4 cancelled**
+- author: agent
+- decision: the 8 new-arm rows of docs/throughput_rtx3080_stock_backbone.csv are replaced by the run2 medians; mmd_iw (spread 0.304 > 0.25) stays marked provisional in scripts/wall_time_report.py; the gated run4 was cancelled before any fit
+- alternatives: wait for a quiet machine (other sub-agents' scoring and tests keep 10-12 cores busy for hours); keep all 8 rows provisional (the pre-declared all-or-nothing rule)
+- rationale: run2 ran with the GPU idle and no other compute process; 11 of 12 arms within 25%; the local GPU is needed for the pilots (SI-30) and another sub-agent's GPU test
+- decided by: lead (a0b87862), message of 2026-10-03 ~16:18 UTC; departs from the pre-declared rule in the preflight plan
+- links: repo@83e9941; NB-20261003-07; NB-20261003-08
+<!-- sha256=dd278d5d7901ad52e28336ad4135ed0d48a20696b63f1dfa8e39fdba348a664d prev=b6823cf225fb7da24e6845fdb51bcc21bea40ada9bb07d2c48b08f1b15a5a81b -->

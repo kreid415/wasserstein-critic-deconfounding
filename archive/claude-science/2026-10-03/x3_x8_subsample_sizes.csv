@@ -1,0 +1,45 @@
+experiment,task,spec,max_epochs,n_cells,n_batches,min_batch,steps_per_epoch,n_hit,n_drop
+X3,atac_small,"{""batch"": ""Fang et al. - CEMBA180305_2B"", ""deplete_pct"": 0, ""kind"": ""composition"", ""n_cells"": 11270, ""types"": [""Excitatory Neurons"", ""Inhibitory Neurons""]}",['400'],11270,3,3618,80,2868.0,0.0
+X3,atac_small,"{""batch"": ""Fang et al. - CEMBA180305_2B"", ""deplete_pct"": 100, ""kind"": ""composition"", ""n_cells"": 11270, ""types"": [""Excitatory Neurons"", ""Inhibitory Neurons""]}",['400'],8402,3,882,60,2868.0,2868.0
+X3,atac_small,"{""batch"": ""Fang et al. - CEMBA180305_2B"", ""deplete_pct"": 50, ""kind"": ""composition"", ""n_cells"": 11270, ""types"": [""Excitatory Neurons"", ""Inhibitory Neurons""]}",['400'],9836,3,2316,70,2868.0,1434.0
+X3,atac_small,"{""batch"": ""Fang et al. - CEMBA180305_2B"", ""deplete_pct"": 80, ""kind"": ""composition"", ""n_cells"": 11270, ""types"": [""Excitatory Neurons"", ""Inhibitory Neurons""]}",['400'],8976,3,1456,64,2868.0,2294.0
+X3,atac_small,"{""batch"": ""Fang et al. - CEMBA180305_2B"", ""deplete_pct"": 95, ""kind"": ""composition"", ""n_cells"": 11270, ""types"": [""Excitatory Neurons"", ""Inhibitory Neurons""]}",['400'],8545,3,1025,61,2868.0,2725.0
+X3,immune_hum_mou,"{""batch"": ""MCA_BM_2"", ""deplete_pct"": 0, ""kind"": ""composition"", ""n_cells"": 20000, ""types"": [""Neutrophils"", ""Monocyte progenitors""]}",['400'],20000,23,49,141,10873.0,0.0
+X3,immune_hum_mou,"{""batch"": ""MCA_BM_2"", ""deplete_pct"": 100, ""kind"": ""composition"", ""n_cells"": 20000, ""types"": [""Neutrophils"", ""Monocyte progenitors""]}",['400'],20000,23,43,141,10873.0,10873.0
+X3,immune_hum_mou,"{""batch"": ""MCA_BM_2"", ""deplete_pct"": 50, ""kind"": ""composition"", ""n_cells"": 20000, ""types"": [""Neutrophils"", ""Monocyte progenitors""]}",['400'],20000,23,46,141,10873.0,5436.0
+X3,immune_hum_mou,"{""batch"": ""MCA_BM_2"", ""deplete_pct"": 80, ""kind"": ""composition"", ""n_cells"": 20000, ""types"": [""Neutrophils"", ""Monocyte progenitors""]}",['400'],20000,23,58,141,10873.0,8698.0
+X3,immune_hum_mou,"{""batch"": ""MCA_BM_2"", ""deplete_pct"": 95, ""kind"": ""composition"", ""n_cells"": 20000, ""types"": [""Neutrophils"", ""Monocyte progenitors""]}",['400'],20000,23,47,141,10873.0,10329.0
+X3,pancreas,"{""batch"": ""inDrop3"", ""deplete_pct"": 0, ""kind"": ""composition"", ""n_cells"": 16382, ""types"": [""alpha"", ""acinar""]}",['400'],16382,9,638,116,1973.0,0.0
+X3,pancreas,"{""batch"": ""inDrop3"", ""deplete_pct"": 100, ""kind"": ""composition"", ""n_cells"": 16382, ""types"": [""alpha"", ""acinar""]}",['400'],14409,9,638,102,1973.0,1973.0
+X3,pancreas,"{""batch"": ""inDrop3"", ""deplete_pct"": 50, ""kind"": ""composition"", ""n_cells"": 16382, ""types"": [""alpha"", ""acinar""]}",['400'],15396,9,638,109,1973.0,986.0
+X3,pancreas,"{""batch"": ""inDrop3"", ""deplete_pct"": 80, ""kind"": ""composition"", ""n_cells"": 16382, ""types"": [""alpha"", ""acinar""]}",['400'],14804,9,638,105,1973.0,1578.0
+X3,pancreas,"{""batch"": ""inDrop3"", ""deplete_pct"": 95, ""kind"": ""composition"", ""n_cells"": 16382, ""types"": [""alpha"", ""acinar""]}",['400'],14508,9,638,103,1973.0,1874.0
+X3,sim2,"{""batch"": ""Batch3Sub1"", ""deplete_pct"": 0, ""kind"": ""composition"", ""n_cells"": 19318, ""types"": [""Group1""]}",['400'],19318,16,485,136,1446.0,0.0
+X3,sim2,"{""batch"": ""Batch3Sub1"", ""deplete_pct"": 100, ""kind"": ""composition"", ""n_cells"": 19318, ""types"": [""Group1""]}",['400'],17872,16,484,126,1446.0,1446.0
+X3,sim2,"{""batch"": ""Batch3Sub1"", ""deplete_pct"": 50, ""kind"": ""composition"", ""n_cells"": 19318, ""types"": [""Group1""]}",['400'],18595,16,485,131,1446.0,723.0
+X3,sim2,"{""batch"": ""Batch3Sub1"", ""deplete_pct"": 80, ""kind"": ""composition"", ""n_cells"": 19318, ""types"": [""Group1""]}",['400'],18161,16,485,128,1446.0,1157.0
+X3,sim2,"{""batch"": ""Batch3Sub1"", ""deplete_pct"": 95, ""kind"": ""composition"", ""n_cells"": 19318, ""types"": [""Group1""]}",['400'],17944,16,485,127,1446.0,1374.0
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 16000, ""subset"": 0}",['400'],16000,16,1000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 16000, ""subset"": 1}",['400'],16000,16,1000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 16000, ""subset"": 0}",['400'],16000,2,8000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 16000, ""subset"": 1}",['400'],16000,2,8000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 16000, ""subset"": 0}",['400'],16000,4,4000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 16000, ""subset"": 1}",['400'],16000,4,4000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 16000, ""subset"": 0}",['400'],16000,8,2000,113,,
+X8,immune_hum_mou,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 16000, ""subset"": 1}",['400'],16000,8,2000,113,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 6000, ""subset"": 0}",['400'],6000,16,375,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 6000, ""subset"": 1}",['400'],6000,16,375,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 6000, ""subset"": 0}",['400'],6000,2,3000,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 6000, ""subset"": 1}",['400'],6000,2,3000,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 6000, ""subset"": 0}",['400'],6000,4,1500,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 6000, ""subset"": 1}",['400'],6000,4,1500,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 6000, ""subset"": 0}",['400'],6000,8,750,43,,
+X8,lung,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 6000, ""subset"": 1}",['400'],6000,8,750,43,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 3000, ""subset"": 0}",['400'],2992,16,187,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 16, ""n_cells"": 3000, ""subset"": 1}",['400'],2992,16,187,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 3000, ""subset"": 0}",['400'],3000,2,1500,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 2, ""n_cells"": 3000, ""subset"": 1}",['400'],3000,2,1500,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 3000, ""subset"": 0}",['400'],3000,4,750,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 4, ""n_cells"": 3000, ""subset"": 1}",['400'],3000,4,750,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 3000, ""subset"": 0}",['400'],3000,8,375,22,,
+X8,sim2,"{""kind"": ""batches"", ""n_batches"": 8, ""n_cells"": 3000, ""subset"": 1}",['400'],3000,8,375,22,,

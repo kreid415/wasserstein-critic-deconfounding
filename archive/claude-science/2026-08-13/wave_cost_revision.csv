@@ -1,0 +1,8 @@
+quantity,budget_150ep,measured_500ep
+shards,221,221
+worker-hours,186,236
+wall-clock h,45,58
+critic s/config (pancreas),1041,1563
+disc s/config (pancreas),90,51
+"mean epochs, critic",130,176
+"mean epochs, disc",116,114

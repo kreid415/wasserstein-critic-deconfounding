@@ -1,0 +1,39 @@
+{
+ "n_unique": 175,
+ "n_screened": 60,
+ "n_partial": 14,
+ "n_substantial": 0,
+ "n_forward": 54,
+ "forward_by_work": {
+  "ResPAN": 26,
+  "sysVI": 16,
+  "scIB-E": 6,
+  "scCRAFT": 6
+ },
+ "coverage": {
+  "openalex|Wasserstein critic versus discriminator single-cell batch correction": 20,
+  "arxiv|Wasserstein critic versus discriminator single-cell batch correction": 0,
+  "europepmc|Wasserstein critic versus discriminator single-cell batch correction": 6,
+  "openalex|adversarial MMD optimal transport batch correction variational autoencoder single-cell comparison": 20,
+  "arxiv|adversarial MMD optimal transport batch correction variational autoencoder single-cell comparison": 9,
+  "europepmc|adversarial MMD optimal transport batch correction variational autoencoder single-cell comparison": 14,
+  "openalex|latent alignment loss comparison scVI batch effect Jensen-Shannon Wasserstein maximum mean discrepancy": 4,
+  "arxiv|latent alignment loss comparison scVI batch effect Jensen-Shannon Wasserstein maximum mean discrepancy": 16,
+  "europepmc|latent alignment loss comparison scVI batch effect Jensen-Shannon Wasserstein maximum mean discrepancy": 2,
+  "openalex|Sinkhorn divergence single-cell integration batch effect autoencoder": 20,
+  "arxiv|Sinkhorn divergence single-cell integration batch effect autoencoder": 0,
+  "europepmc|Sinkhorn divergence single-cell integration batch effect autoencoder": 6,
+  "openalex|controlled benchmark batch correction loss functions single-cell integration same backbone": 20,
+  "arxiv|controlled benchmark batch correction loss functions single-cell integration same backbone": 20,
+  "europepmc|controlled benchmark batch correction loss functions single-cell integration same backbone": 20,
+  "openalex|WGAN-GP batch effect removal scRNA-seq": 13,
+  "arxiv|WGAN-GP batch effect removal scRNA-seq": 0,
+  "europepmc|WGAN-GP batch effect removal scRNA-seq": 4
+ },
+ "raw_total": 194,
+ "raw_by_source": {
+  "openalex": 97,
+  "arxiv": 45,
+  "europepmc": 52
+ }
+}

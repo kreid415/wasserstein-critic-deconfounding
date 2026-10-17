@@ -1,0 +1,176 @@
+{
+ "summary": {
+  "none@0.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 5,
+   "n_steps": 5
+  },
+  "discriminator@1.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "discriminator@10.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "reference@1.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "reference@10.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "pooled@1.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "pooled@10.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "mmd@1.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 5,
+   "n_steps": 5
+  },
+  "mmd@10.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 5,
+   "n_steps": 5
+  },
+  "barycenter@1.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "barycenter@10.0": {
+   "same_init_as_none": true,
+   "first_epoch_minibatches_equal_to_none": 0,
+   "n_steps": 5
+  },
+  "discriminator: lambda 1 vs 10 same minibatch order": true,
+  "reference: lambda 1 vs 10 same minibatch order": true,
+  "pooled: lambda 1 vs 10 same minibatch order": true,
+  "mmd: lambda 1 vs 10 same minibatch order": true,
+  "barycenter: lambda 1 vs 10 same minibatch order": true
+ },
+ "raw": {
+  "none@0.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "8ae94166da",
+    "5b0d500e3a",
+    "2136a20593",
+    "f9f3ffc9e7",
+    "0d1010e739"
+   ]
+  },
+  "discriminator@1.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "discriminator@10.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "reference@1.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "reference@10.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "pooled@1.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "pooled@10.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "mmd@1.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "8ae94166da",
+    "5b0d500e3a",
+    "2136a20593",
+    "f9f3ffc9e7",
+    "0d1010e739"
+   ]
+  },
+  "mmd@10.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "8ae94166da",
+    "5b0d500e3a",
+    "2136a20593",
+    "f9f3ffc9e7",
+    "0d1010e739"
+   ]
+  },
+  "barycenter@1.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  },
+  "barycenter@10.0": {
+   "init": "e57de87df86b",
+   "steps": [
+    "5714184819",
+    "8ef3d3b73b",
+    "c06f85001c",
+    "fb179a000d",
+    "d7d4b03317"
+   ]
+  }
+ }
+}

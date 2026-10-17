@@ -1,0 +1,121 @@
+{
+  "version": 3,
+  "created_at": "2026-07-22T14:06:40.410Z",
+  "task_summary": "Restructure Topology Matters manuscript for Genome Biology: reorder, split methods, integrate E2/E3/E5/E6, new figures, reconcile claims",
+  "agents": [],
+  "phases": [
+    {
+      "name": "Title & framing",
+      "delegations": [
+        {
+          "name": "Title workshop",
+          "steps": [
+            {
+              "title": "Workshop new title candidates",
+              "description": "Propose a shortlist of candidate titles reflecting the narrowed, discriminator-preferred conclusion and the broadened scope (multi-backbone, biological validation, disjoint-support). Discuss with user; pick one."
+            },
+            {
+              "title": "Reconcile abstract to narrowed claims",
+              "description": "Rewrite the structured abstract (GB Background/Results/Conclusions) so it matches the revision conclusions: discriminator preferable at operating point, critic over-corrects; drop the 'critic yields superior mixing' framing. Show exact current->proposed for approval."
+            }
+          ]
+        }
+      ],
+      "id": "phase-0"
+    },
+    {
+      "name": "Structure & methods",
+      "delegations": [
+        {
+          "name": "Restructure",
+          "steps": [
+            {
+              "title": "Reorder to GB structure (methods last)",
+              "description": "Move Materials and Methods to the end (after Discussion/Conclusions), Nature/GB style. Keep Background(Intro)/Related Work up front, Results in the middle."
+            },
+            {
+              "title": "Split scCRAFT-specific from general methods",
+              "description": "Separate the general adversarial-deconfounding framework (discriminator vs critic objective, evaluation) from scCRAFT-specific backbone details, mapping onto the authored-vs-upstream code split."
+            },
+            {
+              "title": "Add per-architecture subsections",
+              "description": "Add Methods subsections for each of the 4 backbones (scCRAFT / scVI-NB / Gaussian / ZINB) describing how the two adversarial heads attach to each."
+            },
+            {
+              "title": "Apply E0 notation fixes",
+              "description": "Fix the three flagged equations: NB inverse-dispersion theta (not r_g); cosine loss L2-normalization + cell indexing; discriminator single V-way CE (not per-batch head h_v). Show each current->proposed."
+            }
+          ]
+        }
+      ],
+      "id": "phase-1"
+    },
+    {
+      "name": "Results integration",
+      "delegations": [
+        {
+          "name": "New results",
+          "steps": [
+            {
+              "title": "Integrate E2 backbone-generalization results",
+              "description": "New Results subsection + figure (fig_E2_backbones) showing the critic-vs-discriminator trade-off holds on all 4 backbones; retires the single-backbone limitation."
+            },
+            {
+              "title": "Integrate E3 external baselines",
+              "description": "New Results subsection + table/figure comparing Harmony/scVI/scANVI/Scanorama/unintegrated against both adversarial heads."
+            },
+            {
+              "title": "Integrate E5 biological validation",
+              "description": "New Results subsection + figure (fig_E5_biology): per-cell-type purity, rare-cell retention, label-transfer; direct evidence of critic over-correction."
+            },
+            {
+              "title": "Integrate E6 support-overlap + local/global",
+              "description": "Fold support-overlap (measured disjointness, sep 0.68-1.00) into the premise/setup and add the local-vs-global decomposition result addressing the local/global mismatch."
+            },
+            {
+              "title": "Expand dataset scope to 8",
+              "description": "Update datasets table + text from 3 to 8 (add cross-species immune, sim1/sim2, 2 ATAC); update the E8 multibatch results with the full metric suite."
+            }
+          ]
+        }
+      ],
+      "id": "phase-2"
+    },
+    {
+      "name": "Figures, conclusions, title-port",
+      "delegations": [
+        {
+          "name": "Finalize",
+          "steps": [
+            {
+              "title": "Redraw architecture figure",
+              "description": "Redraw Figure 1 to show the multi-headed reference-based Wasserstein critic, gradient penalty, reference batch, and the discriminator-vs-critic swap on a fixed backbone; propose design for approval before rendering."
+            },
+            {
+              "title": "Reconcile Discussion + add Conclusions",
+              "description": "Update Discussion to the narrowed conclusions (remove single-backbone limitation now addressed; keep barycenter/annealing future work) and add a separate Conclusions section (GB convention)."
+            },
+            {
+              "title": "Port to BMC/GB template + compile-check",
+              "description": "Once user provides bmcart.cls, port structure onto it (abstract macros, bibstyle, figure handling) and compile-check on the dsai cluster (texlive module). Commit to GitHub."
+            }
+          ]
+        }
+      ],
+      "id": "phase-3"
+    }
+  ],
+  "desired_outputs": [
+    "Restructured manuscript .tex (GB structure: Background/Results/Discussion/Conclusions/Methods-last)",
+    "Redrawn architecture figure (Figure 1) showing multi-headed reference critic + backbone swap",
+    "New Results subsections + figures for E2 (backbones), E3 (external baselines), E5 (biology), E6 (support-overlap/local-global)",
+    "Reconciled abstract + discussion + new Conclusions section matching narrowed critic-vs-discriminator conclusions",
+    "Notation fixes (NB theta, cosine L2-norm, discriminator V-way CE) per E0",
+    "Candidate title shortlist",
+    "Final port onto bmcart (BMC/GB) class once template provided, compile-checked on dsai cluster"
+  ],
+  "feasibility": {
+    "confidence": "high",
+    "rationale": "All revision data and figures already exist as artifacts; the work is editorial restructuring + integration. Two external dependencies: the BMC bmcart class (user will provide) and LaTeX compilation (available on the dsai cluster, not in-sandbox). Each manuscript edit will be shown as exact current->proposed text for approval before applying."
+  }
+}

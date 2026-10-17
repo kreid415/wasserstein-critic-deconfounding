@@ -1,0 +1,12 @@
+mutant	verdict	pytest	commit=39aa51e
+G01_plan_no_stats	KILLED	1 failed in 4.78s
+G01_record_always	KILLED	1 failed in 25.80s
+G01_no_count	KILLED	3 failed, 21 passed in 5.78s
+G02_sum_omits_gp	KILLED	1 failed, 2 passed in 4.59s
+G02_first_step_only	KILLED	2 failed, 1 passed in 4.63s
+G03_call_removed	KILLED	1 failed in 25.91s
+G03_row_not_passed	KILLED	1 failed in 25.87s
+G05_lam_not_refused	KILLED	1 failed in 0.40s
+G04_entry_dropped	KILLED	1 failed in 0.38s
+G14_history_unchecked	KILLED	1 failed in 0.23s
+G04_extra_key_dropped	KILLED	1 failed in 0.38s

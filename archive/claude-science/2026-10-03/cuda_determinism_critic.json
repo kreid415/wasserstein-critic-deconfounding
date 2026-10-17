@@ -1,0 +1,25 @@
+{
+ "torch": "2.13.0+cu130",
+ "device": "NVIDIA GeForce RTX 3080",
+ "deterministic_algorithms": false,
+ "reference": {
+  "loss_identical": false,
+  "gp_identical": true,
+  "grad_bitwise_identical": true,
+  "max_abs_grad_diff": 0.0
+ },
+ "pooled": {
+  "loss_identical": false,
+  "gp_identical": false,
+  "grad_bitwise_identical": true,
+  "max_abs_grad_diff": 0.0
+ },
+ "mmd": {
+  "value_identical": true,
+  "grad_bitwise_identical": true
+ },
+ "sinkhorn": {
+  "value_identical": true,
+  "grad_bitwise_identical": true
+ }
+}

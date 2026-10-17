@@ -1,0 +1,215 @@
+{
+ "manifest_sha256_prefix": "6efbe422c8f09f98",
+ "manifest_rows": 6930,
+ "x1_rows": 3000,
+ "x1_rows_by_arm": {
+  "reference": 480,
+  "discriminator": 480,
+  "barycenter": 480,
+  "pooled": 480,
+  "mmd": 480,
+  "sinkhorn": 480,
+  "none": 80,
+  "scvi_adv": 40
+ },
+ "x1_n_critic_by_arm": {
+  "barycenter": [
+   5
+  ],
+  "discriminator": [
+   1
+  ],
+  "mmd": [
+   0
+  ],
+  "none": [
+   0
+  ],
+  "pooled": [
+   5
+  ],
+  "reference": [
+   5
+  ],
+  "scvi_adv": [
+   0
+  ],
+  "sinkhorn": [
+   0
+  ]
+ },
+ "scvi_adv_rows": 40,
+ "scvi_adv_adv_input_values": [
+  "mean"
+ ],
+ "scvi_adv_cond_values": [
+  1
+ ],
+ "authored_adv_input_values": [
+  "A2"
+ ],
+ "authored_zstd_values": [
+  "A3"
+ ],
+ "authored_cond_values": [
+  0,
+  1
+ ],
+ "x1_epochs_by_task": {
+  "atac_large": [
+   94
+  ],
+  "atac_small": [
+   400
+  ],
+  "immune": [
+   239
+  ],
+  "immune_hum_mou": [
+   82
+  ],
+  "lung": [
+   246
+  ],
+  "pancreas": [
+   400
+  ],
+  "sim1": [
+   400
+  ],
+  "sim2": [
+   400
+  ]
+ },
+ "x1_batch_sizes": [
+  128
+ ],
+ "x1_n_latent": [
+  10
+ ],
+ "x13_matches_x1_epochs_batch_latent": {
+  "sysvi": {
+   "atac_large": true,
+   "atac_small": true,
+   "immune": true,
+   "immune_hum_mou": true,
+   "lung": true,
+   "pancreas": true,
+   "sim1": true,
+   "sim2": true
+  },
+  "scanvi": {
+   "atac_large": true,
+   "atac_small": true,
+   "immune": true,
+   "immune_hum_mou": true,
+   "lung": true,
+   "pancreas": true,
+   "sim1": true,
+   "sim2": true
+  }
+ },
+ "x6_arm_steps_rows": {
+  "discriminator[1]": 27,
+  "discriminator_r1[1]": 27,
+  "discriminator_sn[1]": 27,
+  "pooled[1]": 27,
+  "pooled[5]": 27,
+  "pooled[10]": 27,
+  "pooled_sn[1]": 27,
+  "pooled_sn[5]": 27
+ },
+ "x7_arms": [
+  "discriminator_ref",
+  "mmd_ref",
+  "reference",
+  "reference_fixed"
+ ],
+ "r4_a1_blocks": {
+  "atac_small|0": {
+   "b0": 0.401761079435129,
+   "b_common": 0.6424186362973804,
+   "diff": 0.24065755686225138,
+   "setter": "barycenter",
+   "sinkhorn_M": 0.6755613380722346,
+   "low_signal": false
+  },
+  "atac_small|1": {
+   "b0": 0.6939108475311903,
+   "b_common": 0.7981650419234092,
+   "diff": 0.10425419439221895,
+   "setter": "barycenter",
+   "sinkhorn_M": 0.8018701342310633,
+   "low_signal": false
+  },
+  "immune|0": {
+   "b0": 0.4990703139136829,
+   "b_common": 0.5621289866826692,
+   "diff": 0.0630586727689863,
+   "setter": "barycenter",
+   "sinkhorn_M": 0.6884622005110573,
+   "low_signal": false
+  },
+  "immune|1": {
+   "b0": 0.6381673018004433,
+   "b_common": 0.6569909962526824,
+   "diff": 0.01882369445223908,
+   "setter": "barycenter",
+   "sinkhorn_M": 0.6628613102186097,
+   "low_signal": true
+  },
+  "sim1|0": {
+   "b0": 0.23229900491912522,
+   "b_common": 0.5063338132642264,
+   "diff": 0.2740348083451012,
+   "setter": "barycenter",
+   "sinkhorn_M": 0.7152755709616145,
+   "low_signal": false
+  },
+  "sim1|1": {
+   "b0": 0.8119601403099188,
+   "b_common": 0.8188775558554181,
+   "diff": 0.006917415545499295,
+   "setter": "mmd",
+   "sinkhorn_M": 0.8349453781280672,
+   "low_signal": true
+  }
+ },
+ "r4_a1_status": "frozen",
+ "r4_a1_extensions": 0,
+ "r4_a1_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+ "plan_L359": "z_used = mu if self.adv_input == \"mean\" else inference_outputs[\"z\"]",
+ "plan_L292_298": [
+  "def _fool_loss(self, z, batch_index):",
+  "\"\"\"scvi-tools fool loss: CE between the head's prediction and uniform-over-other-batches.\"\"\"",
+  "logits = self._wcd_head(z, None)",
+  "k = logits.shape[1]",
+  "logp = F.log_softmax(logits, dim=1)",
+  "other = (~F.one_hot(batch_index, k).bool()).float() / (k - 1)",
+  "return -(logp * other).sum(dim=1).mean()"
+ ],
+ "plan_L348_351": [
+  "if self.adversary_base in (\"none\", \"scvi_adv\"):",
+  "train_loss = super().training_step(batch, batch_idx)",
+  "self._nf_check(batch_idx, train_loss=train_loss)",
+  "return train_loss"
+ ],
+ "plan_L8_9": [
+  "discriminator   V-way classifier head (JS-type adversary), bounded scvi-tools fool loss,",
+  "ONE adversary step per generator step (as discriminators are trained)."
+ ],
+ "scvi_tp_L689": "z = inference_outputs[\"z\"]",
+ "scvi_tp_L674_678": [
+  "kappa = (",
+  "1 - self.kl_weight",
+  "if self.scale_adversarial_loss == \"auto\"",
+  "else self.scale_adversarial_loss",
+  ")"
+ ],
+ "scvi_bc_L304_305": [
+  "dist = Normal(q_m, q_v.sqrt())",
+  "latent = self.z_transformation(dist.rsample())"
+ ],
+ "scvi_vae_L390": "qz, z = self.z_encoder(encoder_input, batch_index, *categorical_input)",
+ "scvi_vae_L413": "MODULE_KEYS.Z_KEY: z,"
+}

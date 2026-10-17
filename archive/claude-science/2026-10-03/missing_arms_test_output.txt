@@ -1,0 +1,139 @@
+# Test output, branch missing-arms-v2 (head 82819bb; suites run at 126812c, which differs from the head only in docs/SPECS_missing_arms.md)
+# all runs CPU only (CUDA_VISIBLE_DEVICES empty), 2026-10-03
+
+## wcd unit + prereg suite (env wcd-gpu)
+$ PYTHONPATH=$(pwd)/src <wcd-gpu>/bin/python -m pytest -q -p no:cacheprovider tests --ignore=tests/scvi --ignore=tests/x13
+........................................................................ [ 29%]
+........................................................................ [ 59%]
+........................................................................ [ 88%]
+...........................                                              [100%]
+=============================== warnings summary ===============================
+tests/prereg/test_cli_e2e.py: 132 warnings
+tests/prereg/test_manifest_design.py: 7 warnings
+tests/prereg/test_rules.py: 73 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/pandas/core/algorithms.py:522: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    common = np.find_common_type([values.dtype, comps_array.dtype], [])
+
+tests/wcd_vae/test_adversarial_engages.py::test_discriminator_head_learns_batch_from_separable_latent
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/pkg_resources/_vendor/pyparsing.py:87: DeprecationWarning: module 'sre_constants' is deprecated
+    import sre_constants
+
+tests/wcd_vae/test_adversarial_engages.py: 4 warnings
+tests/wcd_vae/test_metrics.py: 8 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/anndata/_core/aligned_df.py:68: ImplicitModificationWarning: Transforming to str index.
+    warnings.warn("Transforming to str index.", ImplicitModificationWarning)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/9c73f1c4-a415-4e42-8952-1c72c6c26abf/wcd/tests/wcd_vae/test_backbones.py:28: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_backbones.py: 21 warnings
+tests/wcd_vae/test_formulations.py: 5 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-gpu/lib/python3.11/site-packages/scanpy/preprocessing/_simple.py:590: FutureWarning: Use sc.pp.normalize_total instead
+    normalize_per_cell(
+
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[reference]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[pooled]
+tests/wcd_vae/test_formulations.py::test_formulation_trains_finite[barycenter]
+tests/wcd_vae/test_formulations.py::test_barycenter_has_no_learnable_anchors
+tests/wcd_vae/test_formulations.py::test_reference_only_has_no_anchors
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/9c73f1c4-a415-4e42-8952-1c72c6c26abf/wcd/tests/wcd_vae/test_formulations.py:25: FutureWarning: Use sc.pp.normalize_total instead
+    sc.pp.normalize_per_cell(a, counts_per_cell_after=1e4)
+
+tests/wcd_vae/test_metrics.py::test_resolution_cache_uses_igraph_with_matched_iterations
+  /home/kendall/.claude-science/orgs/7339da5c-ddcf-4ba9-9b06-df362dd1208a/workspaces/9c73f1c4-a415-4e42-8952-1c72c6c26abf/wcd/src/wcd_vae/wcd/experiment.py:278: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    sc.tl.leiden(adata, **kwargs)  # scanpy/scib default -- keeps parity
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+243 passed, 1 skipped, 278 warnings in 174.01s (0:02:54)
+
+## scvi plan / runner / manifest / X3-X13 design suite (env scvi-api)
+$ WCD_SRC=$(pwd)/src PREPPED_DIR=<prepped_scib> <scvi-api>/bin/python -m pytest -q -p no:cacheprovider tests/scvi
+......................s......................................            [100%]
+=============================== warnings summary ===============================
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 17 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=11` in the `DataLoader` to improve performance.
+
+tests/scvi/test_adversarial_plan_v2.py: 27 warnings
+tests/scvi/test_missing_arms_plan.py: 15 warnings
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py:321: The number of training batches (5) is smaller than the logging interval Trainer(log_every_n_steps=10). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[True]
+tests/scvi/test_missing_arms_plan.py::test_stratified_sampler_feeds_equal_counts[False]
+  /home/kendall/.claude-science/conda/envs/scvi-api/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py:321: The number of training batches (6) is smaller than the logging interval Trainer(log_every_n_steps=10). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+60 passed, 1 skipped, 132 warnings in 108.63s (0:01:48)
+
+## X13 CPU baselines + scoring suite (env wcd-kbet)
+$ R_HOME=<wcd-kbet>/lib/R R_LIBS=<Rlib_kbet> PREPPED_DIR=<prepped_scib> <wcd-kbet>/bin/python -m pytest -q -p no:cacheprovider tests/x13 tests/scoring
+.................                                                        [100%]
+=============================== warnings summary ===============================
+tests/x13/test_cpu_baselines.py::test_knobs_reach_the_tools
+tests/x13/test_cpu_baselines.py::test_knobs_reach_the_tools
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_scanorama_output_is_in_input_cell_order
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama-10-40]
+tests/x13/test_cpu_baselines.py::test_declared_dimensions[scanorama-100-20]
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/utils.py:72: FutureWarning: Use anndata.concat instead of AnnData.concatenate, AnnData.concatenate is deprecated and will be removed in the future. See the tutorial for concat at: https://anndata.readthedocs.io/en/latest/concatenation.html
+    return anndata.AnnData.concatenate(*adata_list, **kwargs)
+
+tests/x13/test_cpu_baselines.py: 6 warnings
+tests/scoring/test_kbet_determinism.py: 42 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/algorithms.py:522: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    common = np.find_common_type([values.dtype, comps_array.dtype], [])
+
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/clustering.py:96: FutureWarning: In the future, the default backend for leiden will be igraph instead of leidenalg.
+  
+   To achieve the future defaults please pass: flavor="igraph" and n_iterations=2.  directed must also be False to work with igraph's implementation.
+    cluster_function(adata, resolution=res, key_added=resolution_key, **kwargs)
+
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scanpy/preprocessing/_pca/__init__.py:226: FutureWarning: Argument `use_highly_variable` is deprecated, consider using the mask argument. Use_highly_variable=True can be called through mask_var="highly_variable". Use_highly_variable=False can be called through mask_var=None
+    mask_var_param, mask_var = _handle_mask_var(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:186: UserWarning: iso_threshold is equal to number of batches in data, no isolated labels will be found
+    isolated_labels = get_isolated_labels(
+
+tests/scoring/test_kbet_determinism.py: 12 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/isolated_labels.py:212: FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    scores = pd.Series(scores)
+
+tests/scoring/test_kbet_determinism.py: 18 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/kbet.py:229: DeprecationWarning: The global conversion available with activate() is deprecated and will be removed in the next major release. Use a local converter.
+    anndata2ri.activate()
+
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_same_latent_twice_gives_identical_kbet
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_the_seed_is_live
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+tests/scoring/test_kbet_determinism.py::test_mutant_without_set_seed_fails_the_identity_check
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/scib/metrics/lisi.py:172: UserWarning: 'batch_key' is deprecated and will be ignore
+    warnings.warn("'batch_key' is deprecated and will be ignore", stacklevel=1)
+
+tests/scoring/test_kbet_determinism.py: 30 warnings
+  /home/kendall/.claude-science/conda/envs/wcd-kbet/lib/python3.11/site-packages/pandas/core/dtypes/cast.py:1641: DeprecationWarning: np.find_common_type is deprecated.  Please use `np.result_type` or `np.promote_types`.
+  See https://numpy.org/devdocs/release/1.25.0-notes.html and the docs for more information.  (Deprecated NumPy 1.25)
+    return np.find_common_type(types, [])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+17 passed, 141 warnings in 488.74s (0:08:08)

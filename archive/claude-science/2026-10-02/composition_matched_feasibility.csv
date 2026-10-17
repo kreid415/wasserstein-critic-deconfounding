@@ -1,0 +1,9 @@
+dataset,key,n_batches,shared_types,total_types,cells_total,cells_equal_count_design,frac_retained,shared_types_with_ge20_per_batch
+pancreas,tech,9,4,14,16382,3555,0.217,3
+immune,chemistry,4,4,16,33506,1756,0.052,4
+lung,protocol,2,10,17,32472,14170,0.436,10
+immune_hum_mou,species,2,11,19,97861,17262,0.176,11
+sim1,Batch,6,3,7,12097,2544,0.21,3
+sim2,Batch,4,4,4,19318,10572,0.547,4
+atac_small,batchname,3,6,7,11270,6075,0.539,6
+atac_large,batchname,3,6,7,84813,11001,0.13,6

@@ -1,0 +1,27 @@
+{
+ "reference_ref0": {
+  "per_head_gap": {
+   "head1": 2.2196784019470215
+  },
+  "objective_mean_over_heads": 2.2196784019470215
+ },
+ "reference_ref1": {
+  "per_head_gap": {
+   "head0": 2.232954978942871
+  },
+  "objective_mean_over_heads": 2.232954978942871
+ },
+ "pooled": {
+  "per_head_gap": {
+   "head0": 0.44600510597229004,
+   "head1": 1.683610439300537
+  },
+  "objective_mean_over_heads": 1.0648077726364136
+ },
+ "truth": {
+  "W1": 2.0,
+  "pooled_expected_head0": 0.43999999999999995,
+  "pooled_expected_head1": 1.56,
+  "pooled_expected_objective": 1.0
+ }
+}

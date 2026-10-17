@@ -1,0 +1,24 @@
+% ---- paper.tex preamble (outline phase). ASCII-only sources; build: tectonic paper.tex ----
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{enumitem}
+\usepackage{needspace,etoolbox}
+\pretocmd{\paragraph}{\needspace{4\baselineskip}}{}{}  % keep run-in headings with their first lines
+\usepackage[dvipsnames]{xcolor}
+\usepackage[authoryear,round]{natbib}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=MidnightBlue,urlcolor=MidnightBlue}
+\setlist{nosep,leftmargin=1.4em}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\DeclareUrlCommand\file{\urlstyle{tt}}
+% Outline status macros
+%   plain text + \src{...}   = LOCKED (user decision in CONSTRAINTS.md, rule frozen at tag prereg-tier12-v2, or verified fact)
+%   \pending{what}{when}      = not locked; 'when' names the event that will lock it
+%   \unverified{key}          = citation lead whose claim has not been checked against the source
+\newcommand{\src}[1]{{\scriptsize\textcolor{gray}{[#1]}}}
+\newcommand{\pending}[2]{{\color{BurntOrange}\textbf{[PENDING:} #1 \textit{--- locks when: #2}\textbf{]}}}
+\newcommand{\unverified}[1]{{\color{red}[?#1]}}

@@ -1,0 +1,11 @@
+{
+ "lines_replaced": 27,
+ "lines_inserted": 4,
+ "tex_errors": 0,
+ "undefined_citations_or_references": 0,
+ "underfull_original": 2,
+ "underfull_patched": 2,
+ "compiler": "tectonic (conda env python)",
+ "diff_lines_removed": 27,
+ "diff_lines_added": 31
+}

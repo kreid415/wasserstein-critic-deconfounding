@@ -1,0 +1,66 @@
+{
+ "R1": {
+  "grids_match_record": 8,
+  "of": 8,
+  "blocks_match": 36,
+  "points_compared": 372,
+  "max_abs_diff": 0.0
+ },
+ "R4_a1": {
+  "cells_match": 36,
+  "targets_match": 6,
+  "round1_extensions": "immune c1 discriminator/reference/pooled at 0.03 (record identical)"
+ },
+ "R2": {
+  "n": 12,
+  "evaluable": 12,
+  "mean_D": -0.0014478227373954378,
+  "decision": "mean (default)"
+ },
+ "R3": {
+  "n": 20,
+  "evaluable": 17,
+  "mean_D": 0.0010093060206532935,
+  "decision": "off (default)"
+ },
+ "copy_code_R1": {
+  "mmd|1": {
+   "record": [
+    3.0,
+    10.0,
+    30.0,
+    300.0,
+    1000.0,
+    3000.0
+   ],
+   "copy_code": [
+    1.0,
+    3.0,
+    30.0,
+    100.0,
+    1000.0,
+    3000.0
+   ],
+   "x1_rows_with_lambda_not_in_copy_grid": 80
+  },
+  "w1|0": {
+   "record": [
+    0.3,
+    1.0,
+    3.0,
+    10.0,
+    30.0,
+    100.0
+   ],
+   "copy_code": [
+    0.1,
+    0.3,
+    1.0,
+    3.0,
+    10.0,
+    30.0
+   ],
+   "x1_rows_with_lambda_not_in_copy_grid": 120
+  }
+ }
+}
