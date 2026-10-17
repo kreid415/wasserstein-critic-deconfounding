@@ -113,5 +113,5 @@ def main(argv=None):
     return 1 if bad else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma: no cover - entry point
     sys.exit(main())

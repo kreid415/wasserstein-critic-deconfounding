@@ -24,7 +24,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def run(*cmd, env=None):
+def run(*cmd, env=None):   # pragma: no cover - subprocess launcher, used by execute()
     return subprocess.run([sys.executable, *cmd], env=env, check=False).returncode
 
 
@@ -42,6 +42,14 @@ def main(argv=None):
     out = os.path.abspath(a.out)
     if os.path.exists(f"{out}/exit_codes.txt"):
         raise SystemExit(f"{out} already holds a run: use a new folder (the worker skips existing latents)")
+    lines = open(a.rows).read().splitlines()           # line 1: '#' comment, line 2: column names, then the rows
+    tags = [l.split("\t")[0] for l in lines[2:]]
+    if len(tags) != len(set(tags)) or not tags or a.control > len(tags):
+        raise SystemExit(f"{a.rows}: need distinct tags and at least {a.control} rows, got {len(tags)}")
+    return execute(a, out, lines, tags)
+
+
+def execute(a, out, lines, tags):   # pragma: no cover - runs the checkouts' fits; exercised by the recorded plan_identity run
     os.makedirs(out, exist_ok=True)
     env = dict(os.environ)
     if a.synthetic:
@@ -51,10 +59,6 @@ def main(argv=None):
     else:
         prepped = os.path.abspath(a.prepped)
     env["PREPPED_DIR"] = prepped
-    lines = open(a.rows).read().splitlines()           # line 1: '#' comment, line 2: column names, then the rows
-    tags = [l.split("\t")[0] for l in lines[2:]]
-    if len(tags) != len(set(tags)) or not tags or a.control > len(tags):
-        raise SystemExit(f"{a.rows}: need distinct tags and at least {a.control} rows, got {len(tags)}")
     open(f"{out}/manifest.tsv", "w").write("\n".join(lines) + "\n")
     open(f"{out}/control_manifest.tsv", "w").write("\n".join(lines[:2 + a.control]) + "\n")
     open(f"{out}/tags.txt", "w").write("\n".join(tags) + "\n")
@@ -70,5 +74,5 @@ def main(argv=None):
     return 1 if (rc or rc_control) else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma: no cover - entry point
     sys.exit(main())

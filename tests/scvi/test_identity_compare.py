@@ -70,4 +70,31 @@ def test_identity_compare_missing_file_fails(tmp_path):
     _write(tmp_path, "old", "t1")
     (tmp_path / "tags.txt").write_text("t1\n")
     (tmp_path / "exit_codes.txt").write_text("old t1 0\nnew t1 0\n")
-    assert ic.main([str(tmp_path), "r.csv", "--no-models"]) == 1
+    assert ic.main([str(tmp_path), "r.csv"]) == 1                      # new latents and both model files missing
+    row = next(__import__("csv").DictReader(open(tmp_path / "r.csv")))
+    assert row["arrays_identical"] == row["model_identical"] == "missing"
+
+
+def test_plan_identity_refuses_bad_input(tmp_path):   # test-reason: the no-fit driver's input guards; the run itself is recorded, not unit-tested
+    def load(name):
+        s = importlib.util.spec_from_file_location(name, os.path.join(ROOT, "experiments", "followup_build_20261017", f"{name}.py"))
+        m = importlib.util.module_from_spec(s)
+        s.loader.exec_module(m)
+        return m
+    pi = load("plan_identity")
+    load("nofit_worker")                                              # imports cleanly (its body runs only in a real run)
+    rows = tmp_path / "rows.tsv"
+    rows.write_text("# comment\ntag\tx\nt1\t1\nt2\t1\n")
+    args = [str(tmp_path / "old"), str(tmp_path / "new"), str(tmp_path / "out"), str(rows)]
+    with pytest.raises(SystemExit, match="at least 5 rows"):
+        pi.main(args + ["--synthetic"])                              # default control (5) exceeds the 2 rows
+    rows.write_text("# comment\ntag\tx\nt1\t1\nt1\t2\n")
+    with pytest.raises(SystemExit, match="distinct tags"):
+        pi.main(args + ["--synthetic", "--control", "1"])
+    rows.write_text("# comment\ntag\tx\nt1\t1\nt2\t1\n")
+    pi.execute = lambda a, out, lines, tags: (tags, a.control)       # valid input reaches the run with its tags
+    assert pi.main(args + ["--synthetic", "--control", "1"]) == (["t1", "t2"], 1)
+    (tmp_path / "out").mkdir()
+    (tmp_path / "out" / "exit_codes.txt").write_text("")
+    with pytest.raises(SystemExit, match="already holds a run"):
+        pi.main(args + ["--synthetic"])

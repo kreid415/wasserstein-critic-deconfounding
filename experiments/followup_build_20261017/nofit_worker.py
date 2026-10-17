@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 
-def make_synthetic(path):
+def make_synthetic(path):   # pragma: no cover - runs only in the SYNTHETIC mode of plan_identity.py
     """Stand-in for prepped_scib/sim2__scib.h5ad: 6 batches x 4,000 cells, 5 cell types, 30 genes (counts layer, all
     highly variable), batch and cell-type names as the X3 identity rows refer to them (Batch3Sub1, Batch4Sub2, Group1).
     It only has to let the plan be built; no scientific value is read from it."""
@@ -38,7 +38,7 @@ def make_synthetic(path):
     a.write_h5ad(path)
 
 
-def main(checkout, label, out, rows, exit_codes):
+def main(checkout, label, out, rows, exit_codes):   # pragma: no cover - patches the trainer process-wide; exercised by the recorded plan_identity run
     checkout = os.path.abspath(checkout)
     os.environ.update(CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", NUMBA_NUM_THREADS="1",
                       KMP_AFFINITY="disabled", PYTHONWARNINGS="ignore", WCD_SRC=f"{checkout}/src", MANIFEST=rows,
@@ -85,7 +85,7 @@ def main(checkout, label, out, rows, exit_codes):
         sys.exit(f"{label}: {failed} of {len(tags)} rows failed (exit codes in {exit_codes}, tracebacks in {out}/out_{label}/)")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma: no cover - entry point
     if sys.argv[1] == "--make-synthetic":
         make_synthetic(sys.argv[2])
     else:
