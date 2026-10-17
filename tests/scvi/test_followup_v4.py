@@ -47,8 +47,8 @@ def _check_v4(m, v3):
     out = ~m.experiment.isin(CHANGED)
     assert m.tag[out].tolist() == v3.tag[~v3.experiment.isin(CHANGED)].tolist()
     got = m[m.experiment.isin(CHANGED + ["X15"])].groupby(["experiment", "cond"]).size().to_dict()
-    assert got == {("X3", "1"): 828, ("X3", "0"): 828, ("X6", "1"): 243, ("X6", "0"): 243, ("X7", "1"): 792,
-                   ("X7", "0"): 792, ("X8", "1"): 504, ("X8", "0"): 504, ("X12", "1"): 576, ("X12", "0"): 576,
+    assert got == {("X3", "1"): 828, ("X3", "0"): 828, ("X6", "1"): 243, ("X6", "0"): 243, ("X7", "1"): 864,
+                   ("X7", "0"): 864, ("X8", "1"): 504, ("X8", "0"): 504, ("X12", "1"): 576, ("X12", "0"): 576,
                    ("X15", "1"): 84}, got
     assert not m.tag.duplicated().any()
     iw = m.extra.str.contains('"iw"')
@@ -61,7 +61,7 @@ def _check_v4(m, v3):
         assert r.max_epochs == str(bpm.scvi_epochs(sp["n_cells"])) and set(x8.lam) <= {"0", "matched"}
     x7 = m[m.experiment == "X7"]
     dep = x7[x7.extra.str.contains("reference_composition")]
-    assert len(dep) == 288 and set(dep.arm) == {"reference", "reference_fixed", "mmd_ref", "discriminator_ref"}
+    assert len(dep) == 432 and dep.extra.str.contains('"types": \\[\\]').sum() == 144 and set(dep.arm) == {"reference", "reference_fixed", "mmd_ref", "discriminator_ref"}
     assert all(r.reference == _spec(r)["batch"] for r in dep.itertuples())
     for r in dep.itertuples():
         ref, n_ref, n, levels = bpm.X7_DEPLETED[r.task]
@@ -164,7 +164,7 @@ def test_x7_depleted_reference_spec():
     sizes = {("ref", f"t{j}"): 40 + 20 * j for j in range(5)}                       # 40, 60, 80, 100, 120 = 400 cells
     sizes.update({(b, f"t{j}"): 30 for b in ("o1", "o2") for j in range(5)})         # 300 other cells
     a = _obs(sizes)
-    rare = {"two_thirds": ["t0", "t1"], "one_third": ["t0", "t1", "t2"]}              # rarest first; keeps 3 and 2 types
+    rare = {"none": [], "two_thirds": ["t0", "t1"], "one_third": ["t0", "t1", "t2"]}  # rarest first; keeps 5, 3 and 2 types
     n_ref = 220                                                                      # 100 + 120: the deeper level's cells
     spec = lambda t: dict(kind="reference_composition", batch="ref", types=t, n_reference=n_ref,  # noqa: E731
                           n_cells=n_ref + 300, draw=fpc.X7_DRAW)
@@ -173,6 +173,8 @@ def test_x7_depleted_reference_spec():
         ref = sub.obs[sub.obs.batch == "ref"]
         assert sub.n_obs == 520 and len(ref) == n_ref and not ref.celltype.isin(types).any()
         assert (sub.obs.batch != "ref").sum() == 300 and sub.obs_names.is_unique          # other batches untouched
+    none = fpc.subsample(a, spec([]), 0).obs
+    assert none[none.batch == "ref"].celltype.nunique() == 5                       # same-size control keeps every type
     deep = fpc.subsample(a, spec(rare["one_third"]), 0)
     assert set(deep.obs[deep.obs.batch == "ref"].celltype) == {"t3", "t4"}               # all kept cells of t3, t4
     for bad, exc, msg in [(dict(n_reference=300, n_cells=600), ValueError, "keeps only"),
@@ -207,7 +209,7 @@ def test_x7_depleted_table_and_x8_eligibility_follow_the_rules():   # test-reaso
         cnt = obs[obs.batch == ref].celltype.value_counts()
         order = sorted(cnt.index, key=lambda c: (cnt[c], c))                       # rarest first, ties by name
         c = len(order)
-        want = {"two_thirds": order[:c - round(c * 2 / 3)], "one_third": order[:c - round(c / 3)]}
+        want = {"none": [], "two_thirds": order[:c - round(c * 2 / 3)], "one_third": order[:c - round(c / 3)]}
         assert levels == want, task
         kept = {k: int(cnt.sum() - cnt[t].sum()) for k, t in levels.items()}
         assert n_ref == min(kept.values()) and n == n_ref + len(obs) - int(cnt.sum()), task

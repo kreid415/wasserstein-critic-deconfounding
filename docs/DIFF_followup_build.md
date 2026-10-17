@@ -17,7 +17,7 @@ unconditioned decoder; X1 = the main benchmark; "tag" = git tag `prereg-tier12-v
 | `scripts/scvi_adversarial_plan.py` | arm `discriminator_sn_critic_opt` (parsed as `discriminator_sn`, critic Adam settings); `with_gp=not spectral_norm` in the critic's inner step; **unconditioned importance weights**: `_iw_cell_vector` builds the per-cell weight column, registered as an extra data field of the unconditioned model (`iw_cell` plan option), read in `_iw_weights`, and removed from the model's registry after training so the saved model reloads without it; the conditioned table path is untouched; the refusal of unconditioned weights is removed | 98, I036, 93 |
 | `scripts/prereg_rules.py` | `BASE_ARM[discriminator_sn_critic_opt] = discriminator` | 98 |
 | `scripts/cost_model.py` | arm label strips `_critic_opt` (same step cost as `discriminator_sn`) | 98 |
-| `manifests/paper_manifest_stock_pilot_u5_b10_v4.tsv` | 10,764 rows (v3: 6,930), built with `--x12-runs 16 --followup-design v4`; v3 untouched | all |
+| `manifests/paper_manifest_stock_pilot_u5_b10_v4.tsv` | 10,908 rows (v3: 6,930), built with `--x12-runs 16 --followup-design v4`; v3 untouched | all |
 | `docs/prereg/amendment_20261017_followups.md` | draft PREREG section 9 amendment (not pasted into PREREG.md) | all |
 | `experiments/followup_build_20261017/` | `diff_report.py`, `static_x1_paths.py`, `select_x1_rows.py`, `fit_identity.sh`, `score_identity.sh`, README, results | proof |
 | `tests/scvi/test_followup_v4.py` (new), `test_adversarial_plan_v2.py`, `test_runner_and_manifest_missing_arms.py`, `test_missing_arms_plan.py` | see Tests | all |
@@ -28,7 +28,7 @@ unconditioned decoder; X1 = the main benchmark; "tag" = git tag `prereg-tier12-v
 |---|---|---|---|---|---|
 | X3 | cond 1 / cond 0 | 828 / 0 | 828 / 828 | 0 / 828 | 0 / 0 |
 | X6 | cond 1 / cond 0 | 216 / 0 | 243 / 243 | 27 / 243 | 0 / 0 |
-| X7 | cond 1 / cond 0 | 216 / 0 | 792 / 792 | 576 / 792 | 0 / 0 |
+| X7 | cond 1 / cond 0 | 216 / 0 | 864 / 864 | 648 / 864 | 0 / 0 |
 | X8 | cond 1 / cond 0 | 504 / 0 | 504 / 504 | 504 / 504 | 504 / 0 |
 | X12 | cond 1 / cond 0 | 288 / 0 | 576 / 576 | 504 / 576 | 216 / 0 |
 | X15 | cond 1 | 84 | 84 | 0 | 0 |
@@ -36,28 +36,32 @@ unconditioned decoder; X1 = the main benchmark; "tag" = git tag `prereg-tier12-v
 X1, X13, A1-A3 and X15: **identical in v3 and v4 (4,878 rows, tags and all columns)**; `diff_report.py` fails otherwise and was
 shown to reject a one-cell change. X8 rows are replaced (new draw); X12 conditioned rows keep 72 of 288 (settings that
 coincide between the 8- and 16-run designs). Provisional cost (`cost_model.py`, stock-backbone throughput; no decoder term):
-follow-ups 5,970 fits and 1,564.1 lane-hours against 2,136 and 594.4 in v3 (X3 519.3, X6 159.5, X7 497.8, X8 96.9, X12 266.6,
+follow-ups 6,114 fits and 1,608.1 lane-hours against 2,136 and 594.4 in v3 (X3 519.3, X6 159.5, X7 541.7, X8 96.9, X12 266.6,
 X15 24.1), before any R4-x1 grid-edge extension fits. Of these: unconditioned weighted X3 rows 288 fits, 94.6 lane-hours;
-depleted-reference arm (both decoders) 288 fits, 87.9; new X6 arm (both decoders) 54 fits, 10.9.
+depleted-reference arm (both decoders, three levels) 432 fits, 131.9 (144 per level; see below); new X6 arm (both decoders) 54 fits, 10.9.
 
 ## X7 depleted-reference arm: rule, sizes, share removed (derived from prepped_scib; re-derived by a test when PREPPED_DIR is set)
 
-Rule: reference = automatic choice (inDrop1, Batch5). Level 'two_thirds' / 'one_third' keeps round(2c/3) / round(c/3) of the c
+Rule: reference = automatic choice (inDrop1, Batch5). Level 'none' (the same-size control, lead decision implementing the user's "keep its size") removes no type; level 'two_thirds' / 'one_third' keeps round(2c/3) / round(c/3) of the c
 types by removing the RAREST types (count ascending, ties by name). The reference is drawn, without replacement, to one size per
 task, the number of cells it keeps at the deeper level (first cells of one fixed permutation of the batch among the kept
-types); every other batch is kept whole. No replacement or duplication occurs.
+types, seed 50,000; for level 'none' among all types); every other batch is kept whole. No replacement or duplication occurs.
+Each level has 3 seeds × 4 arms (reference, reference_fixed, mmd_ref, discriminator_ref) × 3 λ × 2 decoders = 72 fits per task;
+the control adds 72 fits per decoder (144 in all, 43.9 lane-hours).
 
-| task | reference cells in the task | c types | level | types removed | reference cells removed | share removed | reference size used (both levels) | total cells |
-|---|---|---|---|---|---|---|---|---|
-| pancreas (inDrop1) | 1,937 | 14 | two_thirds | 5 | 42 | 2.2% | 1,572 (323 more cells of kept types thinned) | 16,017 |
-| pancreas | | | one_third | 9 | 365 | 18.8% | 1,572 (none thinned) | 16,017 |
-| sim1 (Batch5) | 1,761 | 7 | two_thirds | 2 | 194 | 11.0% | 1,005 (562 more thinned) | 11,341 |
-| sim1 | | | one_third | 5 | 756 | 42.9% | 1,005 (none thinned) | 11,341 |
+| task (reference) | reference cells in the task | c types | level | types removed | reference cells removed | share removed | reference size used | thinned (kept-type cells dropped) | total cells | fits (both decoders) | lane-hours |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| pancreas (inDrop1) | 1,937 | 14 | none (control) | 0 | 0 | 0% | 1,572 | 365 | 16,017 | 72 | 25.7 |
+| pancreas | | | two_thirds | 5 | 42 | 2.2% | 1,572 | 323 | 16,017 | 72 | 25.7 |
+| pancreas | | | one_third | 9 | 365 | 18.8% | 1,572 | 0 | 16,017 | 72 | 25.7 |
+| sim1 (Batch5) | 1,761 | 7 | none (control) | 0 | 0 | 0% | 1,005 | 756 | 11,341 | 72 | 18.2 |
+| sim1 | | | two_thirds | 2 | 194 | 11.0% | 1,005 | 562 | 11,341 | 72 | 18.2 |
+| sim1 | | | one_third | 5 | 756 | 42.9% | 1,005 | 0 | 11,341 | 72 | 18.2 |
 
 The reference therefore has the same size at both levels (pancreas 1,572 of 1,937 natural, sim1 1,005 of 1,761); it differs
 from the natural X7 reference (full tasks, 1,937 and 1,761 cells) and the total differs from the full task (16,382 and
-12,097). There is no level-0 control at the same size in the manifest (not asked for; it would add 72 fits per decoder: 2 tasks x 3 seeds x 4 arms x 3 λ).
-Types left in the reference: pancreas 9 and 5; sim1 5 and 2.
+12,097). The control (level 'none') has the same reference size, so the contrast between levels differs in coverage only. Types in the
+reference: pancreas 14, 9, 5; sim1 7, 5, 2.
 
 ## X3 oracle-weighted rows with the unconditioned decoder
 
@@ -100,7 +104,7 @@ toy fit). Real-data smoke fit (CPU, 1 epoch, nice): X3 sim2 discriminator dose 5
 - `test_adversarial_plan_v2.py`: new arm in the every-arm-trains-finite list; optimiser settings and gradient-penalty calls
   (I036, SI-98). `test_runner_and_manifest_missing_arms.py`: the arm added to the `heads` table.
 - `fl_lint` on the touched scripts: nothing at medium or above (two low: `set -e` absent in the copied identity shells).
-  `check_extra` accepts all 5,970 follow-up rows; `fl_unique_outputs` ok.
+  `check_extra` accepts all 6,114 follow-up rows; `fl_unique_outputs` ok.
 - Real-data CPU smoke fits (1 epoch, nice, 1 thread; outputs in /tmp, discarded): X3 sim2 unconditioned weighted, X7 sim1 depleted
   reference (cond 0 reference arm; cond 1 discriminator_ref), X8 sim2 V=4 unconditioned (748 cells), X6 atac_small new arm unconditioned:
   all finite, cell counts as designed. These are smoke checks, not X1-identity evidence.
@@ -115,7 +119,7 @@ toy fit). Real-data smoke fit (CPU, 1 epoch, nice): X3 sim2 discriminator dose 5
 
 ## Open questions
 
-None that block the next step. Two things to know: (1) there is no same-size level-0 reference control in X7 (natural X7 rows use full references of 1,937 / 1,761 cells); (2) reference size 1,005 on sim1 keeps only 2 cell types at the deeper level (43% of the reference removed). Neither was asked about; both are one-table changes.
+None that block the next step. Two things to know: (1) the natural X7 rows use the full references (1,937 / 1,761 cells), so the depleted-arm contrast is read within the equal-size levels, not against them; (2) sim1's deepest level keeps only 2 cell types (43% of the reference removed). Both are one-table changes.
 
 ## NOT done
 

@@ -1,18 +1,18 @@
 file,function,changed_lines,guard,x1_x13_rows_reaching,rows_checked,x3_weighted_cond1_rows_touching,x3_weighted_cond1_rows
-scripts/build_paper_manifest.py,<module>,29,constants used by design v4 only,0,3280,0,288
+scripts/build_paper_manifest.py,<module>,33,constants used by design v4 only,0,3280,0,288
 scripts/build_paper_manifest.py,build,50,"followup_design == 'v4' (default v3; byte-identical, check 1)",0,3280,0,288
 scripts/build_paper_manifest.py,main,5,--followup-design flag and header text; v3 header unchanged (check 1),0,3280,0,288
 scripts/cost_model.py,arm_label,1,arm name contains _critic_opt (cost model only),0,3280,0,288
-scripts/fit_paper_config.py,<module>,32,arm == discriminator_sn_critic_opt (set members) or X8/X7 spec constants,0,3280,0,288
+scripts/fit_paper_config.py,<module>,19,arm == discriminator_sn_critic_opt (set members) or X8/X7 spec constants,0,3280,0,288
 scripts/fit_paper_config.py,resolve_reference,4,subsample kind == reference_composition,0,3280,0,288
 scripts/fit_paper_config.py,subsample,8,'subsample' in extra (X1 and X13 rows have none),0,3280,288,288
 scripts/fit_paper_config.py,x7_draw,26,new function: kind == reference_composition,0,3280,0,288
 scripts/fit_paper_config.py,x8_draw,24,new function: batches spec with draw == nested_chain_v1,0,3280,0,288
-scripts/prereg_rules.py,<module>,9,BASE_ARM gains the key discriminator_sn_critic_opt,0,3280,0,288
+scripts/prereg_rules.py,<module>,2,BASE_ARM gains the key discriminator_sn_critic_opt,0,3280,0,288
 scripts/scvi_adversarial_plan.py,<module>,9,arm == discriminator_sn_critic_opt (_CRITIC_OPT_ARMS),0,3280,0,288
-scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan.__init__,9,arm == discriminator_sn_critic_opt (any other arm: dict.get returns the arm) or unconditioned weighted row,0,3280,288,288
+scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan.__init__,7,arm == discriminator_sn_critic_opt (any other arm: dict.get returns the arm) or unconditioned weighted row,0,3280,288,288
 scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan._iw_weights,4,unconditioned weighted row (per-cell column); the table path is unchanged,0,3280,288,288
 scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan.configure_optimizers,1,arm == discriminator_sn_critic_opt,0,3280,0,288
-scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan.training_step,12,critic arm with spectral norm (arm ends _sn); I036,0,3280,288,288
+scripts/scvi_adversarial_plan.py,WassersteinAdversarialTrainingPlan.training_step,4,critic arm with spectral norm (arm ends _sn); I036,0,3280,288,288
 scripts/scvi_adversarial_plan.py,_iw_cell_vector,13,new function: unconditioned weighted row,0,3280,0,288
 scripts/scvi_adversarial_plan.py,fit_adversarial_scvi,19,"unconditioned weighted row (refusal removed, extra data field, field dropped after training)",0,3280,288,288

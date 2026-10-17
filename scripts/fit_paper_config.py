@@ -279,8 +279,8 @@ def x7_draw(obs, spec):
     bat, ct = obs["batch"].astype(str).values, obs["celltype"].astype(str).values
     ref = np.where(bat == b)[0]
     absent = sorted(set(types) - set(ct[ref]))
-    if not types or len(set(types)) != len(types) or absent:
-        raise ValueError(f"types must be distinct, non-empty and present in batch {b!r}; absent: {absent}")
+    if len(set(types)) != len(types) or absent:     # an empty list is the level-0 control: nothing removed, same thinning
+        raise ValueError(f"types must be distinct and present in batch {b!r}; absent: {absent}")
     if int(spec["n_cells"]) != n_ref + len(obs) - len(ref):
         raise ValueError(f"n_cells={spec['n_cells']} must equal n_reference + the other batches' {len(obs) - len(ref)} cells")
     order = ref[np.random.default_rng(X7_PERMUTATION_SEED).permutation(len(ref))]

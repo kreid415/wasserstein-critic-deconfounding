@@ -126,15 +126,19 @@ FOLLOWUP_DESIGNS = ("v3", "v4")
 # 'one_third' keeps round(c * 2/3) / round(c * 1/3) of the reference's c cell types (c = types present in it) by removing,
 # entirely, its RAREST types (count ascending, ties by name). The reference is then thinned without replacement to ONE
 # size n_reference per task = the cells it keeps at the deeper level, so it has the same size at both levels; all other
-# batches are untouched (fit_paper_config.x7_draw). n_cells = n_reference + the other batches' cells. Read from
+# batches are untouched (fit_paper_config.x7_draw). n_cells = n_reference + the other batches' cells. Level 'none' (SI-96,
+# lead decision 2026-10-17: "keep its size") removes no type and is thinned to the same n_reference by the same permutation:
+# the same-size control, so the contrast between levels differs in coverage only. Read from
 # prepped_scib/<task>__scib.h5ad (2026-10-17); tests/scvi/test_followup_v4.py re-derives every entry when PREPPED_DIR is set.
 X7_DRAW = "reference_fixed_v1"   # = fit_paper_config.X7_DRAW
 X7_DEPLETED = {   # task: (reference batch, n_reference, n_cells, {level: types removed from the reference})
     "pancreas": ("inDrop1", 1572, 16017, {
+        "none": [],
         "two_thirds": ["t_cell", "schwann", "mast", "epsilon", "macrophage"],
         "one_third": ["t_cell", "schwann", "mast", "epsilon", "macrophage", "activated_stellate", "gamma",
                       "quiescent_stellate", "acinar"]}),
     "sim1": ("Batch5", 1005, 11341, {
+        "none": [],
         "two_thirds": ["Group2", "Group7"],
         "one_third": ["Group2", "Group7", "Group4", "Group3", "Group6"]}),
 }
