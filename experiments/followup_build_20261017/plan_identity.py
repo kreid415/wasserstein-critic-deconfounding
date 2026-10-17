@@ -63,7 +63,7 @@ def main(argv=None):
     for label, checkout, manifest in (("old", a.old, "manifest.tsv"), ("new", a.new, "manifest.tsv"),
                                       ("old2", a.old, "control_manifest.tsv")):
         if run(f"{HERE}/nofit_worker.py", checkout, label, out, f"{out}/{manifest}", f"{out}/exit_codes.txt", env=env):
-            raise SystemExit(f"worker {label} failed outside any row (see its traceback above)")
+            print(f"WARNING: worker {label} reported failed rows; the comparison below fails them", file=sys.stderr)
     rc_control = run(f"{HERE}/identity_compare.py", out, "plan_identity_control.csv", "--labels", "old", "old2",
                      "--tags", f"{out}/control_tags.txt", "--steps-zero")
     rc = run(f"{HERE}/identity_compare.py", out, "plan_identity.csv", "--steps-zero")

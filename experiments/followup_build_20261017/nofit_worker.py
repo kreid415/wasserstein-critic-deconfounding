@@ -62,6 +62,7 @@ def main(checkout, label, out, rows, exit_codes):
     _trainer.Trainer.__init__, _trainer.Trainer.fit = init0, fit0
     tags = pd.read_csv(rows, sep="\t", comment="#", dtype=str).tag.tolist()
     os.makedirs(f"{out}/out_{label}", exist_ok=True)
+    failed = 0
     with open(f"{out}/out_{label}/steps.txt", "w") as fs, open(exit_codes, "a") as fc:
         for t in tags:
             os.environ["TAG"] = t
@@ -71,7 +72,7 @@ def main(checkout, label, out, rows, exit_codes):
                 code = 0
             except SystemExit as e:
                 code = 0 if e.code in (None, 0) else (e.code if isinstance(e.code, int) else 1)
-            except BaseException:
+            except BaseException:   # fl: allow FL101 per-row failure is recorded (traceback file, exit code 1, final sys.exit); other rows still run so the comparison lists every failing row
                 with open(f"{out}/out_{label}/{t}.log", "w") as lf:
                     traceback.print_exc(file=lf)
                 code = 1
@@ -79,6 +80,9 @@ def main(checkout, label, out, rows, exit_codes):
                 code = code or 3         # no trainer ran: nothing to compare
             fs.write(f"{t} {sum(steps)}\n"); fs.flush()
             fc.write(f"{label} {t} {code}\n"); fc.flush()
+            failed += code != 0
+    if failed:
+        sys.exit(f"{label}: {failed} of {len(tags)} rows failed (exit codes in {exit_codes}, tracebacks in {out}/out_{label}/)")
 
 
 if __name__ == "__main__":
