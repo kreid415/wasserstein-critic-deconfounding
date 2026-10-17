@@ -1,0 +1,84 @@
+== whoami/date
+kreid
+2026-10-17T12:22:41-04:00
+== env wcd-fit
+drwxr-x--- 11 kreid users 14 Oct  4 19:01 /users/kreid/envs/wcd-fit
+-rw-r----- 1 kreid users 61 2026-10-04 19:01 /users/kreid/envs/wcd-fit/.verified
+3.11.15
+stdlib ok
+bin
+compiler_compat
+conda-meta
+.intact_baseline.json
+.verified
+== ref_local
+total 262932
+drwxr-x---  3 kreid users         8 2026-10-02 17:17 .
+drwxr-x--- 21 kreid users        21 2026-10-04 18:15 ..
+drwxr-x---  3 kreid users         3 2026-10-02 17:16 bench_out_stock
+-rw-r-----  1 kreid users      6627 2026-10-02 15:58 bench_queue_manifest.tsv
+-rw-r-----  1 kreid users 270288496 2026-10-02 17:16 immune__scib.h5ad
+-rw-r-----  1 kreid users       834 2026-10-02 15:58 queue_order.txt
+-rw-r-----  1 kreid users      3650 2026-10-02 16:07 queue_times.tsv
+-rw-r-----  1 kreid users        26 2026-10-02 17:17 .staged
+9cca9c8c38e767ebf13a98ad44bb9e95  bench_queue_manifest.tsv
+64
+== scratch tree
+drwxr-x--- 21 kreid users 21 2026-10-04 18:15 /fastscratch/myscratch/kreid/wcd
+drwxr-x---  4 kreid users  4 2026-10-03 04:03 /fastscratch/myscratch/kreid/wcd/gate
+drwxr-x---  7 kreid users  7 2026-10-04 19:06 /fastscratch/myscratch/kreid/wcd/prod
+run_36131135
+run_36133219
+job_36155495
+job_36155496
+job_36155707
+job_36155708
+slots
+== free space
+Filesystem                       Size  Used Avail Use% Mounted on
+fastscratch:/scratch1/myscratch   22T  6.2T   15T  30% /fastscratch/myscratch
+dcs08:/srv/dcs08/users   60T   38T   22T  64% /users
+== repo on cluster
+/users/kreid/wcd_repo
+/users/kreid/wcd_repo/.git
+a54fa05 2026-09-06 09:42:25 -0400 sweep: unified-lambda extension manifest (matched grid across all arms)
+fatal: git cat-file: could not get object info
+git version 2.43.0
+== partition gpu
+AllowAccounts=ALL
+AllowQos=ALL
+QoS=public-gpu-limit
+DefaultTime=1-00:00:00
+MaxNodes=UNLIMITED
+MaxTime=3-00:00:00
+PriorityJobFactor=1
+OverSubscribe=NO
+State=UP
+TotalNodes=8
+public-gpu-limit||gres/gpu=5||
+== queue gpu
+pending: 36
+running: 17
+pending by gres:
+     23 gres:gpu:1
+      8 gres:gpu:l40s:1
+      3 gres:gpu:tesa100:1
+      1 N/A
+      1 gres:gpu:tesv100s:1
+running by gres:
+      9 gres:gpu:1
+      5 gres:gpu:tesa100:1
+      3 N/A
+my jobs (read-only):
+36449954|p2a-cpu-qwen_drop-hepg2|PENDING|shared|N/A|2-00:00:00|0:00
+36449955|p2a-cpu-qwen_string-hepg2|PENDING|shared|N/A|2-00:00:00|0:00
+36449951|p2a-cpu-chatntval|PENDING|shared|N/A|1-00:00:00|0:00
+36449952|p2a-cpu-qwen_drop-k562|PENDING|shared|N/A|2-00:00:00|0:00
+36449953|p2a-cpu-qwen_string-k562|PENDING|shared|N/A|2-00:00:00|0:00
+== L40S nodes
+compute-171|gpu:l40s:4|mixed|12/12/0/24|1019394
+compute-172|gpu:l40s:4|mixed|7/17/0/24|1019394
+compute-173|gpu:l40s:4|mixed|18/6/0/24|1019394
+pending jobs asking l40s: 8
+
+--STDERR--

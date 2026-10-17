@@ -1,0 +1,47 @@
+== prepped_scib (purge-age check)
+total 3265044
+-rw-r----- 1 kreid users 173447320 2026-10-02 18:52 atac_large__scib.h5ad
+-rw-r----- 1 kreid users  31838753 2026-10-02 18:52 atac_small__scib.h5ad
+-rw-r----- 1 kreid users 639101136 2026-10-02 18:51 immune_hum_mou__scib.h5ad
+-rw-r----- 1 kreid users 270288401 2026-10-02 18:52 immune__scib.h5ad
+-rw-r----- 1 kreid users 473757381 2026-10-02 18:51 lung__scib.h5ad
+-rw-r----- 1 kreid users 335958147 2026-10-02 18:52 pancreas__scib.h5ad
+-rw-r----- 1 kreid users 502773644 2026-10-02 18:51 sim1__scib.h5ad
+-rw-r----- 1 kreid users 933461366 2026-10-02 18:51 sim2__scib.h5ad
+files: 8
+== oldest/newest mtime in ref_local + prepped (top level)
+total 17
+drwxr-x--- 2 kreid users 66 2026-10-02 17:17 latents
+== L40S node GPU alloc
+ CfgTRES=cpu=24,mem=1019394M,billing=1019426,gres/gpu=4,G=4  AllocTRES=cpu=12,mem=336392M,gres/gpu=4,G=2 
+
+ CfgTRES=cpu=24,mem=1019394M,billing=1019426,gres/gpu=4,G=4  AllocTRES=cpu=7,mem=107016M,gres/gpu=4,G=3 
+
+ CfgTRES=cpu=24,mem=1019394M,billing=1019426,gres/gpu=4,G=4  AllocTRES=cpu=18,mem=42672M,gres/gpu=4,G=4 
+
+== gate evidence dirs
+bench_out
+bench_queue_manifest.tsv
+gate_latents_jhpce.tar
+logs
+queue_order.txt
+546	/fastscratch/myscratch/kreid/wcd/gate/run_36133219
+== job workdir home dir size (scratch_root)
+/users/kreid/.claude-science-scratch
+0
+== sacct gpu l40s queue history (own jobs, aggregate)
+36133219|operon-a2b6ae1f|gpu|billing=65548,cpu=10,gres/gpu:l40s=1,gres/gpu=1,mem=64G,node=1|2026-10-02T20:13:04|2026-10-03T04:02:30|00:07:36|COMPLETED
+36155495|operon-6b992ae8|gpu|billing=98316,cpu=10,gres/gpu:l40s=1,gres/gpu=1,mem=96G,node=1|2026-10-04T18:00:53|2026-10-04T18:01:20|00:00:03|FAILED
+36155496|operon-797c2949|gpu|billing=98316,cpu=10,gres/gpu:l40s=1,gres/gpu=1,mem=96G,node=1|2026-10-04T18:00:59|2026-10-04T18:01:20|00:00:03|FAILED
+36155707|operon-681c962c|gpu|billing=98316,cpu=10,gres/gpu:l40s=1,gres/gpu=1,mem=96G,node=1|2026-10-04T19:03:35|2026-10-04T19:03:36|05:18:22|COMPLETED
+36155708|operon-95e6fcd6|gpu|billing=98316,cpu=10,gres/gpu:l40s=1,gres/gpu=1,mem=96G,node=1|2026-10-04T19:03:42|2026-10-04T19:03:42|07:11:26|COMPLETED
+== env intact baseline
+{
+"recorded_files": 69224,
+"missing": [
+"bin/pip3.12"
+]
+}
+built 2026-10-04T19:01:24-04:00 at /users/kreid/envs/wcd-fit
+
+--STDERR--
