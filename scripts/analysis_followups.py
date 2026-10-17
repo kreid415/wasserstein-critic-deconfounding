@@ -6,21 +6,26 @@ follow-up rows (seeds 10-12) and the targets (b0, b*, low-signal flag) of the fr
 the frozen helpers of scripts/analysis_x1.py and scripts/prereg_rules.py without changing them.
 
 Usage (repo root):
-  python scripts/analysis_followups.py --manifest <resolved follow-up manifest> --scores <dir> [<dir> ...] \
+  python scripts/analysis_followups.py --manifest <resolved follow-up manifest, design v4> --scores <dir> [<dir> ...] \
       --failures <csv that covers every follow-up row> --r4-record docs/prereg/r4_x1_record.json \
-      --celltype-counts <csv: task, draw, batch, cell_type, n> --out-json <followups.json>
+      (--prepped-dir <dir of <task>__scib.h5ad> | --celltype-counts <csv: task, draw, batch, cell_type, n>) --out-json <followups.json>
+With --prepped-dir the cell-type count table is built from the prepped obs ('batch', 'celltype') with the fitter's own X8 draw
+and written next to the record as <out-json>.celltype_counts.csv.
 """
 import argparse
+import itertools
 import json
 import math
 import os
 import sys
 
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analysis_x1 as A  # noqa: E402
+import build_paper_manifest as BPM  # noqa: E402
 import prereg_rules as P  # noqa: E402
 
 FU_SEEDS = (10, 11, 12)
@@ -41,7 +46,7 @@ EXPECTED = {
 EXTRA_KEYS = {"subsample", "sampler", "iw", "factorial_run", "adv_width", "adv_lr", "kl_warmup", "r1_gamma"}
 X3_DOSES, X3_IW_DOSES = (0, 50, 80, 95, 100), (50, 80, 95)
 X3_ARMS = ("discriminator", "reference", "pooled", "mmd")
-X6_COPT = "discriminator_sn_copt"     # SI-98: JS + spectral norm trained with the critic's Adam settings (assumed name)
+X6_COPT = "discriminator_sn_critic_opt"   # SI-98: JS + spectral norm trained with the critic's Adam settings (followup-build)
 X6_CONFIGS = {"js": ("discriminator", 1), "js_sn": ("discriminator_sn", 1), "js_r1": ("discriminator_r1", 1),
               "js_sn_copt": (X6_COPT, 1), "w1_gp_1": ("pooled", 1), "w1_gp_5": ("pooled", 5),
               "w1_gp_10": ("pooled", 10), "w1_sn_1": ("pooled_sn", 1), "w1_sn_5": ("pooled_sn", 5)}
@@ -52,7 +57,8 @@ X6_CONTRASTS = {   # name: (minuend, subtrahend); "divergence" is the confirmato
     "w1_steps_10": ("w1_gp_10", "w1_gp_1"), "w1_sn_steps_5": ("w1_sn_5", "w1_sn_1"), "as_used": ("w1_gp_1", "js")}
 X7_FORMS = ("reference", "reference_fixed", "mmd_ref", "discriminator_ref")
 X7_COMPARATORS = ("discriminator_ref", "mmd_ref")    # first = primary (same target, JS); second = secondary
-X7_DEPLETION = ("two_thirds", "one_third")           # assumed subsample 'level' values of the depleted-reference arm
+X7_CONTROL, X7_DEPLETION = "none", ("two_thirds", "one_third")   # levels of BPM.X7_DEPLETED; 'none' = same-size control
+KINDS = {"composition": BPM.X3_DRAW, "batches": BPM.X8_DRAW, "reference_composition": BPM.X7_DRAW}   # subsample kind: draw
 X7_MIN_COUNT = 10                                    # a cell type 'covers' when the reference holds >= 10 of its cells
 X8_V = (2, 4, 8, 16)
 X8_ARMS = ("none", "discriminator", "mmd", "reference", "pooled")
@@ -75,6 +81,8 @@ def prepare(out, experiment):
     bad = sorted({k for e in ex for k in e} - EXTRA_KEYS)
     P._require(not bad, f"{experiment}: unknown extra keys {bad} (spec section 1.4)")
     sub = [e.get("subsample", {}) for e in ex]
+    kinds = sorted({(s.get("kind"), s.get("draw")) for s in sub if s} - set(KINDS.items()))
+    P._require(not kinds, f"{experiment}: unknown subsample kinds or draws {kinds} (known: {KINDS})")
     o["dose"] = [s["deplete_pct"] if s.get("kind") == "composition" else -1 for s in sub]
     o["iw"] = [e.get("iw") == "depletion_oracle" for e in ex]
     o["V"] = [s["n_batches"] if s.get("kind") == "batches" else 0 for s in sub]
@@ -84,9 +92,22 @@ def prepare(out, experiment):
     o["adv_width"] = [e.get("adv_width", 0) for e in ex]
     o["adv_lr"] = [e.get("adv_lr", 0.0) for e in ex]
     o["kl"] = [e.get("kl_warmup", "") for e in ex]
-    o["ref_level"] = [s["level"] if s.get("kind") == "reference_depletion" else "natural" for s in sub]
+    o["ref_level"] = [x7_level(t, ref, s) for t, ref, s in zip(o.task, o.reference, sub)]
     o["k"] = o.n_critic.astype(int)
     return o
+
+
+def x7_level(task, reference, spec):
+    """Depletion level of an X7 row from its removed-type list (BPM.X7_DEPLETED); 'natural' for the full-task rows."""
+    if spec.get("kind") != "reference_composition":
+        return "natural"
+    P._require(task in BPM.X7_DEPLETED, f"X7 {task}: no depleted-reference table entry")
+    batch, n_ref, _, levels = BPM.X7_DEPLETED[task]
+    P._require(spec["batch"] == batch == reference and int(spec["n_reference"]) == n_ref,
+               f"X7 {task}: depleted spec {spec} does not match the table (reference {batch}, n_reference {n_ref})")
+    hit = [lv for lv, types in levels.items() if sorted(types) == sorted(spec["types"])]
+    P._require(len(hit) == 1, f"X7 {task}: removed types {spec['types']} match no level of the table")
+    return hit[0]
 
 
 def seed_values(rows, value="C"):
@@ -126,6 +147,8 @@ def pooled(cells, tasks):
     `cells`: {task: loso result}. With 1-2 datasets the result is inconclusive by construction (AN-R12)."""
     keep = [t for t in sorted(tasks) if t in REAL and cells[t]["reason"] is None]
     res = A.combine(keep, [cells[t]["d"] for t in keep], [cells[t]["s"] for t in keep], "family", A.PRIOR_SCALE, MARGIN)
+    if 0 < len(keep) < 3:     # user answer 2026-10-17: report per dataset, no verdict, with 1-2 real datasets
+        res = dict(res, model_declaration=res["declaration"], declaration="not_decidable_1_2_real_datasets")
     p = A.wilcoxon_exact([cells[t]["d"] for t in keep]) if keep else None
     not_eval = {t: cells[t]["reason"] for t in sorted(tasks) if t in REAL and cells[t]["reason"] is not None}
     return dict(res, wilcoxon_p=p, not_evaluable=not_eval,
@@ -316,7 +339,6 @@ def ols(X, y):
 def x7(out, targets, counts):
     o = prepare(out, "X7")
     P._require(set(o.arm) == set(X7_FORMS), f"X7 arms {sorted(set(o.arm))} != {sorted(X7_FORMS)}")
-    P._require(set(o.ref_level) <= {"natural", *X7_DEPLETION}, f"X7 depletion levels {sorted(set(o.ref_level))}")
     cells, assoc, causal, pools = {}, {}, {}, {}
     for t, c in sorted(EXPECTED["X7"]):
         tg = targets[f"{t}|{c}"]
@@ -359,34 +381,33 @@ def x7(out, targets, counts):
                     res["adjusted_coverage_coef"] = None if se_a is None else float(beta_a[1])   # None: collinear covariates
             assoc[(t, c, comp)] = res
         dep = r[r.ref_level != "natural"]
+        P._require(len(dep) == 0 or (set(dep.ref_level) == {X7_CONTROL, *X7_DEPLETION} and set(dep.arm) == set(X7_FORMS)),
+                   f"X7 {t}|{c}: depleted rows need levels {X7_CONTROL}, {X7_DEPLETION} and every formulation")
         if len(dep):
-            dref = sorted(set(dep.reference))
-            P._require(len(dref) == 1 and set(dep.ref_level) == set(X7_DEPLETION) and set(dep.arm) == set(X7_FORMS),
-                       f"X7 {t}|{c}: depleted rows need one reference, levels {X7_DEPLETION} and every formulation")
-            ref = dref[0]
-            dpts = {(f, lv): window_points(dep[(dep.arm == f) & (dep.ref_level == lv)]) for f in X7_FORMS for lv in X7_DEPLETION}
-            dpts.update({(f, "natural"): pts[(f, ref)] for f in X7_FORMS})
-            lv_cov = {lv: coverage(counts, t, "full" if lv == "natural" else f"x7_{lv}", names[int(ref)])["coverage"]
-                      for lv in ("natural",) + X7_DEPLETION}
-            order = ("natural",) + X7_DEPLETION
-            for comp in X7_COMPARATORS:
-                def stat(keep, comp=comp):
-                    y = []
-                    for lv in order:
-                        a, b = read_bstar(dpts[("reference", lv)], tg["bstar"], keep), read_bstar(dpts[(comp, lv)], tg["bstar"], keep)
-                        y.append(None if a is None or b is None else a - b)
-                    return slope([lv_cov[lv] for lv in order], y)
+            # SI-96: each depleted level against the same-size control (level 'none'), so only coverage differs
+            dpts = {(f, lv): window_points(dep[(dep.arm == f) & (dep.ref_level == lv)]) for f in X7_FORMS for lv in (X7_CONTROL,) + X7_DEPLETION}
+            removed = {lv: len(types) for lv, types in BPM.X7_DEPLETED[t][3].items()}
+            for comp, lv in itertools.product(X7_COMPARATORS, X7_DEPLETION):
+                def gap(keep, level, comp=comp):
+                    a, b = read_bstar(dpts[("reference", level)], tg["bstar"], keep), read_bstar(dpts[(comp, level)], tg["bstar"], keep)
+                    return None if a is None or b is None else a - b
+
+                def stat(keep, comp=comp, lv=lv):
+                    g1, g0 = gap(keep, lv, comp), gap(keep, X7_CONTROL, comp)
+                    return None if g1 is None or g0 is None else g1 - g0
                 res = dict(reason="low_signal", d=None, s=None, m=0) if tg["bstar_low_signal"] else loso(stat)
                 if res["d"] is None and res["reason"] != "low_signal":
                     res["reason"] = "unreached"
-                causal[(t, c, comp)] = dict(res, reference=ref, coverage=lv_cov)
+                causal[(t, c, f"{lv}_{comp}")] = dict(res, reference=BPM.X7_DEPLETED[t][0], n_reference=BPM.X7_DEPLETED[t][1],
+                                                      types_removed=removed[lv])
         cells[f"{t}|{c}"] = dict(points=cell, spread=spread)
     for c in (0, 1):
         tasks = [t for t, cc in EXPECTED["X7"] if cc == c]
         for comp in X7_COMPARATORS:
             pools[f"association_{comp}|{c}"] = pooled({t: assoc[(t, c, comp)] for t in tasks}, tasks)
-            dtasks = [t for t in tasks if (t, c, comp) in causal]
-            pools[f"depleted_{comp}|{c}"] = pooled({t: causal[(t, c, comp)] for t in dtasks}, dtasks)
+            for lv in X7_DEPLETION:
+                dtasks = [t for t in tasks if (t, c, f"{lv}_{comp}") in causal]
+                pools[f"depleted_{lv}_{comp}|{c}"] = pooled({t: causal[(t, c, f"{lv}_{comp}")] for t in dtasks}, dtasks)
     key = lambda d: {f"{t}|{c}|{k}": v for (t, c, k), v in d.items()}  # noqa: E731
     return dict(cells=cells, association=key(assoc), depleted=key(causal), pooled=pools)
 
@@ -570,9 +591,30 @@ def x15(out, targets):
     return dict(cells={f"{t}|{c}|{k}": v for (t, c, k), v in res.items()}, B_minus_bstar=batch, collapse=coll, pooled=pools)
 
 
+# ---------------------------------------------------------------------------------------------- inputs: cell-type counts
+def celltype_counts(obs_by_task, M):
+    """The cell-type count table from prepped obs ('batch', 'celltype'): draw 'full' of every task and, for every X8
+    subsample spec of manifest M, the cells of the fitter's own draw (fit_paper_config.x8_draw), draw 'x8_V<V>_s<subset>'."""
+    import fit_paper_config as FPC
+
+    def table(obs, task, draw):
+        g = obs.groupby(["batch", "cell_type"], observed=True).size()
+        return g[g > 0].rename("n").reset_index().assign(task=task, draw=draw)
+    frames = []
+    for t, obs in sorted(obs_by_task.items()):
+        obs = pd.DataFrame({"batch": obs["batch"].astype(str).to_numpy(), "cell_type": obs["celltype"].astype(str).to_numpy()})
+        frames.append(table(obs, t, "full"))
+        specs = {json.dumps(json.loads(e)["subsample"], sort_keys=True) for e in M.extra[(M.experiment == "X8") & (M.task == t)]}
+        for spec in map(json.loads, sorted(specs)):
+            frames.append(table(obs.iloc[FPC.x8_draw(obs, spec)], t, f"x8_V{spec['n_batches']}_s{spec['subset']}"))
+    out = pd.concat(frames, ignore_index=True)[["task", "draw", "batch", "cell_type", "n"]]
+    P._require(not out.duplicated(["task", "draw", "batch", "cell_type"]).any(), "cell-type counts: duplicate rows")
+    return out.sort_values(["task", "draw", "batch", "cell_type"], ignore_index=True)
+
+
 # ---------------------------------------------------------------------------------------------- record
 CONFIRMATORY = [f"X3|slope_contrast|{c}|{lv}" for c in (0, 1) for lv in FIXED] + [f"X6|divergence|{c}" for c in (0, 1)] + \
-               [f"X7|depleted_discriminator_ref|{c}" for c in (0, 1)] + [f"X8|ref_dis|iLISI_cn|{c}" for c in (0, 1)]
+               [f"X7|depleted_{lv}_discriminator_ref|{c}" for c in (0, 1) for lv in X7_DEPLETION] + [f"X8|ref_dis|iLISI_cn|{c}" for c in (0, 1)]
 
 
 def analyse(out, targets, counts):
@@ -594,12 +636,20 @@ def main(argv=None):
     ap.add_argument("--scores", nargs="+", required=True)
     ap.add_argument("--failures", required=True)
     ap.add_argument("--r4-record", required=True)
-    ap.add_argument("--celltype-counts", required=True)
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--celltype-counts")
+    src.add_argument("--prepped-dir")
     ap.add_argument("--out-json", required=True)
     a = ap.parse_args(argv)
     P._require(not os.path.exists(a.out_json), f"analysis record {a.out_json} exists")
-    import pandas as pd
     M, _ = P.read_manifest(a.manifest)
+    if a.prepped_dir:
+        import anndata as ad
+        tasks = sorted({t for e in ("X7", "X8") for t, _ in EXPECTED[e]})
+        obs = {t: ad.read_h5ad(os.path.join(a.prepped_dir, f"{t}__scib.h5ad"), backed="r").obs for t in tasks}
+        a.celltype_counts = a.out_json + ".celltype_counts.csv"
+        P._require(not os.path.exists(a.celltype_counts), f"{a.celltype_counts} exists")
+        celltype_counts(obs, M).to_csv(a.celltype_counts, index=False)
     P.check_seed_separation(M)
     r4 = P.read_record(a.r4_record, "R4", stage="x1")
     S, score_files = P.read_scores(a.scores)
