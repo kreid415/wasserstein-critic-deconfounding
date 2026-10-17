@@ -7,6 +7,9 @@
 # and the output dir differ. Preflight: experiments/X1/PREFLIGHT.md (to be redone for v3 and the redone rules).
 # MAN_SHA is EMPTY ON PURPOSE: the resolved X1 manifest exists only after stage 2 of the Sinkhorn redo (R1, R4-a1, R2/R3;
 # experiments/sinkhorn_redo_stage2/PLAN.md step X). Set MAN_SHA to the sha256 that step prints; the launcher refuses until then.
+# Output folder: NEW, $D/tier12_v3/X1_local (decision D-S2-3). $D/tier12_v2/X1_local holds the 19 pre-redo scored rows (hashed under
+# SI-79, never written to); the runner refuses outputs recorded for other settings and Sinkhorn output made at c88cce3, so it is
+# not reused as the output folder. Reusable non-Sinkhorn outputs are linked in by name first (link_v2_outputs.py; PLAN.md step X2).
 # Usage: run_X1_local.sh [--dry-run | --report-only | --clear-stale-claims | --clear-foreign-claims]
 set -euo pipefail
 D=/home/kendall/experiment_data/wasserstein-critic-deconfounding
@@ -36,7 +39,7 @@ cd "$REPO"
 rc=0
 "$ENVS/scvi-api/bin/python" scripts/run_stage.py \
   --manifest "$MAN" --experiments X1 --tasks atac_small immune sim1 \
-  --out-dir "$D/tier12_v2/X1_local" --prepped-dir "$D/prepped_scib" \
+  --out-dir "$D/tier12_v3/X1_local" --prepped-dir "$D/prepped_scib" \
   --fit-python "$ENVS/scvi-api/bin/python" --score-python "$ENVS/wcd-kbet/bin/python" \
   --r-home "$ENVS/wcd-kbet/lib/R" --r-libs "$D/Rlib_kbet" --expect-device "RTX 3080" \
   --fit-lanes 8 --fit-threads 1 --score-workers-during 3 --score-workers-after 8 ${PASS[@]+"${PASS[@]}"} || rc=$?
