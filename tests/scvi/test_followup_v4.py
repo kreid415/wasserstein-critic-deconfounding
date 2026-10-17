@@ -173,6 +173,10 @@ def test_x7_depleted_reference_spec():
         ref = sub.obs[sub.obs.batch == "ref"]
         assert sub.n_obs == 520 and len(ref) == n_ref and not ref.celltype.isin(types).any()
         assert (sub.obs.batch != "ref").sum() == 300 and sub.obs_names.is_unique          # other batches untouched
+        pos = np.where(a.obs.batch.values == "ref")[0]                                    # spec: the first n_reference cells of one
+        order = pos[np.random.default_rng(fpc.X7_PERMUTATION_SEED).permutation(len(pos))]  # fixed permutation of the batch, among
+        want = order[~a.obs.celltype.iloc[order].isin(types).values][:n_ref]               # the kept types: the same permutation
+        assert set(ref.index) == set(a.obs_names[want]), level                             # at every level, control included
     none = fpc.subsample(a, spec([]), 0).obs
     assert none[none.batch == "ref"].celltype.nunique() == 5                       # same-size control keeps every type
     deep = fpc.subsample(a, spec(rare["one_third"]), 0)

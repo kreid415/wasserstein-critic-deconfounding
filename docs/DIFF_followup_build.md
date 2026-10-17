@@ -42,7 +42,7 @@ depleted-reference arm (both decoders, three levels) 432 fits, 131.9 (144 per le
 
 ## X7 depleted-reference arm: rule, sizes, share removed (derived from prepped_scib; re-derived by a test when PREPPED_DIR is set)
 
-Rule: reference = automatic choice (inDrop1, Batch5). Level 'none' (the same-size control, lead decision implementing the user's "keep its size") removes no type; level 'two_thirds' / 'one_third' keeps round(2c/3) / round(c/3) of the c
+Rule: reference = automatic choice (inDrop1, Batch5). Level 'none' (the same-size control: no type removed, thinned to the same size) removes no type. **User decision 2026-10-17 ("Thin all levels to one size", chosen over refilling the freed slots): all levels, the control included, use one reference size per task and are not refilled, so the reference does not keep its natural size (pancreas inDrop1 1,572 of 1,937 cells, -19%; sim1 Batch5 1,005 of 1,761, -43%).** Level level 'two_thirds' / 'one_third' keeps round(2c/3) / round(c/3) of the c
 types by removing the RAREST types (count ascending, ties by name). The reference is drawn, without replacement, to one size per
 task, the number of cells it keeps at the deeper level (first cells of one fixed permutation of the batch among the kept
 types, seed 50,000; for level 'none' among all types); every other batch is kept whole. No replacement or duplication occurs.
@@ -103,7 +103,8 @@ toy fit). Real-data smoke fit (CPU, 1 epoch, nice): X3 sim2 discriminator dose 5
   weights {1, 2}, the fit differs from the unweighted one, the extra field is gone afterwards).
 - `test_adversarial_plan_v2.py`: new arm in the every-arm-trains-finite list; optimiser settings and gradient-penalty calls
   (I036, SI-98). `test_runner_and_manifest_missing_arms.py`: the arm added to the `heads` table.
-- `fl_lint` on the touched scripts: nothing at medium or above (two low: `set -e` absent in the copied identity shells).
+- Review fixes 2026-10-17: `test_discriminator_optimiser_and_gradient_penalty_calls` now asserts `spectral_norm` and the whole Adam parameter group (lr, betas, eps, weight_decay, amsgrad) of the critic-optimiser arm and its siblings; `test_x7_depleted_reference_spec` asserts that at every level, the control included, the kept reference cells are the first `n_reference` cells of the one seed-50,000 permutation among the kept types.
+- `fl_lint` on the touched scripts: nothing at medium or above. `fit_identity.sh` now has `set -euo pipefail`, records each fit's exit code, and compares every saved array, the saved config (resolved plan) and the model weights through `identity_compare.py`.
   `check_extra` accepts all 6,114 follow-up rows; `fl_unique_outputs` ok.
 - Real-data CPU smoke fits (1 epoch, nice, 1 thread; outputs in /tmp, discarded): X3 sim2 unconditioned weighted, X7 sim1 depleted
   reference (cond 0 reference arm; cond 1 discriminator_ref), X8 sim2 V=4 unconditioned (748 cells), X6 atac_small new arm unconditioned:
@@ -119,7 +120,7 @@ toy fit). Real-data smoke fit (CPU, 1 epoch, nice): X3 sim2 discriminator dose 5
 
 ## Open questions
 
-None that block the next step. Two things to know: (1) the natural X7 rows use the full references (1,937 / 1,761 cells), so the depleted-arm contrast is read within the equal-size levels, not against them; (2) sim1's deepest level keeps only 2 cell types (43% of the reference removed). Both are one-table changes.
+The thin-versus-refill question is answered (user, 2026-10-17: thin all levels to one size, no refill; recorded in the amendment SI-96 row and a new ledger entry by the lead). Two things to know: (1) the natural X7 rows use the full references (1,937 / 1,761 cells), so the depleted-arm contrast is read within the equal-size levels, not against them; (2) sim1's deepest level keeps only 2 cell types (43% of the reference removed). Both are one-table changes.
 
 ## NOT done
 

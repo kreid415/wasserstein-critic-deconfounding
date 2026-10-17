@@ -68,18 +68,23 @@ def test_every_arm_trains_finite(arm, conditioned):
     assert z.shape == (600, 4) and np.isfinite(z).all()
 
 
-@pytest.mark.parametrize("arm,lr,betas,penalty", [
-    ("discriminator_sn", 1e-3, (0.9, 0.999), False),             # classifier Adam (scvi-tools)
-    ("discriminator_sn_critic_opt", 1e-4, (0.0, 0.9), False),    # SI-98: the critic's Adam settings
-    ("pooled", 1e-4, (0.0, 0.9), True),                          # gradient-penalty critic: penalty computed (positive control)
-    ("pooled_sn", 1e-4, (0.0, 0.9), False)])                     # final review I036: spectral-norm critic, no penalty pass
-def test_discriminator_optimiser_and_gradient_penalty_calls(arm, lr, betas, penalty, monkeypatch):   # test-reason: optimiser settings and penalty calls, which no other test reads
-    seen = {"opt": None, "gp": []}
+CLASSIFIER_ADAM = dict(lr=1e-3, betas=(0.9, 0.999), eps=0.01, weight_decay=1e-6, amsgrad=False)   # scvi-tools classifier
+CRITIC_ADAM = dict(lr=1e-4, betas=(0.0, 0.9), eps=1e-8, weight_decay=0, amsgrad=False)   # WGAN-GP critic, torch defaults
+
+
+@pytest.mark.parametrize("arm,sn,group,penalty", [
+    ("discriminator_sn", True, CLASSIFIER_ADAM, False),             # classifier Adam (scvi-tools)
+    ("discriminator_sn_critic_opt", True, CRITIC_ADAM, False),      # SI-98: spectral norm AND the critic's whole Adam group
+    ("pooled", False, CRITIC_ADAM, True),                           # gradient-penalty critic: penalty computed (positive control)
+    ("pooled_sn", True, CRITIC_ADAM, False)])                       # final review I036: spectral-norm critic, no penalty pass
+def test_discriminator_optimiser_and_gradient_penalty_calls(arm, sn, group, penalty, monkeypatch):   # test-reason: spectral norm, whole optimiser group and penalty calls (X6 contrast pooled_sn minus discriminator_sn_critic_opt); no other test reads them
+    seen = {"opt": None, "sn": None, "gp": []}
     orig_conf, orig_head = plan.WassersteinAdversarialTrainingPlan.configure_optimizers, plan.WassersteinAdversarialTrainingPlan._head
 
     def conf(self):
         opts = orig_conf(self)
-        seen["opt"] = (opts[1].defaults["lr"], tuple(opts[1].defaults["betas"]))
+        g = opts[1].param_groups[0]
+        seen["opt"], seen["sn"] = {k: (tuple(g[k]) if k == "betas" else g[k]) for k in group}, self.spectral_norm
         return opts
 
     def head(self, z, batch_index, target, with_gp, weights=None):
@@ -89,7 +94,7 @@ def test_discriminator_optimiser_and_gradient_penalty_calls(arm, lr, betas, pena
     monkeypatch.setattr(plan.WassersteinAdversarialTrainingPlan, "configure_optimizers", conf)
     monkeypatch.setattr(plan.WassersteinAdversarialTrainingPlan, "_head", head)
     plan.fit_adversarial_scvi(_toy(), "batch", conditioned=True, **_kw(arm), **COMMON)
-    assert seen["opt"] == (lr, betas) and (True in seen["gp"]) == penalty, seen
+    assert seen["sn"] is sn and seen["opt"] == group and (True in seen["gp"]) == penalty, seen
 
 
 def test_argument_guards():
