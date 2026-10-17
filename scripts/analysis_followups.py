@@ -380,12 +380,19 @@ def x7(out, targets, counts):
                     beta_a, se_a = ols(Xa, y)
                     res["adjusted_coverage_coef"] = None if se_a is None else float(beta_a[1])   # None: collinear covariates
             assoc[(t, c, comp)] = res
-        dep = r[r.ref_level != "natural"]
+        dep, dcell = r[r.ref_level != "natural"], {}
         P._require(len(dep) == 0 or (set(dep.ref_level) == {X7_CONTROL, *X7_DEPLETION} and set(dep.arm) == set(X7_FORMS)),
                    f"X7 {t}|{c}: depleted rows need levels {X7_CONTROL}, {X7_DEPLETION} and every formulation")
         if len(dep):
             # SI-96: each depleted level against the same-size control (level 'none'), so only coverage differs
-            dpts = {(f, lv): window_points(dep[(dep.arm == f) & (dep.ref_level == lv)]) for f in X7_FORMS for lv in (X7_CONTROL,) + X7_DEPLETION}
+            # read at the full task's b* (SI-95; spec 1.4, review F10), with a fixed-'matched' fallback for every contrast
+            drows = {(f, lv): dep[(dep.arm == f) & (dep.ref_level == lv)] for f in X7_FORMS for lv in (X7_CONTROL,) + X7_DEPLETION}
+            dpts = {k: window_points(g) for k, g in drows.items()}
+            fixed = {k: drows[k][drows[k].level == "matched"] for k in drows}
+            fixed = {k: {v: seed_values(g, v) for v in ("B", "C")} for k, g in fixed.items()}
+            dcell = {f"{f}|{lv}": dict(status=bstar_status(dpts[(f, lv)], tg["bstar"]),
+                                       fixed_matched=at_level(dpts[(f, lv)], drows[(f, lv)], "matched", tg["bstar"]))
+                     for f, lv in drows}
             removed = {lv: len(types) for lv, types in BPM.X7_DEPLETED[t][3].items()}
             for comp, lv in itertools.product(X7_COMPARATORS, X7_DEPLETION):
                 def gap(keep, level, comp=comp):
@@ -395,12 +402,19 @@ def x7(out, targets, counts):
                 def stat(keep, comp=comp, lv=lv):
                     g1, g0 = gap(keep, lv, comp), gap(keep, X7_CONTROL, comp)
                     return None if g1 is None or g0 is None else g1 - g0
+
+                def fixed_stat(v, comp=comp, lv=lv):
+                    def s(keep):
+                        m = [mean(fixed[(f, level)][v], keep) for level in (lv, X7_CONTROL) for f in ("reference", comp)]
+                        return None if None in m else (m[0] - m[1]) - (m[2] - m[3])
+                    return s
                 res = dict(reason="low_signal", d=None, s=None, m=0) if tg["bstar_low_signal"] else loso(stat)
                 if res["d"] is None and res["reason"] != "low_signal":
                     res["reason"] = "unreached"
                 causal[(t, c, f"{lv}_{comp}")] = dict(res, reference=BPM.X7_DEPLETED[t][0], n_reference=BPM.X7_DEPLETED[t][1],
-                                                      types_removed=removed[lv])
-        cells[f"{t}|{c}"] = dict(points=cell, spread=spread)
+                                                      types_removed=removed[lv],
+                                                      fixed_matched=dict(C=loso(fixed_stat("C")), dB=fixed_stat("B")(list(FU_SEEDS))))
+        cells[f"{t}|{c}"] = dict(points=cell, spread=spread, depleted_points=dcell)
     for c in (0, 1):
         tasks = [t for t, cc in EXPECTED["X7"] if cc == c]
         for comp in X7_COMPARATORS:
@@ -617,16 +631,21 @@ CONFIRMATORY = [f"X3|slope_contrast|{c}|{lv}" for c in (0, 1) for lv in FIXED] +
                [f"X7|depleted_{lv}_discriminator_ref|{c}" for c in (0, 1) for lv in X7_DEPLETION] + [f"X8|ref_dis|iLISI_cn|{c}" for c in (0, 1)]
 
 
+def holm_all(p):
+    """Holm over the whole family (spec 1.7): a missing p (no evaluable dataset) enters as 1 so m never shrinks; its
+    adjusted value is reported as None."""
+    adj = A.holm([1.0 if x is None else x for x in p])
+    return [None if x is None else a for x, a in zip(p, adj)]
+
+
 def analyse(out, targets, counts):
     res = dict(X3=x3(out), X6=x6(out, targets), X7=x7(out, targets, counts), X8=x8(out, counts),
                X12=x12(out, targets), X15=x15(out, targets))
     p = [res[k.split("|")[0]]["pooled"][k.split("|", 1)[1]]["wilcoxon_p"] for k in CONFIRMATORY]
-    have = [i for i, x in enumerate(p) if x is not None]
-    adj = A.holm([p[i] for i in have]) if have else []
+    adj = holm_all(p)
     res["confirmatory"] = {k: dict(declaration=res[k.split("|")[0]]["pooled"][k.split("|", 1)[1]]["declaration"],
-                                   wilcoxon_p=p[i], holm_p=adj[have.index(i)] if i in have else None)
-                           for i, k in enumerate(CONFIRMATORY)}
-    res["n_confirmatory"] = len(CONFIRMATORY)
+                                   wilcoxon_p=p[i], holm_p=adj[i]) for i, k in enumerate(CONFIRMATORY)}
+    res["n_confirmatory"] = res["holm_m"] = len(CONFIRMATORY)
     return res
 
 

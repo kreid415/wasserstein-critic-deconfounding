@@ -39,7 +39,7 @@ penalty on data points. *iLISI* = integration local inverse Simpson's index (scI
 | X3 composition dose-response: does removing cell types from one batch make an adversary over-correct, and does oracle reweighting undo it? | P2-dose: reference-critic minus discriminator slope of the biology cost on dose, at each fixed strength (lo, hi), per decoder | confirmatory (4 results) | 3 (atac_small, immune_hum_mou, pancreas); sim2 per task | 2 |
 | X6 divergence vs regularisation vs adversary steps | R3-divergence: W1+SN critic minus JS+SN discriminator with the critic's optimiser, biology at b\* (SI-98) | confirmatory (2 results) | 3 (atac_small, immune, pancreas) | 3 |
 | X7 reference choice | P4: each depleted level minus the same-size control, reference critic minus reference JS (SI-96; user answer 2026-10-17); natural-reference association secondary | confirmatory, reported per dataset with no verdict (4 results) | depleted: 1 (pancreas), sim1 per task; association: 2 (pancreas, atac_small) | 4 |
-| X8 batch count | P3: slope on log2 V of reference-critic minus discriminator ceiling-normalised iLISI at fixed strength | confirmatory, reported per dataset with no verdict (2 results) | 2 (immune_hum_mou, lung); sim2 per task | 5 |
+| X8 batch count together with total cells and training steps (SI-94: they grow together, section 5.6) | P3: slope on log2 V of reference-critic minus discriminator ceiling-normalised iLISI at fixed strength | confirmatory, reported per dataset with no verdict (2 results) | 2 (immune_hum_mou, lung); sim2 per task | 5 |
 | X12 architecture robustness | sign stability of reference minus discriminator over 16 configurations; factor effects | secondary (descriptive and pooled main effects) | 3 | 6 |
 | X15 KL warm-up | change of the X1-type comparisons when the KL (Kullback-Leibler) warm-up completes | sensitivity, reported per dataset with no verdict | 2 (immune, atac_large) | 7 |
 
@@ -99,6 +99,14 @@ evaluable at b\*' and report it at fixed strength; never call a single-strength 
   contrast never brackets b\* (status `unreached_low`, `unreached_high`), or when fewer than 3 LOSO readings exist. Every
   not-evaluable cell is listed with its reason and is also reported at the fixed `matched` strength (C difference and B
   difference), labelled fixed-strength.
+- *X7's depleted reference (user answer SI-95; lead decision 2026-10-17, review finding F10).* The depleted levels are subsampled
+  tasks too, but they keep every non-reference batch whole and thin only the reference (16,017 of 16,382 cells in pancreas, 11,341
+  of 12,097 in sim1, that is 2-6% fewer cells), they run on the X7 lo / matched / hi window, and SI-95 reads X7 at b\*. Their
+  contrast (section 4.4) is therefore read at the full task's b\* (the same target as the natural references), with the same
+  not-evaluable rules. Because plain scVI's batch score on the thinned task may differ slightly from the full task's, every depleted
+  point is reported with its achieved B - b\* at the fixed `matched` strength, and every depleted contrast is also reported at the
+  fixed `matched` strength (C and B differences of the same difference-in-differences, labelled fixed-strength, with a LOSO
+  standard error for C). A depleted contrast that is not evaluable at b\* is reported through this fixed-strength fallback only.
 - *Where b\* is not read.* X3 and X8 run on subsampled tasks, where the full task's b\* is not a defined target (the plain-scVI
   batch score changes with the subsample; brief Q3), and they have only lo/hi (X3) or one strength (X8, SI-95). X12 changes the
   architecture, so the response to lambda is not the X1 response (D-06). X15 has lo/hi only. These are compared at fixed strength,
@@ -142,7 +150,8 @@ equivalent if P(|Delta| <= r) >= 0.95, otherwise inconclusive; each on its own p
 X3 P2-dose (2 strengths x 2 decoders), X6 R3-divergence (2 decoders), X7 P4 (2 depletion levels x 2 decoders), X8 P3 (2 decoders)
 (`CONFIRMATORY` in the script). The report states that 12 were judged, and that the 6 of X7 and X8 are reported per dataset
 without a verdict (section 1.5). Frequentist companion: the exact two-sided Wilcoxon signed-rank test over the
-pooled datasets' d, with Holm's adjustment over the 12 (as ANALYSIS_SPEC section 5 and PREREG "Holm over P1-P4"). It cannot reject:
+pooled datasets' d, with Holm's adjustment over the 12 (as ANALYSIS_SPEC section 5 and PREREG "Holm over P1-P4"); a result with no
+p-value (no evaluable real dataset) enters the adjustment with p = 1, so the family size stays m = 12 (recorded as `holm_m`). It cannot reject:
 the smallest attainable p is 2/2^n = 0.25 with 3 datasets, 0.5 with 2 and 1 with 1. It is reported because it is registered,
 and used for no conclusion. Secondary results are declared with the same rule and are not in the Holm family.
 
@@ -270,20 +279,26 @@ association; coverage moves with entropy, size and technology across references 
 **4.4 Depleted reference (causal; confirmatory; user answer 2026-10-17).** On pancreas (reference inDrop1) and sim1 (reference
 Batch5) the reference batch is drawn at three levels with one size per task (1,572 and 1,005 cells): `none` keeps every type (the
 same-size control), `two_thirds` and `one_third` keep round(2c/3) and round(c/3) of its c types by removing the rarest types first;
-every other batch is whole (`BPM.X7_DEPLETED`, `fit_paper_config.x7_draw`). The levels therefore differ in coverage only, while
-technology and reference size are fixed. For each depleted level L and decoder:
+every other batch is whole (`BPM.X7_DEPLETED`, `fit_paper_config.x7_draw`). **Reference size (user decision 2026-10-17): all
+depleted levels and the same-size control use one thinned reference size (pancreas 1,572, sim1 1,005 cells), with no refill**:
+removed types are not replaced by cells of other types; instead every level, the control included, is thinned to the size the
+deepest level keeps. The levels therefore differ in coverage only, while technology and reference size are fixed. bio@b\* is read
+at the full task's b\* (section 1.4). For each depleted level L and decoder:
 d_L = [bio@b\*(reference, L) - bio@b\*(discriminator_ref, L)] - [bio@b\*(reference, none) - bio@b\*(discriminator_ref, none)],
 the change of the critic-minus-JS difference caused by removing types, against the control of the same size (never against the
 full-size natural reference, whose size differs). Companion: the same with `mmd_ref`. Standard error by LOSO (the reference is
 fixed, so seed noise is the error). Confirmatory results: d_two_thirds and d_one_third for each decoder (4). The dense-reference
 claim predicts d_L < 0, more negative at one_third. Not evaluable: low-signal; any of the 4 curves of a contrast unreached; fewer
-than 3 readings. Reporting: per dataset with intervals; pancreas is the only real dataset, so the pooled entry is "not decidable
+than 3 readings. Fixed-strength fallback (section 1.4): every depleted contrast is also computed with the same four terms taken
+at the fixed `matched` strength instead of at b\* (mean C and mean B of each point; LOSO standard error for the C difference),
+and every depleted point's achieved B - b\* at `matched` is recorded; a cell not evaluable at b\* is reported only through this
+fallback, labelled fixed-strength and never "matched batch removal". Reporting: per dataset with intervals; pancreas is the only real dataset, so the pooled entry is "not decidable
 with 1-2 real datasets" (section 1.5); sim1 is reported per task and never pooled. The record keeps the reference, its size and
 the number of types removed at each level.
 
 **4.5 Labels and limits.** Only the depleted-reference contrast is described causally (I089 default as amended by the user's Q4
-answer). The reference arm's automatic target uses cell-type labels, and the depletion is chosen from the reference's most abundant
-types (I092 disclosure). `reference_fixed` (the critic with a fixed reference target) is reported per reference, descriptive.
+answer). The reference arm's automatic target uses cell-type labels, and the depletion removes the reference's rarest types first
+(count ascending, ties by name; `BPM.X7_DEPLETED`, section 4.4) (I092 disclosure). `reference_fixed` (the critic with a fixed reference target) is reported per reference, descriptive.
 
 ## 5. X8: batch count (P3)
 
@@ -305,7 +320,9 @@ means, default sampler); the least-squares slope of g on log2 V over the 4 value
 ceiling-normalised iLISI per doubling of V). Per decoder: 2 results, pooled over immune_hum_mou and lung (2 datasets: inconclusive
 by construction, section 1.5); sim2 per task. The "bottleneck" claim predicts d < 0. Chains that select identical batch sets at a V
 (listed in the record) are not independent composition replicates (I016): averaging them adds no information, and the standard
-error comes from seeds only.
+error comes from seeds only. The estimand is therefore conditional on the two drawn chains (it does not generalise over other
+draws of the batch sets); for lung and sim2, which have exactly 16 eligible batches, the two chains hold the same 16 batches at
+V = 16 and differ there only in which cells are drawn from batches with more than N/16 cells.
 
 **5.5 Secondary.** The same slope for B and for C; the pooled critic minus the discriminator (PAPER_PLAN: "attribute to reference
 design only if the pooled critic shows no slope", read descriptively); the stratified minus default sampler slope for each critic
@@ -366,7 +383,7 @@ section 1.5); no declaration and no change to any X1 conclusion. The 12 stock-wa
 | Critic over-corrects under composition shift; discriminator protective | X3 P2-dose d | P(Delta < -0.01) >= 0.95 | P(Delta > 0.01) >= 0.95 or equivalence | yes (3 real datasets), if the difference is about 0.03 or more |
 | The difference is due to the divergence | X6 R3-divergence d | direction declared with P1's sign | equivalence, or opposite sign | yes (3 datasets; 2 if immune is low-signal: no) |
 | Critic needs a dense reference | X7 d_L (depleted level minus same-size control) | d_L < -0.01 | d_L > 0.01 | no: 1 real dataset; per dataset, no verdict (user answer) |
-| Critic scales poorly with batch count | X8 P3 d | slope < -0.01 per doubling | slope > 0.01 | no: 2 real datasets; per dataset, no verdict (user answer) |
+| Critic scales poorly with batch count together with total cells and training steps (SI-94) | X8 P3 d | slope < -0.01 per doubling | slope > 0.01 | no: 2 real datasets; per dataset, no verdict (user answer) |
 | Sign is stable across architectures | X12 sign counts | no opposite signs beyond ±0.01 | runs of both signs | descriptive |
 | X1 holds without the warm-up artefact | X15 | changes within ±0.01 | changes beyond ±0.01 | descriptive (sensitivity) |
 
@@ -392,7 +409,7 @@ section 1.5); no declaration and no change to any X1 conclusion. The 12 stock-wa
   (only `x8_draw`, when it builds the count table), `analysis_x1` (`combine`, `wilcoxon_exact`, `holm`,
   `clopper_pearson`, `PRIOR_SCALE`) and `prereg_rules` (`outcomes`, `bio_at_bstar`, `read_record`, `write_record`, the constants)
   and changes neither; no X1 fit or analysis path is touched. One JSON record per run (inputs with SHA-256, git state, constants,
-  every per-cell quantity, the not-evaluable reasons, the 10 confirmatory declarations with Wilcoxon and Holm values); it refuses
+  every per-cell quantity, the not-evaluable reasons, the 12 confirmatory declarations with Wilcoxon and Holm values); it refuses
   to overwrite an existing record. Rows are sorted by tag before any computation.
 - Tests (`tests/analysis_followups/test_analysis_followups.py`, synthetic scores on the real v4 follow-up rows): the v4 row
   enumeration (section 1.9); known answers (jackknife of a mean = SD/sqrt(3),

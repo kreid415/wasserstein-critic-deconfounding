@@ -64,9 +64,12 @@ def prepped_obs():
 
 def world(effects):
     """(status, B, C) per row. Planted (when `effects`): X3 the reference critic loses 0.10 more biology per 100%
-    depletion than the other arms, which the oracle weights undo; X6 W1+SN at 1 step keeps 0.05 more biology at every
-    lambda; X7 the reference critic's biology rises 0.2 per unit coverage share (natural references) and by 0.2 x the
-    kept share of the depleted reference's types (1, 2/3, 1/3 for levels none, two_thirds, one_third), the comparators' not at all; X8 the reference critic's batch score falls 0.02 per doubling of V (default sampler only);
+    depletion than the other arms, which the oracle weights undo; X6 W1+SN at 1 step keeps 0.05 more biology and JS+SN with
+    the critic's optimiser 0.02 less at every lambda (so the divergence contrast is +0.07, the own-optimiser one +0.05);
+    X7 the reference critic's biology rises 0.2 per unit coverage share (natural references) and, on a depleted reference
+    with kept type share q (1, 2/3, 1/3 for levels none, two_thirds, one_third), changes by 0.2 q - 0.3 (1 - q) log10(lambda),
+    so the depleted contrast depends on where along lambda it is read; the comparators' not at all; X8 the reference
+    critic's batch score falls 0.01 (chain 0) and 0.03 (chain 1) per doubling of V, mean 0.02 (default sampler only);
     X12 reference minus discriminator = 0.03 + 0.03 x code(A), so factor A's effect is 0.06; X15 none. Seed effects are
     shared by every arm of a task x decoder (pairing). One failed run each in X6 and X3; X12 atac_small|1 run 5
     reference at matched_hi fails on every seed; three X7 curves and one X6 curve never reach b*."""
@@ -94,13 +97,17 @@ def world(effects):
             C = 0.70 - 0.05 * math.log10(lam) + sc + e
             if exp == "X6" and effects and arm == "pooled_sn" and int(r["n_critic"]) == 1:
                 C += 0.05
+            if exp == "X6" and effects and arm == F.X6_COPT:
+                C -= 0.02
             if exp == "X7" and effects and arm == "reference":
                 level = F.x7_level(t, r["reference"], ex.get("subsample", {}))
-                C += 0.2 * (coverage_of(t, int(r["reference"])) if level == "natural" else SHARE[level])
+                C += 0.2 * coverage_of(t, int(r["reference"])) if level == "natural" else \
+                    0.2 * SHARE[level] - 0.3 * (1 - SHARE[level]) * math.log10(lam)
             return "ok", B, C
         if exp == "X8":
             V = ex["subsample"]["n_batches"]
-            B = 0.5 + sb + e - (0.02 * math.log2(V) if effects and arm == "reference" and "sampler" not in ex else 0.0)
+            slope_v = 0.01 if ex["subsample"]["subset"] == 0 else 0.03
+            B = 0.5 + sb + e - (slope_v * math.log2(V) if effects and arm == "reference" and "sampler" not in ex else 0.0)
             return "ok", B, 0.7 + sc + e
         if exp == "X12":
             a = 1 if int(r["n_latent"]) == 30 else -1
@@ -123,6 +130,14 @@ def r4_record():
     return dict(rule="R4", stage="x1", status="frozen",
                 targets={f"{t}|{c}": dict(b0=0.4, bstar=BSTAR, b_common=0.6, bstar_low_signal=f"{t}|{c}" in LOW)
                          for t in tasks for c in (0, 1)})
+
+
+def depleted_d(task, c, at):
+    """Planted X7 depleted contrast (q - 1)(0.2 + 0.3 x) at x = log10(lambda): at b* (mean seed shift of B moves the
+    crossing, B = 0.4 + 0.2 (x + 0.5) / 1.5 + mean sb) or at the fixed 'matched' lambda (3); q = kept share."""
+    sbm = np.mean([synth._noise(f"b{task}|{c}|{s}", 0.01) for s in F.FU_SEEDS])
+    x = math.log10(3) if at == "matched" else (BSTAR - 0.4 - sbm) * 7.5 - 0.5
+    return {lv: (SHARE[lv] - 1) * (0.2 + 0.3 * x) for lv in F.X7_DEPLETION}
 
 
 def write_inputs(tmp, effects):
@@ -169,6 +184,7 @@ def test_known_answers():  # test-reason: jackknife, slope, iLISI ceiling, cover
     beta, se = F.ols([[1, 0.5], [1, 0.5], [1, 0.5]], [1, 2, 3])
     assert se is None                                         # a predictor that does not vary has no slope
     assert F.bio_window(pts[:1] + [(10.0, {}, {10: 0.80}, 2)])["reason"] == "best point has fewer than 2 runs"
+    assert F.holm_all([0.01] + [None] * 11) == [pytest.approx(0.12)] + [None] * 11    # Holm over 12 even when 11 are missing
 
 
 def test_planted_effects(records):  # test-reason: each follow-up's endpoint recovers its planted value and declaration
@@ -186,8 +202,10 @@ def test_planted_effects(records):  # test-reason: each follow-up's endpoint rec
     assert cell["reference|matched_lo"]["collapse"]["100"]["x"] == 3                    # -0.12 against the 0.10 bound
     assert cell["mmd|matched_hi"]["collapse"]["100"]["x"] == 1 and cell["mmd|matched_hi"]["collapse"]["100"]["n_failed"] == 1
     x6 = rec["X6"]
-    assert x6["pooled"]["divergence|0"]["mean"] == pytest.approx(0.05, abs=0.01)
-    assert x6["contrast"]["pancreas|0|divergence"]["d"] == pytest.approx(0.05, abs=0.003)
+    assert x6["pooled"]["divergence|0"]["mean"] == pytest.approx(0.07, abs=0.01)
+    # the confirmatory contrast is pooled_sn minus discriminator_sn_critic_opt (not minus discriminator_sn)
+    assert x6["contrast"]["pancreas|0|divergence"]["d"] == pytest.approx(0.07, abs=0.003)
+    assert x6["contrast"]["pancreas|0|divergence_own_optimiser"]["d"] == pytest.approx(0.05, abs=0.003)
     assert x6["pooled"]["divergence|0"]["declaration"] == "above" and x6["pooled"]["js_optimiser|0"]["declaration"] != "above"
     assert x6["pooled"]["divergence|1"]["not_evaluable"] == {"immune": "low_signal"} and x6["pooled"]["divergence|1"]["n"] == 2
     assert x6["pooled"]["divergence|1"]["declaration"] == "not_decidable_1_2_real_datasets"     # 2 real datasets (user, round 2)
@@ -196,16 +214,25 @@ def test_planted_effects(records):  # test-reason: each follow-up's endpoint rec
     x7 = rec["X7"]
     for c in (0, 1):
         assert x7["association"][f"pancreas|{c}|discriminator_ref"]["d"] == pytest.approx(0.2, abs=0.01)
-        # each depleted level against the same-size control: 0.2 x (2/3 - 1) and 0.2 x (1/3 - 1)
-        assert x7["depleted"][f"pancreas|{c}|two_thirds_discriminator_ref"]["d"] == pytest.approx(-0.2 / 3, abs=0.01)
-        assert x7["depleted"][f"pancreas|{c}|one_third_discriminator_ref"]["d"] == pytest.approx(-0.4 / 3, abs=0.01)
+        # each depleted level against the same-size control, read at the full task's b*; the fixed-'matched' fallback
+        # reads the same contrast at lambda = 3, where the planted gap is larger
+        for lv in F.X7_DEPLETION:
+            r = x7["depleted"][f"pancreas|{c}|{lv}_discriminator_ref"]
+            assert r["d"] == pytest.approx(depleted_d("pancreas", c, "bstar")[lv], abs=0.005)
+            assert r["fixed_matched"]["C"]["d"] == pytest.approx(depleted_d("pancreas", c, "matched")[lv], abs=0.005)
+            assert r["fixed_matched"]["C"]["m"] == 3 and abs(r["fixed_matched"]["dB"]) < 0.005
         assert x7["pooled"][f"association_discriminator_ref|{c}"]["n"] == 2 - (c == 0)
     assert x7["association"]["atac_small|1|mmd_ref"]["d"] == pytest.approx(0.2, abs=0.01)
     assert x7["association"]["atac_small|0|mmd_ref"]["reason"] == "fewer_than_3_references"   # reference 2 never reaches b*
     assert x7["association"]["sim1|1|discriminator_ref"]["reason"] == "low_signal"
     assert x7["depleted"]["sim1|1|one_third_discriminator_ref"]["reason"] == "low_signal"
-    assert x7["depleted"]["sim1|0|one_third_discriminator_ref"]["reason"] == "unreached"
-    assert x7["depleted"]["sim1|0|two_thirds_mmd_ref"]["d"] == pytest.approx(-0.2 / 3, abs=0.01)
+    r = x7["depleted"]["sim1|0|one_third_discriminator_ref"]       # not evaluable at b*: reported at fixed 'matched' only
+    assert r["reason"] == "unreached" and r["d"] is None
+    assert r["fixed_matched"]["C"]["d"] == pytest.approx(depleted_d("sim1", 0, "matched")["one_third"], abs=0.005)
+    assert r["fixed_matched"]["dB"] == pytest.approx(0.1 + 0.2 * (math.log10(3) + 0.5) / 1.5, abs=0.005)   # B 0.3 vs the window
+    pt = x7["cells"]["sim1|0"]["depleted_points"]["discriminator_ref|one_third"]
+    assert pt["status"] == "unreached_low" and pt["fixed_matched"]["B_minus_bstar"] == pytest.approx(-0.2, abs=0.03)
+    assert x7["depleted"]["sim1|0|two_thirds_mmd_ref"]["d"] == pytest.approx(depleted_d("sim1", 0, "bstar")["two_thirds"], abs=0.005)
     assert {k: x7["depleted"]["pancreas|0|one_third_mmd_ref"][k] for k in ("reference", "n_reference", "types_removed")} == \
         dict(reference="inDrop1", n_reference=1572, types_removed=9)
     p = x7["pooled"]["depleted_one_third_discriminator_ref|0"]
@@ -235,7 +262,7 @@ def test_planted_effects(records):  # test-reason: each follow-up's endpoint rec
     assert x12["cells"]["atac_small|1|matched_hi"]["runs"]["5"]["n_failed"] == {"reference": 3, "discriminator": 0}
     assert x7["cells"]["atac_small|0"]["points"]["reference|2"]["n_failed"] == 0
     assert len(rec["X15"]["B_minus_bstar"]) == 2 * 2 * 3 * 2 and all(abs(v - 0.05) < 0.03 for v in rec["X15"]["B_minus_bstar"].values())
-    assert set(rec["confirmatory"]) == set(F.CONFIRMATORY) and rec["n_confirmatory"] == 12
+    assert set(rec["confirmatory"]) == set(F.CONFIRMATORY) and rec["n_confirmatory"] == rec["holm_m"] == 12
     assert rec["confirmatory"]["X8|ref_dis|iLISI_cn|1"]["declaration"] == "not_decidable_1_2_real_datasets"
     assert os.path.exists(records["effect_args"][-1] + ".celltype_counts.csv")       # built from the prepped files
 
