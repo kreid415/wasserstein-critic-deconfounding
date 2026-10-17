@@ -162,6 +162,18 @@ def test_a_moved_non_sinkhorn_a3_window_never_reuses_the_score_fitted_at_the_old
     write_runner_dir(os.path.join(t, "v3", "A2A3_bad"), S_old, NO_FAILURES, at_old)       # a new-dir file at the old lambda
     with pytest.raises(SystemExit, match="recorded settings differ"):
         S2.main(args(s, "r2r3", "r23_badnew", [m4], olds, news + ["v3/A2A3_bad"], "--r4a1-record", rec))
+    # other plan-fits refusals: an unresolved (placeholder) lambda never matches a score; a score without its recorded settings,
+    # or the same tag fitted at the row's settings in two old folders, stops the plan
+    n_nonsk = int(((M4.experiment.isin(["A2", "A3"])) & (M4.arm != "sinkhorn")).sum())
+    assert S2.main(["plan-fits", "--manifest", s["man"], "--experiments", "A2", "A3", "--old-dir", os.path.join(t, "v2/A2A3"),
+                    "--out-tags", os.path.join(t, "placeholder.tags")]) == 0
+    assert f"{n_nonsk} moved" in open(os.path.join(t, "placeholder.tags")).readline()
+    os.makedirs(os.path.join(t, "v2", "nometa", "scores"))
+    pd.DataFrame([dict(tag=cell.tag.iloc[0], kbet_seed=0)]).to_csv(os.path.join(t, "v2", "nometa", "scores", f"{cell.tag.iloc[0]}.csv"), index=False)
+    for olds_bad, msg in ((["v2/nometa"], "expected one score row"), (["v2/A2A3", "v2/A2A3_old"], "more than one old folder")):
+        with pytest.raises(SystemExit, match=msg):
+            S2.main(["plan-fits", "--manifest", m4, "--experiments", "A3", "--tasks", "immune", "--out-tags", plan,
+                     *sum((["--old-dir", os.path.join(t, d)] for d in olds_bad), [])])
 
 
 @pytest.mark.parametrize("case, match", [("duplicate_manifest", "duplicate manifest tags"), ("wrong_commit", "expected"),
