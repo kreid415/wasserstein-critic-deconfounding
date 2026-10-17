@@ -695,3 +695,31 @@
 - added: 2026-10-17
 - keywords: X6, optimiser, discriminator, spectral, critic, arm
 - notebook: NB-20261017-06
+
+## SI-99 · active · method
+- rule: X7 (reference choice) depleted-reference arm removes the rarest reference cell types first so the reference size stays about the same (refines SI-96 and NB-20261017-04, which fix the arm and its refill to the same size but not which types go)
+- source: "Rarest types first (Recommended)" (user, ask_user answer to "X7's new arm removes cell types from one reference batch ... Which types should be removed?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, depleted, rarest, reference, coverage, size, refill
+- notebook: NB-20261017-10
+
+## SI-100 · active · method
+- rule: X3 oracle-reweighted rows also run with the unconditioned decoder via new per-cell weight code (+288 fits); refines SI-93, which sends X3 to the unconditioned decoder but left the weighted rows conditioned-only
+- source: "Yes, add new weighting code" (user, ask_user answer to "Should the X3 reweighting control also run with the unconditioned decoder?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X3, oracle, reweighted, weights, unconditioned, decoder
+- notebook: NB-20261017-11
+
+## SI-101 · active · method
+- rule: X7, X8 and X15 (1-2 real datasets): registered pooled rule kept; per-dataset estimates with intervals; stated not decidable with 1-2 real datasets; no per-dataset decision rule, no added datasets (refines SI-68 and SI-96)
+- source: "Report per dataset, no verdict (Recommended)" (user, ask_user answer to "X7, X8 and X15 use only 1-2 real datasets ... How should they be decided?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, X8, X15, per dataset, verdict, pooled, not decidable, datasets
+- notebook: NB-20261017-12
+
+## SI-102 · active · method
+- rule: X7: P4 confirmatory = depleted levels vs same-size level-0 control; natural-reference association secondary (refines SI-68 and SI-96)
+- source: "Depleted-reference comparison (Recommended)" (user, ask_user answer to "For X7, which result is the main pre-registered one?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, P4, confirmatory, depleted, natural, association, primary
+- notebook: NB-20261017-13
