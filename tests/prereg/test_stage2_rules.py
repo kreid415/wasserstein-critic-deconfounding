@@ -3,6 +3,7 @@ writes them (scores/<tag>.csv, failures.csv): v2 folders hold pre-fix Sinkhorn o
 Walks R1 (extension round, then frozen) -> R4-a1 -> R2/R3 with the real rule scripts. No fits, no real data."""
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -17,11 +18,17 @@ import stage2_rules as S2  # noqa: E402
 import freeze_a1_grid  # noqa: E402
 
 
-def write_runner_dir(d, S, F=None):
+NO_FAILURES = pd.DataFrame(columns=["tag", "status", "detail"])
+
+
+def write_runner_dir(d, S, F, rows):
+    """Score files as run_stage.py writes them: the scorer's META columns (experiment, task, arm, lam, cond, seed) come
+    from the manifest rows the file was fitted for."""
     os.makedirs(os.path.join(d, "scores"))
+    S = S.join(rows.set_index("tag")[["experiment", "task", "arm", "lam", "cond", "seed"]], on="tag")
     for i in range(len(S)):
         S.iloc[[i]].to_csv(os.path.join(d, "scores", f"{S.tag.iloc[i]}.csv"), index=False)
-    (F if F is not None else pd.DataFrame(columns=["tag", "status", "detail"])).to_csv(os.path.join(d, "failures.csv"), index=False)
+    F.to_csv(os.path.join(d, "failures.csv"), index=False)
 
 
 def early(r):                                   # corrected Sinkhorn reaches batch removal a decade earlier: R1 must extend
@@ -38,11 +45,14 @@ def stage2(tmp_path_factory):
     man = synth.write_tsv(M, os.path.join(t, "base.tsv"))
     a1 = M[M.experiment == "A1"]
     S, F = synth.scores(a1)                                       # v2: every arm, pre-fix Sinkhorn included
-    write_runner_dir(os.path.join(t, "v2", "A1"), S, F)
+    sk_tag = a1[a1.arm == "sinkhorn"].tag.iloc[0]                 # one pre-fix Sinkhorn fit failed at v2: its failure row
+    S = S[S.tag != sk_tag]                                        # must stay out of the merged failures (SI-54)
+    F = pd.concat([F, pd.DataFrame([dict(tag=sk_tag, status="diverged", detail="synthetic pre-fix")])], ignore_index=True)
+    write_runner_dir(os.path.join(t, "v2", "A1"), S, F, a1)
     Sn, Fn = synth.scores(a1[a1.arm == "sinkhorn"], early)        # v3: the Sinkhorn refits
-    write_runner_dir(os.path.join(t, "v3", "A1_sinkhorn"), Sn, Fn)
+    write_runner_dir(os.path.join(t, "v3", "A1_sinkhorn"), Sn, Fn, a1)
     common = dict(checkout=co, expect=head)
-    return dict(t=t, M=M, man=man, n_sk=int((a1.arm == "sinkhorn").sum()), **common)
+    return dict(t=t, M=M, man=man, n_sk=int((a1.arm == "sinkhorn").sum()) - 1, **common)   # n_sk: old Sinkhorn score files
 
 
 def args(s, step, out, mans, olds, news, *extra):
@@ -62,6 +72,7 @@ def test_the_two_folders_together_are_refused_but_the_wrapper_selects_one_file_p
     assert S2.main(args(s, "r1", "r1_pass1", [s["man"]], ["v2/A1"], ["v3/A1_sinkhorn"])) == P.EXIT_EXTEND
     rec = json.load(open(os.path.join(t, "r1_pass1", "step.json")))
     assert rec["n_old_sinkhorn_skipped"] == s["n_sk"] and rec["n_score_files"] == rec["n_rows"]
+    assert rec["n_failure_rows"] == 0                                           # the v2 Sinkhorn failure row is left out
     assert rec["outputs"]["a1_extension.tsv"] == S2.sha256(os.path.join(t, "r1_pass1", "a1_extension.tsv"))
     E, _ = P.read_manifest(os.path.join(t, "r1_pass1", "a1_extension.tsv"))
     assert set(E.arm) == {"sinkhorn"} and not os.path.exists(os.path.join(t, "r1_pass1", "m.r1.tsv"))
@@ -81,7 +92,7 @@ def test_rule_order_r1_extension_then_r4a1_then_r2r3(stage2):
     E, _ = P.read_manifest(os.path.join(t, "r1_pass1", "a1_extension.tsv"))
     ext = synth.write_tsv(E, os.path.join(t, "ext1.tsv"))
     Se, Fe = synth.scores(E, early)
-    write_runner_dir(os.path.join(t, "v3", "A1_ext_r1"), Se, Fe)
+    write_runner_dir(os.path.join(t, "v3", "A1_ext_r1"), Se, Fe, E)
     # plan-fits: the Sinkhorn extension rows need fits even though a v2 folder could hold files of that name
     tags = os.path.join(t, "ext1.tags")
     assert S2.main(["plan-fits", "--manifest", ext, "--experiments", "A1", "--old-dir", os.path.join(t, "v2/A1"),
@@ -98,10 +109,10 @@ def test_rule_order_r1_extension_then_r4a1_then_r2r3(stage2):
     pil = M4[M4.experiment.isin(["A2", "A3"])]
     old_pil = pil[pil.arm != "sinkhorn"]                                        # unchanged windows reuse v2 files
     S_all, _ = synth.scores(pil)
-    write_runner_dir(os.path.join(t, "v2", "A2A3"), S_all)                      # pre-fix: every arm, same tags
+    write_runner_dir(os.path.join(t, "v2", "A2A3"), S_all, NO_FAILURES, pil)    # pre-fix: every arm, same tags
     sk = pil[pil.arm == "sinkhorn"]
     Sk, Fk = synth.scores(sk, early)
-    write_runner_dir(os.path.join(t, "v3", "A2A3"), Sk, Fk)
+    write_runner_dir(os.path.join(t, "v3", "A2A3"), Sk, Fk, sk)
     plan = os.path.join(t, "a2a3.tags")
     assert S2.main(["plan-fits", "--manifest", m4, "--experiments", "A2", "A3", "--old-dir", os.path.join(t, "v2/A2A3"),
                     "--out-tags", plan]) == 0
@@ -112,9 +123,51 @@ def test_rule_order_r1_extension_then_r4a1_then_r2r3(stage2):
     assert rec["exit_code"] == 0 and rec["n_old_sinkhorn_skipped"] == s["n_sk"] + len(sk)     # A1 and A2/A3 pre-fix files
 
 
+def test_a_moved_non_sinkhorn_a3_window_never_reuses_the_score_fitted_at_the_old_lambda(stage2):
+    """F1 (SI-57): A2/A3 tags keep their placeholder name when R4-a1 moves a window, so only the score's recorded lambda tells."""
+    s, t = stage2, stage2["t"]
+    M4, _ = P.read_manifest(os.path.join(t, "r4", "m.r4a1.tsv"))
+    cell = M4[(M4.experiment == "A3") & (M4.arm == "mmd") & (M4.task == "immune") & (M4.cond == "1") & M4.tag.str.contains("_lo_")]
+    assert len(cell) == 3                                                       # one window point x 3 seeds
+    key = "immune|1|mmd"
+    m4 = os.path.join(t, "r4", "m.r4a1.tsv")
+    at_old = cell.assign(lam=P.fmt_lam(float(cell.lam.iloc[0]) / 3))            # the cell's v2 fits were made one step lower
+    S_old, _ = synth.scores(cell)
+    shutil.copytree(os.path.join(t, "v2", "A2A3"), os.path.join(t, "v2", "A2A3_old"))
+    for tag in cell.tag:                                                        # same tag, same scores, recorded old lambda
+        p = os.path.join(t, "v2", "A2A3_old", "scores", f"{tag}.csv")
+        pd.read_csv(p, dtype=str).assign(lam=at_old.set_index("tag").lam[tag]).to_csv(p, index=False)
+    plan, v2 = os.path.join(t, "moved.tags"), os.path.join(t, "v2/A2A3_old")
+    plan_args = ["plan-fits", "--manifest", m4, "--experiments", "A2", "A3", "--old-dir", v2, "--out-tags", plan]
+    assert S2.main(plan_args) == 0
+    sk = M4[(M4.experiment.isin(["A2", "A3"])) & (M4.arm == "sinkhorn")]
+    todo = open(plan).read().split("\n")
+    assert sorted(todo[1:-1]) == sorted(set(sk.tag) | set(cell.tag)) and "3 moved" in todo[0]
+    ch = os.path.join(t, "changes.json")                                        # the decision-changes record explains the move
+    json.dump(dict(changed=[dict(key=f"R4a1 {key} lo", old=1.0, new=3.0)]), open(ch, "w"))
+    assert S2.main(plan_args + ["--changes", ch]) == 0
+    json.dump(dict(changed=[dict(key="R4a1 immune|0|mmd lo", old=1.0, new=3.0),            # another cell moved, this one did not
+                            dict(key="R4a1 immune|1|sinkhorn lo", old=1.0, new=3.0)]), open(ch, "w"))
+    with pytest.raises(SystemExit, match="not explained by the decision changes"):
+        S2.main(plan_args + ["--changes", ch])
+    # r2r3 with the stale v2 file and no refit of the moved rows is refused; with the refit the v3 file is used
+    olds, news = ["v2/A1", "v2/A2A3_old"], ["v3/A1_sinkhorn", "v3/A1_ext_r1", "v3/A2A3"]
+    rec = os.path.join(t, "r4", "r4_a1_record.json")
+    with pytest.raises(SystemExit, match="no score file.*stale"):
+        S2.main(args(s, "r2r3", "r23_stale", [m4], olds, news, "--r4a1-record", rec))
+    write_runner_dir(os.path.join(t, "v3", "A2A3_moved"), S_old, NO_FAILURES, cell)       # refit at the manifest's lambda
+    assert S2.main(args(s, "r2r3", "r23_moved", [m4], olds, news + ["v3/A2A3_moved"], "--r4a1-record", rec)) == 0
+    step = json.load(open(os.path.join(t, "r23_moved", "step.json")))
+    assert step["n_old_stale_skipped"] == 3 and step["n_score_files"] == step["n_rows"]
+    write_runner_dir(os.path.join(t, "v3", "A2A3_bad"), S_old, NO_FAILURES, at_old)       # a new-dir file at the old lambda
+    with pytest.raises(SystemExit, match="recorded settings differ"):
+        S2.main(args(s, "r2r3", "r23_badnew", [m4], olds, news + ["v3/A2A3_bad"], "--r4a1-record", rec))
+
+
 @pytest.mark.parametrize("case, match", [("duplicate_manifest", "duplicate manifest tags"), ("wrong_commit", "expected"),
                                          ("dirty_checkout", "uncommitted"), ("no_failures_csv", "does not exist"),
-                                         ("failure_in_two_folders", "more than one folder"), ("no_rows", "no manifest rows")])
+                                         ("failure_in_two_folders", "more than one folder"), ("no_rows", "no manifest rows"),
+                                         ("missing_score", "no score file and no failure row")])
 def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
     s, t = stage2, stage2["t"]
     one = ["v2/A1"], ["v3/A1_sinkhorn"]
@@ -126,6 +179,11 @@ def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
     elif case == "no_failures_csv":
         os.makedirs(os.path.join(t, "v3", "empty"))
         argv = args(s, "r1", f"x_{case}", [s["man"]], *one[:1], ["v3/empty"])
+    elif case == "missing_score":
+        shutil.copytree(os.path.join(t, "v2", "A1"), os.path.join(t, "v2", "A1_cut"))
+        tag = s["M"][(s["M"].experiment == "A1") & (s["M"].arm == "discriminator")].tag.iloc[0]
+        os.remove(os.path.join(t, "v2", "A1_cut", "scores", f"{tag}.csv"))
+        argv = args(s, "r1", f"x_{case}", [s["man"]], ["v2/A1_cut"], ["v3/A1_sinkhorn"])
     elif case == "failure_in_two_folders":
         tag = s["M"][(s["M"].experiment == "A1") & (s["M"].arm == "discriminator")].tag.iloc[0]
         for d in ("f1", "f2"):

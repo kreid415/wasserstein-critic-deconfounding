@@ -14,7 +14,8 @@ Usage (env with pandas, numpy, scipy; scvi-api has them):
         --old-dir tier12_v2/A1 [...] --new-dir tier12_v3/A1_sinkhorn [...]
   python stage2_rules.py r4a1   ... (same) --r1-record OUT_R1/r1_record.json
   python stage2_rules.py r2r3   ... (same) --r4a1-record OUT_R4/r4_a1_record.json
-  python stage2_rules.py plan-fits --manifest M --experiments A2 A3 [--tasks T ...] [--old-dir D] --out-tags FILE
+  python stage2_rules.py plan-fits --manifest M --experiments A2 A3 [--tasks T ...] [--old-dir D] --out-tags FILE \
+        [--changes CHANGES.json]   (moved-window rows are listed and checked against the diff-records output)
   python stage2_rules.py diff-records --old OLD.json --new NEW.json --out CHANGES.json   (decisions only, SI-87 list)
 Exit status of r1 / r4a1: 0 = frozen, 3 = extension needed (a normal outcome: see the extension manifest in OUT),
 anything else = error. plan-fits: 0 = tags file written.
@@ -29,6 +30,7 @@ import sys
 import pandas as pd
 
 EXCLUDE_OLD_ARMS = ("sinkhorn",)       # EQUIVALENT_COMMITS.json not_for_arms: their v2 outputs are refused (SI-54)
+META_KEYS = ("experiment", "task", "arm", "cond", "seed")   # score columns that must equal the manifest row's (with lam)
 SCRIPT = {"r1": "freeze_a1_grid.py", "r4a1": "freeze_matched_lambda.py", "r2r3": "decide_a2_a3.py"}
 EXPERIMENTS = {"r1": ["A1"], "r4a1": ["A1"], "r2r3": ["A1", "A2", "A3"]}
 
@@ -62,20 +64,51 @@ def check_checkout(checkout, expect):
     return head
 
 
+def settings_differ(path, row):
+    """Names of the settings a score file records (the scorer's META columns, run_stage.py launch()) that differ from the
+    manifest row it would be used for. lam is compared as a number. A2/A3 tags keep their placeholder name when R4-a1
+    moves a window, so the tag alone cannot show that a score was fitted at the row's penalty strength (SI-57).
+    adv_input and zstd are not recorded in a score file; they are fixed per A2/A3 cell and R4-a1 does not touch them."""
+    S = pd.read_csv(path, dtype=str, keep_default_na=False)
+    missing = [c for c in ("tag", "lam") + META_KEYS if c not in S.columns]
+    if missing or len(S) != 1:
+        raise SystemExit(f"{path}: expected one score row with the recorded settings {missing or ''} (rows: {len(S)}); "
+                         f"cannot show it was fitted at the manifest row's settings")
+    r = S.iloc[0]
+    diff = [c for c in ("tag",) + META_KEYS if r[c] != row[c]]
+    try:
+        same_lam = float(r["lam"]) == float(row["lam"])
+    except ValueError:                                        # a placeholder or non-numeric lambda is never a match
+        same_lam = False
+    return diff + ([] if same_lam else ["lam"])
+
+
 def select_scores(rows, old_dirs, new_dirs):
-    """One score file per manifest row: new dirs for every arm, old dirs for arms not excluded. Returns (files, skipped)."""
-    files, skipped = [], 0
-    for tag, arm in zip(rows.tag, rows.arm):
+    """One score file per manifest row: new dirs for every arm, old dirs for arms not excluded, and only an old file
+    fitted at the row's own settings. Returns (files, skipped, stale): skipped = old Sinkhorn files left out; stale = tags
+    whose old file records other settings (a moved R4-a1 window) and so needs a new file. A new-dir file whose recorded
+    settings differ from the row is an error."""
+    files, skipped, stale = [], 0, []
+    for row in rows.to_dict("records"):
+        tag = row["tag"]
         new = [p for p in (os.path.join(d, "scores", f"{tag}.csv") for d in new_dirs) if os.path.isfile(p)]
         old = [p for p in (os.path.join(d, "scores", f"{tag}.csv") for d in old_dirs) if os.path.isfile(p)]
-        if arm in EXCLUDE_OLD_ARMS:
+        if row["arm"] in EXCLUDE_OLD_ARMS:
             skipped += len(old)
             old = []
+        for p in new:
+            diff = settings_differ(p, row)
+            if diff:
+                raise SystemExit(f"{p}: recorded settings differ from the manifest row of {tag} in {diff}")
+        fitted_here = [p for p in old if not settings_differ(p, row)]
+        if old and not fitted_here:
+            stale.append(tag)
+        old = fitted_here
         found = new + old
         if len(found) > 1:
             raise SystemExit(f"tag {tag} has score files in more than one folder: {found}")
         files += found
-    return files, skipped
+    return files, skipped, stale
 
 
 def merge_failures(rows, old_dirs, new_dirs, path):
@@ -95,7 +128,7 @@ def merge_failures(rows, old_dirs, new_dirs, path):
     if F.tag.duplicated().any():
         raise SystemExit(f"a tag is in the failures of more than one folder: {F.tag[F.tag.duplicated()].tolist()[:5]}")
     F.to_csv(path, index=False)
-    return len(F)
+    return F
 
 
 def run_rule(a):
@@ -103,12 +136,19 @@ def run_rule(a):
     os.makedirs(a.out_dir)                                   # refuses an existing folder: no overwrite
     M = read_manifests(a.manifest)
     rows = M[M.experiment.isin(EXPERIMENTS[a.cmd])]
-    files, skipped = select_scores(rows, a.old_dir, a.new_dir)
+    files, skipped, stale = select_scores(rows, a.old_dir, a.new_dir)
     lst = os.path.join(a.out_dir, "scores_list.txt")
     with open(lst, "w") as f:
         f.write("\n".join(files) + "\n")
     fails = os.path.join(a.out_dir, "failures_merged.csv")
-    n_fail = merge_failures(rows, a.old_dir, a.new_dir, fails)
+    F = merge_failures(rows, a.old_dir, a.new_dir, fails)
+    n_fail = len(F)
+    have = {os.path.basename(p)[:-len(".csv")] for p in files} | set(F.tag)
+    missing = [t for t in rows.tag if t not in have]
+    if missing:                                              # stop here, with the tags, before any rule script runs
+        raise SystemExit(f"{len(missing)} of {len(rows)} rows have no score file and no failure row, e.g. {missing[:5]}; "
+                         f"{len(set(missing) & set(stale))} of them have only a stale old file fitted at other settings "
+                         f"(a moved R4-a1 window): they need a refit in a --new-dir folder")
 
     def o(name):
         return os.path.join(a.out_dir, name)
@@ -129,32 +169,53 @@ def run_rule(a):
     sys.stderr.write(r.stderr)
     outs = {n: sha256(o(n)) for n in sorted(os.listdir(a.out_dir))}
     rec = dict(step=a.cmd, exit_code=r.returncode, commit=head, n_rows=len(rows), n_score_files=len(files),
-               n_old_sinkhorn_skipped=skipped, n_failure_rows=n_fail, manifests={m: sha256(m) for m in a.manifest},
+               n_old_sinkhorn_skipped=skipped, n_old_stale_skipped=len(stale), stale_tags=stale, n_failure_rows=n_fail, manifests={m: sha256(m) for m in a.manifest},
                outputs=outs)
     with open(o("step.json"), "w") as f:
         json.dump(rec, f, indent=1, sort_keys=True)
     print(f"[stage2] {a.cmd} exit {r.returncode}: {len(files)} score files, {skipped} old Sinkhorn files skipped, "
-          f"{n_fail} failure rows; outputs {sorted(outs)}")
+          f"{len(stale)} stale old files skipped, {n_fail} failure rows; outputs {sorted(outs)}")
     return r.returncode
 
 
 def plan_fits(a):
-    """Tags file of the rows that still need a fit: every selected row except non-Sinkhorn rows with a v2 score file."""
+    """Tags file of the rows that still need a fit: every selected row except non-Sinkhorn rows with a v2 score file fitted
+    at the row's own settings (task, arm, cond, seed, lam). An old file at other settings = a moved window: the row is refitted."""
     M = read_manifests(a.manifest)
     rows = M[M.experiment.isin(a.experiments)]
     if a.tasks:
         rows = rows[rows.task.isin(a.tasks)]
     if not len(rows):
         raise SystemExit(f"no manifest rows for {a.experiments} {a.tasks}")
-    reuse = [t for t, arm in zip(rows.tag, rows.arm)
-             if arm not in EXCLUDE_OLD_ARMS and any(os.path.isfile(os.path.join(d, "scores", f"{t}.csv")) for d in a.old_dir)]
+    reuse, moved = [], []
+    for row in rows.to_dict("records"):
+        if row["arm"] in EXCLUDE_OLD_ARMS:
+            continue
+        old = [p for p in (os.path.join(d, "scores", f"{row['tag']}.csv") for d in a.old_dir) if os.path.isfile(p)]
+        ok = [p for p in old if not settings_differ(p, row)]
+        if len(ok) > 1:
+            raise SystemExit(f"tag {row['tag']} has score files in more than one old folder: {ok}")
+        if ok:
+            reuse.append(row["tag"])
+        elif old:                                            # an old file at other settings: the window moved (SI-57)
+            moved.append(row)
+    moved_tags = {r["tag"] for r in moved}
+    cells = sorted({f"{r['task']}|{r['cond']}|{r['arm']}" for r in moved})
+    if a.changes:
+        changed = {c["key"].split(" ")[1] for c in json.load(open(a.changes))["changed"]
+                   if len(c["key"].split(" ")) == 3 and c["key"].startswith("R4a1 ") and c["key"].endswith((" lo", " matched", " hi"))}
+        unexplained = [c for c in cells if c not in changed]
+        if unexplained:
+            raise SystemExit(f"moved cells {unexplained} are not explained by the decision changes in {a.changes}: "
+                             f"their old scores differ from the manifest for another reason; stop and investigate")
     todo = rows[~rows.tag.isin(reuse)]
     with open(a.out_tags, "w") as f:
         f.write(f"# rows of {a.experiments} that need a fit: {len(todo)} of {len(rows)} "
-                f"({len(reuse)} reuse a v2 non-Sinkhorn score)\n")
+                f"({len(reuse)} reuse a v2 non-Sinkhorn score, {len(moved_tags)} moved: old score fitted at other settings, "
+                f"cells {cells})\n")
         f.write("\n".join(todo.tag) + ("\n" if len(todo) else ""))
-    print(f"[plan-fits] {len(todo)} of {len(rows)} rows need a fit, {len(reuse)} reused; "
-          f"to fit by arm {todo.groupby(['experiment', 'arm']).size().to_dict()}; tags sha256 {sha256(a.out_tags)}")
+    print(f"[plan-fits] {len(todo)} of {len(rows)} rows need a fit, {len(reuse)} reused, {len(moved_tags)} moved "
+          f"(cells {cells}); to fit by arm {todo.groupby(['experiment', 'arm']).size().to_dict()}; tags sha256 {sha256(a.out_tags)}")
     return 0
 
 
@@ -200,6 +261,7 @@ def main(argv=None):
     p.add_argument("--tasks", nargs="+", default=None)
     p.add_argument("--old-dir", action="append", default=[])
     p.add_argument("--out-tags", required=True)
+    p.add_argument("--changes", default=None, help="diff-records output: every moved cell must be a cell whose R4-a1 window changed")
     p = sub.add_parser("diff-records")
     p.add_argument("--old", required=True)
     p.add_argument("--new", required=True)
