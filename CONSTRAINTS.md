@@ -653,3 +653,45 @@
 - added: 2026-10-16
 - keywords: *
 - notebook: NB-20261016-26
+
+## SI-93 · active · method
+- rule: The five mechanism follow-ups (X3 composition dose-response, X6 divergence vs regularisation, X7 reference choice, X8 batch count, X12 architecture robustness) also run with the unconditioned decoder (the adversary alone removes batch effects, the original paper's setting), in addition to the batch-conditioned decoder; X15 (KL warm-up check) is unchanged
+- source: "Add unconditioned to all five" (user, ask_user answer to "Should the follow-ups (X3 composition dose-response, X6 divergence vs regularisation, X7 reference choice, X8 batch count, X12 architecture robustness) also run with the unconditioned decoder (the adversary alone removes batch effects; the original paper's setting)?", 2026-10-17)
+- added: 2026-10-17
+- keywords: decoder, unconditioned, X3, X6, X7, X8, X12, follow-up, manifest
+- notebook: NB-20261017-01
+
+## SI-94 · active · method
+- rule: X8 (batch count) uses nested batch sets (the 2 batches sit inside the 4, inside the 8, inside the 16) and every batch keeps the same number of cells (N/16 of the task's X8 cell budget) at every batch count, so total cells and training steps grow with the batch count; achieved batch score and cell counts are reported as covariates
+- source: "Nested batches, fixed cells per batch" (user, ask_user answer to "Which batches should each batch count (2, 4, 8, 16) use in X8 (batch count)?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X8, batch count, nested, cells per batch, subset
+- notebook: NB-20261017-02
+
+## SI-95 · active · method
+- rule: X7 (reference choice) gets the low/matched/high penalty-strength window (lambda lo/matched/hi, as X3, X6, X12 and X15 have) and is read at matched batch removal; X8 stays a fixed-strength comparison with the achieved batch score as a covariate
+- source: "Add strengths to X7 only (Recommended)" (user, ask_user answer to "Should X7 (reference choice) and X8 (batch count) get weaker and stronger penalty strengths so biology can be read at the same batch-removal target?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, X8, lambda, window, matched, batch removal
+- notebook: NB-20261017-03
+
+## SI-96 · active · method
+- rule: X7 (reference choice) adds a depleted-reference arm: on pancreas and sim1 the reference batch has cell types removed at 2 levels and is refilled to the same size, reusing the X3 depletion-and-refill code, to test the dense-reference claim causally
+- source: "Add a depleted-reference arm (Recommended)" (user, ask_user answer to "Should X7 (reference choice) add an arm that removes cell types from one reference batch (keeping size and technology) to test the dense-reference claim directly?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, depleted, reference, coverage, refill, X3
+- notebook: NB-20261017-04
+
+## SI-97 · active · method
+- rule: X12 (architecture robustness) uses 16 combinations: a 2^(5-1) design with generator E=ABCD, resolution V (x12_runs=16, already supported by build_paper_manifest.py; one test needed)
+- source: "16 combinations (Recommended)" (user, ask_user answer to "Should X12 (architecture robustness) use 16 combinations instead of 8?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X12, combinations, resolution, x12_runs, architecture
+- notebook: NB-20261017-05
+
+## SI-98 · active · method
+- rule: X6 (divergence vs regularisation) adds one new arm: a spectral-norm Jensen-Shannon discriminator trained with the critic's Adam settings, inheriting the discriminator penalty-strength window
+- source: "Add discriminator with critic's optimiser (Recommended)" (user, ask_user answer to "Should X6 (divergence vs regularisation) add a discriminator trained with the critic's optimiser settings?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X6, optimiser, discriminator, spectral, critic, arm
+- notebook: NB-20261017-06
