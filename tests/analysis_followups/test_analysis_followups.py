@@ -86,8 +86,8 @@ def counts_table():
             for lv, k in X7_DEPLETED.items():
                 C += [dict(task=t, draw=f"x7_{lv}", batch="b0", cell_type=f"ct{j}", n=(20 + 5 * j) if j < k else 0) for j in range(N_TYPES)]
     for t, ch, V in itertools.product(X8_TASKS, (0, 1), F.X8_V):     # nested chains, 100 cells per batch (SI-94)
-        C += [dict(task=t, draw=f"x8_V{V}_s{ch}", batch=f"b{ch}_{b}", cell_type=f"ct{(b + j) % 4}", n=25)
-              for b in range(V) for j in range(4)]
+        C += [dict(task=t, draw=f"x8_V{V}_s{ch}", batch=f"b{ch}_{b}", cell_type=f"ct{j}",     # chain 1: composition moves with V
+                   n=25 if ch == 0 else (40 if j == (b // 2) % 4 else 20)) for b in range(V) for j in range(4)]
     return pd.DataFrame(C, columns=["task", "draw", "batch", "cell_type", "n"])
 
 
@@ -234,6 +234,10 @@ def test_planted_effects(records):  # test-reason: each follow-up's endpoint rec
         assert x8["slopes"][f"{t}|{c}|ref_strat_default|B"]["d"] == pytest.approx(0.02, abs=0.002)
     assert x8["cells"]["lung|1"]["covariates"]["0|16"] == dict(total_cells=1600, ceiling=1.0, cells_per_batch_per_minibatch=8.0,
                                                                tv_from_V2=0.0)
+    # V=2: 2 batches of type ct0-heavy, so ct0 = 0.4 and the rest 0.2; V=16: each type heavy in 4 of 16 batches, all 0.25
+    assert x8["cells"]["lung|1"]["covariates"]["1|16"]["tv_from_V2"] == pytest.approx(0.15)
+    adj = x8["cells"]["lung|1"]["exploratory_adjusted"]   # no planted bio gap; the batch gap falls 0.02 per doubling, so
+    assert adj["log2V"] - 0.02 * adj["batch_gap"] == pytest.approx(0.0, abs=0.003)   # only this combination is pinned
     x12 = rec["X12"]
     assert x12["effects"]["atac_small|1|matched_hi|A"]["reason"] == "run_without_paired_seeds"
     assert x12["pooled"]["A|1|matched_hi"]["not_evaluable"] == {"atac_small": "run_without_paired_seeds"}

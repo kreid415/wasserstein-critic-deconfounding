@@ -444,16 +444,18 @@ def x8(out, counts):
         for name, (a, b) in named.items():
             for v in ("iLISI_cn", "B", "C"):
                 slopes[(t, c, f"{name}|{v}")] = loso(gap(a, b, v))
-        # exploratory (SI-95): bio gap on log2 V with the achieved batch-score gap as covariate, point means, no interval
+        # exploratory (SI-95, I078): bio gap on log2 V with the achieved batch-score gap and the composition distance from
+        # the V = 2 draw as covariates; point means, no interval; None when the covariates are collinear
         pts = [(math.log2(V), mean(vals[(ch, V) + R]["B"], FU_SEEDS) - mean(vals[(ch, V) + D]["B"], FU_SEEDS),
-                mean(vals[(ch, V) + R]["C"], FU_SEEDS) - mean(vals[(ch, V) + D]["C"], FU_SEEDS)) for ch in chains for V in X8_V]
-        adj = ols([[1.0, x, gb] for x, gb, _ in pts], [gc for _, _, gc in pts])[0]
+                cov[(ch, V)]["tv_from_V2"], mean(vals[(ch, V) + R]["C"], FU_SEEDS) - mean(vals[(ch, V) + D]["C"], FU_SEEDS))
+               for ch in chains for V in X8_V]
+        adj, adj_se = ols([[1.0, x, gb, tv] for x, gb, tv, _ in pts], [gc for *_, gc in pts])
         zero = {(ch, V): vals[(ch, V, "none", "default")]["C"] for ch in chains for V in X8_V}
         coll = {f"{a}|{smp}": collapse_rate([x for ch in chains for V in X8_V for x in runs_vs_zero(
                     r[(r.chain == ch) & (r.V == V) & (r.arm == a) & (r.sampler == smp)], zero[(ch, V)])])
                 for (a, smp) in {(a, s) for _, _, a, s in vals} if a != "none"}
         cells[f"{t}|{c}"] = dict(covariates={f"{ch}|{V}": v for (ch, V), v in cov.items()}, identical_chains_at_V=identical,
-                                 exploratory_adjusted=dict(log2V=float(adj[1]), batch_gap=float(adj[2])), collapse=coll,
+                                 exploratory_adjusted=None if adj_se is None else dict(log2V=float(adj[1]), batch_gap=float(adj[2]), tv=float(adj[3])), collapse=coll,
                                  B_minus_none={f"{ch}|{V}|{a}|{s}": mean(vals[(ch, V, a, s)]["B"], FU_SEEDS) - mean(vals[(ch, V, "none", "default")]["B"], FU_SEEDS)
                                                for (ch, V, a, s) in vals if a != "none"})
     for c in (0, 1):
