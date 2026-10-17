@@ -6,8 +6,8 @@ and optimisers are built exactly as in a fit; no minibatch is run). Nothing here
 
 | item | value |
 |---|---|
-| OLD | clean checkout of tag `prereg-tier12-v3`, commit 10a1ca5 (`git_dirty` False in all 62 saved configs) |
-| NEW | clean checkout of commit 9de6426 of branch `followup-build` (`git_dirty` False). The later commits of the branch change only files under `experiments/` and `tests/`: nothing under `scripts/` or `src/` differs between 9de6426 and the branch head |
+| OLD | clean checkout of tag `prereg-tier12-v3`, commit 10a1ca5 (`git_dirty` False in all 57 saved configs) |
+| NEW | clean checkout of commit 9de6426 of branch `followup-build` (`git_dirty` False in all 57 saved configs; the 5 control configs of OLD also show 10a1ca5, `git_dirty` False). The later commits of the branch change only files under `experiments/` and `tests/`: nothing under `scripts/` or `src/` differs between 9de6426 and the branch head |
 | libraries | scvi-tools 1.4.2, torch 2.13.0+cu130, CPU (environment `scvi-api`), identical in every config |
 | rows | 57 of 57 pass every check: exit code 0 at both commits; every saved array equal (seeded initial latent, obs names, batch, celltype); saved config equal apart from git_sha, git_dirty, fit_seconds (so the row, reference batch, cell counts, resolved plan: every optimiser parameter group, gradient_penalty, lambda_gp, spectral_norm, adversary settings); loss history equal; model weights equal; 0 optimiser steps at both commits (`plan_identity.csv`) |
 | determinism control | OLD run twice on the first 5 rows: 5 of 5 pass the same checks (`plan_identity_control.csv`) |
