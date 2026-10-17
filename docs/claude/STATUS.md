@@ -76,18 +76,24 @@ JHPCE X1 (cluster part, 1,800 fits), follow-ups X3/X6/X7/X8/X12/X15, the X1 anal
    CR2-01; `cluster/jhpce/gate_gpu.sh`). Every cluster submission needs the user's explicit go (project GO rule, 2026-10-03):
    show what runs, where, how long. Machine: JHPCE (partition gpu, account jhpce, one L40S per job); data and harvests stay on
    its scratch, latents are downloaded and scored locally with the tagged scorer (wcd-kbet environment, R with kBET).
-10. R4-x1 (`freeze_matched_lambda.py --stage x1`) after X1 is scored; then the follow-ups X3, X6, X7, X8, X12 (seeds 10 to 12)
+10. Implement the 2026-10-17 follow-up design decisions (SI-93 to SI-98; NB-20261017-01 to NB-20261017-08; brief `docs/followup_design_decisions_20261017.md` on `final-review-fixes`). Why: these changes alter which cells the follow-up rows draw on, and R4-x1 (the rule that sets every follow-up's penalty strength from the X1 scores) must not run before they are committed. What to do, before R4-x1 and before anyone examines an X1 result (SI-68; under SI-78 a script that uses X1 scores counts as examining):
+    (a) Rebuild the follow-up manifest and code: stratified nested X8 draw with N/16 cells per batch (SI-94); X7 low/matched/high penalty-strength window (SI-95) and X7 depleted-reference arm on pancreas and sim1 at 2 depletion levels (SI-96); X12 16-run test for `x12_runs=16` (SI-97); X6 spectral-norm discriminator arm with the critic's optimiser (SI-98); the I036 gradient-penalty fix (no gradient penalty on spectral-norm critics); unconditioned-decoder rows for X3, X6, X7, X8 and X12 (SI-93).
+    (b) Commit them with a PREREG section 9 amendment and a new code tag after `prereg-tier12-v3`. `docs/PREREG.md` and `docs/ANALYSIS_SPEC.md` are frozen by the tag: the amendment is a new section, not an edit of frozen text.
+    (c) Run an identity check that X1 fit paths give results identical to the v3 tag under the new tag (as `EQUIVALENT_COMMITS.json` did for SI-54).
+    (d) Write and lock the follow-up analysis specification (P2 dose-response, P3, P4, R3 factor effects, X15) before R4-x1.
+    (e) Re-estimate the cost: the cost model has no decoder term, so the +2,052 fits (about +570 GPU-hours) for unconditioned rows is provisional, and the depleted-reference arm is not yet specified.
+    Nothing in this step blocks the Sinkhorn redo (step 4) or the X1 runs (steps 7 to 9). Machine: edit anywhere; the identity check needs the local GPU machine. An experiment preflight GO is still needed for each follow-up wave.
+11. R4-x1 (`freeze_matched_lambda.py --stage x1`) after X1 is scored; then the follow-ups X3, X6, X7, X8, X12 (seeds 10 to 12)
     and X15. Their analyses are locked later, while X1 runs and before anyone examines an X1 result (SI-68;
-    `docs/ANALYSIS_SPEC.md` section 0). X7 and X8 were rated NO-GO as designed (I015, I077, I078, D-06, D-07): their design
-    fixes are still to be written. The reporting script for no-pair step counts and unreached cells is written after the runs
+    `docs/ANALYSIS_SPEC.md` section 0). X7 and X8 were rated NO-GO as designed (I015, I077, I078, D-06, D-07); step 10 implements the design fixes the user chose on 2026-10-17. The reporting script for no-pair step counts and unreached cells is written after the runs
     (SI-81 c).
-11. X1 analysis, once, with `scripts/analysis_x1.py` (usage in its docstring; inputs: X1 manifest, extension manifests and score
+12. X1 analysis, once, with `scripts/analysis_x1.py` (usage in its docstring; inputs: X1 manifest, extension manifests and score
     directories, one failures table covering every row, `docs/prereg/r1_record.json`, the R4-x1 record). Runs only after all X1
     rows are final; refuses to overwrite a record. It is CPU-only, so it can run on any machine that holds the score tables, but
     the run is the first examination of X1 scores (SI-78): do it only on the user's instruction. Tests, as last run (NB-20261016-31, fresh clone at 8f223c8,
     env scvi-api, `WCD_SRC=src`): `python scripts/check_tests.py --base 7fa19ea --src scripts cluster -- tests/analysis
     tests/prereg tests/scvi tests/stage tests/jhpce tests/test_legacy_retired.py` (exit 0; 445 passed, 18 skipped; 1,192 s).
-12. Paper (branch `paper`, section 6): fill Results from the analysis record only after step 11; open paper decisions in section 3.
+13. Paper (branch `paper`, section 6): fill Results from the analysis record only after step 12; open paper decisions in section 3.
 
 ## 3. Pending user decisions and deferred ones
 
@@ -101,7 +107,7 @@ Needed from the user to proceed (matter for the experiment):
 2. Go to launch the Sinkhorn redo once its pre-launch check reports GO (a local run; report it; the user wanted launches soon).
 3. Case-by-case decisions that arise during runs, by registered rule: each Sinkhorn iteration-cap hit (SI-81 b) and each scib
    NMI-0 case (SI-65, SI-81 a) stop the stage until the user decides whether it counts as a failed fit.
-4. Which paper-affecting design fixes X7/X8 need before their analyses are locked (SI-68), when X1 is running.
+4. (Decided 2026-10-17, no longer pending.) The six follow-up design questions were answered: ledger entries SI-93 to SI-98 (`CONSTRAINTS.md`), notebook entries NB-20261017-01 to NB-20261017-06; the defaults list is NB-20261017-07 and what they require is NB-20261017-08. The decision brief is `docs/followup_design_decisions_20261017.md` on branch `final-review-fixes`.
 
 Deferred (do not raise before the experiments are launched):
 - Paper: journal, title, authors, figures; whether the contribution is worded as a "controlled decomposition"; whether research
