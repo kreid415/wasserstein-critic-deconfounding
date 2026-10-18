@@ -10,6 +10,26 @@ Blinding (SI-78, SI-79): this file holds counts and status only. It contains no 
 8 datasets x 2 decoders x 5 seeds) or X13 (standard-method baselines). Do not open score files, latents, status records or
 `attempts/*.jsonl` of those stages; an analysis script that reads a score counts as examining it.
 
+## 0. Scope update, 2026-10-17 (user decision SI-103, NB-20261018-01): follow-ups pruned
+
+The paper goes to a lower-impact journal, so the follow-up experiments are pruned. **This section overrides every mention of
+X3, X7, X8, X12 and X15 as follow-ups below, and the "SI-93 to SI-98" implementation list in step 10.** PREREG section 9 has the
+dated amendment (entry of 2026-10-17); the work is on local branches that are not pushed: `prune-amendment` (this file, PREREG,
+ledger, notebook), `prune-manifest`, `prune-spec` and `prune-paper`. The user's confirmation is pending at the diff review.
+- Unchanged: X1 (all 8 arms, both decoders, all locked X1 and X13 analyses), X13, pilots A1 to A3, the Sinkhorn redo (stage 2).
+- Kept: follow-up X6 (divergence vs regularisation vs adversary steps).
+- Kept, exploratory, no new fits: R0 (premise check) from the per-epoch histories in every X1 latent file (`adv_grad_norm`,
+  `adv_acc` for discriminator arms) plus the lambda = 0 latents; X1 fit logging is not changed. X10 minimal = cross-batch
+  label-transfer F1 per cell type at the matched batch score b*, on X1 latents.
+- Dropped, never to be fitted: X3, X7, X8, X12, X15. Paper sections R2 (batch count, P3) and R4 (reference selection, P4) are
+  removed; the claims "critic scales poorly with batch count" and "critic depends on a dense reference" are removed, not tested;
+  R3 factor effects are X6 only; X12 and X15 topics become scope limitations.
+- Manifest v5 (branch `prune-manifest`): `manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv`, 5,280 rows (X1 3,000; A1 1,098;
+  X6 486; X13 408; A3 180; A2 108); regenerate with the command in `experiments/prune_manifest_20261017/README.md`. Step 10 now means:
+  merge v5 and the X6-only follow-up specification (`prune-spec`), not the full v4 build; R4-x1 resolves X6 only.
+- Timing: made while the X1 analysis is still blinded; written as a decision under the blinding rule in force, not as a fact that
+  no X1 result was examined.
+
 ## 1. State in one paragraph
 
 The pre-registration is frozen again as version 3: tag `prereg-tier12-v3` (annotated, tag object ce056088ee) points to
@@ -27,7 +47,7 @@ JHPCE X1 (cluster part, 1,800 fits), follow-ups X3/X6/X7/X8/X12/X15, the X1 anal
 ## 2. Next steps, in order
 
 1. Orient (any machine, minutes). `git fetch --all --tags`; confirm `prereg-tier12-v3` -> 10a1ca5; read notebook pages from
-   2026-10-16 onward; read `CONSTRAINTS.md` (active rules SI-01..SI-98). The notebook and ledger helpers are ported: `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, `nb_index`,
+   2026-10-16 onward; read `CONSTRAINTS.md` (active rules SI-01..SI-103). The notebook and ledger helpers are ported: `.claude/skills/lab-notebook/kernel.py` (`nb_entry`, `nb_index`,
    `nb_check`; `nb_check('.')` verified all 249 entries and their hash chain at 1ad44cb) and
    `.claude/skills/standing-instructions/kernel.py` (`si_add`, `si_retire`, `si_link`). Append entries only through them;
    never edit old entries.

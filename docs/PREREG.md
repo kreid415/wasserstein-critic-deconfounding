@@ -659,3 +659,39 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
 | 17 | What should we do about small tidiness warnings in the code? | Leave them: no code change for the 28 ruff warnings of 08f1e3c, 23 of them outside the identity-proof code; the count goes in the note of question 16. | NB-20261015-12 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
 | 18 | Should we delete 11 old review copies of the code and two stray files? | Delete after a check: each of the 11 old review worktrees is checked for uncommitted work first, and any that has some is reported and kept; the folders and the two stray files go to the Trash through the approval prompt. | NB-20261015-13 (notebook entry only) | notebook/2026-10-15.md; housekeeping, no rule of this file |
 | 19 | Do you approve the remaining wording changes from earlier rounds? | Approved as shown in the diff: the wording of I091 (R1 depends on the trajectory score through its noise estimate, SI-53), D-01 (PAPER_PLAN's P1 comparator), D-02 (the power claim) and the format of the amendment table at the top of this section (DOC-03). | NB-20261015-14 (notebook entry only) | this file, entries of 2026-10-13 on R1 and the trajectory score and on PAPER_PLAN, and the amendment table; docs/PAPER_PLAN.md sections 3.2 and 5 |
+
+- **2026-10-17, the follow-up experiments are pruned for the target journal: X3, X7, X8, X12 and X15 are dropped, X6 is kept, and
+  R0 and X10 are reduced to analyses with no new fits (user decision SI-103, NB-20261018-01).**
+  Status: decided by the user on 2026-10-17 (final); written into the ledger and the notebook on 2026-10-18. Done on local
+  branches that are not pushed: this entry, the ledger entry and the notebook entry (branch prune-amendment), manifest v5
+  (prune-manifest), the trimmed follow-up specification (prune-spec) and the paper outline (prune-paper). Planned: the user's
+  review of these four branches, then their merge. This entry changes no rule R1 to R4, no X1 or X13 fit and no X1 or X13
+  analysis. It does not edit the frozen text of this file or of docs/ANALYSIS_SPEC.md; where an earlier entry or table names
+  X3, X7, X8, X12 or X15 as follow-ups, this entry applies.
+  What the decision says, in plain words:
+  - Unchanged: X1 (all eight arms, both decoders, every locked X1 and X13 analysis), X13 (the standard-method baselines),
+    the pilots A1 to A3, and the Sinkhorn redo (stage 2, running).
+  - Kept: follow-up X6 (divergence versus regularisation versus the number of adversary steps), as designed in SI-93 and
+    SI-98 (both decoders; the added spectral-norm discriminator arm).
+  - Dropped: X3 (composition dose-response), X7 (reference choice), X8 (batch count), X12 (architecture factorial) and X15
+    (KL warm-up check). No fit of these experiments is made. Manifest v5 is v4 without their rows: 5,280 rows (X1 3,000; A1
+    1,098; X6 486; X13 408; A3 180; A2 108); its rows are byte-identical to v4.
+  - Consequences for the research questions: the questions on batch count (endpoint P3) and on reference selection
+    (endpoint P4) are removed from the paper, and the original claims that the critic scales poorly with the number of
+    batches and that it depends on a dense reference are removed, not tested. Factor effects of R3 come from X6 only (the
+    X12, X15 and A3 factor effects are dropped). Architecture and KL warm-up are not varied, and reference choice and
+    batch count are not tested; the paper states these as scope limitations.
+  - R0 (premise check), exploratory, no new fits: analysed from the per-epoch training histories that every X1 latent file
+    already holds (adv_grad_norm, the adversary's gradient norm, and adv_acc, the discriminator's accuracy at telling
+    batches apart, for the discriminator arms) together with the lambda = 0 latents (plain scVI). X1 fit logging is not
+    changed.
+  - X10 minimal, exploratory, no new fits: cross-batch label transfer (cell-type labels learned on some batches and
+    predicted on the others), scored as the F1 score per cell type at the matched batch score b*, on X1 latents. It is the
+    minimal form of X10 (downstream biology at matched batch removal, PAPER_PLAN section 4); the classifier and the batch
+    split belong to the analysis script, not to this decision.
+  Reasons the user recorded: scope for the target journal; X7 and X8 cannot reach a verdict with this design (the
+  follow-up specification, section 8, finds 1 and 2 real datasets); X12 and X15 are descriptive only; X3 was dropped by the
+  user's choice, since over-correction is measured in X1 by P1, P2 and the strength curves.
+  Timing: the decision was made while the X1 analysis is still blinded (X1 is not relaunched, and stage 2 is running). It
+  was made under the blinding rule in force (SI-68, SI-78); the user's confirmation is pending at the diff review. This
+  entry does not state as a fact that no X1 result was examined.

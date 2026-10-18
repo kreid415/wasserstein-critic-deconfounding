@@ -723,3 +723,10 @@
 - added: 2026-10-17
 - keywords: X7, P4, confirmatory, depleted, natural, association, primary
 - notebook: NB-20261017-13
+
+## SI-103 · active · method
+- rule: The paper goes to a lower-impact journal, so the follow-up experiments are pruned: X3, X7, X8, X12 and X15 are dropped (X6 kept; R0 and X10 reduced to analyses with no new fits); X1, X13, pilots A1 to A3 and the Sinkhorn redo are unchanged; the claims on batch-count scaling and on a dense reference are removed, not tested
+- source: "The paper goes to a lower-impact journal, so the follow-up experiments are pruned. The core is unchanged (user decision, 2026-10-17, final)" (user, 2026-10-17); NB-20261018-01
+- added: 2026-10-17
+- keywords: X3, X6, X7, X8, X12, X15, R0, X10, pruned, dropped, follow-up, manifest v5, P3, P4, journal
+- notebook: NB-20261018-01
