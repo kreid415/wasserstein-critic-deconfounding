@@ -52,6 +52,8 @@ user's decisions of 2026-10-17 (CONSTRAINTS.md SI-93..SI-98) to X3, X6, X7, X8, 
   SI-96  X7: depleted-reference arm on pancreas and sim1 (X7_DEPLETED);
   SI-98  X6: arm discriminator_sn_critic_opt (spectral-norm JS discriminator, critic Adam settings), lo / matched / hi.
 SI-97 (X12 as a 16-run 2^(5-1) design) is the existing flag --x12-runs 16.
+--exclude-experiments X3 X7 X8 X12 X15 (with --followup-design v4) gives manifest v5 of the 2026-10-17 pruning amendment: the
+rows of the other experiments are byte-identical to v4 and the header names the excluded experiments.
 
 Usage: python scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 \\
            --bary-iter 10 --out scripts/paper_manifest.tsv
@@ -121,6 +123,7 @@ X15_KL_WARMUP = ["stock", "complete"]
 X8_TOTAL = {"immune_hum_mou": 16000, "lung": 6000, "sim2": 3000}
 X8_DRAW = "nested_chain_v1"   # = fit_paper_config.X8_DRAW (SI-94); design v4 only: cells per batch = X8_TOTAL // 16 at every V
 FOLLOWUP_DESIGNS = ("v3", "v4")
+PRUNABLE = ("X3", "X6", "X7", "X8", "X12", "X15")   # follow-ups that --exclude-experiments may remove
 # X7 depleted-reference arm (SI-96), design v4. Rule fixed in advance (user answer 2026-10-17: rarest types first): the
 # task's reference batch is the dose-0 automatic choice (select_reference_batch; as X3_TARGETS). Level 'two_thirds' /
 # 'one_third' keeps round(c * 2/3) / round(c * 1/3) of the reference's c cell types (c = types present in it) by removing,
@@ -337,6 +340,15 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8, follow
     return R
 
 
+def drop_experiments(R, names):
+    """Rows without the named follow-up experiments (--exclude-experiments; manifest v5 of the 2026-10-17 pruning amendment).
+    X1, X13 and the pilots are never dropped here; the other rows are untouched (tags depend on the row only)."""
+    bad = sorted(set(names) - set(PRUNABLE))
+    if bad:
+        raise ValueError(f"cannot exclude {bad}: only the follow-ups {list(PRUNABLE)} can be excluded")
+    return [r for r in R if r["experiment"] not in names]
+
+
 def finalize(R):
     """Tag rows; mark rows whose settings equal an X1 row (they reuse that fit). A 'matched*' lambda
     is resolved to an X1 grid value at freeze time, so it is compared with lambda as a wildcard."""
@@ -367,6 +379,8 @@ def main():
     ap.add_argument("--x12-runs", type=int, choices=[8, 16], default=8, help="X12 fractional factorial size (plan: 8)")
     ap.add_argument("--followup-design", choices=FOLLOWUP_DESIGNS, default="v3",
                     help="'v3' = the manifest of record; 'v4' = the 2026-10-17 follow-up decisions SI-93..SI-96, SI-98 (docstring)")
+    ap.add_argument("--exclude-experiments", nargs="+", default=[], metavar="EXP",
+                    help="drop these follow-ups from the manifest (2026-10-17 pruning amendment: X3 X7 X8 X12 X15 = v5)")
     ap.add_argument("--bary-iter", type=int, default=None,
                     help="barycenter: cold fixed-point iterations per step, init = minibatch cells (default 10)")
     ap.add_argument("--bary-warm-iter", type=int, default=None,
@@ -374,11 +388,13 @@ def main():
     a = ap.parse_args()
     global BARY_WARM_ITER, BARY_ITER
     BARY_WARM_ITER, BARY_ITER = a.bary_warm_iter, a.bary_iter
-    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs, a.followup_design))
+    R = finalize(drop_experiments(
+        build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs, a.followup_design), a.exclude_experiments))
     fit = [r for r in R if not r["reuses_x1"]]
     with open(a.out, "w") as f:
         f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}, uncond_seeds={a.uncond_seeds}, "
                 f"x12_runs={a.x12_runs}, " + (f"followup_design={a.followup_design}, " if a.followup_design != "v3" else "") +
+                (f"excluded_experiments={','.join(a.exclude_experiments)}, " if a.exclude_experiments else "") +
                 f"bary_iter={a.bary_iter or 10}, bary_warm_iter={a.bary_warm_iter}; "
                 f"lambda grid {LAMBDA_GRID}; 'g*' = per-family "
                 f"grid from A1; 'matched*' lambdas are "
