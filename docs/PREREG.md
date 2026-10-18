@@ -689,7 +689,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     predicted on the others), scored as the F1 score per cell type at the matched batch score b*, on X1 latents. It is the
     minimal form of X10 (downstream biology at matched batch removal, PAPER_PLAN section 4); the classifier and the batch
     split belong to the analysis script, not to this decision.
-  Reasons the user recorded: scope for the target journal; X7 and X8 cannot reach a verdict with this design (the
+  Reasons: scope for the target journal (the user's statement); the rest are from the agent's proposal, which the user accepted: X7 and X8 cannot reach a verdict with this design (the
   follow-up specification, section 8, finds 1 and 2 real datasets); X12 and X15 are descriptive only; X3 was dropped by the
   user's choice, since over-correction is measured in X1 by P1, P2 and the strength curves.
   Timing: the decision was made while the X1 analysis is still blinded (X1 is not relaunched, and stage 2 is running). It
