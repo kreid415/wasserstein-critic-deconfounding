@@ -126,7 +126,7 @@ Declarations follow ANALYSIS_SPEC section 5: a direction if P(Delta > r) >= 0.95
 equivalent if P(|Delta| <= r) >= 0.95, otherwise inconclusive; each on its own posterior. The confirmatory results are 2:
 X6 R3-divergence (2 decoders). The report states that 2 were judged (before the pruning of SI-103 the draft had 12, 10 of them
 in the dropped experiments). Frequentist companion: the exact two-sided Wilcoxon signed-rank test over the
-pooled datasets' d, with Holm's adjustment over the 2 (as ANALYSIS_SPEC section 5 and PREREG "Holm over P1-P4"); a result with no
+pooled datasets' d, with Holm's adjustment over the 2 (as ANALYSIS_SPEC section 5, whose X1 Holm family is the frozen six primary results: P1, the trade-off area and P2, each per decoder; SI-80, `analysis_x1.py`:523-527); a result with no
 p-value (no evaluable real dataset) enters the adjustment with p = 1, so the family size stays m = 2 (recorded as `holm_m`). It cannot reject:
 the smallest attainable p is 2/2^n = 0.25 with 3 datasets, 0.5 with 2 and 1 with 1. It is reported because it is registered,
 and used for no conclusion. Secondary results are declared with the same rule and are not in the Holm family.
