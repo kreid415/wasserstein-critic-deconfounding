@@ -1,8 +1,6 @@
 # PREFLIGHT: sinkhorn_redo_stage2
 
-**Verdict: NO-GO**  (checked 2026-10-17T16:37:50Z; plan_sha a9fe8a0bde249a32)
-
-Blocking, not satisfied: PF-17, PF-19, PF-23
+**Verdict: GO**  (checked 2026-10-19T16:29:25Z; plan_sha a9fe8a0bde249a32)
 
 ## Plan
 
@@ -22,7 +20,7 @@ Blocking, not satisfied: PF-17, PF-19, PF-23
 | PF-01 | blocking | Pre-declaration | pass | [auto:pf_check_plan] plan complete (sha a9fe8a0bde249a32) |
 | PF-02 | major | Multiple comparisons | n/a | one launch decision per step; no hypothesis test or ranking is produced by stage 2 (the rules' statistics are registered and unchanged at the tag) |
 | PF-03 | blocking | Unit of analysis | n/a | no probe, classifier or held-out split: unsupervised scVI fits of all cells per task |
-| PF-04 | blocking | ID integrity | pass | tests/prereg/test_stage2_rules.py: naive two-folder call is refused ('scored more than once'); wrapper selects one file per tag, refuses a tag in two folders (SystemExit) and duplicate manifest tags; 3 mutants of stage2_rules.py all killed (a pre-fix Sinkhorn file kept, out dir reuse, Sinkhorn re... |
+| PF-04 | blocking | ID integrity | pass | Re-checked 2026-10-19 at final-review-fixes f33ef95 (review finding F3): tests/prereg/test_stage2_rules.py + tests/stage/test_link_v2_outputs.py + tests/jhpce/test_x1_command.py 16 passed; independent acceptance (artifact accept.py 6f9d4015) fails on 874e482, passes on the fix; check_tests.py vs ... |
 | PF-05 | major | Nesting of factors | n/a | no factors are compared in stage 2; factor nesting belongs to the later analyses |
 | PF-06 | blocking | Selection bias | pass | penalty-strength selection is the registered R1/R4-a1 rule on A1 pilot seeds 100-102; prereg_rules.check_seed_separation (called by all three rule scripts) refuses overlap with X1 seeds 0-4 and follow-up seeds 10-12; tests/prereg/test_rules.py covers it |
 | PF-07 | blocking | Matched comparison | n/a | no arm comparison is made by the wrapper or launchers; the rules compare arms by registered code that is byte-identical at the tag (git diff c3fd92d 10a1ca5 empty over fit/score code) |
@@ -35,13 +33,13 @@ Blocking, not satisfied: PF-17, PF-19, PF-23
 | PF-14 | major | Test vs control | n/a | no new design, probe or filter is proposed; rows are those the registered rules resolve |
 | PF-15 | major | Attribution | n/a | no mechanism is attributed to any method in stage 2 |
 | PF-16 | blocking | Timing confounds | pass | cost figures are labelled provisional with their basis and confound: pre-fix production fit_seconds (tier12_v2 ledgers, 8 concurrent lanes) x a corrected-code factor of 1.45 (stage-1 preflight per-task predictions) to 2.8 (NB-20261013-11 hardest regime, run alone); no end-to-end corrected-code ti... |
-| PF-17 | blocking | Cost estimate | UNANSWERED |  |
+| PF-17 | blocking | Cost estimate | pass | pf_estimate_cost on stage-1 measured wall: 180 Sinkhorn A1 fits+scores in 94,651 s (D/tier12_v3/A1_sinkhorn/ledger/...a19e4683640a.csv, fit_started min to score_ended max) = 525.8 s per row at the same launcher settings (RTX 3080, 8 lanes, 1 thread, 3 scorers, 10a1ca5). Step 2 (r1ext1) = 18 rows:... |
 | PF-18 | major | Co-scheduling | pass | same 8 GPU lanes + 3 scorers (during fits) as stage 1 and the v2 A2A3 launcher; run_stage2_fits.sh refuses when any run_stage.py is alive (pattern run_stage[.]py, shown not to self-match) or GPU memory >= 500 MiB; steps run one at a time; refusal paths executed read-only on the real D without sid... |
-| PF-19 | blocking | Launch manifest | UNANSWERED |  |
-| PF-20 | major | Count reconciliation | UNANSWERED |  |
-| PF-21 | major | Replicates vary | UNANSWERED |  |
+| PF-19 | blocking | Launch manifest | pass | pf_check_manifest per task on D/tier12_v3/rules/r1_pass1/a1_extension.tsv restricted to fit_tags.txt (18 rows, sha256 aee75716...): 6 rows each atac_small/immune/sim1 carry all 14 intended flags (n_latent 10, n_layers 1, n_hidden 128, zinb, batch_size 128, max_epochs 400/239 immune/400, train_siz... |
+| PF-20 | major | Count reconciliation | pass | Independent count: r1_record.json (r1_pass1) families: only sinkhorn/1 and js/0 have status extend; js/0 = 18 discriminator rows reused from tier12_v2/A1_ext_r1_round1 (plan-fits: 18 reused, 0 moved); sinkhorn/1 = 1 edge x 3 tasks x 2 lambdas x 3 seeds = 18 rows to fit = fit_tags.txt count 18 (k=... |
+| PF-21 | major | Replicates vary | pass | Seeds 100/101/102 are manifest columns read by run_stage.py per row; stage-1 completion check (LAUNCH_SINKHORN_STAGE1.md script, run 2026-10-19) cells_with_identical_seed_latents = 0 over 60 cells of the same launcher and code; the 18 step-2 rows are 6 cells x 3 seeds. |
 | PF-22 | blocking | Output persistence | pass | every fit step writes per-tag latents/scores/attempts/ledger/failures.csv to its own new folder under D/tier12_v3 (2.4 TB free vs about 1.4 GB per 180 fits); run_stage completion gate gives exit 0 only when every row is final; launcher appends an exit-code trailer to D/tier12_v3/logs/stage2_exit.... |
-| PF-23 | blocking | Provenance and inclusion | UNANSWERED |  |
+| PF-23 | blocking | Provenance and inclusion | pass | R1 pass 1 (D/tier12_v3/rules/r1_pass1/step.json) ran prereg_rules.outcomes -> check_provenance (prereg_rules.py:320 at 10a1ca5) on the explicit list of 1,098 score files (918 v2 non-Sinkhorn + 180 v3 Sinkhorn) and exited 3 (extension) with no provenance error; n_old_sinkhorn_skipped 180 = expecte... |
 | PF-24 | major | Config vs input | pass | fit flags in run_stage2_fits.sh equal those of the v2 A2A3 launcher and the stage-1 launcher (fit-lanes 8, fit-threads 1, score-workers 3/8, expect-device RTX 3080, scvi-api/wcd-kbet pythons, Rlib_kbet); only manifest, tags file, experiments, tasks and out-dir differ per step |
 | SC-01 | blocking | splits | n/a | no labels are used for a probe or held-out metric in stage 2 |
 | SC-02 | blocking | splits | n/a | one assay per task, no donor-level labels; no cohort pooling is created |
@@ -62,9 +60,13 @@ Blocking, not satisfied: PF-17, PF-19, PF-23
 | SC-17 | major | metrics | pass | a metric that cannot be computed (scib NMI zero at every resolution, SI-65) is not imputed: the runner records it as an infrastructure error, stops the stage and the user decides (SI-81 a); rule scripts raise on non-finite required metrics (prereg_rules.outcomes) |
 | SC-18 | major | aggregation | n/a | no per-model pooling across datasets is computed here |
 | SC-19 | major | inputs | pass | tier12_v2 folders hold pre-fix Sinkhorn results under the same tags: stage2_rules.py excludes arm sinkhorn from every --old-dir (test_stage2_rules.py mutant 1 killed) and run_stage refuses c88cce3 Sinkhorn output (SI-54); non-Sinkhorn v2 files are reused by exact tag name only |
-| SC-20 | blocking | runners | pass | PASS SC-20 scpf_scan_fallbacks (n_lines_scanned=285, n_hits=0); fl_lint zero findings at medium on stage2_rules.py, run_stage2_fits.sh, run_stage2_rules.sh, test_stage2_rules.py; no try/except in the wrapper; every refusal is SystemExit or a non-zero exit |
+| SC-20 | blocking | runners | pass | Re-run 2026-10-19 on installed D/code/stage2 (stage2_rules.py sha256 c90bfad6..., identical to merged final-review-fixes f33ef95): scpf_scan_fallbacks ok, 0 problems; F1/F2 refusals are SystemExit; run_stage2_fits.sh sha ca2a2d3d... unchanged from the record. |
 | SC-21 | minor | metrics | n/a | no classifier-based disentanglement metric |
 | SC-22 | minor | claims | n/a | no field-standard claim is made |
+
+## Update 2026-10-19 (review finding F3)
+
+Answered after stage 1 ended (exit 0, 180/180 scored, completion check PASS) for the first fit step r1ext1 (18 Sinkhorn rows; tags sha256 aee75716...). The record now reflects the merged code (final-review-fixes f33ef95). The per-step checks in the table below (PF-17, PF-19, PF-20, PF-21) are repeated at the launch of every later fit step (r4ext*, a1half, a2a3) and logged in the notebook; the original 2026-10-17 note follows unchanged.
 
 ## Verdict note and checks that can only be made when stage 1 has ended ("check at launch")
 

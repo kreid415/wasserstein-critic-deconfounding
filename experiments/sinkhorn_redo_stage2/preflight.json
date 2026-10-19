@@ -306,9 +306,15 @@
     },
     "PF-04": {
       "status": "pass",
-      "evidence": "tests/prereg/test_stage2_rules.py: naive two-folder call is refused ('scored more than once'); wrapper selects one file per tag, refuses a tag in two folders (SystemExit) and duplicate manifest tags; 3 mutants of stage2_rules.py all killed (a pre-fix Sinkhorn file kept, out dir reuse, Sinkhorn reuse in plan-fits)",
-      "at": "2026-10-17T16:37:30Z",
-      "history": []
+      "evidence": "Re-checked 2026-10-19 at final-review-fixes f33ef95 (review finding F3): tests/prereg/test_stage2_rules.py + tests/stage/test_link_v2_outputs.py + tests/jhpce/test_x1_command.py 16 passed; independent acceptance (artifact accept.py 6f9d4015) fails on 874e482, passes on the fix; check_tests.py vs 874e482 OK. Mutation (agent_mutate, seed 0, 12 of 39 mutants): link_v2_outputs.py 8/12 killed, survivors at lines 32, 38, 53, 82 (NA parsing, printed counts, arg-check And->Or), none on the F1 lines. stage2_rules.py mutation NOT re-run: agent_mutate copies the tree without .git and the test fixture clones a git checkout (baseline_red); the 2026-10-17 result (3 hand mutants killed) stands for the unchanged functions.",
+      "at": "2026-10-19T16:29:25Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "tests/prereg/test_stage2_rules.py: naive two-folder call is refused ('scored more than once'); wrapper selects one file per tag, refuses a tag in two folders (SystemExit) and duplicate manifest tags; 3 mutants of stage2_rules.py all killed (a pre-fix Sinkhorn file kept, out dir reuse, Sinkhorn reuse in plan-fits)",
+          "at": "2026-10-17T16:37:30Z"
+        }
+      ]
     },
     "PF-06": {
       "status": "pass",
@@ -468,32 +474,58 @@
     },
     "SC-20": {
       "status": "pass",
-      "evidence": "PASS SC-20 scpf_scan_fallbacks (n_lines_scanned=285, n_hits=0); fl_lint zero findings at medium on stage2_rules.py, run_stage2_fits.sh, run_stage2_rules.sh, test_stage2_rules.py; no try/except in the wrapper; every refusal is SystemExit or a non-zero exit",
-      "at": "2026-10-17T16:37:36Z",
+      "evidence": "Re-run 2026-10-19 on installed D/code/stage2 (stage2_rules.py sha256 c90bfad6..., identical to merged final-review-fixes f33ef95): scpf_scan_fallbacks ok, 0 problems; F1/F2 refusals are SystemExit; run_stage2_fits.sh sha ca2a2d3d... unchanged from the record.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "PASS SC-20 scpf_scan_fallbacks (n_lines_scanned=285, n_hits=0); fl_lint zero findings at medium on stage2_rules.py, run_stage2_fits.sh, run_stage2_rules.sh, test_stage2_rules.py; no try/except in the wrapper; every refusal is SystemExit or a non-zero exit",
+          "at": "2026-10-17T16:37:36Z"
+        }
+      ]
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "pf_estimate_cost on stage-1 measured wall: 180 Sinkhorn A1 fits+scores in 94,651 s (D/tier12_v3/A1_sinkhorn/ledger/...a19e4683640a.csv, fit_started min to score_ended max) = 525.8 s per row at the same launcher settings (RTX 3080, 8 lanes, 1 thread, 3 scorers, 10a1ca5). Step 2 (r1ext1) = 18 rows: estimate 2.63 h, x2 safety 5.26 h. Caveat: extension lambdas 10000/30000 exceed stage-1 max 3000; stage-1 cond-1 lam-3000 median fit_s atac_small 1843, immune 4186, sim1 2050; worst stage-1 fit 10,787 s, so worst case 3 rounds of 8 lanes ~9 h. Local tmux run, no walltime limit; tripwire: check at 5.3 h. Later fit steps (r4ext, a2a3) re-estimated at their launch from the same per-row figure.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "pass",
+      "evidence": "pf_check_manifest per task on D/tier12_v3/rules/r1_pass1/a1_extension.tsv restricted to fit_tags.txt (18 rows, sha256 aee75716...): 6 rows each atac_small/immune/sim1 carry all 14 intended flags (n_latent 10, n_layers 1, n_hidden 128, zinb, batch_size 128, max_epochs 400/239 immune/400, train_size 0.9, adv_input mean, zstd 0, arm sinkhorn, experiment A1, decoder SCVI, cond 1); lam numeric {10000, 30000}, no placeholder; seeds 100-102; all non-tag/lam/seed columns identical to stage-1 Sinkhorn cond-1 rows of the base manifest 6efbe422. Fit-step manifests r4ext/a2a3 checked at their launch.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-20": {
+      "status": "pass",
+      "evidence": "Independent count: r1_record.json (r1_pass1) families: only sinkhorn|1 and js|0 have status extend; js|0 = 18 discriminator rows reused from tier12_v2/A1_ext_r1_round1 (plan-fits: 18 reused, 0 moved); sinkhorn|1 = 1 edge x 3 tasks x 2 lambdas x 3 seeds = 18 rows to fit = fit_tags.txt count 18 (k=1, plan central path).",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-21": {
+      "status": "pass",
+      "evidence": "Seeds 100/101/102 are manifest columns read by run_stage.py per row; stage-1 completion check (LAUNCH_SINKHORN_STAGE1.md script, run 2026-10-19) cells_with_identical_seed_latents = 0 over 60 cells of the same launcher and code; the 18 step-2 rows are 6 cells x 3 seeds.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "pass",
+      "evidence": "R1 pass 1 (D/tier12_v3/rules/r1_pass1/step.json) ran prereg_rules.outcomes -> check_provenance (prereg_rules.py:320 at 10a1ca5) on the explicit list of 1,098 score files (918 v2 non-Sinkhorn + 180 v3 Sinkhorn) and exited 3 (extension) with no provenance error; n_old_sinkhorn_skipped 180 = expected 180; n_old_stale_skipped 0; failure rows 0. Step-2 outputs are provenance-checked again by R1 pass 2.",
+      "at": "2026-10-19T16:27:22Z",
       "history": []
     }
   },
   "verdict": {
-    "go": false,
-    "blocking": [
-      "PF-17",
-      "PF-19",
-      "PF-23"
-    ],
-    "unanswered": [
-      "PF-17",
-      "PF-19",
-      "PF-20",
-      "PF-21",
-      "PF-23"
-    ],
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
     "major_fail": [],
     "minor_fail": [],
     "plan_changed": false,
     "n_items": 46,
-    "n_pass": 10,
+    "n_pass": 15,
     "n_na": 31,
-    "at": "2026-10-17T16:37:50Z"
+    "at": "2026-10-19T16:29:25Z"
   },
   "path": "repo/experiments/sinkhorn_redo_stage2"
 }
