@@ -3,6 +3,7 @@ writes them (scores/<tag>.csv, failures.csv): v2 folders hold pre-fix Sinkhorn o
 Walks R1 (extension round, then frozen) -> R4-a1 -> R2/R3 with the real rule scripts. No fits, no real data."""
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -170,6 +171,7 @@ def test_a_moved_non_sinkhorn_a3_window_never_reuses_the_score_fitted_at_the_old
     assert f"{n_nonsk} moved" in open(os.path.join(t, "placeholder.tags")).readline()
     os.makedirs(os.path.join(t, "v2", "nometa", "scores"))
     pd.DataFrame([dict(tag=cell.tag.iloc[0], kbet_seed=0)]).to_csv(os.path.join(t, "v2", "nometa", "scores", f"{cell.tag.iloc[0]}.csv"), index=False)
+    NO_FAILURES.to_csv(os.path.join(t, "v2", "nometa", "failures.csv"), index=False)
     for olds_bad, msg in ((["v2/nometa"], "expected one score row"), (["v2/A2A3", "v2/A2A3_old"], "more than one old folder")):
         with pytest.raises(SystemExit, match=msg):
             S2.main(["plan-fits", "--manifest", m4, "--experiments", "A3", "--tasks", "immune", "--out-tags", plan,
@@ -179,7 +181,8 @@ def test_a_moved_non_sinkhorn_a3_window_never_reuses_the_score_fitted_at_the_old
 @pytest.mark.parametrize("case, match", [("duplicate_manifest", "duplicate manifest tags"), ("wrong_commit", "expected"),
                                          ("dirty_checkout", "uncommitted"), ("no_failures_csv", "does not exist"),
                                          ("failure_in_two_folders", "more than one folder"), ("no_rows", "no manifest rows"),
-                                         ("missing_score", "no score file and no failure row")])
+                                         ("missing_score", "no score file and no failure row"),
+                                         ("plan_no_failures_csv", "does not exist"), ("plan_v2_failure", "person must decide")])
 def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
     s, t = stage2, stage2["t"]
     one = ["v2/A1"], ["v3/A1_sinkhorn"]
@@ -202,6 +205,27 @@ def test_inputs_that_would_make_a_record_wrong_are_refused(stage2, case, match):
             os.makedirs(os.path.join(t, "v3", d))
             pd.DataFrame([dict(tag=tag, status="diverged", detail="synthetic")]).to_csv(os.path.join(t, "v3", d, "failures.csv"), index=False)
         argv = args(s, "r1", f"x_{case}", [s["man"]], [], ["v3/f1", "v3/f2"])
+    elif case.startswith("plan_"):                    # plan-fits reads every old folder's failures.csv and writes no tags file on refusal
+        out, old = os.path.join(t, f"{case}.tags"), os.path.join(t, "v2", case)
+        os.makedirs(old)
+        if case == "plan_v2_failure":
+            a1 = s["M"][s["M"].experiment == "A1"]
+            fail = a1[(a1.arm == "discriminator") & (a1.task == "immune")].tag.iloc[0]
+            other = a1[(a1.arm == "discriminator") & (a1.task != "immune")].tag.iloc[0]
+            sk = a1[a1.arm == "sinkhorn"].tag.iloc[0]
+            rows = [dict(tag=t_, status="diverged", detail="synthetic") for t_ in (other, sk)]
+            plan = ["plan-fits", "--manifest", s["man"], "--experiments", "A1", "--tasks", "immune", "--old-dir", old]
+            pd.DataFrame(rows).to_csv(os.path.join(old, "failures.csv"), index=False)
+            assert S2.main(plan + ["--out-tags", out + ".ok"]) == 0               # failures of an unselected task or of Sinkhorn: ignored
+            pd.DataFrame(rows + [dict(tag=fail, status="diverged", detail="synthetic")]).to_csv(os.path.join(old, "failures.csv"), index=False)
+            with pytest.raises(SystemExit, match=re.escape(fail)) as e:
+                S2.main(plan + ["--out-tags", out])
+            assert other not in str(e.value) and sk not in str(e.value)
+        else:
+            with pytest.raises(SystemExit, match=match):
+                S2.main(["plan-fits", "--manifest", s["man"], "--experiments", "A1", "--old-dir", old, "--out-tags", out])
+        assert not os.path.exists(out)
+        return
     elif case == "no_rows":
         with pytest.raises(SystemExit, match=match):
             S2.main(["plan-fits", "--manifest", s["man"], "--experiments", "A1", "--tasks", "no_such_task", "--out-tags", os.path.join(t, "none.tags")])

@@ -180,13 +180,24 @@ def run_rule(a):
 
 def plan_fits(a):
     """Tags file of the rows that still need a fit: every selected row except non-Sinkhorn rows with a v2 score file fitted
-    at the row's own settings (task, arm, cond, seed, lam). An old file at other settings = a moved window: the row is refitted."""
+    at the row's own settings (task, arm, cond, seed, lam). An old file at other settings = a moved window: the row is refitted.
+    A missing old failures.csv, or a v2 failure row of a selected non-Sinkhorn row, stops the plan before the tags file is written."""
     M = read_manifests(a.manifest)
     rows = M[M.experiment.isin(a.experiments)]
     if a.tasks:
         rows = rows[rows.task.isin(a.tasks)]
     if not len(rows):
         raise SystemExit(f"no manifest rows for {a.experiments} {a.tasks}")
+    arm = dict(zip(rows.tag, rows.arm))
+    for d in a.old_dir:                                      # a v2 failure of a non-Sinkhorn row needs a person's decision
+        f = os.path.join(d, "failures.csv")
+        if not os.path.isfile(f):
+            raise SystemExit(f"{f} does not exist (every stage folder writes one, header only when there are no failures)")
+        F = pd.read_csv(f, dtype=str, keep_default_na=False)
+        bad = F.tag[F.tag.isin(list(arm)) & ~F.tag.map(arm).isin(EXCLUDE_OLD_ARMS)].tolist()
+        if bad:
+            raise SystemExit(f"{f} has failure rows for selected non-Sinkhorn tags {bad[:5]} ({len(bad)} in all): a person must "
+                             f"decide whether that v2 failure stands or the row is refitted; no tags file was written")
     reuse, moved = [], []
     for row in rows.to_dict("records"):
         if row["arm"] in EXCLUDE_OLD_ARMS:

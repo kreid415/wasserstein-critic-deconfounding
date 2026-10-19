@@ -4,7 +4,9 @@
 Why (review F3): the 19 X1 rows scored before the Sinkhorn redo sit in D/tier12_v2/X1_local (hashed under SI-79; that folder
 is never written to). The post-redo X1 run uses a new folder, D/tier12_v3/X1_local. SI-54 lets non-Sinkhorn outputs made at
 c88cce3 count as v3, so for every X1 manifest row whose arm is not in EXCLUDE_OLD_ARMS (sinkhorn: refused) this script
-symlinks latents/<tag>.npz, models/<tag> and scores/<tag>.csv when they exist. It opens no file and prints counts only
+symlinks latents/<tag>.npz, models/<tag> and scores/<tag>.csv when they exist, but only for a tag whose latent exists: the
+fitter saves the model folder before it moves the latent into place, so a tag with no latent is a killed fit and gets no link
+of any kind (a refit would write through a model link into the old folder). It opens no file and prints counts only
 (SI-78/79): a symlink copies no bytes. The stage runner then checks every linked file against the manifest row (its settings
 lam, adv_input, zstd, cond, seed, commit); a row whose settings changed in the redo is reported as `invalid output` with its tag,
 and its links are removed with --unlink TAG ... before the run (PLAN.md step X2). Nothing here accepts an output by itself.
@@ -34,11 +36,14 @@ def link(a):
     if os.path.exists(a.new_dir):
         raise SystemExit(f"{a.new_dir} exists: the link step creates the folder (refused to reuse it)")
     n = dict.fromkeys(KINDS, 0)
-    n_tags = 0
+    n_tags = n_nolatent = 0
     for tag, arm in zip(rows.tag, rows.arm):
         old = paths(a.old_dir, tag)
         have = [k for k in KINDS if os.path.lexists(old[k])]
         if arm in EXCLUDE_OLD_ARMS or not have:
+            continue
+        if "latents" not in have:                          # killed fit (model saved, latent never moved in): refit cleanly
+            n_nolatent += 1
             continue
         n_tags += 1
         for k in have:
@@ -47,7 +52,7 @@ def link(a):
             os.symlink(os.path.abspath(old[k]), dst)
             n[k] += 1
     os.makedirs(a.new_dir, exist_ok=True)                  # also when nothing was reusable
-    print(f"[link] {len(rows)} X1 rows; {n_tags} with reusable v2 outputs; linked {n}")
+    print(f"[link] {len(rows)} X1 rows; {n_tags} with reusable v2 outputs; linked {n}; {n_nolatent} left unlinked (no latent)")
     return 0
 
 
