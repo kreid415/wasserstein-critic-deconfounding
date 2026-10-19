@@ -1,6 +1,6 @@
 % paper.tex -- outline of the revised paper (BIOINF-2026-1434 revision). Outline phase: locked information only.
 % Build:  tectonic paper.tex   (bibliography: refs.bib, natbib plainnat). ASCII-only source.
-% Built from branch final-review-fixes at commit 08f1e3c (2026-10-14); see 'How to read this outline'.
+% Built from branch final-review-fixes at commit 08f1e3c (2026-10-14); Methods and Supplement S-M, S-E updated to commit 04f5c99 (2026-10-19; code tag prereg-tier12-v3, commit 10a1ca5); see 'How to read this outline'.
 
 \documentclass[11pt]{article}
 \usepackage[margin=2.2cm]{geometry}
@@ -32,7 +32,7 @@
 {\LARGE\bfseries Paper outline}\\[4pt]
 {\large Wasserstein critic versus discriminator in adversarial batch correction on scVI}\\[6pt]
 \pending{title}{your decision}\quad \pending{authors and target journal}{your decision}\\[2pt]
-{\small Outline of the paper; repository state: commit 08f1e3c, 2026-10-14.}
+{\small Outline of the paper; repository state: commit 08f1e3c, 2026-10-14 (Methods and Supplement S-M and S-E updated to commit 04f5c99, 2026-10-19).}
 \end{center}
 
 \section*{How to read this outline}
@@ -40,12 +40,12 @@
 \item Three status forms. Plain text followed by a grey bracket \src{source} is \textbf{locked}: a user decision in the decision ledger (\file{CONSTRAINTS.md}), a rule frozen at tag prereg-tier12-v2 (commit c88cce3), or a fact verified in a file. \pending{what is still open}{the event that will lock it} marks text that is \textbf{not locked}. \unverified{key} marks a citation key whose claim has not yet been checked against its source; none remains. Author-year citations are checked: each claim against the source text, recorded in \file{paper/evidence.md}, which names the citations checked against the abstract or metadata only and those read in a preprint version.
 \item SI-nn: entry nn of the decision ledger \file{CONSTRAINTS.md} (103 entries as of SI-103). Each quotes the user's answer, except SI-42, a lead-agent decision that is not locked, and the sentence of SI-17 marked as an agent-derived corollary. SI-35 and SI-59 are retired (replaced by SI-46 and SI-61).
 \item PREREG \S n: section n of \file{docs/PREREG.md}, the pre-registered decision rules. Frozen at tag prereg-tier12-v2 (commit c88cce3) and byte-identical at 08f1e3c: \S0--\S2, \S4, \S6--\S8, the Disclosure paragraph, and 11 of the 12 section 9 entries dated 2026-10-03/04 \src{\file{docs/PREREG.md} at c88cce3 and 08f1e3c, compared}. At 08f1e3c, \S3, \S5 and the 2026-10-03 entry also carry bracketed notes dated 2026-10-13/14 (version 3): the \S3 note and the 2026-10-03 correction implement SI-56, SI-66 and SI-53; the \S5 note (Holm over six results) was approved by the user on 2026-10-15 \src{SI-80}. The section 9 entries dated 2026-10-13 and 2026-10-14 are version 3, frozen at tag prereg-tier12-v3 (10a1ca5).
-\item ANALYSIS\_SPEC \S n: section n of \file{docs/ANALYSIS_SPEC.md}, the draft specification of the X1 analyses. It holds user decisions (SI-68 to SI-77) and agent proposals that wait for the user's review of the full diff.
+\item ANALYSIS\_SPEC \S n: section n of \file{docs/ANALYSIS_SPEC.md}, the specification of the X1 analyses, frozen by tag prereg-tier12-v3. It holds user decisions (SI-68 to SI-77, SI-83, SI-84) and agent proposals that the user approved as rules on 2026-10-15 \src{SI-80}.
 \item PAPER\_PLAN \S n: section n of \file{docs/PAPER_PLAN.md}, the design-time paper plan of 2026-10-02, partly superseded.
 \item NB-yyyymmdd-nn: entry nn of the lab notebook page \file{notebook/yyyy-mm-dd.md}.
 \item I0nn: finding nn of the final pre-publication review of 2026-10-13 (\file{docs/review_final/REVIEW_FINAL.md}; full list in \file{D/review/lead/verified_issues.csv}). D-nn: finding nn of that review's recheck of the design documents (\file{D/review/rereview/design_fable/REVIEW_design_recheck.md}).
-\item file:line: a line of a repository file at commit 08f1e3c (branch final-review-fixes, 2026-10-14). Files in \file{scripts/} are named without the folder; \file{wcd/} stands for \file{src/wcd_vae/wcd/}. \file{D/} is the project data folder.
-\item diff review: the user's review of the full diff of branch final-review-fixes before the tag prereg-tier12-v3 is made \src{SI-52; SI-60}.
+\item file:line: a line of a repository file at commit 10a1ca5 (tag prereg-tier12-v3, 2026-10-16); the lines cited from \file{src/} and \file{scripts/}, except those of \file{analysis_x1.py}, are the same at 08f1e3c (2026-10-14). Files in \file{scripts/} are named without the folder; \file{wcd/} stands for \file{src/wcd_vae/wcd/}. \file{D/} is the project data folder.
+\item diff review: the user's review of the full diff of branch final-review-fixes before the tag prereg-tier12-v3 was made; the user decided on 2026-10-16 to tag \src{SI-52; SI-60; NB-20261016-32}.
 \end{itemize}
 \subsection*{Glossary}
 {\small
@@ -99,11 +99,11 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \begin{itemize}
 \item Question: does replacing the Jensen--Shannon (JS) discriminator of adversarial batch correction with a Wasserstein-1 (W1) critic change the trade-off between batch removal and biology conservation on scVI, with maximum mean discrepancy (MMD) and Sinkhorn as non-adversarial comparators? \src{SI-09; SI-12; SI-18; manifest}
 \item Design: six adversarial arms (discriminator; reference, pooled and barycenter W1 critics; MMD; Sinkhorn) and scvi-tools' own adversary on one scvi-tools default scVI backbone \src{SI-10; manifest}; batch-conditioned and unconditioned decoders \src{SI-11; SI-16}; the eight scIB tasks, fitted as distributed \src{SI-02; SI-03; SI-15}; scIB metrics without min--max scaling \src{SI-08; PREREG \S1}.
-\item Fixed in advance: penalty-strength grids from a pilot on seeds disjoint from the main experiment, and decision rules R1--R4 \src{PREREG \S0--\S4 and Disclosure; SI-13; SI-16}; the main-experiment analyses, locked before any of its results is examined \src{SI-52; SI-68}; \pending{freeze of that analysis plan}{diff review, then tag prereg-tier12-v3}.
+\item Fixed in advance: penalty-strength grids from a pilot on seeds disjoint from the main experiment, and decision rules R1--R4 \src{PREREG \S0--\S4 and Disclosure; SI-13; SI-16}; the main-experiment analyses, locked before any of its results is examined \src{SI-52; SI-68}; that analysis plan is frozen by tag prereg-tier12-v3, commit 10a1ca5 \src{NB-20261016-34}.
 \item Primary comparison (P1): biology score at matched batch removal, reference critic minus discriminator, one result per decoder \src{SI-21; SI-68; SI-70}.
 \item Main result: \pending{main result}{X1 scored and the single analysis run}
 \item Implication: \pending{guidance for scVI users, including the case that no adversary improves on plain scVI}{X1 and X13 analysed}
-\item Availability: code in the GitHub repository kreid415/wasserstein-critic-deconfounding \src{git remote}; \pending{tag and commit of record}{tag prereg-tier12-v3}; scIB task files with checksums [S-D2].
+\item Availability: code in the GitHub repository kreid415/wasserstein-critic-deconfounding \src{git remote}; tag and commit of record: prereg-tier12-v3, commit 10a1ca5 \src{NB-20261016-34}; scIB task files with checksums [S-D2].
 \end{itemize}
 
 \section{Introduction}\label{sec:intro}
@@ -134,9 +134,9 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \item Continuous noise added to the discriminator input gives both distributions a density (Thm.~3.1); with Gaussian noise the densities are positive everywhere, so the supports overlap (Cor.~3.1) \citep{arjovsky2017towards}.
 \item scVI (single-cell variational inference) encodes each cell as a Gaussian in the latent space, with a mean and a variance; the posterior mean is that mean, and a posterior sample adds Gaussian noise with that variance; the noise scale is therefore cell-specific, a case Thm.~3.1 does not cover directly \src{scvi-tools 1.4.2: scvi/nn/\_base\_components.py:304--305}.
 \item In the main experiment X1, scvi-tools' own adversary (arm scvi\_adv) is given posterior samples \src{scvi-tools 1.4.2: scvi/module/\_vae.py:390, :413, scvi/train/\_trainingplans.py:689; \file{scvi_adversarial_plan.py}:348--351}; the manifest's adv\_input column reads `mean' for its 40 X1 rows, a value this arm does not read \src{\file{manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv}}.
-\item The six arms implemented in this project (discriminator; reference, pooled and barycenter W1 critics; MMD; Sinkhorn) are given the posterior mean by default \src{SI-19; \file{scvi_adversarial_plan.py}:359}. X1 keeps this default and keeps standardisation off \src{SI-56; SI-66}: the pilot rules that could switch the adversary input to posterior samples (rule R2) or standardise it per latent dimension (rule R3) keep their defaults while a block they use is flagged low-signal, that is, while the batch removal that all six arms reach exceeds plain scVI's by less than 0.02. \pending{formal re-run of rules R2 and R3}{after the Sinkhorn redo (SI-57)}
+\item The six arms implemented in this project (discriminator; reference, pooled and barycenter W1 critics; MMD; Sinkhorn) are given the posterior mean by default \src{SI-19; \file{scvi_adversarial_plan.py}:359}. X1 keeps this default and keeps standardisation off \src{SI-56; SI-66}: the pilot rules that could switch the adversary input to posterior samples (rule R2) or standardise it per latent dimension (rule R3) keep their defaults while a block they use is flagged low-signal, that is, while the batch removal that all six arms reach exceeds plain scVI's by less than 0.02. \pending{formal re-run of rules R2 and R3}{after the 36 A3 Sinkhorn pilot fits, started 2026-10-19 (NB-20261019-03)}
 \item The frozen record of the strength-matching rule (rule R4), run on the penalty-strength pilot (A1), flags two blocks, both with the conditioned decoder: immune (difference 0.0188) and sim1 (0.0069). Rules R2 and R3 are run on pilots A2 and A3, which cover atac\_small and immune only, so only immune bears on them \src{\file{docs/prereg/r4_a1_record.json}; manifest}.
-\item Refitting Sinkhorn (the Sinkhorn arm was corrected after the pilot, so its pilot fits are redone) cannot clear either flag: the common level is set by the arm that reaches the least batch removal (barycenter in five of the six blocks, MMD in sim1 with the conditioned decoder, Sinkhorn in none), so refitting Sinkhorn can only lower it \src{\file{docs/prereg/r4_a1_record.json}; SI-51; SI-57}.
+\item The Sinkhorn pilot fits cannot clear either flag: the common level is set by the arm that reaches the least batch removal (barycenter in five of the six blocks, MMD in sim1 with the conditioned decoder, Sinkhorn in none), so a change of the Sinkhorn fits can only lower it \src{\file{docs/prereg/r4_a1_record.json}; SI-57}.
 \item The discriminator arm minimises scvi-tools' fool loss (cross-entropy to the uniform distribution over the other batches, over all cells) at one adversary step \src{SI-01; \file{scvi_adversarial_plan.py}:8--9, 292--298}; for two batches the target is the other batch alone, so this is the label-flipped non-saturating loss \src{\file{scvi_adversarial_plan.py}:297--298, with two batches}.
 \item These results assume a fixed second distribution (the real data) and a moving generator (WGAN Thm.~1 and Example~1; Thms.~2.4--2.6), and Thm.~2.4 a discriminator close to the optimal one. Here every batch's latent moves and the discriminator takes one step per encoder step \src{SI-01; \file{scvi_adversarial_plan.py}:8--9; manifest}, so they do not transfer automatically; whether their conditions arise here is what the exploratory premise check R0 describes \src{SI-68}.
 \item The vanishing-gradient premise is examined, not assumed: the premise check R0 (batch separability before integration; adversary gradient norms) is exploratory and gives no confirmed or refuted claim \src{SI-68; PAPER\_PLAN \S3; decision letter, Reviewer 1, major comment 2 (fairness of the comparison)}.
@@ -172,8 +172,8 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 \item A controlled decomposition of the critic--discriminator trade-off \pending{the decomposition as the paper's stated contribution (PAPER\_PLAN \S2; no ledger entry)}{your decision}. How much is:
 \begin{enumerate}
 \item operating point: arms compared at equal batch removal (P1, biology kept at equal batch removal) \src{SI-68};
-\item W1 geometry or latent scale: the W1 critics, MMD and Sinkhorn arms side by side in the single-strength tables and in the widths of the ranges of good strengths \src{SI-18; SI-68} \pending{attribution of a difference to W1 geometry rather than latent scale, and its analysis}{follow-up analyses locked during X1 (SI-68)}; per-dimension standardisation of the adversary input, compared in pilot A3 under rule R3 \src{SI-20; SI-27}; off in X1 for the same reason as the adversary input \src{SI-66; \file{docs/prereg/r4_a1_record.json}} \pending{formal re-run of rule R3}{after the Sinkhorn redo (SI-57)};
-\item regularisation and update budget: X6 (the discriminator plain, spectrally normalised [\citealp{miyato2018spectral}] or with an R1 gradient penalty [\citealp{mescheder2018training}; not rule R1]; the pooled critic at 1, 5 and 10 critic steps, and spectrally normalised at 1 and 5) \src{SI-22; manifest} \pending{X6 analysis}{specified during X1 (SI-68)}.
+\item W1 geometry or latent scale: the W1 critics, MMD and Sinkhorn arms side by side in the single-strength tables and in the widths of the ranges of good strengths \src{SI-18; SI-68} \pending{attribution of a difference to W1 geometry rather than latent scale, and its analysis}{follow-up analyses locked during X1 (SI-68)}; per-dimension standardisation of the adversary input, compared in pilot A3 under rule R3 \src{SI-20; SI-27}; off in X1 for the same reason as the adversary input \src{SI-66; \file{docs/prereg/r4_a1_record.json}} \pending{formal re-run of rule R3}{after the 36 A3 Sinkhorn pilot fits (NB-20261019-03)};
+\item regularisation and update budget: X6 (the discriminator plain, spectrally normalised [\citealp{miyato2018spectral}] or with an R1 gradient penalty [\citealp{mescheder2018training}; not rule R1], and spectrally normalised with the critics' optimiser settings; the pooled critic at 1, 5 and 10 critic steps, and spectrally normalised at 1 and 5; both decoders) \src{SI-22; SI-93; SI-98; manifest v5} \pending{X6 analysis}{lock of the follow-up specification by the follow-up code tag, during X1 (SI-68)}.
 \end{enumerate}
 \item Also asked: whether the critic reaches matched batch removal through more local mixing \src{SI-76}. Scope: architecture and KL warm-up are not varied, and reference choice and batch count are not tested \src{SI-103}.
 \item Comparison with stock scVI and standard tools (Harmony, Scanorama, sysVI, scANVI) at equal numbers of tries \src{SI-68; SI-77} \pending{outcome}{results of X1 and of the baseline experiment X13}. \pending{guidance for scVI users, including the case that no adversary beats stock scVI (PAPER\_PLAN \S2)}{results of X1 and X13}
@@ -220,8 +220,8 @@ other abbreviations & GP: gradient penalty; WGAN-GP: Wasserstein GAN (generative
 % ---------------------------------------------------------------------------------------------------
 
 \subsection{Research questions}
-The four remaining research questions (R0, R1, R3, R5) are open: 19 of the 3,000 X1 rows are scored (local run paused on 2026-10-12) and the X1 analysis has not been run \src{NB-20261012-05; NB-20261014-21}. \pending{that no X1 result has been examined}{the user's confirmation at the diff review (ANALYSIS\_SPEC App.~A.3, item 2)}
-R2 (batch count, endpoint P3) and R4 (reference selection, endpoint P4) were removed, with X8 and X7 and with the claims that the critic scales poorly with batch count and depends on a dense reference; the numbering R0 to R5 is kept \src{SI-103; NB-20261018-01}. The user decided this on 2026-10-17, under the blinding rule in force; \pending{that the decision was made before any X1 result was examined}{the user's confirmation at the diff review (ANALYSIS\_SPEC App.~A.3, item 2)}
+The four remaining research questions (R0, R1, R3, R5) are open: 19 of the 3,000 X1 rows are scored (local run paused on 2026-10-12) and the X1 analysis has not been run \src{NB-20261012-05; NB-20261014-21}. The user stated on 2026-10-15 that nobody had read an X1 or X13 score value \src{NB-20261015-15}; ``examined'' is defined in SI-78, and two displays shown to an AI agent only are disclosed, not counted as examined \src{SI-78; SI-88}.
+R2 (batch count, endpoint P3) and R4 (reference selection, endpoint P4) were removed, with X8 and X7 and with the claims that the critic scales poorly with batch count and depends on a dense reference; the numbering R0 to R5 is kept \src{SI-103; NB-20261018-01}. The user decided this on 2026-10-17, under the blinding rule in force; \pending{that the decision was made before any X1 result was examined}{the user's confirmation}
 
 \paragraph{R0 Premise (exploratory).}
 \begin{itemize}
@@ -243,7 +243,7 @@ R2 (batch count, endpoint P3) and R4 (reference selection, endpoint P4) were rem
 \paragraph{R3 Sensitivity to penalty strength and design factors.}
 \begin{itemize}
 \item Question: is any critic-versus-discriminator difference due to the divergence rather than to regularisation, update budget or latent scale, and how wide is each method's range of good penalty strengths? \src{PAPER\_PLAN \S3, R3 row; SI-68; ANALYSIS\_SPEC \S0}
-\item Range of good strengths: measured on X1 with the selection score $S = 0.4B + 0.6C$ \src{SI-68; SI-77}; \pending{window rule (ANALYSIS\_SPEC \S10)}{diff review}.
+\item Range of good strengths: measured on X1 with the selection score $S = 0.4B + 0.6C$ \src{SI-68; SI-77}; window rule [S-M18] \src{SI-80; ANALYSIS\_SPEC \S10}.
 \item Factor effects: X6 only (the X12, X15 and A3 factor effects were dropped \src{SI-103}); \pending{hypotheses and analysis}{follow-up analyses locked during X1 (SI-68)}
 \item Status: open.
 \end{itemize}
@@ -251,7 +251,7 @@ R2 (batch count, endpoint P3) and R4 (reference selection, endpoint P4) were rem
 \paragraph{R5 Placement against standard integrators.}
 \begin{itemize}
 \item Question: does any adversary improve on plain scVI, and where do the arms sit relative to Harmony, Scanorama, sysVI and scANVI when every method gets the same number of tries? \src{PAPER\_PLAN \S3, R5 row; SI-68; ANALYSIS\_SPEC \S0}
-\item Locked analyses: tables of each method at one penalty strength chosen on the other datasets, and the comparison at equal numbers of tries, both ranked by $S = 0.4B + 0.6C$ \src{SI-68; SI-77}. \pending{rule for the single strength (leave-one-family-out) and best-of-k rule}{diff review (ANALYSIS\_SPEC \S8, \S9)}
+\item Locked analyses: tables of each method at one penalty strength chosen on the other datasets, and the comparison at equal numbers of tries, both ranked by $S = 0.4B + 0.6C$ \src{SI-68; SI-77}. Rules for the single strength (leave-one-family-out) and best-of-k [S-M18] \src{SI-80; ANALYSIS\_SPEC \S8, \S9}.
 \item Hypothesis: \pending{whether R5 states a hypothesis (PAPER\_PLAN poses it as a question)}{your decision}
 \item Status: open.
 \end{itemize}
@@ -339,7 +339,7 @@ Reproduction detail is in the Supplementary material [S-...].
 [S-M1]
 \begin{itemize}
 \item Conditioned: the decoder receives the batch label. Unconditioned: no batch label reaches encoder or decoder, only the adversary \src{\file{scvi_adversarial_plan.py}:534, :537; \file{tests/scvi/test_adversarial_plan_v2.py}:118}.
-\item Both decoders in X1, 5 seeds each \src{SI-11; SI-16; manifest}.
+\item Both decoders in X1, 5 seeds each \src{SI-11; SI-16; manifest}, and in X6, 3 seeds each \src{SI-93; NB-20261017-01; manifest v5}.
 \end{itemize}
 
 \subsection{Adversarial arms of X1}
@@ -351,10 +351,10 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Pooled critic (W1): head $k$ targets all other batches \src{\file{wcd/critic.py}:77}.
 \item Barycenter critic (W1): head $k$ targets a Wasserstein-2 barycenter (average distribution; \citealp{cuturi2014fast}) of the minibatch's batches, recomputed per step, cold start, at most 10 iterations \src{SI-14 (10 iterations); \file{wcd/barycenter.py}:38, :72--73 (cap 10, stop threshold $10^{-7}$); manifest}.
 \item MMD (no network): squared maximum mean discrepancy (\citealp{gretton2012kernel}) of each batch to the others, fixed multi-scale Gaussian kernel \src{\file{wcd/alignment.py}:49, :109}.
-\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\citealp{cuturi2013sinkhorn}; \citealp{genevay2018learning}; \citealp{feydy2019interpolating}), Euclidean cost, entropic regularisation $\varepsilon$ = blur = $0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:12--13, :50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{recomputed on refitted latents}.
+\item Sinkhorn (no network): debiased Sinkhorn divergence of each batch to the others (\citealp{cuturi2013sinkhorn}; \citealp{genevay2018learning}; \citealp{feydy2019interpolating}), Euclidean cost, entropic regularisation $\varepsilon$ = blur = $0.05\sqrt{2d}$ \src{\file{wcd/alignment.py}:12--13, :50, :249}; not a W1 estimate at this blur \src{\file{wcd/alignment.py}:15}; \pending{size of the gap to W1}{computed on the latents of the Sinkhorn pilot fits}.
 \item scvi\_adv: scvi-tools' own classifier adversary (32 hidden units, weight $1 -$ KL weight), conditioned decoder only, outside rules R1--R4 \src{\file{scvi_adversarial_plan.py}:5, :177; PREREG \S3; manifest}.
 \item Discriminator and critics: same head architecture (latent, 128, 128, one output per batch; ReLU) \src{\file{wcd/adversarial.py}:50, :76}; critics add a per-head gradient penalty (\citealp{gulrajani2017improved}) of weight 10 \src{\file{wcd/critic.py}:158}.
-\item Reference batch: highest cell-type Shannon entropy, ties by size \src{\file{wcd/data.py}:32; \file{fit_paper_config.py}:324; manifest}.
+\item Reference batch: highest cell-type Shannon entropy, ties by size; the choice uses the cell-type labels \src{NB-20261017-07 (I092); \file{wcd/data.py}:32; \file{fit_paper_config.py}:324; manifest}.
 \end{itemize}
 
 \subsection{Adversary input and standardisation}
@@ -363,7 +363,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Defaults: posterior-mean input, no per-dimension standardisation; rules R2 and R3 switch either only if their criteria hold, and a sample input that misses b* where the mean reaches it is refused \src{SI-19; SI-20; PREREG \S3}.
 \item One pooled decision over both decoders (A2: 12 cells, 8 evaluable needed; A3: 20, 14) \src{SI-27}; low-signal cells count as not evaluable \src{SI-66}; edge window points are fitted on A1 seeds \src{SI-45}.
 \item The decision covers all six arms; if both switch, the untested combination is disclosed \src{PREREG \S3}.
-\item X1 keeps the defaults (posterior mean; standardisation off): the frozen rule-R4 record on A1 flags immune with the conditioned decoder as low-signal ($b_{\mathrm{common}} - b_0 = 0.0188$; sim1 with the conditioned decoder is also flagged, 0.0069, but is not an A2 or A3 task), so rules R2 and R3 cannot switch while that flag holds \src{SI-66; \file{docs/prereg/r4_a1_record.json}; NB-20261012-01}; Sinkhorn sets $b_{\mathrm{common}}$ in no block, so refitting it alone can only lower $b_{\mathrm{common}}$ \src{\file{docs/prereg/r4_a1_record.json} targets}. \pending{formal re-run of rules R2 and R3}{after the Sinkhorn redo (SI-57)}
+\item X1 keeps the defaults (posterior mean; standardisation off): the committed rule-R4 record on A1 flags immune with the conditioned decoder as low-signal ($b_{\mathrm{common}} - b_0 = 0.0188$; sim1 with the conditioned decoder is also flagged, 0.0069, but is not an A2 or A3 task), so rules R2 and R3 cannot switch while that flag holds \src{SI-66; \file{docs/prereg/r4_a1_record.json}; NB-20261012-01}; $b_{\mathrm{common}}$ is the minimum over the six arms and Sinkhorn sets it in no block of that record, so a change of the Sinkhorn pilot fits can only lower it and a flagged block stays flagged \src{\file{docs/prereg/r4_a1_record.json} targets}. \pending{the flags in the rule-R4 record on A1 that holds the Sinkhorn pilot fits (frozen on 2026-10-19; the record file is not yet in the repository)}{that record is committed under \file{docs/prereg/} (NB-20261019-03)} \pending{formal re-run of rules R2 and R3}{after the 36 A3 Sinkhorn pilot fits, started 2026-10-19 (NB-20261019-03)}
 \end{itemize}
 
 \subsection{Training}
@@ -373,8 +373,8 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Adversary steps reuse the minibatch's detached latent (WGAN-GP draws fresh data) \src{\file{scvi_adversarial_plan.py}:392--394; PREREG \S9, 2026-10-04 (CR-12)}.
 \item KL warm-up: scvi-tools' 400-epoch default, incomplete on tasks with fewer epochs [S-E3], while $\lambda$ acts from the first step \src{\file{fit_paper_config.py}:123; manifest; PREREG \S9, 2026-10-04 (X15)}.
 \item Failed fit: non-finite training loss (diverged) or non-finite latent (nonfinite\_latent); infrastructure errors are rerun \src{PREREG \S1}.
-\item Sinkhorn corrected before X1 (gradient counted once; solve converged at the final smoothing step) \src{SI-51}; its 180 A1 fits are refitted, then rules R1 and R4 on A1 decide which extension and A3 rows to refit (18 and 36 before the fix, 234 fits in all) \src{SI-51; SI-57}.
-\item Sinkhorn solve in float64, at most 500,000 final-step iterations with an error at the cap, immediate stop on a NaN marginal error \src{SI-61; SI-62}. \pending{tolerance ($10^{-4}$ L1 marginal error, \file{wcd/alignment.py}:56) and the outcome of a fit that keeps reaching the cap}{diff review, tag prereg-tier12-v3}
+\item Sinkhorn: the gradient is taken once, at the converged transport plan, and the solve is converged at the final smoothing step \src{SI-51; \file{wcd/alignment.py}:37}. All Sinkhorn pilot fits (A1, the extension rows of rule R1 and A3) use this solver; the extension rows and the A3 rows are outputs of rules R1 and R4 on the A1 Sinkhorn fits \src{SI-51; SI-57; NB-20261019-02}.
+\item Sinkhorn solve in float64, iterated at the final smoothing step until the L1 marginal error of every plan (the total absolute amount by which its row or column sums miss the cell weights) is below $10^{-4}$, at most 500,000 iterations; reaching the cap raises an error that stops the stage; a NaN marginal error stops the solve at once, and the fit is then recorded as failed (diverged) \src{SI-61; SI-62; \file{wcd/alignment.py}:56--57; PREREG \S9, 2026-10-13 (Sinkhorn entry)}. A fit that reaches the cap is neither scored nor recorded as failed: the user decides case by case whether it counts as failed; a failed fit counts as a collapse in P2; each decision is listed with the results; no default outcome is registered \src{SI-81 (b)}.
 \end{itemize}
 
 \subsection{Data}
@@ -396,8 +396,8 @@ Reproduction detail is in the Supplementary material [S-...].
 \item B: mean of PCR comparison, batch ASW, graph iLISI, graph connectivity, kBET (\citealp{buttner2019test}) \src{PREREG \S1; \file{score_scib_native.py}:51}. C: mean of NMI, ARI, cell-type ASW, isolated-label F1 and silhouette, graph cLISI, plus cell-cycle conservation (pancreas, lung, immune, immune\_hum\_mou) and trajectory (immune, immune\_hum\_mou, the tasks with pseudotime) \src{PREREG \S1; SI-28; \file{score_scib_native.py}:52, :212--213}.
 \item Raw values on $[0, 1]$; no rule uses min--max scaling; required metrics must be finite \src{PREREG \S1}.
 \item kBET: R seed 0 set before every call; rule scripts refuse mixed kBET seeds \src{PREREG \S1; \file{score_scib_native.py}:54, :80}.
-\item NMI of 0 at every resolution keeps scib's error, decided case by case \src{SI-65}; latents without cell names are refused \src{SI-64}.
-\item Score rows record scorer commit, CPU and versions, and mixed provenance is refused \src{PREREG \S9, 2026-10-04 (CR-05, CR-08)}.
+\item NMI of 0 at every resolution keeps scib's error; the user decides each such case, every case is listed with the results, and no default outcome is registered \src{SI-65; SI-81 (a)}; latents without cell names are refused \src{SI-64}.
+\item Score rows record scorer commit, CPU and versions, and mixed provenance is refused \src{PREREG \S9, 2026-10-04 (CR-05, CR-08)}. The stage runner also refuses a latent or a divergence record of any arm that names no git commit, and any result made from a checkout with uncommitted changes \src{SI-85; SI-89}.
 \item Sensitivity: X1 comparisons on immune and immune\_hum\_mou also with C without trajectory \src{SI-38}.
 \end{itemize}
 
@@ -411,9 +411,9 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Rule R4: $b^* = b_0 + 0.5\,(b_{\mathrm{common}} - b_0)$ per task and decoder, unscaled; matched strength = failure-free grid point with seed-mean B closest to b* \src{SI-21; PREREG \S4}.
 \item Grid edges: extensions only for matching; P1 and the frontier use the six registered strengths; edge optima disclosed \src{SI-55; PREREG \S4}.
 \item Curves of C against B start at $\lambda = 0$; low-signal blocks ($b_{\mathrm{common}} - b_0 < 0.02$) are not evaluable for P1 or rules R2/R3 and are reported separately \src{SI-56; SI-66; PREREG \S4}.
-\item Freeze: rule files and manifest builder tagged before first A1 fit; each rule's record (input hashes, commit) committed before its stage \src{PREREG \S6}. Manifest of record at the freeze: 6,930 rows, SHA-256 6efbe422c8f09f98\ldots{} \src{PREREG \S9, 2026-10-04; recomputed}. The pruned manifest v5 (v4 without X3, X7, X8, X12 and X15) has 5,280 rows, SHA-256 ce8dfbf2008b4dbc\ldots{} \src{SI-103; \file{manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv.sha256}}.
-\item Fits and scores at c88cce3 and at the new tag form one set except for Sinkhorn, whose rows must carry the new tag; no rescoring \src{SI-54; SI-60; \file{docs/EQUIVALENT_COMMITS.json}}.
-\item \pending{freeze of version 3 (amendments of 2026-10-13/14, ANALYSIS\_SPEC, \file{analysis_x1.py})}{diff review, then tag prereg-tier12-v3 (SI-52, SI-60)}
+\item Freeze: rule files and manifest builder tagged before first A1 fit; each rule's record (input hashes, commit) committed before its stage \src{PREREG \S6}. Manifest of record at the freeze: 6,930 rows, SHA-256 6efbe422c8f09f98\ldots{} \src{PREREG \S9, 2026-10-04; recomputed}. The manifest of record after the pruning of 2026-10-17 is v5, in which X3, X7, X8, X12 and X15 are not run: 5,280 rows, SHA-256 ce8dfbf2008b4dbc\ldots{} (full value in S-E1) \src{SI-103; \file{manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv.sha256}}.
+\item Code of record: tag prereg-tier12-v3, commit 10a1ca5, for X1 and for the Sinkhorn pilot fits and the rules run on them. Fits and scores made at c88cce3 (tag prereg-tier12-v2) form one set with those made at v3 for every arm except Sinkhorn, whose rows must carry v3; no rescoring \src{SI-54; SI-60; \file{docs/EQUIVALENT_COMMITS.json}; NB-20261017-20; NB-20261019-02}.
+\item Version 3 (amendments of 2026-10-13 to 2026-10-16, ANALYSIS\_SPEC, \file{analysis_x1.py}) is frozen by the annotated tag prereg-tier12-v3 on commit 10a1ca5, made on 2026-10-16 on the user's decision after the final diff review \src{SI-52; SI-60; NB-20261016-32; NB-20261016-34}. SHA-256 hashes of every X1 and X13 score file that existed when the list was made (2026-10-15, extended on 2026-10-16 to the runner logs and status records) are committed in \file{experiments/x1_x13_score_hashes_20261015/}; the tagged commit reached GitHub at 2026-10-16T21:48:53Z (server time; GitHub keeps no record of when the tag reference was created) \src{SI-79; SI-90; NB-20261017-22}.
 \end{itemize}
 
 \subsection{Statistical analysis of X1}
@@ -427,23 +427,33 @@ Reproduction detail is in the Supplementary material [S-...].
 \item Area corner: plain scVI's B and its C minus 0.10; divided by the task's batch range to pool \src{SI-72}.
 \item Pooling: overall + family + task effects, prior scales 0.1 (0.05, 0.2 as sensitivity), exact calculation \src{SI-73}.
 \item Margin 0.01; direction, practical equivalence or inconclusive at posterior probability 0.95, the region-of-practical-equivalence rule of \citealp{corani2017statistical} \src{SI-74}.
-\item P2: collapse = failed, or C at least 0.10 below the same seed's plain scVI; Clopper--Pearson intervals (\citealp{clopper1934use}); pooled critic-minus-discriminator difference (prior 0.25, margin 5 points) \src{SI-75}. \pending{whether SI-75 stands after the pilot recount (8 of 54, not 8 of 45)}{diff review}
+\item P2: collapse = failed, or C at least 0.10 below the same seed's plain scVI; Clopper--Pearson intervals (\citealp{clopper1934use}); pooled critic-minus-discriminator difference (prior 0.25, margin 5 points) \src{SI-75; the user confirmed on 2026-10-15 that SI-75 stands, NB-20261015-07}.
 \item Local versus global: mean of iLISI, kBET, graph connectivity at the P1 crossing; sign test plus the P1 model, margin 0.01 \src{SI-76}.
 \item Selection score $S = 0.4B + 0.6C$, unscaled \src{SI-77}.
 \item Frequentist companion: exact two-sided Wilcoxon signed-rank test on the per-task differences, with Holm's correction over the six primary results (P1, the trade-off area and P2, each per decoder); with 6 real tasks its smallest p, $2/2^6 = 0.031$, is above Holm's first threshold $0.05/6 = 0.0083$, so it cannot reject at the Holm-adjusted level and is reported as descriptive \src{SI-80; ANALYSIS\_SPEC \S5; \file{analysis_x1.py}:523--527}
-\item \pending{agent proposals of ANALYSIS\_SPEC \S2.3, \S5, \S8, \S9, \S10, \S11 (unnamed sensitivities), \S15}{diff review; approvals become ledger entries}
-\item \pending{definition of ``examined''; redone R1 record name; scaling sensitivities}{diff review (ANALYSIS\_SPEC App.~A.3)}
-\item Power (PREREG \S5 rule; frozen record): the design is flagged UNDERPOWERED; minimal detectable effect at 80\% power 0.131 for D = 6 real tasks (0.182 for D = 4 families) [S-M15] \src{PREREG \S5; \file{docs/prereg/r1_record.json} power}. \pending{recomputed estimate with the P1 reading and evaluable blocks only}{rule R4 on A1 re-run after the Sinkhorn redo (SI-57)}
-\item \pending{one analysis run after all 3,000 X1 and 408 X13 rows are scored or failed}{tag prereg-tier12-v3}
+\item The agent proposals of ANALYSIS\_SPEC \S2.3 (not-evaluable rule), \S5 (marginal declarations; Holm for the descriptive companion), \S8 (leave-one-family-out transfer rule), \S9 (best-of-k placement), \S10 (width of the range of good strengths), \S11 (sensitivity analyses that no decision names) and \S15 (implementation details) were approved by the user as rules on 2026-10-15 \src{SI-80}. A dataset whose leave-one-seed-out standard error is below $10^{-6}$ is kept with its standard error raised to $10^{-6}$, and the number of such datasets is reported next to each pooled declaration \src{SI-83}. The user also approved five designs of the analysis code: a 201-point grid for the between-dataset spreads, a solve-based formula for the overall difference, recomputation of $b_0$, $b_{\mathrm{common}}$, $b^*$ and the low-signal flag from the same rows with a stop on a mismatch, t-based limits in the sign table, and the per-run sensitivity for P1 and the local-versus-global test only \src{SI-84}.
+\item ``Examined'': a score is examined when a person reads its value or an analysis script uses it; checks that print only counts or flags do not count; this covers every X1 and X13 score of any arm, and a value shown to an AI agent is disclosed, not examined \src{SI-78}. The analysis script reads the rule-R1 record \file{docs/prereg/r1_record.json}; the rule records keep their file names \src{SI-87; ANALYSIS\_SPEC \S1}.
+\item Four scaling checks of PAPER\_PLAN \S5 (leave-one-method-out rescaling, z-score aggregation, a composite without the silhouette metrics, and rank stability by Kendall's tau, a rank-agreement coefficient) are reported as exploratory, not pre-registered, and used for no conclusion \src{SI-82}. The counts of training steps whose minibatch gave a critic-free loss no pair of batches to compare and, per arm, of cells not evaluable because the arm never reaches b* are tabulated by a reporting script written after the runs; the tag freezes this promise, not the script \src{SI-81 (c)}.
+\item Power (PREREG \S5 rule; frozen record): the design is flagged UNDERPOWERED; minimal detectable effect at 80\% power 0.131 for D = 6 real tasks (0.182 for D = 4 families) [S-M15] \src{PREREG \S5; \file{docs/prereg/r1_record.json} power}. \pending{recomputed estimate with the P1 reading and evaluable blocks only}{the rule-R4 record on A1 that holds the Sinkhorn pilot fits (frozen on 2026-10-19, NB-20261019-03) is committed and the power report recomputed from it (SI-57)}
+\item One analysis run, after all 3,000 X1 and 408 X13 rows are scored or failed; the script refuses to overwrite an existing record \src{ANALYSIS\_SPEC \S1, \S14; PREREG \S9, 2026-10-14 (X1 analyses)}.
 \end{itemize}
 
 \subsection{Follow-up experiments}
 [S-E1, S-M9]
 \begin{itemize}
-\item Seeds 10--12, at the strengths matched by rule R4 on X1; variant arms inherit their base arm's strength \src{PREREG \S4; SI-26}. \pending{matched strengths}{rule R4 on the scored X1}
-\item X6: discriminator plain, spectrally normalised (\citealp{miyato2018spectral}) or with an R1 gradient penalty (\citealp[Eq.~9]{mescheder2018training}; $\gamma = 10$ is this study's setting); pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps \src{SI-22; manifest}.
-\item \pending{analysis of X6}{locked during X1, before any X1 result is examined (SI-68)}
+\item Seeds 10--12 (3 runs per point), at the three strengths that rule R4 assigns on X1 (the matched strength and its two neighbours on the X1 grid: lo, matched, hi); variant arms inherit their base arm's strengths \src{PREREG \S4; SI-26}. \pending{matched strengths}{rule R4 on the scored X1}
+\item X6 (divergence versus regularisation versus adversary steps): tasks atac\_small, immune and pancreas; both decoders; 486 rows, 243 per decoder \src{SI-93; manifest v5}. Arms, each at 1 step unless stated: discriminator plain; spectrally normalised (\citealp{miyato2018spectral}); with an R1 gradient penalty (\citealp[Eq.~9]{mescheder2018training}; $\gamma = 10$ is this study's setting); spectrally normalised and trained with the critic's optimiser settings (Adam, learning rate $10^{-4}$, betas (0, 0.9)), which takes the discriminator's strengths \src{SI-98}; pooled critic at 1, 5 and 10 steps, and spectrally normalised at 1 and 5 steps. Spectrally normalised critics compute no gradient penalty \src{SI-22; SI-93; SI-98; manifest v5; \file{scvi_adversarial_plan.py} on branch followup-build:266--269, :410}. \pending{follow-up code tag (the spectrally normalised discriminator with the critic's optimiser; no gradient penalty on spectrally normalised critics)}{new code tag after prereg-tier12-v3, before rule R4 on X1}
+\item \pending{analysis of X6 (draft \file{docs/ANALYSIS_SPEC_FOLLOWUPS.md} on branch followup-analysis-spec: one confirmatory contrast per decoder, the spectrally normalised pooled critic at 1 step minus the spectrally normalised discriminator with the critic's optimiser, so Holm's correction runs over 2 results; biology read at the matched batch score b* only where the cell's own three strengths bracket b*, otherwise at the matched strength alone and labelled fixed-strength; margin 0.01; all 3 leave-one-seed-out readings required)}{lock of that specification with its script and tests by the follow-up code tag, before rule R4 on X1 and before any X1 result is examined (SI-68)}
 \item Dropped on 2026-10-17: X3, X7, X8, X12 and X15 \src{SI-103}. R0 and X10 minimal use X1 latents and the per-epoch histories saved in them, with no new fits.
+\end{itemize}
+
+\subsection{Exploratory analyses (R0 and X10)}
+\begin{itemize}
+\item Both are exploratory: no confirmed or refuted claim, no fits of their own, X1 fit logging unchanged \src{SI-68; SI-103; NB-20261018-01}.
+\item R0 (the premise check: are batches nearly separable before integration, and does the discriminator's gradient vanish early in training while the critics' gradients persist) reads the per-epoch training histories stored in every X1 latent file and the $\lambda = 0$ latents of plain scVI \src{SI-103; \file{fit_paper_config.py}:351--361}.
+\item Traces, each logged once per epoch as the average over that epoch's training steps: adv\_grad\_norm, the mean over a minibatch's cells of the Euclidean norm of the gradient of the unscaled alignment term (the adversary's term before multiplication by $\lambda$) with respect to the latent coordinates the adversary reads, for the six adversarial arms; adv\_acc, the fraction of a minibatch's cells whose batch the discriminator predicts correctly after its update, for the discriminator arm only. Plain scVI (arm none) and scvi\_adv write neither \src{\file{scvi_adversarial_plan.py}:300--301, :348--351, :378, :432, :435; \file{fit_paper_config.py}:351--361}.
+\item \pending{the batch-separability statistic computed on the $\lambda = 0$ latents, and what counts as early in training}{the R0 analysis script is written and committed (ANALYSIS\_SPEC does not yet define them)}
+\item X10 minimal (downstream biology at matched batch removal): cell-type labels learned on some batches and predicted on the others (cross-batch label transfer), scored as the F1 score per cell type (the harmonic mean of precision and recall for that cell type) at the matched batch score b*, on X1 latents \src{SI-103; PREREG \S9, 2026-10-17 (pruning); NB-20261018-01}. \pending{classifier, batch split and the choice of latents at b*}{the X10 analysis script is written and committed; the pruning decision leaves the classifier and the batch split to it}
 \end{itemize}
 
 \subsection{Baselines (X13)}
@@ -456,7 +466,7 @@ Reproduction detail is in the Supplementary material [S-...].
 \item scANVI (\citealp{xu2021probabilistic}): scIB's protocol, scVI then scANVI with all labels; seeds 0--4 \src{\file{fit_paper_config.py}:399, :401; manifest}.
 \item sysVI (\citealp{hrovatin2025integrating}): scvi-tools' SysVI, cycle weight $\in \{1, 2, 5, 10, 20, 50\}$, seeds 0--4, no KL warm-up \src{\file{fit_paper_config.py}:404, :413; manifest; PREREG \S9, 2026-10-04 (CR-12)}.
 \item Harmony, Scanorama and PCA use the file's normalised values on its highly variable genes \src{\file{run_cpu_baselines.py}:230}.
-\item \pending{placement rule (best-of-k at equal k; scANVI in a label-aware stratum)}{diff review (ANALYSIS\_SPEC \S9)}
+\item Placement rule: each method family compared at equal k by the expected best of k configurations, with scANVI in its own label-aware stratum \src{SI-68; SI-77; SI-80; ANALYSIS\_SPEC \S9}.
 \end{itemize}
 
 \subsection{Compute and reproducibility}
@@ -464,11 +474,11 @@ Reproduction detail is in the Supplementary material [S-...].
 \begin{itemize}
 \item Each task runs entirely on one machine \src{SI-17}.
 \item atac\_small, immune, sim1: local RTX 3080 \src{SI-30}; the other five: JHPCE L40S GPUs \src{SI-39}.
-\item Scoring is local, from one worktree pinned at the tag per stage \src{SI-47; PREREG \S9, 2026-10-04 (b)}.
+\item Scoring is local, from one worktree pinned at the tag of the stage: prereg-tier12-v3 for X1 and the Sinkhorn pilot fits, prereg-tier12-v2 for the other pilot rows, which count as v3 for every arm but Sinkhorn \src{SI-47; SI-54; PREREG \S9, 2026-10-04 (b); NB-20261017-20}.
 \item Software [S-E5]: scvi-tools 1.4.2, PyTorch 2.13.0 (fits); scib 1.1.7, R 4.5.2, kBET 0.99.6 (scoring) \src{\file{cluster/envspec/local_scvi-}\file{api_pip_freeze.txt}; \file{docs/jhpce/gate_data/versions_*_local.json}}.
 \item Each fit sets scvi-tools' seed to its row seed \src{\file{scvi_adversarial_plan.py}:526}; each latent stores its row, resolved settings and provenance \src{\file{fit_paper_config.py}:4--8}.
 \item Identity checks at c3fd92d (CPU, 1 epoch, 1 thread, one fit per code path): 59 of 59 non-Sinkhorn fit code paths and 7 of 7 rescored latents (all 32 compared columns) equal c88cce3 \src{\file{docs/EQUIVALENT_COMMITS.json}; NB-20261013-39, -40}.
-\item From c3fd92d to 08f1e3c no file under \file{src/} and none of \file{fit_paper_config.py}, \file{scvi_adversarial_plan.py}, \file{score_scib_native.py} or their imports changed, which is the validity condition of \file{docs/EQUIVALENT_COMMITS.json}; the stage runner \file{run_stage.py}, which is in the fit import closure, changed its start-up provenance check (CF-02, 8351999), and the proof was taken to carry over without a re-run \src{git log c3fd92d..08f1e3c; NB-20261014-29 (agent judgment)}. \pending{acceptance of the carry-over; tag commit, with the checks repeated if fit or score code changes}{diff review, tag prereg-tier12-v3 (SI-52)}
+\item From c3fd92d to the tag prereg-tier12-v3 (10a1ca5) no file under \file{src/} and none of \file{fit_paper_config.py}, \file{scvi_adversarial_plan.py}, \file{score_scib_native.py} or their imports changed, which is the validity condition of \file{docs/EQUIVALENT_COMMITS.json}; the scripts that changed there are \file{analysis_x1.py}, \file{decide_a2_a3.py}, \file{prereg_rules.py} (none imported by the fit or score code) and the stage runner \file{run_stage.py}, which is in the fit import closure and changed its start-up provenance checks (CF-02, 8351999). The proof was taken to carry over without a re-run, and the tag was made on the user's decision after the final diff review \src{git diff --stat c3fd92d 10a1ca5; NB-20261014-29 (agent judgment); NB-20261016-32}.
 \item Data provenance: scIB source files and MD5 checksums [S-D2] \src{\file{docs/prepped_fingerprints_scib.json}}.
 \end{itemize}
 
@@ -478,7 +488,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 \subsection{R0 Premise (exploratory)}
 \begin{itemize}
 \item Endpoint and rule: none; exploratory, no confirmed or refuted claim \src{SI-68}.
-\item Data: the per-epoch training histories saved in every X1 latent file (adv\_grad\_norm and adv\_acc for the discriminator arms) and the $\lambda = 0$ latents; no new fits, X1 fit logging unchanged \src{SI-103; NB-20261018-01; ANALYSIS\_SPEC \S0}.
+\item Data: the per-epoch training histories saved in every X1 latent file (adv\_grad\_norm for the six adversarial arms, adv\_acc for the discriminator arm; plain scVI and scvi\_adv write neither) and the $\lambda = 0$ latents; no new fits, X1 fit logging unchanged \src{SI-103; NB-20261018-01; ANALYSIS\_SPEC \S0; \file{scvi_adversarial_plan.py}:348--351, :378, :432, :435}.
 \item Figure: \pending{premise figure}{your decision}
 \item Result: \pending{R0 result}{X1 scored and the single analysis run}
 \end{itemize}
@@ -494,7 +504,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 
 \subsection{R3 Sensitivity to penalty strength and design factors}
 \begin{itemize}
-\item Endpoint (X1 part): width of each method's range of good strengths, ranked by S [S-M18] \src{SI-68; SI-77}; \pending{window rule}{diff review (ANALYSIS\_SPEC \S10)}
+\item Endpoint (X1 part): width of each method's range of good strengths, ranked by S [S-M18] \src{SI-68; SI-77; SI-80; ANALYSIS\_SPEC \S10}
 \item Factor effects: X6 only \src{SI-103}; \pending{endpoints and rules for X6}{locked during X1 (SI-68)}
 \item Figure: \pending{strength-curve and factor figures}{your decision}
 \item Result: \pending{window widths; factor effects}{X1 scored and the single analysis run; follow-up analysis run}
@@ -502,7 +512,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 
 \subsection{R5 Placement against standard integrators}
 \begin{itemize}
-\item Endpoints: single-strength tables and the comparison at equal numbers of tries, ranked by S \src{SI-68; SI-77}; PCA is the uncorrected anchor \src{SI-36}; \pending{transfer and best-of-k rules}{diff review (ANALYSIS\_SPEC \S8, \S9)}
+\item Endpoints: single-strength tables and the comparison at equal numbers of tries, ranked by S \src{SI-68; SI-77}; PCA is the uncorrected anchor \src{SI-36}; transfer and best-of-k rules \src{SI-80; ANALYSIS\_SPEC \S8, \S9}
 \item Experiments: X13 and X1 \src{SI-68}.
 \item Figure: \pending{placement figure}{your decision}
 \item Result: \pending{placement and single-strength results}{X1 and X13 scored and the single analysis run}
@@ -543,7 +553,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 
 \clearpage
 \section*{Supplementary material}
-Equations are read from the code at commit 08f1e3c; file:line as in the reading guide.
+Equations are read from the code at the tag prereg-tier12-v3 (commit 10a1ca5), except the X6 variants of S-M9, which are read from branch followup-build (not yet tagged); file:line as in the reading guide.
 
 \subsection*{S-M Methods detail}
 \paragraph{S-M1 Generator objective, backbone loss and KL weight.}
@@ -578,8 +588,8 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \begin{itemize}
 \item $\mathcal{L}_{\mathrm{adv}} = \frac{1}{K}\sum_k S_\varepsilon(a_k, b_k)$, $S_\varepsilon(a, b) = \mathrm{OT}_\varepsilon(a, b) - \frac{1}{2}\mathrm{OT}_\varepsilon(a, a) - \frac{1}{2}\mathrm{OT}_\varepsilon(b, b)$, $\mathrm{OT}_\varepsilon$ the regularised transport value $\langle a, f\rangle + \langle b, g\rangle$ from the dual potentials \src{\file{wcd/alignment.py}:232; \file{wcd/alignment.py}:249}.
 \item Cost $c(x, y) = \|x - y\|_2$; blur $\varepsilon = 0.05\sqrt{2d}$ (0.224 for $d = 10$), reached by annealing from the cost diameter with ratio 0.8 \src{\file{wcd/alignment.py}:236--243; \file{wcd/alignment.py}:50, :51, :256}.
-\item Solve in float64 \src{SI-62}; at most 500,000 iterations at the final $\varepsilon$, with an error at the cap; a NaN marginal error stops at once, $+\infty$ does not \src{SI-61}; float32 was validated against SI-58's criterion and not adopted \src{SI-58; SI-62}; gradient taken once at the converged plan \src{SI-51; \file{wcd/alignment.py}:37}.
-\item \pending{convergence tolerance ($10^{-4}$ L1 marginal error, \file{wcd/alignment.py}:56) and whether a fit that keeps reaching the cap counts as failed}{diff review and tag prereg-tier12-v3}
+\item Solve in float64 \src{SI-62}; at most 500,000 iterations at the final $\varepsilon$, with an error at the cap; a NaN marginal error stops at once, $+\infty$ does not \src{SI-61}; gradient taken once at the converged plan \src{SI-51; \file{wcd/alignment.py}:37}.
+\item Convergence tolerance: $10^{-4}$ L1 marginal error of every plan \src{\file{wcd/alignment.py}:56; PREREG \S9, 2026-10-13 (Sinkhorn entry)}. A fit that reaches the cap is decided by the user case by case; a failed fit counts as a collapse in P2; each decision is listed with the results; no default outcome is registered \src{SI-81 (b)}.
 \end{itemize}
 \paragraph{S-M7 scvi-tools adversary (scvi\_adv).}
 \begin{itemize}
@@ -593,7 +603,8 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \paragraph{S-M9 Follow-up arm variants.}
 \begin{itemize}
 \item R1 penalty (X6; one-vs-rest form of \citealp[Eq.~9]{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
-\item Spectral normalisation (X6; \citealp{miyato2018spectral}): every head layer spectrally normalised and the gradient penalty dropped \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py}:288}.
+\item Spectral normalisation (X6; \citealp{miyato2018spectral}): every head layer spectrally normalised and no gradient penalty computed \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py} on branch followup-build:248, :410}.
+\item Spectrally normalised discriminator with the critic's optimiser (X6; SI-98): the same head and loss as the spectrally normalised discriminator, 1 step per training step, trained by Adam with learning rate $10^{-4}$ and betas (0, 0.9), the settings of the critics, instead of the discriminator's Adam (learning rate $10^{-3}$, $\epsilon$ 0.01, weight decay $10^{-6}$); it takes the penalty strengths of the discriminator \src{SI-98; \file{scvi_adversarial_plan.py} on branch followup-build:266--269; \file{prereg_rules.py} on branch followup-build:62}.
 \end{itemize}
 \paragraph{S-M10 Rule R1 (A1 to the X1 grids).}
 \begin{itemize}
@@ -621,13 +632,13 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \item bio@b*: C at the first point equal to b* (within $10^{-9}$), else linear interpolation in B over the first adjacent pair that brackets b* \src{SI-69; PREREG \S3; \file{prereg_rules.py}:610}.
 \item $d = \mathrm{bio@}b^*(\text{reference}) - \mathrm{bio@}b^*(\text{discriminator})$; readings $d_{(i)}$ leave seed $i$ out of both arms and of $\lambda = 0$, with b* fixed; $s^2 = \frac{m-1}{m}\sum_i (d_{(i)} - \bar d_{(\cdot)})^2$ over the $m$ readings that exist \src{SI-69; ANALYSIS\_SPEC App.~A.1, Q2 option A}.
 \item Sensitivity analyses: each run read on its own curve \src{SI-69}; points with any failed run removed \src{SI-71}.
-\item \pending{not-evaluable rule (low-signal; a curve that never reaches b*; fewer than 4 of 5 leave-one-out readings) and later crossings counted but unused}{diff review (ANALYSIS\_SPEC \S2.2, \S2.3)}
+\item Not evaluable: a cell flagged low-signal, a cell where either arm's curve never reaches b*, or a cell with fewer than 4 of the 5 leave-one-seed-out readings; each is listed with its reason, and readings of low-signal cells are shown separately and never pooled. Further crossings of b* (a curve that falls back past its batch peak) are counted and reported but not used \src{SI-80; SI-56; ANALYSIS\_SPEC \S2.2, \S2.3}.
 \end{itemize}
 \paragraph{S-M14 Trade-off area.}
 \begin{itemize}
 \item $\mathrm{Area} = \bigl|\bigcup_i [b_0, \bar B_i] \times [c_0 - 0.10, \bar C_i]\bigr|$ over the registered points with $\bar B_i > b_0$ and $\bar C_i > c_0 - 0.10$; pooled as $\mathrm{Area}/(b_{\mathrm{common}} - b_0)$; low-signal cells have no area \src{SI-72; SI-56}.
 \item Co-primary with P1, one result per decoder \src{SI-68; SI-70; SI-72 (option A chosen over a secondary area)}.
-\item \pending{corner moving with the dropped seed in leave-one-out repeats; corner $(b_0, 0)$ as sensitivity}{diff review (ANALYSIS\_SPEC \S15.3, \S11)}
+\item In each leave-one-seed-out repeat the corner moves with the dropped seed ($b_0$ and $c_0$ from the other 4 plain-scVI runs) while the divisor $b_{\mathrm{common}} - b_0$ stays fixed; the corner $(b_0, 0)$ is a sensitivity analysis \src{SI-80; ANALYSIS\_SPEC \S11, \S15.3}.
 \end{itemize}
 \paragraph{S-M15 Pooling and declarations.}
 \begin{itemize}
@@ -635,22 +646,25 @@ Equations are read from the code at commit 08f1e3c; file:line as in the reading 
 \item Direction if $P(\Delta > 0.01) \geq 0.95$ or $P(\Delta < -0.01) \geq 0.95$; practically equivalent if $P(|\Delta| \leq 0.01) \geq 0.95$; otherwise inconclusive \src{SI-74}.
 \item Frequentist companion: exact two-sided Wilcoxon signed-rank test on the $d_t$; smallest attainable p with 6 tasks $2/2^6 = 0.03125$, above Holm's first threshold 0.05/6 = 0.0083 for the six primary results (P1, the trade-off area and P2, each per decoder); the companion is descriptive \src{SI-80; ANALYSIS\_SPEC \S5; \file{analysis_x1.py}:523--527}.
 \item Power (PREREG \S5 rule; frozen record): the design is flagged UNDERPOWERED; for D = 6 real tasks SE 0.045, minimal detectable effect at 80\% power 0.131 and power at $\Delta = 0.02$ 0.104 (D = 4 families: 0.182 and 0.088); equivalence within $\pm 0.01$ or $\pm 0.02$ is unreachable; computed for the matched-strength contrast on the six A1 blocks, sim1 and the two low-signal blocks included \src{PREREG \S5; \file{docs/prereg/r1_record.json} power}; noise estimates $\hat\sigma = 0.0298$ (12 df) and $\hat\tau = 0.109$ (4 df) \src{\file{docs/prereg/r1_record.json} power}.
-\item \pending{integration grid (201 log-spaced points per spread), the zero-spread rule ($s_t < 10^{-6}$), the reported quantities and the pairs-first and six-independent sensitivity analyses}{diff review (ANALYSIS\_SPEC \S4 amendments, \S11, \S15.4)}
+\item Integration: each spread $\tau$ is integrated on a grid of 201 points evenly spaced in $\log\tau$ from $10^{-15}$ to 5 prior scales (trapezoid rule in $\log\tau$) \src{SI-84; ANALYSIS\_SPEC \S4, \S15.4}. A dataset whose leave-one-seed-out standard error $s_t$ is below $10^{-6}$ is kept, with $s_t$ raised to $10^{-6}$ (also in the paired-datasets analysis, where a family's averaged standard error is raised again if needed); every raised dataset is listed and their number is reported next to each pooled declaration \src{SI-83}.
+\item Reported: the posterior mean and 95\% interval of $\Delta$; $P(\Delta < -r)$, $P(|\Delta| \leq r)$ and $P(\Delta > r)$ for the margin $r = 0.01$; the heterogeneity $\sqrt{\tau_f^2 + \tau_d^2}$; per-dataset posteriors; a per-dataset sign table with intervals $d \pm t_{0.975,\,m-1}\,s$ and no per-dataset significance claim. Sensitivity analyses: the two related pairs of datasets averaged first (4 units, one spread), six independent datasets (one spread), prior scales 0.05 and 0.2 \src{SI-73; SI-80; ANALYSIS\_SPEC \S4, \S11}.
 \end{itemize}
 \paragraph{S-M16 P2 collapse rate.}
 \begin{itemize}
 \item A run collapses if it failed or if $C \leq C_{\lambda = 0}(\text{same seed}) - 0.10$; rate per arm and decoder over the six registered points and 5 seeds, per task and pooled over the 6 real tasks, with Clopper--Pearson 95\% intervals (\citealp{clopper1934use}) \src{SI-75}.
-\item Comparison: per-task rate difference (reference minus discriminator) with the Agresti--Caffo standard error, pooled with the S-M15 model at $\Delta \sim N(0, 0.25^2)$, $\tau \sim$ half-normal(0.25), margin 0.05 \src{SI-75; ANALYSIS\_SPEC App.~A.1, Q9 option A}. \pending{whether SI-75 stands}{diff review}
+\item Comparison: per-task rate difference (reference minus discriminator) with the Agresti--Caffo standard error, pooled with the S-M15 model at $\Delta \sim N(0, 0.25^2)$, $\tau \sim$ half-normal(0.25), margin 0.05 \src{SI-75; ANALYSIS\_SPEC App.~A.1, Q9 option A}; the user confirmed on 2026-10-15 that SI-75 stands \src{NB-20261015-07}.
 \end{itemize}
 \paragraph{S-M17 Local versus global batch removal.}
 \begin{itemize}
-\item $L$ = mean of iLISI, kBET and graph connectivity; $G$ = mean of PCR comparison and batch ASW; so $B = (3L + 2G)/5$, and at equal B, $3\Delta L + 2\Delta G = 0$ \src{SI-76; \file{analysis_x1.py}:36, :37}.
+\item $L$ = mean of iLISI, kBET and graph connectivity; $G$ = mean of PCR comparison and batch ASW; so $B = (3L + 2G)/5$, and at equal B, $3\Delta L + 2\Delta G = 0$ \src{SI-76; \file{analysis_x1.py}:41, :42}.
 \item Question: is $\Delta L > 0$ (critic minus discriminator) at the P1 crossing, with the same interpolation weights; exact two-sided sign test over the real tasks and the S-M15 model, margin 0.01 \src{SI-76}.
 \end{itemize}
 \paragraph{S-M18 Selection score and selection rules.}
 \begin{itemize}
 \item $S = 0.4B + 0.6C$, unscaled, for single-strength tables, the equal-tries comparison and the window width \src{SI-77}.
-\item \pending{transfer strength: the registered point with the highest mean S over the real tasks of the other families, failure-free, ties to the smaller $\lambda$; best-of-k: expected best of k configurations drawn at random, compared at equal k; window: points with mean S at least the lower 95\% bound of the best point, width in decades}{diff review (ANALYSIS\_SPEC \S8--\S10)}
+\item Transfer strength (leave-one-family-out): for each held-out real task, arm and decoder, the registered point with the highest mean S over the real tasks of the other families, using only points without a failed run in any of them, ties to the smaller $\lambda$; sim1 and sim2 take the strength chosen on all six real tasks; the tables also give each task's own best strength, labelled an optimistic bound \src{SI-80; ANALYSIS\_SPEC \S8}.
+\item Best-of-k: per task and decoder, the configurations of each method family (each adversarial arm: 6 strengths; Harmony: 6 $\theta$ at 10 PCs; Scanorama: 6 knn at 10 dimensions; sysVI: 6 cycle weights; scANVI, plain scVI and scvi\_adv: 1 each; PCA is the uncorrected anchor, not a family), each scored by its mean S over its runs. The expected best of k configurations drawn at random is $E_k = \sum_i S_{(i)} \binom{i-1}{k-1} / \binom{N}{k}$ with the $N$ scores sorted ascending; families are compared at equal k and the result is labelled optimistic; scANVI is shown in its own label-aware stratum \src{SI-68; SI-77; SI-80; ANALYSIS\_SPEC \S9}.
+\item Window: the points whose mean S is at least the lower end of the two-sided 95\% t interval ($n - 1$ degrees of freedom) of the best point's mean; width in decades, $\log_{10}$(largest strength) $- \log_{10}$(smallest), and the number of points \src{SI-80; ANALYSIS\_SPEC \S10, \S15}.
 \end{itemize}
 
 \subsection*{S-D Data}
@@ -694,7 +708,7 @@ Task & Non-integer batches (cells) & Pseudo-time & Genes & Source file & Source 
 
 \subsection*{S-E Experiments}
 \needspace{18\baselineskip}
-\paragraph{S-E1 Experiments in the manifest.} The counts are those of manifest v5, \file{manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv}, 5,280 rows, SHA-256 ce8dfbf2008b4dbc\ldots: v4 without X3, X7, X8, X12 and X15; the manifest of record at the freeze (v3) has 6,930 rows, SHA-256 6efbe422c8f09f98\ldots; adversary steps per training step in brackets (none: critic-free or no adversary) \src{SI-103; manifest (row count); \file{docs/manifest_v5_counts.csv}}.
+\paragraph{S-E1 Experiments in the manifest.} The counts are those of manifest v5, \file{manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv}, 5,280 rows, SHA-256 \texttt{ce8dfbf2008b4dbca3b33fbe266039f6\allowbreak{}8a3cf8befb2dc66efcdfa00774a46432} (X3, X7, X8, X12 and X15 are not run); the extension rows that rules R1 and R4 add are in separate extension manifests; adversary steps per training step in brackets (none: critic-free or no adversary) \src{SI-103; manifest (row count and SHA-256 computed with Python's hashlib on the file at origin/followup-build, 4685d50); \file{docs/manifest_v5_counts.csv}}.
 {\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.05\linewidth}r>{\raggedright\arraybackslash}p{0.18\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.11\linewidth}>{\raggedright\arraybackslash}p{0.1\linewidth}>{\raggedright\arraybackslash}p{0.16\linewidth}}
 \toprule
@@ -729,14 +743,14 @@ Generator optimiser & Adam, $10^{-3}$, $\epsilon$ 0.01, weight decay $10^{-6}$ &
 KL warm-up & 400 epochs, linear & \src{\file{fit_paper_config.py}:123} \\
 Adversary head & 128, 128, ReLU & \src{\file{wcd/adversarial.py}:50; manifest} \\
 Discriminator optimiser, steps & Adam, $10^{-3}$, $\epsilon$ 0.01, weight decay $10^{-6}$; 1 & \src{\file{scvi_adversarial_plan.py}:260; PREREG \S9, 2026-10-04 (CR-12); SI-01; manifest} \\
-Critic optimiser, steps & Adam, $10^{-4}$, betas (0, 0.9); 5 (X6 pooled: 1, 5, 10) & \src{\file{scvi_adversarial_plan.py}:258; manifest} \\
+Critic optimiser, steps & Adam, $10^{-4}$, betas (0, 0.9); 5 (X6 pooled: 1, 5, 10; the X6 spectrally normalised discriminator with the critic's optimiser: Adam $10^{-4}$, betas (0, 0.9), 1 step) & \src{\file{scvi_adversarial_plan.py}:258; manifest; SI-98} \\
 Gradient penalty & weight 10, two-sided & \src{\file{wcd/critic.py}:158--210} \\
 Barycenter & at most 10 cold-start iterations (stop threshold $10^{-7}$), support = minibatch & \src{SI-14; \file{wcd/barycenter.py}:38, :72--73} \\
 MMD kernel & Gaussian, bandwidths $\sqrt{d} \times \{0.25, 0.5, 1, 2, 4\}$ & \src{\file{wcd/alignment.py}:49} \\
-Sinkhorn & blur $0.05\sqrt{2d}$, annealing ratio 0.8, float64, cap 500,000 & \src{\file{wcd/alignment.py}:50--51; SI-61; SI-62} \\
+Sinkhorn & blur $0.05\sqrt{2d}$, annealing ratio 0.8, float64, L1 marginal error below $10^{-4}$, cap 500,000 & \src{\file{wcd/alignment.py}:50--51, :56--57; SI-61; SI-62} \\
 R1 penalty (X6) & $\gamma = 10$ & \src{SI-22; manifest} \\
-Adversary input & posterior mean (rules R2/R3 cannot switch while immune, conditioned, is flagged low-signal; methods); \pending{formal rule R2 re-run}{after the Sinkhorn redo} & \src{SI-19; SI-66; \file{docs/prereg/r4_a1_record.json}; manifest} \\
-Standardisation & off (rules R2/R3 cannot switch while immune, conditioned, is flagged low-signal; methods); \pending{formal rule R3 re-run}{after the Sinkhorn redo} & \src{SI-20; SI-66; \file{docs/prereg/r4_a1_record.json}; manifest} \\
+Adversary input & posterior mean (rules R2/R3 cannot switch while immune, conditioned, is flagged low-signal; methods); \pending{formal rule R2 re-run}{after the 36 A3 Sinkhorn pilot fits (NB-20261019-03)} & \src{SI-19; SI-66; \file{docs/prereg/r4_a1_record.json}; manifest} \\
+Standardisation & off (rules R2/R3 cannot switch while immune, conditioned, is flagged low-signal; methods); \pending{formal rule R3 re-run}{after the 36 A3 Sinkhorn pilot fits (NB-20261019-03)} & \src{SI-20; SI-66; \file{docs/prereg/r4_a1_record.json}; manifest} \\
 Reference batch & highest cell-type entropy & \src{\file{wcd/data.py}:32; manifest} \\
 scANVI epochs & $\min(10, \max(2, \mathrm{round}(E/3)))$ after scVI & \src{\file{fit_paper_config.py}:401} \\
 sysVI cycle weight & 1, 2, 5, 10, 20, 50 & \src{\file{build_paper_manifest.py}:197; manifest} \\
@@ -768,7 +782,7 @@ Task & Cells & Epochs $E$ & Final KL weight \\
 \end{longtable}
 }
 
-\paragraph{S-E4 Frozen X1 strength grids (rule R1).} Six strengths per family and decoder from \file{docs/prereg/r1_record.json} (status frozen, git commit c88cce3) \src{\file{docs/prereg/r1_record.json} families[*].x1\_grid; SI-18}. The record still holds a Sinkhorn grid that is superseded \src{PREREG \S9, 2026-10-13 (Sinkhorn entry); SI-57}.
+\paragraph{S-E4 Frozen X1 strength grids (rule R1).} Six strengths per family and decoder from \file{docs/prereg/r1_record.json} (status frozen, git commit c88cce3) \src{\file{docs/prereg/r1_record.json} families[*].x1\_grid; SI-18}. The Sinkhorn grids of the committed record are not those of X1: the X1 Sinkhorn grids are in the rule-R1 record frozen on 2026-10-19, which is not yet in the repository \src{NB-20261019-03; SI-87}.
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}p{0.14\linewidth}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}p{0.16\linewidth}}
 \toprule
@@ -781,8 +795,8 @@ W1 (reference, pooled, barycenter) & conditioned & 0.1, 0.3, 3, 10, 100, 300 & \
 W1 (reference, pooled, barycenter) & unconditioned & 0.3, 1, 3, 10, 30, 100 & \src{\file{r1_record.json} w1$|$0} \\
 MMD (mmd) & conditioned & 3, 10, 30, 300, 1000, 3000 & \src{\file{r1_record.json} mmd$|$1} \\
 MMD (mmd) & unconditioned & 3, 10, 30, 100, 300, 1000 & \src{\file{r1_record.json} mmd$|$0} \\
-Sinkhorn (sinkhorn) & conditioned & \pending{six strengths}{rule R1 re-run on the refitted Sinkhorn fits (SI-57)} & -- \\
-Sinkhorn (sinkhorn) & unconditioned & \pending{six strengths}{rule R1 re-run on the refitted Sinkhorn fits (SI-57)} & -- \\
+Sinkhorn (sinkhorn) & conditioned & \pending{six strengths}{the rule-R1 record frozen on 2026-10-19 is committed under \file{docs/prereg/} (NB-20261019-03)} & -- \\
+Sinkhorn (sinkhorn) & unconditioned & \pending{six strengths}{the rule-R1 record frozen on 2026-10-19 is committed under \file{docs/prereg/} (NB-20261019-03)} & -- \\
 \bottomrule
 \end{longtable}
 }
@@ -839,11 +853,11 @@ all (scoring, CPU baselines) & local CPU & \src{SI-47; PREREG \S9, 2026-10-04 (b
 \item Pairing: equal seeds give equal initialisation and training split in every arm, but the minibatch order is shared only within an arm and with the arms without an adversary head (MMD, Sinkhorn) \src{PREREG \S9, 2026-10-04 (CR-07)}. Declared differences between arms (critic and discriminator steps; scANVI's extra epochs; sysVI without KL warm-up) are stated in Methods \src{PREREG \S9, 2026-10-04 (CR-12)}.
 \item The Scanorama grid was amended before any X13 fit (knn 160 replaced by 2 after knn 160 did not finish within 8 h on immune\_hum\_mou); the X13 grid was not chosen from results \src{SI-37; SI-46}.
 \item If rules R2 and R3 both switch, the untested combination is disclosed \src{PREREG \S3}.
-\item Rule R1 depends on the trajectory metric through its noise estimate; the registered R1 and frozen grids are kept and R1 without trajectory is reported as a sensitivity analysis \src{SI-53}. \pending{result of R1 without trajectory}{its Sinkhorn part recomputed after the Sinkhorn redo}
+\item Rule R1 depends on the trajectory metric through its noise estimate; the registered R1 and frozen grids are kept and R1 without trajectory is reported as a sensitivity analysis \src{SI-53}. \pending{result of R1 without trajectory}{its Sinkhorn part recomputed on the Sinkhorn pilot fits used by the rule-R1 record frozen on 2026-10-19 (NB-20261019-03)}
 \item In the Sinkhorn arm at tag prereg-tier12-v2 the gradient was counted twice and the solve stopped before converging at the final smoothing step \src{SI-51; I031; I032}.
 \item The 234 Sinkhorn pilot fits made with it (A1 180, R1 extension 18, A3 36) are replaced by refits in rule order, in which the numbers of extension and A3 rows are outputs of rules R1 and R4 on the new fits \src{SI-51; SI-57}.
 \item Part of X1 was fitted and scored before the X1 analyses were specified: the local run of 2026-10-12 stopped with 19 X1 rows scored (17 adversarial-arm rows, all immune, conditioned decoder, seed 0, plus none and scvi\_adv) \src{NB-20261012-05; NB-20261014-21}.
-\item An audit of the project's chat records found no display or analysis of these values \src{NB-20261014-21}. \pending{the user's confirmation that nobody read an X1 adversarial-arm score, and the definition of ``examined''}{diff review (ANALYSIS\_SPEC App.~A.3, item 2)}
+\item An audit of the project's chat records found no display or analysis of these values \src{NB-20261014-21}. The user stated on 2026-10-15 that nobody had read an X1 or X13 score value \src{NB-20261015-15}; ``examined'' is defined in SI-78 \src{SI-78; SI-88}.
 \item The area corner (SI-72), the prior scales (SI-73) and the P2 margin and prior (SI-75) were chosen after the A1 pilot ranges and collapse rates had been shown with the questions \src{NB-20261014-05; NB-20261014-07; NB-20261014-09; ANALYSIS\_SPEC App.~A.1}.
 \item The ledger decisions SI-51 to SI-77 (2026-10-13 and 2026-10-14) were made after A1, A2 and A3 had been fitted and scored and rules R2 and R3 first run (NB-20261012-01), and after the local X1 run began (NB-20261012-04) \src{\file{CONSTRAINTS.md} dates; NB-20261012-01; NB-20261012-04}.
 \item sysVI rows carry likelihood and decoder values that the sysVI fit does not read; per-arm refusals of unread settings are kept as implemented \src{SI-63}.
