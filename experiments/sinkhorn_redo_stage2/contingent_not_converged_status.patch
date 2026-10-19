@@ -1,0 +1,58 @@
+diff --git a/scripts/fit_outcome.py b/scripts/fit_outcome.py
+index b18ad19..fb902df 100644
+--- a/scripts/fit_outcome.py
++++ b/scripts/fit_outcome.py
+@@ -16,7 +16,7 @@ import os
+ import socket
+ import time
+ 
+-FAILURE_STATUSES = ("diverged", "nonfinite_latent")   # = prereg_rules.FAILURE_STATUSES (checked in tests/stage)
++FAILURE_STATUSES = ("diverged", "nonfinite_latent", "not_converged")   # = prereg_rules.FAILURE_STATUSES (checked in tests/stage)
+ # exit status of fit_paper_config.py after it recorded a divergence; distinct from Python's 1 (uncaught exception),
+ # argparse's 2 and signal exits (negative in subprocess, 128 + n in a shell)
+ EXIT_DIVERGED = 23
+diff --git a/scripts/prereg_rules.py b/scripts/prereg_rules.py
+index 2258d63..99cb7de 100644
+--- a/scripts/prereg_rules.py
++++ b/scripts/prereg_rules.py
+@@ -60,7 +60,7 @@ BASE_ARM = dict({a: a for a in ADV_ARMS}, discriminator_sn="discriminator", refe
+                 reference_fixed="reference", pooled_sn="pooled", barycenter_sn="barycenter", mmd_ref="mmd",
+                 discriminator_r1="discriminator", discriminator_ref="discriminator")   # SPECS_missing_arms.md (SI-22, SI-23)
+ NO_ADVERSARY = ("none", "scvi_adv", "scanvi", "sysvi")
+-FAILURE_STATUSES = ("diverged", "nonfinite_latent")
++FAILURE_STATUSES = ("diverged", "nonfinite_latent", "not_converged")
+ CC_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou")   # uns modality rna, organism human (prepped, 2026-10-02)
+ TRAJ_TASKS = ("immune", "immune_hum_mou")                     # obs dpt_pseudotime present (prepped, 2026-10-02)
+ REAL_TASKS = ("pancreas", "lung", "immune", "immune_hum_mou", "atac_small", "atac_large")
+diff --git a/scripts/run_stage.py b/scripts/run_stage.py
+index 5fe6fb3..501eca9 100644
+--- a/scripts/run_stage.py
++++ b/scripts/run_stage.py
+@@ -95,7 +95,8 @@ CPU_DEVICE = "cpu"                      # cfg["device"] of a CPU-baseline latent
+ # score-row columns that must be present and identical over a stage (CR-05; shared interface (a), 2026-10-03)
+ SCORER_PROVENANCE = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
+ EXIT_PREFLIGHT, EXIT_INFRA, EXIT_GATE = 4, 5, 6
+-FINAL = {True: ("scored", "diverged", "nonfinite_latent"), False: ("fitted", "scored", "diverged", "nonfinite_latent")}
++FINAL = {True: ("scored", "diverged", "nonfinite_latent", "not_converged"),
++         False: ("fitted", "scored", "diverged", "nonfinite_latent", "not_converged")}
+ NO_ADV_INPUT = ("none", "scvi_adv", "scanvi", "sysvi")      # arms that never read adv_input
+ LEDGER_COLS = ["tag", "experiment", "task", "arm", "lam", "cond", "seed", "state", "detail", "fit_attempts",
+                "score_attempts", "fit_host", "fit_started", "fit_ended", "fit_wall_s", "fit_seconds", "score_started",
+diff --git a/tests/prereg/test_rules.py b/tests/prereg/test_rules.py
+index 1ba9891..886e7fe 100644
+--- a/tests/prereg/test_rules.py
++++ b/tests/prereg/test_rules.py
+@@ -336,9 +336,10 @@ def test_duplicate_score_and_double_status_raise():
+ 
+ def test_failure_rows_become_failed_outcomes(tmp_path):
+     M, S, F = _small()
+-    F2 = pd.DataFrame([dict(tag=S.tag.iloc[0], status="nonfinite_latent", detail="z had NaN")])
+-    out = P.outcomes(M, S.iloc[1:], F2, ["A1"])
+-    assert (out.status == "failed").sum() == 1
++    for status in P.FAILURE_STATUSES:           # includes not_converged: a user-ruled Sinkhorn iteration-cap hit (SI-81 b)
++        F2 = pd.DataFrame([dict(tag=S.tag.iloc[0], status=status, detail="z had NaN")])
++        out = P.outcomes(M, S.iloc[1:], F2, ["A1"])
++        assert (out.status == "failed").sum() == 1
+     bad = tmp_path / "f.csv"
+     pd.DataFrame([dict(tag="x", status="oom", detail="killed")]).to_csv(bad, index=False)
+     with pytest.raises(P.PreregError, match="not in"):
