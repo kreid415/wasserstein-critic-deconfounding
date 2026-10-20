@@ -18,7 +18,7 @@ Checking aid only; not part of the outline. Line numbers are lines of `paper/pap
 | Meth-3 | 339-342, 348, 350-351 | Pilot outcomes for input and standardisation pending (141, 342) |
 | Meth-4 | 359-365 | Immune-task and ATAC-task nesting in 363-364 |
 | Meth-5 | 371-373, 408, 518 | Scoring on all cells (518) |
-| Meth-6 | 383-386, 391-392, 414; 64 | Fits count 3,000 (64); statement on when the analysis was specified left open (226, 836) |
+| Meth-6 | 383-386, 391-392, 414; 64 | Fits count 3,000 (64); when the analysis was specified: tag prereg-tier12-v3 2026-10-16 17:48 EDT (ce05608), PREREG amendment 2026-10-18 (57241a2, 587389c); 19 scored-not-read X1 rows (226, 836) |
 | Meth-7 | 387-389, 399-403, 406-407; 600-601 | b* and low-signal threshold 0.02 (387, 389); collapse rule (406) |
 | Meth-8 | 404-406, 409, 413; 621-624 | MDE 0.131 for six tasks (413, 624); recomputation pending (413) |
 | Meth-9 | 408, 439-445; 640-643 | Window rule 643; best-of-k 642; leave-one-family-out 641 |
@@ -36,7 +36,7 @@ Checking aid only; not part of the outline. Line numbers are lines of `paper/pap
 | Disc-1 | 500; 176 | Placeholder only |
 | Disc-2 | 502; 160-162, 146, 151-155 | |
 | Disc-3 | 501; 182 | |
-| Disc-4 | 507-515, 518, 520; 333; 413 | Underpowered, Wilcoxon descriptive (513) |
+| Disc-4 | 507-515, 518, 520; 333; 413 | Underpowered, Wilcoxon descriptive (513); power block of stage-2 R1 re-run (D/tier12_v3/rules/r1_pass2/r1_record.json) identical in all 43 fields to the tag's docs/prereg/r1_record.json (checked 2026-10-20) |
 | Disc-5 | 515-517 | |
 | Avail-1 | 110; BUDGET section 4 (availability sentence) | Tag and commit left as placeholder because tag names are not allowed in the outline |
 | Supplementary material (8 lines) | 534-668, 672-707, 685-840 (S-M, S-D, S-E, S-X headings) | |

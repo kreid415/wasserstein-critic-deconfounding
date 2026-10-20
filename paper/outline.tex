@@ -124,7 +124,7 @@
 \begin{itemize}
 \item Pilot (three tasks, seeds 100--102) set six strengths per method group and decoder; main seeds 0--4; follow-up 10--12.
 \item Main: plain scVI, six methods at six strengths, scvi-tools adversary; 3,000 fits.
-\item Analysis specified before any main score was read; run once.
+\item Rules and analysis frozen in a tagged pre-registration on 16 October 2026 (amended 18 October to drop follow-ups), before any main score was examined; run once. 19 early main fits had been scored but not read; disclosed in the supplement.
 \end{itemize}
 \pp{Meth-7}{Methods are compared at the same amount of batch removal, not at the same penalty strength.}
 \begin{itemize}
@@ -136,7 +136,7 @@
 \begin{itemize}
 \item Pooled model: overall, family, task effects; margin 0.01; direction, equivalence or inconclusive at posterior probability 0.95 \citep{corani2017statistical}. Collapse: Clopper--Pearson intervals \citep{clopper1934use}, margin 5 points.
 \item Wilcoxon companion, descriptive: with six real tasks smallest $p$ 0.031 exceeds 0.05/6.
-\item Underpowered: minimal detectable effect 0.131, 80\% power. \tbd{update if power is recomputed}
+\item Underpowered: minimal detectable effect 0.131 at 80\% power over six real tasks (0.182 over four dataset families); unchanged after the corrected Sinkhorn pilot.
 \end{itemize}
 \pp{Meth-9}{The range of good penalty strengths and the comparison with standard tools use the selection score at equal numbers of tries.}
 \begin{itemize}
