@@ -30,9 +30,11 @@
 \begin{document}
 \begin{center}
 {\LARGE\bfseries Paper outline}\\[4pt]
-{\large Wasserstein critic versus discriminator in adversarial batch correction on scVI}\\[6pt]
-\pending{title}{your decision}\quad Kendall Reid$^{1,*}$, Genevieve Stein-O'Brien$^{1,\dagger}$, Erhan Guven$^{2,\dagger}$ \src{user 2026-10-20; author block of the July 2026 manuscript, \file{manuscript\_tm/oup-authoring-template/oup-authoring-template.tex}:84--92}\\[2pt]
-{\small $^1$Neuroscience, Johns Hopkins University, Baltimore, MD, USA; $^2$Johns Hopkins University Applied Physics Laboratory, Laurel, MD, USA; $^*$corresponding author; $^\dagger$equal contribution.}\\[2pt]
+{\large Wasserstein critics versus discriminators for single-cell batch correction: a pre-registered comparison on scVI}\\[2pt]
+{\small Running title: Adversaries for scVI batch correction \src{user 2026-10-20}}\\[6pt]
+Kendall Reid$^{1,*}$, Genevieve Stein-O'Brien$^{2,\dagger}$, Erhan Guven$^{3,\dagger}$ \src{user 2026-10-20; author block of the July 2026 manuscript, \file{manuscript\_tm/oup-authoring-template/oup-authoring-template.tex}:84--92}\\[2pt]
+{\small $^1$Department of Computer Science, Johns Hopkins University, Baltimore, MD, USA; $^2$\pending{Genevieve Stein-O'Brien's affiliation (Neuroscience in the July manuscript)}{your confirmation}; $^3$Johns Hopkins University Applied Physics Laboratory, Laurel, MD, USA; $^*$corresponding author; $^\dagger$equal contribution.}\\[2pt]
+{\small Keywords: single-cell RNA sequencing; batch correction; adversarial learning; optimal transport; benchmarking \src{user 2026-10-20}}\\[2pt]
 {\small Target journal: \emph{Bioinformatics Advances} (OUP and ISCB), Original Article: up to 8 pages, abstract at most 200 words, at most 5 keywords, 50 references, 6 figures and 6 tables; sections Abstract, Introduction, Methods, Discussion, References; transfers and reviewer reports from \emph{Bioinformatics} accepted \src{user decision 2026-10-19; journal author guidelines, checked 2026-10-19}.}\\[2pt]
 {\small Outline of the paper; repository state: commit 08f1e3c, 2026-10-14 (Methods and Supplement S-M and S-E updated to commit 04f5c99, 2026-10-19).}
 \end{center}
@@ -261,7 +263,7 @@ R2 (batch count, endpoint P3) and R4 (reference selection, endpoint P4) were rem
 %   Topology_Matters.zip oup-authoring-template.tex:137,139 = 08f1e3c manuscript_tm/oup-authoring-template/
 %   oup-authoring-template.tex:135,137; additions named in PAPER_PLAN section 3, item 2. One line per work.
 
-% Short form kept in the main text (user decision 2026-10-19: all eight methods asked for on 2026-10-15 stay, the rest moves to S-R).
+% Short form kept in the main text (user decision 2026-10-19: all eight methods asked for on 2026-10-15 stay, the other Related work items were dropped on 2026-10-20: no citations in the supplement, user decision).
 \section{Related work}\label{sec:related}
 
 \paragraph{Baselines of this study.}
@@ -529,49 +531,6 @@ Main figures (at most 6 in the journal) \src{user decision 2026-10-19; \file{pap
 \section*{Supplementary material}
 Equations are read from the code at the tag prereg-tier12-v3 (commit 10a1ca5), except the X6 variants of S-M9, which are read from branch followup-build (not yet tagged); file:line as in the reading guide.
 
-\subsection*{S-R Further related work}
-Related-work items moved out of the main text on 2026-10-19 (user decision: keep a short Related work section naming the eight requested methods); wording unchanged from the earlier outline (paper.tex at commit 82d7090, lines 263--323). Keys cited only here: ritchie2015limma, johnson2007adjusting, haghverdi2018batch, stuart2019comprehensive, tran2020benchmark, luecken2025defining, lotfollahi2020conditional, shree2023scdreamer, wang2019bermuda, cao2022unified.
-
-\paragraph{Statistical and geometric integration.}
-\begin{itemize}
-\item limma: gene-wise linear models that can include batch terms; \texttt{removeBatchEffect} \citep{ritchie2015limma}.
-\item ComBat: empirical Bayes batch adjustment, robust for small batches \citep{johnson2007adjusting}.
-\item MNN: correction from mutual nearest neighbours between batches \citep{haghverdi2018batch}.
-\item Seurat: anchors between datasets, across technologies and modalities \citep{stuart2019comprehensive}.
-\end{itemize}
-
-\paragraph{Benchmarks.}
-\begin{itemize}
-\item 14 methods, five scenarios, including non-identical cell types across batches \citep{tran2020benchmark}.
-\item Open Problems: benchmarks with different datasets and metrics disagree; standardised tasks \citep{luecken2025defining}.
-\end{itemize}
-
-\paragraph{Deep generative models.}
-\begin{itemize}
-\item trVAE (transfer VAE): conditional out-of-distribution generation for unpaired data, for example perturbation response; MMD on the decoder layer that follows the bottleneck matches the conditions \citep{lotfollahi2020conditional}.
-\end{itemize}
-
-\paragraph{Adversarial (JS-type) integration.}
-\begin{itemize}
-\item DANN (domain-adversarial neural network): domain-indiscriminate features via gradient reversal against a domain classifier \citep{ganin2016domain}.
-\item AD-AE (adversarial deconfounding autoencoder): autoencoder plus an adversary that predicts the confounder \citep{dincer2020adversarial}.
-\item scDREAMER (single-cell deep generative integration model with adversarial classifier): adversarial VAE (Bhattacharyya loss) plus an adversarial cross-entropy batch classifier \citep{shree2023scdreamer}.
-\end{itemize}
-
-\paragraph{Wasserstein critics.}
-\begin{itemize}
-\item WDGRL (Wasserstein distance guided representation learning): a gradient-penalised domain critic estimates the empirical W1 between source and target features, which the feature extractor minimises \citep{shen2018wasserstein}.
-\item iMAP (integration of multiple single-cell datasets by adversarial paired transfer networks): adversarial losses optimised with WGAN-GP; one dataset is the uncorrected anchor \citep{wang2021imap}.
-\end{itemize}
-
-\paragraph{Kernel and optimal-transport alignment.}
-\begin{itemize}
-\item MMD-ResNet: residual network minimising the MMD between one source batch and one target batch \citep{shaham2017removal}.
-\item SAUCIE (sparse autoencoder for unsupervised clustering, imputation and embedding): MMD penalty on an internal layer aligning batches to a reference batch \citep{amodio2019exploring}.
-\item BERMUDA (batch effect removal using deep autoencoders): MMD between similar clusters across batches; tolerates different compositions if two batches share a cell type \citep{wang2019bermuda}.
-\item uniPort: coupled VAE with minibatch unbalanced OT \citep{cao2022unified}.
-\end{itemize}
-
 \subsection*{S-M Methods detail}
 \paragraph{S-M1 Generator objective, backbone loss and KL weight.}
 \begin{itemize}
@@ -594,7 +553,7 @@ Related-work items moved out of the main text on 2026-10-19 (user decision: keep
 \end{itemize}
 \paragraph{S-M4 Barycenter target.}
 \begin{itemize}
-\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (the update of \citealp{cuturi2014fast}, Algorithm~2 with $\theta = 1$, as implemented in POT free\_support\_barycenter, \citealp{flamary2021pot}; stop threshold $10^{-7}$) with exact transport plans; recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:8--10, :38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
+\item $B^\ast = \arg\min_B \sum_k w_k\, W_2^2(P_k, B)$ with $w_k = 1/K$ over the $K$ batches in the minibatch; $n$ support points with uniform weights, started at the minibatch cells (cold start); at most 10 fixed-point iterations (the update of Cuturi and Doucet (main-text reference), Algorithm~2 with $\theta = 1$, as implemented in POT free\_support\_barycenter, the POT library (main-text reference); stop threshold $10^{-7}$) with exact transport plans; recomputed from the detached latent at every step \src{SI-14; \file{wcd/barycenter.py}:8--10, :38, :61, :71--73; \file{scvi_adversarial_plan.py}:388}.
 \end{itemize}
 \paragraph{S-M5 MMD.}
 \begin{itemize}
@@ -619,8 +578,8 @@ Related-work items moved out of the main text on 2026-10-19 (user decision: keep
 \end{itemize}
 \paragraph{S-M9 Follow-up arm variants.}
 \begin{itemize}
-\item R1 penalty (X6; one-vs-rest form of \citealp[Eq.~9]{mescheder2018training}): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
-\item Spectral normalisation (X6; \citealp{miyato2018spectral}): every head layer spectrally normalised and no gradient penalty computed \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py} on branch followup-build:248, :410}.
+\item R1 penalty (X6; one-vs-rest form of Mescheder et al. (main-text reference)): $\frac{\gamma}{2}\frac{1}{n}\sum_i \|\nabla_z D_{b_i}(z_i)\|^2$, $D_k = \ell_k - \log\sum_{j \neq k} e^{\ell_j}$, $\gamma = 10$, discriminator step only \src{SI-22; \file{wcd/discriminator_losses.py}:30--46}.
+\item Spectral normalisation (X6; Miyato et al. (main-text reference)): every head layer spectrally normalised and no gradient penalty computed \src{\file{wcd/adversarial.py}:50; \file{scvi_adversarial_plan.py} on branch followup-build:248, :410}.
 \item Spectrally normalised discriminator with the critic's optimiser (X6; SI-98): the same head and loss as the spectrally normalised discriminator, 1 step per training step, trained by Adam with learning rate $10^{-4}$ and betas (0, 0.9), the settings of the critics, instead of the discriminator's Adam (learning rate $10^{-3}$, $\epsilon$ 0.01, weight decay $10^{-6}$); it takes the penalty strengths of the discriminator \src{SI-98; \file{scvi_adversarial_plan.py} on branch followup-build:266--269; \file{prereg_rules.py} on branch followup-build:62}.
 \end{itemize}
 \paragraph{S-M10 Rule R1 (A1 to the X1 grids).}
@@ -668,7 +627,7 @@ Related-work items moved out of the main text on 2026-10-19 (user decision: keep
 \end{itemize}
 \paragraph{S-M16 P2 collapse rate.}
 \begin{itemize}
-\item A run collapses if it failed or if $C \leq C_{\lambda = 0}(\text{same seed}) - 0.10$; rate per arm and decoder over the six registered points and 5 seeds, per task and pooled over the 6 real tasks, with Clopper--Pearson 95\% intervals (\citealp{clopper1934use}) \src{SI-75}.
+\item A run collapses if it failed or if $C \leq C_{\lambda = 0}(\text{same seed}) - 0.10$; rate per arm and decoder over the six registered points and 5 seeds, per task and pooled over the 6 real tasks, with Clopper--Pearson 95\% intervals (Clopper and Pearson (main-text reference)) \src{SI-75}.
 \item Comparison: per-task rate difference (reference minus discriminator) with the Agresti--Caffo standard error, pooled with the S-M15 model at $\Delta \sim N(0, 0.25^2)$, $\tau \sim$ half-normal(0.25), margin 0.05 \src{SI-75; ANALYSIS\_SPEC App.~A.1, Q9 option A}; the user confirmed on 2026-10-15 that SI-75 stands \src{NB-20261015-07}.
 \end{itemize}
 \paragraph{S-M17 Local versus global batch removal.}
