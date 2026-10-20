@@ -131,3 +131,15 @@ User decision: add all eight coverage candidates; GLUE's reference added where t
 
 ## Removed keys (2026-10-15, user decisions)
 - he2025partially (scCRAFT) and reid2025topology (the authors' earlier preprint) were removed from paper.tex and refs.bib: the user decided that the main text does not name scCRAFT and does not mention the earlier submission, the preprint or their pipeline defects ("only the final methods and results are written up"). Their claim checks are in this file's history at commit d556bb1.
+
+
+## zhao2022adversarial (Portal) - full-text check 2026-10-20
+- Source: bioRxiv preprint v2 (10.1101/2021.11.16.468892v2; published version Nat Comput Sci 2:317-330 is paywalled), Methods pp.28-32 and 35, read by Claude Code (LIT_REVIEWER, claude-sonnet-5-5, high); code checked by the lead agent in a clone of YangLabHKUST/Portal at 6bf6149.
+- Loss: standard GAN log-loss with the non-saturating ('logD-trick') generator loss (preprint l.698-716); code portal/model.py:302 (discriminator) and :329 (generator), logits clamped at +/-self.margin, self.margin = 5.0 (:37); first 5 steps unclamped (:299, :327); networks.py:62 clamps raw logits to +/-50.
+- Clamp purpose: zero gradient for cells scored as extremely real or fake, so adversarial learning applies only to populations likely shared across domains (preprint l.737-740).
+- Pairwise alignment of two domains; more datasets added incrementally into the first dataset's domain (preprint Methods, 'Integration of multiple datasets'; read via HTML relay, not the PDF).
+- Regularisers: autoencoder, latent alignment, cosine similarity; weights 10, 10, 20 (preprint p.35; model.py:16, :34-35).
+- Group: classifier/GAN discriminator (JS-type by inference; the paper does not say 'Jensen-Shannon').
+
+## gu2025scstarcorrect - 2026-10-20
+- Full text closed access (IEEE BIBM 2025); no preprint or code found (web search 2026-10-20); user has no access. Kept with abstract-level claims only; no loss-form claim.
