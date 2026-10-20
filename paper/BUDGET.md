@@ -75,6 +75,8 @@ Left out of PAPER_PLAN section 3 (lines 103-112): figures 5, 6, 7 (batch-count s
 
 ## 3. Reference cut: 59 keys cited, limit 50
 
+**Superseded 2026-10-19:** the user chose to keep a short Related work naming all eight coverage methods and to cut background references instead. Result: 49 main-text keys, 10 supplement-only (section S-R). See `paper/relwork_cut_20261019.md`. The table below is the original proposal.
+
 I counted 59 distinct keys in cite commands (grep of `\cite` on paper.tex), and `refs.bib` has 59 entries, each cited. All are cited between lines 110 and 483; Results and Discussion cite none. I did not re-check any citation against its source here; `paper/evidence.md` records those checks. "Role" below is how the main text uses the key.
 
 Proposal: 19 keys leave (59 to 40), leaving 10 free slots. Reason for the margin: the pending items will need citations not yet in `refs.bib` (the X10 classifier, the R0 separability statistic, Holm and Wilcoxon tests, scanpy), and I do not know which. Reserve 6, leaving 4 optional put-backs.
