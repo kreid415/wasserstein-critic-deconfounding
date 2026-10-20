@@ -483,13 +483,13 @@ Reproduction detail is in the Supplementary material [S-...].
 \end{itemize}
 
 \section{Results}
-PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
+Main figures (at most 6 in the journal) \src{user decision 2026-10-19; \file{paper/BUDGET.md} \S2}: Figure 1, design schematic (scVI encoder and decoder with or without the batch label, swappable alignment term) and a cartoon of how biology is read at matched batch removal b*; Figures 2--6 as listed under R0--R5 below. Cut order if the article exceeds 8 pages: Figure 2 to the supplement, then Figure 1 panel (a), then Table 3, then a shorter Limitations.
 
 \subsection{R0 Premise (exploratory)}
 \begin{itemize}
 \item Endpoint and rule: none; exploratory, no confirmed or refuted claim \src{SI-68}.
 \item Data: the per-epoch training histories saved in every X1 latent file (adv\_grad\_norm for the six adversarial arms, adv\_acc for the discriminator arm; plain scVI and scvi\_adv write neither) and the $\lambda = 0$ latents; no new fits, X1 fit logging unchanged \src{SI-103; NB-20261018-01; ANALYSIS\_SPEC \S0; \file{scvi_adversarial_plan.py}:348--351, :378, :432, :435}.
-\item Figure: \pending{premise figure}{your decision}
+\item Figure: Figure 2 (exploratory): (a) batch separability before integration, one dot per task; (b) adv\_grad\_norm against epoch, one line per arm, median and band across seeds, one panel per decoder; (c) discriminator accuracy against epoch. First figure to move to the supplement if the article exceeds 8 pages \src{user decision 2026-10-19; \file{paper/BUDGET.md} \S2}
 \item Result: \pending{R0 result}{X1 scored and the single analysis run}
 \end{itemize}
 
@@ -498,7 +498,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 \item Endpoints: P1 per decoder with its trade-off area [S-M13, S-M14], P2 [S-M16], local versus global [S-M17] \src{SI-68; SI-70; SI-72; SI-75; SI-76}.
 \item Rule: declaration on the pooled posterior over the 6 real tasks, margin 0.01 (P2: 5 points); low-signal blocks reported separately; simulations per task \src{SI-73; SI-74; SI-75; SI-56; PREREG \S5}.
 \item Experiments: X1 \src{SI-68}; X10 minimal (cross-batch label-transfer F1 per cell type at b*, on X1 latents; no new fits), exploratory \src{SI-68; SI-103}.
-\item Figure: \pending{frontier and P1 figures (PAPER\_PLAN \S3 proposes per-task frontiers and a forest plot)}{your decision}
+\item Figure: Figure 3: biology C against batch score B, small multiples (rows: 2 decoders; columns: 6 real tasks), one line per arm through the 6 strengths, plain scVI as a point, b* as a vertical line, baselines as reference points; if not legible, the unconditioned row moves to the supplement. Figure 4: forest panels per real task plus pooled estimate for (a) P1, (b) trade-off area, (c) P2 collapse difference, (d) local minus global at the P1 crossing \src{user decision 2026-10-19; \file{paper/BUDGET.md} \S2}
 \item Result: \pending{P1, area, P2 and local-versus-global results per decoder}{X1 scored and the single analysis run}
 \end{itemize}
 
@@ -506,7 +506,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 \begin{itemize}
 \item Endpoint (X1 part): width of each method's range of good strengths, ranked by S [S-M18] \src{SI-68; SI-77; SI-80; ANALYSIS\_SPEC \S10}
 \item Factor effects: X6 only \src{SI-103}; \pending{endpoints and rules for X6}{locked during X1 (SI-68)}
-\item Figure: \pending{strength-curve and factor figures}{your decision}
+\item Figure: Figure 5: (a) width of each arm's range of good strengths, one dot per task, by decoder; (b) X6 arms, biology at the matched strength minus the plain discriminator, one panel per decoder, the confirmatory contrast marked \src{user decision 2026-10-19; \file{paper/BUDGET.md} \S2}
 \item Result: \pending{window widths; factor effects}{X1 scored and the single analysis run; follow-up analysis run}
 \end{itemize}
 
@@ -514,7 +514,7 @@ PAPER\_PLAN \S3 lists nine figures; that list is a proposal.
 \begin{itemize}
 \item Endpoints: single-strength tables and the comparison at equal numbers of tries, ranked by S \src{SI-68; SI-77}; PCA is the uncorrected anchor \src{SI-36}; transfer and best-of-k rules \src{SI-80; ANALYSIS\_SPEC \S8, \S9}
 \item Experiments: X13 and X1 \src{SI-68}.
-\item Figure: \pending{placement figure}{your decision}
+\item Figure: Figure 6: (a) expected best S against number of tries k, one line per method family, by decoder, scANVI in its own stratum; (b) B against C at each method's single transfer strength, one point per real task \src{user decision 2026-10-19; \file{paper/BUDGET.md} \S2}
 \item Result: \pending{placement and single-strength results}{X1 and X13 scored and the single analysis run}
 \end{itemize}
 
