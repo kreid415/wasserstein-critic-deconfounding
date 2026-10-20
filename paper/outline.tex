@@ -1,0 +1,280 @@
+% outline.tex -- writer's outline (8-page article). Build: tectonic outline.tex  (natbib plainnat, refs.bib)
+\documentclass[10pt]{article}
+\usepackage[margin=1.7cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage[authoryear,round]{natbib}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\setlist{nosep,leftmargin=1.2em,topsep=0pt,itemsep=0pt}
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\renewcommand{\bibfont}{\scriptsize}
+\setlength{\bibsep}{0pt}
+\newcommand{\pp}[2]{\par\vspace{3pt}\noindent\textbf{#1.}\ #2\par\nopagebreak}
+\newcommand{\res}[1]{[\textit{result: #1}]}
+\newcommand{\tbd}[1]{[\textit{to be decided: #1}]}
+\newcommand{\hd}[2]{\section*{#1 \hfill {\normalfont\small #2}}\vspace{-4pt}}
+
+\begin{document}
+\begin{center}
+{\large\bfseries Wasserstein critics versus discriminators for single-cell batch correction}\\[2pt]
+{\small Kendall Reid$^{1,*}$, Genevieve Stein-O'Brien$^{2,\dagger}$, Erhan Guven$^{3,\dagger}$}\\[1pt]
+{\footnotesize $^1$Department of Computer Science, Johns Hopkins University; $^2$Department of Neuroscience, Johns Hopkins University; $^3$Johns Hopkins University Applied Physics Laboratory. $^*$Corresponding author. $^\dagger$These authors contributed equally.}\\[1pt]
+{\footnotesize Keywords: single-cell RNA sequencing; batch correction; adversarial learning; optimal transport; benchmarking}
+\end{center}
+{\footnotesize \textbf{Writer's outline.} Target: \emph{Bioinformatics Advances}, Original Article, 8 pages; abstract at most 200 words; at most 6 figures, 6 tables, 50 references; the supplement carries no citations. Word budget of the main text: about 5,000 words in total (sections below, plus 400 words of captions and table notes), with 6 figures and 3 tables. Each paragraph is about 100--150 words of final prose. Square brackets mark text to be filled from results or still open.}
+
+\hd{Abstract}{200 words; 7 sentences}
+\begin{enumerate}[leftmargin=1.5em]
+\item Adversarial batch correction trains an encoder against a discriminator that predicts each cell's batch; a Wasserstein-1 (W1) critic, which estimates the earth mover's distance between batches, is an alternative adversary.
+\item We ask whether replacing the Jensen--Shannon (JS) discriminator with a W1 critic changes how much biology is kept at the same amount of batch removal in scVI (single-cell variational inference).
+\item In a pre-registered comparison on eight tasks of the single-cell integration benchmark (scIB), we added to scVI a JS discriminator, three W1 critics (reference, pooled and barycenter), maximum mean discrepancy (MMD) and Sinkhorn divergence, with and without the batch label in the decoder.
+\item \res{biology kept at matched batch removal, reference critic minus discriminator, for each decoder: estimate, interval, call.}
+\item \res{trade-off area, collapse rate, local versus global batch removal, and the range of good penalty strengths.}
+\item \res{whether any critic--discriminator difference comes from the divergence or from regularisation and adversary update steps; placement against plain scVI, Harmony, Scanorama, sysVI and scANVI at equal numbers of tries, including whether any adversary improves on plain scVI.}
+\item \res{one sentence of guidance for scVI users.} Code and task checksums: \tbd{repository address and version tag at submission}.
+\end{enumerate}
+
+\hd{Introduction}{850 words; 8 paragraphs}
+\pp{Intro-1}{Batch effects are technical differences between samples that have to be removed without removing biology.}
+\begin{itemize}
+\item They come from laboratory conditions, reagent lots, personnel, instruments, time or analysis pipeline, and mislead when they correlate with the outcome \citep{leek2010tackling,yu2024assessing}.
+\item In single-cell RNA sequencing (scRNA-seq), separately processed replicates differ markedly \citep{tung2017batch}; the problem is expected to persist and brings new modelling challenges \citep{goh2022batch}.
+\item Correction fails in both directions: uncorrected batch effects mislead, and over-correction can hinder discovery \citep{yu2024assessing}. Integration is therefore scored on batch removal and on conservation of biological variation \citep{luecken2022benchmarking}.
+\end{itemize}
+\pp{Intro-2}{Adversarial integration trains the encoder to defeat a second network that predicts the batch from each cell's latent code.}
+\begin{itemize}
+\item The adversary can predict the batch or another confounder such as age \citep{ganin2016domain,dincer2020adversarial}.
+\item A discriminator, as in the original generative adversarial network (GAN), targets the Jensen--Shannon (JS) divergence between distributions \citep{goodfellow2014generative}.
+\item A Wasserstein-1 (W1) critic estimates the earth mover's distance through a function limited to slope at most one \citep{arjovsky2017wasserstein}; the Wasserstein GAN with gradient penalty (WGAN-GP) enforces that limit softly \citep{gulrajani2017improved}.
+\end{itemize}
+\pp{Intro-3}{Theory favours W1 in some settings, but its assumptions do not transfer automatically to batch correction.}
+\begin{itemize}
+\item W1 is continuous, and differentiable almost everywhere under regularity conditions, where JS is not; on two disjoint parallel lines JS stays constant while W1 equals the offset \citep{arjovsky2017wasserstein}.
+\item A perfect discriminator on disjoint supports gives vanishing gradients to the generator \citep{arjovsky2017towards}.
+\item These results assume a fixed real distribution, a moving generator and a near-optimal discriminator. Here every batch's latent code moves and the discriminator takes one step per encoder step, so whether the conditions arise is an open, exploratory question (the premise check), not an assumption.
+\end{itemize}
+\pp{Intro-4}{Aligning batches exactly can cost accuracy when batches contain different cell-type proportions.}
+\begin{itemize}
+\item With unequal label proportions, a shared classifier's error grows as latent distributions are aligned more tightly \citep{zhao2019learning}; exact alignment under any distance that is zero only for identical distributions leaves error at least the label-proportion gap \citep{wu2019domain}.
+\item In sysVI's study, an adversarial conditional variational autoencoder and an adversarial multi-omics method mixed unrelated cell types with unbalanced proportions, more so at higher correction strength \citep{hrovatin2025integrating}.
+\item Dataset imbalance changed clustering, annotation, differential expression, mapping and trajectories for five methods \citep{maan2024characterizing}. Method differences must therefore be read at equal batch removal.
+\end{itemize}
+\pp{Intro-5}{In image GANs, differences between losses shrink once each loss is tuned equally.}
+\begin{itemize}
+\item With enough tuning and restarts, most losses reached similar scores, and none consistently beat the non-saturating GAN loss \citep{lucic2018gans}.
+\item Spectral normalisation helped consistently and the gradient penalty only sometimes \citep{kurach2019large}.
+\item A critic--discriminator difference may thus reflect regularisation, update budget or tuning rather than the divergence. This is an inference from image studies; the follow-up experiment examines it for batch correction.
+\end{itemize}
+\pp{Intro-6}{Several single-cell methods already use adversarial or Wasserstein-type alignment, mostly with a reference batch and a custom backbone.}
+\begin{itemize}
+\item Reference-batch designs: iDLC maps each batch to a reference batch with a WGAN-GP critic plus a Sinkhorn term \citep{jiang2026geometric}; scStarCorrect is StarGAN-based, with a batch-conditioned variational autoencoder and a discriminator that aligns every batch to one fixed reference batch (from its abstract) \citep{gu2025scstarcorrect}.
+\item Wasserstein critics: Beaconet trains a corrector against one Wasserstein-distance network per batch, with no reference batch \citep{xu2024beaconet}; IMGG trains a WGAN-GP generator towards a synthetic target built from matched cell cohorts \citep{wang2022imgg}; ResPAN pairs mutual nearest neighbours with skip-connected autoencoders \citep{wang2022respan}; IMAAE is an adversarial autoencoder with an anchor batch and known cell labels \citep{wang2023integrating}.
+\item Standard-GAN discriminators: Portal translates cells between two datasets and clamps discriminator logits so clearly unique cells are not forced to mix \citep{zhao2022adversarial}; AIF adds a GAN discriminator and a batch classifier to a conditional variational autoencoder \citep{monnier2024novel}; ABC trains an autoencoder against a multi-class batch discriminator, with cell-type classifier branches that use labels \citep{danino2024batch}.
+\item Li et al.\ add maximum mean discrepancy (MMD), or an adversarial mutual-information penalty, to a preliminary scVI and learn the trade-off by Pareto multi-task learning \citep{li2022trade}.
+\end{itemize}
+\pp{Intro-7}{No study we found compares JS, W1 and MMD or optimal-transport (OT) objectives on one stock scVI backbone.}
+\begin{itemize}
+\item The closest controlled study compares six batch losses (GAN, Hilbert--Schmidt independence criterion, orthogonal projection, mutual information, gradient reversal, reverse cross-entropy) in one scVI framework, with no W1, OT or explicit MMD term between batch distributions \citep{yi2025benchmarking}.
+\item The nearest designs are Li et al.\ (MMD against an adversarial penalty on a preliminary scVI) \citep{li2022trade} and iDLC (no JS or MMD method) \citep{jiang2026geometric}. W1 critics, reference anchoring and MMD alignment to a reference batch already exist \citep{shen2018wasserstein,wang2021imap,amodio2019exploring,shaham2017removal}.
+\item The absence is search-based, not exhaustive: state databases and search terms. \tbd{repeat the search before submission}
+\end{itemize}
+\pp{Intro-8}{We report a pre-registered comparison at matched batch removal, built to answer four questions.}
+\begin{itemize}
+\item Contribution: a pre-registered comparison of a JS discriminator, three W1 critics (reference, pooled, barycenter), MMD and Sinkhorn divergence added to stock scVI, at matched batch removal on eight benchmark tasks, with guidance for scVI users that allows for the outcome that no adversary improves on plain scVI. A follow-up tests whether a critic--discriminator difference comes from the divergence or from regularisation and the number of adversary update steps.
+\item Questions: (i) premise check: are batches nearly separable before integration, and do discriminator gradients vanish early while critic gradients persist (exploratory, no hypothesis)? (ii) At equal batch removal, does the critic keep a different amount of biology than the discriminator, and is its batch removal more local? (iii) How wide is each method's range of good penalty strengths, and does a difference come from the divergence, regularisation or update steps? (iv) Does any adversary improve on plain scVI, and where do the methods sit against standard tools at equal numbers of tries?
+\item Scope: scVI as it is usually used, at default settings; architecture and warm-up are not varied.
+\end{itemize}
+
+\hd{Methods}{1,300 words; 10 paragraphs}
+\pp{Meth-1}{Every method is added to one stock scVI model at its default settings, with two decoder versions.}
+\begin{itemize}
+\item scVI \citep{lopez2018deep} as implemented in scvi-tools \citep{gayoso2022python}: 10 latent dimensions, one hidden layer of 128 units, zero-inflated negative binomial likelihood, 90\% training split, minibatch 128; epochs by the scvi-tools rule, no early stopping; epochs, minibatch and latent size are equal for all methods within a task.
+\item Conditioned decoder: receives the batch label, as scVI is usually used. Unconditioned decoder: no batch label reaches the model, so the adversary is the only batch correction. Each decoder has its own primary result.
+\item Plain scVI is the stock training plan (penalty strength zero). The scored embedding is the posterior mean, the mean of each cell's Gaussian code.
+\end{itemize}
+\pp{Meth-2}{Each method adds a penalty, weighted by a fixed strength, to the scVI loss (Table 1).}
+\begin{itemize}
+\item Adversarial: the discriminator minimises the scvi-tools fool loss, a JS-type objective \citep{goodfellow2014generative}, at one update step per training step. The three W1 critics \citep{arjovsky2017wasserstein} take five steps, with gradient penalty weight 10 \citep{gulrajani2017improved}: reference (each batch against a reference batch), pooled (each batch against all others), barycenter (each batch against a Wasserstein barycenter, an average distribution, of the minibatch's batches \citep{cuturi2014fast}).
+\item Reference batch: the batch with the highest cell-type entropy, so its choice uses cell-type labels.
+\item No network: MMD with a fixed multi-scale Gaussian kernel \citep{gretton2012kernel}; debiased Sinkhorn divergence, an entropy-regularised OT distance \citep{cuturi2013sinkhorn,genevay2018learning,feydy2019interpolating}, which is not a W1 estimate at the smoothing used. Reference method: the scvi-tools adversarial classifier (conditioned decoder only). Equations and settings: supplement.
+\end{itemize}
+\pp{Meth-3}{Training settings and the adversary input are the scvi-tools defaults, with a few declared differences between methods.}
+\begin{itemize}
+\item The adversary reads the posterior mean, without per-dimension standardisation. \tbd{state the outcome of the adversary-input and standardisation pilots}
+\item Encoder and discriminator use the scvi-tools Adam settings; critics use Adam with learning rate $10^{-4}$. Update steps differ by design: one for the discriminator, five for critics.
+\item The Kullback--Leibler (KL) warm-up uses the 400-epoch default, so it is incomplete on the four tasks with fewer epochs, while the penalty acts from the first step. A fit fails if its loss or latent turns non-finite; failures are counted, not dropped.
+\end{itemize}
+\pp{Meth-4}{The tasks are eight integration tasks of the single-cell integration benchmark (scIB), used as distributed.}
+\begin{itemize}
+\item Six real tasks (pancreas, lung, immune, a human--mouse immune version, and gene-activity versions of a small and a large chromatin-accessibility (ATAC) task) and two simulations, from the benchmark of \citet{luecken2022benchmarking}; no new data.
+\item Four task families: pancreas; lung; immune (two tasks); ATAC (two tasks). Simulations are reported per task and never pooled with real tasks.
+\item Genes: 2,000 highly variable genes per RNA task. Counts are fitted as distributed: 18 batches in four tasks hold non-integer values. Task table and checksums: supplement.
+\end{itemize}
+\pp{Meth-5}{Each fit is scored with scIB metrics, unscaled, on all cells.}
+\begin{itemize}
+\item Batch score: mean of principal-component regression comparison, batch average silhouette width (ASW), graph integration local inverse Simpson's index (iLISI), graph connectivity and the k-nearest-neighbour batch-effect test (kBET) \citep{buttner2019test}.
+\item Biology score: mean of the task's biology metrics: normalised mutual information, adjusted Rand index, cell-type ASW, isolated-label F1 and silhouette, graph cell-type LISI, plus cell-cycle and trajectory conservation where defined.
+\item Raw values on a 0--1 scale, with no min--max scaling. Selection score for ranking strengths and methods: 0.4 $\times$ batch score + 0.6 $\times$ biology score.
+\end{itemize}
+\pp{Meth-6}{Penalty strengths and decision rules were fixed before the main benchmark.}
+\begin{itemize}
+\item A penalty-strength pilot (three tasks, seeds 100--102) set six strengths for each method group and decoder; the main benchmark uses seeds 0--4 and the follow-up seeds 10--12, so no run is reused.
+\item Main benchmark: plain scVI, six penalty methods at six strengths each, and the scvi-tools adversary; 3,000 fits across tasks, decoders and seeds.
+\item The analysis was specified before any main-benchmark score was read, and runs once after all fits are scored or failed.
+\end{itemize}
+\pp{Meth-7}{Methods are compared at the same amount of batch removal, not at the same penalty strength.}
+\begin{itemize}
+\item Matched batch-removal level ($b^*$): halfway between plain scVI's batch score and the highest batch score every method reaches without failed runs, set per task and decoder. A task--decoder pair where that gap is under 0.02 is low-signal: not evaluable, reported separately.
+\item Primary comparison: biology kept at $b^*$, reference critic minus discriminator, one result per decoder, never averaged. Biology is read at the first crossing of $b^*$ by interpolation on the five-run mean; uncertainty by leaving one seed out.
+\item Also: trade-off area (area between plain scVI and a method's batch--biology curve), collapse rate (a failed run, or biology 0.10 or more below the same seed's plain scVI), and local versus global batch removal (iLISI, kBET and connectivity against the other two metrics) at the crossing.
+\end{itemize}
+\pp{Meth-8}{Task-level differences are pooled in one model, with a frequentist companion that is descriptive only.}
+\begin{itemize}
+\item Pooled model: overall, family and task effects with normal priors (scale 0.1; 0.05 and 0.2 as sensitivity); margin 0.01; call a direction, practical equivalence or inconclusive at posterior probability 0.95 \citep{corani2017statistical}. Collapse rates use Clopper--Pearson intervals \citep{clopper1934use}, margin 5 points.
+\item Wilcoxon signed-rank companion on per-task differences: with six real tasks its smallest possible $p$ (0.031) exceeds the corrected threshold for six results (0.05/6), so it is reported as descriptive.
+\item The design is underpowered: minimal detectable effect 0.131 at 80\% power for six tasks. \tbd{update the figure if power is recomputed}
+\end{itemize}
+\pp{Meth-9}{The range of good penalty strengths and the comparison with standard tools use the selection score at equal numbers of tries.}
+\begin{itemize}
+\item Range of good strengths: width, in decades of strength, of the points whose mean selection score lies within the 95\% interval of the best point.
+\item Baseline comparison: Harmony \citep{korsunsky2019fast} (six theta values), Scanorama \citep{hie2019efficient} (six neighbour counts), PCA (uncorrected anchor), scANVI \citep{xu2021probabilistic} (semi-supervised, uses cell-type labels) and sysVI \citep{hrovatin2025integrating} (six cycle weights); seeds 0--4 for the neural methods, one run for Harmony, Scanorama and PCA.
+\item Placement: single-strength tables (strength chosen on the other task families) and expected best of $k$ tries, $k=1$ to 6, with scANVI in its own label-using stratum. Reported descriptively; no decision rule.
+\end{itemize}
+\pp{Meth-10}{The follow-up and two exploratory checks reuse the main-benchmark fits where possible.}
+\begin{itemize}
+\item Regularisation and update-step follow-up: three tasks, both decoders, seeds 10--12, at three strengths around the matched strength. Discriminator plain, spectrally normalised \citep{miyato2018spectral}, with the R1 penalty on the size of the discriminator's gradient \citep{mescheder2018training}, and spectrally normalised with the critic's optimiser settings; pooled critic at 1, 5 and 10 steps, spectrally normalised at 1 and 5. \tbd{analysis rule and confirmatory contrast, fixed before the main-benchmark analysis run}
+\item Premise check: batch separability before integration (nearest-neighbour classifier, area under the receiver operating characteristic curve) and adversary gradient norms and discriminator accuracy over epochs; no new fits, no claim to confirm or refute.
+\item Label-transfer check: cross-batch cell-type label transfer (F1 per cell type, leave one batch out) at $b^*$; exploratory.
+\end{itemize}
+
+\hd{Results}{1,500 words; 10 paragraphs}
+\pp{Res-1}{We first report which fits completed and where batch removal could be matched.}
+\begin{itemize}
+\item \res{fits completed and failed, per method and decoder, out of 3,000 main-benchmark fits and the baseline runs.}
+\item \res{task--decoder pairs flagged low-signal; pairs where a method never reaches $b^*$.}
+\item Table 1 lists the methods and strengths.
+\end{itemize}
+\pp{Res-2}{The premise check reports how separable batches are before integration and how adversary gradients behave in training (Figure 2).}
+\begin{itemize}
+\item \res{separability statistic per task (Figure 2a).}
+\item \res{gradient norm per epoch, by method and decoder, at fixed strengths named beforehand (Figure 2b); discriminator accuracy per epoch (Figure 2c).}
+\item State that the check is exploratory and describe only; no claim about whether the premise holds.
+\end{itemize}
+\pp{Res-3}{Figure 3 shows each method's trade-off between batch removal and biology in every real task.}
+\begin{itemize}
+\item Layout: rows are decoders, columns are the six real tasks; plain scVI as a point, $b^*$ as a vertical line, standard tools as reference points.
+\item \res{description of the curves: where methods overlap, where curves end early or collapse.}
+\item Simulations are shown per task in the supplement.
+\end{itemize}
+\pp{Res-4}{The primary comparison reports biology kept at matched batch removal, reference critic minus discriminator, for each decoder (Figure 4a, Table 2).}
+\begin{itemize}
+\item \res{pooled estimate, 95\% interval, three posterior probabilities and the call, conditioned decoder.}
+\item \res{the same for the unconditioned decoder; per-task estimates; number of evaluable tasks.}
+\item \res{Wilcoxon companion, described as descriptive; simulations per task.}
+\end{itemize}
+\pp{Res-5}{Trade-off area and collapse rate give a second and third view of the same comparison (Figure 4b,c, Table 2).}
+\begin{itemize}
+\item \res{trade-off area, reference critic minus discriminator, per decoder.}
+\item \res{collapse rate per method and decoder with intervals; pooled difference and call.}
+\item \res{sensitivity to prior scale and to leaving out low-signal tasks.}
+\end{itemize}
+\pp{Res-6}{We then report whether batch removal is more local with a critic, and the label-transfer check (Figure 4d).}
+\begin{itemize}
+\item \res{local-minus-global difference at the crossing, per decoder, with sign test and pooled call.}
+\item \res{label-transfer F1 per cell type at $b^*$ (supplement table), described as exploratory.}
+\end{itemize}
+\pp{Res-7}{The range of good penalty strengths is reported for every method (Figure 5a).}
+\begin{itemize}
+\item \res{width in decades per method, task and decoder.}
+\item \res{methods whose best strength lies at the edge of the grid; methods with no good range.}
+\end{itemize}
+\pp{Res-8}{The regularisation and update-step follow-up reports whether a critic--discriminator difference comes from the divergence (Figure 5b).}
+\begin{itemize}
+\item \res{biology at the matched strength minus the plain discriminator, per variant and decoder.}
+\item \res{the confirmatory contrast: estimate, interval, call.}
+\item \res{effect of one, five and ten critic steps for the pooled critic.}
+\end{itemize}
+\pp{Res-9}{Single-strength tables place each method against plain scVI and the standard tools (Table 3, Figure 6b).}
+\begin{itemize}
+\item \res{selection score per method, decoder and task at the strength chosen on the other families; each task's own best strength as an optimistic bound.}
+\item \res{batch against biology score at the single strength, one point per real task.}
+\end{itemize}
+\pp{Res-10}{The comparison at equal numbers of tries reports whether any adversary improves on plain scVI (Figure 6a).}
+\begin{itemize}
+\item \res{expected best selection score at $k=1$ to 6 tries for each method family, per decoder; scANVI in its own stratum.}
+\item \res{whether any adversary exceeds plain scVI, Harmony, Scanorama or sysVI at equal $k$.}
+\item Report descriptively; label best-of-$k$ results optimistic.
+\end{itemize}
+
+\hd{Discussion}{700 words; 5 paragraphs}
+\pp{Disc-1}{\res{one-sentence answer to the main question for each decoder.}}
+\begin{itemize}
+\item \res{read the primary comparison, trade-off area and collapse rate together.}
+\item \res{state whether differences exceed the 0.01 margin and what the local-versus-global result adds.}
+\end{itemize}
+\pp{Disc-2}{\res{what the follow-up and the premise check say about why methods differ.}}
+\begin{itemize}
+\item \res{divergence versus regularisation versus update steps}, set against the image-GAN findings \citep{lucic2018gans,kurach2019large}.
+\item \res{premise check} against the theory \citep{arjovsky2017towards}; exploratory only.
+\item Composition shift: tie any over-correction to batch removal at matched level \citep{zhao2019learning,hrovatin2025integrating}.
+\end{itemize}
+\pp{Disc-3}{\res{guidance for scVI users, including the outcome that no adversary improves on plain scVI.}}
+\begin{itemize}
+\item \res{when a penalty is worth adding; which strength range; whether a standard tool does better at equal tries.}
+\item Word the guidance from the placement results only.
+\end{itemize}
+\pp{Disc-4}{The design limits what the data can show.}
+\begin{itemize}
+\item Underpowered (minimal detectable effect 0.131 for six real tasks at 80\% power); the Wilcoxon companion is descriptive. Six real tasks in four families, two pairs nested (the human--mouse immune task contains all immune cells; the large ATAC task contains the small one).
+\item The penalty-strength grids were set on three of the eight tasks. The reference critic takes five steps, the discriminator one; an update-step control exists only for the pooled critic.
+\item One batch variable per task; ATAC tasks are gene-activity matrices; non-integer counts fitted as distributed; scoring includes training cells; the Sinkhorn method is not a W1 estimate at its smoothing; the reference batch choice uses labels.
+\end{itemize}
+\pp{Disc-5}{Several factors are outside the scope of this comparison.}
+\begin{itemize}
+\item Architecture, KL warm-up (incomplete on shorter tasks while the penalty acts from the start), reference-batch choice and batch number are not varied or tested; composition shift is read from the strength curves, not a dose-response test.
+\item Adversary steps reuse one minibatch.
+\end{itemize}
+
+\hd{Availability and declarations}{50 words; 1 paragraph}
+\pp{Avail-1}{Code and data access.}
+\begin{itemize}
+\item Repository github.com/kreid415/wasserstein-critic-deconfounding; \tbd{version tag and commit at submission}; task checksums in the supplement.
+\item \tbd{funding, conflicts of interest and author-contribution statements as the journal requires}
+\end{itemize}
+
+\hd{Supplementary material}{no citations}
+\begin{itemize}
+\item Model equations: generator loss and KL weight; discriminator; W1 critics; barycenter target; MMD; Sinkhorn divergence; scvi-tools adversary.
+\item Adversary input and standardisation pilots, and the follow-up method variants.
+\item Pilot rules that set the penalty-strength grids and the matched strengths.
+\item Primary-comparison reading, trade-off area, pooling and decision calls, collapse rate, local versus global, selection score and placement rules.
+\item Data: task table (cells, batches, cell types, genes, checksums) and as-distributed counts.
+\item Experiments: run counts per stage, settings, epochs and final KL weight per task, strength grids, software versions, hardware.
+\item Disclosures: design choices made after the pilots, baseline grid amendments, seed pairing between methods.
+\item Extra results: simulations per task, sensitivity analyses, premise-check details, label-transfer table, per-metric strength curves, exploratory scaling checks, long limitations list.
+\end{itemize}
+
+\hd{Figures and tables}{400 words of captions and notes}
+\begin{itemize}
+\item Figure 1: (a) model schematic, with the decoder with or without batch label and a swappable alignment term; (b) cartoon of how biology is read at $b^*$. If the article is too long, panel (a) is the second cut, after Figure 2.
+\item Figure 2: premise check: (a) batch separability per task; (b) gradient norm per epoch; (c) discriminator accuracy per epoch. First figure to move to the supplement if pages run short.
+\item Figure 3: biology against batch score, decoders by tasks, one line per method, plain scVI point, $b^*$ line, standard tools as points.
+\item Figure 4: forest plots per task and pooled: (a) primary comparison; (b) trade-off area; (c) collapse-rate difference; (d) local minus global.
+\item Figure 5: (a) width of the range of good strengths per method; (b) follow-up variants, biology at matched strength minus plain discriminator.
+\item Figure 6: (a) expected best selection score against number of tries; (b) batch against biology score at each method's single strength.
+\item Table 1: methods compared: alignment term, network, update steps, six strengths per decoder, follow-up variants.
+\item Table 2: the six primary results (primary comparison, trade-off area, collapse rate, each per decoder): estimate, interval, probabilities, call, evaluable tasks.
+\item Table 3: single-strength placement: selection score per method, decoder and task.
+\end{itemize}
+
+\vspace{4pt}
+\begin{multicols}{2}
+\renewcommand{\refname}{References}
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{multicols}
+\end{document}
