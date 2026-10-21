@@ -5,8 +5,8 @@
 # (SI-54: non-Sinkhorn outputs already in the output folder that were made at c88cce3 count as v3; Sinkhorn output at c88cce3 is refused).
 # Same device and settings as A1-A3 (RTX 3080; 8 lanes, 1 thread; 3 scorers during fits, 8 after); only the manifest, the experiment
 # and the output dir differ. Preflight: experiments/X1/PREFLIGHT.md (to be redone for v3 and the redone rules).
-# MAN_SHA is EMPTY ON PURPOSE: the resolved X1 manifest exists only after stage 2 of the Sinkhorn redo (R1, R4-a1, R2/R3;
-# experiments/sinkhorn_redo_stage2/PLAN.md step X). Set MAN_SHA to the sha256 that step prints; the launcher refuses until then.
+# MAN_SHA pins the resolved X1 manifest made by stage 2 of the Sinkhorn redo (R1, R4-a1, R2/R3; rules/r23/m.x1.tsv, set 2026-10-20 at
+# experiments/sinkhorn_redo_stage2/PLAN.md step X); the launcher refuses any other manifest.
 # Output folder: NEW, $D/tier12_v3/X1_local (decision D-S2-3). $D/tier12_v2/X1_local holds the 19 pre-redo scored rows (hashed under
 # SI-79, never written to); the runner refuses outputs recorded for other settings and Sinkhorn output made at c88cce3, so it is
 # not reused as the output folder. Reusable non-Sinkhorn outputs are linked in by name first (link_v2_outputs.py; PLAN.md step X2).
@@ -16,7 +16,7 @@ D=/home/kendall/experiment_data/wasserstein-critic-deconfounding
 REPO=$D/code/wcd_prereg-tier12-v3
 TAG_COMMIT=10a1ca5874fbcdc033b148525b5e71d866306bdb
 MAN=$D/tier12_v3/manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv
-MAN_SHA=""
+MAN_SHA="034403eb206f77296bc857e5776a84e22e6a172f787913875a9ddc159e1fa6c8"
 ENVS=/home/kendall/.claude-science/conda/envs
 EXITLOG=$D/tier12_v3/logs/X1_local_exit.txt
 die() { echo "$1" >&2; exit "${2:-2}"; }

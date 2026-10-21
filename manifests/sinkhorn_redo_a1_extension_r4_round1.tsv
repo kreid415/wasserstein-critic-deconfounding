@@ -1,0 +1,12 @@
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+# R4 a1 extension, 9 A1 rows (freeze_matched_lambda.py)
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+A1_immune_discriminator_l0.03_c1_s100_9a41af53	A1	immune	scib	discriminator	0.03	1	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	100	auto	{}
+A1_immune_discriminator_l0.03_c1_s101_8f28671a	A1	immune	scib	discriminator	0.03	1	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	101	auto	{}
+A1_immune_discriminator_l0.03_c1_s102_b39983fd	A1	immune	scib	discriminator	0.03	1	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	102	auto	{}
+A1_immune_reference_l0.03_c1_s100_a1d0a054	A1	immune	scib	reference	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	100	auto	{}
+A1_immune_reference_l0.03_c1_s101_bde188fb	A1	immune	scib	reference	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	101	auto	{}
+A1_immune_reference_l0.03_c1_s102_cd1a3148	A1	immune	scib	reference	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	102	auto	{}
+A1_immune_pooled_l0.03_c1_s100_0c3f7de7	A1	immune	scib	pooled	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	100	auto	{}
+A1_immune_pooled_l0.03_c1_s101_946ad1ca	A1	immune	scib	pooled	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	101	auto	{}
+A1_immune_pooled_l0.03_c1_s102_78e90f0d	A1	immune	scib	pooled	0.03	5	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	102	auto	{}

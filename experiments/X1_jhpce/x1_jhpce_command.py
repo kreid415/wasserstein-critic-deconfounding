@@ -21,11 +21,10 @@ import subprocess
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TAG_SHA = "10a1ca5874fbcdc033b148525b5e71d866306bdb"                     # prereg-tier12-v3
-MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv"
-# DESIGN_SHA is EMPTY ON PURPOSE (as MAN_SHA in experiments/X1_local/run_X1_local.sh): MANIFEST above is the PRE-REDO X1 design
-# (Sinkhorn grid and R2/R3 decisions before the redo, SI-51/SI-57). After stage 2 (experiments/sinkhorn_redo_stage2/PLAN.md step X)
-# point MANIFEST at the resolved file and put its sha256 here; the builder refuses until it equals the committed file's.
-DESIGN_SHA = ""
+MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv"
+# MANIFEST is the resolved X1 design after stage 2 of the Sinkhorn redo (experiments/sinkhorn_redo_stage2/PLAN.md step X, 2026-10-20;
+# same file as MAN_SHA in experiments/X1_local/run_X1_local.sh); the builder refuses unless its sha256 equals DESIGN_SHA.
+DESIGN_SHA = "034403eb206f77296bc857e5776a84e22e6a172f787913875a9ddc159e1fa6c8"
 TAGS_DIR = "experiments/X1_jhpce/tags"
 TASKS = ("atac_large", "immune_hum_mou", "lung", "pancreas", "sim2")
 STAGE = "x1_jhpce"
