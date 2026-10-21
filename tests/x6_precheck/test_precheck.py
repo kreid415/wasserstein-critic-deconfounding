@@ -37,7 +37,7 @@ def test_build_copies_pilot_rows(tmp_path):
     lams = {"discriminator": {"atac_small|0": (300, 1000, 3000), "atac_small|1": (0.3, 1, 3), "immune|0": (0.1, 0.3, 1),
                               "immune|1": (0.1, 0.3, 1), "sim1|0": (10, 30, 100), "sim1|1": (100, 300, 1000)},
             "pooled": {"atac_small|0": (100, 300, 1000), "atac_small|1": (1, 3, 10), "immune|0": (0.3, 1, 3),
-                       "immune|1": (3, 10, 30), "sim1|0": (30, 100, 300), "sim1|1": (0.1, 0.3, 1)}}
+                       "immune|1": (3, 10, 30), "sim1|0": (30, 100, 300), "sim1|1": (0.03, 0.1, 0.3)}}   # 0.03: no pilot fit
     rec = {"cells": {f"{k}|{base}": dict(lo=float(a), matched=float(b), hi=float(c))
                      for base, cells in lams.items() for k, (a, b, c) in cells.items()}}
     r4 = tmp_path / "r4.json"; r4.write_text(json.dumps(rec))
@@ -49,7 +49,9 @@ def test_build_copies_pilot_rows(tmp_path):
     for arm, base in (("discriminator_sn_critic_opt", "discriminator"), ("pooled_sn", "pooled")):
         d = df[df.arm == arm]
         src = v5[(v5.experiment == "A1") & (v5.arm == base)][same]
-        assert len(d) == 18 and len(d[same].merge(src, how="inner")) == 18      # every other field equals a pilot base-arm row
+        assert len(d) == 18 and len(d[same].merge(src, how="inner")) == 18 - (arm == "pooled_sn")   # every other field equals a pilot base-arm row
+        keys = set(map(tuple, src.drop(columns="lam").values))          # the 0.03 row: equal apart from the strength
+        assert all(tuple(r) in keys for r in d[same].drop(columns="lam").values)
         got = {f"{t}|{c}": tuple(sorted(float(x) for x in g.lam)) for (t, c), g in d.groupby(["task", "cond"])}
         assert got == {k: tuple(float(x) for x in v) for k, v in lams[base].items()}
         assert d.tag.str.match(rf"^PC6_(atac_small|immune|sim1)_{arm}_l[0-9.]+_c[01]_s100_[0-9a-f]{{8}}$").all()

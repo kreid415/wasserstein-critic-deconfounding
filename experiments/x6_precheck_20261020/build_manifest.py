@@ -25,6 +25,11 @@ def build(source, r4):
                 for lam in (cell["lo"], cell["matched"], cell["hi"]):
                     src = m[(m.experiment == "A1") & (m.arm == base) & (m.task == task) & (m.cond == cond)
                             & (m.seed == SEED) & (pd.to_numeric(m.lam, errors="coerce") == float(lam))]
+                    if src.empty:   # an edge strength the pilot never fitted (record flag edge_not_extended): rows differ only in lam
+                        src = m[(m.experiment == "A1") & (m.arm == base) & (m.task == task) & (m.cond == cond) & (m.seed == SEED)]
+                        if len(src.drop(columns=["tag", "lam"]).drop_duplicates()) != 1:
+                            raise SystemExit(f"{task}|{cond} lam {lam}: no pilot {base} row, and its other rows differ beyond lam")
+                        src = src.iloc[:1]
                     if len(src) != 1:
                         raise SystemExit(f"{task}|{cond} lam {lam}: {len(src)} pilot {base} rows, need 1")
                     r = src.iloc[0].to_dict()

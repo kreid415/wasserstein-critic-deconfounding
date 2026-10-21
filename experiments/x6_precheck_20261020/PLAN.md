@@ -70,3 +70,10 @@ read the numbers and the rule below.
   critics compute no gradient penalty). The branch `x6-precheck` and `x6-lock` both do (`with_gp=not self.spectral_norm` in
   `scripts/scvi_adversarial_plan.py`); fits made without it are not comparable. The 36-row manifest and the launch commit are
   pinned at launch.
+
+### Note 2026-10-21, after the tag `prereg-x6-v1`: a strength with no pilot fit
+Building the 36-row manifest found that the pilot record's `sim1|1|pooled` cell has lo = 0.03, which the pilot never fitted (the
+record flags it `edge_not_extended`). `build_manifest.py` therefore copies that row from the pilot `pooled` row of the same task,
+decoder and seed, after checking that those rows differ only in strength, and sets the strength to 0.03. This changes no rule and no
+other row; sim1|1 is a low-signal cell, reported and not counted in the decision.
+
