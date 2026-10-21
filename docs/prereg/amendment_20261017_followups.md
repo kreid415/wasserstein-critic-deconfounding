@@ -1,5 +1,10 @@
 # PREREG section 9 amendment (DRAFT): follow-up design of 2026-10-17
 
+**SUPERSEDED on 2026-10-20 by the entry of 2026-10-20 at the end of `docs/PREREG.md` section 9, which puts only X6 in force
+(both decoders, the arm `discriminator_sn_critic_opt` with its base-arm mapping, no gradient penalty for spectral-norm critics,
+the follow-up analysis rule and the strength pre-check). This draft is kept as the record of the earlier text; its rows for X3,
+X7, X8 and X12 were dropped by the user's decision SI-103 and are not in force. Do not paste it into PREREG.md.**
+
 Status: **draft, not in force.** Written on branch `followup-build` for the user's review. It is not part of `docs/PREREG.md`
 (frozen by tag `prereg-tier12-v3`); to take effect it is pasted into section 9 of PREREG.md and committed together with the
 code it describes, and a new code tag is made, before the first follow-up fit and before R4-x1 (see "Order").

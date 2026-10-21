@@ -659,3 +659,74 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
 | 17 | What should we do about small tidiness warnings in the code? | Leave them: no code change for the 28 ruff warnings of 08f1e3c, 23 of them outside the identity-proof code; the count goes in the note of question 16. | NB-20261015-12 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
 | 18 | Should we delete 11 old review copies of the code and two stray files? | Delete after a check: each of the 11 old review worktrees is checked for uncommitted work first, and any that has some is reported and kept; the folders and the two stray files go to the Trash through the approval prompt. | NB-20261015-13 (notebook entry only) | notebook/2026-10-15.md; housekeeping, no rule of this file |
 | 19 | Do you approve the remaining wording changes from earlier rounds? | Approved as shown in the diff: the wording of I091 (R1 depends on the trajectory score through its noise estimate, SI-53), D-01 (PAPER_PLAN's P1 comparator), D-02 (the power claim) and the format of the amendment table at the top of this section (DOC-03). | NB-20261015-14 (notebook entry only) | this file, entries of 2026-10-13 on R1 and the trajectory score and on PAPER_PLAN, and the amendment table; docs/PAPER_PLAN.md sections 3.2 and 5 |
+
+- **2026-10-20, the follow-up experiment X6 is put in force as designed: both decoders, the added spectral-norm discriminator
+  arm, no gradient penalty for spectral-norm critics, its analysis rule, and a pre-check of that arm's penalty strengths
+  (user decisions SI-93 and SI-98 of 2026-10-17, and the pre-check decision of 2026-10-20).**
+  Status: written 2026-10-20 on branch x6-lock (the fit branch followup-build, the pre-check folder and the analysis branch
+  followup-analysis-spec, merged at d034db7). This entry **replaces the draft** `docs/prereg/amendment_20261017_followups.md`,
+  which is marked superseded; the draft described four more follow-ups (X3, X7, X8, X12) that the user dropped (SI-103, below).
+  Done: the design below is in the code and the manifest of this branch. Planned and not done: the user's review, the check
+  that X1 fit paths give results identical to the tag (`experiments/followup_build_20261017/README.md`, "X1 fit identity"), the
+  pre-check fits and its decision file, and the new code tag `prereg-x6-v1`, which will freeze this entry, the scripts named
+  below, `docs/ANALYSIS_SPEC_FOLLOWUPS.md` and its tests before R4-x1 runs and before any X1 result is examined (SI-68). This
+  entry changes no fit of X1, X13, A1, A2 or A3, no rule R1 to R3, no part of the X1 or X13 analysis, and not
+  `scripts/analysis_x1.py` or `docs/ANALYSIS_SPEC.md` (both are identical to the tag; checked with `git diff prereg-tier12-v3
+  --stat` on those two files, which is empty). No X1, X13 or follow-up score was read to prepare this entry or the changes it
+  lists; the tests use synthetic scores only.
+  What is registered, in plain words:
+  - **Scope (SI-103, decided by the user on 2026-10-17).** X3, X7, X8, X12 and X15 are dropped and X6 is kept. The entry that
+    records this (user decision SI-103, with the ledger and notebook entries) is on branch final-review-fixes and is not in
+    this tree; it applies where it differs from the older entries, and it does not give the X6 design, which is given here.
+    Manifest v5 (`manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv`, SHA-256 ce8dfbf2...a46432, checked with `sha256sum -c`
+    against `manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv.sha256`) holds 5,280 rows (X1 3,000; A1 1,098; X6 486; X13 408;
+    A3 180; A2 108), built by `build_paper_manifest.py --followup-design v4 --exclude-experiments X3 X7 X8 X12 X15`.
+  - **X6 design: 486 fits.** 3 tasks (atac_small, immune, pancreas) x 2 decoders (SI-93: the decoder that receives the batch
+    label, cond 1, and the decoder without it, cond 0, where the adversary alone removes batch effects) x 9 settings of arm
+    and adversary steps per update x 3 penalty strengths x 3 seeds (10, 11, 12; SI-26). The 9 settings: Jensen-Shannon (JS)
+    discriminator with no penalty, with spectral normalisation (SN), with the R1 penalty (weight 10, `extra` =
+    `{"r1_gamma": 10}`) and with SN and the critic's optimiser (the new arm), each at 1 step; the pooled Wasserstein-1 (W1)
+    critic with a gradient penalty (GP) at 1, 5 and 10 steps; the pooled W1 critic with SN at 1 and 5 steps. The three strengths
+    are `matched_lo`, `matched` and `matched_hi` (the point whose batch score is closest to the target b* and its two grid
+    neighbours), resolved by `freeze_matched_lambda.py --stage x1` (R4, section 4). There is no strength-0 row in X6.
+  - **New arm `discriminator_sn_critic_opt` (SI-98).** A JS discriminator with spectral normalisation, trained with the critic's
+    Adam settings (learning rate 1e-4, betas (0, 0.9)) instead of the discriminator's (learning rate 1e-3), at 1 adversary step.
+    Its reason: the confirmatory X6 comparison of the two divergences then differs in the loss and the target only. **Base-arm
+    mapping (R4, "Variant arms", section 4):** this arm inherits the matched strengths of `discriminator` on the same task and
+    decoder, as `discriminator_sn` and `discriminator_r1` do. This adds one entry to `BASE_ARM` in `scripts/prereg_rules.py`:
+    `git diff prereg-tier12-v3 -- scripts/prereg_rules.py` shows exactly two changed lines, lines 61 (a trailing comma after
+    `discriminator_ref="discriminator"`) and 62 (the new entry `discriminator_sn_critic_opt="discriminator"`); no other line of
+    that file differs from the tag, and no other behaviour of it changes. The sentence of section 4 "An arm without a mapping
+    stops the script" is unchanged. `tests/prereg/test_rules_unchanged.py` now expects this one entry as the only difference
+    between the rule records of the previous commit and of this tree.
+  - **Spectral-norm critics compute no gradient penalty (finding I036).** Before, a spectral-norm critic computed a gradient
+    penalty and discarded it, which also advanced the spectral-norm power iteration and drew random numbers; now `with_gp=not
+    spectral_norm` in `scripts/scvi_adversarial_plan.py`. This changes the training path of the X6 `pooled_sn` arm only. Fits of
+    `pooled_sn` made before the new code tag are not comparable with those made at it (none exist; keep it that way). That no X1
+    arm is changed is the build track's claim (`docs/DIFF_followup_build.md`, `static_x1_paths.py`); the fit-identity run that
+    checks it is listed above as not yet done.
+  - **Strength pre-check of the new arm (user decision, 2026-10-20).** The new arm inherits the strengths of the plain
+    discriminator, which is trained at a ten times higher learning rate; if the slower-learning arm removes less batch effect, its batch score never reaches b*
+    and the confirmatory result cannot be read. The pre-check fits that arm (18 fits: atac_small, immune and sim1, both decoders,
+    3 strengths, pilot seed 100) and applies a rule fixed before any pre-check fit (`experiments/x6_precheck_20261020/PLAN.md`,
+    committed with `decide.py`): of the 4 counted cells (not low-signal in the pilot record), `shift_up` if at least 3 never reach
+    b* from below, `shift_down` if at least 3 never reach it from above, otherwise `keep`. The result is `decision.json`
+    written by `decide.py`. **Effect on X6:** `freeze_matched_lambda.py --stage x1` takes `--precheck-decision <decision.json>`
+    and stops, when it resolves X6 rows of `discriminator_sn_critic_opt`, if the option is missing or if the value is anything
+    other than `keep`, `shift_up` or `shift_down`. For this arm only, each of the three resolved strengths then moves one step up
+    (`shift_up`) or down (`shift_down`) the sequence ..., 0.1, 0.3, 1, 3, 10, ... (`prereg_rules.lam_step`); `keep` changes
+    nothing. One step only, no second pre-check. The R4-x1 record keeps the decision (`precheck_decision`), the number of rows of
+    the arm (`precheck_arm_rows`) and the file's SHA-256 (under `inputs`). `git diff prereg-tier12-v3 --
+    scripts/freeze_matched_lambda.py` shows the change; without the option and with no row of that arm the script behaves as at
+    the tag (the records of the previous commit and of this tree are equal, `test_rules_unchanged.py`).
+  - **Analysis rule.** `docs/ANALYSIS_SPEC_FOLLOWUPS.md`, `scripts/analysis_followups.py` and `tests/analysis_followups/` are
+    frozen by the code tag. Two confirmatory results (one per decoder): biology at b* of the SN critic at 1 step minus that of
+    the new arm, pooled over the evaluable real datasets with the frozen model of `analysis_x1.combine`, margin 0.01, declaration
+    threshold 0.95, Holm's adjustment over the 2 results. Everything else in it is secondary or descriptive. The spec lists its
+    departures from `docs/ANALYSIS_SPEC.md` (section 1.11). Its design names are hard-coded in the script (spec section 1.9); the
+    script stops on any departure from them.
+  - **Scripts that differ from the tag (`git diff prereg-tier12-v3 --stat -- scripts`):** `build_paper_manifest.py`,
+    `fit_paper_config.py`, `scvi_adversarial_plan.py` and `cost_model.py` (build side: the follow-up design flag, the new arm, the
+    I036 fix; their default settings reproduce manifest v3 byte for byte, per the build track), `prereg_rules.py` (2 lines,
+    above), `freeze_matched_lambda.py` (the pre-check option, above) and `analysis_followups.py` (new). `src/` and
+    `analysis_x1.py` do not differ.
