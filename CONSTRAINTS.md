@@ -736,16 +736,17 @@
 - source: user decision by ask_user, 2026-10-20 (lock the follow-up rule as drafted after an independent review)
 - added: 2026-10-20
 - keywords: X6, follow-up, analysis rule, lock, prereg-x6-v1, confirmatory, review
-
+- notebook: NB-20261021-02
 ## SI-105 · active · method
 - rule: Before the X6 rule is applied, run an 18-fit strength pre-check of discriminator_sn_critic_opt (pilot tasks atac_small, immune, sim1 x 2 decoders x the plain discriminator's lo/matched/hi strengths, seed 100); shift its three strengths one grid step up if >=3 of 4 counted cells are unreached_low, down if >=3 are unreached_high, else keep (experiments/x6_precheck_20261020/PLAN.md)
 - source: user decision by ask_user, 2026-10-20 (option a, the 18-fit pre-check)
 - added: 2026-10-20
 - keywords: X6, pre-check, discriminator_sn_critic_opt, strength, lambda, shift, decide.py
-
+- notebook: NB-20261021-02
 ## SI-106 · active · method
 - rule: The X1 fit-identity check (experiments/followup_build_20261017/README.md Steps 0-1: no-fit plan comparison and 57 one-epoch CPU fits plus 5 control fits, OLD = tag prereg-tier12-v3, NEW = the commit to be tagged) runs and passes before the tag prereg-x6-v1 is made
 - source: "Run the check first, then tag (Recommended)" (user, 2026-10-21)
 - added: 2026-10-21
 - keywords: X6, identity, fit identity, prereg-x6-v1, tag, precondition, F5
+- notebook: NB-20261021-04
 
