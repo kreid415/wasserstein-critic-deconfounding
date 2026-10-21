@@ -22,7 +22,7 @@ Checking aid only; not part of the outline. Line numbers are lines of `paper/pap
 | Meth-7 | 387-389, 399-403, 406-407; 600-601 | b* and low-signal threshold 0.02 (387, 389); collapse rule (406) |
 | Meth-8 | 404-406, 409, 413; 621-624 | MDE 0.131 for six tasks (413, 624); recomputation pending (413) |
 | Meth-9 | 408, 439-445; 640-643 | Window rule 643; best-of-k 642; leave-one-family-out 641 |
-| Meth-10 | 421-422, 429-432 | Analysis rule for the follow-up still open (422) |
+| Meth-10 | 421-422, 429-432; follow-up arms: manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv (followup-build, X6 = 9 settings x 54); contrast, margin, Holm: docs/ANALYSIS_SPEC_FOLLOWUPS.md 1.6-1.7, 3.4 (followup-analysis-spec); premise check and label transfer: paper/R0_X10_DEFAULTS.md sections 3-5 | Rule lock (tag prereg-x6-v1) and the 18-fit strength check still open |
 | Res-1 | 64, 389, 611 | Counts left as placeholders |
 | Res-2 | 465-470; 429-431 | Exploratory, Figure 2 (468) |
 | Res-3 | 477; BUDGET section 2 (Figure 3) | |
