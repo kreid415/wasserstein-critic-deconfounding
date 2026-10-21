@@ -29,7 +29,7 @@ def _old_scripts(tmp):
     return os.path.join(d, "scripts")
 
 
-def _pipeline(scripts, tmp, man, fp, s_a1):
+def _pipeline(scripts, tmp, man, fp, s_a1, x1_args=()):
     """Run the four rule CLIs of `scripts` in `tmp`; scores of later stages are synthesized from each stage's output."""
     os.makedirs(tmp)
     run = lambda name, *args: subprocess.run([sys.executable, os.path.join(scripts, name), *args],  # noqa: E731
@@ -51,7 +51,7 @@ def _pipeline(scripts, tmp, man, fp, s_a1):
     synth.write_scores(S, F, j("scores"), "x1")
     run("freeze_matched_lambda.py", "--stage", "x1", "--manifest", "m.x1.tsv", "--scores", "scores/x1.csv",
         "--failures", fp, "--r1-record", "r1.json", "--out-json", "r4x1.json", "--out-manifest", "m.r4x1.tsv",
-        "--extension-manifest", "x1_ext.tsv")
+        "--extension-manifest", "x1_ext.tsv", *x1_args)
     return tmp
 
 
@@ -70,8 +70,10 @@ def both(tmp_path_factory):
     man = synth.write_tsv(M, os.path.join(tmp, "manifest.tsv"))
     S, F = synth.scores(M[M.experiment == "A1"])
     s_a1, fp = synth.write_scores(S, F, os.path.join(tmp, "scores"), "a1")
+    keep = os.path.join(tmp, "keep.json")     # SI-107: the manifest's X6 pooled_sn rows at n_critic 1 need a pre-check decision; 'keep' moves nothing
+    json.dump(dict(decisions={"discriminator_sn_critic_opt": "keep", "pooled_sn": "keep"}), open(keep, "w"))
     old = _pipeline(_old_scripts(tmp), os.path.join(tmp, "run_old"), man, fp, s_a1)
-    new = _pipeline(os.path.join(ROOT, "scripts"), os.path.join(tmp, "run_new"), man, fp, s_a1)
+    new = _pipeline(os.path.join(ROOT, "scripts"), os.path.join(tmp, "run_new"), man, fp, s_a1, ("--precheck-decision", keep))
     return old, new
 
 
@@ -89,6 +91,9 @@ def test_decision_records_are_the_same(both, name):
         assert rn.pop("n_default_half_extension_rows") == 0
     # the one registered rule difference of this tree (PREREG section 9, entry of 2026-10-20): the X6 optimiser-control arm's base arm
     assert rn["constants"]["BASE_ARM"].pop("discriminator_sn_critic_opt") == "discriminator"
+    if name == "r4x1.json":      # the other: the decisions file (all 'keep') and the rows each arm's decision could move (SI-107)
+        assert set(rn.pop("precheck_decisions").values()) == {"keep"} and rn.pop("precheck_arm_rows")["pooled_sn"] > 0
+        in_.pop("precheck_decision")
     assert rn == ro
     assert in_ == io                                     # same manifests, scores, failures (SHA-256)
 

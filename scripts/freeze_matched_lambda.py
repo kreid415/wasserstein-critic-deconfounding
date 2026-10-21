@@ -5,9 +5,11 @@
   --stage x1  on X1 scores: resolves the follow-ups' matched_lo / matched / matched_hi (variant arms take
               their base arm's value, prereg_rules.BASE_ARM). Follow-ups run on fresh seeds (SI-26), so no
               follow-up row may equal an X1 row after resolution: the script stops if one does.
-              X6 rows of the arm discriminator_sn_critic_opt also need --precheck-decision (the decision.json of
-              experiments/x6_precheck_20261020/decide.py: keep, shift_up or shift_down). That arm's three strengths
-              then move one step up or down the 1-3 grid (prereg_rules.lam_step); without the file the script stops.
+              X6 rows of two arms also need --precheck-decision (the decision.json of
+              experiments/x6_precheck_20261020/decide.py, key `decisions`: one of keep, shift_up or shift_down per arm):
+              discriminator_sn_critic_opt (every row) and pooled_sn at n_critic 1 (SI-107; pooled_sn at n_critic 5 is
+              not checked). Each arm's three strengths move one step up or down the 1-3 grid (prereg_rules.lam_step)
+              by that arm's own decision; without a decision for each arm the script stops.
 
 b* =b0 + 0.5 (b_common - b0) on the unscaled batch score (mean of the 5 raw scIB batch metrics); the
 matched point is the failure-free grid point closest to b* (ties -> smaller lambda). A matched point on
@@ -34,7 +36,9 @@ import prereg_rules as P  # noqa: E402
 from prereg_rules import BPM  # noqa: E402
 
 X1_MATCHED = ["matched_lo", "matched", "matched_hi"]
-SHIFT_ARM = "discriminator_sn_critic_opt"                       # X6 optimiser control (SI-98); the only arm that is shifted
+# X6 arms whose strengths move by their own pre-check decision (SI-98, SI-107): arm -> the n_critic of the rows that
+# move (None = every row of the arm). No other arm or row moves.
+SHIFT_ARMS = {"discriminator_sn_critic_opt": None, "pooled_sn": 1}
 PRECHECK_STEPS = {"keep": 0, "shift_up": 1, "shift_down": -1}   # X6 strength pre-check decision -> grid steps
 
 
@@ -42,15 +46,24 @@ def _value(cell, label):
     return cell[{"lo": "lo", "": "matched", "hi": "hi"}[label.rsplit("matched", 1)[1].lstrip("_")]]
 
 
-def precheck_steps(decision):
-    P._require(decision in PRECHECK_STEPS, f"X6 strength pre-check decision {decision!r} is not one of "
-                                           f"{sorted(PRECHECK_STEPS)} (pass --precheck-decision <decision.json>)")
+def shifted(arm, n_critic):
+    """True for the X6 rows that their arm's pre-check decision moves (SHIFT_ARMS)."""
+    return arm in SHIFT_ARMS and SHIFT_ARMS[arm] in (None, int(n_critic))
+
+
+def precheck_steps(precheck, arm):
+    """Grid steps for `arm` from `precheck` ({arm: decision}); a missing or invalid decision is an error."""
+    is_dict = isinstance(precheck, dict)
+    decision = precheck.get(arm) if is_dict else precheck
+    P._require(is_dict and decision in sorted(PRECHECK_STEPS), f"{arm}: X6 strength pre-check decision {decision!r} is not "
+               f"one of {sorted(PRECHECK_STEPS)} in an {{arm: decision}} dict (pass --precheck-decision <decision.json>)")
     return PRECHECK_STEPS[decision]
 
 
 def resolve(M, r4, stage, precheck=None):
     """Replace the stage's placeholders; any placeholder left for this stage is an error. `precheck` is the X6
-    strength pre-check decision; it is required for, and applied to, the rows of SHIFT_ARM only."""
+    strength pre-check decision {arm: decision}; each row that `shifted` is moved by its own arm's decision, and
+    resolving such a row without a valid decision for its arm is an error."""
     M = M.copy()
     labels, exps = (BPM.A1_MATCHED, ["A2", "A3"]) if stage == "a1" else (X1_MATCHED, list(P.FOLLOWUPS))
     hit = M.lam.isin(labels)
@@ -67,7 +80,7 @@ def resolve(M, r4, stage, precheck=None):
         P._require(key in r4["cells"], f"{M.at[i, 'tag']}: no matched cell {key}")
         v = _value(r4["cells"][key], M.at[i, "lam"])
         P._require(v is not None, f"{M.at[i, 'tag']}: {key} has no {M.at[i, 'lam']}")
-        step = precheck_steps(precheck) if arm == SHIFT_ARM else 0
+        step = precheck_steps(precheck, arm) if shifted(arm, M.at[i, "n_critic"]) else 0
         if step:
             v = P.lam_step(v, step)
         M.at[i, "lam"] = P.fmt_lam(v)
@@ -106,7 +119,8 @@ def main(argv=None):
     ap.add_argument("--out-json", required=True)
     ap.add_argument("--out-manifest", required=True)
     ap.add_argument("--extension-manifest", required=True)
-    ap.add_argument("--precheck-decision", help=f"decision.json of the X6 strength pre-check; required to resolve X6 rows of {SHIFT_ARM}")
+    ap.add_argument("--precheck-decision", help=f"decision.json of the X6 strength pre-check (key `decisions`, one per arm of "
+                                                f"{sorted(SHIFT_ARMS)}); required to resolve their X6 rows")
     a = ap.parse_args(argv)
     M, header = P.read_manifest(a.manifest)
     P.check_seed_separation(M)
@@ -130,10 +144,12 @@ def main(argv=None):
         return P.EXIT_EXTEND
     precheck, x6_precheck = None, {}
     if a.precheck_decision:
-        precheck = json.load(open(a.precheck_decision)).get("decision")
-        precheck_steps(precheck)
+        precheck = json.load(open(a.precheck_decision)).get("decisions")
+        for arm in SHIFT_ARMS:
+            precheck_steps(precheck, arm)
         inputs["precheck_decision"] = [a.precheck_decision]      # its SHA-256 goes into the record
-        x6_precheck = dict(precheck_decision=precheck, precheck_arm_rows=int((M.arm == SHIFT_ARM).sum()))
+        x6_precheck = dict(precheck_decisions=precheck, precheck_arm_rows={
+            arm: sum(shifted(x, n) for x, n in zip(M.arm, M.n_critic) if x == arm) for arm in SHIFT_ARMS})
     M2, n = resolve(M, r4, a.stage, precheck)
     n_checked = check_no_x1_reuse(M2) if a.stage == "x1" else 0
     si45 = {}

@@ -12,11 +12,12 @@ lists where it departs from them (section 1.11).
 2026-10-17 and have no analysis here. Section numbers are those of the earlier, longer draft; sections 2 and 4 to 7 were removed with
 their experiments. The design that this file analyses is put in force by the PREREG section 9 entry of 2026-10-20 (both decoders,
 the arm `discriminator_sn_critic_opt` and its base-arm mapping, no gradient penalty for spectral-norm critics, the strength
-pre-check of section 1.10). The earlier draft amendment `docs/prereg/amendment_20261017_followups.md` is superseded by that entry.
+pre-check of section 1.10 for that arm and for `pooled_sn` at 1 step). The earlier draft amendment `docs/prereg/amendment_20261017_followups.md` is superseded by that entry.
 
 *Decisions it follows: SI-26 (fresh seeds 10-12 for the follow-ups), SI-56 (low-signal cells), SI-69 to SI-73 (reading, failures,
 decoders, pooling), SI-80 (agent proposals approved as rules), SI-82 (exploratory labels), SI-83 (standard-error floor), SI-93 and
-SI-98 (X6 with both decoders; the spectral-norm discriminator arm), SI-103 (the pruning), the pre-check decision of 2026-10-20, and the
+SI-98 (X6 with both decoders; the spectral-norm discriminator arm), SI-103 (the pruning), the pre-check decision of 2026-10-20 and its
+extension to `pooled_sn` at 1 step (SI-107, 2026-10-21), and the
 defaults of NB-20261017-07 (section 4 of `docs/followup_design_decisions_20261017.md`, including the D-09 endpoint definitions, which
 are "written into the follow-up analysis specification and approved with it") and NB-20261017-08. Each choice that no decision settles
 is marked **agent default** and listed in section 11; the two questions put to the user and their answers are in section 12.*
@@ -31,7 +32,8 @@ plain scVI's batch score and the matched batch-removal target of rule R4 for the
 stage-x1 record (computed on X1 seeds 0-4). *lo / matched / hi* = the three penalty strengths R4-x1 assigns to an X6 arm: the X1 point
 whose batch score is closest to b\* and its two neighbours on the X1 grid (PREREG section 4; a variant arm takes the strengths of its
 base arm, in X6: `discriminator_sn`, `discriminator_r1` and `discriminator_sn_critic_opt` take those of `discriminator`;
-`pooled_sn` and `pooled` at other step counts take those of `pooled`). *JS* = Jensen-Shannon divergence (the discriminator), *W1* =
+`pooled_sn` and `pooled` at other step counts take those of `pooled`; the pre-check of section 1.10 then moves the strengths of
+`discriminator_sn_critic_opt` and of `pooled_sn` at 1 step, each by its own decision, one step at most). *JS* = Jensen-Shannon divergence (the discriminator), *W1* =
 Wasserstein-1 distance (the critics), *SN* = spectral normalisation, *GP* = gradient penalty on interpolated points, *R1* = gradient
 penalty on data points. *LOSO* = leave-one-seed-out. *P1* = the main study's primary result: biology at b\* of the reference W1 critic
 minus that of the discriminator, per decoder (ANALYSIS_SPEC section 2).
@@ -61,8 +63,8 @@ in the paper, used for no conclusion (SI-82's wording): any analysis not written
   analysis. The analysis runs once, after every X6 row is scored or failed.
 - From the R4 stage-x1 record only `targets.<task>|<cond>` (b0, b\*, b_common, `bstar_low_signal`) is used. No X1 score row is
   read. The R4-x1 record is itself built from all X1 scores, so the X6 analysis runs after the X1 analysis. The penalty strengths
-  enter through the resolved manifest (`lam`), not through the record's `cells`; for the arm `discriminator_sn_critic_opt` they
-  include the pre-check shift (section 1.10).
+  enter through the resolved manifest (`lam`), not through the record's `cells`; for the arm `discriminator_sn_critic_opt` and for
+  `pooled_sn` at 1 step they include the pre-check shift of each arm's own decision (section 1.10; `pooled_sn` at 5 steps has none).
 - The analysis stops on any departure from the X6 design: missing task x decoder cells; seeds other than 10-12; a tag with no lambda
   label among `matched_lo`, `matched` and `matched_hi` (a strength-0 tag stops it); `extra` other than `{"r1_gamma": 10}` on a
   `discriminator_r1` row or other than empty on any other row; a set of arm x step settings other than the 9 of section 3.2; a missing
@@ -107,9 +109,9 @@ evaluable at b\*' and report it at fixed strength; never call a single-strength 
 - *Fixed-strength report.* Every contrast of every cell is also reported at fixed strength, whether or not it is evaluable at b\*:
   record key `fixed_strength`, label "fixed-strength, not matched batch removal", holding the C difference and the B difference of
   the two arms at their `matched` strengths. **The two arms of a contrast sit at their own inherited strengths**, which in general
-  differ (for the confirmatory pair: the pooled critic's `matched` strength against the strength of `discriminator_sn_critic_opt`,
-  which is the plain discriminator's `matched` strength moved by the pre-check decision, section 1.10), so this difference is not a
-  matched comparison. The achieved batch score minus b\* is reported for every point (`B_minus_bstar`).
+  differ (for the confirmatory pair: the strength of `pooled_sn` at 1 step, which is the pooled critic's `matched` strength moved by
+  that arm's pre-check decision, against the strength of `discriminator_sn_critic_opt`, which is the plain discriminator's `matched`
+  strength moved by that arm's own pre-check decision, section 1.10), so this difference is not a matched comparison. The achieved batch score minus b\* is reported for every point (`B_minus_bstar`).
 
 ### 1.5 Combining datasets
 
@@ -183,19 +185,22 @@ Manifest v5 (`manifests/paper_manifest_stock_pilot_u5_b10_v5.tsv`, SHA-256 in th
 (243 per decoder), 81 per decoder and strength label (3 tasks x 9 settings x 3 seeds). The test `test_v5_rows_enumerated` reads every
 X6 row of manifest v5 through the analysis and checks that count against this hand count.
 
-### 1.10 Strengths of the optimiser-matched arm: the pre-check (user decision, 2026-10-20)
+### 1.10 Strengths of the two arms of the confirmatory contrast: the pre-check (user decisions, 2026-10-20 and 2026-10-21)
 
 The arm `discriminator_sn_critic_opt` takes the matched strengths of the plain discriminator, which is trained at a ten times higher
 learning rate; if the slower-learning arm removes less batch effect, its batch score never reaches b\*, and the confirmatory contrast
-cannot be read at b\*. The pre-check (`experiments/x6_precheck_20261020/PLAN.md`, rule fixed before any pre-check fit) fits that arm
-on the pilot tasks (18 fits, pilot seed 100) and writes `decision.json` with `decision` equal to `keep`, `shift_up` or `shift_down`.
-`freeze_matched_lambda.py --stage x1` requires the file (`--precheck-decision`) when it resolves X6 rows of this arm and stops
-without it or with any other value. For this arm only, each of its three resolved strengths then moves one step up (`shift_up`) or
-down (`shift_down`) the sequence ..., 0.1, 0.3, 1, 3, 10, ... (`prereg_rules.lam_step`); `keep` leaves them unchanged. The R4-x1 record
-holds the decision (`precheck_decision`), the number of rows of the arm and the SHA-256 of the file. The analysis does not read the
-pre-check: it reads the shifted strengths from the manifest. The decision stays what the rule gave, whatever X1 shows; no second pre-check
-is run. If even the shifted window does not bracket b\*, the contrast is not evaluable in that cell (section 1.4) and is reported at fixed
-strength.
+cannot be read at b\*. The other arm, `pooled_sn` at 1 step, takes the matched strengths of the main pooled critic (gradient penalty,
+5 steps), was never piloted, and can miss b\* in the same way (user decision 2026-10-21, SI-107). The pre-check
+(`experiments/x6_precheck_20261020/PLAN.md` and its addendum of 2026-10-21, rule fixed before any pre-check fit) fits both arms
+on the pilot tasks (36 fits: 18 per arm, pilot seed 100) and writes `decision.json`, whose key `decisions` gives each arm its own
+decision: `keep`, `shift_up` or `shift_down`. `freeze_matched_lambda.py --stage x1` requires the file (`--precheck-decision`) when it
+resolves X6 rows of either arm and stops without it, with a file that lacks the key or an arm, or with any other value. For each of the two
+arms, each of its three resolved strengths then moves one step up (`shift_up`) or down (`shift_down`) the sequence ..., 0.1, 0.3, 1, 3,
+10, ... (`prereg_rules.lam_step`) by that arm's own decision; `keep` leaves them unchanged. `pooled_sn` at 5 steps is not checked and
+not moved, and no other arm moves. The R4-x1 record holds the decisions (`precheck_decisions`), the number of rows each arm's decision
+applies to (`precheck_arm_rows`) and the SHA-256 of the file. The analysis does not read the pre-check: it reads the shifted strengths
+from the manifest. The decisions stay what the rule gave, whatever X1 shows; no second pre-check is run. If even a shifted window does not
+bracket b\*, the contrast is not evaluable in that cell (section 1.4) and is reported at fixed strength.
 
 ### 1.11 Departures from ANALYSIS_SPEC
 
@@ -280,8 +285,9 @@ reference are removed.
    from 3 values is rougher than X1's from 5 (ANALYSIS_SPEC section 16, limitation 1, applies more strongly).
 2. Pooled declarations need 3 or more real datasets (section 1.5); X6's conditioned-decoder pool may fall to 2 if immune is low-signal.
 3. The X6 strengths come from X1 (R4-x1): a variant arm inherits its base arm's strengths, so its batch removal can land off b\*;
-   for `discriminator_sn_critic_opt` the pre-check (section 1.10) moves them by at most one step, from a single-seed pilot; where a
-   window does not bracket b\* the contrast is reported at fixed strength only (I048).
+   for `discriminator_sn_critic_opt` and for `pooled_sn` at 1 step the pre-check (section 1.10) moves them, each by its own decision, by at
+   most one step, from a single-seed pilot (`pooled_sn` at 5 steps is not checked and not moved); where a window does not bracket b\*
+   the contrast is reported at fixed strength only (I048).
 4. X6: incomplete factorial and the target difference between pooled critic and discriminator (section 3.7).
 5. X6 with the unconditioned decoder (SI-93) uses the same rules; low-signal cells (SI-56) drop out per decoder.
 6. Scope (SI-103): X3, X7, X8, X12 and X15 are not run. Architecture and KL warm-up are not varied, and reference choice,
@@ -306,8 +312,9 @@ reference are removed.
   unconditioned-decoder cell low-signal (a pool with no evaluable dataset: declaration `not_evaluable`, p = 1 in the Holm family); a
   null world in which no confirmatory result declares a direction; refusals of departures from the design (cells, seeds, `extra` in
   three forms, a strength-0 tag, a tag without a label, arms, a missing point); refusal of score or failure rows of another experiment;
-  no overwrite. The pre-check shift of section 1.10 is tested in `tests/prereg/test_cli_e2e.py` (the three decisions, a missing
-  decision, an invalid decision, the record and the file's SHA-256).
+  no overwrite. The pre-check shift of section 1.10 is tested in `tests/prereg/test_cli_e2e.py` (both arms, each taking its own
+  decision, `pooled_sn` at 5 steps unmoved, a missing decision, an invalid decision, a decision file without the key or an arm, the
+  record and the file's SHA-256) and in `tests/x6_precheck/` (the 36-row manifest and the per-arm decisions).
 - Command, run on 2026-10-20 from the repo root with the environment `scvi-api` (`/home/kendall/.claude-science/conda/envs/scvi-api`):
   `python -m pytest -q tests/analysis_followups tests/x6_precheck tests/prereg`. Output: `168 passed, 1 skipped in 70.22s
   (0:01:10)`. Fewest-tests check, `python scripts/check_tests.py --base d034db7 --src scripts -- tests/analysis_followups
@@ -343,4 +350,5 @@ reference are removed.
 
 - Review this file, the script and the PREREG entry of 2026-10-20; then run the X1 fit-identity check on the commit to be tagged
   (`experiments/followup_build_20261017/README.md`) and make the tag `prereg-x6-v1` on that commit, before R4-x1.
-- The strength pre-check (section 1.10) must have produced its `decision.json` before R4-x1 resolves the X6 rows.
+- The strength pre-check (section 1.10) must have produced its `decision.json`, with a decision for each of its two arms, before R4-x1
+  resolves the X6 rows.

@@ -696,14 +696,15 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   was made under the blinding rule in force (SI-68, SI-78); the user's confirmation is pending at the diff review. This
   entry does not state as a fact that no X1 result was examined.
 - **2026-10-20, the follow-up experiment X6 is put in force as designed: both decoders, the added spectral-norm discriminator
-  arm, no gradient penalty for spectral-norm critics, its analysis rule, and a pre-check of that arm's penalty strengths
-  (user decisions SI-93 and SI-98 of 2026-10-17, the pre-check decision of 2026-10-20, SI-105).**
+  arm, no gradient penalty for spectral-norm critics, its analysis rule, and a pre-check of the penalty strengths of that arm and
+  of the spectral-norm pooled critic at 1 step (user decisions SI-93 and SI-98 of 2026-10-17, the pre-check decision of
+  2026-10-20, SI-105, and SI-107 of 2026-10-21, which adds the second pre-check arm).**
   Status: written 2026-10-20 on branch x6-lock (the fit branch followup-build, the pre-check folder and the analysis branch
   followup-analysis-spec, merged at d034db7). This entry **replaces the draft** `docs/prereg/amendment_20261017_followups.md`,
   which is marked superseded; the draft described four more follow-ups (X3, X7, X8, X12) that the user dropped (SI-103, above).
   Done: the design below is in the code and the manifest of this branch. Planned and not done: the check
   that X1 fit paths give results identical to the tag (`experiments/followup_build_20261017/README.md`, "X1 fit identity"; run on the commit to be tagged, before the tag, user
-  decision SI-106 of 2026-10-21), the pre-check fits and its decision file, and the new code tag `prereg-x6-v1`, which will freeze this entry, the scripts named
+  decision SI-106 of 2026-10-21), the 36 pre-check fits (18 for each of the two arms) and its decision file, and the new code tag `prereg-x6-v1`, which will freeze this entry, the scripts named
   below, `docs/ANALYSIS_SPEC_FOLLOWUPS.md` and its tests before R4-x1 runs and before any X1 result is examined (SI-68). This
   entry changes no fit of X1, X13, A1, A2 or A3, no rule R1 to R3, no part of the X1 or X13 analysis, and not
   `scripts/analysis_x1.py` or `docs/ANALYSIS_SPEC.md` (both are identical to the tag; checked with `git diff prereg-tier12-v3
@@ -723,7 +724,9 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     `{"r1_gamma": 10}`) and with SN and the critic's optimiser (the new arm), each at 1 step; the pooled Wasserstein-1 (W1)
     critic with a gradient penalty (GP) at 1, 5 and 10 steps; the pooled W1 critic with SN at 1 and 5 steps. The three strengths
     are `matched_lo`, `matched` and `matched_hi` (the point whose batch score is closest to the target b* and its two grid
-    neighbours), resolved by `freeze_matched_lambda.py --stage x1` (R4, section 4). There is no strength-0 row in X6.
+    neighbours), resolved by `freeze_matched_lambda.py --stage x1` (R4, section 4); the strengths of the new arm and of the
+    pooled W1 critic with SN at 1 step then move by their pre-check decisions (bullet "Strength pre-check", below). There is no
+    strength-0 row in X6.
   - **New arm `discriminator_sn_critic_opt` (SI-98).** A JS discriminator with spectral normalisation, trained with the critic's
     Adam settings (learning rate 1e-4, betas (0, 0.9)) instead of the discriminator's (learning rate 1e-3), at 1 adversary step.
     Its reason: the confirmatory X6 comparison of the two divergences then differs in the loss and the target only. **Base-arm
@@ -732,28 +735,38 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     `git diff prereg-tier12-v3 -- scripts/prereg_rules.py` shows exactly two changed lines, lines 61 (a trailing comma after
     `discriminator_ref="discriminator"`) and 62 (the new entry `discriminator_sn_critic_opt="discriminator"`); no other line of
     that file differs from the tag, and no other behaviour of it changes. The sentence of section 4 "An arm without a mapping
-    stops the script" is unchanged. `tests/prereg/test_rules_unchanged.py` now expects this one entry as the only difference
-    between the rule records of the previous commit and of this tree.
+    stops the script" is unchanged. `tests/prereg/test_rules_unchanged.py` now expects this one entry (and, in the R4-x1 record,
+    the pre-check fields of the bullet below) as the only differences between the rule records of the previous commit and of
+    this tree.
   - **Spectral-norm critics compute no gradient penalty (finding I036).** Before, a spectral-norm critic computed a gradient
     penalty and discarded it, which also advanced the spectral-norm power iteration and drew random numbers; now `with_gp=not
     spectral_norm` in `scripts/scvi_adversarial_plan.py`. This changes the training path of the X6 `pooled_sn` arm only. Fits of
-    `pooled_sn` made before the new code tag are not comparable with those made at it (none exist; keep it that way). That no X1
+    `pooled_sn` made before the new code tag are not comparable with those made at it (none exist; keep it that way; the
+    `pooled_sn` pre-check fits below are made with the fixed code). That no X1
     arm is changed is the build track's claim (`docs/DIFF_followup_build.md`, `static_x1_paths.py`); the fit-identity run that
     checks it is listed above as not yet done.
-  - **Strength pre-check of the new arm (user decision, 2026-10-20).** The new arm inherits the strengths of the plain
+  - **Strength pre-check of the two arms of the confirmatory contrast (user decisions, 2026-10-20 and 2026-10-21, SI-107).**
+    The new arm inherits the strengths of the plain
     discriminator, which is trained at a ten times higher learning rate; if the slower-learning arm removes less batch effect, its batch score never reaches b*
-    and the confirmatory result cannot be read. The pre-check fits that arm (18 fits: atac_small, immune and sim1, both decoders,
-    3 strengths, pilot seed 100) and applies a rule fixed before any pre-check fit (`experiments/x6_precheck_20261020/PLAN.md`,
-    committed with `decide.py`): of the 4 counted cells (not low-signal in the pilot record), `shift_up` if at least 3 never reach
+    and the confirmatory result cannot be read. The other arm of the contrast, the pooled W1 critic with SN at 1 step
+    (`pooled_sn`, n_critic 1), inherits the strengths of the main pooled critic (gradient penalty, 5 steps) and was never piloted,
+    so it can miss b* in the same way; on 2026-10-21 the user gave it the same check (SI-107). The pre-check fits both arms (36
+    fits, 18 per arm: atac_small, immune and sim1, both decoders, 3 strengths, pilot seed 100; the `pooled_sn` rows are the pilot
+    `pooled` rows with n_critic 1) and applies a rule fixed before any pre-check fit (`experiments/x6_precheck_20261020/PLAN.md`
+    and its addendum of 2026-10-21, committed with `decide.py`), to each arm separately: of the 4 counted cells (not low-signal in
+    the pilot record), `shift_up` if at least 3 never reach
     b* from below, `shift_down` if at least 3 never reach it from above, otherwise `keep`. The result is `decision.json`
-    written by `decide.py`. **Effect on X6:** `freeze_matched_lambda.py --stage x1` takes `--precheck-decision <decision.json>`
-    and stops, when it resolves X6 rows of `discriminator_sn_critic_opt`, if the option is missing or if the value is anything
-    other than `keep`, `shift_up` or `shift_down`. For this arm only, each of the three resolved strengths then moves one step up
-    (`shift_up`) or down (`shift_down`) the sequence ..., 0.1, 0.3, 1, 3, 10, ... (`prereg_rules.lam_step`); `keep` changes
-    nothing. One step only, no second pre-check. The R4-x1 record keeps the decision (`precheck_decision`), the number of rows of
-    the arm (`precheck_arm_rows`) and the file's SHA-256 (under `inputs`). `git diff prereg-tier12-v3 --
-    scripts/freeze_matched_lambda.py` shows the change; without the option and with no row of that arm the script behaves as at
-    the tag (the records of the previous commit and of this tree are equal, `test_rules_unchanged.py`).
+    written by `decide.py`, with one decision per arm under the key `decisions`. **Effect on X6:**
+    `freeze_matched_lambda.py --stage x1` takes `--precheck-decision <decision.json>` and stops, when it resolves X6 rows of
+    `discriminator_sn_critic_opt` or of `pooled_sn` at n_critic 1, if the option is missing, if the file lacks the key
+    `decisions` or an arm, or if a value is anything other than `keep`, `shift_up` or `shift_down`. For these two arms only
+    (not `pooled_sn` at n_critic 5, not any other arm), each of the three resolved strengths then moves one step up
+    (`shift_up`) or down (`shift_down`) the sequence ..., 0.1, 0.3, 1, 3, 10, ... (`prereg_rules.lam_step`) by that arm's own
+    decision; `keep` changes nothing. One step only, no second pre-check. The R4-x1 record keeps the decisions
+    (`precheck_decisions`), the number of rows each arm's decision applies to (`precheck_arm_rows`) and the file's SHA-256
+    (under `inputs`). `git diff prereg-tier12-v3 -- scripts/freeze_matched_lambda.py` shows the change. With every decision
+    `keep`, the resolved manifests of the previous commit and of this tree are byte-identical and the R4-x1 records differ only
+    in these pre-check fields (`test_rules_unchanged.py`).
   - **Analysis rule.** `docs/ANALYSIS_SPEC_FOLLOWUPS.md`, `scripts/analysis_followups.py` and `tests/analysis_followups/` are
     frozen by the code tag. Two confirmatory results (one per decoder): biology at b* of the SN critic at 1 step minus that of
     the new arm, pooled over the evaluable real datasets with the frozen model of `analysis_x1.combine`, margin 0.01, declaration
@@ -763,11 +776,14 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   - **Scripts that differ from the tag (`git diff prereg-tier12-v3 --stat -- scripts`):** `build_paper_manifest.py`,
     `fit_paper_config.py`, `scvi_adversarial_plan.py` and `cost_model.py` (build side: the follow-up design flag, the new arm, the
     I036 fix; their default settings reproduce manifest v3 byte for byte, per the build track), `prereg_rules.py` (2 lines,
-    above), `freeze_matched_lambda.py` (the pre-check option, above) and `analysis_followups.py` (new). `src/` and
+    above), `freeze_matched_lambda.py` (the pre-check option for two arms, above) and `analysis_followups.py` (new). `src/` and
     `analysis_x1.py` do not differ.
   - **Timing of the pre-check decision (departure from `experiments/x6_precheck_20261020/PLAN.md` lines 35-36).** The plan says
     the decision is written into the follow-up amendment before the follow-up analysis is locked. Instead, the analysis is
     locked first (tag `prereg-x6-v1`) and the pre-check decision is applied mechanically at R4-x1 from `decision.json`, whose
     SHA-256 the R4-x1 record keeps. `decision.json` is committed under `experiments/x6_precheck_20261020/results/`, with a
-    notebook entry giving its SHA-256, before R4-x1 runs. The decision rule itself (shift up, shift down or keep, by one grid
-    step, for `discriminator_sn_critic_opt` only) is part of what the tag freezes.
+    notebook entry giving its SHA-256, before R4-x1 runs. This holds for both arms (SI-107): the pre-check of the second arm,
+    `pooled_sn` at 1 step, is written into the plan on 2026-10-21 (addendum of `PLAN.md`) before any pre-check fit, and its
+    decision is applied the same way, from the same `decision.json`. The decision rule itself (shift up, shift down or keep, by
+    one grid step, for `discriminator_sn_critic_opt` and for `pooled_sn` at n_critic 1, each by its own decision) is part of what
+    the tag freezes.

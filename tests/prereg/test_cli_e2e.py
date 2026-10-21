@@ -12,6 +12,8 @@ import decide_a2_a3
 import freeze_a1_grid
 import freeze_matched_lambda
 
+COPT, SN = "discriminator_sn_critic_opt", "pooled_sn"       # the two X6 arms moved by their own strength pre-check decision
+
 
 def _run_a1(tmp, world=synth.world):
     M = synth.pilot_rows()
@@ -28,12 +30,12 @@ def _r1(tmp, mans, scores, fp):
     return freeze_a1_grid.main(args)
 
 
-def _r4(tmp, stage, man, scores, fp):
+def _r4(tmp, stage, man, scores, fp, extra=()):
     return freeze_matched_lambda.main(["--stage", stage, "--manifest", man, "--scores", *scores, "--failures", fp,
                                        "--r1-record", os.path.join(tmp, "r1.json"),
                                        "--out-json", os.path.join(tmp, f"r4{stage}.json"),
                                        "--out-manifest", os.path.join(tmp, f"m.r4{stage}.tsv"),
-                                       "--extension-manifest", os.path.join(tmp, f"{stage}_ext.tsv")])
+                                       "--extension-manifest", os.path.join(tmp, f"{stage}_ext.tsv"), *extra])
 
 
 def _decide(tmp, scores, fp):
@@ -60,7 +62,9 @@ def pipeline(tmp_path_factory):
     Mx, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
     S, F = synth.scores(Mx[Mx.experiment == "X1"])
     xs, _ = synth.write_scores(S, F, os.path.join(tmp, "scores"), "x1")
-    code = _r4(tmp, "x1", os.path.join(tmp, "m.x1.tsv"), [xs], fp)
+    keep = os.path.join(tmp, "keep.json")        # the manifest's X6 pooled_sn rows at n_critic 1 need a pre-check decision (SI-107)
+    json.dump(dict(decisions={COPT: "keep", SN: "keep"}), open(keep, "w"))
+    code = _r4(tmp, "x1", os.path.join(tmp, "m.x1.tsv"), [xs], fp, ["--precheck-decision", keep])
     return dict(tmp=tmp, fp=fp, a1=sp, scores=scores, x1=xs, code=code, M=M)
 
 
@@ -128,54 +132,68 @@ def test_r4_x1_resolves_followups_and_no_followup_equals_an_x1_row(pipeline):
 
 
 V5 = os.path.join(synth.ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v5.tsv")
-COPT = "discriminator_sn_critic_opt"
+LABELS = ("matched_lo", "matched", "matched_hi")
+KEEP = {COPT: "keep", SN: "keep"}
 
 
-@pytest.mark.parametrize("decision, want", [("keep", (0.3, 1.0, 3.0)), ("shift_up", (1.0, 3.0, 10.0)),
-                                            ("shift_down", (0.1, 0.3, 1.0)), (None, "pre-check decision None"),
-                                            ("maybe", "pre-check decision 'maybe'")])
-def test_x6_precheck_moves_only_the_optimiser_matched_arm(decision, want):  # test-reason: X6 strength pre-check (user decision 2026-10-20) on the real X6 rows
+@pytest.mark.parametrize("decisions, want", [
+    (KEEP, {COPT: (0.3, 1.0, 3.0), SN: (3.0, 10.0, 30.0)}),
+    ({COPT: "shift_up", SN: "shift_down"}, {COPT: (1.0, 3.0, 10.0), SN: (1.0, 3.0, 10.0)}),    # each arm takes its own decision
+    ({COPT: "shift_down", SN: "shift_up"}, {COPT: (0.1, 0.3, 1.0), SN: (10.0, 30.0, 100.0)}),
+    (None, "pre-check decision None"), ("keep", "pre-check decision 'keep'"),                   # not a {arm: decision} dict
+    ({COPT: "maybe", SN: "keep"}, f"{COPT}: X6 strength pre-check decision 'maybe'"),
+    ({COPT: "keep"}, f"{SN}: X6 strength pre-check decision None")])
+def test_x6_precheck_moves_each_checked_arm_by_its_own_decision(decisions, want):  # test-reason: X6 strength pre-check (SI-98, SI-107) on the real X6 rows
     M, _ = P.read_manifest(V5)
     x6 = M[M.experiment == "X6"]
     cells = {f"{t}|{c}|discriminator": dict(lo=0.3, matched=1.0, hi=3.0) for t in set(x6.task) for c in (0, 1)}
     cells.update({f"{t}|{c}|pooled": dict(lo=3.0, matched=10.0, hi=30.0) for t in set(x6.task) for c in (0, 1)})
     if isinstance(want, str):
         with pytest.raises(P.PreregError, match=want):
-            freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decision)
+            freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decisions)
         return
-    out, n = freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decision)
+    out, n = freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decisions)
     assert n == len(x6) == 486
-    lo, mid, hi = (P.fmt_lam(v) for v in want)
-    got = {(a, lab): set(out.lam[(x6.arm == a) & (x6.lam == lab)]) for a in set(x6.arm) for lab in ("matched_lo", "matched", "matched_hi")}
-    assert {k: v for k, v in got.items() if k[0] == COPT} == {(COPT, "matched_lo"): {lo}, (COPT, "matched"): {mid}, (COPT, "matched_hi"): {hi}}
-    for arm in set(x6.arm) - {COPT}:     # every other arm keeps its base arm's strengths
-        base = [P.fmt_lam(v) for v in ((0.3, 1.0, 3.0) if P.BASE_ARM[arm] == "discriminator" else (3.0, 10.0, 30.0))]
-        assert [got[(arm, lab)] for lab in ("matched_lo", "matched", "matched_hi")] == [{b} for b in base]
+    for arm, k in set(zip(x6.arm, x6.n_critic)):
+        moved = arm == COPT or (arm == SN and k == "1")           # pooled_sn at n_critic 5 and every other arm keep their base arm's strengths
+        strengths = want[arm] if moved else (0.3, 1.0, 3.0) if P.BASE_ARM[arm] == "discriminator" else (3.0, 10.0, 30.0)
+        got = [set(out.lam[(x6.arm == arm) & (x6.n_critic == k) & (x6.lam == lab)]) for lab in LABELS]
+        assert got == [{P.fmt_lam(v)} for v in strengths], (arm, k)
+    free = x6[~x6.arm.isin([COPT, SN]) | ((x6.arm == SN) & (x6.n_critic == "5"))]     # no row of a checked arm: no decision needed
+    assert freeze_matched_lambda.resolve(free, dict(cells=cells), "x1", None)[1] == len(free)
 
 
-def test_x6_precheck_decision_enters_the_record(pipeline, tmp_path):  # test-reason: the CLI reads the decision file and records its value and SHA-256
+def test_x6_precheck_decisions_enter_the_record(pipeline, tmp_path):  # test-reason: the CLI reads the decisions file and records the decisions, the rows moved and its SHA-256
     tmp = pipeline["tmp"]
     M, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
     d = M[(M.experiment == "X6") & (M.arm == "discriminator")]
     copt = d.assign(arm=COPT, tag=d.tag.str.replace("_discriminator_", f"_{COPT}_"))
     man = synth.write_tsv(pd.concat([M, copt], ignore_index=True), str(tmp_path / "m.tsv"))
+    decisions = {COPT: "shift_up", SN: "shift_down"}
     dec = tmp_path / "decision.json"
-    dec.write_text(json.dumps(dict(decision="shift_up")))
+    dec.write_text(json.dumps(dict(decisions=decisions)))
     args = ["--stage", "x1", "--manifest", man, "--scores", pipeline["x1"], "--failures", pipeline["fp"],
             "--r1-record", os.path.join(tmp, "r1.json"), "--out-json", str(tmp_path / "r4.json"),
             "--out-manifest", str(tmp_path / "m.r4.tsv"), "--extension-manifest", str(tmp_path / "ext.tsv")]
     with pytest.raises(P.PreregError, match="pre-check decision None"):      # no decision file: refused
         freeze_matched_lambda.main(args)
+    for bad, arm in ((dict(decision="shift_up"), COPT), (dict(decisions={COPT: "keep"}), SN)):    # old format; an arm missing
+        dec_bad = tmp_path / "bad.json"
+        dec_bad.write_text(json.dumps(bad))
+        with pytest.raises(P.PreregError, match=f"{arm}: X6 strength pre-check decision None"):
+            freeze_matched_lambda.main(args + ["--precheck-decision", str(dec_bad)])
     assert freeze_matched_lambda.main(args + ["--precheck-decision", str(dec)]) == P.EXIT_FROZEN
     rec = json.load(open(tmp_path / "r4.json"))
-    assert rec["precheck_decision"] == "shift_up" and rec["precheck_arm_rows"] == len(copt)
+    sn1 = (M.arm == SN) & (M.n_critic == "1")
+    assert rec["precheck_decisions"] == decisions and rec["precheck_arm_rows"] == {COPT: len(copt), SN: int(sn1.sum())}
+    assert "precheck_decision" not in rec and 0 < sn1.sum() < (M.arm == SN).sum()
     assert rec["inputs"]["precheck_decision"][0]["sha256"] == P.sha256(str(dec))
     out, _ = P.read_manifest(str(tmp_path / "m.r4.tsv"))
-    cell = rec["cells"]
-    for r in out[out.arm == COPT].to_dict("records"):
-        c = cell[f"{r['task']}|{r['cond']}|discriminator"]
-        lab = M.set_index("tag").at[r["tag"].replace(f"_{COPT}_", "_discriminator_"), "lam"]
-        assert float(r["lam"]) == P.lam_step(c[{"matched_lo": "lo", "matched": "matched", "matched_hi": "hi"}[lab]], 1)
+    labels, label_of = M.set_index("tag").lam, {"matched_lo": "lo", "matched": "matched", "matched_hi": "hi"}
+    for r in out[out.arm.isin([COPT, SN])].to_dict("records"):
+        base, step = ("discriminator", 1) if r["arm"] == COPT else ("pooled", -1 if r["n_critic"] == "1" else 0)
+        v = rec["cells"][f"{r['task']}|{r['cond']}|{base}"][label_of[labels[r["tag"].replace(f"_{COPT}_", "_discriminator_")]]]
+        assert float(r["lam"]) == (P.lam_step(v, step) if step else v)
 
 
 def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):
