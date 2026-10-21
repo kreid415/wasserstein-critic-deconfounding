@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 """Follow-up analysis X6 (docs/ANALYSIS_SPEC_FOLLOWUPS.md; X3, X7, X8, X12 and X15 were dropped, SI-103).
 
-Must be committed and tagged before R4-x1 runs and before any X1 result is examined (SI-68, SI-78). It reads only
-follow-up rows (seeds 10-12) and the targets (b0, b*, low-signal flag) of the frozen R4 stage-x1 record; it reuses
-the frozen helpers of scripts/analysis_x1.py and scripts/prereg_rules.py without changing them.
+Must be committed and tagged (tag prereg-x6-v1) before R4-x1 runs and before any X1 result is examined (SI-68, SI-78).
+It reads only follow-up rows (seeds 10-12) and the targets (b0, b*, low-signal flag) of the frozen R4 stage-x1 record; it
+reuses the frozen helpers of scripts/analysis_x1.py (combine, window, wilcoxon_exact, holm) and scripts/prereg_rules.py
+without changing them. The design names it checks are hard-coded below (spec section 1.9).
 
 Usage (repo root):
-  python scripts/analysis_followups.py --manifest <resolved follow-up manifest, design v4> --scores <dir> [<dir> ...] \
+  python scripts/analysis_followups.py --manifest <resolved follow-up manifest, design v5> --scores <dir> [<dir> ...] \
       --failures <csv that covers every follow-up row> --r4-record docs/prereg/r4_x1_record.json --out-json <followups.json>
+The score directories and the failures table must hold X6 rows only; any other row stops the script.
 """
 import argparse
 import json
-import math
 import os
 import sys
 
@@ -27,21 +28,22 @@ MIN_READINGS = 3              # all 3 leave-one-seed-out readings must exist (X1
 MARGIN = P.DELTA_MIN          # r = 0.01 for every follow-up endpoint, in the endpoint's own unit
 LEVELS = ("matched_lo", "matched", "matched_hi")
 REAL = set(P.REAL_TASKS)
-# ---- design, as decided 2026-10-17 (SI-93..SI-98); names the build track must match (spec section 1.4)
+# ---- design, as decided 2026-10-17 (SI-93..SI-98); names the build track must match (spec section 1.9)
 EXPECTED = {
     "X6": {(t, c) for t in ("atac_small", "immune", "pancreas") for c in (0, 1)},
 }
-EXTRA_KEYS = {"r1_gamma"}
+R1_EXTRA = {"r1_gamma": 10}               # `extra` of the discriminator_r1 rows; every other row has none
 X6_COPT = "discriminator_sn_critic_opt"   # SI-98: JS + spectral norm trained with the critic's Adam settings (followup-build)
 X6_CONFIGS = {"js": ("discriminator", 1), "js_sn": ("discriminator_sn", 1), "js_r1": ("discriminator_r1", 1),
               "js_sn_copt": (X6_COPT, 1), "w1_gp_1": ("pooled", 1), "w1_gp_5": ("pooled", 5),
               "w1_gp_10": ("pooled", 10), "w1_sn_1": ("pooled_sn", 1), "w1_sn_5": ("pooled_sn", 5)}
-X6_CONTRASTS = {   # name: (minuend, subtrahend); "divergence" is the confirmatory one (spec section 4)
+X6_CONTRASTS = {   # name: (minuend, subtrahend); "divergence" is the confirmatory one (spec section 3.4)
     "divergence": ("w1_sn_1", "js_sn_copt"), "divergence_own_optimiser": ("w1_sn_1", "js_sn"),
     "js_optimiser": ("js_sn_copt", "js_sn"), "js_sn": ("js_sn", "js"), "js_r1": ("js_r1", "js"),
     "w1_sn_1": ("w1_sn_1", "w1_gp_1"), "w1_sn_5": ("w1_sn_5", "w1_gp_5"), "w1_steps_5": ("w1_gp_5", "w1_gp_1"),
-    "w1_steps_10": ("w1_gp_10", "w1_gp_1"), "w1_sn_steps_5": ("w1_sn_5", "w1_sn_1"), "as_used": ("w1_gp_1", "js")}
-TAG_LEVEL = r"_l(matched_lo|matched_hi|matched|0)_c[01]_s\d+_[0-9a-f]{8}$"
+    "w1_steps_10": ("w1_gp_10", "w1_gp_1"), "w1_sn_steps_5": ("w1_sn_5", "w1_sn_1"), "as_used": ("w1_gp_5", "js")}
+FIXED_LABEL = "fixed-strength, not matched batch removal"     # rule I048: a single-strength contrast is never "matched"
+TAG_LEVEL = r"_l(matched_lo|matched_hi|matched)_c[01]_s\d+_[0-9a-f]{8}$"
 
 
 # ---------------------------------------------------------------------------------------------- inputs
@@ -55,8 +57,9 @@ def prepare(out, experiment):
     o["level"] = o.tag.str.extract(TAG_LEVEL)[0]
     P._require(o.level.notna().all(), f"{experiment}: tags without a lambda label, e.g. {o.tag[o.level.isna()].tolist()[:3]}")
     ex = [json.loads(e) if e not in ("", "{}") else {} for e in o.extra]
-    bad = sorted({k for e in ex for k in e} - EXTRA_KEYS)
-    P._require(not bad, f"{experiment}: unknown extra keys {bad} (spec section 1.4)")
+    bad = [t for t, e, a in zip(o.tag, ex, o.arm) if e != (R1_EXTRA if a == "discriminator_r1" else {})]
+    P._require(not bad, f"{experiment}: `extra` must be {R1_EXTRA} on discriminator_r1 rows and empty on every other row "
+                        f"(spec section 1.9); {len(bad)} rows differ, e.g. {bad[:3]}")
     o["k"] = o.n_critic.astype(int)
     return o
 
@@ -142,20 +145,9 @@ def bstar_contrast(pa, pb, bstar, low):
         return dict(d=None, s=None, m=0, readings=[], reason="low_signal")
     r = loso(lambda keep: None if read_bstar(pa, bstar, keep) is None or read_bstar(pb, bstar, keep) is None
              else read_bstar(pa, bstar, keep) - read_bstar(pb, bstar, keep))
-    if r["d"] is None:
-        r["reason"] = "unreached"
+    if r["d"] is None:     # the reason is the status of the first arm whose curve does not bracket b*
+        r["reason"] = next(s for s in (bstar_status(pa, bstar), bstar_status(pb, bstar)) if s != "bracketed")
     return r
-
-
-def bio_window(pts):
-    """R3 window width on the bio score (D-09): points whose mean C is at least the lower 95% t bound of the best point."""
-    rows = [(lam, list(cc.values())) for lam, _, cc, _ in pts if len(cc)]
-    best = max(rows, key=lambda r: (np.mean(r[1]), -r[0]))
-    if len(best[1]) < 2:
-        return dict(width=None, n_points=None, reason="best point has fewer than 2 runs")
-    bound = np.mean(best[1]) - stats.t.ppf(0.975, len(best[1]) - 1) * np.std(best[1], ddof=1) / math.sqrt(len(best[1]))
-    inside = [lam for lam, v in rows if np.mean(v) >= bound - P.TIE_TOL]
-    return dict(width=math.log10(max(inside)) - math.log10(min(inside)), n_points=len(inside), bound=float(bound))
 
 
 # ---------------------------------------------------------------------------------------------- X6
@@ -169,14 +161,16 @@ def x6(out, targets):
         r = o[(o.task == t) & (o.cond_i == c)]
         rows = {n: r[(r.arm == a) & (r.k == k)] for n, (a, k) in X6_CONFIGS.items()}
         pts = {n: window_points(g) for n, g in rows.items()}
-        cells[f"{t}|{c}"] = {n: dict(status=bstar_status(pts[n], tg["bstar"]), window=bio_window(pts[n]),
+        cells[f"{t}|{c}"] = {n: dict(status=bstar_status(pts[n], tg["bstar"]),
+                                     window=A.window([(lam, list(cc.values())) for lam, _, cc, _ in pts[n]]),   # R3 window, frozen rule
                                      **{lv: at_level(pts[n], rows[n], lv, tg["bstar"]) for lv in LEVELS})
                              for n in X6_CONFIGS}
         for name, (a, b) in X6_CONTRASTS.items():
             res = bstar_contrast(pts[a], pts[b], tg["bstar"], tg["bstar_low_signal"])
             fa, fb = cells[f"{t}|{c}"][a]["matched"], cells[f"{t}|{c}"][b]["matched"]
-            res["fixed_matched"] = dict(dC=None if None in (fa["C"], fb["C"]) else fa["C"] - fb["C"],
-                                        dB=None if None in (fa["B"], fb["B"]) else fa["B"] - fb["B"])
+            res["fixed_strength"] = dict(label=FIXED_LABEL,    # each arm at its own inherited `matched` strength
+                                         dC=None if None in (fa["C"], fb["C"]) else fa["C"] - fb["C"],
+                                         dB=None if None in (fa["B"], fb["B"]) else fa["B"] - fb["B"])
             contrast[(t, c, name)] = res
     for c in (0, 1):
         tasks = [t for t, cc in EXPECTED["X6"] if cc == c]
@@ -206,6 +200,13 @@ def analyse(out, targets):
     return res
 
 
+def only_x6(M, S, F):
+    """Refuse score or failure rows that are not X6 manifest rows (blinding: no X1 or X13 row is to be read, SI-78)."""
+    x6_tags = set(M.tag[M.experiment == "X6"])
+    other = len(set(S.tag) - x6_tags) + len(set(F.tag) - x6_tags)
+    P._require(not other, f"{other} score or failure rows are not X6 manifest rows; pass X6 score and failure files only")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--manifest", action="append", required=True)
@@ -220,6 +221,7 @@ def main(argv=None):
     r4 = P.read_record(a.r4_record, "R4", stage="x1")
     S, score_files = P.read_scores(a.scores)
     F = P.read_failures(a.failures)
+    only_x6(M, S, F)
     out = P.outcomes(M, S, F, ["X6"]).sort_values("tag", ignore_index=True)    # row order (AN-11)
     rec = analyse(out, r4["targets"])
     P.write_record(a.out_json, dict(rule="analysis_followups", status="done", spec="docs/ANALYSIS_SPEC_FOLLOWUPS.md", **rec),
