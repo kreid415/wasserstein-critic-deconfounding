@@ -695,3 +695,58 @@
 - added: 2026-10-17
 - keywords: X6, optimiser, discriminator, spectral, critic, arm
 - notebook: NB-20261017-06
+
+## SI-99 · active · method
+- rule: X7 (reference choice) depleted-reference arm removes the rarest reference cell types first so the reference size stays about the same (refines SI-96 and NB-20261017-04, which fix the arm and its refill to the same size but not which types go)
+- source: "Rarest types first (Recommended)" (user, ask_user answer to "X7's new arm removes cell types from one reference batch ... Which types should be removed?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, depleted, rarest, reference, coverage, size, refill
+- notebook: NB-20261017-10
+
+## SI-100 · active · method
+- rule: X3 oracle-reweighted rows also run with the unconditioned decoder via new per-cell weight code (+288 fits); refines SI-93, which sends X3 to the unconditioned decoder but left the weighted rows conditioned-only
+- source: "Yes, add new weighting code" (user, ask_user answer to "Should the X3 reweighting control also run with the unconditioned decoder?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X3, oracle, reweighted, weights, unconditioned, decoder
+- notebook: NB-20261017-11
+
+## SI-101 · active · method
+- rule: X7, X8 and X15 (1-2 real datasets): registered pooled rule kept; per-dataset estimates with intervals; stated not decidable with 1-2 real datasets; no per-dataset decision rule, no added datasets (refines SI-68 and SI-96)
+- source: "Report per dataset, no verdict (Recommended)" (user, ask_user answer to "X7, X8 and X15 use only 1-2 real datasets ... How should they be decided?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, X8, X15, per dataset, verdict, pooled, not decidable, datasets
+- notebook: NB-20261017-12
+
+## SI-102 · active · method
+- rule: X7: P4 confirmatory = depleted levels vs same-size level-0 control; natural-reference association secondary (refines SI-68 and SI-96)
+- source: "Depleted-reference comparison (Recommended)" (user, ask_user answer to "For X7, which result is the main pre-registered one?", 2026-10-17)
+- added: 2026-10-17
+- keywords: X7, P4, confirmatory, depleted, natural, association, primary
+- notebook: NB-20261017-13
+
+## SI-103 · active · method
+- rule: The paper goes to a lower-impact journal, so the follow-up experiments are pruned: X3, X7, X8, X12 and X15 are dropped (X6 kept; R0 and X10 reduced to analyses with no new fits); X1, X13, pilots A1 to A3 and the Sinkhorn redo are unchanged; the claims on batch-count scaling and on a dense reference are removed, not tested
+- source: "The paper goes to a lower-impact journal, so the follow-up experiments are pruned. The core is unchanged (user decision, 2026-10-17, final)" (user, 2026-10-17); NB-20261018-01
+- added: 2026-10-17
+- keywords: X3, X6, X7, X8, X12, X15, R0, X10, pruned, dropped, follow-up, manifest v5, P3, P4, journal
+- notebook: NB-20261018-01
+
+## SI-104 · active · method
+- rule: The X6 follow-up analysis rule (docs/ANALYSIS_SPEC_FOLLOWUPS.md, confirmatory contrast pooled_sn at 1 step minus discriminator_sn_critic_opt, biology at b*, per decoder, Holm over 2) is locked as drafted, but only after an independent review
+- source: user decision by ask_user, 2026-10-20 (lock the follow-up rule as drafted after an independent review)
+- added: 2026-10-20
+- keywords: X6, follow-up, analysis rule, lock, prereg-x6-v1, confirmatory, review
+- notebook: NB-20261021-02
+## SI-105 · active · method
+- rule: Before the X6 rule is applied, run an 18-fit strength pre-check of discriminator_sn_critic_opt (pilot tasks atac_small, immune, sim1 x 2 decoders x the plain discriminator's lo/matched/hi strengths, seed 100); shift its three strengths one grid step up if >=3 of 4 counted cells are unreached_low, down if >=3 are unreached_high, else keep (experiments/x6_precheck_20261020/PLAN.md)
+- source: user decision by ask_user, 2026-10-20 (option a, the 18-fit pre-check)
+- added: 2026-10-20
+- keywords: X6, pre-check, discriminator_sn_critic_opt, strength, lambda, shift, decide.py
+- notebook: NB-20261021-02
+## SI-106 · active · method
+- rule: The X1 fit-identity check (experiments/followup_build_20261017/README.md Steps 0-1: no-fit plan comparison and 57 one-epoch CPU fits plus 5 control fits, OLD = tag prereg-tier12-v3, NEW = the commit to be tagged) runs and passes before the tag prereg-x6-v1 is made
+- source: "Run the check first, then tag (Recommended)" (user, 2026-10-21)
+- added: 2026-10-21
+- keywords: X6, identity, fit identity, prereg-x6-v1, tag, precondition, F5
+- notebook: NB-20261021-04
+

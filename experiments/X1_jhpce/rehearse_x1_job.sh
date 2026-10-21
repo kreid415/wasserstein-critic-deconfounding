@@ -58,8 +58,8 @@ EOF
 # ---- stand-ins for the node and Slurm ------------------------------------------------------------------------------
 SCR="$WORK/scratch"
 JOBID=990001
-FIT_ENV="$SCR/conda/envs/wcd-fit"
-mkdir -p "$FIT_ENV/bin"
+FIT_ENV="$WORK/home/envs/wcd-fit"            # env.sh at the tag: ${WCD_ENVS:-$HOME/envs}/wcd-fit (SI-49), HOME = $WORK/home here
+mkdir -p "$FIT_ENV/bin" "$SCR"
 ln -s "$PREPPED" "$SCR/prepped_scib"                       # read-only use: fingerprints and the runner's existence check
 cat > "$WORK/bin/versions_stub.py" <<'EOF'
 """env_versions.py on the L40S node: write expected_fit_versions.json's record (the node's) to --out, and the real

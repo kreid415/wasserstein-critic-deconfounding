@@ -1,0 +1,531 @@
+{
+  "experiment_id": "sinkhorn_redo_stage2",
+  "created_at": "2026-10-17T16:37:30Z",
+  "pf_version": "1.0",
+  "plan": {
+    "question": "Can stage 2 of the Sinkhorn redo (R1 for the Sinkhorn family and its extension fits, R4-a1 over all six arms, the A2/A3 fits it resolves, R2/R3) run from the pinned checkout of tag prereg-tier12-v3 without a tag scored twice, an overwritten frozen file or a pre-fix Sinkhorn output entering a rule, and what will it cost?",
+    "primary_outcome": "Stage 2 launch gate (no scientific outcome computed here): every rule step exits 0 (frozen) or 3 (extension needed) with one score file per manifest tag, and every fit step passes the run_stage completion gate (exit 0). The registered outcomes of R1-R4 are unchanged and not touched.",
+    "unit_of_analysis": "one pilot fit = one manifest row (experiment, task, decoder condition, arm, penalty strength, seed); rule cells are task x decoder x arm",
+    "split_unit": "not applicable: no held-out split; all cells are used for fitting (scVI validation split inside the fitter is registered)",
+    "selection_rule": "none at this stage: penalty-strength windows are chosen by the registered rules R1 and R4-a1 (SI-57 order) from A1 pilot seeds 100-102, disjoint from X1 seeds 0-4 (prereg_rules.check_seed_separation)",
+    "n_comparisons": 1,
+    "multiple_comparison_correction": "not applicable: one launch decision per step; the rules' own statistics are registered and unchanged",
+    "data_filters": "A1/A2/A3 rows of manifests/paper_manifest_stock_pilot_u5_b10_v3.tsv and its extensions; pre-fix Sinkhorn outputs (c88cce3) excluded by arm, non-Sinkhorn v2 outputs reused by tag name (SI-54)"
+  },
+  "plan_sha": "a9fe8a0bde249a32",
+  "extra_items": [
+    {
+      "id": "SC-01",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Are any evaluated labels constant within a donor/patient (donor-level), and if so is the train/test split grouped by donor rather than by cell?",
+      "applies_if": "A probe, classifier or held-out metric uses labels such as response, treatment time, disease, genotype or any per-sample/per-patient annotation.",
+      "how_to_check": "Run scpf_check_donor_split(adata, label_cols, donor_col, split_col=...) on the realized split; a label with one value per donor is donor-level and needs a donor-grouped split.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-02",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Is the grouping key unique across cohorts (composite cohort.patient), with the sample-to-patient mapping verified rather than assumed?",
+      "applies_if": "Data from more than one cohort/study/assay is pooled, or the grouping column is a sample/batch id that is assumed to equal one patient.",
+      "how_to_check": "Run scpf_check_donor_split(..., cohort_col=..., sample_col=...) and inspect id collisions and sample-to-donor nesting; check prior notes/memory for recorded collisions before writing guidance.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-03",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "On the realized train/test assignment, does any donor/group appear on both sides?",
+      "applies_if": "Any train/test, held-out or cross-validation split exists for data with repeated cells per donor/sample.",
+      "how_to_check": "Run scpf_check_split_leakage(adata, group_col, split_col) on the saved split labels, not on the splitting code.",
+      "auto": "scpf_check_split_leakage"
+    },
+    {
+      "id": "SC-04",
+      "area": "splits",
+      "severity": "major",
+      "question": "Are guarantees claimed for a custom grouped-split function (no straddling, target fraction, optimality) verified empirically over many seeds?",
+      "applies_if": "A custom grouped/stratified split function is written or its docstring states a guarantee.",
+      "how_to_check": "Run scpf_check_split_fn(split_fn, group_ids, n_seeds=10, check_optimal=True) and compare reported side stability and optimality gap with the docstring.",
+      "auto": "scpf_check_split_fn"
+    },
+    {
+      "id": "SC-05",
+      "area": "gene panel",
+      "severity": "blocking",
+      "question": "Does every feature in the gene panel / program gene set belong to the intended species (ENSG vs ENSMUSG, symbol case)?",
+      "applies_if": "A gene panel, feature set or program gene set is built from a reference or dataset that may combine species, or a dataset's species is assumed from its name.",
+      "how_to_check": "Run scpf_check_species(adata_or_var_names, expected='human') on the final panel, the program gene set and each model input.",
+      "auto": "scpf_check_species"
+    },
+    {
+      "id": "SC-06",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Does each model's required gene vocabulary cover the dataset's genes, and are models with incompatible species/ID types excluded or reported on the compatible subset?",
+      "applies_if": "A foundation model with a fixed gene vocabulary (token dictionary, species-specific ID list) is evaluated.",
+      "how_to_check": "Run scpf_check_vocab_coverage(var_names, vocab, min_frac=...) per model x dataset; list which datasets each model is excluded from and why.",
+      "auto": "scpf_check_vocab_coverage"
+    },
+    {
+      "id": "SC-07",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Is the zero-intensity perturbation exactly the raw input (a true no-op), for every dataset and every perturbation type, including default dispersion/shape parameters?",
+      "applies_if": "A perturbation axis (noise, dropout, variance shift, batch effect, etc.) includes a level that is meant to be the unperturbed baseline.",
+      "how_to_check": "Run scpf_check_noop_perturbation(raw, perturbed_at_zero) per dataset; any nonzero difference or changed shape blocks the run.",
+      "auto": "scpf_check_noop_perturbation"
+    },
+    {
+      "id": "SC-08",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Are cell counts (and per-cell QC statistics) reported along each perturbation axis, and does the retained sample size stay within a stated ratio?",
+      "applies_if": "A perturbation or filtering step varies in severity and downstream metrics are compared across its levels.",
+      "how_to_check": "Tabulate n_cells (and median genes/cell) per dataset x level and run scpf_check_cell_counts(table, axis_col, max_ratio=...).",
+      "auto": "scpf_check_cell_counts"
+    },
+    {
+      "id": "SC-09",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Can the perturbation generator produce empty cells or genes, and is that guarded before the model runners see the data?",
+      "applies_if": "Dropout, thinning, subsampling or count-level noise is applied before model fitting.",
+      "how_to_check": "Run scpf_check_empty_cells(perturbed, min_genes=1) over the full perturbation grid, not one setting.",
+      "auto": "scpf_check_empty_cells"
+    },
+    {
+      "id": "SC-10",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Do the number of genes reaching each model match the declared panel size, and is HVG selection a real ranking (n_top_genes < n_vars) applied exactly once?",
+      "applies_if": "HVG selection or a fixed gene-panel size is configured and results are compared across models or datasets.",
+      "how_to_check": "Record n_genes at model input per model x dataset and run scpf_check_gene_counts(n_genes_by_model, expected_n, hvg_n, n_vars_input, n_hvg_stages).",
+      "auto": "scpf_check_gene_counts"
+    },
+    {
+      "id": "SC-11",
+      "area": "inputs",
+      "severity": "blocking",
+      "question": "Are batch key, condition and donor columns resolved by explicit name and validated by expected values, never by column position or a heuristic first match?",
+      "applies_if": "A script, smoke test or loader selects obs/metadata columns (batch_key, condition, donor, label).",
+      "how_to_check": "Run scpf_check_obs_keys(adata, required={role: column}, expected_values=..., used={role: resolved column}) in the loader and the smoke test.",
+      "auto": "scpf_check_obs_keys"
+    },
+    {
+      "id": "SC-12",
+      "area": "claims",
+      "severity": "major",
+      "question": "Does the claimed finding (e.g. batch demoted below biology) go beyond what the model's batch/covariate conditioning mechanism does by construction?",
+      "applies_if": "A claim of disentanglement, invariance or integration is made for a model whose decoder or encoder is explicitly conditioned on the covariate in question.",
+      "how_to_check": "List each model's conditioning inputs from its source; label such results as conditioning/integration effects, and require an unconditioned comparison or ablation before claiming disentanglement.",
+      "auto": null
+    },
+    {
+      "id": "SC-13",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are factor pairs deterministically nested (one factor fully determines the other) and excluded from collision/overlap counts and dependence metrics?",
+      "applies_if": "Several covariates (batch, response, time, cancer type, donor) are scored against each other or against latent dimensions.",
+      "how_to_check": "Run scpf_check_nesting(adata, factors, pairs=...) and drop or separately report nested pairs.",
+      "auto": "scpf_check_nesting"
+    },
+    {
+      "id": "SC-14",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Is each model scored in its native concept basis (block metrics for block-structured latents, per-dimension only for one-dimension-per-factor), and are block-sensitive probes and reproducibility scores valid for residual blocks?",
+      "applies_if": "Models with multi-dimensional concept blocks (shared/private/residual subspaces) are compared with per-dimension disentanglement metrics (MIG, DCI, SAP, completeness).",
+      "how_to_check": "Build layouts from each model's source (None if no block structure) and run scpf_check_block_scoring(layouts, bases); fail on silent fallback to per-dimension.",
+      "auto": "scpf_check_block_scoring"
+    },
+    {
+      "id": "SC-15",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Is block-to-factor pairing an explicit name map, with unowned/shared blocks not credited to any factor?",
+      "applies_if": "A block-aware metric pairs latent blocks with annotated factors.",
+      "how_to_check": "Run scpf_check_block_pairing(blocks, factors, pairing, shared_blocks).",
+      "auto": "scpf_check_block_pairing"
+    },
+    {
+      "id": "SC-16",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Are kNN-based metric parameters valid for the smallest sample at every condition (trustworthiness k < n/2; kNN k < n; kBET k <= n)?",
+      "applies_if": "A kNN-derived metric (trustworthiness, kNN purity/NMI, kBET, LISI) is computed on subsampled, filtered or perturbed data of varying size.",
+      "how_to_check": "Run scpf_check_knn_validity(n_cells_by_condition, k, kind) before computing; ensure invalid cells are NaN with a status string.",
+      "auto": "scpf_check_knn_validity"
+    },
+    {
+      "id": "SC-17",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are non-computable metric cells reported as NaN with a status string (never a placeholder value), and are NaN columns traced to their true cause?",
+      "applies_if": "Any metric can be undefined for some dataset/model/condition.",
+      "how_to_check": "Scan result tables for constants such as 1.0000/0.0 on infeasible cells; confirm each NaN has a status and the cause is read from the code path, not guessed.",
+      "auto": null
+    },
+    {
+      "id": "SC-18",
+      "area": "aggregation",
+      "severity": "major",
+      "question": "Do all pooled models cover the same datasets; if not, is pooling restricted to the common subset (or coverage shown) and rank stability checked?",
+      "applies_if": "Metrics are averaged across datasets per model and some models run on a subset (species restriction, memory, failed fits).",
+      "how_to_check": "Run scpf_check_pool_coverage(table, model_col, dataset_col, value_col); report coverage next to every pooled figure.",
+      "auto": "scpf_check_pool_coverage"
+    },
+    {
+      "id": "SC-19",
+      "area": "inputs",
+      "severity": "major",
+      "question": "Do results loaders reject retired/stale perturbation types and result files by their value, not only by a missing field?",
+      "applies_if": "Result JSON/CSV files from earlier code versions can exist in the same directory as current outputs.",
+      "how_to_check": "Run scpf_check_allowed_values(pert_types_in_files, allowed, name='perturbation type') over every loaded file; confirm baseline slices contain only current-run files.",
+      "auto": "scpf_check_allowed_values"
+    },
+    {
+      "id": "SC-20",
+      "area": "runners",
+      "severity": "blocking",
+      "question": "Did any runner catch an exception and continue with a different method (e.g. refit on all cells instead of held-out projection, retry-then-ignore)?",
+      "applies_if": "Model runners wrap fits/projections in try/except, retry-then-ignore, or version-sensitive library calls.",
+      "how_to_check": "Run scpf_scan_fallbacks(log_text_or_path) on all runner logs and grep runner code for broad excepts around projection/transform; confirm every expected cell of the result grid exists.",
+      "auto": "scpf_scan_fallbacks"
+    },
+    {
+      "id": "SC-21",
+      "area": "metrics",
+      "severity": "minor",
+      "question": "Are continuous factors (program scores, pseudotime, dose) kept as ordered axes, not binned into unordered classes for classifier-based metrics?",
+      "applies_if": "A classifier- or MI-based disentanglement metric is applied to a continuous factor.",
+      "how_to_check": "Confirm the metric variant used for continuous factors is regression/ordered; document any binning and its justification.",
+      "auto": null
+    },
+    {
+      "id": "SC-22",
+      "area": "claims",
+      "severity": "minor",
+      "question": "Is every statement that a metric is standard in single-cell benchmarking backed by a cited single-cell source?",
+      "applies_if": "A metric suite is justified by field convention in a plan, README or manuscript.",
+      "how_to_check": "Find a single-cell benchmark paper using the metric (open the full text); otherwise word it as borrowed from general ML disentanglement.",
+      "auto": null
+    }
+  ],
+  "answers": {
+    "PF-01": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_plan] plan complete (sha a9fe8a0bde249a32)",
+      "at": "2026-10-17T16:37:30Z",
+      "history": [],
+      "auto": {
+        "check": "pf_check_plan",
+        "ok": true,
+        "summary": "plan complete (sha a9fe8a0bde249a32)",
+        "warnings": null
+      }
+    },
+    "PF-02": {
+      "status": "n/a",
+      "evidence": "one launch decision per step; no hypothesis test or ranking is produced by stage 2 (the rules' statistics are registered and unchanged at the tag)",
+      "at": "2026-10-17T16:37:30Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "plan declares n_comparisons=1; correction: not applicable: one launch decision per step; the rules' own statistics are registered and unchanged",
+          "at": "2026-10-17T16:37:30Z"
+        }
+      ]
+    },
+    "PF-03": {
+      "status": "n/a",
+      "evidence": "no probe, classifier or held-out split: unsupervised scVI fits of all cells per task",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-05": {
+      "status": "n/a",
+      "evidence": "no factors are compared in stage 2; factor nesting belongs to the later analyses",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-07": {
+      "status": "n/a",
+      "evidence": "no arm comparison is made by the wrapper or launchers; the rules compare arms by registered code that is byte-identical at the tag (git diff c3fd92d 10a1ca5 empty over fit/score code)",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-08": {
+      "status": "n/a",
+      "evidence": "no averaging or ranking is done here; rule code unchanged at the tag",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-09": {
+      "status": "n/a",
+      "evidence": "no perturbation or preprocessing knob is added: lambda=0 rows (arm none) are not refitted and are bit-identical to c88cce3 (59 of 59, NB-20261013-39)",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-10": {
+      "status": "n/a",
+      "evidence": "no filtering or subsampling is added; the rules themselves refuse incomplete lambda x seed designs (prereg_rules._cell_points)",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-11": {
+      "status": "n/a",
+      "evidence": "every arm has one 10-dimensional latent block; no cross-structure metric is applied",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-12": {
+      "status": "n/a",
+      "evidence": "no metric is written, changed or ported; scorer unchanged (7 of 7 stored latents rescored identically, NB-20261013-40); stage2_rules.py only selects files",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-13": {
+      "status": "n/a",
+      "evidence": "stage 2 produces fits and rule decisions, not a new noise estimate; R1's noise estimate is registered code at the tag",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-14": {
+      "status": "n/a",
+      "evidence": "no new design, probe or filter is proposed; rows are those the registered rules resolve",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-15": {
+      "status": "n/a",
+      "evidence": "no mechanism is attributed to any method in stage 2",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-04": {
+      "status": "pass",
+      "evidence": "Re-checked 2026-10-19 at final-review-fixes f33ef95 (review finding F3): tests/prereg/test_stage2_rules.py + tests/stage/test_link_v2_outputs.py + tests/jhpce/test_x1_command.py 16 passed; independent acceptance (artifact accept.py 6f9d4015) fails on 874e482, passes on the fix; check_tests.py vs 874e482 OK. Mutation (agent_mutate, seed 0, 12 of 39 mutants): link_v2_outputs.py 8/12 killed, survivors at lines 32, 38, 53, 82 (NA parsing, printed counts, arg-check And->Or), none on the F1 lines. stage2_rules.py mutation NOT re-run: agent_mutate copies the tree without .git and the test fixture clones a git checkout (baseline_red); the 2026-10-17 result (3 hand mutants killed) stands for the unchanged functions.",
+      "at": "2026-10-19T16:29:25Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "tests/prereg/test_stage2_rules.py: naive two-folder call is refused ('scored more than once'); wrapper selects one file per tag, refuses a tag in two folders (SystemExit) and duplicate manifest tags; 3 mutants of stage2_rules.py all killed (a pre-fix Sinkhorn file kept, out dir reuse, Sinkhorn reuse in plan-fits)",
+          "at": "2026-10-17T16:37:30Z"
+        }
+      ]
+    },
+    "PF-06": {
+      "status": "pass",
+      "evidence": "penalty-strength selection is the registered R1/R4-a1 rule on A1 pilot seeds 100-102; prereg_rules.check_seed_separation (called by all three rule scripts) refuses overlap with X1 seeds 0-4 and follow-up seeds 10-12; tests/prereg/test_rules.py covers it",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-16": {
+      "status": "pass",
+      "evidence": "cost figures are labelled provisional with their basis and confound: pre-fix production fit_seconds (tier12_v2 ledgers, 8 concurrent lanes) x a corrected-code factor of 1.45 (stage-1 preflight per-task predictions) to 2.8 (NB-20261013-11 hardest regime, run alone); no end-to-end corrected-code timing exists until stage 1 ends",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-18": {
+      "status": "pass",
+      "evidence": "same 8 GPU lanes + 3 scorers (during fits) as stage 1 and the v2 A2A3 launcher; run_stage2_fits.sh refuses when any run_stage.py is alive (pattern run_stage[.]py, shown not to self-match) or GPU memory >= 500 MiB; steps run one at a time; refusal paths executed read-only on the real D without side effects",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-22": {
+      "status": "pass",
+      "evidence": "every fit step writes per-tag latents/scores/attempts/ledger/failures.csv to its own new folder under D/tier12_v3 (2.4 TB free vs about 1.4 GB per 180 fits); run_stage completion gate gives exit 0 only when every row is final; launcher appends an exit-code trailer to D/tier12_v3/logs/stage2_exit.txt; rule steps write step.json with sha256 of every output",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "PF-24": {
+      "status": "pass",
+      "evidence": "fit flags in run_stage2_fits.sh equal those of the v2 A2A3 launcher and the stage-1 launcher (fit-lanes 8, fit-threads 1, score-workers 3/8, expect-device RTX 3080, scvi-api/wcd-kbet pythons, Rlib_kbet); only manifest, tags file, experiments, tasks and out-dir differ per step",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-01": {
+      "status": "n/a",
+      "evidence": "no labels are used for a probe or held-out metric in stage 2",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-02": {
+      "status": "n/a",
+      "evidence": "one assay per task, no donor-level labels; no cohort pooling is created",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-03": {
+      "status": "n/a",
+      "evidence": "no split exists",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-04": {
+      "status": "n/a",
+      "evidence": "no split function written",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-05": {
+      "status": "n/a",
+      "evidence": "no gene panel is built; prepped files and HVG settings are fixed by the tagged manifest",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-06": {
+      "status": "n/a",
+      "evidence": "no foundation-model vocabulary",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-07": {
+      "status": "n/a",
+      "evidence": "no perturbation axis: lambda grid points are the registered knob and lambda 0 is the untouched none arm",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-08": {
+      "status": "n/a",
+      "evidence": "no filtering step varies in severity",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-09": {
+      "status": "n/a",
+      "evidence": "no dropout or subsampling",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-10": {
+      "status": "n/a",
+      "evidence": "no HVG setting is changed; manifest rows carry the tagged settings",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-11": {
+      "status": "n/a",
+      "evidence": "no obs column is selected by new code; stage 2 reads manifest and score tables by column name via the tagged prereg_rules",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-12": {
+      "status": "n/a",
+      "evidence": "no disentanglement claim is made in stage 2",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-13": {
+      "status": "n/a",
+      "evidence": "no covariate comparison",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-14": {
+      "status": "n/a",
+      "evidence": "one latent block per model",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-15": {
+      "status": "n/a",
+      "evidence": "no block-aware metric",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-16": {
+      "status": "n/a",
+      "evidence": "scorer and datasets unchanged; kNN validity is a scorer property already checked for the pilots",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-18": {
+      "status": "n/a",
+      "evidence": "no per-model pooling across datasets is computed here",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-21": {
+      "status": "n/a",
+      "evidence": "no classifier-based disentanglement metric",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-22": {
+      "status": "n/a",
+      "evidence": "no field-standard claim is made",
+      "at": "2026-10-17T16:37:30Z",
+      "history": []
+    },
+    "SC-17": {
+      "status": "pass",
+      "evidence": "a metric that cannot be computed (scib NMI zero at every resolution, SI-65) is not imputed: the runner records it as an infrastructure error, stops the stage and the user decides (SI-81 a); rule scripts raise on non-finite required metrics (prereg_rules.outcomes)",
+      "at": "2026-10-17T16:37:36Z",
+      "history": []
+    },
+    "SC-19": {
+      "status": "pass",
+      "evidence": "tier12_v2 folders hold pre-fix Sinkhorn results under the same tags: stage2_rules.py excludes arm sinkhorn from every --old-dir (test_stage2_rules.py mutant 1 killed) and run_stage refuses c88cce3 Sinkhorn output (SI-54); non-Sinkhorn v2 files are reused by exact tag name only",
+      "at": "2026-10-17T16:37:36Z",
+      "history": []
+    },
+    "SC-20": {
+      "status": "pass",
+      "evidence": "Re-run 2026-10-19 on installed D/code/stage2 (stage2_rules.py sha256 c90bfad6..., identical to merged final-review-fixes f33ef95): scpf_scan_fallbacks ok, 0 problems; F1/F2 refusals are SystemExit; run_stage2_fits.sh sha ca2a2d3d... unchanged from the record.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "PASS SC-20 scpf_scan_fallbacks (n_lines_scanned=285, n_hits=0); fl_lint zero findings at medium on stage2_rules.py, run_stage2_fits.sh, run_stage2_rules.sh, test_stage2_rules.py; no try/except in the wrapper; every refusal is SystemExit or a non-zero exit",
+          "at": "2026-10-17T16:37:36Z"
+        }
+      ]
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "pf_estimate_cost on stage-1 measured wall: 180 Sinkhorn A1 fits+scores in 94,651 s (D/tier12_v3/A1_sinkhorn/ledger/...a19e4683640a.csv, fit_started min to score_ended max) = 525.8 s per row at the same launcher settings (RTX 3080, 8 lanes, 1 thread, 3 scorers, 10a1ca5). Step 2 (r1ext1) = 18 rows: estimate 2.63 h, x2 safety 5.26 h. Caveat: extension lambdas 10000/30000 exceed stage-1 max 3000; stage-1 cond-1 lam-3000 median fit_s atac_small 1843, immune 4186, sim1 2050; worst stage-1 fit 10,787 s, so worst case 3 rounds of 8 lanes ~9 h. Local tmux run, no walltime limit; tripwire: check at 5.3 h. Later fit steps (r4ext, a2a3) re-estimated at their launch from the same per-row figure.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "pass",
+      "evidence": "pf_check_manifest per task on D/tier12_v3/rules/r1_pass1/a1_extension.tsv restricted to fit_tags.txt (18 rows, sha256 aee75716...): 6 rows each atac_small/immune/sim1 carry all 14 intended flags (n_latent 10, n_layers 1, n_hidden 128, zinb, batch_size 128, max_epochs 400/239 immune/400, train_size 0.9, adv_input mean, zstd 0, arm sinkhorn, experiment A1, decoder SCVI, cond 1); lam numeric {10000, 30000}, no placeholder; seeds 100-102; all non-tag/lam/seed columns identical to stage-1 Sinkhorn cond-1 rows of the base manifest 6efbe422. Fit-step manifests r4ext/a2a3 checked at their launch.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-20": {
+      "status": "pass",
+      "evidence": "Independent count: r1_record.json (r1_pass1) families: only sinkhorn|1 and js|0 have status extend; js|0 = 18 discriminator rows reused from tier12_v2/A1_ext_r1_round1 (plan-fits: 18 reused, 0 moved); sinkhorn|1 = 1 edge x 3 tasks x 2 lambdas x 3 seeds = 18 rows to fit = fit_tags.txt count 18 (k=1, plan central path).",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-21": {
+      "status": "pass",
+      "evidence": "Seeds 100/101/102 are manifest columns read by run_stage.py per row; stage-1 completion check (LAUNCH_SINKHORN_STAGE1.md script, run 2026-10-19) cells_with_identical_seed_latents = 0 over 60 cells of the same launcher and code; the 18 step-2 rows are 6 cells x 3 seeds.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "pass",
+      "evidence": "R1 pass 1 (D/tier12_v3/rules/r1_pass1/step.json) ran prereg_rules.outcomes -> check_provenance (prereg_rules.py:320 at 10a1ca5) on the explicit list of 1,098 score files (918 v2 non-Sinkhorn + 180 v3 Sinkhorn) and exited 3 (extension) with no provenance error; n_old_sinkhorn_skipped 180 = expected 180; n_old_stale_skipped 0; failure rows 0. Step-2 outputs are provenance-checked again by R1 pass 2.",
+      "at": "2026-10-19T16:27:22Z",
+      "history": []
+    }
+  },
+  "verdict": {
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
+    "major_fail": [],
+    "minor_fail": [],
+    "plan_changed": false,
+    "n_items": 46,
+    "n_pass": 15,
+    "n_na": 31,
+    "at": "2026-10-19T16:29:25Z"
+  },
+  "path": "repo/experiments/sinkhorn_redo_stage2"
+}
