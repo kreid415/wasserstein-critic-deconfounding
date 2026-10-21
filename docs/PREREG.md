@@ -702,9 +702,10 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
   Status: written 2026-10-20 on branch x6-lock (the fit branch followup-build, the pre-check folder and the analysis branch
   followup-analysis-spec, merged at d034db7). This entry **replaces the draft** `docs/prereg/amendment_20261017_followups.md`,
   which is marked superseded; the draft described four more follow-ups (X3, X7, X8, X12) that the user dropped (SI-103, above).
-  Done: the design below is in the code and the manifest of this branch. Planned and not done: the check
-  that X1 fit paths give results identical to the tag (`experiments/followup_build_20261017/README.md`, "X1 fit identity"; run on the commit to be tagged, before the tag, user
-  decision SI-106 of 2026-10-21), the 36 pre-check fits (18 for each of the two arms) and its decision file, and the new code tag `prereg-x6-v1`, which will freeze this entry, the scripts named
+  Done: the design below is in the code and the manifest of this branch; the check that X1 fit paths give results identical
+  to the tag (`experiments/followup_build_20261017/README.md`, "X1 fit identity"; user decision SI-106 of 2026-10-21), run on
+  6163c4f on 2026-10-21: 57 of 57 rows identical in the no-fit plan comparison and in the one-epoch fits, determinism control
+  5 of 5 in each (`experiments/followup_build_20261017/results/identity_run_20261021/RUN.md`). Planned and not done: the 36 pre-check fits (18 for each of the two arms) and its decision file, and the new code tag `prereg-x6-v1`, which will freeze this entry, the scripts named
   below, `docs/ANALYSIS_SPEC_FOLLOWUPS.md` and its tests before R4-x1 runs and before any X1 result is examined (SI-68). This
   entry changes no fit of X1, X13, A1, A2 or A3, no rule R1 to R3, no part of the X1 or X13 analysis, and not
   `scripts/analysis_x1.py` or `docs/ANALYSIS_SPEC.md` (both are identical to the tag; checked with `git diff prereg-tier12-v3
@@ -744,7 +745,7 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     `pooled_sn` made before the new code tag are not comparable with those made at it (none exist; keep it that way; the
     `pooled_sn` pre-check fits below are made with the fixed code). That no X1
     arm is changed is the build track's claim (`docs/DIFF_followup_build.md`, `static_x1_paths.py`); the fit-identity run that
-    checks it is listed above as not yet done.
+    checks it passed on 2026-10-21 (above).
   - **Strength pre-check of the two arms of the confirmatory contrast (user decisions, 2026-10-20 and 2026-10-21, SI-107).**
     The new arm inherits the strengths of the plain
     discriminator, which is trained at a ten times higher learning rate; if the slower-learning arm removes less batch effect, its batch score never reaches b*
