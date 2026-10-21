@@ -27,7 +27,7 @@ import prereg_rules as P  # noqa: E402
 import synth  # noqa: E402
 
 SEEDS = [0, 1, 2, 3, 4]
-X1_MANIFEST = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v3.x1.tsv")
+X1_MANIFEST = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv")   # the resolved design the main benchmark runs (2168d75)
 R1_RECORD = os.path.join(ROOT, "docs", "prereg", "r1_record.json")
 KNOWN = os.path.join(ROOT, "experiments", "analysis_numerics_20261014", "known_answers_small_s.csv")
 
@@ -423,7 +423,7 @@ TRAJ_DROP = 0.08                   # trajectory below the other bio metrics: C =
 FAIL = {("lung", "0", "discriminator", "10", "0"): "diverged",
         ("pancreas", "1", "mmd", "3000", "2"): "nonfinite_latent",
         ("lung", "0", "harmony", "8", "0"): "nonfinite_latent",           # an X13 configuration without a run
-        **{("sim2", "0", "sinkhorn", "3000", str(s)): "diverged" for s in SEEDS},
+        **{("sim2", "0", "sinkhorn", "300", str(s)): "diverged" for s in SEEDS},   # top of the resolved grid (3000 before the Sinkhorn redo)
         # barycenter, unconditioned: failed runs leave lambda 10, 100 failure-free in pancreas and 0.3, 1, 3, 30 in
         # lung, so no lambda is eligible for a held-out dataset that trains on both (all outside their families);
         # each keeps a high failure-free point, so b_common (R4) barely moves

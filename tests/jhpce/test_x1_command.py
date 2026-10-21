@@ -22,10 +22,11 @@ def _builder():
 
 def test_chained_job_clock_covers_every_job_up_its_chain(tmp_path, capsys, monkeypatch):
     b = _builder()
-    assert b.DESIGN_SHA == ""                                                  # pre-redo design file: refused until stage 2 sets it
+    good = hashlib.sha256(open(os.path.join(ROOT, b.MANIFEST), "rb").read()).hexdigest()
+    assert b.DESIGN_SHA == good                                                # pinned to the resolved design by stage 2 (2168d75)
+    monkeypatch.setattr(b, "DESIGN_SHA", "")                                   # an unset pin is still refused
     with pytest.raises(SystemExit, match="DESIGN_SHA is not set"):
         b.main(["--task", "pancreas", "--bundle", "none"])
-    good = hashlib.sha256(open(os.path.join(ROOT, b.MANIFEST), "rb").read()).hexdigest()
     monkeypatch.setattr(b, "DESIGN_SHA", good)
     for extra in (["--chain-position", "2"], ["--after-slurm-job", "444"], ["--chain-position", "-1"]):
         with pytest.raises(SystemExit, match="exactly when"):
