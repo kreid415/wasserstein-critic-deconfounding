@@ -1,0 +1,56 @@
+{
+ "go": true,
+ "blocking": [],
+ "major_fail": [
+  "PF-20"
+ ],
+ "n_items": 46,
+ "n_pass": 31,
+ "n_na": 14,
+ "r19": "2880 rows carry all 9 intended flags",
+ "ok20": false,
+ "cluster": {
+  "immune_hum_mou": {
+   "pred_days": 2.46,
+   "slow_days": 3.01,
+   "longest_sinkhorn_h": 5.1
+  },
+  "atac_large": {
+   "pred_days": 1.56,
+   "slow_days": 2.68,
+   "longest_sinkhorn_h": 4.1
+  },
+  "lung": {
+   "pred_days": 2.12,
+   "slow_days": 2.79,
+   "longest_sinkhorn_h": 4.6
+  },
+  "sim2": {
+   "pred_days": 1.67,
+   "slow_days": 2.68,
+   "longest_sinkhorn_h": 4.4
+  },
+  "pancreas": {
+   "pred_days": 1.67,
+   "slow_days": 2.12,
+   "longest_sinkhorn_h": 3.3
+  }
+ },
+ "gpu_days": 9.5,
+ "factor": 1.116,
+ "local_lane_h": 938.1,
+ "local_wall_h": 137.7,
+ "local_wall_h_x2": 275.4,
+ "lanes_eff": 6.81,
+ "ratio": {
+  "sim1": 2.0690844946675675,
+  "immune": 1.9868198510766542,
+  "atac_small": 1.871424150852496
+ },
+ "sinkmax": 2.57,
+ "how": {
+  "exact": 1076,
+  "scvi_adv=1.5x max none": 14,
+  "cond-p90": 15
+ }
+}

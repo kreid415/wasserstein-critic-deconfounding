@@ -1,0 +1,531 @@
+{
+  "experiment_id": "preflight_x1_20261020",
+  "created_at": "2026-10-21T00:34:19Z",
+  "pf_version": "1.0",
+  "plan": {
+    "question": "X1 main benchmark (PREREG sec 0, after R2/R3), after the Sinkhorn redo: fit and score the 3,000 X1 rows of the resolved design file tier12_v3/manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv = manifests/paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv (sha256 034403eb206f...; rules/r23/m.x1.tsv): 8 scIB tasks x 2 decoders x seeds 0-4; six adversarial arms at R1's 6 penalty strengths per arm x decoder (Sinkhorn grids from the corrected solver), adversary input = posterior mean and no standardisation (R2/R3 re-run 2026-10-20, unchanged), plus none and scvi_adv. 75 rule-free rows on the JHPCE tasks were fitted by the filler jobs; 1,125 rows (atac_small, immune, sim1) run locally on the RTX 3080 (20 non-Sinkhorn rows linked from tier12_v2/X1_local, 1,105 to fit); 1,800 adversarial rows on JHPCE (5 one-task jobs, 1 L40S each, 2 at a time); all scoring on this workstation with the tagged scorer; code = tag prereg-tier12-v3 (10a1ca5) throughout (non-Sinkhorn outputs at c88cce3 count as v3 under SI-54)",
+    "primary_outcome": "P1 (PAPER_PLAN sec 3/5): difference in bio conservation C at the matched batch-removal target b* between the reference W1 critic and the discriminator, on unscaled scIB aggregates; computed in the X1 analysis after all 3,000 rows are scored, not at launch",
+    "unit_of_analysis": "dataset (task) for the primary contrasts: hierarchical model with seeds nested in datasets, simulations a separate family (PAPER_PLAN sec 5); one fit = task x decoder x arm x lambda x seed",
+    "split_unit": "seed: X1 uses seeds 0-4, disjoint from the pilots A1-A3 (100-102) and the follow-ups (10-12); no pilot fit is reused as an X1 fit; scIB metrics use all cells (no cell-level split)",
+    "selection_rule": "nothing is selected at launch: X1's lambda grid (R1), adversary input and standardisation (R2/R3) were frozen from the pilots on seeds 100-102 before any X1 adversarial fit; R4-x1 (matched lambda for the follow-ups) runs on X1's scores afterwards; every X1 row is fitted and reported",
+    "n_comparisons": 4,
+    "multiple_comparison_correction": "P1-P4 form one family: Bayesian hierarchical model with ROPE = max(0.01, 2 x measurement SD) for the declarations; frequentist companion exact Wilcoxon on dataset means with Holm over P1-P4 (PAPER_PLAN sec 5); X1 supplies P1 and P2; the pruning amendment of 2026-10-17 (branches prune-*, not merged, user diff review pending) would drop P3/P4; X1 supplies P1 and P2 either way",
+    "data_filters": "the 8 scIB task files as distributed (SI-15), prepped by scripts/prep_scib_task.py; fingerprints re-verified 2026-10-12 locally (8/8 OK) and re-checked on the JHPCE node by each job; training features = var.highly_variable; no cell, batch or gene filtering beyond the prep"
+  },
+  "plan_sha": "5c1f460798e64f50",
+  "extra_items": [
+    {
+      "id": "SC-01",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Are any evaluated labels constant within a donor/patient (donor-level), and if so is the train/test split grouped by donor rather than by cell?",
+      "applies_if": "A probe, classifier or held-out metric uses labels such as response, treatment time, disease, genotype or any per-sample/per-patient annotation.",
+      "how_to_check": "Run scpf_check_donor_split(adata, label_cols, donor_col, split_col=...) on the realized split; a label with one value per donor is donor-level and needs a donor-grouped split.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-02",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "Is the grouping key unique across cohorts (composite cohort.patient), with the sample-to-patient mapping verified rather than assumed?",
+      "applies_if": "Data from more than one cohort/study/assay is pooled, or the grouping column is a sample/batch id that is assumed to equal one patient.",
+      "how_to_check": "Run scpf_check_donor_split(..., cohort_col=..., sample_col=...) and inspect id collisions and sample-to-donor nesting; check prior notes/memory for recorded collisions before writing guidance.",
+      "auto": "scpf_check_donor_split"
+    },
+    {
+      "id": "SC-03",
+      "area": "splits",
+      "severity": "blocking",
+      "question": "On the realized train/test assignment, does any donor/group appear on both sides?",
+      "applies_if": "Any train/test, held-out or cross-validation split exists for data with repeated cells per donor/sample.",
+      "how_to_check": "Run scpf_check_split_leakage(adata, group_col, split_col) on the saved split labels, not on the splitting code.",
+      "auto": "scpf_check_split_leakage"
+    },
+    {
+      "id": "SC-04",
+      "area": "splits",
+      "severity": "major",
+      "question": "Are guarantees claimed for a custom grouped-split function (no straddling, target fraction, optimality) verified empirically over many seeds?",
+      "applies_if": "A custom grouped/stratified split function is written or its docstring states a guarantee.",
+      "how_to_check": "Run scpf_check_split_fn(split_fn, group_ids, n_seeds=10, check_optimal=True) and compare reported side stability and optimality gap with the docstring.",
+      "auto": "scpf_check_split_fn"
+    },
+    {
+      "id": "SC-05",
+      "area": "gene panel",
+      "severity": "blocking",
+      "question": "Does every feature in the gene panel / program gene set belong to the intended species (ENSG vs ENSMUSG, symbol case)?",
+      "applies_if": "A gene panel, feature set or program gene set is built from a reference or dataset that may combine species, or a dataset's species is assumed from its name.",
+      "how_to_check": "Run scpf_check_species(adata_or_var_names, expected='human') on the final panel, the program gene set and each model input.",
+      "auto": "scpf_check_species"
+    },
+    {
+      "id": "SC-06",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Does each model's required gene vocabulary cover the dataset's genes, and are models with incompatible species/ID types excluded or reported on the compatible subset?",
+      "applies_if": "A foundation model with a fixed gene vocabulary (token dictionary, species-specific ID list) is evaluated.",
+      "how_to_check": "Run scpf_check_vocab_coverage(var_names, vocab, min_frac=...) per model x dataset; list which datasets each model is excluded from and why.",
+      "auto": "scpf_check_vocab_coverage"
+    },
+    {
+      "id": "SC-07",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Is the zero-intensity perturbation exactly the raw input (a true no-op), for every dataset and every perturbation type, including default dispersion/shape parameters?",
+      "applies_if": "A perturbation axis (noise, dropout, variance shift, batch effect, etc.) includes a level that is meant to be the unperturbed baseline.",
+      "how_to_check": "Run scpf_check_noop_perturbation(raw, perturbed_at_zero) per dataset; any nonzero difference or changed shape blocks the run.",
+      "auto": "scpf_check_noop_perturbation"
+    },
+    {
+      "id": "SC-08",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Are cell counts (and per-cell QC statistics) reported along each perturbation axis, and does the retained sample size stay within a stated ratio?",
+      "applies_if": "A perturbation or filtering step varies in severity and downstream metrics are compared across its levels.",
+      "how_to_check": "Tabulate n_cells (and median genes/cell) per dataset x level and run scpf_check_cell_counts(table, axis_col, max_ratio=...).",
+      "auto": "scpf_check_cell_counts"
+    },
+    {
+      "id": "SC-09",
+      "area": "perturbation",
+      "severity": "blocking",
+      "question": "Can the perturbation generator produce empty cells or genes, and is that guarded before the model runners see the data?",
+      "applies_if": "Dropout, thinning, subsampling or count-level noise is applied before model fitting.",
+      "how_to_check": "Run scpf_check_empty_cells(perturbed, min_genes=1) over the full perturbation grid, not one setting.",
+      "auto": "scpf_check_empty_cells"
+    },
+    {
+      "id": "SC-10",
+      "area": "gene panel",
+      "severity": "major",
+      "question": "Do the number of genes reaching each model match the declared panel size, and is HVG selection a real ranking (n_top_genes < n_vars) applied exactly once?",
+      "applies_if": "HVG selection or a fixed gene-panel size is configured and results are compared across models or datasets.",
+      "how_to_check": "Record n_genes at model input per model x dataset and run scpf_check_gene_counts(n_genes_by_model, expected_n, hvg_n, n_vars_input, n_hvg_stages).",
+      "auto": "scpf_check_gene_counts"
+    },
+    {
+      "id": "SC-11",
+      "area": "inputs",
+      "severity": "blocking",
+      "question": "Are batch key, condition and donor columns resolved by explicit name and validated by expected values, never by column position or a heuristic first match?",
+      "applies_if": "A script, smoke test or loader selects obs/metadata columns (batch_key, condition, donor, label).",
+      "how_to_check": "Run scpf_check_obs_keys(adata, required={role: column}, expected_values=..., used={role: resolved column}) in the loader and the smoke test.",
+      "auto": "scpf_check_obs_keys"
+    },
+    {
+      "id": "SC-12",
+      "area": "claims",
+      "severity": "major",
+      "question": "Does the claimed finding (e.g. batch demoted below biology) go beyond what the model's batch/covariate conditioning mechanism does by construction?",
+      "applies_if": "A claim of disentanglement, invariance or integration is made for a model whose decoder or encoder is explicitly conditioned on the covariate in question.",
+      "how_to_check": "List each model's conditioning inputs from its source; label such results as conditioning/integration effects, and require an unconditioned comparison or ablation before claiming disentanglement.",
+      "auto": null
+    },
+    {
+      "id": "SC-13",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are factor pairs deterministically nested (one factor fully determines the other) and excluded from collision/overlap counts and dependence metrics?",
+      "applies_if": "Several covariates (batch, response, time, cancer type, donor) are scored against each other or against latent dimensions.",
+      "how_to_check": "Run scpf_check_nesting(adata, factors, pairs=...) and drop or separately report nested pairs.",
+      "auto": "scpf_check_nesting"
+    },
+    {
+      "id": "SC-14",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Is each model scored in its native concept basis (block metrics for block-structured latents, per-dimension only for one-dimension-per-factor), and are block-sensitive probes and reproducibility scores valid for residual blocks?",
+      "applies_if": "Models with multi-dimensional concept blocks (shared/private/residual subspaces) are compared with per-dimension disentanglement metrics (MIG, DCI, SAP, completeness).",
+      "how_to_check": "Build layouts from each model's source (None if no block structure) and run scpf_check_block_scoring(layouts, bases); fail on silent fallback to per-dimension.",
+      "auto": "scpf_check_block_scoring"
+    },
+    {
+      "id": "SC-15",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Is block-to-factor pairing an explicit name map, with unowned/shared blocks not credited to any factor?",
+      "applies_if": "A block-aware metric pairs latent blocks with annotated factors.",
+      "how_to_check": "Run scpf_check_block_pairing(blocks, factors, pairing, shared_blocks).",
+      "auto": "scpf_check_block_pairing"
+    },
+    {
+      "id": "SC-16",
+      "area": "metrics",
+      "severity": "blocking",
+      "question": "Are kNN-based metric parameters valid for the smallest sample at every condition (trustworthiness k < n/2; kNN k < n; kBET k <= n)?",
+      "applies_if": "A kNN-derived metric (trustworthiness, kNN purity/NMI, kBET, LISI) is computed on subsampled, filtered or perturbed data of varying size.",
+      "how_to_check": "Run scpf_check_knn_validity(n_cells_by_condition, k, kind) before computing; ensure invalid cells are NaN with a status string.",
+      "auto": "scpf_check_knn_validity"
+    },
+    {
+      "id": "SC-17",
+      "area": "metrics",
+      "severity": "major",
+      "question": "Are non-computable metric cells reported as NaN with a status string (never a placeholder value), and are NaN columns traced to their true cause?",
+      "applies_if": "Any metric can be undefined for some dataset/model/condition.",
+      "how_to_check": "Scan result tables for constants such as 1.0000/0.0 on infeasible cells; confirm each NaN has a status and the cause is read from the code path, not guessed.",
+      "auto": null
+    },
+    {
+      "id": "SC-18",
+      "area": "aggregation",
+      "severity": "major",
+      "question": "Do all pooled models cover the same datasets; if not, is pooling restricted to the common subset (or coverage shown) and rank stability checked?",
+      "applies_if": "Metrics are averaged across datasets per model and some models run on a subset (species restriction, memory, failed fits).",
+      "how_to_check": "Run scpf_check_pool_coverage(table, model_col, dataset_col, value_col); report coverage next to every pooled figure.",
+      "auto": "scpf_check_pool_coverage"
+    },
+    {
+      "id": "SC-19",
+      "area": "inputs",
+      "severity": "major",
+      "question": "Do results loaders reject retired/stale perturbation types and result files by their value, not only by a missing field?",
+      "applies_if": "Result JSON/CSV files from earlier code versions can exist in the same directory as current outputs.",
+      "how_to_check": "Run scpf_check_allowed_values(pert_types_in_files, allowed, name='perturbation type') over every loaded file; confirm baseline slices contain only current-run files.",
+      "auto": "scpf_check_allowed_values"
+    },
+    {
+      "id": "SC-20",
+      "area": "runners",
+      "severity": "blocking",
+      "question": "Did any runner catch an exception and continue with a different method (e.g. refit on all cells instead of held-out projection, retry-then-ignore)?",
+      "applies_if": "Model runners wrap fits/projections in try/except, retry-then-ignore, or version-sensitive library calls.",
+      "how_to_check": "Run scpf_scan_fallbacks(log_text_or_path) on all runner logs and grep runner code for broad excepts around projection/transform; confirm every expected cell of the result grid exists.",
+      "auto": "scpf_scan_fallbacks"
+    },
+    {
+      "id": "SC-21",
+      "area": "metrics",
+      "severity": "minor",
+      "question": "Are continuous factors (program scores, pseudotime, dose) kept as ordered axes, not binned into unordered classes for classifier-based metrics?",
+      "applies_if": "A classifier- or MI-based disentanglement metric is applied to a continuous factor.",
+      "how_to_check": "Confirm the metric variant used for continuous factors is regression/ordered; document any binning and its justification.",
+      "auto": null
+    },
+    {
+      "id": "SC-22",
+      "area": "claims",
+      "severity": "minor",
+      "question": "Is every statement that a metric is standard in single-cell benchmarking backed by a cited single-cell source?",
+      "applies_if": "A metric suite is justified by field convention in a plan, README or manuscript.",
+      "how_to_check": "Find a single-cell benchmark paper using the metric (open the full text); otherwise word it as borrowed from general ML disentanglement.",
+      "auto": null
+    }
+  ],
+  "answers": {
+    "PF-01": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_plan] plan complete (sha 5c1f460798e64f50)",
+      "at": "2026-10-21T00:34:19Z",
+      "history": [],
+      "auto": {
+        "check": "pf_check_plan",
+        "ok": true,
+        "summary": "plan complete (sha 5c1f460798e64f50)",
+        "warnings": null
+      }
+    },
+    "PF-02": {
+      "status": "pass",
+      "evidence": "plan declares n_comparisons=4; correction: P1-P4 form one family: Bayesian hierarchical model with ROPE = max(0.01, 2 x measurement SD) for the declarations; frequentist companion exact Wilcoxon on dataset means with Holm over P1-P4 (PAPER_PLAN sec 5); X1 supplies P1 and P2; the pruning amendment of 2026-10-17 (branches prune-*, not merged, user diff review pending) would drop P3/P4; X1 supplies P1 and P2 either way",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-07": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): [auto:pf_check_matched_arms] arms matched on 9 fields (varied: ['extra', 'n_critic']) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-08": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): [auto:pf_check_coverage] all 8 items cover all 8 units || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-23": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): [auto:pf_check_inclusion] all 8 items inside ['OK'] || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-18": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): PASS SC-18 scpf_check_pool_coverage (n_models=8, n_datasets=8, rank_flip=False) (3,000 X1 rows, arm x task) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-01": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no donor-level labels, probes, classifiers or train/test evaluation in X1; scIB integration metrics are computed on all cells || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-02": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no donor-level labels, probes, classifiers or train/test evaluation in X1; scIB integration metrics are computed on all cells || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-03": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no donor-level labels, probes, classifiers or train/test evaluation in X1; scIB integration metrics are computed on all cells || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-03": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no classifier, probe or held-out evaluation: scIB metrics use all cells of each task (scIB convention); scVI's internal 90/10 split only sets the validation loss || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-04": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no unit-level evaluation; batches are the integration targets from each scIB file's own key (SC-11 key check passed on all 8 files); the 3,000 X1 tags are unique (make_x1_tags.py and pf_check_manifest) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-09": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): lambda=0 'none' arm = stock scVI: tests/scvi (incl. test_none_is_bit_identical_to_stock_scvi) 110 passed, 1 skipped at c88cce3 in the X1 job rehearsal (immune_hum_mou, 2026-10-12); every JHPCE job reruns tests/scvi on its node before any fit (prod_fit_job.sh step 3) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-10": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no conditions are created by filtering, subsampling or perturbing: every fit uses the full prepped task (11,270 to 97,861 cells) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-12": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no new or ported metric: the tagged scorer of A1-A3 (score_scib_native.py at c88cce3, scib 1.1.7), known-answer tests as in the A1 v2 record; re-scoring two A1 latents on 2026-10-12 reproduced all 18 metric columns of their A1 score files exactly, in the chat sandbox and as a cs-local host job (identity check C4) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-16": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): timings are used only to size walltimes and estimate finish dates; no speed claim. L40S repeats: 15 configurations (filler X1 none/scvi_adv, 5 seeds each, same nodes and job body) spread 0.4-15.5% of the median (< 25%), no warm-up (pf_check_timing_repeats ok on all 15); local: the cost model with A1's measured ratio 1.06-1.13, plus the measured 11.8% slowdown from one big-task scorer beside 8 fit lanes (NB-20261006-03..06) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-05": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no gene panel from a reference: each task's features are its own scIB HVGs (2,000) or, for the ATAC tasks, all 3,429 / 3,580 features || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-07": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no perturbation or filtering axis in X1 (X3 and X8 get their own preflight) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-08": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no perturbation or filtering axis in X1 (X3 and X8 get their own preflight) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-09": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no perturbation generator; scpf_check_empty_cells on layers['counts'] restricted to the training features: 0 empty cells in all 8 tasks (2026-10-12) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-11": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): scpf_check_obs_keys: 'batch' and 'celltype' present by name in all 8 prepped files (batches 3/10/6/11/23/16/9/16, cell types 7/16/7/7/19/17/14/4 for atac_small/immune/sim1/atac_large/immune_hum_mou/lung/pancreas/sim2); the fitter reads obs['batch'] and obs['celltype'] by name || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-14": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): every arm yields an unstructured 10-dimensional posterior-mean latent; no block-structured models || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-16": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): kNN graphs are built over all cells of a task: graph metrics k=15, LISI k=90, smallest task 11,270 cells (scpf_check_knn_validity ok on the full graphs of all 8). Per-label kBET follows scib 1.1.7, which sizes k0 from each label's batches or skips the label; skips and forced labels are written to every score row (kbet_labels_skipped, kbet_labels_forced_one). Smallest cell types: pancreas 7 cells, lung 46. Task sizes are fixed and identical for all arms, so no parameter differs between arms || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-05": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): scpf_check_nesting(batch, celltype): no deterministic nesting in any of the 8 tasks (2026-10-12) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-11": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): all arms produce 10-dimensional unstructured posterior means scored by the same scIB functions; no metric assumes a latent structure some arms lack || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-13": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): replicate noise = 5 seeds per configuration; ROPE = max(0.01, 2 x measurement SD) (PAPER_PLAN sec 5); scIB metrics use all cells (no subsampling); kBET seeded per call (seed 0), recorded in every score row as in A1-A3 || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-14": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): X1 contains the tested arms (reference, pooled and barycenter critics, discriminator, MMD, Sinkhorn; 6 lambda each) and the controls (none = lambda 0, scvi_adv) on every task and decoder; b* is set from all arms' own batch ranges (R4), not from the critic-discriminator contrast || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-15": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): the launch attributes no mechanism; mechanism analyses are the follow-ups (X3, X7, X8) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-04": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no custom grouped-split function is used || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-06": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no foundation model with a fixed gene vocabulary is used || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-10": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): the fitter keeps var.highly_variable for every arm (fit_paper_config.py l.299): 2,000 features for immune, sim1, immune_hum_mou, lung, pancreas, sim2; all 3,429 (atac_small) and 3,580 (atac_large); one HVG selection, from scIB's files || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-12": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): every adversarial arm is fitted with both decoders (conditioned and unconditioned) and each decoder has its own lambda=0 control, so integration claims are reported per decoder, separately from what the decoder's batch conditioning does || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-13": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): same check as PF-05: scpf_check_nesting finds no deterministic nesting of batch and cell type in the 8 tasks || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-15": {
+      "status": "n/a",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): no block-aware metric is used; latents are unstructured || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-17": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): the tagged scorer writes non-computable metrics as NaN, never placeholders, and reports kBET skips (A1 v2 record); the runner fails any row with a non-finite required metric; all 288 A2/A3 and 48 scored filler X1 rows have every required metric finite || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-21": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): trajectory conservation uses continuous DPT pseudotime (scib trajectory_conservation, Spearman), nothing binned; X1 tasks with dpt_pseudotime: immune, immune_hum_mou || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-22": {
+      "status": "pass",
+      "evidence": "carried from experiments/X1/preflight.json (2026-10-12; design 7c2fe867..., code c88cce3): unchanged since the A1 record: the metric suite and bio/batch grouping follow scIB (Luecken et al. 2022, Nat. Methods) and scib-reproducibility (PREREG sec 1) || still holds at v3: the redo changed only Sinkhorn penalty-strength grids (R1: 2 of 24 cells, both Sinkhorn; R4-a1 10 of 144, all Sinkhorn) and moved the code tag; fit and score code equals c3fd92d's (git diff --stat c3fd92d prereg-tier12-v3 -- src scripts/fit_paper_config.py scripts/scvi_adversarial_plan.py scripts/score_scib_native.py is empty; prereg-tier12-v3..HEAD under src/ and scripts/ is empty); tasks, arms, decoders, seeds, scorer and prepped inputs unchanged",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-06": {
+      "status": "pass",
+      "evidence": "X1 seeds ['0', '1', '2', '3', '4'] disjoint from pilot seeds ['100', '101', '102'] (A1-A3 rows of the resolved file); penalty strengths, adversary input and standardisation were fixed by R1, R4-a1, R2/R3 on pilot seeds only (rules/r1_pass2, r4_pass2, r23 step.json exit 0); no X1 score is used before the X1 analysis",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-19": {
+      "status": "pass",
+      "evidence": "[auto:pf_check_manifest] 2880 rows carry all 9 intended flags",
+      "at": "2026-10-21T00:34:19Z",
+      "history": [],
+      "auto": {
+        "check": "pf_check_manifest",
+        "ok": true,
+        "summary": "2880 rows carry all 9 intended flags",
+        "warnings": []
+      }
+    },
+    "PF-20": {
+      "status": "pass",
+      "evidence": "independent count on the resolved file: X1 3000 rows = 8 tasks x 375 {'pancreas': 375, 'lung': 375, 'immune': 375, 'immune_hum_mou': 375, 'sim1': 375, 'sim2': 375, 'atac_small': 375, 'atac_large': 375}; arms {'none': 80, 'scvi_adv': 40, 'discriminator': 480, 'reference': 480, 'pooled': 480, 'barycenter': 480, 'mmd': 480, 'sinkhorn': 480}; 2,880 rule-set adversarial rows (= r2r3_record x1_rows 2880) + 120 rule-free; local 1,125 (1,080 adversarial + 45 rule-free); cluster 1,875 = 1,800 adversarial in 5 run lists {'x1_jhpce_atac_large.tags': 360, 'x1_jhpce_immune_hum_mou.tags': 360, 'x1_jhpce_lung.tags': 360, 'x1_jhpce_pancreas.tags': 360, 'x1_jhpce_sim2.tags': 360} + 75 rule-free fitted by the filler jobs; local dry run (tier12_v3/logs/x1_local_dry_run_1.txt) 1,125 rows: 19 scored, 1 needs score, 1,105 need fits; report-only 0 invalid outputs (re-recorded: the first answer was a fail caused by the checking script counting experiments/X1_jhpce/tags/x1_jhpce_counts.csv as a run list; only *.tags files are run lists)",
+      "at": "2026-10-21T00:34:44Z",
+      "history": [
+        {
+          "status": "fail",
+          "evidence": "independent count on the resolved file: X1 3000 rows = 8 tasks x 375 {'pancreas': 375, 'lung': 375, 'immune': 375, 'immune_hum_mou': 375, 'sim1': 375, 'sim2': 375, 'atac_small': 375, 'atac_large': 375}; arms {'none': 80, 'scvi_adv': 40, 'discriminator': 480, 'reference': 480, 'pooled': 480, 'barycenter': 480, 'mmd': 480, 'sinkhorn': 480}; 2,880 rule-set adversarial rows (= r2r3_record x1_rows 2880) + 120 rule-free; local 1,125 (1,080 adversarial + 45 rule-free); cluster 1,875 = 1,800 adversarial in 5 run lists {'x1_jhpce_atac_large.tags': 360, 'x1_jhpce_counts.csv': 61, 'x1_jhpce_immune_hum_mou.tags': 360, 'x1_jhpce_lung.tags': 360, 'x1_jhpce_pancreas.tags': 360, 'x1_jhpce_sim2.tags': 360} + 75 rule-free fitted by the filler jobs; local dry run (tier12_v3/logs/x1_local_dry_run_1.txt) 1,125 rows: 19 scored, 1 needs score, 1,105 need fits; report-only 0 invalid outputs",
+          "at": "2026-10-21T00:34:19Z"
+        }
+      ]
+    },
+    "PF-21": {
+      "status": "pass",
+      "evidence": "replicate seeds give distinct latents under the v3 code: Sinkhorn pilot completion check (D/code/stage2/fitcheck.py on tier12_v3/A2A3, 2026-10-20 19:59, log tier12_v3/logs/r2r3_watch.log) cells_with_identical_seed_latents 0 of 12 cells, 36/36 scored, nmi_zero 0; X1 latents are not opened (blinding SI-78), the X1 runner uses the same seed handling as A1-A3",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-17": {
+      "status": "pass",
+      "evidence": "LOCAL (auto): estimate 938.06 h (x2 safety = 1876.11 h); cpu-hours 938.1; recommended walltime 991500s. Method: each of the 1105 local rows to fit gets the median fit_seconds of its pilot cell (task, arm, decoder, penalty strength) from tier12_v2/A1 (non-Sinkhorn, 1,098 rows at 8 lanes) and tier12_v3/A1_sinkhorn + A1_ext_r1_sinkhorn_round1 (corrected Sinkhorn, zstd 0, as X1 uses); match levels {'exact': 1076, 'scvi_adv=1.5x max none': 14, 'cond-p90': 15}; lane-hours 938.1 (by task {'immune': 443.0, 'sim1': 270.8, 'atac_small': 224.3}; Sinkhorn {'immune': 93.5, 'sim1': 64.9, 'atac_small': 38.2}); effective lanes 6.81 measured on A1 (842.7 lane-h in 123.7 h); wall 137.7 h, x2 safety 275.4 h (no walltime limit locally; no per-fit timeout); longest single fit 9627 s; scoring 138.3 lane-h on 3 scorers during fits = 46.1 h, below the fit wall. CLUSTER: corrected/pre-fix Sinkhorn fit-time ratio on the A1 rows median {'sim1': 2.07, 'immune': 1.99, 'atac_small': 1.87}; with Sinkhorn's measured share of local lane-time this raises a job by x1.116 (by task {'sim1': 1.141, 'immune': 1.117, 'atac_small': 1.086}) over the pre-fix plan (SUBMISSION_PLAN.md). Re-estimated GPU-days per job (plan x factor): {'immune_hum_mou': {'pred_days': 2.46, 'slow_days': 3.01, 'longest_sinkhorn_h': 5.1}, 'atac_large': {'pred_days': 1.56, 'slow_days': 2.68, 'longest_sinkhorn_h': 4.1}, 'lung': {'pred_days': 2.12, 'slow_days': 2.79, 'longest_sinkhorn_h': 4.6}, 'sim2': {'pred_days': 1.67, 'slow_days': 2.68, 'longest_sinkhorn_h': 4.4}, 'pancreas': {'pred_days': 1.67, 'slow_days': 2.12, 'longest_sinkhorn_h': 3.3}}; total 9.5 GPU-days (was 8.5). Condition: at x2 safety the two largest jobs exceed the 3-day Slurm limit (builder maximum); the runner's deadline guard stops 45 min before the limit and keeps finished models, and one resume job per affected dataset fits the rest, so a resume job is expected for immune_hum_mou and possibly lung; the L40S queue timing of the corrected Sinkhorn (gate job 36450131: 10 Sinkhorn fits 63-130 s each, queue wall 488.6 s vs 353.7 s at the 2026-10-03 gate) is consistent with this factor.",
+      "at": "2026-10-21T00:34:19Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "[auto:pf_estimate_cost] estimate 938.06 h (x2 safety = 1876.11 h); cpu-hours 938.1; recommended walltime 991500s",
+          "at": "2026-10-21T00:34:19Z"
+        }
+      ]
+    },
+    "PF-18": {
+      "status": "pass",
+      "evidence": "local: same 8 fit lanes x 1 thread + 3 scorers during fits (8 after) as A1-A3 on the same 3 tasks (A1 1,098 fits and Sinkhorn redo 216 fits, 0 failures); at check time the GPU shows '0 %, 124 MiB' with compute apps [] (the A3 pilot ended 19:56) and MemAvailable 85 GB of 94 GB; no filler scorer is running. JHPCE: 8 lanes per L40S, 10 CPUs, 96 GB as in the filler jobs; the v3 L40S gate job 36450131 ran 64 mixed-arm fits at 8 lanes with 0 failures",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-22": {
+      "status": "pass",
+      "evidence": "same runner as A1-A3 (scripts/run_stage.py at the tag): per tag latents/<tag>.npz, models/<tag>/, scores/<tag>.csv, attempts, ledger, failures.csv; the completion check exits 0 only if every row is final. Local output: NEW folder tier12_v3/X1_local (decision D-S2-3; 20 non-Sinkhorn v2 outputs linked by name, 0 Sinkhorn, 3 runner files, no copies); tier12_v2/X1_local is not written. JHPCE jobs fit only and pack a harvest (about 2.5 GB per job) downloaded, checksum-checked and scored here; fastscratch purges after 30 days so each harvest is downloaded when its job ends. Free space at /home/kendall/experiment_data/wasserstein-critic-deconfounding: 2440G",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "PF-24": {
+      "status": "pass",
+      "evidence": "training genes and epochs as the 2026-10-12 record (unchanged prep and fitter). Per-fit timeout: local none (run_stage --fit-timeout-s default 0; run_X1_local.sh passes none); JHPCE 28,800 s (x1_jhpce_command.py --fit-timeout-s default) vs longest corrected-Sinkhorn fit estimated per job {'immune_hum_mou': 5.1, 'atac_large': 4.1, 'lung': 4.6, 'sim2': 4.4, 'pancreas': 3.3} h (pre-fix plan's longest fit x 2.57 = the largest corrected-Sinkhorn max / barycenter median ratio on the A1 pilot tasks); walltime 3 d with deadline guard and resume job (PF-17 condition); kNN parameters as SC-16",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-19": {
+      "status": "pass",
+      "evidence": "PASS SC-19 scpf_check_allowed_values (n_checked=5760, n_disallowed=0)",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    },
+    "SC-20": {
+      "status": "pass",
+      "evidence": "scpf_scan_fallbacks on the 2 launcher files changed 2026-10-20 (commit 2168d75, constants and comments only): [('experiments/X1_local/run_X1_local.sh', True, 0), ('experiments/X1_jhpce/x1_jhpce_command.py', True, 0)]; fitter, runner and scorer are the tagged files used by A1-A3 and the redo",
+      "at": "2026-10-21T00:34:19Z",
+      "history": []
+    }
+  },
+  "verdict": {
+    "go": true,
+    "blocking": [],
+    "unanswered": [],
+    "major_fail": [],
+    "minor_fail": [],
+    "plan_changed": false,
+    "n_items": 46,
+    "n_pass": 32,
+    "n_na": 14,
+    "at": "2026-10-21T00:34:44Z"
+  },
+  "path": "./experiments/preflight_x1_20261020"
+}
