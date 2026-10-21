@@ -16,7 +16,8 @@ piloted. This pre-check asks one thing: does its batch-score curve over the inhe
   target), both decoders (cond 0 and 1), pilot seed 100 only.
 - Strengths: the plain discriminator's lo / matched / hi of the frozen pilot matched-strength record
   (`tier12_v3/rules/r4_pass2/r4_a1_record.json`, cells `<task>|<cond>|discriminator`).
-- Every other setting is copied from the pilot (A1) discriminator row of the same task, decoder, seed and strength
+- Rows are read from the frozen pilot rule-output manifest `tier12_v3/rules/r4_pass2/m.r4a1.tsv` (it holds the pilot
+  extension strengths such as 0.03). Every other setting is copied from the pilot (A1) discriminator row of the same task, decoder, seed and strength
   (adversary input `mean`, no standardisation, as in the pilot that defined b*). Experiment label `PC6`.
 - Code: branch `x6-precheck` (= followup-build plus this folder; no code change). Output: `tier12_v3/x6_precheck/`.
 
