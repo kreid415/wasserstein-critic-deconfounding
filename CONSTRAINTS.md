@@ -750,3 +750,9 @@
 - keywords: X6, identity, fit identity, prereg-x6-v1, tag, precondition, F5
 - notebook: NB-20261021-04
 
+## SI-107 · active · method
+- rule: The X6 strength pre-check also covers pooled_sn at n_critic 1 (18 more fits, pilot pooled strengths, seed 100), with the same rule per arm; each arm's three X6 strengths move by its own decision; pooled_sn at n_critic 5 is not shifted
+- source: "Add an 18-fit check for this arm too" (user, 2026-10-21)
+- added: 2026-10-21
+- keywords: X6, pre-check, pooled_sn, n_critic, strength, shift, confirmatory
+- notebook: NB-20261021-05
