@@ -104,7 +104,7 @@
 \end{itemize}
 \pp{Meth-3}{Training settings and the adversary input are the scvi-tools defaults, with a few declared differences between methods.}
 \begin{itemize}
-\item Adversary reads posterior mean, no standardisation. \tbd{outcome of adversary-input and standardisation pilots}
+\item Adversary reads the posterior mean, with no per-dimension standardisation. Both defaults were kept after two pre-registered pilots (two tasks, both decoders, three seeds): a posterior sample as input (three adversarial methods) and standardisation (five methods) each lowered bio conservation at matched batch removal slightly (mean change $-0.004$ and $-0.003$; 9 of 12 and 14 of 20 task--decoder--method combinations evaluable) and met none of the criteria for switching.
 \item Steps differ by design: one discriminator, five critic.
 \item Kullback--Leibler (KL) warm-up 400 epochs: incomplete on four shorter tasks, penalty acts from step one. Non-finite loss or latent: failed fit, counted.
 \end{itemize}

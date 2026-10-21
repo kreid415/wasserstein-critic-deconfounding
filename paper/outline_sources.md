@@ -15,7 +15,7 @@ Checking aid only; not part of the outline. Line numbers are lines of `paper/pap
 | Intro-8 | 174-176, 178-181, 231, 238-240, 248, 256, 258 | Contribution sentence as fixed in the task and 176; four questions in plain words from 231, 238-240, 248, 256 |
 | Meth-1 | 307-311, 317-318 | |
 | Meth-2 | 324-333 | Reference batch by cell-type entropy (333); Sinkhorn not W1 (330) |
-| Meth-3 | 339-342, 348, 350-351 | Pilot outcomes for input and standardisation pending (141, 342) |
+| Meth-3 | 339-342, 348, 350-351 | Pilot outcomes for input and standardisation: rules R2/R3 re-run 2026-10-20, both keep the default (342; docs/prereg/r2r3_record.json at final-review-fixes 2168d75; NB-20261020-01) |
 | Meth-4 | 359-365 | Immune-task and ATAC-task nesting in 363-364 |
 | Meth-5 | 371-373, 408, 518 | Scoring on all cells (518) |
 | Meth-6 | 383-386, 391-392, 414; 64 | Fits count 3,000 (64); when the analysis was specified: tag prereg-tier12-v3 2026-10-16 17:48 EDT (ce05608), PREREG amendment 2026-10-18 (57241a2, 587389c); 19 scored-not-read X1 rows (226, 836) |
