@@ -1,18 +1,18 @@
 {
   "experiment_id": "x6_precheck_20261020",
-  "created_at": "2026-10-21T01:39:57Z",
+  "created_at": "2026-10-21T16:16:54Z",
   "pf_version": "1.0",
   "plan": {
-    "question": "Does the batch-score curve of discriminator_sn_critic_opt over the plain discriminator's inherited pilot window bracket the pilot target b*?",
+    "question": "Per arm (discriminator_sn_critic_opt; pooled_sn at n_critic 1, SI-107): does the batch-score curve over the base arm's inherited pilot window (plain discriminator; pilot pooled critic) bracket the pilot target b*?",
     "primary_outcome": "per-cell status (reached / unreached_low / unreached_high) of batch score B vs pilot b*",
-    "unit_of_analysis": "cell = task x decoder (4 counted, 2 low-signal reported only)",
+    "unit_of_analysis": "cell = arm x task x decoder (per arm: 4 counted, 2 low-signal reported only)",
     "split_unit": "none: no train/test split; one pilot seed (100), fits on full pilot tasks as in A1",
-    "selection_rule": "decision shift_up if >=3 of 4 counted cells unreached_low, shift_down if >=3 unreached_high, else keep (PLAN.md)",
-    "n_comparisons": 1,
-    "multiple_comparison_correction": "none (one design decision)",
+    "selection_rule": "per arm separately: shift_up if >=3 of 4 counted cells unreached_low, shift_down if >=3 unreached_high, else keep (PLAN.md and addendum 2026-10-21)",
+    "n_comparisons": 2,
+    "multiple_comparison_correction": "none: two separate design decisions (one per arm), each moving only its own arm's strengths by at most one grid step; no claim is made",
     "data_filters": "tasks atac_small, immune, sim1 as prepared for the pilot (D/prepped_scib); no extra filtering"
   },
-  "plan_sha": "bfbbd672fab892ea",
+  "plan_sha": "69ceead66a17e69c",
   "extra_items": [
     {
       "id": "SC-01",
@@ -217,283 +217,289 @@
     "PF-01": {
       "status": "pass",
       "evidence": "[auto:pf_check_plan] plan complete (sha bfbbd672fab892ea)",
-      "at": "2026-10-21T01:39:57Z",
-      "history": [],
-      "auto": {
-        "check": "pf_check_plan",
-        "ok": true,
-        "summary": "plan complete (sha bfbbd672fab892ea)",
-        "warnings": null
-      }
+      "at": "2026-10-21T16:16:54Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "[auto:pf_check_plan] plan complete (sha 69ceead66a17e69c)",
+          "at": "2026-10-21T16:16:54Z"
+        }
+      ]
     },
     "PF-02": {
       "status": "pass",
-      "evidence": "plan declares n_comparisons=1; correction: none (one design decision)",
-      "at": "2026-10-21T01:39:57Z",
-      "history": []
+      "evidence": "plan declares n_comparisons=2 (one design decision per arm); no correction: each decision moves only its own arm by at most one grid step and supports no claim",
+      "at": "2026-10-21T16:16:54Z",
+      "history": [
+        {
+          "status": "pass",
+          "evidence": "plan declares n_comparisons=2; correction: none: two separate design decisions (one per arm), each moving only its own arm's strengths by at most one grid step; no claim is made",
+          "at": "2026-10-21T16:16:54Z"
+        }
+      ]
     },
     "PF-03": {
       "status": "n/a",
       "evidence": "no classifier/probe/resampling evaluated; outcome is the frozen batch score B per fit",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-04": {
       "status": "n/a",
       "evidence": "no merging of sources; each pilot task is the prepared file used by the pilot (D/prepped_scib)",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-06": {
       "status": "n/a",
       "evidence": "no best-of selection precedes a number; strengths are fixed in advance from the frozen pilot record",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-09": {
       "status": "n/a",
       "evidence": "no perturbation/noise knob in this pre-check; adversary strengths only",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-10": {
       "status": "n/a",
       "evidence": "no conditions created by filtering or subsampling",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-12": {
       "status": "n/a",
       "evidence": "no new metric: B = mean of frozen batch metrics via prereg_rules.outcomes on the frozen scorer",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-16": {
       "status": "n/a",
       "evidence": "no runtime number is reported; the cost estimate (PF-17) uses measured pilot fit times",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-01": {
       "status": "n/a",
       "evidence": "no held-out label metric or classifier",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-02": {
       "status": "n/a",
       "evidence": "no cohorts pooled; per task x decoder cells only",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-03": {
       "status": "n/a",
       "evidence": "no train/test split beyond scvi-tools' internal train_size 0.9 copied from pilot rows",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-05": {
       "status": "n/a",
       "evidence": "no gene panel built; prepared pilot inputs reused unchanged",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-07": {
       "status": "n/a",
       "evidence": "no perturbation axis",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-08": {
       "status": "n/a",
       "evidence": "no severity-varying filtering",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-09": {
       "status": "n/a",
       "evidence": "no dropout/thinning before fitting",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-14": {
       "status": "n/a",
       "evidence": "no block-latent models",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-05": {
       "status": "n/a",
       "evidence": "single categorical comparison: status against b* per cell",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-11": {
       "status": "n/a",
       "evidence": "same latent structure (scVI, n_latent 10) as the pilot discriminator rows",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-15": {
       "status": "n/a",
       "evidence": "no mechanism is attributed; result is a design check only",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-20": {
       "status": "n/a",
-      "evidence": "no schedule depends on grid size beyond the 18-row cost estimate in PF-17",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "no schedule depends on grid size beyond the 36-row cost estimate in PF-17",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-21": {
       "status": "n/a",
       "evidence": "no aggregation over seeds: single pilot seed 100 by design (PLAN.md)",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-04": {
       "status": "n/a",
       "evidence": "no custom split function",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-06": {
       "status": "n/a",
       "evidence": "no foundation model",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-10": {
       "status": "n/a",
       "evidence": "no HVG step changed; pilot inputs reused",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-12": {
       "status": "n/a",
       "evidence": "no disentanglement claim",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-13": {
       "status": "n/a",
       "evidence": "no covariates scored against each other",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-15": {
       "status": "n/a",
       "evidence": "no block-aware metric",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-18": {
       "status": "n/a",
       "evidence": "no averaging across datasets",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-21": {
       "status": "n/a",
       "evidence": "no classifier/MI metric on continuous factors",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-22": {
       "status": "n/a",
       "evidence": "metric suite not justified by convention here; frozen pre-registered suite",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-07": {
       "status": "pass",
-      "evidence": "arms matched: every manifest field equals the pilot discriminator row of the same task/cond/seed/strength except arm (test_build_copies_pilot_rows, tests/x6_precheck, 8 passed on pinned checkout 859e572); the varied factor is the optimiser+SN arm, by design",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "each pre-check row equals the pilot base-arm row of the same task/cond/seed/strength except experiment, arm and (pooled_sn) n_critic 1; sim1|1 pooled lo 0.03 has no pilot fit and copies the pilot pooled row of the same task/cond/seed, which differs only in strength (build_manifest.py at fbd407c; tests/x6_precheck 9 passed on pinned checkout fbd407c)",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-08": {
       "status": "pass",
-      "evidence": "no averaging across tasks; decision counts per-cell statuses over 4 named counted cells (PLAN.md, decide.py COUNTED)",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "no averaging across tasks or arms; each arm's decision counts its own per-cell statuses over the 4 named counted cells (decide.summarise, COUNTED)",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-17": {
       "status": "pass",
-      "evidence": "cost: plain discriminator A1 fits measured 19.9 min mean (tier12_v2 attempts) -> 18 fits = 6.0 GPU-h serial, x2 safety = 12 h; scoring ~500 s/fit on CPU (immune A3 log); local workstation, no walltime limit",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "cost from measured A1 fit wall times (tier12_v2 attempts, RTX 3080): plain discriminator 19.9 min mean, pooled critic 63.0 min mean at n_critic 5 (an upper bound for pooled_sn at n_critic 1, which runs 1 critic step and no gradient penalty). 18x19.9 + 18x63.0 = 24.9 GPU-h serial; at the 6.8 effective lanes measured in A1 about 3.7 h wall, 7.3 h at 2x safety; scoring ~500 s/fit on CPU; local workstation, no walltime limit",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-19": {
       "status": "pass",
-      "evidence": "manifest generated by build_manifest.py at 859e572 from m.r4a1.tsv sha256 549f2216..; 18 rows, strengths equal r4_a1_record lo/matched/hi per cell (printed tags); manifest sha256 c37ca348.., tags f57a3e2c.. pinned in launcher args; dry run: 18 rows needs_fit 18, exit 0 (logs/x6_precheck_runner_20261020T213939.log)",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "manifest built by build_manifest.py at fbd407c from m.r4a1.tsv sha256 549f2216.. and r4_a1_record.json sha256 15b4e8ea..; 36 rows (18 discriminator_sn_critic_opt, 18 pooled_sn n_critic 1); strengths equal the record's lo/matched/hi for every arm x cell; adv_input mean, zstd 0, seed 100; the 18 earlier tags unchanged; manifest sha256 08ea2733.., tags 9839f169.. pinned in launcher args; dry run 36 rows needs_fit 36, exit 0 (logs/x6_precheck_runner_20261021T121606.log)",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-22": {
       "status": "pass",
-      "evidence": "run_stage.py ledger/claims make the run resumable; outputs under tier12_v3/x6_precheck/run (new dir); exit line appended to logs/x6_precheck_exit.txt; failures go to failures.csv with frozen statuses",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "run_stage.py ledger/claims make the run resumable; outputs under tier12_v3/x6_precheck/run (new dir, absent before launch); exit line appended to logs/x6_precheck_exit.txt; failures go to failures.csv with frozen statuses",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-23": {
       "status": "pass",
       "evidence": "inputs are the pilot's prepared files D/prepped_scib (same as stage-2 runs) and the frozen pilot rule record r4_a1_record.json sha256 15b4e8ea..",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-13": {
       "status": "pass",
       "evidence": "single seed by design; stated in PLAN.md as a design check, not a result; reading noise acknowledged",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-14": {
       "status": "pass",
-      "evidence": "design and rule committed before any fit (x6-precheck eed6aad, 859e572); user chose this pre-check 2026-10-20",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "design and rule committed before any pre-check fit: arm 1 at 859e572 (2026-10-20), arm 2 addendum at 6163c4f and frozen by tag prereg-x6-v1 (635be7f, 2026-10-21); builder note fbd407c; no pre-check fit exists (dry run needs_fit 36)",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-18": {
       "status": "pass",
-      "evidence": "launcher waits for the stage-2 A3 runner's exit line, then refuses if another run_stage.py is alive or GPU memory >= 500 MiB (run_precheck.sh)",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "run_precheck.sh waits (10-min checks, two in a row) until no run_stage.py is alive and GPU memory < 500 MiB, so it starts only after the main-benchmark local run (tmux x1loc) ends; it never shares the GPU",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "PF-24": {
       "status": "pass",
-      "evidence": "strengths carried over from the pilot record by design (the question is whether they transfer); adv_input mean, zstd 0 copied from pilot rows that defined b*",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "strengths carried over from the pilot record by design (the question is whether they transfer); adv_input mean, zstd 0 copied from the pilot rows that defined b*; pooled_sn n_critic 1 is the X6 setting being checked",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-11": {
       "status": "pass",
-      "evidence": "same loader and obs keys as pilot fits: rows copied from A1 rows, fitted by the same fit_paper_config.py (only change vs tag: new arm in followup-build)",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "same loader and obs keys as pilot fits: rows copied from A1 rows, fitted by fit_paper_config.py at fbd407c, whose fit code is identical to tag prereg-x6-v1 (identity check vs prereg-tier12-v3 57/57, NB-20261021-06)",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-16": {
       "status": "pass",
       "evidence": "kBET/LISI computed by the frozen scorer on full tasks, as in the pilot; no subsampling",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-17": {
       "status": "pass",
       "evidence": "prereg_rules.outcomes refuses non-finite required metrics and records failed fits as failed; decide.py marks a cell not_readable with <2 ok fits",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-19": {
       "status": "pass",
-      "evidence": "new output dir tier12_v3/x6_precheck/run created by this run; no earlier result files there (dry run planned needs_fit 18)",
-      "at": "2026-10-21T01:40:25Z",
+      "evidence": "output dir tier12_v3/x6_precheck/run does not exist before launch (folder lists only the manifests); dry run planned needs_fit 36",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     },
     "SC-20": {
       "status": "pass",
       "evidence": "runner retries infrastructure errors once (max-attempts 2) and stops; fit failures are recorded with frozen statuses, never silently refit",
-      "at": "2026-10-21T01:40:25Z",
+      "at": "2026-10-21T16:16:54Z",
       "history": []
     }
   },
@@ -507,7 +513,7 @@
     "n_items": 46,
     "n_pass": 17,
     "n_na": 29,
-    "at": "2026-10-21T01:40:25Z"
+    "at": "2026-10-21T16:16:54Z"
   },
   "path": "./experiments/x6_precheck_20261020"
 }
