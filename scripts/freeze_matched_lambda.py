@@ -5,8 +5,11 @@
   --stage x1  on X1 scores: resolves the follow-ups' matched_lo / matched / matched_hi (variant arms take
               their base arm's value, prereg_rules.BASE_ARM). Follow-ups run on fresh seeds (SI-26), so no
               follow-up row may equal an X1 row after resolution: the script stops if one does.
+              X6 rows of the arm discriminator_sn_critic_opt also need --precheck-decision (the decision.json of
+              experiments/x6_precheck_20261020/decide.py: keep, shift_up or shift_down). That arm's three strengths
+              then move one step up or down the 1-3 grid (prereg_rules.lam_step); without the file the script stops.
 
-b* = b0 + 0.5 (b_common - b0) on the unscaled batch score (mean of the 5 raw scIB batch metrics); the
+b* =b0 + 0.5 (b_common - b0) on the unscaled batch score (mean of the 5 raw scIB batch metrics); the
 matched point is the failure-free grid point closest to b* (ties -> smaller lambda). A matched point on
 a grid edge needs one more grid point beyond it (exit 3, extension manifest), up to 2 per edge.
 SI-45 (code check CR-11): if stage a1 freezes with a window neighbour of an A2/A3 cell still without an A1 fit
@@ -22,6 +25,7 @@ Usage (repo root):
 Exit status: 0 = frozen; 3 = extension needed; anything else = error.
 """
 import argparse
+import json
 import os
 import sys
 
@@ -30,14 +34,23 @@ import prereg_rules as P  # noqa: E402
 from prereg_rules import BPM  # noqa: E402
 
 X1_MATCHED = ["matched_lo", "matched", "matched_hi"]
+SHIFT_ARM = "discriminator_sn_critic_opt"                       # X6 optimiser control (SI-98); the only arm that is shifted
+PRECHECK_STEPS = {"keep": 0, "shift_up": 1, "shift_down": -1}   # X6 strength pre-check decision -> grid steps
 
 
 def _value(cell, label):
     return cell[{"lo": "lo", "": "matched", "hi": "hi"}[label.rsplit("matched", 1)[1].lstrip("_")]]
 
 
-def resolve(M, r4, stage):
-    """Replace the stage's placeholders; any placeholder left for this stage is an error."""
+def precheck_steps(decision):
+    P._require(decision in PRECHECK_STEPS, f"X6 strength pre-check decision {decision!r} is not one of "
+                                           f"{sorted(PRECHECK_STEPS)} (pass --precheck-decision <decision.json>)")
+    return PRECHECK_STEPS[decision]
+
+
+def resolve(M, r4, stage, precheck=None):
+    """Replace the stage's placeholders; any placeholder left for this stage is an error. `precheck` is the X6
+    strength pre-check decision; it is required for, and applied to, the rows of SHIFT_ARM only."""
     M = M.copy()
     labels, exps = (BPM.A1_MATCHED, ["A2", "A3"]) if stage == "a1" else (X1_MATCHED, list(P.FOLLOWUPS))
     hit = M.lam.isin(labels)
@@ -54,6 +67,9 @@ def resolve(M, r4, stage):
         P._require(key in r4["cells"], f"{M.at[i, 'tag']}: no matched cell {key}")
         v = _value(r4["cells"][key], M.at[i, "lam"])
         P._require(v is not None, f"{M.at[i, 'tag']}: {key} has no {M.at[i, 'lam']}")
+        step = precheck_steps(precheck) if arm == SHIFT_ARM else 0
+        if step:
+            v = P.lam_step(v, step)
         M.at[i, "lam"] = P.fmt_lam(v)
         n += 1
     P._require(not M.lam.isin(labels).any(), f"{stage}: unresolved placeholders remain")
@@ -90,6 +106,7 @@ def main(argv=None):
     ap.add_argument("--out-json", required=True)
     ap.add_argument("--out-manifest", required=True)
     ap.add_argument("--extension-manifest", required=True)
+    ap.add_argument("--precheck-decision", help=f"decision.json of the X6 strength pre-check; required to resolve X6 rows of {SHIFT_ARM}")
     a = ap.parse_args(argv)
     M, header = P.read_manifest(a.manifest)
     P.check_seed_separation(M)
@@ -111,7 +128,13 @@ def main(argv=None):
         P.write_record(a.out_json, dict(r4, extension_manifest=a.extension_manifest, n_extension_rows=len(E)), inputs)
         print(f"R4 {a.stage} extend: {len(E)} {exp} rows -> {a.extension_manifest}")
         return P.EXIT_EXTEND
-    M2, n = resolve(M, r4, a.stage)
+    precheck, x6_precheck = None, {}
+    if a.precheck_decision:
+        precheck = json.load(open(a.precheck_decision)).get("decision")
+        precheck_steps(precheck)
+        inputs["precheck_decision"] = [a.precheck_decision]      # its SHA-256 goes into the record
+        x6_precheck = dict(precheck_decision=precheck, precheck_arm_rows=int((M.arm == SHIFT_ARM).sum()))
+    M2, n = resolve(M, r4, a.stage, precheck)
     n_checked = check_no_x1_reuse(M2) if a.stage == "x1" else 0
     si45 = {}
     if a.stage == "a1":
@@ -132,7 +155,7 @@ def main(argv=None):
     P.write_manifest(M2, header, a.out_manifest, f"R4 {a.stage} frozen: {n} rows resolved"
                                                   f" (freeze_matched_lambda.py, record {os.path.basename(a.out_json)})")
     P.write_record(a.out_json, dict(r4, resolved_rows=n, followup_rows_checked_against_x1=n_checked,
-                                    out_manifest=a.out_manifest, **si45), inputs)
+                                    out_manifest=a.out_manifest, **si45, **x6_precheck), inputs)
     flagged = sum(1 for c in r4["cells"].values() if c["flags"])
     print(f"R4 {a.stage} frozen: {len(r4['cells'])} cells ({flagged} flagged), {n} rows resolved"
           + (f", {n_checked} follow-up rows differ from every X1 row" if a.stage == "x1" else ""))

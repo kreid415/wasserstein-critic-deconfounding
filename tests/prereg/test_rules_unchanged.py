@@ -87,6 +87,8 @@ def test_decision_records_are_the_same(both, name):
     (ro, io), (rn, in_) = _record(os.path.join(old, name)), _record(os.path.join(new, name))
     if name == "r4a1.json":
         assert rn.pop("n_default_half_extension_rows") == 0
+    # the one registered rule difference of this tree (PREREG section 9, entry of 2026-10-20): the X6 optimiser-control arm's base arm
+    assert rn["constants"]["BASE_ARM"].pop("discriminator_sn_critic_opt") == "discriminator"
     assert rn == ro
     assert in_ == io                                     # same manifests, scores, failures (SHA-256)
 

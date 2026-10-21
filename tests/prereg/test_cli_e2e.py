@@ -127,6 +127,57 @@ def test_r4_x1_resolves_followups_and_no_followup_equals_an_x1_row(pipeline):
             M3.set_index("tag").at[r["tag"], "lam"]]
 
 
+V5 = os.path.join(synth.ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v5.tsv")
+COPT = "discriminator_sn_critic_opt"
+
+
+@pytest.mark.parametrize("decision, want", [("keep", (0.3, 1.0, 3.0)), ("shift_up", (1.0, 3.0, 10.0)),
+                                            ("shift_down", (0.1, 0.3, 1.0)), (None, "pre-check decision None"),
+                                            ("maybe", "pre-check decision 'maybe'")])
+def test_x6_precheck_moves_only_the_optimiser_matched_arm(decision, want):  # test-reason: X6 strength pre-check (user decision 2026-10-20) on the real X6 rows
+    M, _ = P.read_manifest(V5)
+    x6 = M[M.experiment == "X6"]
+    cells = {f"{t}|{c}|discriminator": dict(lo=0.3, matched=1.0, hi=3.0) for t in set(x6.task) for c in (0, 1)}
+    cells.update({f"{t}|{c}|pooled": dict(lo=3.0, matched=10.0, hi=30.0) for t in set(x6.task) for c in (0, 1)})
+    if isinstance(want, str):
+        with pytest.raises(P.PreregError, match=want):
+            freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decision)
+        return
+    out, n = freeze_matched_lambda.resolve(x6, dict(cells=cells), "x1", decision)
+    assert n == len(x6) == 486
+    lo, mid, hi = (P.fmt_lam(v) for v in want)
+    got = {(a, lab): set(out.lam[(x6.arm == a) & (x6.lam == lab)]) for a in set(x6.arm) for lab in ("matched_lo", "matched", "matched_hi")}
+    assert {k: v for k, v in got.items() if k[0] == COPT} == {(COPT, "matched_lo"): {lo}, (COPT, "matched"): {mid}, (COPT, "matched_hi"): {hi}}
+    for arm in set(x6.arm) - {COPT}:     # every other arm keeps its base arm's strengths
+        base = [P.fmt_lam(v) for v in ((0.3, 1.0, 3.0) if P.BASE_ARM[arm] == "discriminator" else (3.0, 10.0, 30.0))]
+        assert [got[(arm, lab)] for lab in ("matched_lo", "matched", "matched_hi")] == [{b} for b in base]
+
+
+def test_x6_precheck_decision_enters_the_record(pipeline, tmp_path):  # test-reason: the CLI reads the decision file and records its value and SHA-256
+    tmp = pipeline["tmp"]
+    M, _ = P.read_manifest(os.path.join(tmp, "m.x1.tsv"))
+    d = M[(M.experiment == "X6") & (M.arm == "discriminator")]
+    copt = d.assign(arm=COPT, tag=d.tag.str.replace("_discriminator_", f"_{COPT}_"))
+    man = synth.write_tsv(pd.concat([M, copt], ignore_index=True), str(tmp_path / "m.tsv"))
+    dec = tmp_path / "decision.json"
+    dec.write_text(json.dumps(dict(decision="shift_up")))
+    args = ["--stage", "x1", "--manifest", man, "--scores", pipeline["x1"], "--failures", pipeline["fp"],
+            "--r1-record", os.path.join(tmp, "r1.json"), "--out-json", str(tmp_path / "r4.json"),
+            "--out-manifest", str(tmp_path / "m.r4.tsv"), "--extension-manifest", str(tmp_path / "ext.tsv")]
+    with pytest.raises(P.PreregError, match="pre-check decision None"):      # no decision file: refused
+        freeze_matched_lambda.main(args)
+    assert freeze_matched_lambda.main(args + ["--precheck-decision", str(dec)]) == P.EXIT_FROZEN
+    rec = json.load(open(tmp_path / "r4.json"))
+    assert rec["precheck_decision"] == "shift_up" and rec["precheck_arm_rows"] == len(copt)
+    assert rec["inputs"]["precheck_decision"][0]["sha256"] == P.sha256(str(dec))
+    out, _ = P.read_manifest(str(tmp_path / "m.r4.tsv"))
+    cell = rec["cells"]
+    for r in out[out.arm == COPT].to_dict("records"):
+        c = cell[f"{r['task']}|{r['cond']}|discriminator"]
+        lab = M.set_index("tag").at[r["tag"].replace(f"_{COPT}_", "_discriminator_"), "lam"]
+        assert float(r["lam"]) == P.lam_step(c[{"matched_lo": "lo", "matched": "matched", "matched_hi": "hi"}[lab]], 1)
+
+
 def test_r4_x1_stops_if_a_followup_row_equals_an_x1_row(pipeline):
     M4, _ = P.read_manifest(os.path.join(pipeline["tmp"], "m.r4x1.tsv"))
     dup = M4[(M4.experiment == "X1") & (M4.arm == "pooled")].iloc[[0]].copy()
