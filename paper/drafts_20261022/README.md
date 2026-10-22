@@ -10,4 +10,4 @@ Base: the first author's prose draft of Introduction and Methods (pasted 2026-10
 | figures_tables.tex, make_mock_figures.py, ../figures/mock/fig1-6.png | Claude Science sub-agent, claude-fable-5-1 | Mock figures (synthetic data, numpy seed 20261022, MOCK watermark) and Tables 1-4 |
 
 Integration edits in outline.tex: `\protect\cite...` inside struck-out text wrapped in `\mbox{}` (ulem); todo notes inside deletions shown as `\textit{todo: ...}`; Table 2 cells list the six strengths from `tier12_v3/rules/r1_pass2/r1_record.json` x1_grid (via methods_changelog.md section 3).
-Build: `tectonic paper/outline.tex` (use `\usepackage[final]{changes}` for clean text). Regenerate mocks: `python paper/drafts_20261022/make_mock_figures.py`.
+Build: `tectonic paper/outline.tex` (use `\usepackage[final]{changes}` for clean text). Regenerate mocks: from `paper/`, exec `drafts_20261022/make_mock_figures.py` in a Python session that has the figure-style helpers `apply_figure_style(sizes=(8,7,6))` and `panel_letter` loaded (the script expects them in scope). Figure 2 and 5a titles were made neutral after the final review.

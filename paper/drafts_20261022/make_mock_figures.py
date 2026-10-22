@@ -114,7 +114,7 @@ for j,(dec,mk,off) in enumerate(zip(DECODERS,['o','s'],[-0.17,0.17])):
 ax.axhline(0.95,color='#555555',ls='--',lw=0.8); ax.text(7.45,0.951,'0.95 nearly\nseparable',fontsize=6,ha='right',va='bottom',color='#555555')
 ax.axhline(0.5,color='#AAAAAA',ls=':',lw=0.8); ax.text(0.0,0.515,'chance',fontsize=6,color='#777777')
 ax.set_xticks(range(8)); ax.set_xticklabels(TASKS8,rotation=55,ha='right',rotation_mode='anchor'); ax.set_ylim(0.45,1.02)
-ax.set_ylabel('batch separability (AUC, plain scVI)'); ax.set_title('batches nearly separable',loc='left',fontsize=7)
+ax.set_ylabel('batch separability (AUC, plain scVI)'); ax.set_title('batch separability of plain scVI',loc='left',fontsize=7)
 ax.legend(loc='center left',bbox_to_anchor=(0.0,0.35),fontsize=6,markerscale=1.5)
 panel_letter(ax,'a',dx=-0.22)
 # (b) gradient norm per epoch, normalised to its peak
@@ -130,7 +130,7 @@ ax.axhline(0.1,color='#555555',ls='--',lw=0.8); ax.text(150,0.108,'10% of own pe
 ax.axvline(40,color='#AAAAAA',ls=':',lw=0.8); ax.text(44,0.98,'first 10%\nof epochs',fontsize=6,va='top',color='#777777')
 ax.set_yscale('log'); ax.set_ylim(0.008,1.3); ax.set_yticks([0.01,0.1,1]); ax.set_yticklabels(['0.01','0.1','1'])
 ax.set_xlabel('epoch'); ax.set_ylabel('adversary gradient norm / peak'); ax.set_xlim(0,400)
-ax.set_title('discriminator gradient fades early',loc='left',fontsize=7); h,l=ax.get_legend_handles_labels(); fig.legend(h,l,fontsize=6,loc='lower center',bbox_to_anchor=(0.68,0.0),ncol=3,handlelength=1.4,columnspacing=1.2); panel_letter(ax,'b',dx=-0.3)
+ax.set_title('adversary gradient norm',loc='left',fontsize=7); h,l=ax.get_legend_handles_labels(); fig.legend(h,l,fontsize=6,loc='lower center',bbox_to_anchor=(0.68,0.0),ncol=3,handlelength=1.4,columnspacing=1.2); panel_letter(ax,'b',dx=-0.3)
 # (c) discriminator accuracy per epoch, per task
 ax = axs[2]; accs=[]
 for i,t in enumerate(TASKS8):
@@ -138,7 +138,7 @@ for i,t in enumerate(TASKS8):
     ax.plot(ep,acc,lw=0.7,color=plt.cm.Greys(0.35+0.6*i/7)); accs.append(acc)
 ax.axhline(1/8,color='#AAAAAA',ls=':',lw=0.8); ax.text(390,0.14,'chance (8 batches, example)',fontsize=6,ha='right',color='#777777')
 ax.set_ylim(0,1.05); ax.set_xlim(0,400); ax.set_xlabel('epoch'); ax.set_ylabel('discriminator batch accuracy')
-ax.set_title('accuracy saturates quickly',loc='left',fontsize=7)
+ax.set_title('discriminator batch accuracy',loc='left',fontsize=7)
 ax.text(200,0.55,'one line per task (8 tasks),\nconditioned decoder, seed mean',fontsize=6,ha='center',color='#555555')
 ax.annotate('human-mouse immune',xy=(300,accs[5][299]),xytext=(250,0.78),fontsize=6,arrowprops=dict(arrowstyle='-',lw=0.5),ha='center')
 ax.annotate('simulation 2',xy=(330,accs[7][329]),xytext=(330,0.70),fontsize=6,arrowprops=dict(arrowstyle='-',lw=0.5),ha='center')
@@ -233,7 +233,7 @@ ax.plot([],[],'-',color='k',lw=1.2,label='median'); ax.legend(fontsize=6,loc='up
 ax.set_xticks(range(6)); ax.set_xticklabels(PEN,rotation=40,ha='right',rotation_mode='anchor')
 ax.set_ylabel('good-strength width (decades)'); ax.set_ylim(-0.3,3.0); ax.set_yticks([0,1,2,3])
 ax.set_title('good-strength width, one point per task',loc='left',fontsize=7)
-ax.text(5.45,0.0,'wider = less tuning needed',fontsize=6,ha='right',va='bottom',color='#555555')
+ax.text(5.45,0.0,'wider = broader range of good strengths',fontsize=6,ha='right',va='bottom',color='#555555')
 panel_letter(ax,'a',dx=-0.2,dy=1.04)
 # (b) follow-up variants minus plain discriminator, biology at matched strength
 ax=axs[1]
