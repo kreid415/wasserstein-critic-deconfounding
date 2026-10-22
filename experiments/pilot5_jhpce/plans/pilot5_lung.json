@@ -1,0 +1,65 @@
+{
+ "job": "pilot5_lung",
+ "tasks": [
+  "lung"
+ ],
+ "after_slurm_job": null,
+ "chain_position": 0,
+ "n_tags": 378,
+ "tags_sha256": "22be99ea6502a5699a8aaa99d87c7bf0142239553cf0a3e9db93d1d9cfdb190c",
+ "manifest_sha256": "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
+ "expected_sha": "10a1ca5874fbcdc033b148525b5e71d866306bdb",
+ "job_args": [
+  "--expected-sha",
+  "10a1ca5874fbcdc033b148525b5e71d866306bdb",
+  "--stage",
+  "pilot5_jhpce",
+  "--tags-file",
+  "../x1_inputs/pilot5_jhpce_lung.tags",
+  "--tags-sha256",
+  "22be99ea6502a5699a8aaa99d87c7bf0142239553cf0a3e9db93d1d9cfdb190c",
+  "--manifest",
+  "../x1_inputs/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv",
+  "--manifest-sha256",
+  "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
+  "--experiments",
+  "A1",
+  "--tasks",
+  "lung",
+  "--fit-lanes",
+  "8",
+  "--fit-timeout-s",
+  "28800",
+  "--max-attempts",
+  "2",
+  "--guard-margin-s",
+  "2700",
+  "--slots",
+  "5"
+ ],
+ "inputs_dir": "../x1_inputs",
+ "submit": {
+  "command": "#SBATCH --partition=gpu\n#SBATCH --account=jhpce\n#SBATCH --gres=gpu:l40s:1\n#SBATCH --cpus-per-task=10\n#SBATCH --mem=96G\n#SBATCH --time=3-00:00:00\n#SBATCH --signal=B:TERM@300\n#SBATCH --no-requeue\nset -euo pipefail\nSCR=\"/fastscratch/myscratch/$USER/wcd\"\nJOBDIR=\"$SCR/prod/job_${SLURM_JOB_ID}\"\nmkdir -p \"$JOBDIR/x1_inputs\"\nprintf \"%s  %s\\n\" 5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv 22be99ea6502a5699a8aaa99d87c7bf0142239553cf0a3e9db93d1d9cfdb190c pilot5_jhpce_lung.tags | sha256sum -c --quiet\ncp paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv pilot5_jhpce_lung.tags \"$JOBDIR/x1_inputs/\"\ngit clone -q --no-checkout \"$PWD/wcd.bundle\" \"$JOBDIR/repo\"\ngit -C \"$JOBDIR/repo\" -c advice.detachedHead=false checkout -q 10a1ca5874fbcdc033b148525b5e71d866306bdb\nrc=0\nbash \"$JOBDIR/repo/cluster/jhpce/prod_fit_job.sh\" --expected-sha 10a1ca5874fbcdc033b148525b5e71d866306bdb --stage pilot5_jhpce --tags-file ../x1_inputs/pilot5_jhpce_lung.tags --tags-sha256 22be99ea6502a5699a8aaa99d87c7bf0142239553cf0a3e9db93d1d9cfdb190c --manifest ../x1_inputs/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv --manifest-sha256 5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff --experiments A1 --tasks lung --fit-lanes 8 --fit-timeout-s 28800 --max-attempts 2 --guard-margin-s 2700 --slots 5 || rc=$?\nfor f in \"$JOBDIR/logs/job_summary.json\" \"$JOBDIR/harvest.json\"; do [ ! -f \"$f\" ] || cp \"$f\" .; done   # KB-sized; the harvest stays on fastscratch\nls -l .\nexit \"$rc\"",
+  "inputs": [
+   {
+    "src": "/home/kendall/scratch/wcd_prereg-tier12-v3.bundle",
+    "dst": "wcd.bundle"
+   },
+   {
+    "src": "/home/kendall/scratch/pilot5/manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv",
+    "dst": "paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv"
+   },
+   {
+    "src": "/home/kendall/scratch/pilot5/experiments/pilot5_jhpce/tags/pilot5_jhpce_lung.tags",
+    "dst": "pilot5_jhpce_lung.tags"
+   }
+  ],
+  "outputs": [
+   "job_summary.json",
+   "harvest.json",
+   "slurm-*.out"
+  ],
+  "run_timeout_s": 691200,
+  "intent": "JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), 10 CPU 96G, wall 3-00:00:00: A1 penalty-strength pilot fits lung (378 rows: every A1 row of the task) at prereg-tier12-v3 10a1ca5874, fit only, harvest on fastscratch; harness clock 192 h"
+ }
+}
