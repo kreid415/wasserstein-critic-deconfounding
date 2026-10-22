@@ -137,7 +137,7 @@
 \begin{itemize}
 \item Equal strength is not equal correction: scales differ and biology trades off against batch removal, so biology is compared at one batch score.
 \item The matched level $b^*$ lies halfway between plain scVI's mean batch score and the highest mean batch score all six penalties reach at strengths with no failed fit, for each task and decoder.
-\item A task and decoder pair is low-signal if that gap is under 0.02, because $b^*$ then cannot be placed reliably; such pairs are reported separately. In the pilot, immune and simulation 1 with the conditioned decoder were low-signal (gaps 0.019, 0.007).
+\item The matched level only works if the penalties can remove clearly more batch effect than plain scVI. A task and decoder pair is called low-signal when the gap between plain scVI's batch score and the highest batch score every penalty reaches is under 0.02: $b^*$ then sits less than 0.01 above plain scVI, less than the smallest difference counted as real, so the matched level cannot be told apart from plain scVI's own batch removal. Low-signal pairs are left out of the comparisons made at $b^*$ (biology at $b^*$ and trade-off area); their readings are shown in a separate table and never pooled, while the collapse rate still uses them. In the pilot, two pairs were low-signal, both with the batch-conditioned decoder: immune (plain scVI 0.638, highest common score 0.657, gap 0.019) and simulation 1 (0.812 and 0.819, gap 0.007).
 \end{itemize}
 \pp{Meth-9}{The primary comparison reads biology at $b^*$ for the reference critic and the discriminator, with trade-off area as a second view.}
 \begin{itemize}
