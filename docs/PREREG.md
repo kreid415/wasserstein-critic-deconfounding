@@ -796,15 +796,15 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
     variables that the new job script sets: the first two are recorded in every score row (scorer_versions, cpu_simd,
     numba_cpu_name) and compared by the check of item 6, and the job script is tested to pass the variables that
     run_stage.py gives its scorer (SCORE5_BUILD.md section 10). Declaration: scores made at a4989ff are result-identical
-    to scores made at 10a1ca5, for every arm. It matters only in case (i) of item 6, where one rule input would
-    otherwise mix scorer commits. In case (ii) every pilot score comes from the cluster at one commit, and in case
-    (iii) the new scores come from the workstation. docs/EQUIVALENT_COMMITS.json is not changed by this entry: it
-    holds one declared commit (c88cce3), and prereg_rules.refuse_uncovered and equivalent_commits (lines 220 to 244)
-    read one object with one key "commit", so a second commit cannot be added in its existing format, and the rule
-    scripts would still refuse a rule input that mixes a4989ff with the other commits. Letting the file hold a list
-    needs a change to frozen rule code and to the two tests that read the single entry (tests/stage/test_run_stage.py
-    line 670, tests/prereg/test_provenance_rule.py line 110), which needs the user's approval; until then the refusal
-    is loud and stops the rule script.
+    to scores made at 10a1ca5, for every arm; the match check of item 6 runs at a4989ff, and its pass rule does not
+    compare commits. The pilot scoring itself (cases (i) and (ii) of item 6) runs the scorer from a clean checkout of
+    the tag commit 10a1ca5, with the three job files added in a4989ff (cluster/jhpce/score_array.sh, score_plan.py and
+    compare_scores.py) copied into it as untracked files. The scorer's uncommitted-changes flag ignores untracked
+    files (scripts/score_scib_native.py line 153: git status --porcelain --untracked-files=no), so every new score row
+    records scorer commit 10a1ca5 with flag 0, which is the code that runs. The rule input then holds only c88cce3
+    (read as 10a1ca5 under SI-54) and 10a1ca5, so neither docs/EQUIVALENT_COMMITS.json (it holds one declared
+    commit, c88cce3; prereg_rules.py lines 220 to 244 read one) nor any frozen rule code is changed. In case (iii)
+    the new scores come from the workstation at 10a1ca5.
   - (8) What this changes in the text above. The statement that A1 covers atac_small, immune and sim1 (stage table in
     section 0 and section 2) becomes: the pilot covers all eight datasets, the three finished ones and the five of
     item 2. The disclosure at the top, that the X1 penalty-strength ranges come from 3 of the 8
