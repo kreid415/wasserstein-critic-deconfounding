@@ -102,47 +102,68 @@ finish(fig,'fig1')
 
 
 rng = np.random.default_rng(SEED+2)
-fig, axs = plt.subplots(1,3,figsize=(W2,8.0*CM),gridspec_kw=dict(width_ratios=[1.25,1,1],wspace=0.42,left=0.08,right=0.985,bottom=0.33,top=0.92))
-# (a) separability AUC per task, two decoders, 5 seeds
-ax = axs[0]
-base = np.array([0.97,0.93,0.99,0.96,0.98,0.995,0.90,0.88])
-for j,(dec,mk,off) in enumerate(zip(DECODERS,['o','s'],[-0.17,0.17])):
-    for i,t in enumerate(TASKS8):
-        v = np.clip(base[i]-0.01*j + rng.normal(0,0.008,5),0.5,1)
-        ax.plot(np.full(5,i+off)+rng.normal(0,0.03,5),v,mk,ms=2.6,color=['#0072B2','#E69F00'][j],alpha=0.75,mec='none',label=dec if i==0 else None)
-        ax.plot([i+off-0.12,i+off+0.12],[v.mean()]*2,color='k',lw=1.0)
-ax.axhline(0.95,color='#555555',ls='--',lw=0.8); ax.text(7.45,0.951,'0.95 nearly\nseparable',fontsize=6,ha='right',va='bottom',color='#555555')
-ax.axhline(0.5,color='#AAAAAA',ls=':',lw=0.8); ax.text(0.0,0.515,'chance',fontsize=6,color='#777777')
-ax.set_xticks(range(8)); ax.set_xticklabels(TASKS8,rotation=55,ha='right',rotation_mode='anchor'); ax.set_ylim(0.45,1.02)
-ax.set_ylabel('batch separability (AUC, plain scVI)'); ax.set_title('batch separability of plain scVI',loc='left',fontsize=7)
-ax.legend(loc='center left',bbox_to_anchor=(0.0,0.35),fontsize=6,markerscale=1.5)
-panel_letter(ax,'a',dx=-0.22)
-# (b) gradient norm per epoch, normalised to its peak
-ax = axs[1]; ep = np.arange(1,401)
-shapes = {'JS discriminator':np.exp(-ep/25)*(1+0.1*rng.normal(size=400)*0.3)+0.02,
-          'reference critic':0.6+0.4*np.exp(-ep/150)+0.05*np.sin(ep/15),
-          'pooled critic':0.55+0.45*np.exp(-ep/120)+0.04*np.sin(ep/20+1),
-          'barycenter critic':0.5+0.5*np.exp(-ep/200)+0.04*np.sin(ep/12+2),
-          'MMD':0.4+0.6*np.exp(-ep/80),'Sinkhorn':0.45+0.55*np.exp(-ep/100)}
-for m,y in shapes.items():
-    y = np.clip(y,0.005,None); y = y/y.max(); ax.plot(ep,y,color=COL[m],lw=1.0 if m in('JS discriminator','reference critic') else 0.7,label=m)
-ax.axhline(0.1,color='#555555',ls='--',lw=0.8); ax.text(150,0.108,'10% of own peak',fontsize=6,va='bottom',color='#555555')
-ax.axvline(40,color='#AAAAAA',ls=':',lw=0.8); ax.text(44,0.98,'first 10%\nof epochs',fontsize=6,va='top',color='#777777')
-ax.set_yscale('log'); ax.set_ylim(0.008,1.3); ax.set_yticks([0.01,0.1,1]); ax.set_yticklabels(['0.01','0.1','1'])
-ax.set_xlabel('epoch'); ax.set_ylabel('adversary gradient norm / peak'); ax.set_xlim(0,400)
-ax.set_title('adversary gradient norm',loc='left',fontsize=7); h,l=ax.get_legend_handles_labels(); fig.legend(h,l,fontsize=6,loc='lower center',bbox_to_anchor=(0.68,0.0),ncol=3,handlelength=1.4,columnspacing=1.2); panel_letter(ax,'b',dx=-0.3)
-# (c) discriminator accuracy per epoch, per task
-ax = axs[2]; accs=[]
-for i,t in enumerate(TASKS8):
-    acc = 1/(1+np.exp(-(ep-20)/8))*(base[i]-1/8)+1/8; acc = acc + rng.normal(0,0.01,400)
-    ax.plot(ep,acc,lw=0.7,color=plt.cm.Greys(0.35+0.6*i/7)); accs.append(acc)
-ax.axhline(1/8,color='#AAAAAA',ls=':',lw=0.8); ax.text(390,0.14,'chance (8 batches, example)',fontsize=6,ha='right',color='#777777')
-ax.set_ylim(0,1.05); ax.set_xlim(0,400); ax.set_xlabel('epoch'); ax.set_ylabel('discriminator batch accuracy')
-ax.set_title('discriminator batch accuracy',loc='left',fontsize=7)
-ax.text(200,0.55,'one line per task (8 tasks),\nconditioned decoder, seed mean',fontsize=6,ha='center',color='#555555')
-ax.annotate('human-mouse immune',xy=(300,accs[5][299]),xytext=(250,0.78),fontsize=6,arrowprops=dict(arrowstyle='-',lw=0.5),ha='center')
-ax.annotate('simulation 2',xy=(330,accs[7][329]),xytext=(330,0.70),fontsize=6,arrowprops=dict(arrowstyle='-',lw=0.5),ha='center')
-panel_letter(ax,'c',dx=-0.3)
+# Figure 2: biology at matched batch removal b* (colour) with within-task rank (number); mean rank per penalty
+from matplotlib.patches import Patch, Rectangle
+from matplotlib.lines import Line2D
+PEN = ['JS discriminator','reference critic','pooled critic','barycenter critic','MMD','Sinkhorn']
+# (decoder, penalty, task) cells that are not ranked (low signal or not evaluable); the first two are also not evaluable in Figure 4
+NOT_RANKED = {(0,'pooled critic','ATAC small'),(1,'Sinkhorn','human-mouse immune'),(1,'MMD','ATAC large'),(0,'MMD','ATAC large')}
+NOT_EVAL = {(0,'pooled critic','ATAC small'),(1,'Sinkhorn','human-mouse immune')}
+task_base = np.array([0.68,0.72,0.62,0.58,0.64,0.70])
+# ranks: independent random permutation of the ranked penalties in each task column and decoder (no method is favoured);
+# biology scores are drawn independently and assigned in rank order so the colour agrees with the printed rank
+bio = np.zeros((2,6,6)); rank = np.full((2,6,6),np.nan)
+for d in range(2):
+    for t in range(6):
+        ok = [p for p in range(6) if (d,PEN[p],REAL6[t]) not in NOT_RANKED]
+        perm = rng.permutation(len(ok))            # perm[i] = rank-1 of the i-th ranked penalty
+        vals = np.sort(task_base[t]-0.02*d+rng.normal(0,0.02,len(ok)))[::-1]
+        for i,p in enumerate(ok): rank[d,p,t]=perm[i]+1; bio[d,p,t]=vals[perm[i]]
+        for p in range(6):
+            if p not in ok: bio[d,p,t]=task_base[t]
+fig = plt.figure(figsize=(W2,9.8*CM))
+gs = fig.add_gridspec(1,5,width_ratios=[1,1,0.04,0.85,1.1],wspace=0.09,left=0.125,right=0.975,bottom=0.37,top=0.86)
+axh = [fig.add_subplot(gs[0]),fig.add_subplot(gs[1])]; axc = fig.add_subplot(gs[2]); axb = fig.add_subplot(gs[4])
+cmap = plt.cm.viridis; vmin,vmax = 0.50,0.78; norm = mpl.colors.Normalize(vmin,vmax)
+def lum(c):
+    c = [x/12.92 if x<=0.03928 else ((x+0.055)/1.055)**2.4 for x in c[:3]]; return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]
+for d,ax in enumerate(axh):
+    im = ax.imshow(bio[d],cmap=cmap,norm=norm,aspect='auto')
+    for p in range(6):
+        for t in range(6):
+            if (d,PEN[p],REAL6[t]) in NOT_RANKED:
+                ax.add_patch(Rectangle((t-0.5,p-0.5),1,1,fc='#F2F2F2',ec='#7F7F7F',hatch='////',lw=0,zorder=3))
+                continue
+            L = lum(cmap(norm(bio[d,p,t]))); col = 'white' if 1.05/(L+0.05) > (L+0.05)/0.05 else 'black'
+            ax.text(t,p,f'{int(rank[d,p,t])}',ha='center',va='center',fontsize=6,color=col)
+    ax.set_xticks(range(6)); ax.set_xticklabels(REAL6,rotation=55,ha='right',rotation_mode='anchor')
+    ax.set_yticks(range(6)); ax.set_yticklabels(PEN if d==0 else [])
+    ax.tick_params(length=2,left=(d==0))
+    for s in ax.spines.values(): s.set_visible(False)
+    ax.set_xticks(np.arange(-0.5,6,1),minor=True); ax.set_yticks(np.arange(-0.5,6,1),minor=True)
+    ax.grid(which='minor',color='white',lw=0.8); ax.tick_params(which='minor',length=0)
+    ax.set_title(DECODERS[d],loc='left',fontsize=7)
+cb = fig.colorbar(im,cax=axc); cb.set_label('biology score at $b^*$',fontsize=7); cb.ax.tick_params(labelsize=6,length=2); cb.outline.set_visible(False)
+cb.set_ticks([0.5,0.6,0.7])
+fig.text(0.125,0.955,'biology score at matched batch removal (colour); rank within task column (number, 1 = best)',fontsize=7,ha='left',va='center')
+fig.text(0.012,0.955,'a',fontsize=9,fontweight='bold',ha='left',va='center')
+# (b) mean rank over ranked real tasks, range over tasks
+ax = axb; DM = {0:'o',1:'s'}
+for p,m in enumerate(PEN):
+    for d in range(2):
+        v = rank[d,p][~np.isnan(rank[d,p])]; y = p+(-0.17 if d==0 else 0.17)
+        ax.plot([v.min(),v.max()],[y,y],color=COL[m],lw=1.2,solid_capstyle='butt',zorder=2)
+        ax.plot([v.mean()],[y],DM[d],color=COL[m],ms=4.2,mec='white',mew=0.4,zorder=3)
+ax.set_ylim(5.5,-0.5); ax.set_yticks(range(6)); ax.set_yticklabels(PEN); ax.tick_params(axis='y',length=2); ax.set_xlim(0.6,6.4); ax.set_xticks(range(1,7))
+ax.set_xlabel('mean rank over tasks\n$\\leftarrow$ better (1 = best)',fontsize=7)
+for y in np.arange(0.5,5.5,1): ax.axhline(y,color='#E5E5E5',lw=0.5,zorder=0)
+ax.set_title('mean rank; bars = range',loc='left',fontsize=7)
+panel_letter(ax,'b',dx=-0.12,dy=1.04)
+h=[Patch(fc='#F2F2F2',ec='#7F7F7F',hatch='////',lw=0,label='not ranked (low signal or not evaluable)')]
+fig.legend(handles=h,loc='lower left',bbox_to_anchor=(0.115,0.0),fontsize=6,frameon=False,handlelength=1.6)
+h2=[Line2D([],[],marker='o',ls='none',color='#777777',ms=4,label='conditioned decoder (upper of each pair)'),
+    Line2D([],[],marker='s',ls='none',color='#777777',ms=4,label='unconditioned decoder (lower)')]
+fig.legend(handles=h2,loc='lower left',bbox_to_anchor=(0.62,0.0),fontsize=6,frameon=False,ncol=1,handletextpad=0.3)
 finish(fig,'fig2')
 
 
@@ -186,72 +207,71 @@ finish(fig,'fig3')
 
 
 rng = np.random.default_rng(SEED+4)
-fig, axs = plt.subplots(1,4,figsize=(W2,7.6*CM),gridspec_kw=dict(left=0.16,right=0.985,bottom=0.3,top=0.84,wspace=0.14))
-rows = REAL6+['pooled (6 real tasks)']
-titles = ['biology kept at $b^*$','trade-off area','collapse rate','local vs global removal']
-xlabels = ['biology-score difference','area difference','percentage-point difference','score difference']
-margins = [0.01,0.01,5,None]; scales=[0.03,0.04,8,0.03]
-DCOL = {'conditioned decoder':'#0072B2','unconditioned decoder':'#E69F00'}
-for p,ax in enumerate(axs):
-    sc=scales[p]
-    for j,dec in enumerate(DECODERS):
-        off = 0.18 if j==0 else -0.18
-        est = rng.normal(0.2*sc,0.6*sc,7); est[6]=est[:6].mean()
-        ci = np.abs(rng.normal(1.0*sc,0.3*sc,7)); ci[6]=ci[:6].mean()/2.2
-        for i in range(7):
-            if p<2 and i==2 and j==0: # low-signal pair example: not evaluable
-                ax.text(0,i+off,'n.e.',fontsize=6,ha='center',va='center',color=DCOL[dec]); continue
-            ax.errorbar(est[i],i+off,xerr=ci[i],fmt='o' if i<6 else 'D',color=DCOL[dec],ms=3 if i<6 else 4.5,capsize=1.5,lw=0.8,label=dec if (p==0 and i==0) else None)
-    ax.axvline(0,color='k',lw=0.7)
-    if margins[p] is not None:
-        ax.axvspan(-margins[p],margins[p],color='#DDDDDD',alpha=0.6,lw=0,zorder=0)
-    ax.axhline(5.5,color='#999999',lw=0.6,ls=':')
-    ax.set_ylim(-0.6,6.6); ax.set_yticks(range(7))
-    ax.set_yticklabels(rows if p==0 else []); ax.invert_yaxis()
-    ax.set_title(titles[p],loc='left',fontsize=7); ax.set_xlabel(xlabels[p])
-    ax.set_xlim(-3.2*sc,3.2*sc)
-    panel_letter(ax,'abcd'[p],dx=-0.8 if p==0 else -0.14,dy=1.02)
-axs[0].text(0.011,-0.45,'$\\pm$0.01 margin',fontsize=6,ha='left',va='center',color='#555555')
-axs[2].text(5.5,-0.45,'$\\pm$5 pp margin',fontsize=6,ha='left',va='center',color='#555555')
-fig.suptitle('reference critic minus discriminator, per task and pooled',x=0.57,y=0.98,fontsize=8,ha='center'); fig.text(0.57,0.0,'favours discriminator  $\\leftarrow$   $\\rightarrow$  favours reference critic (a, b);   lower collapse with critic $\\leftarrow$ (c);   $\\rightarrow$ critic removes batch more locally (d)',fontsize=6,ha='center',va='bottom',color='#555555')
-h,l=axs[0].get_legend_handles_labels(); fig.legend(h,l,loc='lower center',bbox_to_anchor=(0.57,0.07),ncol=2,fontsize=6)
+# Figure 4: per-penalty dot plots, both decoders, one point per real task (vertical slot = task order) plus mean tick
+from scipy.stats import beta
+from matplotlib.lines import Line2D
+PEN = ['JS discriminator','reference critic','pooled critic','barycenter critic','MMD','Sinkhorn']
+fig, axs = plt.subplots(1,3,figsize=(W2,10.5*CM),gridspec_kw=dict(left=0.145,right=0.985,bottom=0.2,top=0.88,wspace=0.15))
+titles = ['trade-off area','collapse rate, exact 95% interval','local minus global removal at $b^*$']
+xlabels = ['trade-off area\n(higher = better)','collapse rate (percentage points)\n(lower = better)','local minus global batch removal\n(positive = stronger locally)']
+step = 0.085
+ty = (np.arange(6)-2.5)*step   # task slot offsets within a decoder block
+dblock = {0:-0.2,1:0.2}         # decoder block centre (conditioned above)
+pen_area = np.array([0.52,0.58,0.56,0.55,0.50,0.51]); pen_col = np.array([14,4,8,6,12,10]); pen_loc=np.array([0.01,0.04,0.02,0.03,-0.01,0.00])
+NREP = 24
+MK = {0:'o',1:'s'}
+for pi,ax in enumerate(axs):
+    for p,m in enumerate(PEN):
+        for d in range(2):
+            vals=[]; 
+            for t in range(6):
+                y = p+dblock[d]+ty[t]
+                ne = (d,m,REAL6[t]) in NOT_EVAL and pi!=1
+                if pi==0: v = pen_area[p]-0.02*d+rng.normal(0,0.045)
+                elif pi==1:
+                    k = int(rng.binomial(NREP,min(0.95,max(0.0,(pen_col[p]+(3 if d else 0))/100*1.0+rng.normal(0,0.03)))*1.0)); v=100*k/NREP
+                    lo = 0 if k==0 else beta.ppf(0.025,k,NREP-k+1)*100; hi = 100 if k==NREP else beta.ppf(0.975,k+1,NREP-k)*100
+                else: v = pen_loc[p]-0.005*d+rng.normal(0,0.03)
+                if ne:
+                    ax.text(0.02,y,'n.e.',transform=ax.get_yaxis_transform(),fontsize=6,ha='left',va='center',color='#555555'); continue
+                vals.append(v)
+                if pi==1: ax.plot([lo,hi],[y,y],color=COL[m],lw=0.6,alpha=0.7,solid_capstyle='butt',zorder=2)
+                ax.plot([v],[y],MK[d],color=COL[m],ms=2.6,mec='none',zorder=3)
+            ax.plot([np.mean(vals)]*2,[p+dblock[d]-3*step,p+dblock[d]+3*step],color='k',lw=1.1,zorder=4)
+    for y in np.arange(0.5,5.5,1): ax.axhline(y,color='#E5E5E5',lw=0.5,zorder=0)
+    if pi==2: ax.axvline(0,color='#555555',lw=0.7,ls='--',zorder=1)
+    ax.set_ylim(5.55,-0.55); ax.set_yticks(range(6)); ax.set_yticklabels(PEN if pi==0 else [])
+    ax.set_title(titles[pi],loc='left',fontsize=7); ax.set_xlabel(xlabels[pi],fontsize=7)
+    panel_letter(ax,'abc'[pi],dx=-0.52 if pi==0 else -0.1,dy=1.04)
+axs[0].set_xlim(0.28,0.82); axs[0].set_xticks([0.3,0.5,0.7]); axs[1].set_xlim(-4,104); axs[1].set_xticks([0,25,50,75,100]); axs[2].set_xlim(-0.15,0.2); axs[2].set_xticks([-0.1,0,0.1])
+# 'n.e.' text sits at the left edge of the panel; leave room
+h=[Line2D([],[],marker='o',ls='none',color='#777777',ms=3.5,label='conditioned decoder (upper block)'),
+   Line2D([],[],marker='s',ls='none',color='#777777',ms=3.5,label='unconditioned decoder (lower block)'),
+   Line2D([],[],color='k',lw=1.1,label='mean over tasks'),
+   Line2D([],[],ls='none',label='n.e. = not evaluable')]
+fig.legend(handles=h,loc='lower center',bbox_to_anchor=(0.56,0.0),ncol=4,fontsize=6,frameon=False,handlelength=1.3,columnspacing=1.2,handletextpad=0.4)
 finish(fig,'fig4')
 
 
 rng = np.random.default_rng(SEED+5)
-fig, axs = plt.subplots(1,2,figsize=(W2,7.4*CM),gridspec_kw=dict(width_ratios=[1,1.0],left=0.07,right=0.985,bottom=0.3,top=0.9,wspace=0.7))
-# (a) good-strength width in decades per method; points = task x decoder (8 tasks x 2), median tick
-ax=axs[0]; PEN=['JS discriminator','reference critic','pooled critic','barycenter critic','MMD','Sinkhorn']
+# Figure 5: width of each penalty's range of good strengths (decades), one point per real task and decoder, median per penalty
+from matplotlib.lines import Line2D
+PEN=['JS discriminator','reference critic','pooled critic','barycenter critic','MMD','Sinkhorn']
+fig, ax = plt.subplots(figsize=(W2,7.4*CM),gridspec_kw=dict(left=0.075,right=0.985,bottom=0.22,top=0.9))
 centre={'JS discriminator':1.0,'reference critic':1.4,'pooled critic':1.3,'barycenter critic':1.2,'MMD':1.8,'Sinkhorn':1.6}
 for i,m in enumerate(PEN):
-    for j,(dec,mk) in enumerate(zip(DECODERS,['o','s'])):
-        w=np.clip(rng.normal(centre[m]-0.2*j,0.4,8),0,2.5)
-        ax.plot(i+(-0.17 if j==0 else 0.17)+rng.normal(0,0.04,8),w,mk,ms=2.8,color=COL[m],alpha=0.7,mec='none')
-    allw=np.clip(rng.normal(centre[m]-0.1,0.4,16),0,2.5); ax.plot([i-0.3,i+0.3],[np.median(allw)]*2,color='k',lw=1.2)
-ax.plot([],[],'o',color='#777777',label='conditioned decoder (left)'); ax.plot([],[],'s',color='#777777',label='unconditioned decoder (right)')
-ax.plot([],[],'-',color='k',lw=1.2,label='median'); ax.legend(fontsize=6,loc='upper left',bbox_to_anchor=(0.0,1.0),handlelength=1.3)
-ax.set_xticks(range(6)); ax.set_xticklabels(PEN,rotation=40,ha='right',rotation_mode='anchor')
-ax.set_ylabel('good-strength width (decades)'); ax.set_ylim(-0.3,3.0); ax.set_yticks([0,1,2,3])
-ax.set_title('good-strength width, one point per task',loc='left',fontsize=7)
-ax.text(5.45,0.0,'wider = broader range of good strengths',fontsize=6,ha='right',va='bottom',color='#555555')
-panel_letter(ax,'a',dx=-0.2,dy=1.04)
-# (b) follow-up variants minus plain discriminator, biology at matched strength
-ax=axs[1]
-variants=['discriminator + SN','discriminator + R1','discriminator + SN\n+ critic optimiser *','pooled critic, GP, 1 step','pooled critic, GP, 5 steps','pooled critic, GP, 10 steps','pooled critic, SN, 1 step *','pooled critic, SN, 5 steps']
-DCOL={'conditioned decoder':'#0072B2','unconditioned decoder':'#E69F00'}
-for j,dec in enumerate(DECODERS):
-    off=0.18 if j==0 else -0.18
-    est=rng.normal(0.005,0.015,8); ci=np.abs(rng.normal(0.02,0.006,8))
-    ax.errorbar(est,np.arange(8)+off,xerr=ci,fmt='o',color=DCOL[dec],ms=3,capsize=1.5,lw=0.8,label=dec)
-ax.axvline(0,color='k',lw=0.7); ax.axvspan(-0.01,0.01,color='#DDDDDD',alpha=0.6,lw=0,zorder=0)
-ax.set_yticks(range(8)); ax.set_yticklabels(variants); ax.invert_yaxis(); ax.set_ylim(7.75,-0.75)
-ax.set_xlim(-0.065,0.065); ax.set_xlabel('biology difference vs plain discriminator')
-ax.set_title('follow-up: which ingredient moves biology?',loc='left',fontsize=7)
-ax.text(0.011,7.45,'$\\pm$0.01 margin',fontsize=6,ha='left',va='center',color='#555555')
-h,l=ax.get_legend_handles_labels(); fig.legend(h,l,fontsize=6,loc='lower center',bbox_to_anchor=(0.72,0.09),ncol=2)
-ax.text(0.064,-0.45,'* arms of the confirmatory contrast',fontsize=6,ha='right',va='center',color='#555555')
-fig.text(0.72,0.0,'$\\leftarrow$ favours plain discriminator      favours variant $\\rightarrow$',fontsize=6,ha='center',va='bottom',color='#555555')
-panel_letter(ax,'b',dx=-0.62,dy=1.04)
+    allw=[]
+    for j,mk in enumerate(['o','s']):
+        w=np.clip(rng.normal(centre[m]-0.2*j,0.4,6),0,2.5); allw+=list(w)
+        ax.plot(i+(-0.17 if j==0 else 0.17)+rng.normal(0,0.04,6),w,mk,ms=3.4,color=COL[m],alpha=0.8,mec='none')
+    ax.plot([i-0.32,i+0.32],[np.median(allw)]*2,color='k',lw=1.3,zorder=4)
+ax.set_xticks(range(6)); ax.set_xticklabels(PEN)
+ax.set_ylabel('width of good-strength range\n(decades; wider = broader)'); ax.set_ylim(-0.3,3.0); ax.set_yticks([0,1,2,3]); ax.set_xlim(-0.6,5.6)
+ax.set_title('width of the range of good strengths, one point per real task and decoder',loc='left',fontsize=7)
+h=[Line2D([],[],marker='o',ls='none',color='#777777',ms=3.8,label='conditioned decoder (left of each pair)'),
+   Line2D([],[],marker='s',ls='none',color='#777777',ms=3.8,label='unconditioned decoder (right)'),
+   Line2D([],[],color='k',lw=1.3,label='median over 12 points')]
+fig.legend(handles=h,loc='lower center',bbox_to_anchor=(0.54,0.0),ncol=3,fontsize=6,frameon=False,handlelength=1.5,columnspacing=1.5)
 finish(fig,'fig5')
 
 
