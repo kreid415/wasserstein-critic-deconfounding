@@ -122,5 +122,5 @@ def main(argv=None):
     return 0 if ok else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover  # CLI entry point
     sys.exit(main())

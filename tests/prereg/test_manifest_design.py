@@ -131,6 +131,9 @@ def test_a1_tasks_flag_extends_a1_with_the_r1_grid_edge_strengths(M, tmp_path, t
     assert len(C.compare(old, bad_epochs)) == 1 and "max_epochs" in C.compare(old, bad_epochs)[0]
     assert "differ in (arm, cond, lam, seed)" in C.compare(old, new[1:])[0]
     assert "both old and new" in C.compare(old, old)[0]
+    tampered = tmp_path / "tampered.tsv"                         # one new row with another batch size: main fails, says which
+    tampered.write_text(new_path.read_text().replace("\tzinb\t128\t", "\tzinb\t256\t", 1))
+    assert C.main(["--new", str(tampered), "--old", str(old_path), "--r1-record", str(tmp_path / "rec.json")]) == 1
     rec = _r1_record([old_path])
     rec["families"]["js|0"]["a1_grid"].remove(0.01)             # the record no longer lists a strength the rows hold
     (tmp_path / "rec.json").write_text(json.dumps(rec))

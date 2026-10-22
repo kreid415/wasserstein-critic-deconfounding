@@ -24,12 +24,13 @@ def _builder():
     return _load("x1_jhpce_command")
 
 
-def test_run_lists_follow_the_manifests(tmp_path):
+def test_run_lists_follow_the_manifests(tmp_path, monkeypatch):
     """make_x1_tags.py: the committed pilot5 run lists are what it derives from the pilot5 manifest; a manifest short of a
     row is refused; the X1 job still derives its 1,800 rows (filler tags given) and still needs them."""
     m = _load("make_x1_tags")
-    man = os.path.join(ROOT, "manifests", "paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv")
-    m.main(["--job", "pilot5", "--manifest", man, "--check", "--out-dir", os.path.join(ROOT, "experiments", "pilot5_jhpce", "tags")])
+    monkeypatch.chdir(ROOT)       # the run lists name the manifest by its repo-relative path
+    man = "manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv"
+    m.main(["--job", "pilot5", "--manifest", man, "--check", "--out-dir", "experiments/pilot5_jhpce/tags"])
     assert len(m.derive(man, None, "pilot5")) == 1890
     short = tmp_path / "short.tsv"
     short.write_text("\n".join(open(man).read().splitlines()[:-1]) + "\n")
@@ -57,6 +58,8 @@ def test_chained_job_clock_covers_every_job_up_its_chain(tmp_path, capsys, job, 
     subprocess.run(["git", "clone", "-q", "--no-checkout", ROOT, str(clone)], check=True)
     subprocess.run(["git", "-C", str(clone), "update-ref", "refs/heads/x", sha], check=True)
     subprocess.run(["git", "-C", str(clone), "bundle", "create", "-q", str(bundle), "refs/heads/x"], check=True)
+    with pytest.raises(SystemExit, match="has no head"):          # the other job kind's commit is not in this bundle
+        b.main(["--job", "pilot5" if job == "x1" else "x1", "--task", "pancreas", "--bundle", str(bundle)])
     for pos, extra in ((0, []), (2, ["--after-slurm-job", "444"])):
         b.main(["--job", job, "--task", "pancreas", "--bundle", str(bundle), "--chain-position", str(pos), *extra])
         plan = json.loads(capsys.readouterr().out)
