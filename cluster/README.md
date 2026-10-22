@@ -15,6 +15,8 @@
 | `local_rehearsal.sh` | local | the job's full dry-run path at one commit (bundle clone, every check, the runner's dry run); stubs only the GPU node and Slurm |
 | `harvest_local.py` | local | verifies a harvest (every part, the tar, every file) and merges it all-or-nothing into the durable OUT_DIR |
 | `make_tags.py`, `tags/` | local | tags files of a production job, derived read-only from the tagged manifest |
+| `score_plan.py` (+ `score_array.sh`) | JHPCE clone (plan); `shared` array, 1 CPU per task | score-only job: writes one list and one sbatch file per task (dataset), sized by dataset, and prints the time estimate; each array task scores one latent with `scripts/score_scib_native.py` under the stage runner's settings and writes the workstation's score file. Needs the user's go per submission (SI-29). See `SCORE5_BUILD.md` |
+| `compare_scores.py`, `score_check/` | local | exact comparison of two score sets (cluster against workstation, or cluster run against cluster run); `score_check/check_latents.tsv` = the 20 latents of the cluster-versus-workstation scoring check, with SHA-256 |
 
 `cluster/envspec/`: explicit conda specs and pip pins exported from the local envs on 2026-10-02, plus the local
 freezes they are verified against. `scripts/score_list.sh` scores a list of latents on either host.
