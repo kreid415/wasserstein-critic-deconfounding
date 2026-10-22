@@ -10,6 +10,10 @@ Writes x1_jhpce_<task>.tags (one per job), x1_jhpce.tags (union) and x1_jhpce_co
 Usage (main repo root):
   python experiments/X1_jhpce/make_x1_tags.py --manifest manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv \
       --filler-tags <prereg-tier12-v2 checkout>/cluster/jhpce/tags/fillers_x1_x13.tags --out-dir experiments/X1_jhpce/tags
+--job pilot5: the same for the A1 pilot on the five tasks (every A1 row, 378 per task, no filler tags; files
+pilot5_jhpce_<task>.tags):
+  python experiments/X1_jhpce/make_x1_tags.py --job pilot5 \
+      --manifest manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv --out-dir experiments/pilot5_jhpce/tags
 """
 import argparse
 import hashlib
@@ -21,9 +25,15 @@ import pandas as pd
 
 JHPCE_TASKS = ("atac_large", "immune_hum_mou", "lung", "pancreas", "sim2")     # CONSTRAINTS.md SI-39
 RULE_FREE = ("none", "scvi_adv")                                                 # fitted by the filler jobs
-PER_TASK, TOTAL = 360, 1800
 RULE = ("docs/PREREG.md sec 0: X1 after R2/R3 (docs/prereg/r2r3_record.json); X1 adversarial arms on the JHPCE tasks of "
         "CONSTRAINTS.md SI-39; rule-free X1 rows (none, scvi_adv) were fitted by the filler jobs")
+# job kind: file prefix, experiment, arms left out, rows per task (x 5 tasks = total), rule line. 'pilot5' = the A1
+# penalty-strength pilot on the five JHPCE tasks (manifest build_paper_manifest.py --a1-tasks): every A1 row, the
+# strength-0 'none' rows included, since no filler job fits them.
+JOBS = {"x1": dict(stage="x1_jhpce", experiment="X1", skip=RULE_FREE, per_task=360, rule=RULE),
+        "pilot5": dict(stage="pilot5_jhpce", experiment="A1", skip=(), per_task=378,
+                       rule="A1 penalty-strength pilot on the five JHPCE tasks of CONSTRAINTS.md SI-39: every A1 row of the "
+                            "manifest (build_paper_manifest.py --a1-tasks), strength-0 rows included")}
 
 
 def sha256_bytes(b):
@@ -49,17 +59,21 @@ def placeholders(r):
     return out
 
 
-def derive(manifest, filler_tags):
+def derive(manifest, filler_tags, job="x1"):
+    j = JOBS[job]
     M = pd.read_csv(manifest, sep="\t", comment="#", dtype=str, keep_default_na=False)
     if M.tag.duplicated().any():
         raise SystemExit(f"{manifest}: duplicate tags")
-    sel = M[(M.experiment == "X1") & M.task.isin(JHPCE_TASKS) & ~M.arm.isin(RULE_FREE)].copy()
+    sel = M[(M.experiment == j["experiment"]) & M.task.isin(JHPCE_TASKS) & ~M.arm.isin(j["skip"])].copy()
     bad = {r["tag"]: placeholders(r) for r in sel.to_dict("records") if placeholders(r)}
     if bad:
         raise SystemExit(f"selected rows hold placeholders: {list(bad.items())[:5]}")
     per = sel.groupby("task").size().to_dict()
-    if len(sel) != TOTAL or any(per.get(t, 0) != PER_TASK for t in JHPCE_TASKS):
-        raise SystemExit(f"selection has {len(sel)} rows {per}, expected {PER_TASK} per task ({TOTAL})")
+    if len(sel) != j["per_task"] * len(JHPCE_TASKS) or any(per.get(t, 0) != j["per_task"] for t in JHPCE_TASKS):
+        raise SystemExit(f"selection has {len(sel)} rows {per}, expected {j['per_task']} per task "
+                         f"({j['per_task'] * len(JHPCE_TASKS)})")
+    if job != "x1":      # no filler jobs fitted rows of this job
+        return sel
     fill = set(read_tags(filler_tags))
     overlap = sorted(fill & set(sel.tag))
     if overlap:
@@ -70,11 +84,13 @@ def derive(manifest, filler_tags):
     return sel
 
 
-def render(manifest, msha, label, rows, tasks):
+def render(manifest, msha, label, rows, tasks, job="x1"):
+    j = JOBS[job]
     counts = rows.groupby(["task", "arm"]).size()
+    skip = f" except {', '.join(j['skip'])}" if j["skip"] else ""
     lines = ["# tags file for scripts/run_stage.py --tags-file (one manifest tag per line; '#' starts a comment)",
-             f"# selection: x1_jhpce {label}: X1 arms except {', '.join(RULE_FREE)}; tasks {' '.join(tasks)}",
-             f"# rule: {RULE}",
+             f"# selection: {j['stage']} {label}: {j['experiment']} arms{skip}; tasks {' '.join(tasks)}",
+             f"# rule: {j['rule']}",
              f"# manifest: {manifest} sha256 {msha}",
              f"# rows: {len(rows)}; per task and arm: "
              + "; ".join(f"{t} " + ", ".join(f"{a} {int(n)}" for (tt, a), n in counts.items() if tt == t) for t in tasks),
@@ -85,16 +101,20 @@ def render(manifest, msha, label, rows, tasks):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest", required=True)
-    ap.add_argument("--filler-tags", required=True)
+    ap.add_argument("--job", choices=sorted(JOBS), default="x1")
+    ap.add_argument("--filler-tags", help="required for --job x1")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args(argv)
+    if a.job == "x1" and not a.filler_tags:
+        ap.error("--job x1 needs --filler-tags")
+    stage = JOBS[a.job]["stage"]
     msha = sha256_bytes(open(a.manifest, "rb").read())
-    sel = derive(a.manifest, a.filler_tags)
-    files = {"x1_jhpce.tags": render(a.manifest, msha, "all", sel, list(JHPCE_TASKS))}
+    sel = derive(a.manifest, a.filler_tags, a.job)
+    files = {f"{stage}.tags": render(a.manifest, msha, "all", sel, list(JHPCE_TASKS), a.job)}
     for t in JHPCE_TASKS:
-        files[f"x1_jhpce_{t}.tags"] = render(a.manifest, msha, t, sel[sel.task == t], [t])
-    files["x1_jhpce_counts.csv"] = sel.groupby(["task", "arm", "cond"]).size().rename("rows").reset_index().to_csv(index=False)
+        files[f"{stage}_{t}.tags"] = render(a.manifest, msha, t, sel[sel.task == t], [t], a.job)
+    files[f"{stage}_counts.csv"] = sel.groupby(["task", "arm", "cond"]).size().rename("rows").reset_index().to_csv(index=False)
     bad = []
     for fn, text in files.items():
         p = os.path.join(a.out_dir, fn)

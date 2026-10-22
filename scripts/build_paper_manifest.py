@@ -45,6 +45,8 @@ A2/A3 come after X1, with X1-matched lambdas and their mean / off halves taken f
 
 Usage: python scripts/build_paper_manifest.py --backbone stock --design pilot --uncond-seeds 5 \\
            --bary-iter 10 --out scripts/paper_manifest.tsv
+A1 on further tasks (the same A1 rows plus the R1 round-1 grid-edge strengths A1_EXT_R1, nothing else): add
+           --a1-tasks immune_hum_mou atac_large lung sim2 pancreas   (manifests/*.pilot5.tsv)
 """
 import argparse
 import hashlib
@@ -65,6 +67,9 @@ LAMBDA_GRID = [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]   # half-decade ste
 FAMILY_GRID = [f"g{i}" for i in range(1, 7)]   # design 'pilot': 6 per-family points fixed from A1
 A1_TASKS = ["atac_small", "immune", "sim1"]    # design 'pilot': A1 calibration tasks (3 of 8; disclosed, PREREG.md)
 A1_SEED0 = 100                                  # A1/A2/A3 seeds 100, 101, ...: disjoint from the X1 seeds 0-4
+# R1 round-1 grid-edge strengths of A1 (arm, cond, strengths): r1_record.json of prereg-tier12-v3 and its input
+# a1_extension.tsv; scripts/compare_a1_pilot5.py re-reads both and checks this constant against them
+A1_EXT_R1 = [("discriminator", 0, [0.03, 0.01]), ("sinkhorn", 1, [10000, 30000])]
 A1_MATCHED = ["a1_matched_lo", "a1_matched", "a1_matched_hi"]   # A2/A3 window, resolved from A1 (R4 stage a1)
 ADV_INPUT_PENDING, ZSTD_PENDING = "A2", "A3"    # X1 placeholders, resolved by decide_a2_a3.py (R2 / R3)
 FOLLOWUP_SEEDS = [10, 11, 12]                   # X3/X6/X7/X8/X12/X15: fresh seeds, disjoint from X1 (0-4) and A1 (SI-26)
@@ -150,7 +155,9 @@ def cpu_row(task, arm, knob, value, dims):
                 max_epochs=0, train_size=0, seed=0, reference="auto", extra=json.dumps({"knob": knob} if knob else {}))
 
 
-def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
+def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8, a1_tasks=None):
+    """a1_tasks (design 'pilot' only): return just the A1 rows of these tasks plus the R1 round-1 grid-edge rows
+    (A1_EXT_R1), i.e. the A1 pilot extended to more tasks; None = the full design."""
     R = []
     grid = LAMBDA_GRID if design == "shared" else FAMILY_GRID
     a2_tasks, a2_arms = ["atac_small", "immune"], ["discriminator", "reference", "pooled"]
@@ -162,10 +169,15 @@ def build(bb, design="shared", pilot_seeds=3, uncond_seeds=5, x12_runs=8):
         a1_seeds = [A1_SEED0 + i for i in range(pilot_seeds)]
         if set(a1_seeds) & set(range(5)):
             raise ValueError(f"A1 seeds {a1_seeds} overlap the X1 seeds 0-4")
-        for t, s, cond in itertools.product(A1_TASKS, a1_seeds, [True, False]):
+        for t, s, cond in itertools.product(a1_tasks or A1_TASKS, a1_seeds, [True, False]):
             R.append(row("A1", t, "none", 0, s, cond, bb))
             R += [row("A1", t, a, lam, s, cond, bb, adv_input="mean", zstd=0)
                   for a, lam in itertools.product(ARMS, LAMBDA_GRID)]
+        if a1_tasks:
+            for t, (arm, cond, lams) in itertools.product(a1_tasks, A1_EXT_R1):
+                R += [row("A1", t, arm, lam, s, cond, bb, adv_input="mean", zstd=0)
+                      for lam, s in itertools.product(lams, a1_seeds)]
+            return R
         # ---- A2 / A3 pilots, scheduled BEFORE X1 (R2 / R3 set X1's adversary input and standardisation).
         #      lambda window a1_matched_lo / a1_matched / a1_matched_hi = R4 applied to A1 scores
         #      (freeze_matched_lambda.py --stage a1), so every window value is an A1 grid point. Same tasks,
@@ -308,6 +320,8 @@ def main():
     ap.add_argument("--pilot-seeds", type=int, default=3)
     ap.add_argument("--uncond-seeds", type=int, default=5, help="seeds of the unconditioned X1 block (plan: 5)")
     ap.add_argument("--x12-runs", type=int, choices=[8, 16], default=8, help="X12 fractional factorial size (plan: 8)")
+    ap.add_argument("--a1-tasks", nargs="+", choices=sorted(TASKS),
+                    help="design pilot: write only the A1 rows of these tasks, with the R1 round-1 grid-edge strengths")
     ap.add_argument("--bary-iter", type=int, default=None,
                     help="barycenter: cold fixed-point iterations per step, init = minibatch cells (default 10)")
     ap.add_argument("--bary-warm-iter", type=int, default=None,
@@ -315,7 +329,9 @@ def main():
     a = ap.parse_args()
     global BARY_WARM_ITER, BARY_ITER
     BARY_WARM_ITER, BARY_ITER = a.bary_warm_iter, a.bary_iter
-    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs))
+    if a.a1_tasks and a.design != "pilot":
+        ap.error("--a1-tasks needs --design pilot")
+    R = finalize(build(BACKBONES[a.backbone], a.design, a.pilot_seeds, a.uncond_seeds, a.x12_runs, a.a1_tasks))
     fit = [r for r in R if not r["reuses_x1"]]
     with open(a.out, "w") as f:
         f.write(f"# paper manifest, backbone={a.backbone}, design={a.design}, uncond_seeds={a.uncond_seeds}, "
@@ -324,6 +340,8 @@ def main():
                 f"grid from A1; 'matched*' lambdas are "
                 f"resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted "
                 f"({len(R) - len(fit)} of {len(R)}).\n")
+        if a.a1_tasks:
+            f.write(f"# A1 only, tasks {' '.join(a.a1_tasks)}: base grid plus R1 round-1 grid-edge strengths {A1_EXT_R1}\n")
         f.write("\t".join(COLS) + "\n")
         for r in fit:
             f.write("\t".join(str(r[c]) for c in COLS) + "\n")

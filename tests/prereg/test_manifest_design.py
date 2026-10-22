@@ -1,8 +1,14 @@
 """Hard requirements of the pilot design in scripts/build_paper_manifest.py (docs/PREREG.md sections 0, 2, 3)."""
+import json
+import os
+import subprocess
+import sys
+
 import pytest
 
+import compare_a1_pilot5 as C
 import synth
-from synth import P, BPM
+from synth import P, BPM, ROOT
 
 
 @pytest.fixture(scope="module")
@@ -79,6 +85,59 @@ def test_x1_rows_hold_placeholders_until_the_rules_run(M):
             float(v)
     with pytest.raises(ValueError):                      # fit_paper_config.py: int(zstd) must fail
         int(BPM.ZSTD_PENDING)
+
+
+FIVE = ["immune_hum_mou", "atac_large", "lung", "sim2", "pancreas"]
+
+
+def _a1_manifest(tmp_path, tasks):
+    out = tmp_path / f"a1_{len(tasks)}_{tasks[0]}.tsv"
+    subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "build_paper_manifest.py"), "--backbone", "stock",
+                    "--design", "pilot", "--uncond-seeds", "5", "--a1-tasks", *tasks,      # as M: no --bary-iter
+                    "--out", str(out)], check=True, capture_output=True)
+    return out
+
+
+def _r1_record(old_paths):
+    """A synthetic R1 record whose a1_grid per family x decoder is the base grid plus A1_EXT_R1."""
+    fams = {f"{fam}|{c}": dict(arms=list(arms), cond=c, rounds={"low": 0, "high": 0},
+                               a1_grid=sorted({float(v) for v in BPM.LAMBDA_GRID} |
+                                              {float(lam) for a, k, ls in BPM.A1_EXT_R1 if a in arms and k == c for lam in ls}))
+            for fam, arms in P.FAMILIES.items() for c in (0, 1)}
+    return dict(families=fams, inputs=dict(manifest=[dict(path=str(p), sha256=C.sha256(p)) for p in old_paths]))
+
+
+@pytest.mark.parametrize("tasks", [list(BPM.A1_TASKS), FIVE])
+def test_a1_tasks_flag_extends_a1_with_the_r1_grid_edge_strengths(M, tmp_path, tasks):
+    new_path = _a1_manifest(tmp_path, tasks)
+    new = C.read_a1(new_path)
+    assert {r["experiment"] for r in new} == {"A1"} and sorted({r["task"] for r in new}) == sorted(tasks)
+    assert len(new) == 378 * len(tasks)          # (1 none + 6 arms x 10) x 6 + 12 grid-edge rows, per task
+    ext = [r for r in new if r["arm"] != "none" and float(r["lam"]) not in set(map(float, BPM.LAMBDA_GRID))]
+    assert len(ext) == 12 * len(tasks)
+    assert {(r["arm"], int(r["cond"]), float(r["lam"])) for r in ext} == \
+        {(a, c, float(lam)) for a, c, ls in BPM.A1_EXT_R1 for lam in ls}
+    if tasks == BPM.A1_TASKS:       # the flag leaves the full design's A1 rows as they are, tag included
+        assert set(M.tag[M.experiment == "A1"]) <= {r["tag"] for r in new}
+        return
+    old_path = _a1_manifest(tmp_path, list(BPM.A1_TASKS))
+    old = C.read_a1(old_path)
+    assert C.compare(old, new) == []
+    (tmp_path / "rec.json").write_text(json.dumps(_r1_record([old_path])))
+    assert C.main(["--new", str(new_path), "--old", str(old_path), "--r1-record", str(tmp_path / "rec.json")]) == 0
+    bad_n_latent = [dict(r, n_latent="30") if i == 5 else r for i, r in enumerate(new)]
+    bad_epochs = [dict(r, max_epochs="399") if i == 7 else r for i, r in enumerate(new)]
+    assert len(C.compare(old, bad_n_latent)) == 1 and "n_latent" in C.compare(old, bad_n_latent)[0]
+    assert len(C.compare(old, bad_epochs)) == 1 and "max_epochs" in C.compare(old, bad_epochs)[0]
+    assert "differ in (arm, cond, lam, seed)" in C.compare(old, new[1:])[0]
+    assert "both old and new" in C.compare(old, old)[0]
+    rec = _r1_record([old_path])
+    rec["families"]["js|0"]["a1_grid"].remove(0.01)             # the record no longer lists a strength the rows hold
+    (tmp_path / "rec.json").write_text(json.dumps(rec))
+    assert C.main(["--new", str(new_path), "--old", str(old_path), "--r1-record", str(tmp_path / "rec.json")]) == 1
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "build_paper_manifest.py"), "--backbone", "stock",
+                        "--a1-tasks", "lung", "--out", str(tmp_path / "x.tsv")], capture_output=True)
+    assert r.returncode == 2 and b"--a1-tasks needs --design pilot" in r.stderr
 
 
 def test_shared_design_keeps_x1_matched_pilots():

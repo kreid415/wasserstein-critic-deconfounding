@@ -10,6 +10,12 @@ the checkout, and passed as ../x1_inputs/<file> (prod_fit_job.sh resolves them a
 SHA-256, the tags' membership, experiments and tasks; the checkout stays clean at the tag).
 Inputs are read from this repo's HEAD commit (the working-tree files must equal it), so the plan names committed files.
 Usage (main repo root): python experiments/X1_jhpce/x1_jhpce_command.py --task immune_hum_mou --bundle wcd_tag.bundle
+
+--job pilot5 (default x1): the same job for the A1 penalty-strength pilot on the five JHPCE tasks (docs/PREREG.md; manifest
+build_paper_manifest.py --a1-tasks, run lists make_x1_tags.py --job pilot5). It differs from X1 in the commit it pins
+(prereg-tier12-v3: the Sinkhorn fix; SI-54 refuses Sinkhorn rows at the v2 commit), the manifest, run lists, stage name,
+--experiments A1, and --slots 5 (up to 5 production GPU jobs at once, one per task; prod_fit_job.sh defaults to 2).
+Fit only: nothing here says where the latents are scored.
 """
 import argparse
 import hashlib
@@ -21,10 +27,17 @@ import subprocess
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TAG_SHA = "c88cce3c569e9de47f2d65c6794ca3890637786a"                     # prereg-tier12-v2
-MANIFEST = "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv"
-TAGS_DIR = "experiments/X1_jhpce/tags"
+TAG_SHA_V3 = "10a1ca5874fbcdc033b148525b5e71d866306bdb"                  # prereg-tier12-v3
 TASKS = ("atac_large", "immune_hum_mou", "lung", "pancreas", "sim2")
-STAGE = "x1_jhpce"
+# job kind: pinned tag and commit, manifest, tags dir, stage (= tags-file prefix), --experiments, --slots (None: the
+# job script's default), what the job fits (for the intent line)
+JOBS = {"x1": dict(tag="prereg-tier12-v2", sha=TAG_SHA, manifest="manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv",
+                   tags_dir="experiments/X1_jhpce/tags", stage="x1_jhpce", experiments="X1", slots=None,
+                   what="X1 fits {task} ({n} rows: X1 adversarial arms)"),
+        "pilot5": dict(tag="prereg-tier12-v3", sha=TAG_SHA_V3,
+                       manifest="manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv",
+                       tags_dir="experiments/pilot5_jhpce/tags", stage="pilot5_jhpce", experiments="A1", slots=5,
+                       what="A1 penalty-strength pilot fits {task} ({n} rows: every A1 row of the task)")}
 WALL_RE = re.compile(r"^(\d+-)?\d{1,2}:\d{2}:\d{2}$")
 
 
@@ -54,7 +67,8 @@ def committed(path):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", required=True, choices=TASKS)
-    ap.add_argument("--expected-sha", default=TAG_SHA)
+    ap.add_argument("--job", choices=sorted(JOBS), default="x1")
+    ap.add_argument("--expected-sha", default=None, help="the job's pinned tag commit (the default, and the only value allowed)")
     ap.add_argument("--bundle", required=True, help="workspace path of a git bundle holding --expected-sha")
     ap.add_argument("--walltime", default="3-00:00:00")
     ap.add_argument("--mem", default="96G")
@@ -70,8 +84,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.chain_position < 0 or (a.after_slurm_job is None) != (a.chain_position == 0):
         raise SystemExit("--after-slurm-job is given exactly when --chain-position > 0 (the jobs before this one)")
-    if a.expected_sha != TAG_SHA:
-        raise SystemExit(f"--expected-sha must be prereg-tier12-v2 ({TAG_SHA}): PREREG sec 7 pins every stage to the tag")
+    j = JOBS[a.job]
+    sha = a.expected_sha or j["sha"]
+    if sha != j["sha"]:
+        raise SystemExit(f"--expected-sha must be {j['tag']} ({j['sha']}): PREREG sec 7 pins every stage to the tag")
     if a.after_slurm_job is not None and not re.fullmatch(r"[0-9]+", a.after_slurm_job):
         raise SystemExit(f"--after-slurm-job {a.after_slurm_job!r}: a numeric Slurm job id")
     if not WALL_RE.match(a.walltime) or wall_s(a.walltime) > 3 * 86400:
@@ -81,17 +97,18 @@ def main(argv=None):
     if not os.path.isfile(a.bundle):
         raise SystemExit(f"bundle {a.bundle} not found")
     v = subprocess.run(["git", "bundle", "list-heads", a.bundle], capture_output=True, text=True)
-    if v.returncode != 0 or a.expected_sha not in v.stdout.split():
-        raise SystemExit(f"bundle {a.bundle} has no head at {a.expected_sha}")
-    tags_rel = f"{TAGS_DIR}/x1_jhpce_{a.task}.tags"
-    man_b, tags_b = committed(MANIFEST), committed(tags_rel)
+    if v.returncode != 0 or sha not in v.stdout.split():
+        raise SystemExit(f"bundle {a.bundle} has no head at {sha}")
+    tags_rel = f"{j['tags_dir']}/{j['stage']}_{a.task}.tags"
+    man_b, tags_b = committed(j["manifest"]), committed(tags_rel)
     man_sha, tags_sha = hashlib.sha256(man_b).hexdigest(), hashlib.sha256(tags_b).hexdigest()
     n_tags = sum(1 for l in tags_b.decode().splitlines() if l.split("#", 1)[0].strip())
-    man_name, tags_name = os.path.basename(MANIFEST), os.path.basename(tags_rel)
-    args = ["--expected-sha", a.expected_sha, "--stage", STAGE, "--tags-file", f"../x1_inputs/{tags_name}",
+    man_name, tags_name = os.path.basename(j["manifest"]), os.path.basename(tags_rel)
+    args = ["--expected-sha", sha, "--stage", j["stage"], "--tags-file", f"../x1_inputs/{tags_name}",
             "--tags-sha256", tags_sha, "--manifest", f"../x1_inputs/{man_name}", "--manifest-sha256", man_sha,
-            "--experiments", "X1", "--tasks", a.task, "--fit-lanes", str(a.fit_lanes),
-            "--fit-timeout-s", str(a.fit_timeout_s), "--max-attempts", "2", "--guard-margin-s", str(a.guard_margin_s)]
+            "--experiments", j["experiments"], "--tasks", a.task, "--fit-lanes", str(a.fit_lanes),
+            "--fit-timeout-s", str(a.fit_timeout_s), "--max-attempts", "2", "--guard-margin-s", str(a.guard_margin_s),
+            *(["--slots", str(j["slots"])] if j["slots"] else [])]
     command = "\n".join([
         "#SBATCH --partition=gpu",
         "#SBATCH --account=jhpce",
@@ -109,7 +126,7 @@ def main(argv=None):
         f'printf "%s  %s\\n" {man_sha} {shlex.quote(man_name)} {tags_sha} {shlex.quote(tags_name)} | sha256sum -c --quiet',
         f'cp {shlex.quote(man_name)} {shlex.quote(tags_name)} "$JOBDIR/x1_inputs/"',
         'git clone -q --no-checkout "$PWD/wcd.bundle" "$JOBDIR/repo"',
-        f'git -C "$JOBDIR/repo" -c advice.detachedHead=false checkout -q {a.expected_sha}',
+        f'git -C "$JOBDIR/repo" -c advice.detachedHead=false checkout -q {sha}',
         "rc=0",
         'bash "$JOBDIR/repo/cluster/jhpce/prod_fit_job.sh" ' + " ".join(shlex.quote(x) for x in args) + " || rc=$?",
         'for f in "$JOBDIR/logs/job_summary.json" "$JOBDIR/harvest.json"; do [ ! -f "$f" ] || cp "$f" .; done   # KB-sized; the harvest stays on fastscratch',
@@ -117,17 +134,17 @@ def main(argv=None):
         'exit "$rc"',
     ])
     rt = run_timeout_s(a.walltime, a.queue_allowance_h, a.chain_position)
-    plan = dict(job=f"x1_{a.task}", tasks=[a.task], after_slurm_job=a.after_slurm_job, chain_position=a.chain_position,
+    plan = dict(job=f"{a.job}_{a.task}", tasks=[a.task], after_slurm_job=a.after_slurm_job, chain_position=a.chain_position,
                 n_tags=n_tags, tags_sha256=tags_sha, manifest_sha256=man_sha,
-                expected_sha=a.expected_sha, job_args=args, inputs_dir="../x1_inputs",
+                expected_sha=sha, job_args=args, inputs_dir="../x1_inputs",
                 submit=dict(command=command,
                             inputs=[{"src": a.bundle, "dst": "wcd.bundle"},
-                                    {"src": os.path.join(REPO, MANIFEST), "dst": man_name},
+                                    {"src": os.path.join(REPO, j["manifest"]), "dst": man_name},
                                     {"src": os.path.join(REPO, tags_rel), "dst": tags_name}],
                             outputs=["job_summary.json", "harvest.json", "slurm-*.out"], run_timeout_s=rt,
                             intent=(f"JHPCE gpu/jhpce 1x L40S (gpu:l40s:1), {a.cpus} CPU {a.mem}, wall {a.walltime}: "
-                                    f"X1 fits {a.task} ({n_tags} rows: X1 adversarial arms) at prereg-tier12-v2 "
-                                    f"{a.expected_sha[:10]}, fit only, harvest on fastscratch"
+                                    f"{j['what'].format(task=a.task, n=n_tags)} at {j['tag']} "
+                                    f"{sha[:10]}, fit only, harvest on fastscratch"
                                     + (f"; starts after Slurm job {a.after_slurm_job} ends" if a.after_slurm_job else "")
                                     + f"; harness clock {rt / 3600:g} h")))
     print(json.dumps(plan, indent=1))
