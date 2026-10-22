@@ -130,7 +130,6 @@
 \pp{Meth-7}{The main benchmark fits each penalty at the six strengths its family received in the pilot, on all eight tasks, to ask whether a reference critic keeps different biology than a discriminator at equal batch removal.}
 \begin{itemize}
 \item It uses both decoders and seeds 0--4: plain scVI (80 fits), the scvi-tools adversarial classifier (40 fits, conditioned decoder only) and six penalties at six strengths (480 fits each), 3,000 fits in all.
-\item \res{fits completed and failed per method and decoder; Res-1.}
 \item The pilot rules were frozen on 4 October 2026, before the pilot reported here was run; their amendments and the main-benchmark analysis were frozen on 16 October 2026, before anyone read a main-benchmark score (19 fits had been scored but not read), and the analysis is run once; the follow-up rule was registered before any follow-up fit was scored.
 \item Supplement: registration dates and amendment, early-scored fits, grid-edge extension fits, deviations.
 \end{itemize}
@@ -139,14 +138,12 @@
 \item Equal strength is not equal correction: scales differ and biology trades off against batch removal, so biology is compared at one batch score.
 \item The matched level $b^*$ lies halfway between plain scVI's mean batch score and the highest mean batch score all six penalties reach at strengths with no failed fit, for each task and decoder.
 \item A task and decoder pair is low-signal if that gap is under 0.02, because $b^*$ then cannot be placed reliably; such pairs are reported separately. In the pilot, immune and simulation 1 with the conditioned decoder were low-signal (gaps 0.019, 0.007).
-\item \res{low-signal pairs and methods that never reach $b^*$ in the main benchmark; Res-1.}
 \end{itemize}
 \pp{Meth-9}{The primary comparison reads biology at $b^*$ for the reference critic and the discriminator, with trade-off area as a second view.}
 \begin{itemize}
 \item Each method's curve joins plain scVI and its six strengths by their mean batch and biology scores; biology at $b^*$ is read where the curve first reaches $b^*$, interpolating between neighbouring strengths.
 \item The result is the reference critic's reading minus the discriminator's, per task and decoder, with uncertainty from repeating the reading with each of the five seeds left out; a task is not evaluable if it is low-signal, either curve never reaches $b^*$, or fewer than four of the five readings exist.
 \item The trade-off area uses all six points rather than one reading: it is the area of the batch-score by biology-score plane that a method's points reach beyond a corner at plain scVI's batch score and 0.10 below its biology score, divided by the batch gap that sets $b^*$ so that tasks can be compared.
-\item \res{difference in biology at $b^*$ and in trade-off area, per task and decoder, with intervals; Res-4, Res-5.}
 \end{itemize}
 \pp{Meth-10}{Collapse rate and local versus global removal add two further views of the same comparison.}
 \begin{itemize}
@@ -154,7 +151,6 @@
 \item The collapse rate (collapsed share of 30 fits per method, task and decoder) has Clopper--Pearson intervals \citep{clopper1934use} (exact binomial 95\% intervals); the reference critic's rate minus the discriminator's is pooled with a margin of 5 percentage points.
 \item Two methods can reach one batch score by different routes. Local removal averages three neighbourhood metrics (integration local inverse Simpson's index, k-nearest-neighbour batch-effect test, graph connectivity); global removal averages two whole-embedding metrics (principal-component regression, batch average silhouette width).
 \item The batch score is $(3\,\mathrm{local}+2\,\mathrm{global})/5$, so at $b^*$ more local removal means less global; the question is whether the reference critic reaches $b^*$ with more local mixing than the discriminator, tested at the primary comparison's crossing with an exact sign test over real tasks and the pooled model.
-\item \res{collapse rates with intervals and pooled difference; local-minus-global difference per decoder; Res-5, Res-6.}
 \end{itemize}
 \pp{Meth-11}{Results from the six real tasks are pooled in one model, and a rank test is reported as description only.}
 \begin{itemize}
@@ -168,7 +164,7 @@
 \begin{itemize}
 \item Quality is the selection score, 0.4 times the batch score plus 0.6 times the biology score (the scIB overall weights, unscaled), so it does not depend on which methods are compared.
 \item For each method, task and decoder, the best strength has the highest mean selection score over five seeds; the good range holds every strength whose mean is at least the lower end of the best strength's 95\% confidence interval, and its width is the span from smallest to largest strength in decades (factors of ten).
-\item The width is descriptive, with no decision rule. \res{width in decades per method, task and decoder; best strength at the grid edge; Res-7.}
+\item The width is descriptive, with no decision rule.
 \end{itemize}
 \pp{Meth-13}{Single-strength tables and equal numbers of tries place each penalty against plain scVI and standard tools.}
 \begin{itemize}
@@ -176,7 +172,7 @@
 \item Harmony, Scanorama and sysVI are run at six settings each, scANVI and PCA at one, with seeds 0--4 for the neural methods and one run otherwise (408 fits with sensitivity settings).
 \item In the single-strength tables each penalty uses a strength not tuned on that task: the strength with the best mean selection score on real tasks of other families (related tasks never choose for each other), shown beside the task's own best strength as an optimistic bound.
 \item The equal-tries comparison gives each method the expected best selection score among $k$ settings drawn at random, $k=1$--6, so methods with more settings gain no advantage; it is optimistic, because the best setting is chosen and scored on the same data, and scANVI has its own stratum.
-\item Both are descriptive. \res{selection score per method at one strength; expected best of $k$; whether any adversary beats plain scVI, Harmony, Scanorama or sysVI; Res-9, Res-10.}
+\item Both are descriptive.
 \end{itemize}
 \pp{Meth-14}{A follow-up experiment tests whether the divergence, rather than the regularisation, optimiser or update steps that also distinguish a critic from a discriminator, explains any gap.}
 \begin{itemize}
@@ -190,7 +186,6 @@
 \item Per decoder, the contrast is the spectrally normalised pooled critic minus the spectrally normalised discriminator with the critic's optimiser, both at one step, which differ only in the loss and its target.
 \item Biology is read at $b^*$ by interpolating along the three strengths where they bracket $b^*$ (unlike the primary comparison, with no plain-scVI starting point, and all three leave-one-seed-out readings required); otherwise the task is not evaluable. For every task the difference at the matched strengths is also reported, labelled fixed-strength. The 0.01 margin and 0.95 rule are as in the main analysis; Holm's correction covers the two results of the companion test, which cannot reject with three tasks (smallest $p$ 0.25).
 \item The divergence is said to explain the main gap only if the primary comparison has a declared direction for that decoder, the contrast has the same direction, and every regularisation and step-count contrast is smaller in size.
-\item \res{contrast estimate, interval and declaration per decoder; the registered secondary contrasts (regularisation, optimiser and step count); the explanation rule applied; Res-8.}
 \item Supplement: no direction can be declared with fewer than three evaluable tasks.
 \end{itemize}
 \pp{Meth-16}{A planned pre-check will adjust the strengths of the two arms of the confirmatory contrast.}
@@ -198,7 +193,7 @@
 \item The discriminator arm inherits the plain discriminator's strengths although its learning rate is ten times lower, and the pooled-critic arm inherits the five-step critic's strengths and was never piloted, so either may never reach $b^*$ and the contrast could not be read.
 \item The pre-check has not been run; it will fit 36 models, 18 per arm, on small ATAC, immune and simulation 1 with both decoders, seed 100, at the three strengths the pilot gave the base method.
 \item The rule was fixed before any pre-check fit: for each arm, of the four task and decoder pairs not low-signal in the pilot, if at least three of those pairs stay below $b^*$ at all three strengths, its strengths move one step up the half-decade sequence (\ldots, 0.03, 0.1, 0.3, 1, 3, \ldots); if at least three stay above $b^*$ at all three, one step down; otherwise they stay, with no second pre-check.
-\item \res{decision for each arm (up, down or keep); Res-8.}
+\item \res{outcome for each arm (strengths moved up, moved down or kept), to be filled here once the pre-check is run.}
 \end{itemize}
 \pp{Meth-17}{An exploratory premise check asks how separable batches are and how adversary gradients behave in training.}
 \begin{itemize}
@@ -206,14 +201,14 @@
 \item It needs no new fits: separability uses the 80 plain-scVI embeddings (8 tasks, 2 decoders, 5 seeds) and gradients use the per-epoch training logs of the 2,880 fits of the six penalties, with no strengths or seeds selected.
 \item A 15-nearest-neighbour classifier predicts each cell's batch (five-fold cross-validation); separability is the area under the receiver operating characteristic curve (AUC; 0.5 is chance, 1 is perfect) averaged over batches, and batches count as nearly separable if it is at least 0.95 in all five seeds of a task and decoder.
 \item Each epoch logs the adversary's gradient norm (the penalty's gradient with respect to the embedding, before multiplying by strength) and, for the discriminator, its accuracy at naming each cell's batch; a gradient vanishes early if it stays at or below 10\% of its own peak from within the first 10\% of epochs.
-\item The result is descriptive, with no pooled test and no claim about whether the premise holds. \res{separability per task; gradient norm and discriminator accuracy by epoch; Res-2.}
+\item The result is descriptive, with no pooled test and no claim about whether the premise holds.
 \end{itemize}
 \pp{Meth-18}{An exploratory label-transfer check asks whether cell types learned in some batches are recovered in a held-out batch.}
 \begin{itemize}
 \item Label transfer tests a downstream use of the embedding, annotating a new batch from the others, at matched batch removal.
 \item It needs no new fits: it uses the embeddings of each method at its matched strength (nearest $b^*$ in batch score, never chosen by label-transfer accuracy) for five seeds, plus plain scVI and the scvi-tools adversarial classifier, labelled unmatched.
 \item Each batch is held out in turn and a 15-nearest-neighbour classifier trained on the others predicts its cell types; cell types found in only one batch are dropped, a choice made from the labels alone.
-\item F1 (the harmonic mean of precision and recall) is computed per cell type and averaged over types, with the gap between each matched batch score and $b^*$ printed beside it; there is no test or decision rule, and low-signal pairs are tabulated but left out of summaries. \res{macro and per-type F1 by method; Res-6.}
+\item F1 (the harmonic mean of precision and recall) is computed per cell type and averaged over types, with the gap between each matched batch score and $b^*$ printed beside it; there is no test or decision rule, and low-signal pairs are tabulated but left out of summaries.
 \end{itemize}
 
 \hd{Results}{1,500 words; 10 paragraphs}
