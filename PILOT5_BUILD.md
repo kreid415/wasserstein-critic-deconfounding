@@ -24,7 +24,7 @@ The task text expects Sinkhorn extension strengths on the **unconditioned** deco
 | `D/tier12_v3/rules/r1_pass2/r1_record.json` (the frozen R1 record) | `js|0` (unconditioned): a1_grid starts at 0.01 (L78-91), rounds low=1 (L545-548) | `sinkhorn|1` (conditioned): a1_grid ends at 30000 (L2216-2229), rounds high=1 (L2683-2686); `sinkhorn|0` rounds 0/0 (L2201-2204) |
 | `D/tier12_v3/rules/r1_pass1/a1_extension.tsv` (R1's input, sha256 6c38c116...ecffe) | 0.03 and 0.01, `_c0_` | 10000 and 30000, `_c1_` (row 22: `A1_atac_small_sinkhorn_l10000_c1_s100`) |
 | `D/tier12_v3/rules/{r1_pass2/m.r1,r4_pass2/m.r4a1,r23/m.x1}.tsv` | `_c0_` | `_c1_` |
-| repo `manifests/a1_extension_r1_round1.tsv`, `manifests/*_v3.{r1,r4a1,x1}.tsv`, `experiments/A1_ext_r1_round1/` | `_c0_` | `_c0_` (older round, made before the Sinkhorn fix; PREFLIGHT line 7 says "sinkhorn/0 c0") |
+| repo `manifests/a1_extension_r1_round1.tsv`, `manifests/*_v3.{r1,r4a1,x1}.tsv`, `experiments/A1_ext_r1_round1/` | `_c0_` | `_c0_` (matches the round-1 extension that `experiments/A1_ext_r1_round1/PREFLIGHT.md` line 7 describes as "sinkhorn/0 c0", dated 2026-10-10, before the 2026-10-13 Sinkhorn fix; INFERENCE: how the v3-named copies came to carry it was not checked) |
 
 Decision used here: follow the v3 records, because R1 at the tag read them (`r1_record.json` inputs, L5003-5011). Grid-edge strengths per new dataset: discriminator, unconditioned, 0.01 and 0.03; Sinkhorn, **conditioned**, 10000 and 30000. Row counts are the same either way. The repo copies under `manifests/` are inconsistent with the records and should not be used as the comparison reference for Sinkhorn.
 
