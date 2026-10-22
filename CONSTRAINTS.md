@@ -536,3 +536,10 @@
 - keywords: selection score, transfer lambda, best-of-k, window width, min-max, scIB weights
 - files: docs/ANALYSIS_SPEC.md, scripts/analysis_x1.py
 - notebook: NB-20261014-11
+
+## SI-78 · active · wording
+- rule: Do not refer to this study, its comparison, pilots or analysis as "pre-registered" (nor "registered", "pre-registration" or "registered plan"), in the paper, outline, supplement, figure captions, README or chat. The replacement wording is not yet decided; the current paper/outline.tex (paper 476110b) still has 8 occurrences, left unedited by the user's instruction to stop the outline changes.
+- source: "stop referring to this as pre-registered" ... "add the rule, stop the outline changes" (user, 2026-10-22)
+- added: 2026-10-22
+- keywords: pre-registered, preregistered, pre-registration, registered, registration
+- files: paper/outline.tex, paper/paper.tex
