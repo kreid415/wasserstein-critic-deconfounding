@@ -659,3 +659,155 @@ be". The entries of 2026-10-03 and 2026-10-04 describe work that is done and fro
 | 17 | What should we do about small tidiness warnings in the code? | Leave them: no code change for the 28 ruff warnings of 08f1e3c, 23 of them outside the identity-proof code; the count goes in the note of question 16. | NB-20261015-12 (notebook entry only) | notebook/2026-10-15.md; code housekeeping, no rule of this file |
 | 18 | Should we delete 11 old review copies of the code and two stray files? | Delete after a check: each of the 11 old review worktrees is checked for uncommitted work first, and any that has some is reported and kept; the folders and the two stray files go to the Trash through the approval prompt. | NB-20261015-13 (notebook entry only) | notebook/2026-10-15.md; housekeeping, no rule of this file |
 | 19 | Do you approve the remaining wording changes from earlier rounds? | Approved as shown in the diff: the wording of I091 (R1 depends on the trajectory score through its noise estimate, SI-53), D-01 (PAPER_PLAN's P1 comparator), D-02 (the power claim) and the format of the amendment table at the top of this section (DOC-03). | NB-20261015-14 (notebook entry only) | this file, entries of 2026-10-13 on R1 and the trajectory score and on PAPER_PLAN, and the amendment table; docs/PAPER_PLAN.md sections 3.2 and 5 |
+
+- **2026-10-22, the main benchmark is stopped, the penalty-strength pilot is extended to the five datasets it did not
+  cover, the strength-grid rule is re-run on all eight datasets, and the pilot is scored where a 20-latent check allows
+  (user decisions SI-108 to SI-113, the entries of CONSTRAINTS.md that record the user's answers; the check of the
+  scorer's commit is item 7).**
+  Status: decided by the user on 2026-10-21 and 2026-10-22 and written on 2026-10-22. Done: the main benchmark was
+  stopped (2026-10-21); the manifest of the 1,890 new pilot fits was built (commit 89ee2df on branch pilot5); the 5
+  fitting jobs were submitted (2026-10-22, about 08:10 New York time); the job of the 20-latent scoring check was
+  submitted before its result was known (item 6). Planned, in this order: the scoring check, the scoring of the pilot,
+  the re-run of the strength-grid rule, and the keep-or-refit step for the main benchmark. No fit of the 1,890 has
+  been scored, and the strength-grid rule cannot run on them until every one is scored or recorded as failed
+  (prereg_rules.outcomes, lines 311-313). Plain names used below: the penalty-strength pilot is A1 (seeds 100 to 102;
+  section 2); the main benchmark is X1 (8 datasets, both decoders, seeds 0 to 4); the strength-grid rule is R1
+  (section 2); the matched-strength rule is R4 (section 4); the companion pilots are A2 (does the adversary read the
+  posterior mean or a posterior sample of the latent coordinates) and A3 (are the latent coordinates standardised),
+  decided by the input rule R2 and the standardisation rule R3 (section 3). JHPCE is the Johns Hopkins University
+  cluster, Slurm is its job scheduler, L40S is the model of its graphics card, and a latent is the file that holds one
+  fitted embedding. This entry changes no threshold, constant or rule code. None of its decisions uses a
+  main-benchmark score, a score of any of the 1,890 new fits, or the result of the scoring check.
+  - (1) The main benchmark is stopped (SI-108). The user stopped X1 on 2026-10-21 at about 21:58 New York time. On
+    JHPCE, job 36518712 (immune_hum_mou) and job 36518713 (atac_large) were cancelled after about 23.6 hours, and
+    jobs 36518737, 36518738 and 36518744 (lung, sim2 and pancreas) were cancelled before they started. The run on the
+    user's workstation had already stopped when the machine rebooted (2026-10-21 19:49 New York time; its last latent
+    was written at 19:30). About 572 main-benchmark latents exist: 405 on JHPCE scratch (the cluster's working
+    storage, which is purged by age; all 405 were fitted with a penalty) and 167 on the workstation (10 of them
+    without a penalty). The job numbers, times and counts are the user's; they were not checked against the
+    scheduler or re-counted for this entry, because the cluster was not contacted and the blinding rule forbids
+    opening main-benchmark files. Which of these fits the benchmark keeps is decided in item 5. No main-benchmark
+    score has been examined, in the sense of the entry of 2026-10-14 on the disclosure (a person read a value, or an
+    analysis script used it). The records in this repository that bear on this are the SHA-256 list of every
+    main-benchmark and baseline score file (experiments/x1_x13_score_hashes_20261015/), the disclosure entry above
+    (three displays of values to an AI agent, all listed, and no examination), the user's statement of 2026-10-15
+    that nobody read a value (NB-20261015-15) and the notebook up to 2026-10-16. They end on 2026-10-16 and say
+    nothing about 2026-10-17 to 2026-10-22, so the agent that wrote this entry could not verify the statement for
+    those days from the repository. Two facts support it. The JHPCE jobs fit only and score nothing
+    (cluster/jhpce/prod_fit_job.sh lines 2 and 137: run_stage.py --no-score), so none of the 405 cluster latents has a
+    score; and the writer of this entry opened no main-benchmark file. Whether the workstation run scored any latent
+    after 2026-10-16 was not checked.
+  - (2) The pilot is extended to the five untested datasets (SI-109). A1 fitted three of the eight datasets
+    (atac_small, immune and sim1) with both decoders (the conditioned decoder receives the batch label, the
+    unconditioned one does not; section 9 glossary). It is extended to the five datasets it never covered:
+    immune_hum_mou, atac_large, lung, sim2 and pancreas, with the same seeds 100 to 102. That is 1,890 fits, 378 per
+    dataset. The 378 are the 366 base fits of each finished dataset (the no-penalty fit, 3 seeds x 2 decoders = 6,
+    plus each of the six adversarial arms at the ten base strengths 0.1 to 3000, 2 decoders and 3 seeds = 360) and
+    the 12 fits that the first extension round of R1 added at the edges of the grid: the discriminator with the
+    unconditioned decoder at strengths 0.01 and 0.03, and Sinkhorn with the conditioned decoder at strengths 10,000
+    and 30,000, 3 seeds each. The manifest (the table with one row per fit) is
+    manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv, SHA-256
+    5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff. Its rows equal the old pilot rows in all 18
+    settings compared (every setting except the dataset name, the row's tag and the number of training epochs, which
+    follows each dataset's cell count); scripts/compare_a1_pilot5.py makes this comparison and was run again for this
+    entry (PASS), and experiments/pilot5_amend_20261022/verify_amend5.py recounts the rows. The 1,890 fits run on
+    JHPCE L40S graphics cards, one job per dataset (Slurm 36551148 to 36551152, submitted 2026-10-22 at about 08:10
+    New York time; the numbers are the user's), from the tagged commit 10a1ca5 (prereg-tier12-v3). Each dataset's
+    pilot therefore sits on one machine, as SI-17 requires: the three finished datasets on the workstation, the five
+    new ones on the L40S. The three finished datasets are reused, not refitted. The user's reason: a reviewer can ask
+    why 3 of 8 datasets set the grid, and with the batch-conditioned decoder two of the three (immune and sim1) had
+    too small a range of batch removal to place the target batch score reliably (the flag bstar_low_signal, entry of
+    2026-10-13 on low-signal cells; the frozen record gave a range of 0.0188 for immune and 0.0069 for sim1, against
+    the limit of 0.02).
+  - (3) The companion pilots are not extended (SI-110). A2 and A3 stay on atac_small and immune. Their decisions stand:
+    the adversary reads the posterior mean and standardisation is off (section 3). R4 computes its target batch score
+    for each dataset and decoder separately (prereg_rules.py lines 561 to 573), so adding datasets cannot change the
+    atac_small and immune cells that A2 and A3 used. This entry does not re-run R4, R2 or R3.
+  - (4) The strength-grid rule is re-run on all eight datasets (SI-111). R1 is run again with its code unchanged
+    (scripts/prereg_rules.py and scripts/freeze_a1_grid.py as frozen at the tag; a check of that code for eight
+    datasets found no line to edit, PILOT5_BUILD.md section 7, which ran the real rule scripts on made-up scores for 8
+    datasets). It sets one shared six-point grid for each penalty-strength family and decoder, 8 grids in all, for
+    every dataset; the rule already requires this and stops if the datasets of a family and decoder have different
+    strengths (prereg_rules.py lines 486 to 488). The user rejected a separate grid for each dataset. The inputs are
+    the 3,024 pilot fits of the eight datasets: the 1,098 base fits of the three finished datasets, their 36 fits of
+    the first extension round (D/tier12_v3/rules/r1_pass1/a1_extension.tsv, SHA-256
+    6c38c11671862637d6f5e4ff998549eeeb87304c845231c56270ec3c78eecffe) and the 1,890 new fits. The 9 fits that R4
+    added for matching (immune, conditioned decoder, strength 0.03: discriminator, reference and pooled critics, 3
+    seeds each) are left out, as when R1 first ran: they are not grid points, and with them immune would have a
+    different grid from the other datasets, which the rule refuses. Every block (dataset, decoder and arm) is judged
+    on its own results, and a family's interval runs from the lowest of the blocks' no-effect limits to the highest of
+    their over-correction limits (section 2), so the five new datasets can widen the interval and cannot narrow it. If a block
+    of a new dataset reaches an edge of the grid, R1 asks for an extension of the whole family and decoder: 2 more
+    strengths beyond that edge, fitted on all eight datasets (3 seeds, every arm of the family), each dataset on the
+    machine that fitted its earlier pilot fits (SI-17). R1 allows 2 extension rounds per edge (prereg_rules.py line
+    50). The first extension round already counts as round 1 at two edges (the discriminator with the unconditioned
+    decoder at the low end, Sinkhorn with the conditioned decoder at the high end), so one round is left there and two
+    at every other edge; an edge still open after its last round is accepted and flagged as in section 2. The result
+    is written as a record and committed before item 5 starts (section 6, item 3).
+  - (5) Keep or refit the main benchmark's fits (SI-112). The decision is taken separately for each penalty-strength
+    family and decoder (8 decisions), once the record of item 4 is frozen. (a) If the new grid equals the grid that
+    the main benchmark used (the six strengths of that family and decoder in the manifest that X1 was running), every
+    finished main-benchmark fit of that family and decoder is kept and X1 resumes where it stopped. (b) If the new
+    grid differs, the finished fits at strengths that are also in the new grid are kept, only the new strengths are
+    fitted, on all eight datasets, and the finished fits at strengths that left the grid are removed from the analysis
+    but stay on disk. Main-benchmark rows that depend on no rule (the no-penalty arm none and scVI's own adversary,
+    scvi_adv; section 0) are not affected. The main-benchmark seeds, 0 to 4, stay disjoint from the pilot seeds, 100 to
+    102.
+  - (6) Where the pilot is scored (SI-113). One rule input must come from one scorer: the rule scripts refuse scores
+    that mix scorer commit, uncommitted-changes flag, processor instruction level (cpu_simd), numba setting
+    (numba_cpu_name, the setting of the compiler behind the nearest-neighbour search) or package versions
+    (prereg_rules.py line 73 and lines 247 to 266). The scores of the three finished datasets were made on the
+    workstation (AMD Ryzen 5 3600, instruction level avx2). The cross-host scoring test of 2026-10-03 failed:
+    docs/jhpce/GATE_JHPCE.md line 3 states that the scores of identical latents differed between the workstation and
+    JHPCE processors, so every benchmark latent is scored locally. The user therefore decided that the
+    site for the pilot is chosen by a check declared before its result was known, and chose to amend rather than to
+    rescore all eight datasets up front. The check scores 20 latents of the finished datasets (list and SHA-256
+    hashes in cluster/jhpce/score_check/check_latents.tsv: 17 non-Sinkhorn and 3 Sinkhorn fits; atac_small 6, immune 7,
+    sim1 7; both decoders; every arm at least twice; seeds 100 to 102) on JHPCE nodes with AMD Zen 2 processors
+    (Slurm constraint znver2), which report the workstation's instruction level avx2, with NUMBA_CPU_NAME unset as on
+    the workstation. The scoring is run twice, run1 and run2. cluster/jhpce/compare_scores.py compares two sets of
+    scores, and a comparison passes only if, for every one of the 20 latents, both files hold the same latent SHA-256
+    and the same package-version string and all 19 metric columns are bit-identical as 64-bit numbers (an empty cell
+    counts as not-a-number and equals only another empty cell; no tolerance). Comparison A is run1 against the
+    workstation's scores of the same latents, comparison B is run2 against run1. (i) If A and B both pass, the five new
+    datasets are scored on Zen 2 nodes and the three finished datasets keep their workstation scores. (ii) If B passes
+    and A fails, all eight pilot datasets are scored on Zen 2 nodes; the workstation scores of the three finished
+    datasets stay on disk and are not used by R1. (iii) If B fails, whatever A shows, the five new datasets are scored
+    on the workstation. A comparison that ends with exit status 2 (a file, row or column is missing) is neither a pass
+    nor a failure: it is completed or repeated before a case is chosen (clarification added by the writer of this
+    entry). The check job is Slurm job 36550869 (its record in the assistant app is 6bbb6be0; both numbers are the user's
+    and were not checked against the scheduler); this entry does not report its result. Limit: the 20 latents are all from the three small datasets.
+    No latent of the five new datasets exists yet, and no scored latent of the two largest (immune_hum_mou, 97,861
+    cells, and atac_large, 84,813 cells) exists outside the main benchmark (SCORE5_BUILD.md section 5), so the check
+    does not test identity on the large datasets.
+  - (7) The scorer commit (check made 2026-10-22). The cluster scoring runs from commit a4989ff (branch score5),
+    whereas the finished datasets' scores carry c88cce3 (non-Sinkhorn arms, read as the tag's commit under SI-54) or
+    the tag commit 10a1ca5 (the redone Sinkhorn arm, SCORE5_BUILD.md section 6; confirmed on one score file,
+    A1_sim1_sinkhorn_l30_c0_s100_ebcbe68a, which also records host gimli, AMD Ryzen 5 3600, avx2 and an empty numba
+    setting). The check with git: `git diff --stat 10a1ca5 a4989ff` lists 7
+    files, all of them additions (SCORE5_BUILD.md, two lines in cluster/README.md, cluster/jhpce/score_array.sh,
+    score_plan.py, compare_scores.py and score_check/check_latents.tsv, and tests/jhpce/test_score_check.py), and the
+    git trees of scripts/, src/, configs/, docs/, manifests/ and cluster/envspec/ have the same identifier at both
+    commits. So scripts/score_scib_native.py (blob 800d78ee), scripts/host_info.py (e47b195c; the only file of this
+    repository that the scorer imports), scripts/run_stage.py (5fe6fb35; it sets the thread and kBET-seed environment
+    that the scorer receives), the scorer's settings in those files and the environment specifications are
+    byte-identical at the two commits. The commit af67f3a, which SCORE5_BUILD.md names in its commands, differs from
+    a4989ff only by SCORE5_BUILD.md. git cannot show the installed package versions, the processor, or the environment
+    variables that the new job script sets: the first two are recorded in every score row (scorer_versions, cpu_simd,
+    numba_cpu_name) and compared by the check of item 6, and the job script is tested to pass the variables that
+    run_stage.py gives its scorer (SCORE5_BUILD.md section 10). Declaration: scores made at a4989ff are result-identical
+    to scores made at 10a1ca5, for every arm. It matters only in case (i) of item 6, where one rule input would
+    otherwise mix scorer commits. In case (ii) every pilot score comes from the cluster at one commit, and in case
+    (iii) the new scores come from the workstation. docs/EQUIVALENT_COMMITS.json is not changed by this entry: it
+    holds one declared commit (c88cce3), and prereg_rules.refuse_uncovered and equivalent_commits (lines 220 to 244)
+    read one object with one key "commit", so a second commit cannot be added in its existing format, and the rule
+    scripts would still refuse a rule input that mixes a4989ff with the other commits. Letting the file hold a list
+    needs a change to frozen rule code and to the two tests that read the single entry (tests/stage/test_run_stage.py
+    line 670, tests/prereg/test_provenance_rule.py line 110), which needs the user's approval; until then the refusal
+    is loud and stops the rule script.
+  - (8) What this changes in the text above. The statement that A1 covers atac_small, immune and sim1 (stage table in
+    section 0 and section 2) becomes: the pilot covers all eight datasets, the three finished ones and the five of
+    item 2. The disclosure at the top, that the X1 penalty-strength ranges come from 3 of the 8
+    datasets, holds for the grids that the main benchmark used until the record of item 4 is frozen, and is replaced by
+    "from all 8 datasets" once it is (the pilot seeds stay disjoint from the main-benchmark seeds); the first bullet of
+    section 8 follows it. Sections 3 and 4 (A2 and A3 on two datasets, R2, R3, R4) are not changed.

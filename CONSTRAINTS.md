@@ -653,3 +653,45 @@
 - added: 2026-10-16
 - keywords: *
 - notebook: NB-20261016-26
+
+## SI-108 · active · process
+- rule: The main benchmark (X1) is stopped (2026-10-21, about 21:58 New York time): JHPCE jobs 36518712 (immune_hum_mou) and 36518713 (atac_large) cancelled after about 23.6 h; 36518737, 36518738 and 36518744 (lung, sim2, pancreas) cancelled before they started; the workstation run had stopped at a reboot (2026-10-21 19:49, last latent 19:30). About 572 X1 latents exist (405 on JHPCE scratch, all with a penalty; 167 on the workstation, 10 of them without). They stay on disk; which are kept is decided by SI-112. No X1 score has been examined (SI-78); the repository's blinding records end on 2026-10-16, so this could not be verified for 2026-10-17 to 2026-10-22 (docs/PREREG.md section 9, entry of 2026-10-22, item 1).
+- source: user decision, 2026-10-21 (stop the main benchmark and cancel the five jobs); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: X1, stop, cancel, JHPCE, scancel, reboot, latents, blinding
+- files: docs/PREREG.md
+
+## SI-109 · active · method
+- rule: The penalty-strength pilot (A1, seeds 100-102) is extended to the 5 datasets it never covered (immune_hum_mou, atac_large, lung, sim2, pancreas): 1,890 fits, 378 per dataset = the same 366 base rows plus the 12 grid-edge rows of the first extension round (discriminator, unconditioned decoder, 0.01 and 0.03; Sinkhorn, conditioned decoder, 10,000 and 30,000). Manifest manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv, sha256 5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff; fitted on JHPCE L40S at the tagged commit 10a1ca5 (5 jobs submitted 2026-10-22 about 08:10 New York time, Slurm 36551148-36551152). The 3 finished pilot datasets are reused, not refitted. Reason: a reviewer can ask why 3 of 8 datasets set the grid, and with the batch-conditioned decoder two of the three (immune, sim1) were low-signal.
+- source: user decision, 2026-10-21/22 (extend the pilot to the 5 untested datasets); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: A1, pilot, extension, immune_hum_mou, atac_large, lung, sim2, pancreas, 1890, manifest, L40S
+- files: manifests/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv, docs/PREREG.md
+
+## SI-110 · active · method
+- rule: The companion pilots are not extended: A2 (adversary input) and A3 (latent standardisation) stay on atac_small and immune, and the posterior-mean input and standardisation-off decisions (R2, R3) stand. R4 targets are computed per dataset and decoder (scripts/prereg_rules.py lines 561-573), so the atac_small and immune cells they used are unchanged.
+- source: user decision, 2026-10-21/22 (do not extend A2 and A3); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: A2, A3, R2, R3, R4, companion pilots, adversary input, standardisation
+- files: docs/PREREG.md
+
+## SI-111 · active · method
+- rule: The strength-grid rule (R1) is re-run on all 8 datasets with its code unchanged and ONE shared 6-point grid per penalty family and decoder (a separate grid per dataset was rejected). Inputs: the existing pilot base rows, the first-round extension rows and the 1,890 new rows; the 9 matched-strength extension rows (immune, conditioned, 0.03) are excluded, as when R1 first ran. If R1 asks for a further extension round, the extension fits run on all 8 datasets as the rule specifies.
+- source: user decision, 2026-10-21/22 (re-run R1 on 8 datasets, one shared grid); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: R1, grid, strength grid, 8 datasets, shared grid, extension round, freeze_a1_grid
+- files: scripts/prereg_rules.py, scripts/freeze_a1_grid.py, docs/PREREG.md
+
+## SI-112 · active · method
+- rule: Keep-or-refit rule for the main benchmark (X1), per penalty family and decoder, once the 8-dataset R1 record is frozen: (a) new grid equal to the grid X1 used: keep every finished X1 fit and resume X1 where it stopped; (b) different grid: keep finished X1 fits at strengths still in the new grid, fit only the new strengths, on all 8 datasets; fits at strengths dropped from the grid leave the analysis but stay on disk. Rule-free X1 rows (no penalty; scVI's own adversary, scvi_adv) are unaffected.
+- source: user decision, 2026-10-21/22 (keep finished main fits where the grid allows); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: X1, keep, refit, resume, grid, strengths, scvi_adv, no penalty
+- files: docs/PREREG.md
+
+## SI-113 · active · method
+- rule: Scoring site for the 1,890 new pilot fits is decided by a pre-declared 20-latent match check on JHPCE Zen 2 nodes (Slurm constraint znver2; cpu_simd avx2 like the workstation; NUMBA_CPU_NAME unset), run twice (run1, run2) and compared with cluster/jhpce/compare_scores.py (bit-identical metric columns, same latent hashes and package-version string): (i) run1 equals the workstation AND run2 equals run1: score the 5 new datasets on Zen 2 nodes, the first 3 keep their workstation scores; (ii) run2 equals run1 but run1 differs from the workstation: score all 8 pilot datasets on Zen 2 nodes (old workstation scores kept on disk, not used by R1); (iii) run2 differs from run1: score the 5 new datasets on the workstation. The check job (Slurm 36550869; job record 6bbb6be0 in the assistant app) was submitted before its result was known. Reason for the check: docs/jhpce/GATE_JHPCE.md line 3 (the 2026-10-03 cross-host scoring test failed). The user chose to amend rather than to rescore all 8 up front.
+- source: user decision, 2026-10-21/22 (decide the scoring site by the 20-latent check); the answer as relayed in the brief for the 2026-10-22 amendment, not the verbatim ask_user text
+- added: 2026-10-22
+- keywords: scoring, JHPCE, Zen 2, znver2, match check, compare_scores, workstation, GATE, cross-host
+- files: cluster/jhpce/compare_scores.py, cluster/jhpce/score_check/check_latents.tsv, docs/PREREG.md
