@@ -122,14 +122,14 @@
 \end{itemize}
 \pp{Meth-6}{A pilot on three tasks gave each penalty family its own strength range for each decoder, because strength has a different scale for each penalty.}
 \begin{itemize}
-\item It fitted plain scVI and the six penalties at ten strengths from 0.1 to 3,000 on small chromatin-accessibility (ATAC), immune and simulation 1 tasks, both decoders, seeds 100--102 (1,098 fits); where a range reached the edge of that grid, two further strengths were fitted (36 fits), which is why two ranges below end at 0.03 and 10,000.
+\item It fitted plain scVI and the six penalties at ten strengths from 0.1 to 3,000 on small chromatin-accessibility (ATAC), immune and simulation 1 tasks, both decoders, three seeds (100--102) (1,098 fits); where a range reached the edge of that grid, two further strengths were fitted (36 fits), which is why two ranges below end at 0.03 and 10,000.
 \item Six strengths from this half-decade grid cover a range that runs from the largest strength at which every pilot task still shows no effect to the strength at which every task has over-corrected (batch removal stops rising) or collapsed (a fit fails, or biology falls 0.10 or more below plain scVI); where that span holds fewer than six grid values, the next values above (then below) are added.
 \item Chosen ranges (conditioned, unconditioned decoder): discriminator 0.1--30, 0.03--10; the three critics 0.1--300, 0.3--100; maximum mean discrepancy (MMD) 3--3,000, 3--1,000; Sinkhorn divergence 0.3--10,000, 0.3--300.
 \item Supplement: the noise threshold for no effect, the six strengths of each range, extra fits at grid edges, Sinkhorn pilot refitted after a solver correction.
 \end{itemize}
 \pp{Meth-7}{The main benchmark fits each penalty at the six strengths its family received in the pilot, on all eight tasks, to ask whether a reference critic keeps different biology than a discriminator at equal batch removal.}
 \begin{itemize}
-\item It uses both decoders and seeds 0--4: plain scVI (80 fits), the scvi-tools adversarial classifier (40 fits, conditioned decoder only) and six penalties at six strengths (480 fits each), 3,000 fits in all.
+\item It uses both decoders and five seeds (0--4): plain scVI (80 fits), the scvi-tools adversarial classifier (40 fits, conditioned decoder only) and six penalties at six strengths (480 fits each), 3,000 fits in all.
 \item The pilot rules were frozen on 4 October 2026, before the pilot reported here was run; their amendments and the main-benchmark analysis were frozen on 16 October 2026, before anyone read a main-benchmark score (19 fits had been scored but not read), and the analysis is run once; the follow-up rule was registered before any follow-up fit was scored.
 \item Supplement: registration dates and amendment, early-scored fits, grid-edge extension fits, deviations.
 \end{itemize}
@@ -169,14 +169,14 @@
 \pp{Meth-13}{Single-strength tables and equal numbers of tries place each penalty against plain scVI and standard tools.}
 \begin{itemize}
 \item These ask whether any adversary improves on plain scVI, and how the penalties compare with Harmony \citep{korsunsky2019fast}, Scanorama \citep{hie2019efficient}, sysVI \citep{hrovatin2025integrating}, scANVI (which uses cell-type labels; \citealp{xu2021probabilistic}) and principal-component analysis (PCA), the uncorrected reference.
-\item Harmony, Scanorama and sysVI are run at six settings each, scANVI and PCA at one, with seeds 0--4 for the neural methods and one run otherwise (408 fits with sensitivity settings).
+\item Harmony, Scanorama and sysVI are run at six settings each, scANVI and PCA at one, with five seeds (0--4) for the neural methods and one run otherwise (408 fits with sensitivity settings).
 \item In the single-strength tables each penalty uses a strength not tuned on that task: the strength with the best mean selection score on real tasks of other families (related tasks never choose for each other), shown beside the task's own best strength as an optimistic bound.
 \item The equal-tries comparison gives each method the expected best selection score among $k$ settings drawn at random, $k=1$--6, so methods with more settings gain no advantage; it is optimistic, because the best setting is chosen and scored on the same data, and scANVI has its own stratum.
 \item Both are descriptive.
 \end{itemize}
 \pp{Meth-14}{A follow-up experiment tests whether the divergence, rather than the regularisation, optimiser or update steps that also distinguish a critic from a discriminator, explains any gap.}
 \begin{itemize}
-\item It uses small ATAC, immune and pancreas tasks, both decoders and seeds 10--12, with three strengths per setting (the matched strength of its base method in the main benchmark, meaning the one whose batch score is nearest $b^*$, and its two grid neighbours), so it runs only after the main benchmark is scored: nine settings, 486 fits.
+\item It uses small ATAC, immune and pancreas tasks, both decoders and three seeds (10--12), with three strengths per setting (the matched strength of its base method in the main benchmark, meaning the one whose batch score is nearest $b^*$, and its two grid neighbours), so it runs only after the main benchmark is scored: nine settings, 486 fits.
 \item At one adversary step, the discriminator runs plain, with spectral normalisation \citep{miyato2018spectral} (each layer rescaled so its output cannot change steeply), with an R1 gradient penalty \citep{mescheder2018training} (penalising the output's slope at the cells), and with spectral normalisation plus the critic's optimiser (the critics' Adam settings: learning rate $10^{-4}$, betas 0 and 0.9); the pooled critic runs with gradient penalty at 1, 5 and 10 steps and with spectral normalisation at 1 and 5 steps.
 \item The follow-up uses the pooled critic, not the reference critic of the primary comparison.
 \item Supplement: R1 weight, no gradient penalty on spectrally normalised critics, incomplete factorial design, failure counts instead of collapse rates (the follow-up has no plain-scVI fits).
