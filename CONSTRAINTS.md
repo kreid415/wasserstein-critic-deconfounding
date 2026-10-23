@@ -543,3 +543,10 @@
 - added: 2026-10-22
 - keywords: pre-registered, preregistered, pre-registration, registered, registration
 - files: paper/outline.tex, paper/paper.tex
+
+## SI-114 · active · content
+- rule: The Background paragraph on image-generation GAN studies (lucic2018gans: GAN losses score alike under equal tuning) is dropped on purpose by the first author. Do not add it back, in any wording, in the Background or elsewhere as a paragraph; the first author's own commented-out lines in paper/outline.tex stay as they are. The Discussion bullet that compares the ranking's tightness to image-GAN losses (outline.tex, Discussion) is not covered by this rule and awaits the author's call.
+- source: "i am dropping the image paragraph on purpose. stop adding it back" (user, 2026-10-23)
+- added: 2026-10-23
+- keywords: image GAN, image generation, lucic2018gans, GAN losses, equal tuning, Background
+- files: paper/outline.tex, paper/paper.tex
