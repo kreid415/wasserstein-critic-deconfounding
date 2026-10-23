@@ -24,9 +24,9 @@
 
 \begin{document}
 \begin{center}
-{\large\bfseries \replaced{Benchmarking alignment penalties for single-cell batch correction in scVI}{Wasserstein critics versus discriminators for single-cell batch correction}}\\[2pt]
+{\large\bfseries \replaced{Benchmarking alignment penalties for single-cell batch correction}{Wasserstein critics versus discriminators for single-cell batch correction}}\\[2pt]
 {\small Kendall Reid$^{1,*}$, Genevieve Stein-O'Brien$^{2,\dagger}$, Erhan Guven$^{3,\dagger}$}\\[1pt]
-{\footnotesize $^1$Department of Computer Science, Johns Hopkins University; $^2$Department of Neuroscience, Johns Hopkins University; $^3$Johns Hopkins University Applied Physics Laboratory. $^*$Corresponding author\added[id=P3]{: \tbd{corresponding author email}}. $^\dagger$These authors contributed equally.}\\[1pt]
+{\footnotesize $^1$Department of Computer Science, Johns Hopkins University; $^2$Department of Neuroscience, Johns Hopkins University; $^3$Johns Hopkins University Applied Physics Laboratory. $^*$Corresponding author\added[id=P3]{: kreid20@jh.edu}. $^\dagger$These authors contributed equally.}\\[1pt]
 {\footnotesize \deleted[id=P3]{Keywords: single-cell RNA sequencing; batch correction; adversarial learning; optimal transport; benchmarking}}
 \end{center}
 {\footnotesize \textbf{Writer's outline.} \replaced[id=P3]{Target: \emph{BMC Bioinformatics}, Research article; structured abstract at most 350 words; 3 to 10 keywords; no stated word, figure or reference limit; Declarations required; large language model use documented in Methods.}{Target: \emph{Bioinformatics Advances}, Original Article, 8 pages; abstract at most 200 words; at most 6 figures, 6 tables, 50 references; no citations in the supplement.} Main text about 5,000 words plus 400 words of captions; paragraphs 100--150 words. Brackets: fill from results or still open. \replaced[id=P3]{Background}{Introduction} and Methods are the first author's prose with tracked corrections (\texttt{changes} package; change logs in \texttt{paper/drafts\_20261022/}). Figures 1--6 and Tables 3--4 are mocks; \replaced{Table 1 holds real design facts and Table 2 provisional pilot ranges, to be replaced when the all-task pilot is scored}{Tables 1--2 hold real design facts}.}
@@ -251,7 +251,7 @@
 \pp{\replaced[id=P3]{Availability of data and materials}{Avail-1}}{Code and data access.}
 \begin{itemize}
 \item Repository github.com/kreid415/wasserstein-critic-deconfounding; \tbd{version tag and commit at submission}; checksums in supplement.
-\item \added[id=P3]{\tbd{where the eight task files of the single-cell integration benchmark are obtained}}
+\item \added[id=P3]{The eight task files are the integration-task datasets of the single-cell integration benchmark, figshare article 12420968, version 8 (doi:10.6084/m9.figshare.12420968.v8); file checksums in Supplementary Table S1.}
 \item \deleted[id=P3]{Conflicts of interest: none declared; funding and author-contribution statements to be decided.}
 \end{itemize}
 \pp{\added[id=P3]{Competing interests}}{\added[id=P3]{\tbd{competing interests statement; the earlier outline said none declared, confirm with all authors}}}
@@ -386,7 +386,7 @@ Pooled critic & W1 distance of each batch to all other batches pooled & critic, 
 Barycenter critic & W1 distance of each batch to the minibatch Wasserstein barycenter (an average distribution) & critic, as above & 5 & gradient penalty, weight 10 & \replaced{W1 critics (shared)}{none} \\
 MMD & kernel two-sample distance between batches, multi-scale Gaussian kernel & none & -- & none & \replaced{MMD}{none} \\
 Sinkhorn & debiased Sinkhorn divergence (entropy-regularised OT); not W1 at this smoothing & none & -- & \replaced{entropic smoothing (Supplementary Table S2)}{entropic smoothing $0.05\sqrt{2d}$, $d$ the latent dimension} & \replaced{Sinkhorn divergence}{none} \\
-scvi-tools adversary & scvi-tools adversarial batch classifier (reference method, conditioned decoder only) & batch classifier (scvi-tools default, 32 hidden units) & \tbd{steps} & none; its weight is one minus the KL weight & \replaced{no strength grid}{none} \\
+scvi-tools adversary & scvi-tools adversarial batch classifier (reference method, conditioned decoder only) & batch classifier (scvi-tools default, two hidden layers of 32 units) & 1 & none; its weight is one minus the KL weight & \replaced{no strength grid}{none} \\
 \bottomrule
 \end{tabular}
 \end{table}
