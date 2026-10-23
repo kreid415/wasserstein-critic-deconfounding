@@ -9,7 +9,7 @@ the tag `prereg-tier12-v3` (commit 10a1ca5, 2026-10-16); `git show prereg-tier12
 **This file, the script and its tests must be updated together before any main-benchmark score is read.** Until then the script
 and its tests still implement the contrast design and must not be run on any X1 or X13 score (SI-78). No main-benchmark score has
 been read (the first author's statement; SI-108 records that none has been examined and that the repository's blinding records end
-on 2026-10-16). Which tag or other step freezes this version is open (change log, open point 1). Unchanged by the replacement:
+on 2026-10-16). This version is frozen by a new git tag on the commit that holds the final file, `scripts/analysis_x1.py` and its tests, made after the first author has reviewed the diff and before any main-benchmark score is read (first author, 2026-10-23). Unchanged by the replacement:
 the score definitions, the decision rules R1-R4 and the pilot (PREREG sections 1-4 and 9), b\*, the low-signal rule and the curve
 construction, the transfer-strength rule, the best-of-k estimator, the definition of "examined" and the provenance requirements.
 The earlier status paragraphs, the options not chosen and the reasons of the contrast design are in Appendix A.*
@@ -62,9 +62,8 @@ question put to the user on 2026-10-14 (Appendix A). PREREG section 9 has a glos
 
 Every analysis of X1 or X13 data in sections 2-11 is fixed by this file before any main-benchmark score is read (status
 paragraph), except the X10 readouts other than label transfer, which are exploratory (no confirm/refute claim). The follow-up
-analyses (X3, X7, X8, X12, X15) are fixed later, together with the X7/X8 design fixes, while X1 runs, before R4-x1 runs and before
-anyone examines an X1 result (SI-68's own words; "examined" as defined in the status paragraph, SI-78); their status under the
-ranking design is open (change log, open point 8). (Q1's options and reasons: Appendix A.1.)
+experiments X3, X7, X8, X12 and X15 were dropped by the first author on 2026-10-17 (pruning decision) and are not run; their rows
+above are kept only as a record. (Q1's options and reasons: Appendix A.1.)
 
 ## 1. Inputs and shared definitions (fixed earlier; no choice)
 
@@ -150,8 +149,8 @@ Appendix A.1.)
 
 **3.2 Mean rank.** Per decoder, each penalty's mean rank is the average of its per-task ranks over the real tasks that are ranked
 (not low-signal) in that decoder (scIB style: rank within each task, then average the ranks). The number of real tasks the mean is
-over is reported with it; it is the same for all six penalties, because every penalty is ranked in every ranked pair. If no real task is
-ranked in a decoder, no mean rank exists for it (open point 2). The ranks of each pair are reported with the mean, so a rank given by
+over is reported with it; it is the same for all six penalties, because every penalty is ranked in every ranked pair. No minimum number of ranked real tasks applies; the count is
+shown beside every mean rank. If no real task is ranked in a decoder, no mean rank exists for it (first author, 2026-10-23). The ranks of each pair are reported with the mean, so a rank given by
 the bottom places is visible beside the reading status.
 
 **3.3 Simulations.** sim1 and sim2 are ranked per task and decoder with the same rules, listed by task, and never averaged with each
@@ -162,7 +161,8 @@ other or with the real tasks (PAPER_PLAN section 5). A low-signal simulation pai
 **(i) Standard error of a reading.** Repeat the whole reading five times, each time without one seed: the same seed is left out
 of the penalty's runs and of the plain-scVI runs (so b0 and c0 are the means of the 4 remaining plain-scVI runs), and b\* stays
 fixed. A repeat gives a reading when the penalty reaches b\* in it (a repeat in which the remaining plain-scVI runs leave the anchor at or
-above b\* is not covered by the existing reading; open point 4). From the m readings x_(i) that exist,
+above b\* gives no reading: the existing reading function is kept, and in that repeat's ranking the penalty takes the bottom
+places; first author, 2026-10-23). From the m readings x_(i) that exist,
 s^2 = ((m - 1)/m) x sum_i (x_(i) - mean x_(.))^2. It is reported only when m >= 4; otherwise "not available". (How the five runs
 are combined: average first, then read on the curve of point means; user decision SI-69, Q2. Q2's options and reasons: Appendix A.1.)
 
@@ -171,7 +171,7 @@ section 3.1 (bottom places and ties included). The range is the smallest and the
 repeats. The rank of the full-seed reading is not part of the range.
 
 A penalty that reaches b\* on the seed-mean curve is ranked even if m < 4. A penalty that does not reach b\* on the seed-mean curve
-has no reading, so its standard error is not defined (open point 3). No interval, test or probability is built from the standard
+has no reading, so its standard error is not defined; its rank range is still reported (first author, 2026-10-23). No interval, test or probability is built from the standard
 error or the range; they describe the data (RD-A).
 
 ## 5. Trade-off (frontier) area
@@ -197,7 +197,7 @@ seeds (30 runs), with an exact Clopper-Pearson 95% interval (PAPER_PLAN section 
 tasks are used, low-signal pairs included: the low-signal flag concerns b\*, which the collapse rate does not use. Each family's six points span the same stretch of its response by R1's rule (from
 no effect to the onset of over-correction or collapse on the pilot tasks), which is what makes rates comparable across
 families; the three W1 critics share one grid. No difference between penalties is computed, and no rate is pooled over tasks
-(open point 9). The interval treats the 30 runs as independent; section 17, limitation 3, says how far that holds. (Q9's options:
+(first author, 2026-10-23). The interval treats the 30 runs as independent; section 17, limitation 3, says how far that holds. (Q9's options:
 Appendix A.1.)
 
 ## 7. Local versus global batch removal (user decision SI-76, Q10; per penalty by RD-F)
@@ -221,12 +221,15 @@ lower 95% bound of the best point's mean (t with n - 1 degrees of freedom); widt
 
 Per penalty, task and decoder, on the five-seed embeddings at the penalty's matched strength: the grid point whose seed-mean batch
 score is nearest b\*, chosen as rule R4 chooses its matched strength (PREREG section 4: a point with no failed seed, ties to the
-smaller strength; open point 6a). The strength is never chosen by label-transfer accuracy.
+smaller strength; grid-extension points count, as in R4; first author, 2026-10-23). The strength is never chosen by label-transfer accuracy.
 - Each batch is held out in turn; its cells' cell types are predicted from the cells of the other batches with a 15-nearest-neighbour
   classifier on the embedding (the posterior mean, as for every score).
 - Cell types present in only one batch are dropped; this is decided from the labels alone.
-- Score = F1 per cell type, averaged over cell types (macro F1). How the held-out batches and the five seeds are combined is open
-  (open point 6b).
+- Classifier: scikit-learn's k-nearest-neighbour classifier with k = 15, Euclidean distance and equal vote weights (its defaults).
+- Score = F1 per cell type, averaged over the cell types present in the held-out batch (macro F1), per held-out batch; then the mean
+  over held-out batches; then the mean and standard deviation over the five seeds.
+- Cross-task summary: per penalty and decoder, the mean over the real tasks that are not low-signal. A task with no cell type
+  left after dropping single-batch types is not evaluable and is listed. (First author, 2026-10-23.)
 - Plain scVI (lambda = 0) and the scvi-tools adversarial classifier (`scvi_adv`, conditioned decoder only) are shown unmatched:
   they have no strength to choose.
 - Beside each value the distance of the chosen embedding's seed-mean batch score from b\* is shown, so the reader sees how far
@@ -284,7 +287,7 @@ mean over its successful runs, a point whose runs all failed is skipped, every f
 | Sensitivity | Applies to | Change |
 |---|---|---|
 | Biology without trajectory (SI-38) | every analysis that uses C: readings, ranks, standard errors, area, collapse, width, S-based placement (local minus global and label transfer do not use C) | C on immune and immune_hum_mou without trajectory conservation; b\* unchanged (batch only) |
-| Per-run reading (option of Q2 not chosen, SI-69) | readings and ranks; local minus global | each run read on its own curve (its own lambda = 0 run as the anchor); how per-run readings give one reading and one rank per penalty is open (open point 5) |
+| Per-run reading (option of Q2 not chosen, SI-69) | readings and ranks; local minus global | each run read on its own curve (its own lambda = 0 run as the anchor); in each seed the six penalties are ranked with the rules of section 3.1 (bottom places, average ties) and the five per-seed ranks are averaged (first author, 2026-10-23) |
 | Points with any failed run removed (SI-71) | readings, ranks, standard errors, area, local minus global | a point with a failed run is dropped from the curve; a penalty that then does not reach b\* takes the bottom places |
 | Area corner (b0, 0) (decided 2026-10-15, SI-80) | area | c_ref = 0 instead of c0 - 0.10 |
 
@@ -294,8 +297,8 @@ the pooled model (RD-A).
 
 ## 13. Not in this file
 
-Per Q1 (SI-68): P3 (X8), P4 (X7), the X3 dose-response, the R3 factor effects of X12 and X15 are locked later, with the X7/X8 fixes;
-their status under the ranking design is open (change log, open point 8). X10 other than label transfer is exploratory.
+Dropped by the first author on 2026-10-17 (pruning decision): P3 (X8), P4 (X7), the X3 dose-response and the R3 factor effects of
+X12 and X15; they are not run. X10 other than label transfer is exploratory.
 
 Dropped by the first author (RD-K): the follow-up experiment X6 (regularisation, optimiser and update steps; do not run it) and the
 premise check R0 (batch separability, adversary gradient norms, discriminator accuracy). Their rules are not in this file; the
@@ -349,14 +352,14 @@ still names the contrast sections.
   leaves out: `tests/analysis tests/prereg` alone fails on `scripts/run_stage.py` lines 662 and 663, which only `tests/stage`
   runs (AN-R04). The analysis runs as in the usage line of `scripts/analysis_x1.py`. "Runs once" is a procedure: the script
   itself only refuses to overwrite an existing record.
-- `scripts/check_tests.py`, fail-loud lint, notebook RESULT: frozen with the tag prereg-tier12-v3 for the contrast version. How the
-  ranking version is frozen is open (change log, open point 1).
+- `scripts/check_tests.py`, fail-loud lint, notebook RESULT: frozen with the tag prereg-tier12-v3 for the contrast version. The
+  ranking version is frozen by a new tag (status paragraph).
 
 ## 16. Implementation details (decided 2026-10-15, SI-80; written 2026-10-14; revised 2026-10-23)
 
 Writing `scripts/analysis_x1.py` needed the details below, which sections 1-12 leave open. Items marked (carried over) were approved
 with the contrast version (SI-80, SI-83, SI-84) and apply unchanged. Items marked (ranking) restate the ranking decisions and add no
-rule. What the ranking decisions leave undefined is not decided here; it is an open point of the change log.
+rule. The open points of the change log were decided by the first author on 2026-10-23 and are written into the sections above.
 
 1. Inputs (carried over). X1 and X13 rows are read as one input through `prereg_rules.outcomes`, so they must share one scorer
    commit (after the SI-54 equivalence) and one CPU type: best-of-k compares them directly, and the same latent scores
@@ -367,7 +370,7 @@ rule. What the ranking decisions leave undefined is not decided here; it is an o
    included (a record made from other or partial scores; amended 2026-10-14, AN-03: only b0 was compared before). It
    never overwrites an existing record. Input rows are sorted by tag before any sum (AN-11).
 2. Reading (carried over, ranking). Exact hits of b\* count as crossings. In a LOSO repeat the anchor is the mean of the four remaining
-   plain-scVI runs, a point whose remaining runs all failed is skipped, and b\* is the fixed value of the full analysis (an anchor at or above b\* in a repeat: open point 4). Under the
+   plain-scVI runs, a point whose remaining runs all failed is skipped, and b\* is the fixed value of the full analysis (an anchor at or above b\* in a repeat gives no reading in that repeat). Under the
    per-run reading (a sensitivity analysis, section 12) a penalty is read once per seed, on that seed's own curve.
 3. Ranks (ranking). Readings are compared with the tolerance 1e-9 (PREREG section 1). Ranks in a LOSO repeat come from the same code as
    the main ranks.
@@ -385,8 +388,8 @@ rule. What the ranking decisions leave undefined is not decided here; it is an o
    whose runs all failed is left out and its family's N shrinks; frontier positions count front points that dominate
    a configuration and that it dominates (ties within 1e-9, PREREG section 1). E_k does not penalise failures (a
    configuration's score is the mean of its successful runs), so each family's record also gives its number of
-   configurations and of failed runs, and the tables state this (rigour review AN-13). When N shrinks, a real-task mean at k above
-   a task's N has no defined value (open point 7).
+   configurations and of failed runs, and the tables state this (rigour review AN-13). When N shrinks, the real-task mean at k is taken over the
+   tasks with N >= k, and the number of tasks is shown with each value (first author, 2026-10-23).
 9. Window width (carried over). The lower bound is the lower end of the two-sided 95% t interval (t at 0.975, n - 1
    degrees of freedom) of the best point's mean; with fewer than 2 successful runs at the best point no width is
    computed. The record flags a gap when a point between the window's smallest and largest lambda lies below the
@@ -397,8 +400,8 @@ rule. What the ranking decisions leave undefined is not decided here; it is an o
     per-run reading (readings, ranks and local minus global; the area is defined on point means only, section 5, so it has no
     per-run version: corrected 2026-10-14, AN-05); dropping points with a failed run (readings, ranks, area, local minus global);
     corner (b0, 0) (area).
-11. Label transfer (ranking). Only what section 9 states is fixed. Open: the strength-choice details, how held-out batches and seeds
-    are combined, the classifier's distance and vote rule, the cross-task summary (open point 6).
+11. Label transfer (ranking). Section 9 states every rule (strength choice, classifier, how held-out batches and seeds are
+    combined, cross-task summary).
 
 ## 17. Limitations stated with the results (rigour review 2026-10-14: AN-07, AN-08, AN-12, AN-15, AN-17, DOC-16; user decision 2026-10-16: NB-20261016-15; revised 2026-10-23)
 
