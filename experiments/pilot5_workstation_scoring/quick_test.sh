@@ -2,7 +2,7 @@
 # Quick test before the full scoring (same scorer launcher as the real run: scripts/run_stage.py at 10a1ca5, wcd-kbet, thread_env(1)).
 #  T1 two latents that already have workstation scores (A1 atac_small) are rescored: every metric column must be identical;
 #  T2 one new pilot latent (pancreas) is scored twice into two folders: every metric column must be identical.
-# Compared with cluster/jhpce/compare_scores.py (bit-identical float64 in 19 metric columns, same latent hash, same package versions).
+# Compared with compare_scores.py (verbatim copy of cluster/jhpce/compare_scores.py at origin/pilot5-amend a4989ff; its tests are there) (bit-identical float64 in 19 metric columns, same latent hash, same package versions).
 # Exit 0 only if both pass.
 set -euo pipefail
 D=/home/kendall/experiment_data/wasserstein-critic-deconfounding
@@ -32,8 +32,8 @@ echo "run_stage exits ok? rc=$rc"
 printf 'tag\tref_score\n' > t1.list; for t in $OLD; do printf '%s\t%s\n' $t $D/tier12_v2/A1/scores/$t.csv; done >> t1.list
 printf 'tag\tref_score\n%s\t%s\n' $NEW $T/t2a/scores/$NEW.csv > t2.list
 PYX=$ENVS/scvi-api/bin/python
-echo "== T1: rescored vs existing workstation scores"; $PYX $PW/cluster/jhpce/compare_scores.py --list t1.list --cand $T/t1/scores || rc=1
-echo "== T2: same new latent scored twice";            $PYX $PW/cluster/jhpce/compare_scores.py --list t2.list --cand $T/t2b/scores || rc=1
+echo "== T1: rescored vs existing workstation scores"; $PYX $PW/experiments/pilot5_workstation_scoring/compare_scores.py --list t1.list --cand $T/t1/scores || rc=1
+echo "== T2: same new latent scored twice";            $PYX $PW/experiments/pilot5_workstation_scoring/compare_scores.py --list t2.list --cand $T/t2b/scores || rc=1
 echo "== provenance of the new row"; $PYX - <<PYEOF
 import csv; r=next(csv.DictReader(open("$T/t2a/scores/$NEW.csv")))
 print({k:r[k] for k in ("scorer_git_sha","scorer_dirty","cpu_simd","numba_cpu_name","kbet_seed","score_seconds")})

@@ -168,7 +168,7 @@ def test_expected_rows_refuses_a_changed_manifest(world):
         chain_lib.read_expected(rs, str(world["st"].manifest), chain_lib.sha256_file(str(world["st"].manifest)), ["A1"], [tf, tf])
 
 
-def test_board_workstation_site_for_pilot_scoring(world):
+def test_board_workstation_site_for_pilot_scoring(world):   # test-reason: second pilot site, per-host manifest path and the by-site line, none of which the existing board tests use
     # the pilot's scores can sit at the workstation ('local' site): a score the cluster copy lacks counts, the board names the site,
     # and a manifest given as one path per host reads the first path that exists on this host
     import shutil

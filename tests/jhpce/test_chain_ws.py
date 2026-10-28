@@ -40,18 +40,18 @@ def env(tmp_path):
     return remote, mirror, state, argv
 
 
-def test_verify_marks_missing_and_changed_files_bad():
+def test_verify_marks_missing_and_changed_files_bad():   # test-reason: the bad set must hold files missing on the cluster side too (a precedence bug once dropped them)
     ok, bad = cw.verify({"a": "1", "b": "2", "c": "3"}, {"a": "1", "b": "X"})
     assert ok == ["a"] and bad == ["b", "c"]
 
 
-def test_copy_verify_score_then_done(env):
+def test_copy_verify_score_then_done(env):   # test-reason: a fit younger than the age limit is never copied; two ticks reach the end (sleep path)
     remote, mirror, state, argv = env
     make_remote(remote, TAGS[:3])
     make_remote(remote, TAGS[3:], age_min=1)               # still being written: never copied
-    assert cw.main(argv + ["--max-ticks", "1"]) == cw.EXIT_RUNNING
+    assert cw.main(argv + ["--max-ticks", "2"]) == cw.EXIT_RUNNING
     st = json.load(open(state / "state.json"))
-    assert (st["installed"], st["scored"], st["final"], st["expected"]) == (3, 3, 3, 4)
+    assert (st["mirrored"], st["scored"], st["final"], st["expected"]) == (3, 3, 3, 4)
     assert not os.path.exists(mirror / "latents" / f"{TAGS[3]}.npz")
     assert open(mirror / "models" / TAGS[0] / "model.pt").read() == f"models/{TAGS[0]}/model.pt\n"
     make_remote(remote, TAGS[3:])                           # the last fit is now old enough
