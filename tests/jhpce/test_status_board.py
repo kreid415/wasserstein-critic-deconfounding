@@ -178,6 +178,9 @@ def test_board_workstation_site_for_pilot_scoring(world):   # test-reason: secon
     shutil.copytree(w["st"].out, ws)
     write_score(types.SimpleNamespace(out=str(ws), tmp=w["st"].tmp), "a3", chain_lib.sha256_file(os.path.join(ws, "latents", "a3.npz")))
     os.remove(ws / "scores" / "a0.csv")
+    a0 = w["st"].out + "/scores/a0.csv"                                       # the cluster's a0 score is a fixed-seed JHPCE row (SI-115)
+    head, row = open(a0).read().splitlines()
+    open(a0, "w").write(f"{head},score_site\n{row},jhpce\n")
     cfg = json.load(open(w["cfg"]))
     g = cfg["groups"]["pilot_score"]
     g["sites"]["local"], g["score_sites"]["local"] = str(ws), str(ws)
@@ -188,3 +191,4 @@ def test_board_workstation_site_for_pilot_scoring(world):   # test-reason: secon
     unit = {u["unit"]: u for u in json.load(open(out / "status_board.json"))["groups"]["pilot_score"]["board"]["units"]}["a3"]
     assert "[site local]" in unit["reason"]
     assert "valid units by site: jhpce 2, local 2" in (out / "status_board.md").read_text()
+    assert "scored on, by dataset: atac_small: fake cpu 1, jhpce 1, no score expected 1, not scored yet 1;" in (out / "status_board.md").read_text()

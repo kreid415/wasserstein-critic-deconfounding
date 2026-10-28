@@ -4,6 +4,7 @@ A latent or score file is judged by scripts/run_stage.py's own `Outputs` class (
 gate uses), loaded from the checkout given as --stage-repo, so there is one definition of "valid". Results are cached by
 file size and modification time (hashing a latent is the slow part), so a second pass only reads changed files.
 """
+import csv
 import datetime
 import hashlib
 import importlib.util
@@ -118,7 +119,7 @@ class Checker:
         if not fit[2]["scorable"]:
             return [True, "no score expected: " + fit[1], {"scorable": False, "finished_at": fit[2]["finished_at"]}]
         sha, p = fit[2]["sha256"], self.score_o.score_path(row["tag"])
-        res = self._cached("score:" + row["tag"], _sig(p) + [sha], lambda: self._score(row, sha, p))
+        res = self._cached("score2:" + row["tag"], _sig(p) + [sha], lambda: self._score(row, sha, p))
         return res
 
     def _score(self, row, sha, path):
@@ -128,7 +129,10 @@ class Checker:
             self.score_o.score(row, sha)
         except self.rs.InvalidOutput as e:
             return [False, str(e)[:300], {}]
-        return [True, "scored", {"scorable": True, "finished_at": iso_mtime(path)}]
+        with open(path, newline="") as f:
+            row = next(csv.DictReader(f))
+        # who scored it: the JHPCE fixed-seed rows say score_site (SI-115); other rows name the CPU of the machine that scored them
+        return [True, "scored", {"scorable": True, "finished_at": iso_mtime(path), "scored_on": row.get("score_site") or row.get("cpu_model", "?")}]
 
     def save(self):
         if self.cache_path:

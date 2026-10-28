@@ -85,13 +85,22 @@ def collect_site(g, rows, site, rs, state_dir):
 
 def merge(site_results, tag):
     """First valid result over the sites, else the first invalid one, else None; a second valid copy is noted."""
-    found = [(s, r[tag]) for s, r in site_results.items() if r.get(tag)]
+    found = [(s, r[tag]) for s, r in sorted(site_results.items(), key=lambda x: x[0] != "local") if r.get(tag)]    # the workstation's row first (SI-115)
     valid = [(s, r) for s, r in found if r[0]]
     if valid:
         s, r = valid[0]
         extra = [x for x, _ in valid[1:]]
         return (True, r[1] + (f" [site {s}; also at {extra}]" if extra else f" [site {s}]"), r[2])
     return tuple(found[0][1]) if found else None     # tuples: run-status-board rejects the lists a JSON cache gives
+
+
+def score_breakdown(rows, per_site):
+    """'pancreas: <CPU or site> n, ...; ...' : which machine scored each dataset's valid scores (detail 'scored_on'); not yet scored is counted."""
+    who = collections.Counter()
+    for r in rows:
+        m = merge(per_site, r["tag"])
+        who[(r["task"], "not scored yet" if not (m and m[0]) else m[2].get("scored_on") or ("no score expected" if not m[2].get("scorable", True) else "?"))] += 1
+    return "; ".join(f"{t}: " + ", ".join(f"{w} {n}" for (k, w), n in sorted(who.items()) if k == t) for t in sorted({k[0] for k in who}))
 
 
 def capture_sched(ids, a):
@@ -204,6 +213,7 @@ def main(argv=None):
                (", ".join(f"{j} {st}" + (f" x{n}" if n > 1 else "") for (j, st), n in sorted(jobs.items())) or "none"),
                (f"- valid units by site: " + ", ".join(f"{s} {sum(1 for r in rows if (per_site[s].get(r['tag']) or (False,))[0])}"
                                                          for s in sorted(per_site)) if len(per_site) > 1 else "- sites: " + ", ".join(per_site)),
+               *(["- scored on, by dataset: " + score_breakdown(rows, per_site)] if g["kind"] == "score" else []),
                f"- needs action: {t['failed'] + t['done_invalid']} units (failed {t['failed']}, done_invalid {t['done_invalid']}); "
                f"missing {t['missing']}; details in {name}/status_board.md", ""]
     md.append(f"_generated {datetime.datetime.now().astimezone().isoformat(timespec='seconds')}; scheduler snapshot "
