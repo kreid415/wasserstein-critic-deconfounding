@@ -35,6 +35,11 @@ source and build command in that branch) makes JHPCE draw the same half. Nothing
 10. Tests: `python scripts/check_tests.py --base pilot5-workstation-scoring --src cluster/jhpce scripts/prereg_rules.py -- tests/jhpce tests/prereg --deselect tests/jhpce/test_x1_command.py::test_chained_job_clock_covers_every_job_up_its_chain`
     (that one test fails on the base branch as well).
 
+## Changes made after the launch (2026-10-28 17:50, NB-20261028-20)
+The first 18 immune_hum_mou tasks used 19.8-33.7 GiB (request 32 GB; Slurm lets a task run above its request, and a user cannot raise a pending job's memory), so `score_sizes.json` now says 41 GB for later batches
+and the chain's `measured.json` says 56 GB for atac_large (probe peak 36.5 GiB x 1.5). The two submitted arrays' throttles were set with `scontrol update JobId=<id> ArrayTaskThrottle=<n>` (immune 24, atac_large 18)
+so both datasets run at once (the chain's own budget would have kept atac_large at 3 tasks until immune_hum_mou was done).
+
 ## Limits
 Identity was shown on 5 latents (atac_small x2, immune, sim1, immune_hum_mou), all 19 metric columns, znver2 only for the rule record; znver3 gave identical values on the 4 older latents (not used for production).
 The workstation's RDRAND is a hardware fault: a firmware change or another machine would move every workstation LISI value by about 0.005 and make the record untrue for the workstation rows.
