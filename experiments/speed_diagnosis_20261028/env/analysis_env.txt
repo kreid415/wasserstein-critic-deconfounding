@@ -1,0 +1,4 @@
+Python 3.11.15
+matplotlib==3.11.0
+numpy @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_numpy_1779169198/work/dist/numpy-2.4.6-cp311-cp311-linux_x86_64.whl#sha256=9f5ed645865bdd41eb671568973753a710fda708ed74e7a0b4acf98e7a7a2970
+pandas @ file:///home/conda/feedstock_root/build_artifacts/pandas_1764614468005/work
