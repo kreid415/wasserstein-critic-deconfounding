@@ -1,0 +1,126 @@
+{
+ "job": "harness 637d2de5 / Slurm 36569613 (outputs in /users/kreid/.claude-science-scratch/.claude-science/jobs/637d2de5-dc9e-4bf3-b399-6fea35f39d75/out/check_results.tgz)",
+ "check_results_tgz_sha256": "4ebf201de6331a5a273ed4c3b4051c7c3ebe5e5c1cba6ac90352397ce46adb12",
+ "scorer_commit": "a4989ff80206e03b721e0adf874bc5604803e335",
+ "node": "compute-121.cm.cluster, AMD EPYC 7702, avx2 (both runs, same node)",
+ "rule": "PREREG 2026-10-22 item 6: PASS only if latent_sha256, scorer_versions equal and all 19 metric columns bit-identical; (i) A and B pass -> 5 new on Zen 2; (ii) B passes, A fails -> all 8 on Zen 2; (iii) B fails -> 5 new on workstation",
+ "comparison_A_run1_vs_workstation": {
+  "result": "FAIL",
+  "columns_differing": {
+   "iLISI": {
+    "latents_differ": 19,
+    "max_abs_diff": 0.00435
+   },
+   "cLISI": {
+    "latents_differ": 13,
+    "max_abs_diff": 0.00187
+   }
+  },
+  "n_metric_columns": 19,
+  "n_latents_differ": 19,
+  "full_precision": {
+   "iLISI": {
+    "latents_differ": 19,
+    "max_abs_diff": 0.004352513875949926
+   },
+   "cLISI": {
+    "latents_differ": 13,
+    "max_abs_diff": 0.0018743513693968428
+   }
+  }
+ },
+ "comparison_B_run2_vs_run1": {
+  "result": "FAIL",
+  "columns_differing": {
+   "iLISI": {
+    "latents_differ": 19,
+    "max_abs_diff": 0.00566
+   },
+   "cLISI": {
+    "latents_differ": 13,
+    "max_abs_diff": 0.00319
+   }
+  },
+  "n_metric_columns": 19,
+  "n_latents_differ": 19,
+  "full_precision": {
+   "iLISI": {
+    "latents_differ": 19,
+    "max_abs_diff": 0.005655439157987802
+   },
+   "cLISI": {
+    "latents_differ": 13,
+    "max_abs_diff": 0.0031916292983207306
+   }
+  }
+ },
+ "case": "(iii) B fails -> the 5 new pilot datasets are scored on the workstation",
+ "identical_columns_B": [
+  "NMI_cluster/label",
+  "ARI_cluster/label",
+  "ASW_label",
+  "ASW_label/batch",
+  "PCR_batch",
+  "cell_cycle_conservation",
+  "isolated_label_F1",
+  "isolated_label_silhouette",
+  "graph_conn",
+  "kBET",
+  "hvg_overlap",
+  "trajectory",
+  "kbet_seed",
+  "kbet_r_calls",
+  "traj_root_fallback",
+  "kbet_labels_forced_one",
+  "kbet_labels_skipped"
+ ],
+ "equivalence_record_needed": false,
+ "equivalence_record_reason": "Needed only if mixed scorer CPU provenance were accepted (case i or ii). In case iii the 5 new datasets are scored on the workstation like the 3 finished ones, so no mixed provenance arises and no record is written.",
+ "score_file_sha256": {
+  "run1": {
+   "A1_atac_small_discriminator_l10_c0_s101_b841ed69": "04bd17de933745941e78a433664f761131cfe418e449b3487fa5487bb6627894",
+   "A1_atac_small_mmd_l3_c0_s100_0107d6f1": "b67e5b8bdc6dba7fd2877d6ce3db5a4c1faf0477f2f4340b1098064a3ba62425",
+   "A1_atac_small_none_l0_c1_s100_8d38e2a3": "e24c935827335b0340d508c677ff0d45c7ab8bb7130b82fa52c1679415452038",
+   "A1_atac_small_pooled_l100_c1_s101_e65e48b7": "eda45f89a99103b26abf237c6ee38aff9b325f726335f1af5b7eb4ee9280e108",
+   "A1_atac_small_reference_l30_c0_s102_17472a8a": "b687985dbb9d6d6e92f2d6a6b26e4e367a3fc61af1fddd31e3d0e8ec7404ce02",
+   "A1_atac_small_sinkhorn_l300_c1_s102_b78dd77a": "0e0efa1b7c4ed5c3b3d84a64205d1a4b7ef725db9f79129b231fd75f83330eba",
+   "A1_immune_barycenter_l1_c0_s102_c23fbdae": "21e464823938b455c57977fe328b1751dc97bcf4038fec5020f3c899e3a5d7f7",
+   "A1_immune_discriminator_l100_c1_s102_32d8eb57": "d2c8e80309927b498ffcb2202b8ff0bb13107c3b61d4522c5766400ac24d8795",
+   "A1_immune_mmd_l1000_c1_s100_d437ee0d": "0c32823c5abcefb52e7000b763f3ce0ab323a183a609840e27896959d1fb72ba",
+   "A1_immune_none_l0_c0_s101_78c7bb6a": "8729089cbb11b0d84b6aa2362b9ce6feaa1c0144ed66a4aed7b05b6a0568dc84",
+   "A1_immune_pooled_l10_c0_s101_75d8d59e": "c14280efc433ac0aa95786ccc5ade7306102975d08ff0d536d9bb3a653d912c4",
+   "A1_immune_reference_l30_c1_s100_31992831": "aea224b906e04e8ef397108b0bc23d00de42187641ecebc5629c08b1410f79a1",
+   "A1_immune_sinkhorn_l3_c1_s101_6c0fba12": "e6ffd837b47082010f1999e66b114bbc96b9a86e78f89f8303f5bb69ce05e99e",
+   "A1_sim1_barycenter_l300_c1_s100_f51f28be": "0db1f2c3643ce7b48d67fb78a3c4deaa9020c9088fb9bb98277007e636d04436",
+   "A1_sim1_discriminator_l100_c0_s100_36fb5e2c": "261d67c03200a62ee558243f9e84604092fafbc2beb680b5d93a8693c4b87501",
+   "A1_sim1_mmd_l30_c1_s101_39564dc6": "d720087eca5925097e5380d5b363c9f34678ae7fef1cfa61f0f27b400d7b63f4",
+   "A1_sim1_none_l0_c1_s102_2ec5aa2e": "80b65eee7973f105db33c697ecda042a527bd01ad7f513d6a8f4c8d9da24faef",
+   "A1_sim1_pooled_l10_c0_s102_855bf21b": "588cd5ee0017cf6a3cf98aff960be15a71daabff0e58dd1dcf1d4deb8cbc370d",
+   "A1_sim1_reference_l3_c0_s101_43834004": "a46881a07ab13233d53d0fb9cafe0c040fbe4b49d502b180a03400220da568dd",
+   "A1_sim1_sinkhorn_l30_c0_s100_ebcbe68a": "49a5decfcec7acff04565fd99216f0c73db3976310318fff16d0f4fd76016597"
+  },
+  "run2": {
+   "A1_atac_small_discriminator_l10_c0_s101_b841ed69": "6e94cc4d6a030c333f41396f2a0892f36d1cb2243aeacade24a3a0ce5c8fd5da",
+   "A1_atac_small_mmd_l3_c0_s100_0107d6f1": "71310471f497230f8fd8713630b08f1b74abfa06b073914b21ee46375ca38b97",
+   "A1_atac_small_none_l0_c1_s100_8d38e2a3": "9349a908b58d7bec70417af158ed27c198e619aa37eff561fcf554b32a735633",
+   "A1_atac_small_pooled_l100_c1_s101_e65e48b7": "8d4976a5ad48b0c543a38955b003dc1ede8d944dbd410c43808ead51e87b0750",
+   "A1_atac_small_reference_l30_c0_s102_17472a8a": "6793b44840838b10f786a4cd21401567630a6984dfa7e309c3e62bd0859d55af",
+   "A1_atac_small_sinkhorn_l300_c1_s102_b78dd77a": "d0725e12427cfc82202ac28a5b9530fa61d5da5cd96543260ed1a069c7439349",
+   "A1_immune_barycenter_l1_c0_s102_c23fbdae": "76812f99209eb4157396e4f68ed85d2e9cb9132bd45183fef65cf03bf530fff5",
+   "A1_immune_discriminator_l100_c1_s102_32d8eb57": "26036b282ce681abc8e0fe51cdbbc06f8464ee2b0813bd81d9f24bd774dcbc81",
+   "A1_immune_mmd_l1000_c1_s100_d437ee0d": "f4bf266bf1362f6d7740a4edec599fae3a7f1c85f6030d1511a6cd2246d4a6e4",
+   "A1_immune_none_l0_c0_s101_78c7bb6a": "7a311fabb5dd25a9501c676f427a32e40c7de4f1d2851ba3f61ce8a2c20b6357",
+   "A1_immune_pooled_l10_c0_s101_75d8d59e": "71940350052dd4e25f11fefabc4dd4cba524a1d561619790a81216f28716310a",
+   "A1_immune_reference_l30_c1_s100_31992831": "9732bbd91ffe39b8f0d35a5c4996af7e36e79e8ab4ac7dd6949553126f188d48",
+   "A1_immune_sinkhorn_l3_c1_s101_6c0fba12": "2ff4a60c95417531f3d6623824874a199b080d4cdb1afbc0247c93bc553e9da3",
+   "A1_sim1_barycenter_l300_c1_s100_f51f28be": "21dfafaf8b88211c59d304fe5875aca8bd8f5ac3d2cd353d055f68d3ce88cac9",
+   "A1_sim1_discriminator_l100_c0_s100_36fb5e2c": "156ffd6f398e65a2cef2a39ecb7d9113fae05a1f36d672c4cb0be86fd5c97463",
+   "A1_sim1_mmd_l30_c1_s101_39564dc6": "f8cd11db8e4c12c109f300ac8b0866eec4059dd2fba0bbd2507d9c3773351441",
+   "A1_sim1_none_l0_c1_s102_2ec5aa2e": "8c1144a6f99619e32b6a64f89ee0f369a7f5429f072f80a02e07ebd6746d52a0",
+   "A1_sim1_pooled_l10_c0_s102_855bf21b": "ed0903ddf3adaca200e0109173d4ca2947c9865ba0da8a9af609142c284ef6f7",
+   "A1_sim1_reference_l3_c0_s101_43834004": "e942ec273e7631ee70fea81d5a9732da30a220259f7c7fe473b02cf75dce8e2b",
+   "A1_sim1_sinkhorn_l30_c0_s100_ebcbe68a": "596ceb973e9926c1a15ba3246da954417cccc2993c2f277fa97978e5526c772f"
+  }
+ },
+ "workstation_comparator_files": "ref_score column of cluster/jhpce/score_check/check_latents.tsv (tier12_v2/A1 for 17 non-Sinkhorn, tier12_v3/A1_sinkhorn for 3 Sinkhorn)"
+}

@@ -1,0 +1,43 @@
+PASS rule: PASS only if, for every latent, latent_sha256 and scorer_versions are equal and every metric column is identical (float64; NaN only against NaN)
+20 latents, 19 metric columns
+metric column                latents differ   max |diff| NaN vs value
+NMI_cluster/label                         0            0            0
+ARI_cluster/label                         0            0            0
+ASW_label                                 0            0            0
+ASW_label/batch                           0            0            0
+PCR_batch                                 0            0            0
+cell_cycle_conservation                   0            0            0
+isolated_label_F1                         0            0            0
+isolated_label_silhouette                 0            0            0
+graph_conn                                0            0            0
+kBET                                      0            0            0
+iLISI                                    19      0.00435            0
+cLISI                                    13      0.00187            0
+hvg_overlap                               0            0            0
+trajectory                                0            0            0
+kbet_seed                                 0            0            0
+kbet_r_calls                              0            0            0
+traj_root_fallback                        0            0            0
+kbet_labels_forced_one                    0            0            0
+kbet_labels_skipped                       0            0            0
+differs: A1_atac_small_none_l0_c1_s100_8d38e2a3: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_atac_small_discriminator_l10_c0_s101_b841ed69: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_atac_small_reference_l30_c0_s102_17472a8a: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_atac_small_pooled_l100_c1_s101_e65e48b7: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_atac_small_mmd_l3_c0_s100_0107d6f1: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_atac_small_sinkhorn_l300_c1_s102_b78dd77a: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_none_l0_c0_s101_78c7bb6a: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_discriminator_l100_c1_s102_32d8eb57: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_reference_l30_c1_s100_31992831: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_pooled_l10_c0_s101_75d8d59e: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_barycenter_l1_c0_s102_c23fbdae: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_mmd_l1000_c1_s100_d437ee0d: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_immune_sinkhorn_l3_c1_s101_6c0fba12: 2 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_none_l0_c1_s102_2ec5aa2e: 1 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_discriminator_l100_c0_s100_36fb5e2c: 1 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_reference_l3_c0_s101_43834004: 1 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_pooled_l10_c0_s102_855bf21b: 1 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_barycenter_l300_c1_s100_f51f28be: 1 columns, scored on compute-121.cm.cluster (avx2)
+differs: A1_sim1_mmd_l30_c1_s101_39564dc6: 1 columns, scored on compute-121.cm.cluster (avx2)
+latents by candidate CPU: compute-121.cm.cluster (avx2): 20 scored, 19 differ
+FAIL
