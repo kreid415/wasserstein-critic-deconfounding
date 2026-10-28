@@ -3,6 +3,7 @@
 # because --expect-device L40S is required before a fit and this machine has no L40S, SI-17). Same scorer code, environment
 # and thread settings as the first three datasets' scores: scripts/run_stage.py from a clean checkout of tag prereg-tier12-v3
 # (10a1ca5), scorer env wcd-kbet, thread_env(1), KBET seed from the scorer's own default (PREREG section 9 item 7, case iii).
+# TAGS_FILE (environment) replaces the dataset's full run list (the chain backend scores the latents that have arrived).
 # Usage: run_pilot_scoring.sh TASK WORKERS [extra run_stage.py args, e.g. --dry-run]
 #   TASK in atac_large immune_hum_mou lung pancreas sim2; WORKERS = scorers at once (about 6 small, 3 large)
 set -euo pipefail
@@ -20,7 +21,7 @@ export KMP_AFFINITY=disabled
 cd "$REPO"
 exec nice -n 10 "$ENVS/scvi-api/bin/python" scripts/run_stage.py \
   --manifest "$I/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv" --experiments A1 --tasks "$TASK" \
-  --tags-file "$I/pilot5_jhpce_$TASK.tags" \
+  --tags-file "${TAGS_FILE:-$I/pilot5_jhpce_$TASK.tags}" \
   --out-dir "$D/jhpce_tier12/pilot5_jhpce" --prepped-dir "$D/prepped_scib" \
   --fit-python "$ENVS/scvi-api/bin/python" --score-python "$ENVS/wcd-kbet/bin/python" \
   --r-home "$ENVS/wcd-kbet/lib/R" --r-libs "$D/Rlib_kbet" --expect-device L40S \

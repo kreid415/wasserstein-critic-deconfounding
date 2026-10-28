@@ -8,7 +8,8 @@
    "stage_repo": ".",
    "expect_device": "L40S",
    "sites": {
-    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce",
+    "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce"
    },
    "jobs": {
     "immune_hum_mou": "36551148",
@@ -17,7 +18,10 @@
     "sim2": "36551151",
     "pancreas": "36551152"
    },
-   "manifest": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+   "manifest": [
+    "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+    "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_inputs/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv"
+   ],
    "manifest_sha256": "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
    "experiments": [
     "A1"
@@ -37,13 +41,18 @@
    "stage_repo": ".",
    "expect_device": "L40S",
    "sites": {
-    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce",
+    "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce"
    },
    "score_sites": {
-    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce",
+    "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce"
    },
    "submissions": "/fastscratch/myscratch/kreid/wcd/chain/pilot5/state/submissions.jsonl",
-   "manifest": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+   "manifest": [
+    "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+    "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_inputs/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv"
+   ],
    "manifest_sha256": "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
    "experiments": [
     "A1"

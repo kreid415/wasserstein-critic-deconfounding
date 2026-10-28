@@ -55,7 +55,9 @@ def read_submissions(path):
 
 
 def expected_rows(rs, g):
-    rows = chain_lib.read_expected(rs, abspath(g["manifest"]), g["manifest_sha256"], g["experiments"],
+    man = g["manifest"]        # one path, or the same file at each host (the first that exists here is read; its SHA-256 is checked)
+    man = man if isinstance(man, str) else next((m for m in man if os.path.exists(abspath(m))), man[0])
+    rows = chain_lib.read_expected(rs, abspath(man), g["manifest_sha256"], g["experiments"],
                                    [abspath(t) for t in g.get("tags_files", [])])
     for r in rows:
         r["job"] = str(g.get("jobs", {}).get(r["task"], ""))
@@ -200,6 +202,8 @@ def main(argv=None):
                              "not applicable: no live job (nothing running or pending)")),
                "- jobs (Slurm accounting, " + (sa["captured_at"] if sa else "none") + "): " +
                (", ".join(f"{j} {st}" + (f" x{n}" if n > 1 else "") for (j, st), n in sorted(jobs.items())) or "none"),
+               (f"- valid units by site: " + ", ".join(f"{s} {sum(1 for r in rows if (per_site[s].get(r['tag']) or (False,))[0])}"
+                                                         for s in sorted(per_site)) if len(per_site) > 1 else "- sites: " + ", ".join(per_site)),
                f"- needs action: {t['failed'] + t['done_invalid']} units (failed {t['failed']}, done_invalid {t['done_invalid']}); "
                f"missing {t['missing']}; details in {name}/status_board.md", ""]
     md.append(f"_generated {datetime.datetime.now().astimezone().isoformat(timespec='seconds')}; scheduler snapshot "

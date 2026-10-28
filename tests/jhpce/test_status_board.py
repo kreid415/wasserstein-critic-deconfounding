@@ -166,3 +166,25 @@ def test_expected_rows_refuses_a_changed_manifest(world):
     with pytest.raises(SystemExit, match="more than one tags file"):
         tf, _ = world["st"].tags_file("a0\n")
         chain_lib.read_expected(rs, str(world["st"].manifest), chain_lib.sha256_file(str(world["st"].manifest)), ["A1"], [tf, tf])
+
+
+def test_board_workstation_site_for_pilot_scoring(world):
+    # the pilot's scores can sit at the workstation ('local' site): a score the cluster copy lacks counts, the board names the site,
+    # and a manifest given as one path per host reads the first path that exists on this host
+    import shutil
+    import types
+    w, out = world, world["tmp"] / "board_ws"
+    ws = w["tmp"] / "ws_pilot"
+    shutil.copytree(w["st"].out, ws)
+    write_score(types.SimpleNamespace(out=str(ws), tmp=w["st"].tmp), "a3", chain_lib.sha256_file(os.path.join(ws, "latents", "a3.npz")))
+    os.remove(ws / "scores" / "a0.csv")
+    cfg = json.load(open(w["cfg"]))
+    g = cfg["groups"]["pilot_score"]
+    g["sites"]["local"], g["score_sites"]["local"] = str(ws), str(ws)
+    g["manifest"] = [str(w["tmp"] / "no_such_host" / "m.tsv"), g["manifest"]]
+    (w["tmp"] / "cfg_ws.json").write_text(json.dumps(cfg))
+    run_board(w["tmp"] / "cfg_ws.json", out, "--sites", "jhpce", "local", "--groups", "pilot_score", "--sacct-file", str(w["sa"]), "--squeue-file", str(w["sq"]))
+    assert totals(out, "pilot_score")["done_valid"] == 3                      # was 2 without the workstation copy (a3 is scored there)
+    unit = {u["unit"]: u for u in json.load(open(out / "status_board.json"))["groups"]["pilot_score"]["board"]["units"]}["a3"]
+    assert "[site local]" in unit["reason"]
+    assert "valid units by site: jhpce 2, local 2" in (out / "status_board.md").read_text()
