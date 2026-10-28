@@ -17,7 +17,7 @@ REPO=$(cd "${WCD_REPO:?set WCD_REPO to the repo checkout (Slurm runs a copy of t
 source "$REPO/cluster/jhpce/env.sh"
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 mkdir -p "$STATE"
-CMD="$SCORE_PY $REPO/cluster/jhpce/chain_score.py --state-dir $STATE $*"
+CMD=$(printf "%q " "$SCORE_PY" "$REPO/cluster/jhpce/chain_score.py" --state-dir "$STATE" "$@")   # %q keeps arguments with spaces whole
 if [ ! -f "$STATE/jw/state.json" ]; then
   "$SCORE_PY" "$REPO/cluster/vendor/jw.py" start --state "$STATE/jw" --kind local --workdir "$STATE" --cmd "$CMD" \
     --validate "$CMD --check-finished" --progress-file "$STATE/status.json" --stall-min 90 --retries 2
