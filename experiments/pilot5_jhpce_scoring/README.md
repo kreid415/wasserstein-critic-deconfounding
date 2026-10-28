@@ -41,5 +41,5 @@ and the chain's `measured.json` says 56 GB for atac_large (probe peak 36.5 GiB x
 so both datasets run at once (the chain's own budget would have kept atac_large at 3 tasks until immune_hum_mou was done).
 
 ## Limits
-Identity was shown on 5 latents (atac_small x2, immune, sim1, immune_hum_mou), all 19 metric columns, znver2 only for the rule record; znver3 gave identical values on the 4 older latents (not used for production).
+Identity was shown on 5 latents (atac_small x2, immune, sim1, immune_hum_mou), all 19 metric columns, znver2 only for the rule record; znver3 (EPYC 7713) also gave identical values on all 5 latents (docs/scorer_identity_check_20261028_znver3.json; not used for production: 1 h 54 min per immune_hum_mou latent against 44 min).
 The workstation's RDRAND is a hardware fault: a firmware change or another machine would move every workstation LISI value by about 0.005 and make the record untrue for the workstation rows.

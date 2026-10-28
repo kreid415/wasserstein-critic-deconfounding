@@ -13,7 +13,7 @@
   "lisi_preload_sha256": "fda4d45779c0971626018a0e68abb405b1a1b8f5810841a6bef4da6f5d9feea3",
   "preload_source": "fixed_random_device.cpp, branch lisi-jhpce-investigation@ed280a2, built with g++ 11.4 on JHPCE (command in that report, section 2)",
   "scorer_git_sha": "10a1ca5874fbcdc033b148525b5e71d866306bdb",
-  "nodes": "Slurm feature znver2 (AMD EPYC 7702, Zen 2), the type of the 20-latent match check"
+  "nodes": "Slurm feature znver2 (AMD EPYC 7702, Zen 2): the node type of the identity check and of all production scoring. Cross-check on znver3 (AMD EPYC 7713, Zen 3): the same 5 latents were also identical in all 19 columns (docs/scorer_identity_check_20261028_znver3.json); znver3 is not used for production (immune_hum_mou took 1 h 54 min there against 44 min)."
  },
  "identity_check": {
   "file": "scorer_identity_check_20261028.json",
@@ -24,6 +24,6 @@
  "limits": [
   "Equality was shown for the latents of the identity check only; it rests on the preload making the JHPCE draw equal to the workstation's stuck RDRAND value.",
   "If the workstation's RDRAND state ever changes (firmware, other machine), every workstation LISI value changes by about 0.005 and this record no longer describes the workstation rows.",
-  "Non-Zen 2 JHPCE nodes (AVX-512) were not tested; the scoring jobs request znver2 only."
+  "Production scoring requests znver2 only; znver3 gave identical values on the 5 identity latents but is not part of the rule's evidence file. AVX-512 nodes were not tested."
  ]
 }
