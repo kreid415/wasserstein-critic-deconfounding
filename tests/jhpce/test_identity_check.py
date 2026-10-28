@@ -34,7 +34,7 @@ def run(tmp_path, ref_over=None, cand_over=None):
     return code, json.load(open(tmp_path / "out.json"))
 
 
-def test_identity_check_passes_equal_rows_and_flags_every_kind_of_difference(tmp_path):
+def test_identity_check_passes_equal_rows_and_flags_every_kind_of_difference(tmp_path):   # test-reason: identity_check.py lives under experiments/ (outside --src) and its verdict is the evidence the rule check reads
     code, res = run(tmp_path)
     assert code == 0 and res["all_columns_identical"] and res["n_latents"] == 1 and res["n_metric_columns"] == [2]    # provenance columns do not count
     code, res = run(tmp_path, cand_over={"iLISI": "0.2500001"})

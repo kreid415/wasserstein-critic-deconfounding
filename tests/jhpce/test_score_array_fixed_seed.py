@@ -30,7 +30,7 @@ def run(script, tmp_path, lib, **env_extra):
     return subprocess.run(["bash", str(script), "sha", str(tmp_path / "list"), str(tmp_path / "out")], env=env, capture_output=True, text=True)
 
 
-def test_wrapper_refuses_a_missing_or_other_preload_library(tmp_path):
+def test_wrapper_refuses_a_missing_or_other_preload_library(tmp_path):   # test-reason: the wrapper is a shell script (outside --src): this is its only guard test
     other = tmp_path / "fixed_random_device.so"
     other.write_bytes(b"not the pinned library")
     for lib in (tmp_path / "absent.so", other):
@@ -38,7 +38,7 @@ def test_wrapper_refuses_a_missing_or_other_preload_library(tmp_path):
         assert r.returncode == 9 and "not the pinned preload library" in r.stderr
 
 
-def test_wrapper_scores_adds_the_provenance_columns_once_and_checks_a_kept_file(tmp_path):
+def test_wrapper_scores_adds_the_provenance_columns_once_and_checks_a_kept_file(tmp_path):   # test-reason: shell script outside --src: columns, rerun and race-retry paths
     lib = next((m.group(1) for m in re.finditer(r"\s(/\S+/(?:libm|libc)\.so[.\d]*)$", open("/proc/self/maps").read(), re.M)), None)
     if lib is None:
         pytest.skip("no shared library to preload in this interpreter")      # pragma: no cover  # depends on the interpreter's libraries
