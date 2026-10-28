@@ -73,7 +73,7 @@ def figure(rec, pairs, mean, path):
         m = mean[mean.cond == cond].set_index("arm").reindex(ARMS)
         axs[2].plot(m.mean_rank, np.arange(len(ARMS)) + (-0.15 if cond == 1 else 0.15), mk, color="k", ms=3.5, label=DECODERS[str(cond)])
     axs[2].set_ylim(5.6, -0.6); axs[2].set_yticks(range(len(ARMS)), []); axs[2].set_xlim(0.8, 6.2); axs[2].grid(axis="y", color="#E5E5E5")
-    axs[2].set_xlabel("mean rank (1 = best)"); axs[2].legend(loc="lower left", frameon=False, fontsize=5.5, handletextpad=0.2)
+    axs[2].set_xlabel("mean rank (1 = best)"); axs[2].legend(loc="upper center", bbox_to_anchor=(0.5, -0.32), frameon=False, fontsize=5.5, handletextpad=0.2)
     axs[2].set_title("mean rank", loc="left")
     panel_letter(axs[2], "b", dx=-0.1)
     fig.text(0.01, 0.01, "a: colour = biology at b*; number = rank in the task (1 = best).\nHatched: low-signal pair (not ranked), or the curve never reaches b* (bottom places).", fontsize=6)
