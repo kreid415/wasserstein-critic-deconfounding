@@ -756,3 +756,11 @@
 - added: 2026-10-21
 - keywords: X6, pre-check, pooled_sn, n_critic, strength, shift, confirmatory
 - notebook: NB-20261021-05
+
+## SI-115 · active · method
+- rule: Pilot scoring may be split across the workstation and JHPCE. A score made on JHPCE counts as equal to a workstation score only if it was made with the LISI seed fixed (preload library fixed_random_device.so, LISI_RANDOM_DEVICE_VALUE=0xFFFFFFFF, SHA-256 fda4d45779c0971626018a0e68abb405b1a1b8f5810841a6bef4da6f5d9feea3) at scorer commit 10a1ca5 (clean checkout), the same scoring environment and thread settings, on Zen 2 nodes (Slurm feature znver2), and its row carries score_site, lisi_random_device and lisi_preload_sha256. The rule check accepts such a mix only while docs/SCORER_EQUIVALENCE.json names an intact identity check (docs/scorer_identity_check_20261028.json: every column identical on at least 3 latents scored on both sites) and refuses every other mix (scripts/prereg_rules.py, refuse_unknown_scorer_sites). A latent scored on both sites keeps its workstation row; the JHPCE file is set aside (scores_jhpce_duplicate/). No score value and no analysis rule changes.
+- source: "just let it be mixed, I don't care" (user, 2026-10-28)
+- added: 2026-10-28
+- keywords: scoring site, JHPCE, workstation, mixed, LISI, seed, RDRAND, preload, scorer equivalence, provenance, immune_hum_mou, atac_large
+- files: scripts/prereg_rules.py, docs/SCORER_EQUIVALENCE.json, cluster/jhpce/score_array_fixed_seed.sh, cluster/jhpce/chain_ws.py
+- notebook: NB-20261028-14
