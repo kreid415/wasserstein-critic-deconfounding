@@ -73,6 +73,10 @@ FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivi
 PROVENANCE_COLS = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
 EQUIVALENT_COMMITS = os.path.join(HERE, os.pardir, "docs", "EQUIVALENT_COMMITS.json")   # SI-54
 PROVENANCE_MAY_BE_EMPTY = ("numba_cpu_name",)
+# SI-115: score rows of one rule input may come from the workstation and from JHPCE only if every JHPCE row was scored with the fixed
+# LISI seed (docs/SCORER_EQUIVALENCE.json); the JHPCE rows carry these columns (cluster/jhpce/score_array_fixed_seed.sh).
+SCORER_EQUIVALENCE = os.path.join(HERE, os.pardir, "docs", "SCORER_EQUIVALENCE.json")
+SITE_COLS = ("cpu_model", "score_site", "lisi_random_device", "lisi_preload_sha256")
 
 
 class PreregError(RuntimeError):
@@ -208,7 +212,7 @@ def _read_score_file(path):
     ''); a file without one of them leaves it absent, so after concatenation its rows hold NaN there (refused by
     outcomes)."""
     df = pd.read_csv(path, dtype={"tag": str})
-    prov = [c for c in PROVENANCE_COLS if c in df.columns]
+    prov = [c for c in PROVENANCE_COLS + SITE_COLS if c in df.columns]
     if prov:
         raw = pd.read_csv(path, dtype=str, keep_default_na=False, usecols=prov)
         _require(len(raw) == len(df), f"{path}: provenance columns read {len(raw)} rows, metrics {len(df)}")
@@ -244,6 +248,33 @@ def equivalent_commits(shas, arms):
     return [r.stdout.strip() if s == E["commit"] else s for s in shas]
 
 
+def refuse_unknown_scorer_sites(s, experiments):
+    """SI-115: rows scored on the workstation (cpu_model in the record, no score_site) and rows scored on JHPCE with the fixed LISI
+    seed (score_site, seed value and preload-library SHA-256 as in the record) may share a rule input, once the record's identity check
+    is intact. Any other row (JHPCE without the fixed seed, an unknown CPU, a row without these columns) mixed with them is refused.
+    An input of one kind of rows is judged by the other provenance columns alone, as before."""
+    def col(c):
+        return s[c].fillna("").astype(str) if c in s.columns else pd.Series("", index=s.index)
+    with open(SCORER_EQUIVALENCE) as f:
+        E = json.load(f)
+    fx = E["jhpce_fixed_seed"]
+    on_ws = col("cpu_model").isin(E["workstation"]["cpu_model"]) & col("score_site").eq("")
+    on_jh = (col("score_site").eq(fx["score_site"]) & col("lisi_random_device").eq(fx["lisi_random_device"])
+             & col("lisi_preload_sha256").eq(fx["lisi_preload_sha256"]))
+    other = ~(on_ws | on_jh)
+    if int(on_ws.any()) + int(on_jh.any()) + int(other.any()) < 2:
+        return
+    _require(not other.any(), f"scores of {experiments} mix scorer sites: {int(other.sum())} rows are neither workstation rows nor "
+                              f"JHPCE rows scored with the fixed LISI seed (SI-115), e.g. {sorted(s.tag[other])[:3]}")
+    ev = E["identity_check"]
+    path = os.path.join(os.path.dirname(SCORER_EQUIVALENCE), ev["file"])
+    _require(os.path.isfile(path) and hashlib.sha256(open(path, "rb").read()).hexdigest() == ev["sha256"],
+             f"{path} is missing or changed: the scorer-equivalence record's identity check is not intact (SI-115)")
+    res = json.load(open(path))
+    _require(res["all_columns_identical"] is True and res["n_latents"] >= 3,
+             f"{path}: the identity check did not find every column identical on at least 3 latents")
+
+
 def check_provenance(s, experiments, arms):
     """Code check CR-05, rule side: every score row of one rule input carries the scorer provenance columns, with a
     value (numba_cpu_name may be ''), and all rows share one value per column (scorer_git_sha after SI-54's
@@ -259,6 +290,7 @@ def check_provenance(s, experiments, arms):
             lacking |= s[c].astype(str).str.strip().eq("")
     bad = sorted(s.tag[lacking])
     _require(not bad, f"{len(bad)} score rows of {experiments} lack scorer provenance values, e.g. {bad[:5]}")
+    refuse_unknown_scorer_sites(s, experiments)
     s = s.assign(scorer_git_sha=equivalent_commits(s.scorer_git_sha, arms))
     mixed = {c: sorted(s[c].astype(str).unique()) for c in PROVENANCE_COLS if s[c].astype(str).nunique() > 1}
     _require(not mixed, f"scores of {experiments} mix scorer provenance: "

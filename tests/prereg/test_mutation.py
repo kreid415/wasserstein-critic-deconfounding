@@ -34,6 +34,14 @@ MUTANTS = {
                                    "    missing = []\n", checks.check_provenance_missing),
     "provenance_check_not_called": ('    check_provenance(s, experiments, s.tag.map(rows.set_index("tag").arm))\n', "    pass\n",
                                     checks.check_provenance_mix),
+    # SI-115: workstation and fixed-seed JHPCE rows may share a rule input; any other mix, or a broken identity check, is refused
+    "site_mix_allowed": ('_require(not other.any(), f"scores of {experiments} mix scorer sites', '_require(True, f"scores of {experiments} mix scorer sites',
+                         checks.check_scorer_sites),
+    "site_seed_sha_ignored": ('col("lisi_preload_sha256").eq(fx["lisi_preload_sha256"])', 'True', checks.check_scorer_sites),
+    "site_identity_file_ignored": ('hashlib.sha256(open(path, "rb").read()).hexdigest() == ev["sha256"]', 'True', checks.check_scorer_sites),
+    "site_identity_result_ignored": ('_require(res["all_columns_identical"] is True and res["n_latents"] >= 3,',
+                                     '_require(True or res["all_columns_identical"] is True,', checks.check_scorer_sites),
+    "site_check_not_called": ("    refuse_unknown_scorer_sites(s, experiments)\n", "    pass\n", checks.check_scorer_sites),
     # SI-45 (code check CR-11): the unresolved window neighbour is marked and turned into default-half rows
     "si45_not_marked": ('                        cell.setdefault("edge_unresolved", []).append(nbr)\n',
                         '                        pass\n', checks.check_si45_flagged),

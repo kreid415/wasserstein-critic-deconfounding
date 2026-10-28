@@ -11,6 +11,10 @@ Used for the penalty-strength pilot while its scoring site is the workstation (P
   4. when anything is new, score the mirror's tags of the task with experiments/pilot5_workstation_scoring/run_pilot_scoring.sh (scripts/run_stage.py at the
      tag commit 10a1ca5, 3 scorers) unless another scoring run holds the lock (the four-dataset run keeps it): then try again
      next tick, and the copy goes on.
+--no-score and --pull-scores (CONSTRAINTS.md SI-115): a task scored on JHPCE (cluster/jhpce/score_array_fixed_seed.sh, fixed LISI seed)
+is not scored here; each tick also copies its JHPCE score files (the remote root's scores/), checks the SHA-256 against a hash made on JHPCE
+and that the row carries the provenance columns of docs/SCORER_EQUIVALENCE.json, and installs the file only when this machine holds no score of
+the tag (a tag scored on both sites keeps the workstation row; the JHPCE file goes to <mirror>/scores_jhpce_duplicate/).
 Ends: exit 0 when every expected tag has a valid score file or a failure record, 10 at --max-hours / --max-ticks (state kept;
 run again; run it under job-watch), 2 on a usage or setup error. Every other failure raises (nothing is skipped silently).
 State: <state-dir>/state.json (written every tick) and chain_ws.log.
@@ -43,6 +47,16 @@ def read_tags(path):
 def files_for(tag, failed=False):
     """Mirror-relative files of one tag: a fit has latent, model and attempts; a failure record has status and attempts."""
     return ([f"status/{tag}.json"] if failed else [f"latents/{tag}.npz", f"models/{tag}/model.pt"]) + [f"attempts/{tag}.jsonl"]
+
+
+def provenance_ok(path, eq):
+    """True if the one-row score file carries the JHPCE fixed-seed provenance columns of the equivalence record `eq`."""
+    import csv
+    with open(path, newline="") as f:
+        rows = list(csv.DictReader(f))
+    want = {"score_site": "jhpce", "lisi_random_device": eq["jhpce_fixed_seed"]["lisi_random_device"],
+            "lisi_preload_sha256": eq["jhpce_fixed_seed"]["lisi_preload_sha256"]}
+    return len(rows) == 1 and all(rows[0].get(k) == v for k, v in want.items())
 
 
 def sha256_file(path):
@@ -98,6 +112,35 @@ def local_state(mirror, tags):
     return have, scored
 
 
+def pull_scores(a, rem, tags, log):
+    """Copy the JHPCE score files of tags this machine has no score for; (installed, duplicates, bad) tag lists."""
+    eq = json.load(open(os.path.join(REPO, "docs", "SCORER_EQUIVALENCE.json")))
+    ready = rem.old_files("scores", f"A1_{a.task}_*.csv", a.min_age_min)
+    new = [t for t in tags if f"{t}.csv" in ready]
+    installed, dup, bad = [], [], []
+    for i in range(0, len(new), a.batch):
+        files = [f"scores/{t}.csv" for t in new[i:i + a.batch]]
+        rem.fetch(files, os.path.join(a.mirror, "_incoming_scores"))
+        local = {f: sha256_file(os.path.join(a.mirror, "_incoming_scores", f)) for f in files}   # raises if a file did not arrive
+        ok, _ = verify(local, rem.sums(files))
+        for f in files:
+            src, t = os.path.join(a.mirror, "_incoming_scores", f), os.path.basename(f)[:-4]
+            if f not in ok or not provenance_ok(src, eq):
+                bad.append(t)
+                continue
+            os.makedirs(os.path.join(a.mirror, "scores"), exist_ok=True)
+            try:
+                os.link(src, os.path.join(a.mirror, f))        # never overwrites: a workstation row stays
+                os.unlink(src)
+                installed.append(t)
+            except FileExistsError:
+                os.makedirs(os.path.join(a.mirror, "scores_jhpce_duplicate"), exist_ok=True)
+                os.replace(src, os.path.join(a.mirror, "scores_jhpce_duplicate", t + ".csv"))
+                dup.append(t)
+    log(f"JHPCE scores: {len(installed)} installed, {len(dup)} already scored here (kept the workstation row), {len(bad)} failed verification")
+    return installed, dup, bad
+
+
 def tick(a, rem, tags, log):
     have, scored = local_state(a.mirror, tags)
     ready_fit = rem.old_files("latents", f"A1_{a.task}_*.npz", a.min_age_min)
@@ -123,8 +166,13 @@ def tick(a, rem, tags, log):
     log(f"copied and verified {len(installed)} tags; {len(bad)} failed verification (copied again next tick)")
     have, scored = local_state(a.mirror, tags)
     fits = sorted(t for t, k in have.items() if k == "fit")
-    rc = None
-    if a.after_jw and json.load(open(os.path.join(a.after_jw, "state.json")))["status"] != "done":
+    rc, pulled = None, ([], [], [])
+    if a.pull_scores:
+        pulled = pull_scores(a, rem, tags, log)
+        have, scored = local_state(a.mirror, tags)
+    if a.no_score:
+        log("scoring is done on JHPCE; not scored here")
+    elif a.after_jw and json.load(open(os.path.join(a.after_jw, "state.json")))["status"] != "done":
         log(f"scoring waits: job-watch run {a.after_jw} is not done")        # the four-dataset run needs the memory first
     elif fits and set(fits) - scored:
         sub = os.path.join(a.state_dir, "tags_present.tags")
@@ -139,7 +187,8 @@ def tick(a, rem, tags, log):
         have, scored = local_state(a.mirror, tags)
     done = sum(1 for t in tags if t in scored or have.get(t) == "failed")
     return dict(at=now(), expected=len(tags), mirrored=len(have), scored=len(scored), failed_fits=sum(k == "failed" for k in have.values()),
-                final=done, installed=len(installed), bad=len(bad), score_rc=rc)
+                final=done, installed=len(installed), bad=len(bad), score_rc=rc,
+                scores_pulled=len(pulled[0]), scores_duplicate=len(pulled[1]), scores_bad=len(pulled[2]))
 
 
 def main(argv=None):
@@ -155,6 +204,8 @@ def main(argv=None):
     ap.add_argument("--lock", default=None, help="flock file shared with the four-dataset run (default <mirror>/.ws_scoring.lock)")
     ap.add_argument("--after-jw", default=None, help="job-watch state dir; score only once that run is done (memory is shared)")
     ap.add_argument("--workers", type=int, default=3, help="scorers at once (large dataset: 3)")
+    ap.add_argument("--no-score", action="store_true", help="never score here (the task is scored on JHPCE)")
+    ap.add_argument("--pull-scores", action="store_true", help="also copy and verify the task's score files made on JHPCE")
     ap.add_argument("--min-age-min", type=float, default=20)
     ap.add_argument("--batch", type=int, default=40)
     ap.add_argument("--interval", type=float, default=900)

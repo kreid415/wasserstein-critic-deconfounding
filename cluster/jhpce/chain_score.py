@@ -19,6 +19,7 @@ import argparse
 import datetime
 import json
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -56,13 +57,15 @@ def admit(live, mem_gb, n, max_cpus, max_mem_gb):
     return max(0, min(n, cpu_left, int(mem_left // mem_gb)))
 
 
-def sbatch_text(job, n, throttle, size, score_repo, sha, lst, out, logs, constraint=None):
+def sbatch_text(job, n, throttle, size, score_repo, sha, lst, out, logs, constraint=None, script=None, env=()):
     head = ["#!/bin/bash", f"#SBATCH --job-name={job}", "#SBATCH --partition=shared", "#SBATCH --account=jhpce",
             f"#SBATCH --array=1-{n}%{throttle}", "#SBATCH --cpus-per-task=1", f"#SBATCH --mem={size['mem_gb']}G",
             f"#SBATCH --time={size['walltime']}", "#SBATCH --no-requeue", f"#SBATCH --output={logs}/slurm-%x_%A_%a.out"]
     if constraint:
         head.append(f"#SBATCH --constraint={constraint}")
-    return "\n".join(head + ["set -euo pipefail", f"exec bash {score_repo}/cluster/jhpce/score_array.sh {sha} {lst} {out}", ""])
+    script = script or f"{score_repo}/cluster/jhpce/score_array.sh"       # --score-array: a wrapper that calls the repo's script
+    exports = [f"export {k}={shlex.quote(v)}" for k, v in (e.split("=", 1) for e in env)]
+    return "\n".join(head + ["set -euo pipefail", *exports, f"exec bash {script} {sha} {lst} {out}", ""])
 
 
 def read_submissions(path):
@@ -142,7 +145,7 @@ def make_batch(a, rows_by_tag, fit_detail, tags, size, throttle, bid):
     sb = os.path.join(bdir, "score.sbatch")
     with open(sb, "w") as f:
         f.write(sbatch_text(f"wcdscore-{bid}", len(tags), throttle, size, a.score_repo, a.score_sha, lst, a.score_out,
-                            os.path.join(bdir, "logs"), a.constraint))
+                            os.path.join(bdir, "logs"), a.constraint, a.score_array, a.score_env))
     return sb
 
 
@@ -234,6 +237,8 @@ def main(argv=None):
     ap.add_argument("--probe-n", type=int, default=3, help="latents of the first batch of a task whose memory is not measured")
     ap.add_argument("--settle-s", type=float, default=60, help="a latent is scored only when this old (the fitter is done writing)")
     ap.add_argument("--constraint", help="one Slurm feature, e.g. znver2 (same CPU family for all scores)")
+    ap.add_argument("--score-array", help="array-task script to run instead of <score-repo>/cluster/jhpce/score_array.sh (same arguments)")
+    ap.add_argument("--score-env", nargs="*", default=[], metavar="NAME=VALUE", help="exported in every array task before the script")
     ap.add_argument("--interval", type=float, default=300)
     ap.add_argument("--max-ticks", type=int, default=0)
     ap.add_argument("--max-hours", type=float, default=0)
@@ -245,6 +250,8 @@ def main(argv=None):
         return 0 if os.path.exists(fin_path) and json.load(open(fin_path))["ok"] else 1
     if not (a.fit_jobs or a.max_hours or a.max_ticks):
         raise SystemExit("give --fit-jobs (so the chain knows when fits are over) or --max-hours / --max-ticks")
+    if any("=" not in e or e.startswith("=") for e in a.score_env):
+        raise SystemExit("--score-env takes NAME=VALUE items")
     if not 1 <= a.max_cpus <= 200:
         raise SystemExit("--max-cpus must be 1..200: the project limit for scoring arrays is 200 CPUs held")
     os.makedirs(a.state_dir, exist_ok=True)

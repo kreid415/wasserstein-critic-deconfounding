@@ -129,12 +129,14 @@ def test_admit(live_arrays, mem, n, want):  # test-reason: pins the CPU and memo
 def test_chain_runs_fit_to_scoring(env):
     st = env
     fit(st, ["a0", "a1", "a2", "i0"])
-    code = chain(st, "--constraint", "znver2", "--max-cpus", "2")
+    wrap = str(st.tmp / "wrap" / "score_array.sh")
+    code = chain(st, "--constraint", "znver2", "--max-cpus", "2", "--score-array", wrap, "--score-env", "SCORER_REPO=/a b", "X=1")
     s = subs(st)
     assert code == cs.EXIT_RUNNING and [r["event"] for r in s] == ["intent", "submitted"]
     assert s[1]["tags"] == ["a0", "a1", "a2"] and s[1]["task"] == "atac_small" and s[1]["throttle"] == 2
     text = json.load(open(sorted(st.stub.glob("sbatch_*.json"))[0]))["text"]
     assert "--array=1-3%2" in text and "--mem=3G" in text and "--constraint=znver2" in text and str(st.score_out) in text
+    assert f"exec bash {wrap} " in text and "export SCORER_REPO='/a b'\nexport X=1\n" in text           # --score-array / --score-env
     lines = [x.split("\t") for x in open(st.state / "batches" / s[1]["batch"] / "list.tsv").read().splitlines()]
     assert [x[0] for x in lines] == ["a0", "a1", "a2"]
     assert json.loads(lines[0][3])["latent_sha256"] == chain_lib.sha256_file(os.path.join(st.out, "latents", "a0.npz"))
@@ -208,6 +210,7 @@ def test_chain_submit_failure_dry_run_and_adoption(env, monkeypatch):
 
 @pytest.mark.parametrize("extra,match", [
     (["--max-cpus", "201"], "1..200"),
+    (["--score-env", "oops"], "NAME=VALUE"),
     (["--sizes", "MISSING"], "no size"),
 ])
 def test_chain_refuses_bad_settings(env, tmp_path, extra, match):

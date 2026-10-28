@@ -175,6 +175,54 @@ def check_provenance_missing(P):
     _refused(P, M, S.drop(columns=["cpu_simd"]), F, r"lack the scorer provenance columns \['cpu_simd'\]")
 
 
+def check_scorer_sites(P):
+    """SI-115: workstation rows and fixed-seed JHPCE rows may share a rule input once the record's identity check is intact. Rows of
+    any other kind mixed with them (JHPCE without the fixed seed or with another preload library, another CPU, no site columns), a
+    changed identity file and an identity check that is not 'identical on >= 3 latents' are refused. An input of one kind of rows
+    (all workstation, all JHPCE) is not judged here."""
+    import hashlib
+    import json
+    import os
+    import tempfile
+    M, S, F = _prov_input()
+    real = json.load(open(P.SCORER_EQUIVALENCE))
+    ws_cpu, fx = real["workstation"]["cpu_model"][0], real["jhpce_fixed_seed"]
+    jh = dict(cpu_model="AMD EPYC 7702 64-Core Processor", score_site=fx["score_site"], lisi_random_device=fx["lisi_random_device"],
+              lisi_preload_sha256=fx["lisi_preload_sha256"])
+
+    def table(n_jhpce, **over):
+        """S with the first n_jhpce rows scored on JHPCE (columns of `jh`, changed by `over`), the others on the workstation."""
+        T = S.assign(cpu_model=ws_cpu, score_site="", lisi_random_device="", lisi_preload_sha256="")
+        for col, val in {**jh, **over}.items():
+            T.loc[:n_jhpce - 1, col] = val
+        return T
+
+    with tempfile.TemporaryDirectory() as d:
+        def record(result, tamper=False):
+            text = json.dumps(result)
+            with open(os.path.join(d, "identity.json"), "w") as f:
+                f.write(text + (" " if tamper else ""))
+            with open(os.path.join(d, "eq.json"), "w") as f:
+                json.dump(dict(real, identity_check=dict(file="identity.json", sha256=hashlib.sha256(text.encode()).hexdigest())), f)
+            P.SCORER_EQUIVALENCE = os.path.join(d, "eq.json")
+        saved = P.SCORER_EQUIVALENCE
+        try:
+            good = dict(all_columns_identical=True, n_latents=3)
+            record(good)
+            for n in (0, 4, len(S)):                                    # all workstation, mixed, all JHPCE
+                assert len(P.outcomes(M, table(n), F, ["A1"])) == len(M)
+            for T in (table(4, lisi_random_device=""), table(4, lisi_preload_sha256="0" * 64), table(4, score_site="", cpu_model="Intel"),
+                      table(4, score_site="", lisi_random_device="", lisi_preload_sha256="")):
+                _refused(P, M, T, F, "mix scorer sites")
+            record(good, tamper=True)
+            _refused(P, M, table(4), F, "identity check is not intact")
+            for bad in (dict(all_columns_identical=False, n_latents=3), dict(all_columns_identical=True, n_latents=2)):
+                record(bad)
+                _refused(P, M, table(4), F, "did not find every column identical")
+        finally:
+            P.SCORER_EQUIVALENCE = saved
+
+
 # ---- SI-45 (code check CR-11): an R4-a1 window neighbour without an A1 fit -> default-half A1 rows --------------------
 SI45_CELL = ("immune", 1, "pooled")
 SI45_LOW_EXT = [0.03, 0.01]     # the two R4-a1 extension rounds below the A1 grid (R4_MAX_ROUNDS x R4_EXT_POINTS)

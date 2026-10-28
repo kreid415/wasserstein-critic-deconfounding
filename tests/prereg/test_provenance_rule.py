@@ -37,6 +37,10 @@ def test_missing_provenance_is_refused():
     checks.check_provenance_missing(P)
 
 
+def test_workstation_and_fixed_seed_jhpce_rows_may_share_a_rule_input():     # test-reason: SI-115 site mix; mutants are killed in test_mutation.py
+    checks.check_scorer_sites(P)
+
+
 def test_csv_round_trip_keeps_an_empty_numba_cpu_name(tmp_path):
     M, S, F = checks._prov_input()
     sp, _ = synth.write_scores(S, F, str(tmp_path), "a1")

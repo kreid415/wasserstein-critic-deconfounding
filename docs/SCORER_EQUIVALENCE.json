@@ -1,0 +1,27 @@
+{
+ "rule": "SI-115 (CONSTRAINTS.md); user decision 2026-10-28: scoring of the pilot may be mixed across the workstation and JHPCE",
+ "meaning": "Score rows made on the workstation and score rows made on JHPCE with the LISI seed fixed (cluster/jhpce/score_array_fixed_seed.sh) may share one rule input. scripts/prereg_rules.py (refuse_unknown_scorer_sites) accepts that mix only if every row is a workstation row (cpu_model listed below, no score_site) or a JHPCE row carrying score_site, lisi_random_device and lisi_preload_sha256 exactly as below, and only while identity_check names an intact file (SHA-256) whose result is 'every column identical on at least 3 latents'. Any other mix (JHPCE rows without the fixed seed, another CPU, rows without these columns) is refused. The five PROVENANCE_COLS must still agree across the whole input (scorer commit, dirty flag, SIMD width, NUMBA_CPU_NAME, package versions).",
+ "workstation": {
+  "cpu_model": [
+   "AMD Ryzen 5 3600 6-Core Processor"
+  ],
+  "why": "RDRAND and RDSEED on this CPU always return 0xffffffff, so scib 1.1.7's knn_graph helper (mt19937 seeded from std::random_device) always scores the same half of the cells for iLISI and cLISI (experiments/lisi_jhpce_investigation_20261028/lisi_jhpce_investigation_20261028.md section 1, branch lisi-jhpce-investigation@ed280a2)."
+ },
+ "jhpce_fixed_seed": {
+  "score_site": "jhpce",
+  "lisi_random_device": "0xFFFFFFFF",
+  "lisi_preload_sha256": "fda4d45779c0971626018a0e68abb405b1a1b8f5810841a6bef4da6f5d9feea3",
+  "preload_source": "fixed_random_device.cpp, branch lisi-jhpce-investigation@ed280a2, built with g++ 11.4 on JHPCE (command in that report, section 2)",
+  "scorer_git_sha": "10a1ca5874fbcdc033b148525b5e71d866306bdb",
+  "nodes": "Slurm feature znver2 (AMD EPYC 7702, Zen 2), the type of the 20-latent match check"
+ },
+ "identity_check": {
+  "file": "scorer_identity_check_20261028.json",
+  "sha256": "c446ef70ab4a6736df3b6c1fa19306aa832a1e2965e1fa6d2827f461baadb450"
+ },
+ "limits": [
+  "Equality was shown for the latents of the identity check only; it rests on the preload making the JHPCE draw equal to the workstation's stuck RDRAND value.",
+  "If the workstation's RDRAND state ever changes (firmware, other machine), every workstation LISI value changes by about 0.005 and this record no longer describes the workstation rows.",
+  "Non-Zen 2 JHPCE nodes (AVX-512) were not tested; the scoring jobs request znver2 only."
+ ]
+}

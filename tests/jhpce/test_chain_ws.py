@@ -111,3 +111,24 @@ def test_corrupt_copy_is_not_installed_and_setup_errors(env, tmp_path, monkeypat
     dup = tmp_path / "dup"
     dup.write_text(TAGS[0] + "\n" + TAGS[0] + "\n")
     assert cw.main(argv[:argv.index("--tags-file") + 1] + [str(dup)] + argv[argv.index("--tags-file") + 2:]) == cw.EXIT_USAGE
+
+
+def test_jhpce_scores_are_pulled_verified_and_a_workstation_row_stays(env):
+    """--no-score --pull-scores (SI-115): a JHPCE score file with the fixed-seed columns is installed; one without them is not; a tag
+    this machine already scored keeps its row (the JHPCE file is set aside); nothing is scored here."""
+    remote, mirror, state, argv = env
+    make_remote(remote, TAGS[:3])
+    fx = json.load(open(os.path.join(ROOT, "docs", "SCORER_EQUIVALENCE.json")))["jhpce_fixed_seed"]
+    good = f"tag,score_site,lisi_random_device,lisi_preload_sha256\n%s,jhpce,{fx['lisi_random_device']},{fx['lisi_preload_sha256']}\n"
+    for t, text in ((TAGS[0], good % TAGS[0]), (TAGS[1], good % TAGS[1]), (TAGS[2], f"tag\n{TAGS[2]}\n")):
+        os.makedirs(remote / "scores", exist_ok=True)
+        (remote / "scores" / f"{t}.csv").write_text(text)
+        os.utime(remote / "scores" / f"{t}.csv", (time.time() - 3600,) * 2)
+    os.makedirs(mirror / "scores")
+    (mirror / "scores" / f"{TAGS[1]}.csv").write_text("workstation row\n")
+    assert cw.main(argv + ["--no-score", "--pull-scores", "--max-ticks", "1"]) == cw.EXIT_RUNNING
+    st = json.load(open(state / "state.json"))
+    assert (st["scores_pulled"], st["scores_duplicate"], st["scores_bad"], st["score_rc"]) == (1, 1, 1, None)
+    assert open(mirror / "scores" / f"{TAGS[0]}.csv").read() == good % TAGS[0]
+    assert open(mirror / "scores" / f"{TAGS[1]}.csv").read() == "workstation row\n"
+    assert (mirror / "scores_jhpce_duplicate" / f"{TAGS[1]}.csv").exists() and not (mirror / "scores" / f"{TAGS[2]}.csv").exists()

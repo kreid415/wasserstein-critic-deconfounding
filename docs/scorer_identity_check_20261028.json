@@ -1,0 +1,6 @@
+{
+ "all_columns_identical": false,
+ "n_latents": 0,
+ "note": "replaced by experiments/pilot5_jhpce_scoring/identity_check.py output after the first JHPCE batch (NB-20261028-15)",
+ "status": "pending"
+}
