@@ -1,0 +1,46 @@
+{
+ "basis": "start-to-done wall time per fit read from /fastscratch/myscratch/kreid/wcd/prod/job_36551149/logs/run_stage.log (250 completed fits, 8 lanes, lane use 1.00); mean wall per arm for fits finished after 35% of the run (slow regime)",
+ "mean_wall_s_by_arm": {
+  "none": 8365,
+  "discriminator": 9403,
+  "reference": 11099,
+  "pooled": 10832,
+  "barycenter": 12327,
+  "mmd": 9469,
+  "sinkhorn": 10153
+ },
+ "missing_by_arm": {
+  "discriminator": 21,
+  "reference": 20,
+  "pooled": 20,
+  "barycenter": 20,
+  "mmd": 20,
+  "sinkhorn": 26,
+  "none": 1
+ },
+ "shard_tags": [
+  [
+   "pilot5_jhpce_atac_large_resume_s1.tags",
+   "526bc4fcf66bffd3334255c0bd58ee09180e8257e7c9c09e39115ebb571d78df",
+   42
+  ],
+  [
+   "pilot5_jhpce_atac_large_resume_s2.tags",
+   "96ce7c2de44799698baf556531fa8b57f5e4cd89db4a9998e372064f3902a366",
+   43
+  ],
+  [
+   "pilot5_jhpce_atac_large_resume_s3.tags",
+   "2bf1c3d78ec2ee90dd2e0f257a52ad359e5d237d3946eea6ff24cdf26538bec3",
+   43
+  ]
+ ],
+ "job_36551149": {
+  "elapsed": "2-23:50:44",
+  "maxrss_kb": 37052776,
+  "reqmem": "96G",
+  "total_cpu": "6-06:14:42",
+  "alloc_cpus": 10,
+  "cpu_efficiency": 0.209
+ }
+}
