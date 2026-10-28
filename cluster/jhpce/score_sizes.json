@@ -1,16 +1,16 @@
 {
  "_note": "Memory and wall time of one scoring task (1 CPU, scripts/score_scib_native.py at the production setting). mem_gb = measured peak RSS x 1.3 (rounded up); walltime = 2 x the longest measured run (30 min floor). 'measured': false = a provisional value scaled from a measured dataset; chain_score.py then sends a probe batch first and replaces mem_gb by the probe's measured peak (state/measured.json). Sources: JHPCE chaining test 2026-10-28 (sacct MaxRSS and Elapsed of Slurm arrays 36746338-36746340: atac_small 1.88 and 1.89 GiB in 2.4 min, immune 7.31 and 9.67 GiB in 12.7 and 20.7 min, sim1 14.13 GiB in 6.8 min); chaining test 2 (arrays 36746572, 36746573, 36746627; probe path, memory read back by chain_score.py): atac_small 1.89 GiB, sim1 15.22 GiB in 4.7 min; experiments/fillers_x1_x13_local_scoring/PREFLIGHT.md PF-18 (local, immune_hum_mou 19.36 GB, atac_large 24.79 GB, 2,500-3,000 s loaded).",
  "immune_hum_mou": {
-  "mem_gb": 32,
+  "mem_gb": 41,
   "walltime": "02:00:00",
   "measured": true,
-  "basis": "measured on JHPCE 2026-10-28: identity-batch task (Slurm 36753851) MaxRSS 25,318,520 KB = 24.15 GiB, 44.4 min, x 1.3 (a 24 GiB request was too small); 2 x 3,000 s loaded (PF-18)"
+  "basis": "measured on JHPCE 2026-10-28: first 18 production tasks (Slurm 36754568) MaxRSS 19.8-33.7 GiB (median 26.2), 51 min median; 33.7 GiB x 1.2. The running array was submitted with 32 GB (Slurm lets a task run above its request; users cannot raise a pending job's memory); 2 x 3,000 s loaded (PF-18)"
  },
  "atac_large": {
-  "mem_gb": 46,
+  "mem_gb": 56,
   "walltime": "02:00:00",
   "measured": false,
-  "basis": "provisional: workstation peak 24.79 GB (PF-18) x 1.41 (JHPCE/workstation peak ratio of immune_hum_mou, 24.15 GiB vs 18.4 GB) x 1.3; chain_score.py sends a probe batch first and replaces it by the probe's measured peak x 1.3; 2 x 3,000 s loaded"
+  "basis": "probe (Slurm 36754567, 3 tasks) peak 36.5 GiB in 38 min; x 1.5 because immune_hum_mou tasks peaked up to 1.4 x the first single measurement; chain_score.py reads its own measured.json (state dir) for this task: 56 there since 2026-10-28 17:50"
  },
  "lung": {
   "mem_gb": 13,
