@@ -3,6 +3,7 @@
 # already have workstation scores at scorer 10a1ca5 plus 1 immune_hum_mou latent (scored on the workstation for this check), through the same
 # wrapper, scorer checkout, preload library and node type as the production arrays. Run on the JHPCE login node (text files only), then
 # `sbatch` each printed file. Compare with experiments/pilot5_jhpce_scoring/identity_check.py.
+# CONSTRAINT (environment): Slurm CPU feature, default znver2 (znver3 for the cross-check).
 # Usage: identity_batch.sh WORKDIR HUMMOU_LIST_LINE_FILE
 #   HUMMOU_LIST_LINE_FILE: one list line (tag, latent npz, prepped h5ad, meta json; the format of cluster/jhpce/chain_score.py batches)
 set -euo pipefail
@@ -32,7 +33,7 @@ for f in atac_small immune sim1 immune_hum_mou; do
 #SBATCH --mem=${MEM}G
 #SBATCH --time=$WALL
 #SBATCH --no-requeue
-#SBATCH --constraint=znver2
+#SBATCH --constraint=${CONSTRAINT:-znver2}
 #SBATCH --output=$W/logs/slurm-%x_%A_%a.out
 set -euo pipefail
 export SCORER_REPO=$SCORER FIXED_SEED_LIB=$S/lisi_fix/fixed_random_device.so
