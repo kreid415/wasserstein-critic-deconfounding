@@ -1,0 +1,9 @@
+{"_note": "Memory and wall time of one scoring task (1 CPU, scripts/score_scib_native.py at the production setting). mem_gb = measured peak RSS x margin; 'scaled' sizes are NOT measured (cells-scaled from the two measured big datasets) until a MaxRSS read-back replaces them. Sources: experiments/fillers_x1_x13_local_scoring/PREFLIGHT.md PF-18 (immune_hum_mou 19.36 GB, atac_large 24.79 GB); cluster/jhpce/score_plan.py SIZES (pilot5-amend).",
+ "immune_hum_mou": {"mem_gb": 32, "walltime": "03:00:00", "basis": "measured 19.36 GB x 1.65"},
+ "atac_large": {"mem_gb": 32, "walltime": "03:00:00", "basis": "measured 24.79 GB x 1.3"},
+ "lung": {"mem_gb": 16, "walltime": "01:00:00", "basis": "scaled by cells, not measured"},
+ "immune": {"mem_gb": 16, "walltime": "01:00:00", "basis": "scaled by cells, not measured"},
+ "sim2": {"mem_gb": 8, "walltime": "00:40:00", "basis": "scaled by cells, not measured"},
+ "pancreas": {"mem_gb": 8, "walltime": "00:40:00", "basis": "scaled by cells, not measured"},
+ "sim1": {"mem_gb": 8, "walltime": "00:30:00", "basis": "scaled by cells, not measured"},
+ "atac_small": {"mem_gb": 8, "walltime": "00:30:00", "basis": "scaled by cells, not measured"}}

@@ -15,6 +15,8 @@
 | `local_rehearsal.sh` | local | the job's full dry-run path at one commit (bundle clone, every check, the runner's dry run); stubs only the GPU node and Slurm |
 | `harvest_local.py` | local | verifies a harvest (every part, the tar, every file) and merges it all-or-nothing into the durable OUT_DIR |
 | `make_tags.py`, `tags/` | local | tags files of a production job, derived read-only from the tagged manifest |
+| `status_board.py` (+ `board_config.json`, `status_board_job.sh`, `chain_lib.py`) | `shared` 1-CPU job, or any host for the presence-only groups | one run-status-board for pilot fits, pilot scoring, main-benchmark (X1) fits and scoring: expected units from the manifests, validity by `run_stage.py`'s own output contract (main groups: files only counted, never opened), Slurm accounting for explicit job ids, throughput ETA with an interval; `--export-inventory` / `--import` join two hosts |
+| `chain_score.py` (+ `chain_job.sh`, `score_sizes.json`) | one 1-CPU job under `cluster/vendor/jw.py` | fit-to-scoring chain: when latents pass the validity check, submits one throttled scoring array per dataset (`score_array.sh` of the score checkout; at most 200 CPUs and 2,000 GB held), never resubmits a failed score; state in `--state-dir` |
 
 `cluster/envspec/`: explicit conda specs and pip pins exported from the local envs on 2026-10-02, plus the local
 freezes they are verified against. `scripts/score_list.sh` scores a list of latents on either host.

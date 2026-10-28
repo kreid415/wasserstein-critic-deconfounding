@@ -1,0 +1,97 @@
+{
+ "_note": "Paths are host paths (jhpce = /fastscratch/..., local = the workstation data root). Pilot groups are judged with run_stage's output contract; main groups are presence-only (blinded). Job ids come from the app's job records (compute_usage, project proj_f1d989766996) read 2026-10-28; tracker states can be stale, so only Slurm accounting is used for states.",
+ "groups": {
+  "pilot_fit": {
+   "title": "Pilot fits (5 new datasets x 378 tags, A1)",
+   "kind": "fit",
+   "check": "full",
+   "stage_repo": ".",
+   "expect_device": "L40S",
+   "sites": {
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+   },
+   "jobs": {
+    "immune_hum_mou": "36551148",
+    "atac_large": "36551149",
+    "lung": "36551150",
+    "sim2": "36551151",
+    "pancreas": "36551152"
+   },
+   "manifest": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+   "manifest_sha256": "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
+   "experiments": [
+    "A1"
+   ],
+   "tags_files": [
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_immune_hum_mou.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_atac_large.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_lung.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_sim2.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_pancreas.tags"
+   ]
+  },
+  "pilot_score": {
+   "title": "Pilot scoring (same 1,890 tags)",
+   "kind": "score",
+   "check": "full",
+   "stage_repo": ".",
+   "expect_device": "L40S",
+   "sites": {
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+   },
+   "score_sites": {
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce"
+   },
+   "submissions": "/fastscratch/myscratch/kreid/wcd/chain/pilot5/state/submissions.jsonl",
+   "manifest": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
+   "manifest_sha256": "5dd65550fdb18e5c80e73dcfa731d72bdeb6128bdeac7ffb36df6c54450396ff",
+   "experiments": [
+    "A1"
+   ],
+   "tags_files": [
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_immune_hum_mou.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_atac_large.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_lung.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_sim2.tags",
+    "experiments/chaining_board_20261028/expected/pilot5_jhpce_pancreas.tags"
+   ]
+  },
+  "main_fit": {
+   "title": "Main benchmark fits (X1, presence only)",
+   "kind": "fit",
+   "check": "presence",
+   "stage_repo": ".",
+   "sites": {
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/x1_jhpce",
+    "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/X1_local"
+   },
+   "jobs": {
+    "immune_hum_mou": "36518712",
+    "atac_large": "36518713",
+    "lung": "36518737",
+    "sim2": "36518738",
+    "pancreas": "36518744"
+   },
+   "manifest": "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv",
+   "manifest_sha256": "7c2fe8679631c882abf6a4d020c6c3ba7f327261903bf47fc968e6cf80feaf85",
+   "experiments": [
+    "X1"
+   ]
+  },
+  "main_score": {
+   "title": "Main benchmark scoring (X1, presence only)",
+   "kind": "score",
+   "check": "presence",
+   "stage_repo": ".",
+   "sites": {
+    "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/x1_jhpce",
+    "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/X1_local"
+   },
+   "manifest": "manifests/paper_manifest_stock_pilot_u5_b10_v3.x1.tsv",
+   "manifest_sha256": "7c2fe8679631c882abf6a4d020c6c3ba7f327261903bf47fc968e6cf80feaf85",
+   "experiments": [
+    "X1"
+   ]
+  }
+ }
+}
