@@ -10,7 +10,7 @@
   "mem_gb": 56,
   "walltime": "02:00:00",
   "measured": false,
-  "basis": "probe (Slurm 36754567, 3 tasks) peak 36.5 GiB in 38 min; x 1.5 because immune_hum_mou tasks peaked up to 1.4 x the first single measurement; chain_score.py reads its own measured.json (state dir) for this task: 56 there since 2026-10-28 17:50"
+  "basis": "probe (Slurm 36754567, 3 tasks): peaks 17.8, 15.7 and 36.5 GiB (largest 36.5), 38-40 min each; largest x 1.5 because immune_hum_mou tasks peaked up to 1.4 x the first single measurement; chain_score.py reads its own measured.json (state dir) for this task: 48 from the probe at 17:32, 56 from 2026-10-28 18:03 (file mtime)"
  },
  "lung": {
   "mem_gb": 13,
