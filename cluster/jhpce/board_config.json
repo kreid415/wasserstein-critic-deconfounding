@@ -48,7 +48,7 @@
     "jhpce": "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce",
     "local": "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce"
    },
-   "submissions": "/fastscratch/myscratch/kreid/wcd/chain/pilot5/state/submissions.jsonl",
+   "submissions": "/fastscratch/myscratch/kreid/wcd/pilot5_jhpce_scoring/chain/state/submissions.jsonl",
    "manifest": [
     "/fastscratch/myscratch/kreid/wcd/tier12/pilot5_jhpce/manifests/5dd65550fdb18e5c.tsv",
     "/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_inputs/paper_manifest_stock_pilot_u5_b10_v3.pilot5.tsv"
