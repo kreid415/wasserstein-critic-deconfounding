@@ -1,16 +1,16 @@
 {
  "_note": "Memory and wall time of one scoring task (1 CPU, scripts/score_scib_native.py at the production setting). mem_gb = measured peak RSS x 1.3 (rounded up); walltime = 2 x the longest measured run (30 min floor). 'measured': false = a provisional value scaled from a measured dataset; chain_score.py then sends a probe batch first and replaces mem_gb by the probe's measured peak (state/measured.json). Sources: JHPCE chaining test 2026-10-28 (sacct MaxRSS and Elapsed of Slurm arrays 36746338-36746340: atac_small 1.88 and 1.89 GiB in 2.4 min, immune 7.31 and 9.67 GiB in 12.7 and 20.7 min, sim1 14.13 GiB in 6.8 min); chaining test 2 (arrays 36746572, 36746573, 36746627; probe path, memory read back by chain_score.py): atac_small 1.89 GiB, sim1 15.22 GiB in 4.7 min; experiments/fillers_x1_x13_local_scoring/PREFLIGHT.md PF-18 (local, immune_hum_mou 19.36 GB, atac_large 24.79 GB, 2,500-3,000 s loaded).",
  "immune_hum_mou": {
-  "mem_gb": 24,
+  "mem_gb": 32,
   "walltime": "02:00:00",
   "measured": true,
-  "basis": "workstation pilot scoring peak 18.4 GB (2026-10-28) x 1.3; 2 x 3,000 s loaded (PF-18); JHPCE peak read from the identity batch (experiments/pilot5_jhpce_scoring/)"
+  "basis": "measured on JHPCE 2026-10-28: identity-batch task (Slurm 36753851) MaxRSS 25,318,520 KB = 24.15 GiB, 44.4 min, x 1.3 (a 24 GiB request was too small); 2 x 3,000 s loaded (PF-18)"
  },
  "atac_large": {
-  "mem_gb": 33,
+  "mem_gb": 46,
   "walltime": "02:00:00",
-  "measured": true,
-  "basis": "PF-18 local peak 24.79 GB x 1.3; 2 x 3,000 s loaded; not yet seen on JHPCE"
+  "measured": false,
+  "basis": "provisional: workstation peak 24.79 GB (PF-18) x 1.41 (JHPCE/workstation peak ratio of immune_hum_mou, 24.15 GiB vs 18.4 GB) x 1.3; chain_score.py sends a probe batch first and replaces it by the probe's measured peak x 1.3; 2 x 3,000 s loaded"
  },
  "lung": {
   "mem_gb": 13,

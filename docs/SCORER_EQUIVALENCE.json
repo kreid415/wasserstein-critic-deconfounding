@@ -17,7 +17,9 @@
  },
  "identity_check": {
   "file": "scorer_identity_check_20261028.json",
-  "sha256": "c446ef70ab4a6736df3b6c1fa19306aa832a1e2965e1fa6d2827f461baadb450"
+  "sha256": "885e8ee3daa4ab71c45bfddb72719ce55844ecd8f82f8d69031ed35997037395",
+  "n_latents": 5,
+  "n_metric_columns": 19
  },
  "limits": [
   "Equality was shown for the latents of the identity check only; it rests on the preload making the JHPCE draw equal to the workstation's stuck RDRAND value.",
