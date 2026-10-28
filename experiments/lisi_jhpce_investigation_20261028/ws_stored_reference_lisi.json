@@ -1,0 +1,162 @@
+{
+ "A1_atac_small_discriminator_l10_c0_s101_b841ed69": {
+  "iLISI": "0.6649568434934996",
+  "cLISI": "0.8746555291302617",
+  "latent_sha256": "c811de4def2f4c504e7689f41b492ac34c910bc15aa69d524c3041f4086d2b2e",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_atac_small_mmd_l3_c0_s100_0107d6f1": {
+  "iLISI": "0.07244727727840661",
+  "cLISI": "0.9754050391924686",
+  "latent_sha256": "e06aea3590a25c32619b753c88148762a13c019071ff64a930a990e8485f4ba7",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_atac_small_none_l0_c1_s100_8d38e2a3": {
+  "iLISI": "0.5316829849849558",
+  "cLISI": "0.9506162273859472",
+  "latent_sha256": "d0eec57499d8a079f0386b6b2e6b486fdbc9765c8829760e023f9588692b1387",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_atac_small_pooled_l100_c1_s101_e65e48b7": {
+  "iLISI": "0.7445728899929709",
+  "cLISI": "0.8989329019831223",
+  "latent_sha256": "f08ae0b09d78b90e8b82eea99b0a791f0a0a172c87876b891c83ff6ece58ba3d",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_atac_small_reference_l30_c0_s102_17472a8a": {
+  "iLISI": "0.8328271469954238",
+  "cLISI": "0.844784289804755",
+  "latent_sha256": "34e492100ca4903eaea9ccc5b57639cd9f6cc236e3c360b6dff1fcdb9d591c73",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_atac_small_sinkhorn_l300_c1_s102_b78dd77a": {
+  "iLISI": "0.5631946635531284",
+  "cLISI": "0.8566473527476904",
+  "latent_sha256": "70472db9c63a7bfecb44e9c76e9556e4c396ceb25dd20344ed75fc038c4f2750",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_barycenter_l1_c0_s102_c23fbdae": {
+  "iLISI": "0.037133455574307445",
+  "cLISI": "0.9991758869877465",
+  "latent_sha256": "710b2455d1400b05656c3d809cb283baeae652454e1c7916a0f45463b01ee561",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_discriminator_l100_c1_s102_32d8eb57": {
+  "iLISI": "0.2800664739578006",
+  "cLISI": "0.990517637004493",
+  "latent_sha256": "9870e9dabdd81c05a81ded03f511d8147a13b8a7cfd89f8758aed5d7be8d3ea0",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_mmd_l1000_c1_s100_d437ee0d": {
+  "iLISI": "0.23757868084460812",
+  "cLISI": "0.9967506172416605",
+  "latent_sha256": "458d47ab599089c319986f3cee97649f895a1c1147c3031070f1eb97cb4235ff",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_none_l0_c0_s101_78c7bb6a": {
+  "iLISI": "0.02864453249453251",
+  "cLISI": "0.9991627087311775",
+  "latent_sha256": "c986a8c74402fd82ab67835daa3117011c0f550f0fb2c197d9958050f9fe9532",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_pooled_l10_c0_s101_75d8d59e": {
+  "iLISI": "0.2492204892016478",
+  "cLISI": "0.9946912427283727",
+  "latent_sha256": "81e686cbdd084abbdd9af4df6dc153b8afee4345d3be345473a94576ba0b0381",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_reference_l30_c1_s100_31992831": {
+  "iLISI": "0.27840288617464304",
+  "cLISI": "0.9902022142764795",
+  "latent_sha256": "bf34238d60dfbfb983125d79cd43bf794f819ba11da240a75e0f78af2e542622",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_immune_sinkhorn_l3_c1_s101_6c0fba12": {
+  "iLISI": "0.25461044385990483",
+  "cLISI": "0.9954759147404272",
+  "latent_sha256": "3aaf5c51b1e1c2828deeea90bf92b85d83ac428f52a56840d806e209f67968a5",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_barycenter_l300_c1_s100_f51f28be": {
+  "iLISI": "0.06729577412720852",
+  "cLISI": "1.0",
+  "latent_sha256": "58e2e3ec0d63e69e4c0fe7499b144995a06cdc0d733369bf44da4c7f395f7b7e",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_discriminator_l100_c0_s100_36fb5e2c": {
+  "iLISI": "0.14862809308468267",
+  "cLISI": "1.0",
+  "latent_sha256": "247049a15176fe68bd1b4ba5b99ffd368ad34669b7bf43b19ab08969321b9d2b",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_mmd_l30_c1_s101_39564dc6": {
+  "iLISI": "0.5186481740542536",
+  "cLISI": "1.0",
+  "latent_sha256": "734d386686b4988cbbf93a3bc2ae52f7d845a396351993c582a295a49fa6b5d9",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_none_l0_c1_s102_2ec5aa2e": {
+  "iLISI": "0.5119698807823563",
+  "cLISI": "1.0",
+  "latent_sha256": "4a3450cfd97f8275634e7fd39dced51ad4952bba50b34ca1846058c66fc8e214",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_pooled_l10_c0_s102_855bf21b": {
+  "iLISI": "0.1796919854110212",
+  "cLISI": "1.0",
+  "latent_sha256": "d9730b81768958408fcb39f23d4a27139c3c89474b24f94e4dc9aa9eb85a9883",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_reference_l3_c0_s101_43834004": {
+  "iLISI": "0.0006752299760476088",
+  "cLISI": "1.0",
+  "latent_sha256": "9dab75c22a77f34410165196ef774b5c1830651839e18cc8f495cc64228b0995",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ },
+ "A1_sim1_sinkhorn_l30_c0_s100_ebcbe68a": {
+  "iLISI": "0.1553177794579647",
+  "cLISI": "1.0",
+  "latent_sha256": "e39831bef4d688104a11d3cdd893fe05471a627aa94fada9253b9769512ded82",
+  "scorer_git_sha": "c88cce3c569e9de47f2d65c6794ca3890637786a",
+  "cpu_model": "AMD Ryzen 5 3600 6-Core Processor",
+  "numba_cpu_name": ""
+ }
+}
