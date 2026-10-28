@@ -12,6 +12,7 @@ come in with --import SITE=file, a file written on that host with --export-inven
 pilot latent (about 1,900 x 4 MB): run it as a 1-CPU job (cluster/jhpce/status_board_job.sh); later passes read only changed files.
 """
 import argparse
+import collections
 import datetime
 import json
 import os
@@ -177,8 +178,13 @@ def main(argv=None):
             for r in rows:
                 r["job"] = subs[name].get(r["tag"], "")
         gids = {str(v) for v in g.get("jobs", {}).values()} | {j.split("_")[0] for j in subs.get(name, {}).values()}
-        sched = unit_sched([p for p in (sa, sq) if p], rows) if gids and sa else None
         per_site = inv[name]
+        # a unit with a valid output keeps no job row: a job the stop guard ended (FAILED, exit 15) after 250 good fits is not a conflict
+        open_rows = [r for r in rows if not (merge(per_site, r["tag"]) or (False,))[0]]
+        sched = unit_sched([p for p in (sa, sq) if p], open_rows) if gids and sa else None
+        sched = sched if sched and any(p["rows"] for p in sched) else None
+        jobs = collections.Counter((r["job_id"].split("_")[0], r["state"]) for r in (sa or {"rows": []})["rows"]
+                                   if r["job_id"].split("_")[0] in gids)
         board = RSB.rs_board(rows, "tag", lambda r, p=per_site: merge(p, r["tag"]), sched, sched_key=lambda sr: sr["unit"], strict=bool(sched))
         board["validity_basis"] = "presence_only" if g["check"] == "presence" else board["validity_basis"]
         live = board["totals"]["running"] + board["totals"]["pending"]
@@ -192,6 +198,8 @@ def main(argv=None):
                "- ETA: " + (("none: " + eta["reason"]) if eta and eta["refused"] else
                             (f"{eta['eta_median']} ({eta['eta_low']} to {eta['eta_high']}), {eta['n_completed_used']} completions" if eta else
                              "not applicable: no live job (nothing running or pending)")),
+               "- jobs (Slurm accounting, " + (sa["captured_at"] if sa else "none") + "): " +
+               (", ".join(f"{j} {st}" + (f" x{n}" if n > 1 else "") for (j, st), n in sorted(jobs.items())) or "none"),
                f"- needs action: {t['failed'] + t['done_invalid']} units (failed {t['failed']}, done_invalid {t['done_invalid']}); "
                f"missing {t['missing']}; details in {name}/status_board.md", ""]
     md.append(f"_generated {datetime.datetime.now().astimezone().isoformat(timespec='seconds')}; scheduler snapshot "

@@ -108,7 +108,8 @@ def test_board_states_presence_only_and_two_sites(world, monkeypatch):
     assert f["totals"]["failed"] == 1                                                          # a3: empty file, its job FAILED
     assert any("also at" in u["reason"] for u in f["units"] if u["unit"] == "a2") and totals(out, "main_score")["done_valid"] == 1
     md = (out / "status_board.md").read_text()
-    assert "PRESENCE ONLY" in md and "not applicable: no live job" in md
+    assert "PRESENCE ONLY" in md and "not applicable: no live job" in md and "- jobs (Slurm accounting" in md and "111 FAILED" in md
+    assert not json.load(open(out / "status_board.json"))["groups"]["pilot_fit"]["board"]["anomalies"]    # valid units keep no job row
     # the board is rebuilt from the cache of the first pass (no latent is read twice); an unchanged tree gives the same totals
     assert run_board(w["cfg"], out, "--sites", "jhpce", "local", "--sacct-file", str(w["sa"]), "--squeue-file", str(w["sq"])) == 0
     assert totals(out, "pilot_fit") == t and (out / "validity_cache_jhpce.json").exists()
