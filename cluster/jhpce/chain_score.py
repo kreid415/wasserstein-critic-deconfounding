@@ -7,6 +7,8 @@ latents to one Slurm array of `cluster/jhpce/score_array.sh` from --score-repo (
 settings of run_stage.thread_env(1), so scores equal the runner's own). A batch goes when it holds --min-batch latents, or when
 the dataset's fits are all final, or when every fit job is over. The arrays together never hold more than --max-cpus CPUs or
 --max-mem-gb of memory (sum of their throttles; each array's `%throttle`). Scores land in --score-out/scores/<tag>.csv.
+A task whose size in score_sizes.json is not 'measured' sends --probe-n latents first; the peak RSS of that array (sacct) x 1.3
+sets the memory of the rest (state/measured.json).
 Ends: exit 0 when every expected unit has a valid score (or a recorded fit failure), 3 when nothing more can happen (fits over,
 no live array, units still without a score: listed in state/finished.json), 10 at --max-ticks / --max-hours (state kept; run again).
 A failed scoring task is never resubmitted: it is listed and ends the chain at exit 3 (resubmit by hand after reading its log).
@@ -23,9 +25,12 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "vendor"))
 import chain_lib  # noqa: E402
+import run_status_board as RSB  # noqa: E402
 
 EXIT_DONE, EXIT_STALLED, EXIT_RUNNING = 0, 3, 10
+MEM_MARGIN = 1.3           # memory asked = measured peak RSS x this, rounded up to whole GB
 
 
 def now():
@@ -92,6 +97,22 @@ def live_tasks(job_ids):
     return out
 
 
+def measured_mem_gb(job_id):
+    """Largest peak RSS (GB) over the finished tasks of an array, x MEM_MARGIN, rounded up; None unless every task COMPLETED
+    and reported a peak."""
+    r = run(["sacct", "-P", "-n", "-j", job_id, "--format", "JobID,State,MaxRSS"])
+    peaks, states = [], []
+    for line in r.stdout.splitlines():
+        jid, state, rss = line.split("|")
+        if ".batch" in jid:
+            peaks.append(RSB.rs_mem_mb(rss)[0])
+        elif ".extern" not in jid:
+            states.append(state)
+    if r.returncode or not peaks or None in peaks or set(states) != {"COMPLETED"}:
+        return None
+    return int(-(-max(peaks) * MEM_MARGIN // 1024))
+
+
 def adopt_dangling(path, intents):
     """An intent without a 'submitted' record: sbatch may have run before a crash. Look the job up by its unique name."""
     for rec in intents:
@@ -133,6 +154,8 @@ def tick(a, rows, ck, sizes):
         adopt_dangling(sub_path, intents)
         sub, intents = read_submissions(sub_path)
     rows_by_tag = {r["tag"]: r for r in rows}
+    mpath = os.path.join(a.state_dir, "measured.json")
+    measured = json.load(open(mpath)) if os.path.exists(mpath) else {}
     fit = {r["tag"]: ck.fit(r) for r in rows}
     score = {r["tag"]: ck.score(r) for r in rows}
     ck.save()
@@ -150,10 +173,22 @@ def tick(a, rows, ck, sizes):
     task_final = {k: (not fit_jobs_live) or all(fit[r["tag"]] and fit[r["tag"]][0] for r in rows if r["task"] == k)
                   for k in tasks}
     ready = {k: [r["tag"] for r in rows if r["task"] == k and r["tag"] in settled and r["tag"] not in final] for k in tasks}
-    todo = plan_batches(ready, sent, task_final, a.min_batch)
+    # A task whose memory was not measured sends one small probe batch first; its measured peak sets the size of the rest.
+    for b in sub.values():
+        if b["task"] not in measured and not sizes[b["task"]].get("measured") and not live[b["job_id"]]:
+            gb = measured_mem_gb(b["job_id"])
+            if gb:
+                measured[b["task"]] = dict(mem_gb=gb, basis=f"measured peak RSS of job {b['job_id']} x {MEM_MARGIN}")
+                with open(mpath, "w") as f:
+                    json.dump(measured, f)
+    size_of = {k: dict(v, **measured.get(k, {}), measured=bool(v.get("measured") or k in measured)) for k, v in sizes.items() if not k.startswith("_")}
+    probing = {t for t in tasks if not size_of[t]["measured"] and any(b["task"] == t for b in sub.values())}
+    todo = plan_batches({k: v for k, v in ready.items() if k not in probing}, sent, task_final, a.min_batch)
     now_sent = []
     for task, tags in todo.items():
-        size = sizes[task]
+        size = size_of[task]
+        if not size["measured"]:
+            tags = tags[:a.probe_n]
         throttle = admit([(b["throttle"], b["mem_gb"]) for b in live_batches], size["mem_gb"], len(tags), a.max_cpus,
                          a.max_mem_gb)
         if throttle < 1:
@@ -178,8 +213,9 @@ def tick(a, rows, ck, sizes):
                   live_arrays=len(live_batches), cpus_running=sum(live[b["job_id"]].get("RUNNING", 0) for b in sub.values()),
                   cpus_bound=sum(b["throttle"] for b in live_batches), fit_jobs_live=fit_jobs_live,
                   submitted_now=[(s["batch"], len(s["tags"]), s["throttle"]) for s in now_sent],
-                  fit_missing=[r["tag"] for r in rows if not (fit[r["tag"]] and fit[r["tag"]][0])])
-    busy = bool(live_batches or now_sent or todo)
+                  fit_missing=[r["tag"] for r in rows if not (fit[r["tag"]] and fit[r["tag"]][0])],
+                  waiting_for_measurement=sorted(probing))
+    busy = bool(live_batches or now_sent or todo)       # a task waiting for its probe is not busy: nothing can start it but the probe
     return status, busy
 
 
@@ -195,6 +231,7 @@ def main(argv=None):
     ap.add_argument("--max-cpus", type=int, default=200)
     ap.add_argument("--max-mem-gb", type=int, default=2000, help="below the shared QOS cap of 2.5 TB")
     ap.add_argument("--min-batch", type=int, default=10)
+    ap.add_argument("--probe-n", type=int, default=3, help="latents of the first batch of a task whose memory is not measured")
     ap.add_argument("--settle-s", type=float, default=60, help="a latent is scored only when this old (the fitter is done writing)")
     ap.add_argument("--constraint", help="one Slurm feature, e.g. znver2 (same CPU family for all scores)")
     ap.add_argument("--interval", type=float, default=300)
@@ -240,7 +277,8 @@ def main(argv=None):
         if not status["fit_jobs_live"] and not busy:
             with open(fin_path, "w") as f:
                 json.dump(dict(ok=False, at=now(), expected=len(rows), final=status["final"],
-                               failed_scores=status["failed_scores"], fit_missing=status["fit_missing"]), f)
+                               failed_scores=status["failed_scores"], fit_missing=status["fit_missing"],
+                               waiting_for_measurement=status["waiting_for_measurement"]), f)
             return EXIT_STALLED
         if (a.max_ticks and n >= a.max_ticks) or (a.max_hours and time.time() - t0 > a.max_hours * 3600):
             return EXIT_RUNNING

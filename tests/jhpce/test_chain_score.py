@@ -53,7 +53,7 @@ SQ_STUB = textwrap.dedent('''\
 SA_STUB = textwrap.dedent('''\
     #!{py}
     import os, sys
-    p = os.environ["STUB_DIR"] + "/sacct_by_name.txt"
+    p = os.environ["STUB_DIR"] + ("/sacct_by_name.txt" if "--name" in sys.argv else "/sacct_job.txt")
     print(open(p).read() if os.path.exists(p) else "", end="")
     ''')
 
@@ -134,7 +134,7 @@ def test_chain_runs_fit_to_scoring(env):
     assert code == cs.EXIT_RUNNING and [r["event"] for r in s] == ["intent", "submitted"]
     assert s[1]["tags"] == ["a0", "a1", "a2"] and s[1]["task"] == "atac_small" and s[1]["throttle"] == 2
     text = json.load(open(sorted(st.stub.glob("sbatch_*.json"))[0]))["text"]
-    assert "--array=1-3%2" in text and "--mem=8G" in text and "--constraint=znver2" in text and str(st.score_out) in text
+    assert "--array=1-3%2" in text and "--mem=3G" in text and "--constraint=znver2" in text and str(st.score_out) in text
     lines = [x.split("\t") for x in open(st.state / "batches" / s[1]["batch"] / "list.tsv").read().splitlines()]
     assert [x[0] for x in lines] == ["a0", "a1", "a2"]
     assert json.loads(lines[0][3])["latent_sha256"] == chain_lib.sha256_file(os.path.join(st.out, "latents", "a0.npz"))
@@ -227,3 +227,33 @@ def test_chain_needs_a_stop_rule_and_a_git_score_repo(env, tmp_path):
         cs.main(args)
     with pytest.raises(SystemExit, match="not a git checkout"):
         cs.main(args[:3] + [str(tmp_path / "nogit")] + args[4:] + ["--max-ticks", "1"])
+
+
+PROBE_SIZES = {"atac_small": {"mem_gb": 8, "walltime": "00:30:00", "measured": False}, "immune": {"mem_gb": 1, "walltime": "00:30:00", "measured": True}}
+
+
+def test_unmeasured_task_sends_a_probe_first_then_uses_its_measured_memory(env, tmp_path):
+    st = env
+    sizes = tmp_path / "sizes.json"
+    sizes.write_text(json.dumps(PROBE_SIZES))
+    fit(st, ["a0", "a1", "a2", "a3", "i0", "i1"])
+    args = ["--sizes", str(sizes), "--min-batch", "1", "--probe-n", "2"]
+    assert chain(st, *args) == cs.EXIT_RUNNING
+    first = [r for r in subs(st) if r["event"] == "submitted"]
+    assert [r["tags"] for r in first] == [["a0", "a1"], ["i0", "i1"]] and [r["mem_gb"] for r in first] == [8, 1]   # probe: 2 of 4
+    (st.stub / "sacct_job.txt").write_text("101_1|COMPLETED|\n101_1.batch|COMPLETED|2000000K\n101_1.extern|COMPLETED|0\n"
+                                           "101_2|COMPLETED|\n101_2.batch|COMPLETED|1800000K\n")
+    assert chain(st, *args) == cs.EXIT_RUNNING                                                # probe scored: size measured, rest sent
+    sent = [r for r in subs(st) if r["event"] == "submitted"]
+    assert [r["tags"] for r in sent] == [["a0", "a1"], ["i0", "i1"], ["a2", "a3"]] and sent[2]["mem_gb"] == 3
+    assert json.load(open(st.state / "measured.json")) == {"atac_small": {"mem_gb": 3, "basis": json.load(open(st.state / "measured.json"))["atac_small"]["basis"]}}
+    # 1.91 GiB x 1.3, rounded up; the immune size was measured already and is not replaced
+    # a probe that did not complete cleanly measures nothing: the task waits, and the chain ends once nothing else can happen
+    st2 = st.tmp / "state2"
+    st.state = st2
+    st.score_out = st.tmp / "scores2"
+    (st.stub / "sacct_job.txt").write_text("201_1|FAILED|\n201_1.batch|FAILED|1000K\n")
+    live(st, fits=False)
+    assert chain(st, *args, ticks=3) == cs.EXIT_STALLED
+    assert json.load(open(st2 / "finished.json"))["waiting_for_measurement"] == ["atac_small"]
+    assert [r["tags"] for r in subs(st) if r["event"] == "submitted"] == [["a0", "a1"], ["i0", "i1"]]   # nothing more for a waiting task

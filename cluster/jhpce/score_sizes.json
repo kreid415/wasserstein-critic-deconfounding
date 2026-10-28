@@ -1,9 +1,51 @@
-{"_note": "Memory and wall time of one scoring task (1 CPU, scripts/score_scib_native.py at the production setting). mem_gb = measured peak RSS x margin; 'scaled' sizes are NOT measured (cells-scaled from the two measured big datasets) until a MaxRSS read-back replaces them. Sources: experiments/fillers_x1_x13_local_scoring/PREFLIGHT.md PF-18 (immune_hum_mou 19.36 GB, atac_large 24.79 GB); cluster/jhpce/score_plan.py SIZES (pilot5-amend).",
- "immune_hum_mou": {"mem_gb": 32, "walltime": "03:00:00", "basis": "measured 19.36 GB x 1.65"},
- "atac_large": {"mem_gb": 32, "walltime": "03:00:00", "basis": "measured 24.79 GB x 1.3"},
- "lung": {"mem_gb": 16, "walltime": "01:00:00", "basis": "scaled by cells, not measured"},
- "immune": {"mem_gb": 16, "walltime": "01:00:00", "basis": "scaled by cells, not measured"},
- "sim2": {"mem_gb": 8, "walltime": "00:40:00", "basis": "scaled by cells, not measured"},
- "pancreas": {"mem_gb": 8, "walltime": "00:40:00", "basis": "scaled by cells, not measured"},
- "sim1": {"mem_gb": 8, "walltime": "00:30:00", "basis": "scaled by cells, not measured"},
- "atac_small": {"mem_gb": 8, "walltime": "00:30:00", "basis": "scaled by cells, not measured"}}
+{
+ "_note": "Memory and wall time of one scoring task (1 CPU, scripts/score_scib_native.py at the production setting). mem_gb = measured peak RSS x 1.3 (rounded up); walltime = 2 x the longest measured run (30 min floor). 'measured': false = a provisional value scaled from a measured dataset; chain_score.py then sends a probe batch first and replaces mem_gb by the probe's measured peak (state/measured.json). Sources: JHPCE chaining test 2026-10-28 (sacct MaxRSS and Elapsed of Slurm arrays 36746338-36746340: atac_small 1.88 and 1.89 GiB in 2.4 min, immune 7.31 and 9.67 GiB in 12.7 and 20.7 min, sim1 14.13 GiB in 6.8 min); experiments/fillers_x1_x13_local_scoring/PREFLIGHT.md PF-18 (local, immune_hum_mou 19.36 GB, atac_large 24.79 GB, 2,500-3,000 s loaded).",
+ "immune_hum_mou": {
+  "mem_gb": 26,
+  "walltime": "02:00:00",
+  "measured": true,
+  "basis": "PF-18 local peak 19.36 GB x 1.3; 2 x 3,000 s loaded; not yet seen on JHPCE"
+ },
+ "atac_large": {
+  "mem_gb": 33,
+  "walltime": "02:00:00",
+  "measured": true,
+  "basis": "PF-18 local peak 24.79 GB x 1.3; 2 x 3,000 s loaded; not yet seen on JHPCE"
+ },
+ "lung": {
+  "mem_gb": 13,
+  "walltime": "00:45:00",
+  "measured": false,
+  "basis": "provisional: immune (33,506 cells, 9.67 GiB peak) scaled to 32,472 cells, x 1.3"
+ },
+ "immune": {
+  "mem_gb": 13,
+  "walltime": "00:45:00",
+  "measured": true,
+  "basis": "measured 9.67 GiB x 1.3; 2 x 20.7 min"
+ },
+ "sim2": {
+  "mem_gb": 30,
+  "walltime": "00:30:00",
+  "measured": false,
+  "basis": "provisional: sim1 (12,097 cells, 14.13 GiB peak) scaled to 19,318 cells, x 1.3"
+ },
+ "pancreas": {
+  "mem_gb": 7,
+  "walltime": "00:30:00",
+  "measured": false,
+  "basis": "provisional: immune scaled to 16,382 cells, x 1.3"
+ },
+ "sim1": {
+  "mem_gb": 19,
+  "walltime": "00:30:00",
+  "measured": true,
+  "basis": "measured 14.13 GiB x 1.3; 2 x 6.8 min, 30 min floor"
+ },
+ "atac_small": {
+  "mem_gb": 3,
+  "walltime": "00:30:00",
+  "measured": true,
+  "basis": "measured 1.89 GiB x 1.3; 2 x 2.5 min, 30 min floor"
+ }
+}
