@@ -115,6 +115,7 @@ def local_state(mirror, tags):
 def pull_scores(a, rem, tags, log):
     """Copy the JHPCE score files of tags this machine has no score for; (installed, duplicates, bad) tag lists."""
     eq = json.load(open(os.path.join(REPO, "docs", "SCORER_EQUIVALENCE.json")))
+    rem = Remote(rem.host, rem.root, a.score_hash_prefix)          # score files are about 1 KB: hashed where they are, not through a Slurm job
     ready = rem.old_files("scores", f"A1_{a.task}_*.csv", a.min_age_min)
     new = [t for t in tags if f"{t}.csv" in ready]
     installed, dup, bad = [], [], []
@@ -204,6 +205,7 @@ def main(argv=None):
     ap.add_argument("--lock", default=None, help="flock file shared with the four-dataset run (default <mirror>/.ws_scoring.lock)")
     ap.add_argument("--after-jw", default=None, help="job-watch state dir; score only once that run is done (memory is shared)")
     ap.add_argument("--workers", type=int, default=3, help="scorers at once (large dataset: 3)")
+    ap.add_argument("--score-hash-prefix", default="", help="runs the remote sha256sum of the (tiny) score files; default: directly on the login node")
     ap.add_argument("--no-score", action="store_true", help="never score here (the task is scored on JHPCE)")
     ap.add_argument("--pull-scores", action="store_true", help="also copy and verify the task's score files made on JHPCE")
     ap.add_argument("--min-age-min", type=float, default=20)
