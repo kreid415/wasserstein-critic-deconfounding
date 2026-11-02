@@ -1,0 +1,472 @@
+{
+ "source": {
+  "file": "sweep_analysis_dev/check_a361ba2/tables/ranking_pairs.csv",
+  "sha256": "786cb8c839070b4cc58ae9c032eee5b3a5ba018938ed6380f2c6cbfb8e73d989",
+  "code": "sweep-paper a361ba2"
+ },
+ "n_ranked_pairs": 13,
+ "bstar": {
+  "atac_large|0": 0.5496056084580223,
+  "atac_large|1": 0.631701506067609,
+  "atac_small|0": 0.5220898578662547,
+  "atac_small|1": 0.7460379447272998,
+  "immune_hum_mou|0": 0.4504452799896063,
+  "immune_hum_mou|1": 0.553626067491557,
+  "immune|0": 0.530599650298176,
+  "lung|0": 0.5348399662808235,
+  "lung|1": 0.6477540651979374,
+  "pancreas|0": 0.4924492393268572,
+  "pancreas|1": 0.6840932932332424,
+  "sim1|0": 0.36931640909167585,
+  "sim2|0": 0.3183018951321983
+ },
+ "readings": {
+  "atac_large|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.6170185601020902,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.621306904637878,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6196310862979557,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6110632499853417,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6215166706968677,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.5958636985726806,
+    "status": "bracketed",
+    "rank": 6.0
+   }
+  },
+  "atac_large|1": {
+   "discriminator": {
+    "bio_at_bstar": 0.5424482032167115,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.5653588028556338,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.5461924749457027,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.5625241413672475,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.5356418676929862,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.5402550441725603,
+    "status": "bracketed",
+    "rank": 5.0
+   }
+  },
+  "atac_small|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.6661062799334424,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.6587323975188318,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6772287178257659,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.699615242194715,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6919432657179198,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6841628995272436,
+    "status": "bracketed",
+    "rank": 3.0
+   }
+  },
+  "atac_small|1": {
+   "discriminator": {
+    "bio_at_bstar": 0.5853260899784838,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.6025157222456387,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6315095204258805,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6312104611476357,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6191334539707707,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6314338564516955,
+    "status": "bracketed",
+    "rank": 2.0
+   }
+  },
+  "immune_hum_mou|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.6167851890031999,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.588546785334036,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6187044887528773,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6178974341203015,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6191172463111643,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6170197644157164,
+    "status": "bracketed",
+    "rank": 4.0
+   }
+  },
+  "immune_hum_mou|1": {
+   "discriminator": {
+    "bio_at_bstar": 0.6223186557314165,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.6179069904105886,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6239372913972432,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6193612698221544,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6166712615209571,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.630414120753938,
+    "status": "bracketed",
+    "rank": 1.0
+   }
+  },
+  "immune|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.7195868125834642,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.7162786020078855,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.7110518204533347,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.7083825967995101,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.7028352050869353,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.707799230576303,
+    "status": "bracketed",
+    "rank": 5.0
+   }
+  },
+  "lung|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.6904751298644929,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.7101750171484233,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.702535291465474,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6902453571293301,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.7069122766141603,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6850791758731728,
+    "status": "bracketed",
+    "rank": 6.0
+   }
+  },
+  "lung|1": {
+   "discriminator": {
+    "bio_at_bstar": 0.7039498480742549,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.7167244343814626,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.7193439460194243,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.7146697216363913,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.7229563849837032,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.7261391445467592,
+    "status": "bracketed",
+    "rank": 1.0
+   }
+  },
+  "pancreas|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.5848718124434689,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.5819386999109714,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.5787926188327034,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.575532819096017,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.5883451582555679,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.5811334889548987,
+    "status": "bracketed",
+    "rank": 4.0
+   }
+  },
+  "pancreas|1": {
+   "discriminator": {
+    "bio_at_bstar": 0.6906938075121003,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.6968967709063171,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.698647773295061,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.7013985666934724,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6943982137193639,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6974738328059732,
+    "status": "bracketed",
+    "rank": 3.0
+   }
+  },
+  "sim1|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.7087015021017511,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.6912923969883411,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.6814662114213503,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.6771759265107925,
+    "status": "bracketed",
+    "rank": 6.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.6875193725835974,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.6832213007094543,
+    "status": "bracketed",
+    "rank": 4.0
+   }
+  },
+  "sim2|0": {
+   "discriminator": {
+    "bio_at_bstar": 0.5835134983792714,
+    "status": "bracketed",
+    "rank": 1.0
+   },
+   "reference": {
+    "bio_at_bstar": 0.5791973245246367,
+    "status": "bracketed",
+    "rank": 4.0
+   },
+   "pooled": {
+    "bio_at_bstar": 0.581831962718153,
+    "status": "bracketed",
+    "rank": 2.0
+   },
+   "barycenter": {
+    "bio_at_bstar": 0.5781909954210176,
+    "status": "bracketed",
+    "rank": 5.0
+   },
+   "mmd": {
+    "bio_at_bstar": 0.5809621691901661,
+    "status": "bracketed",
+    "rank": 3.0
+   },
+   "sinkhorn": {
+    "bio_at_bstar": 0.5732783230709781,
+    "status": "bracketed",
+    "rank": 6.0
+   }
+  }
+ },
+ "large_gaps": [
+  {
+   "pair": "atac_small|0",
+   "a": "barycenter",
+   "b": "reference",
+   "sweep_diff": 0.04088284467588321,
+   "sign": 1
+  },
+  {
+   "pair": "atac_small|1",
+   "a": "barycenter",
+   "b": "discriminator",
+   "sweep_diff": 0.045884371169151894,
+   "sign": 1
+  },
+  {
+   "pair": "atac_small|1",
+   "a": "discriminator",
+   "b": "pooled",
+   "sweep_diff": -0.0461834304473967,
+   "sign": -1
+  },
+  {
+   "pair": "atac_small|1",
+   "a": "discriminator",
+   "b": "sinkhorn",
+   "sweep_diff": -0.04610776647321169,
+   "sign": -1
+  }
+ ],
+ "n_near_ties": 160
+}
