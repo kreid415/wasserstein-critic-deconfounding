@@ -116,17 +116,17 @@ def test_rank_one_pair():  # test-reason: hand-worked readings, leave-one-seed-o
 
 
 # ---------------------------------------------------------------------------------------------
-# frontier area (spec section 5)
+# hypervolume (spec section 5) and share of non-dominated points (spec section 5.1)
 # ---------------------------------------------------------------------------------------------
 @pytest.mark.parametrize("points, want", [
     # vertical strips from the corner (0.4, 0.6): 0.1 x 0.3 + 0.1 x 0.2 + 0.1 x 0.15
     ([(0.6, 0.8), (0.7, 0.75), (0.5, 0.9)], 0.065),
-    # + a dominated point, one below the corner's C, one left of its B and one on its B: no area added
+    # + a dominated point, one below the corner's C, one left of its B and one on its B: nothing added
     ([(0.6, 0.8), (0.7, 0.75), (0.5, 0.9), (0.55, 0.7), (0.9, 0.55), (0.35, 0.95), (0.4, 0.99)], 0.065),
     ([], 0.0),
 ])
-def test_area(points, want):  # test-reason: known answer for the union of rectangles
-    assert A.area(points, 0.4, 0.6) == pytest.approx(want, abs=1e-12)
+def test_hypervolume(points, want):  # test-reason: known answer for the union of rectangles
+    assert A.hypervolume(points, 0.4, 0.6) == pytest.approx(want, abs=1e-12)
 
 
 @pytest.mark.parametrize("points, corner, want", [
@@ -140,9 +140,23 @@ def test_area(points, want):  # test-reason: known answer for the union of recta
     # a point whose five runs failed is skipped (SI-71)
     ({1: (0.6, 0.78), 2: (0.9, 0.1)}, "collapse", 0.2 * 0.08 / 0.2),
 ])
-def test_read_area(points, corner, want):  # test-reason: known answers: the moving corner (mean of the plain-scVI C), both corners
+def test_read_hypervolume(points, corner, want):  # test-reason: known answers: the moving corner (mean of the plain-scVI C), both corners
     fail = [(2, s) for s in SEEDS] if 2 in points and points[2] == (0.9, 0.1) else []
-    close(A.read_area(zero(c=[0.76, 0.78, 0.80, 0.82, 0.84]), pts(points, fail=fail), 0.2, corner=corner), want)
+    close(A.read_hypervolume(zero(c=[0.76, 0.78, 0.80, 0.82, 0.84]), pts(points, fail=fail), 0.2, corner=corner), want)
+
+
+@pytest.mark.parametrize("spec, fail, want", [
+    # (0.55, 0.7) is beaten by (0.6, 0.8) on both scores; the other three trade batch for biology: 3 of 4
+    ({1: (0.6, 0.8), 2: (0.7, 0.75), 3: (0.5, 0.9), 4: (0.55, 0.7)}, [], (0.75, 3, 4)),
+    # equal batch, higher biology dominates; identical points do not dominate each other
+    ({1: (0.5, 0.6), 2: (0.5, 0.7), 3: (0.5, 0.7)}, [], (2 / 3, 2, 3)),
+    # a point whose five runs failed is not a point (SI-71); a lone point is non-dominated
+    ({1: (0.6, 0.8), 2: (0.9, 0.9)}, [(2, s) for s in SEEDS], (1.0, 1, 1)),
+    ({}, [], (None, 0, 0)),
+])
+def test_read_nondominated(spec, fail, want):  # test-reason: known answers for spec 5.1, ties, failed points, no points
+    got = A.read_nondominated(pts(spec, fail=fail))
+    assert (got["share"], got["n_nondominated"], got["n"]) == (pytest.approx(want[0], abs=1e-12) if want[0] is not None else None, *want[1:])
 
 
 @pytest.mark.parametrize("x, n", [(0, 30), (4, 5), (30, 30), (7, 180)])
@@ -250,9 +264,9 @@ def test_label_transfer_f1():  # test-reason: hand-worked macro F1 over the type
 
 def test_guards():  # test-reason: refusals at the function boundaries
     with pytest.raises(P.PreregError, match="scale"):
-        A.read_area(zero(), pts({1: (0.6, 0.7)}), 0.0)
+        A.read_hypervolume(zero(), pts({1: (0.6, 0.7)}), 0.0)
     with pytest.raises(P.PreregError, match="corner"):
-        A.read_area(zero(), pts({1: (0.6, 0.7)}), 0.2, corner="sideways")
+        A.read_hypervolume(zero(), pts({1: (0.6, 0.7)}), 0.2, corner="sideways")
     with pytest.raises(P.PreregError, match="rank_pair"):
         A.rank_pair({})
     with pytest.raises(P.PreregError, match="rank_pair"):
@@ -294,8 +308,8 @@ FAIL = {("lung", "0", "discriminator", "10", "0"): "diverged",
         # each keeps a high failure-free point, so b_common (R4) barely moves
         **{("pancreas", "0", "barycenter", lam, "3"): "diverged" for lam in ("0.3", "1", "3", "30")},
         **{("lung", "0", "barycenter", lam, "3"): "diverged" for lam in ("10", "100")},
-        ("atac_small", "1", "reference", "10", "2"): "diverged"}    # a failed run at a point that adds area
-ZERO_AREA = ("lung", "1")          # every adversarial point 0.35 below in biology: no penalty adds area
+        ("atac_small", "1", "reference", "10", "2"): "diverged"}    # a failed run at a point that adds hypervolume
+ZERO_HV = ("lung", "1")          # every adversarial point 0.35 below in biology: no penalty adds hypervolume
 # R4-x1 extension points (used for matching only, never as points; SI-55). The first is of the arm that sets b_common in
 # atac_small, decoder 0, with a batch score above its six grid points: b_common and so b* rise, so the analysis must see the
 # row (AN-R07). The second is of mmd in sim1, decoder 0, whose six grid points gain only 0.05 in B while its extension point is
@@ -330,7 +344,7 @@ def world(r):
         B += _gain(r) * synth.sig(x / 0.3) + synth._noise("B" + r["tag"], 0.003)
         B += EXT_BUMP.get((r["task"], r["cond"], r["arm"], r["lam"]), 0.0)
         C += -0.25 * synth.sig((x - 1) / 0.3) + BONUS.get(r["arm"], 0.0) * synth.sig(x / 0.3) + synth._noise("C" + r["tag"], 0.003)
-        C -= 0.35 if (r["task"], r["cond"]) == ZERO_AREA else 0.0
+        C -= 0.35 if (r["task"], r["cond"]) == ZERO_HV else 0.0
         a = SPREAD.get(r["arm"], 0.0) * synth.sig(x / 0.3)
     elif r["experiment"] == "X13":
         B += 0.05 + 0.01 * math.log1p(float(r["lam"]))      # better with the setting: the best setting is the largest
@@ -460,7 +474,8 @@ def test_end_to_end_ranking(e2e):  # test-reason: the record's wiring of reading
         for arm, want in json.loads(json.dumps(A.rank_one_pair(z, points, tg["bstar"]))).items():
             assert {k: cell["penalties"][arm][k] for k in want} == want
         scale = tg["b_common"] - tg["b0"]
-        assert cell["area"] == pytest.approx({a: A.read_area(z, points[a], scale) for a in P.ADV_ARMS}, abs=1e-12)
+        assert cell["hypervolume"] == pytest.approx({a: A.read_hypervolume(z, points[a], scale) for a in P.ADV_ARMS}, abs=1e-12)
+        assert cell["nondominated"] == {a: A.read_nondominated(points[a]) for a in P.ADV_ARMS}
     # local minus global: 3 local + 2 global = 5 batch, so at the crossing it is 2.5 (local - b*), read from the same curve
     z, points = points_of(out, r1, "pancreas", 1)
     zl, local = points_of(out, r1, "pancreas", 1, "L")
@@ -492,10 +507,11 @@ def test_end_to_end_ranking(e2e):  # test-reason: the record's wiring of reading
     for a in ("reference", "discriminator"):
         assert [x is None for x in pen[a]["loso"]] == [False, True, False, False, False] and pen[a]["m"] == 4 and pen[a]["s"] > 0
     assert pen["reference"]["rank"] == 1 and (pen["reference"]["rank_lo"], pen["reference"]["rank_hi"]) == (1, 5.5)
-    # lung|1: no point is above the collapse line, so every area is 0 (not none); immune|1 is low-signal: not ranked, no area
-    assert prim["cells"]["lung|1"]["area"] == dict.fromkeys(P.ADV_ARMS, 0.0)
+    # lung|1: no point is above the collapse line, so every hypervolume is 0 (not none); immune|1 is low-signal: not ranked, no hypervolume
+    assert prim["cells"]["lung|1"]["hypervolume"] == dict.fromkeys(P.ADV_ARMS, 0.0)
     low = prim["cells"]["immune|1"]
-    assert low["low_signal"] and low["area"] is None
+    assert low["low_signal"] and low["hypervolume"] is None
+    assert set(low["nondominated"]) == set(P.ADV_ARMS) and all(v["n"] > 0 for v in low["nondominated"].values())  # needs no b*
     assert all(set(r) == {"bio", "status", "crossings", "local_minus_global"} for r in low["penalties"].values())
 
     # mean ranks: decoder 0 ranks all six real tasks, decoder 1 five (immune is low-signal); the simulations are listed by task
@@ -637,7 +653,7 @@ def test_end_to_end_sensitivity(e2e):  # test-reason: each sensitivity analysis 
     assert sens["no_trajectory"]["settings"]["value"] == "C_nt" and sens["corner_zero"]["settings"]["corner"] == "zero"
     # per run: each seed read on its own curve and the penalties ranked within each seed. In immune_hum_mou|1 reference and
     # discriminator respond in seed 1 only (nothing in the other seeds), so in the other four seeds they share places 5 and 6
-    # (5.5 each); the rank in seed 1 rests on a single seed's noise and is not asserted. The area has no per-run version
+    # (5.5 each); the rank in seed 1 rests on a single seed's noise and is not asserted. The hypervolume has no per-run version
     pen = sens["per_run"]["cells"]["immune_hum_mou|1"]["penalties"]
     assert [x is not None for x in pen["reference"]["readings"]] == [False, True, False, False, False]
     ranks = [A.rank_pair({a: pen[a]["readings"][s] for a in P.ADV_ARMS}) for s in SEEDS]
@@ -650,16 +666,17 @@ def test_end_to_end_sensitivity(e2e):  # test-reason: each sensitivity analysis 
     got = sens["per_run"]["cells"]["pancreas|1"]["penalties"]
     assert {a: got[a]["rank"] for a in P.ADV_ARMS} == pytest.approx(want, abs=1e-12)
     assert got["pooled"]["readings"] == pytest.approx([r["pooled"]["bio"] for r in runs], abs=1e-12)
-    assert sens["per_run"]["cells"]["pancreas|1"]["area"] == prim["cells"]["pancreas|1"]["area"]
-    # drop_failed reaches the area: the failed reference run in atac_small|1 removes its lambda-10 point (SI-71)
+    assert sens["per_run"]["cells"]["pancreas|1"]["hypervolume"] == prim["cells"]["pancreas|1"]["hypervolume"]
+    # drop_failed reaches the hypervolume and the non-dominated share: the failed reference run in atac_small|1 removes its lambda-10 point (SI-71)
     t, c = "atac_small", 1
     tg, (z, points) = r4["targets"][f"{t}|{c}"], points_of(out, r1, t, c)
     kept = [p for p in points["reference"] if p["n_fail"] == 0]
     assert len(kept) == 5
-    dropped = A.read_area(z, kept, tg["b_common"] - tg["b0"])
-    close(sens["drop_failed"]["cells"][f"{t}|{c}"]["area"]["reference"], dropped)
-    assert abs(dropped - prim["cells"][f"{t}|{c}"]["area"]["reference"]) > 1e-4
-    close(sens["corner_zero"]["cells"][f"{t}|{c}"]["area"]["reference"], A.read_area(z, points["reference"], tg["b_common"] - tg["b0"], "zero"))
+    dropped = A.read_hypervolume(z, kept, tg["b_common"] - tg["b0"])
+    close(sens["drop_failed"]["cells"][f"{t}|{c}"]["hypervolume"]["reference"], dropped)
+    assert abs(dropped - prim["cells"][f"{t}|{c}"]["hypervolume"]["reference"]) > 1e-4
+    assert sens["drop_failed"]["cells"][f"{t}|{c}"]["nondominated"]["reference"] == A.read_nondominated(kept)
+    close(sens["corner_zero"]["cells"][f"{t}|{c}"]["hypervolume"]["reference"], A.read_hypervolume(z, points["reference"], tg["b_common"] - tg["b0"], "zero"))
 
 
 def _rewrite(src, dst, keep, drop=()):

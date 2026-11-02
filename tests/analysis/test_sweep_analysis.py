@@ -219,7 +219,7 @@ def test_sweep_readings_and_ranks(sweep):  # test-reason: every strength is a po
     pen = cells["pancreas|0"]["penalties"]
     assert pen["pooled"]["bio"] == pen["barycenter"]["bio"] and pen["pooled"]["rank"] == pen["barycenter"]["rank"] == 2.5
     low = cells["immune|1"]
-    assert low["low_signal"] and low["area"] is None and all("rank" not in r for r in low["penalties"].values())
+    assert low["low_signal"] and low["hypervolume"] is None and set(low["nondominated"]) == set(P.ADV_ARMS) and all("rank" not in r for r in low["penalties"].values())
     anchor = cells["sim2|1"]
     assert anchor["low_signal"] and anchor["bstar"] < anchor["b0"]
     assert all((r["status"], r["bio"], r["local_minus_global"]) == (A.ANCHOR_STATUS, None, None) for r in anchor["penalties"].values())
@@ -321,6 +321,10 @@ def test_report_and_paper_numbers(sweep):  # test-reason: tables and figures exi
     c = rec["primary"]["cells"]["lung|0"]
     assert N["rank.pooled.lung.cond0"]["value"] == c["penalties"]["pooled"]["rank"] and N["bio_at_bstar.pooled.lung.cond0"]["value"] == c["penalties"]["pooled"]["bio"]
     assert N["collapse_ci.mmd.lung.cond0"]["value"] == [c["collapse"]["mmd"]["lo"], c["collapse"]["mmd"]["hi"]]
+    assert N["hypervolume.pooled.lung.cond0"]["value"] == c["hypervolume"]["pooled"] and not any(k.startswith("area.") for k in N)
+    assert N["nondominated_share.pooled.lung.cond0"]["value"] == c["nondominated"]["pooled"]["share"]
+    sec = pd.read_csv(os.path.join(tdir, "secondary.csv"))
+    assert {"hypervolume", "nondominated_share", "nondominated_n"} <= set(sec.columns) and "area" not in sec.columns
     assert N["pair.sim2.cond1.low_signal"]["value"] is True and "rank.pooled.sim2.cond1" not in N and N["reading_status.pooled.sim2.cond1"]["value"] == A.ANCHOR_STATUS
     assert N["mean_rank.cond0.reference"]["value"] == rec["primary"]["ranking"]["0"]["mean_rank"]["reference"]["mean"]
     assert N["n_fits.total"]["value"] == len(sweep["a1"]) + 1890 and N["n_failed.total"]["value"] == 5
