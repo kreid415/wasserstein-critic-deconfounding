@@ -123,6 +123,12 @@ def main(argv=None):
     scored, failed, missing = select(base, scores, latents, fails_b, "baselines")
     status = pd.Series("missing", index=base.tag)
     status[scored], status[failed] = "scored", "failed"
+    setting_status = base.assign(status=status.values).groupby(["task", "arm", "lam", "n_latent", "status"], dropna=False).size().unstack(fill_value=0)
+    setting_status = setting_status.reindex(columns=["scored", "failed", "missing"], fill_value=0)
+    setting_status.insert(0, "expected", setting_status.sum(axis=1))
+    setting_status = setting_status.reset_index()
+    setting_status["status"] = setting_status.apply(
+        lambda r: "incomplete" if r.missing else "complete", axis=1)
     cov = base.assign(status=status.values).groupby(["task", "arm"]).status.value_counts().unstack(fill_value=0)
     cov = cov.reindex(columns=["scored", "failed", "missing"], fill_value=0)
     cov.insert(0, "expected", cov.sum(axis=1))
@@ -151,6 +157,7 @@ def main(argv=None):
                 sources=sources, counts=dict(counts, baselines=dict(rows=len(base), scored=len(scored), failed=len(failed),
                                                                      missing=len(missing))),
                 baseline_rows_missing=missing, baseline_coverage=cov.to_dict("records"),
+                baseline_setting_coverage=setting_status.to_dict("records"),
                 n_manifest_rows=len(M), n_score_files=len(score_files), n_failed=len(F))
     with open(os.path.join(a.out, "inputs.json"), "w") as f:
         json.dump(info, f, indent=1)

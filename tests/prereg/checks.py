@@ -188,11 +188,12 @@ def check_scorer_sites(P):
     real = json.load(open(P.SCORER_EQUIVALENCE))
     ws_cpu, fx = real["workstation"]["cpu_model"][0], real["jhpce_fixed_seed"]
     jh = dict(cpu_model="AMD EPYC 7702 64-Core Processor", score_site=fx["score_site"], lisi_random_device=fx["lisi_random_device"],
-              lisi_preload_sha256=fx["lisi_preload_sha256"])
+              lisi_preload_sha256=fx["lisi_preload_sha256"], scorer_git_sha=fx["scorer_git_sha"], scorer_dirty="0")
 
     def table(n_jhpce, **over):
         """S with the first n_jhpce rows scored on JHPCE (columns of `jh`, changed by `over`), the others on the workstation."""
-        T = S.assign(cpu_model=ws_cpu, score_site="", lisi_random_device="", lisi_preload_sha256="")
+        T = S.assign(cpu_model=ws_cpu, score_site="", lisi_random_device="", lisi_preload_sha256="",
+                     scorer_git_sha=fx["scorer_git_sha"], scorer_dirty="0")
         for col, val in {**jh, **over}.items():
             T.loc[:n_jhpce - 1, col] = val
         return T
@@ -207,7 +208,8 @@ def check_scorer_sites(P):
             P.SCORER_EQUIVALENCE = os.path.join(d, "eq.json")
         saved = P.SCORER_EQUIVALENCE
         try:
-            good = dict(all_columns_identical=True, n_latents=3)
+            good = dict(all_columns_identical=True, n_latents=3, latents=[dict(cand_cpu="AMD EPYC 7702 64-Core Processor",
+                           cand_scorer_git_sha=fx["scorer_git_sha"])])
             record(good)
             for n in (0, 4, len(S)):                                    # all workstation, mixed, all JHPCE
                 assert len(P.outcomes(M, table(n), F, ["A1"])) == len(M)
@@ -216,7 +218,8 @@ def check_scorer_sites(P):
                 _refused(P, M, T, F, "mix scorer sites")
             record(good, tamper=True)
             _refused(P, M, table(4), F, "identity check is not intact")
-            for bad in (dict(all_columns_identical=False, n_latents=3), dict(all_columns_identical=True, n_latents=2)):
+            for bad in (dict(all_columns_identical=False, n_latents=3, latents=good["latents"]),
+                        dict(all_columns_identical=True, n_latents=2, latents=good["latents"])):
                 record(bad)
                 _refused(P, M, table(4), F, "did not find every column identical")
         finally:

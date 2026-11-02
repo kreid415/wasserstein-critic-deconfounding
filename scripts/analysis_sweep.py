@@ -69,7 +69,7 @@ def main(argv=None):
     latents = dict(paths=paths, sha=dict(zip(S.tag, S.latent_sha256)))
     targets, matched = sweep_targets(out, tasks, seeds)
     common = dict(exp=EXP, seeds=seeds, targets=targets, grids=None, matched=matched, fail_status=fail_status, same_grid=False,
-                  min_readings=len(seeds) - 1)
+                  min_readings=len(seeds) - 1, baseline_setting_coverage=info["baseline_setting_coverage"])
     primary = A.analyse_pairs(out, latents=latents, lt_scope="all", jobs=a.jobs, debug_subset=a.debug_label_transfer_subset, **common)
     sensitivity = {name: A.analyse_pairs(out, **common, **kw) for name, kw in A.SENSITIVITY.items()}   # label transfer uses none
     n_fits = {t: int((sweep.task == t).sum()) for t in tasks}

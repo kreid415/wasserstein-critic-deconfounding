@@ -261,20 +261,29 @@ def refuse_unknown_scorer_sites(s, experiments):
         E = json.load(f)
     fx = E["jhpce_fixed_seed"]
     on_ws = col("cpu_model").isin(E["workstation"]["cpu_model"]) & col("score_site").eq("")
+    jhpce_rows = col("score_site").eq(fx["score_site"])
+    identity_path = os.path.join(os.path.dirname(SCORER_EQUIVALENCE), E["identity_check"]["file"])
+    identity = None
+    jhpce_cpus = set()
+    if jhpce_rows.any():
+        _require(os.path.isfile(identity_path) and hashlib.sha256(open(identity_path, "rb").read()).hexdigest() == E["identity_check"]["sha256"],
+                 f"{identity_path} is missing or changed: the scorer-equivalence record's identity check is not intact (SI-115)")
+        identity = json.load(open(identity_path))
+        jhpce_cpus = {row["cand_cpu"] for row in identity["latents"] if row["cand_scorer_git_sha"] == fx["scorer_git_sha"]}
+    with open(EQUIVALENT_COMMITS) as f:
+        equivalent = json.load(f)
+    allowed_commits = {fx["scorer_git_sha"], equivalent["commit"]}
     on_jh = (col("score_site").eq(fx["score_site"]) & col("lisi_random_device").eq(fx["lisi_random_device"])
-             & col("lisi_preload_sha256").eq(fx["lisi_preload_sha256"]))
+             & col("lisi_preload_sha256").eq(fx["lisi_preload_sha256"]) & col("cpu_model").isin(jhpce_cpus)
+             & col("scorer_git_sha").isin(allowed_commits) & col("scorer_dirty").str.lower().isin(("0", "false")))
+    _require(not (jhpce_rows & ~on_jh).any(), f"scores of {experiments} mix scorer sites: JHPCE rows with unqualified CPU, scorer commit, dirty state or fixed-seed provenance (SI-115)")
     other = ~(on_ws | on_jh)
     if int(on_ws.any()) + int(on_jh.any()) + int(other.any()) < 2:
         return
     _require(not other.any(), f"scores of {experiments} mix scorer sites: {int(other.sum())} rows are neither workstation rows nor "
                               f"JHPCE rows scored with the fixed LISI seed (SI-115), e.g. {sorted(s.tag[other])[:3]}")
-    ev = E["identity_check"]
-    path = os.path.join(os.path.dirname(SCORER_EQUIVALENCE), ev["file"])
-    _require(os.path.isfile(path) and hashlib.sha256(open(path, "rb").read()).hexdigest() == ev["sha256"],
-             f"{path} is missing or changed: the scorer-equivalence record's identity check is not intact (SI-115)")
-    res = json.load(open(path))
-    _require(res["all_columns_identical"] is True and res["n_latents"] >= 3,
-             f"{path}: the identity check did not find every column identical on at least 3 latents")
+    _require(identity["all_columns_identical"] is True and identity["n_latents"] >= 3,
+             f"{identity_path}: the identity check did not find every column identical on at least 3 latents")
 
 
 def check_provenance(s, experiments, arms):

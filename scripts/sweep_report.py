@@ -40,7 +40,7 @@ BASE_MARK = dict(none=("k", "*"), scvi_adv=("k", "P"), scanvi=("k", "X"), sysvi=
 
 def tables(rec):
     prim, T = rec["primary"], {}
-    pairs, sec, curves, bpts, lt, ltc, bok, single = [], [], [], [], [], [], [], []
+    pairs, sec, curves, bpts, lt, ltc, bok, single, setting_cov = [], [], [], [], [], [], [], [], []
     for key, c in prim["cells"].items():
         t, cond = c["task"], c["cond"]
         for arm in ARMS:
@@ -58,10 +58,11 @@ def tables(rec):
                             window_n_points=w["n_points"], window_gap=w["gap"]))
             curves += [dict(task=t, cond=cond, arm=arm, lam=lam, B=b, C=cc, n_fail=nf) for lam, b, cc, nf in c["curve"][arm]]
         bpts += [dict(task=t, cond=cond, name=n, **v) for n, v in c["baseline_points"].items()]
+        setting_cov += c.get("baseline_settings", [])
         single += [dict(task=t, cond=cond, name=n, n_ok=v["n_ok"], n_fail=v["n_fail"], B=v["B"][0], B_sd=v["B"][1], C=v["C"][0],
                         C_sd=v["C"][1], S=v["S"][0], S_sd=v["S"][1], S_minus_plain_scvi=v["S_minus_plain_scvi"]) for n, v in c["single"].items()]
         for fam, v in c["best_of_k"].items():
-            bok += [dict(task=t, cond=cond, family=fam, k=k + 1, E=e, E_minus_plain_scvi=d, n_configs=v["n"], failed_runs=v["failed_runs"])
+            bok += [dict(task=t, cond=cond, family=fam, stratum=v["stratum"], k=k + 1, E=e, E_minus_plain_scvi=d, n_configs=v["n"], failed_runs=v["failed_runs"])
                     for k, (e, d) in enumerate(zip(v["E"], v["E_minus_plain_scvi"]))]
     L = prim["label_transfer"]
     for cond, d in L["decoders"].items():
@@ -73,7 +74,7 @@ def tables(rec):
                              batch_score=y["batch_score"], distance=y["distance"]) for y in x.get("curve", [])]
     mean = [dict(cond=int(k), arm=a, mean_rank=v["mean"], n_tasks=v["n_tasks"]) for k, d in prim["ranking"].items()
             for a, v in d["mean_rank"].items()]
-    real_mean = [dict(cond=int(k), family=f, k=i + 1, mean_E=e, n_tasks=n) for k, d in prim["best_of_k_real_mean"].items()
+    real_mean = [dict(cond=int(k), family=f, stratum=next(v["best_of_k"][f]["stratum"] for v in prim["cells"].values() if f in v["best_of_k"]), k=i + 1, mean_E=e, n_tasks=n) for k, d in prim["best_of_k_real_mean"].items()
                  for f, v in d.items() for i, (e, n) in enumerate(v)]
     tr = []
     for cond, d in prim["transfer"].items():
@@ -85,14 +86,17 @@ def tables(rec):
                         row[name + q], row[name + q + "_sd"] = (at[q] if at else (None, None))
                     row[name + "S_minus_plain_scvi"] = at["S_minus_plain_scvi"] if at else None
                 tr.append(row)
-    status = pd.DataFrame(pairs).groupby(["cond", "arm", "status"]).size().rename("n_pairs").reset_index()
+    pair_df = pd.DataFrame(pairs)
+    status = pair_df.groupby(["cond", "arm", "status"]).size().rename("n_pairs").reset_index()
     counts = [dict(kind="sweep_fits", task=t, n=n) for t, n in rec["counts"]["sweep_fits"].items()]
     counts += [dict(kind="sweep_failed", task=t, n=n) for t, n in rec["counts"]["sweep_failed"].items()]
     counts += [dict(kind=f"reading_status_{r.status}", task=f"cond{r.cond}|{r.arm}", n=int(r.n_pairs)) for r in status.itertuples()]
-    T.update(ranking_pairs=pd.DataFrame(pairs), mean_rank=pd.DataFrame(mean), secondary=pd.DataFrame(sec), curves=pd.DataFrame(curves),
+    T.update(ranking_pairs=pair_df[~pair_df.low_signal].reset_index(drop=True), low_signal_pairs=pair_df[pair_df.low_signal].reset_index(drop=True),
+             mean_rank=pd.DataFrame(mean), secondary=pd.DataFrame(sec), curves=pd.DataFrame(curves),
              baseline_points=pd.DataFrame(bpts), label_transfer=pd.DataFrame(lt), label_transfer_curve=pd.DataFrame(ltc),
              best_of_k=pd.DataFrame(bok), best_of_k_real_mean=pd.DataFrame(real_mean), transfer_strength=pd.DataFrame(tr),
-             single_methods=pd.DataFrame(single), baseline_coverage=pd.DataFrame(rec["baselines"]["coverage"]), counts=pd.DataFrame(counts))
+             single_methods=pd.DataFrame(single), baseline_coverage=pd.DataFrame(rec["baselines"]["coverage"]),
+             baseline_setting_coverage=pd.DataFrame(setting_cov).drop_duplicates().reset_index(drop=True), counts=pd.DataFrame(counts))
     return T
 
 
@@ -146,14 +150,15 @@ def best_of_k_figure(rec, T, path):
         d = T["best_of_k_real_mean"][T["best_of_k_real_mean"].cond == cond]
         for fam, g in d.groupby("family"):
             g = g.sort_values("k")
+            label = f"{fam} (label-aware)" if fam == "scanvi" else fam
             if fam in ARMS:
                 ax.plot(g.k, g.mean_E, "-o", color=COLOUR[fam], ms=2.5, lw=0.9, label=fam)
             elif fam in TOOLS:
                 col, mk = BASE_MARK[fam]
-                ax.plot(g.k, g.mean_E, "--" + mk, color=col, ms=3, lw=0.8, mfc="none", label=fam)
+                ax.plot(g.k, g.mean_E, "--" + mk, color=col, ms=3, lw=0.8, mfc="none", label=label)
             else:
                 col, mk = BASE_MARK[fam]
-                ax.plot(g.k, g.mean_E, mk, color=col, ms=4, mfc="none", label=fam)
+                ax.plot(g.k, g.mean_E, mk, color=col, ms=4, mfc="none", label=label)
         ax.set_title(DECODER[cond], loc="left")
         ax.set_xlabel("k tries")
         ax.set_ylabel("expected best selection score S")
@@ -257,7 +262,7 @@ def paper_numbers(rec, T, record_path):
         for t, ranks in d["sim_ranks"].items():
             for arm, rk in ranks.items():
                 put(f"sim_rank.{t}.cond{cond}.{arm}", rk, f"rank of {arm} on the simulation {t}, {DECODER[int(cond)]}")
-    st = T["ranking_pairs"].groupby(["cond", "arm"]).status.apply(lambda s: int((s != "bracketed").sum()))
+    st = pd.concat([T["ranking_pairs"], T["low_signal_pairs"]]).groupby(["cond", "arm"]).status.apply(lambda s: int((s != "bracketed").sum()))
     for (cond, arm), n in st.items():
         put(f"n_pairs_no_reading.cond{cond}.{arm}", n, f"task pairs in which {arm}'s curve gives no reading at b*, {DECODER[cond]}")
     for cond, d in prim["best_of_k_real_mean"].items():
@@ -300,16 +305,20 @@ def main(argv=None):
     for name, df in T.items():
         df.to_csv(os.path.join(tdir, name + ".csv"), index=False)
     pairs = T["ranking_pairs"]
-    for ext in (".png", ".pdf"):
-        ranking_figure(rec["primary"], pairs, T["mean_rank"], os.path.join(fdir, "fig_ranking" + ext))
+    real_tasks = rec.get("real_tasks", [])
+    if real_tasks:
+        figure_pairs = pd.concat([pairs, T["low_signal_pairs"]], ignore_index=True)
+        for ext in (".png", ".pdf"):
+            ranking_figure(rec["primary"], figure_pairs, T["mean_rank"], os.path.join(fdir, "fig_ranking" + ext))
     for cond in (1, 0):
         tradeoff_figure(rec, T, cond, os.path.join(fdir, f"fig_tradeoff_cond{cond}"))
-    best_of_k_figure(rec, T, os.path.join(fdir, "fig_best_of_k"))
+    if real_tasks:
+        best_of_k_figure(rec, T, os.path.join(fdir, "fig_best_of_k"))
     collapse_figure(T, os.path.join(fdir, "fig_collapse"))
     N = paper_numbers(rec, T, a.record)
     with open(os.path.join(a.out, "paper_numbers.json"), "w") as f:
         json.dump(N, f, indent=1, sort_keys=True)
-    print(f"{len(T)} tables, 5 figures (png + pdf), {len(N)} paper numbers -> {a.out}")
+    print(f"{len(T)} tables, real-task figures {'included' if real_tasks else 'skipped'}, {len(N)} paper numbers -> {a.out}")
     return 0
 
 

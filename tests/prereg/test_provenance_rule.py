@@ -41,6 +41,27 @@ def test_workstation_and_fixed_seed_jhpce_rows_may_share_a_rule_input():     # t
     checks.check_scorer_sites(P)
 
 
+@pytest.mark.parametrize("column,value", [
+    ("cpu_model", "Intel Xeon Platinum"),
+    ("scorer_git_sha", "f" * 40),
+    ("scorer_dirty", "1"),
+])
+# test-reason: catches invalid metadata on an all-JHPCE input; existing SI-115 cases cover mixed inputs only.
+def test_jhpce_rows_with_unqualified_cpu_or_scorer_metadata_are_refused(column, value):
+    E = json.load(open(P.SCORER_EQUIVALENCE))
+    fx = E["jhpce_fixed_seed"]
+    S = pd.DataFrame([
+        dict(tag="ws", cpu_model=E["workstation"]["cpu_model"][0], score_site="", lisi_random_device="",
+             lisi_preload_sha256="", scorer_git_sha=fx["scorer_git_sha"], scorer_dirty="0"),
+        dict(tag="jh", cpu_model="AMD EPYC 7702 64-Core Processor", score_site=fx["score_site"],
+             lisi_random_device=fx["lisi_random_device"], lisi_preload_sha256=fx["lisi_preload_sha256"],
+             scorer_git_sha=fx["scorer_git_sha"], scorer_dirty="0"),
+    ])
+    S.loc[1, column] = value
+    with pytest.raises(P.PreregError, match="JHPCE rows with unqualified"):
+        P.refuse_unknown_scorer_sites(S.iloc[[1]], ["A1"])
+
+
 def test_csv_round_trip_keeps_an_empty_numba_cpu_name(tmp_path):
     M, S, F = checks._prov_input()
     sp, _ = synth.write_scores(S, F, str(tmp_path), "a1")
@@ -121,6 +142,7 @@ def test_the_committed_scorer_equivalence_record():
     E = json.load(open(P.SCORER_EQUIVALENCE))
     fx = E["jhpce_fixed_seed"]
     S = pd.DataFrame(dict(tag=["a", "b"], cpu_model=[E["workstation"]["cpu_model"][0], "AMD EPYC 7702 64-Core Processor"], score_site=["", fx["score_site"]],
-                          lisi_random_device=["", fx["lisi_random_device"]], lisi_preload_sha256=["", fx["lisi_preload_sha256"]]))
+                          lisi_random_device=["", fx["lisi_random_device"]], lisi_preload_sha256=["", fx["lisi_preload_sha256"]],
+                          scorer_git_sha=[fx["scorer_git_sha"]] * 2, scorer_dirty=["0"] * 2))
     P.refuse_unknown_scorer_sites(S, ["A1"])
     assert (fx["lisi_random_device"], fx["scorer_git_sha"][:7], E["identity_check"]["n_latents"]) == ("0xFFFFFFFF", "10a1ca5", 5)

@@ -90,9 +90,14 @@ def config_points(rows):
     return points
 
 
-def tool_rows(x13, task, arm):
+def tool_rows(x13, task, arm, setting_status=None):
     rows = x13[(x13.task == task) & (x13.arm == arm)]
-    return rows[rows.n_latent == "10"] if arm in ("harmony", "scanorama") else rows      # 10 principal components / dimensions
+    rows = rows[rows.n_latent == "10"] if arm in ("harmony", "scanorama") else rows      # 10 principal components / dimensions
+    if setting_status is not None:
+        keys = [(arm, float(r.lamf), str(r.n_latent)) for r in rows.itertuples()]
+        P._require(all(k in setting_status for k in keys), f"{task} {arm}: missing baseline setting coverage")
+        rows = rows.loc[[setting_status[k] == "complete" for k in keys]]
+    return rows
 
 
 def usable(points, mode):
@@ -461,7 +466,8 @@ def transfer_labels(pen, adv, matched, latents, cells, scope="matched", jobs=1, 
 
 
 def analyse_pairs(out, exp, seeds, targets, grids, matched, fail_status, latents=None, value="C", mode="mean",
-                  corner="collapse", same_grid=True, min_readings=MIN_READINGS, lt_scope="matched", jobs=1, debug_subset=None):
+                  corner="collapse", same_grid=True, min_readings=MIN_READINGS, lt_scope="matched", jobs=1, debug_subset=None,
+                  baseline_setting_coverage=None):
     """The ranking analysis (spec 2-12) of every pair in `targets` ({'task|cond': b0, b_common, bstar, bstar_low_signal, M}).
     exp: experiment of the penalty and plain-scVI rows; seeds: their seeds; grids: {(task, cond, arm): the six strengths} or
     None for every fitted strength; matched: {(task, cond, arm): the strength of label transfer}. Baselines are the X13 rows and
@@ -495,7 +501,12 @@ def analyse_pairs(out, exp, seeds, targets, grids, matched, fail_status, latents
                     n_points={arm: len(points[arm]) for arm in P.ADV_ARMS},
                     area=None if target["bstar_low_signal"] else
                     {arm: read_area(zero, used[arm], target["b_common"] - target["b0"], corner) for arm in P.ADV_ARMS})
-        family_points = dict(points, **{tool: config_points(tool_rows(x13, task, tool)) for tool in TOOLS})
+        setting_coverage = [dict(r) for r in baseline_setting_coverage if r["task"] == task] if baseline_setting_coverage is not None else []
+        setting_status = ({(r["arm"], float(r["lam"]), str(r["n_latent"])): r["status"] for r in setting_coverage}
+                          if baseline_setting_coverage is not None else None)
+        if setting_status is not None:
+            P._require(all(s in ("complete", "incomplete") for s in setting_status.values()), f"{task}: unknown baseline setting status")
+        family_points = dict(points, **{tool: config_points(tool_rows(x13, task, tool, setting_status)) for tool in TOOLS})
         scores = {arm: [(p["lam"], [W_B * b + W_C * p["C"][s] for s, b in p["B"].items()]) for p in pts]
                   for arm, pts in family_points.items()}
         all_points[key], all_scores[key] = family_points, scores
@@ -512,6 +523,11 @@ def analyse_pairs(out, exp, seeds, targets, grids, matched, fail_status, latents
         cell["curve"] = {arm: [(0.0, *np.mean(list(zero.values()), axis=0), 0)] + P.window_curve(points[arm]) for arm in P.ADV_ARMS}
         failed = {arm: [p["n_fail"] for p in points[arm]] for arm in P.ADV_ARMS}     # failed runs per configuration
         for (arm, lam, n_latent), config in baselines.groupby(["arm", "lam", "n_latent"], sort=True):
+            setting_key = (arm, float(lam), str(n_latent))
+            if arm in (*TOOLS, "scanvi", "scvi_adv", "pca") and baseline_setting_coverage is not None:
+                P._require(setting_key in setting_status, f"{task} {arm}: missing baseline setting coverage for {setting_key[1:]}")
+            if setting_status is not None and setting_status.get(setting_key) == "incomplete":
+                continue
             anchor = arm == "pca" or (arm in ("harmony", "scanorama") and n_latent != "10")
             n_failed = int((config.status == "failed").sum())
             if not anchor:
@@ -534,6 +550,7 @@ def analyse_pairs(out, exp, seeds, targets, grids, matched, fail_status, latents
                                       stratum="label_aware" if arm == "scanvi" else "standard")
                              for arm, v in family_scores.items()}
         cell["single"], cell["frontier"], cell["baseline_points"] = single, frontier, base_points
+        cell["baseline_settings"] = [dict(r, cond=cond) for r in setting_coverage]
         cells[key] = cell
 
     ranking, real_mean, transfer = {}, {}, {}

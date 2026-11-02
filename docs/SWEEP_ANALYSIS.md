@@ -172,14 +172,14 @@ processes on an idle machine, and about twice that at the load seen here. A firs
 
 ## 6. Tests
 
-New: `tests/analysis/test_sweep_analysis.py` (six tests). Its module fixture builds a synthetic data root in the real layout (the
+New: `tests/analysis/test_sweep_analysis.py` (seven tests). Its module fixture builds a synthetic data root in the real layout (the
 r4_pass2 score list with a superseded Sinkhorn copy under the same tags, the pilot5 runner layout, two baseline directories, the
 committed pilot5 manifest and baseline run list) and runs `scripts/run_sweep_analysis.sh` end to end; planted cases: a tie, a
 low-signal pair, a pair whose anchor lies above b* (b_common < b0), a penalty that reaches b* only with one seed (2 of 3 repeats), sweep
 and baseline failures, differing strength sets across tasks, partial baseline coverage, a task whose label transfer is not evaluable.
 The tests check the inputs and the coverage table, the `--require-baselines` refusal, the readings and ranks, label transfer (every
 embedding, the matched strength, the process pool against one process), the tables, figures and `paper_numbers.json`, the debug subset
-and task subset, and the anchor rule (unit test). Existing tests are unchanged except for the SI-115 port (`tests/prereg`).
+and task subset, the incomplete baseline seed group, simulation-only reporting, and the anchor rule (unit test). The SI-115 provenance tests cover invalid JHPCE CPU and scorer metadata (`tests/prereg`).
 
 Results on 2026-11-01 (environment scvi-api, workstation under the load described above):
 
@@ -202,3 +202,11 @@ label-transfer pool uses spawned workers with one BLAS thread each (threadpoolct
 3. Transfer-strength eligibility restricted to strengths fitted in the held-out task (item 9).
 4. Which baseline directories the final run reads (`fillers_x1_x13` plus `sweep_baselines`), and whether a baseline scored in both is
    possible (the pipeline refuses it; the directory of the earlier scoring would have to be dropped from the list).
+
+## 8. Review fixes
+
+- SI-115 accepts JHPCE scores only from the documented Zen 2 CPU with an allowed scorer commit and a clean scorer checkout, while retaining the site, seed, preload and provenance checks.
+- Baseline settings with missing seeds remain in per-setting coverage with status `incomplete` and do not enter placement or strength selection until each expected seed is scored or failed.
+- Exported tables retain the `label_aware` stratum, and scANVI has a separate label-aware label in the best-of-k figure.
+- Low-signal pairs go to `low_signal_pairs.csv` and are omitted from `ranking_pairs.csv`.
+- Simulation-only reports omit figures that summarize real tasks and still write the remaining tables and figures.

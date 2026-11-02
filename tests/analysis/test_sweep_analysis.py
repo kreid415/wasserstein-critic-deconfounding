@@ -152,12 +152,18 @@ def sweep(tmp_path_factory):
     fb = runner_dir(d1, base[first & (~cpu | base.task.isin(SCENARIO["cpu_tools_on"]))])
     fb += runner_dir(d2, base[~first & ~cpu])
     assert [f["tag"][:-9] for f in fb] == list(SCENARIO["baseline_failed"])
+    # A single scored seed with four neither-scored-nor-failed seeds must not count as a usable scANVI setting.
+    partial = base[(base.task == "pancreas") & (base.arm == "scanvi")].groupby(["lam", "n_latent"], sort=True).head(1)
+    remaining = base[(base.task == "pancreas") & (base.arm == "scanvi") & ~base.tag.isin(partial.tag)]
+    for row in remaining.itertuples():
+        for sub in ("scores", "latents"):
+            os.unlink(os.path.join(d1, sub, row.tag + (".csv" if sub == "scores" else ".npz")))
     env = dict(os.environ, WCD_DATA_ROOT=root, PYTHON=sys.executable)
     sh = os.path.join(ROOT, "scripts", "run_sweep_analysis.sh")
     full = os.path.join(out, "full")
     r = subprocess.run(["bash", sh, full, "--baseline-dirs", d1, d2, "--jobs", "2"], env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
-    return dict(root=root, out=out, full=full, env=env, sh=sh, dirs=[d1, d2], base=base, a1=a1, m5=m5,
+    return dict(root=root, out=out, full=full, env=env, sh=sh, dirs=[d1, d2], base=base, a1=a1, m5=m5, baseline_missing_extra=remaining.tag.tolist(),
                 rec=json.load(open(os.path.join(full, "analysis_sweep.json"))), numbers=json.load(open(os.path.join(full, "paper_numbers.json"))))
 
 
@@ -167,13 +173,16 @@ def test_inputs_and_coverage(sweep):  # test-reason: the mapping of the three so
     M, _ = P.read_manifest(os.path.join(full, "inputs", "manifest.tsv"))
     assert info["counts"]["tier12_v3/rules/r4_pass2"] == dict(rows=len(sweep["a1"]), scored=len(sweep["a1"]) - 1, failed=1)
     assert info["counts"]["jhpce_tier12/pilot5_jhpce"] == dict(rows=1890, scored=1886, failed=4)
-    missing = base[base.arm.isin(["harmony", "scanorama", "pca"]) & ~base.task.isin(SCENARIO["cpu_tools_on"])]
-    assert sorted(info["baseline_rows_missing"]) == sorted(missing.tag) and len(missing) == 16 * 6
+    missing = base[(base.arm.isin(["harmony", "scanorama", "pca"]) & ~base.task.isin(SCENARIO["cpu_tools_on"])) | base.tag.isin(sweep["baseline_missing_extra"])]
+    assert sorted(info["baseline_rows_missing"]) == sorted(missing.tag) and len(missing) == 16 * 6 + len(sweep["baseline_missing_extra"])
     assert len(M) == len(sweep["a1"]) + 1890 + 448 - len(missing) and set(M.experiment) == {"A1", "X1", "X13"}
     cov = pd.read_csv(os.path.join(full, "inputs", "baseline_coverage.csv")).set_index(["task", "arm"])
     assert cov.loc[("lung", "sysvi")].to_dict() == dict(expected=30, scored=29, failed=1, missing=0)
     assert cov.loc[("atac_small", "harmony")].to_dict() == dict(expected=7, scored=0, failed=0, missing=7)
     assert cov.loc[("pancreas", "pca")].to_dict() == dict(expected=2, scored=2, failed=0, missing=0)
+    setting = next(r for r in info["baseline_setting_coverage"] if r["task"] == "pancreas" and r["arm"] == "scanvi")
+    assert setting["expected"] == 5 and setting["scored"] == 1 and setting["failed"] == 0 and setting["missing"] == 4
+    assert setting["status"] == "incomplete"
     assert cov.expected.sum() == 448 and list(cov.columns) == ["expected", "scored", "failed", "missing"]
     lat = dict(ln.rstrip("\n").split("\t") for ln in open(os.path.join(full, "inputs", "latents.tsv")))
     sk = sweep["a1"][sweep["a1"].arm == "sinkhorn"].tag.iloc[0]
@@ -287,13 +296,26 @@ def test_sweep_label_transfer(sweep):  # test-reason: label transfer on every pe
 def test_report_and_paper_numbers(sweep):  # test-reason: tables and figures exist, paper_numbers.json carries the record's values under documented keys
     full, rec, N = sweep["full"], sweep["rec"], sweep["numbers"]
     tdir, fdir = os.path.join(full, "tables"), os.path.join(full, "figures")
-    names = {"ranking_pairs", "mean_rank", "secondary", "curves", "baseline_points", "label_transfer", "label_transfer_curve", "best_of_k",
-             "best_of_k_real_mean", "transfer_strength", "single_methods", "baseline_coverage", "counts"}
+    names = {"ranking_pairs", "low_signal_pairs", "mean_rank", "secondary", "curves", "baseline_points", "label_transfer", "label_transfer_curve", "best_of_k",
+             "best_of_k_real_mean", "transfer_strength", "single_methods", "baseline_coverage", "baseline_setting_coverage", "counts"}
     assert {f[:-4] for f in os.listdir(tdir)} == names
     for fig in ("fig_ranking", "fig_tradeoff_cond1", "fig_tradeoff_cond0", "fig_best_of_k", "fig_collapse"):
         assert all(os.path.getsize(os.path.join(fdir, fig + ext)) > 0 for ext in (".png", ".pdf"))
     pairs = pd.read_csv(os.path.join(tdir, "ranking_pairs.csv"))
-    assert len(pairs) == 96 and pairs["rank"].isna().sum() == 12 and (pairs.status == A.ANCHOR_STATUS).sum() == 6
+    assert len(pairs) == 84 and pairs["low_signal"].sum() == 0 and pairs["rank"].isna().sum() == 0
+    low_signal = pd.read_csv(os.path.join(tdir, "low_signal_pairs.csv"))
+    assert len(low_signal) == 12 and low_signal.low_signal.all()
+    scanvi = pd.read_csv(os.path.join(tdir, "best_of_k.csv"))
+    assert set(scanvi[scanvi.family == "scanvi"].stratum) == {"label_aware"}
+    scanvi_mean = pd.read_csv(os.path.join(tdir, "best_of_k_real_mean.csv"))
+    assert set(scanvi_mean[scanvi_mean.family == "scanvi"].stratum) == {"label_aware"}
+    coverage = pd.read_csv(os.path.join(tdir, "baseline_setting_coverage.csv"))
+    assert (coverage[(coverage.task == "pancreas") & (coverage.arm == "scanvi")].status == "incomplete").all()
+    for cond in (0, 1):
+        c = rec["primary"]["cells"][f"pancreas|{cond}"]
+        assert c["best_of_k"]["scanvi"]["n"] == 0
+        assert not any(v["arm"] == "scanvi" for v in c["baseline_points"].values())
+    assert "fig_best_of_k.pdf" in os.listdir(fdir)
     assert set(pd.read_csv(os.path.join(tdir, "curves.csv")).arm) == set(P.ADV_ARMS) and len(pd.read_csv(os.path.join(tdir, "label_transfer_curve.csv"))) > 96
     assert all(isinstance(v, dict) and set(v) == {"value", "description"} for v in N.values())
     c = rec["primary"]["cells"]["lung|0"]
@@ -336,6 +358,18 @@ def test_debug_subset_and_partial_tasks(sweep):  # test-reason: the debug option
     # an existing output directory is refused
     r = subprocess.run(["bash", sweep["sh"], out, "--baseline-dirs", sweep["dirs"][0]], env=sweep["env"], capture_output=True, text=True)
     assert r.returncode == 2 and "refusing" in r.stderr
+
+
+def test_simulation_only_report_skips_real_task_figures(sweep):  # test-reason: --tasks sim1 leaves real-task summaries empty
+    out = os.path.join(sweep["out"], "sim1_only")
+    r = subprocess.run(["bash", sweep["sh"], out, "--baseline-dirs", *sweep["dirs"], "--tasks", "sim1", "--jobs", "1"],
+                       env=sweep["env"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    rec = json.load(open(os.path.join(out, "analysis_sweep.json")))
+    files = set(os.listdir(os.path.join(out, "figures")))
+    assert rec["real_tasks"] == []
+    assert not any(name.startswith(("fig_ranking", "fig_best_of_k")) for name in files)
+    assert {"fig_tradeoff_cond0.pdf", "fig_tradeoff_cond1.pdf", "fig_collapse.pdf"} <= files
 
 
 def test_anchor_at_or_above_bstar():  # test-reason: spec 4 (i) and 16.2: an anchor at or above b* gives no reading even when the curve falls through b*
