@@ -695,3 +695,17 @@
 - added: 2026-10-22
 - keywords: scoring, JHPCE, Zen 2, znver2, match check, compare_scores, workstation, GATE, cross-host
 - files: cluster/jhpce/compare_scores.py, cluster/jhpce/score_check/check_latents.tsv, docs/PREREG.md
+
+## SI-116 · active · scope
+- rule: The main benchmark (X1) is not run. The paper's results are the eight-task penalty-strength sweep (A1, ~3,024 scored fits, all strengths, both decoders, seeds 100-102), framed as an exploratory comparison, not a confirmatory test. The no-look rule for X1 scores (SI-68, SI-78) is retired for baseline rows. Detail: docs/RESCOPE_20261102.md.
+- source: "how can we rescope this project to take much less time. I want to write this up and be done" and "Use Claude Code fable 5.1 on high to draft this paper with the sweep results" (user, 2026-11-02)
+- added: 2026-11-02
+- keywords: rescope, main benchmark, X1, sweep, pilot, A1, exploratory, confirmatory, no-look
+- files: docs/RESCOPE_20261102.md
+
+## SI-117 · active · method
+- rule: Compare the penalties against all baselines of the committed run list on all eight tasks: scvi_adv, scANVI, sysVI, Harmony, Scanorama, PCA (448 rows); fit the missing rows and score the unscored ones.
+- source: "Add all baselines" (user, 2026-11-02, choice card)
+- added: 2026-11-02
+- keywords: baselines, scvi_adv, scANVI, sysVI, Harmony, Scanorama, PCA, X13
+- files: docs/RESCOPE_20261102.md, manifests/paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv
