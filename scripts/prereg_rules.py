@@ -73,6 +73,10 @@ FOLLOWUPS = ("X3", "X6", "X7", "X8", "X12", "X15")   # X15: KL warm-up sensitivi
 PROVENANCE_COLS = ("scorer_git_sha", "scorer_dirty", "cpu_simd", "numba_cpu_name", "scorer_versions")
 EQUIVALENT_COMMITS = os.path.join(HERE, os.pardir, "docs", "EQUIVALENT_COMMITS.json")   # SI-54
 PROVENANCE_MAY_BE_EMPTY = ("numba_cpu_name",)
+# SI-115: score rows of one rule input may come from the workstation and from JHPCE only if every JHPCE row was scored with the fixed
+# LISI seed (docs/SCORER_EQUIVALENCE.json); the JHPCE rows carry these columns (cluster/jhpce/score_array_fixed_seed.sh).
+SCORER_EQUIVALENCE = os.path.join(HERE, os.pardir, "docs", "SCORER_EQUIVALENCE.json")
+SITE_COLS = ("cpu_model", "score_site", "lisi_random_device", "lisi_preload_sha256")
 
 
 class PreregError(RuntimeError):
@@ -207,8 +211,10 @@ def _read_score_file(path):
     """One score CSV. The provenance columns are read as the literal strings written (an empty numba_cpu_name stays
     ''); a file without one of them leaves it absent, so after concatenation its rows hold NaN there (refused by
     outcomes)."""
-    df = pd.read_csv(path, dtype={"tag": str})
-    prov = [c for c in PROVENANCE_COLS if c in df.columns]
+    # hash columns are read as text: pandas 2.3.3 crashes (segmentation fault) when it tries to read a hex digest such as
+    # 33e05422...d8488 as a number with a huge exponent (seen on a synthetic latent_sha256 in tests/analysis/test_sweep_analysis.py)
+    df = pd.read_csv(path, dtype={c: str for c in ("tag", "latent_sha256") + PROVENANCE_COLS + SITE_COLS})
+    prov = [c for c in PROVENANCE_COLS + SITE_COLS if c in df.columns]
     if prov:
         raw = pd.read_csv(path, dtype=str, keep_default_na=False, usecols=prov)
         _require(len(raw) == len(df), f"{path}: provenance columns read {len(raw)} rows, metrics {len(df)}")
@@ -244,6 +250,33 @@ def equivalent_commits(shas, arms):
     return [r.stdout.strip() if s == E["commit"] else s for s in shas]
 
 
+def refuse_unknown_scorer_sites(s, experiments):
+    """SI-115: rows scored on the workstation (cpu_model in the record, no score_site) and rows scored on JHPCE with the fixed LISI
+    seed (score_site, seed value and preload-library SHA-256 as in the record) may share a rule input, once the record's identity check
+    is intact. Any other row (JHPCE without the fixed seed, an unknown CPU, a row without these columns) mixed with them is refused.
+    An input of one kind of rows is judged by the other provenance columns alone, as before."""
+    def col(c):
+        return s[c].fillna("").astype(str) if c in s.columns else pd.Series("", index=s.index)
+    with open(SCORER_EQUIVALENCE) as f:
+        E = json.load(f)
+    fx = E["jhpce_fixed_seed"]
+    on_ws = col("cpu_model").isin(E["workstation"]["cpu_model"]) & col("score_site").eq("")
+    on_jh = (col("score_site").eq(fx["score_site"]) & col("lisi_random_device").eq(fx["lisi_random_device"])
+             & col("lisi_preload_sha256").eq(fx["lisi_preload_sha256"]))
+    other = ~(on_ws | on_jh)
+    if int(on_ws.any()) + int(on_jh.any()) + int(other.any()) < 2:
+        return
+    _require(not other.any(), f"scores of {experiments} mix scorer sites: {int(other.sum())} rows are neither workstation rows nor "
+                              f"JHPCE rows scored with the fixed LISI seed (SI-115), e.g. {sorted(s.tag[other])[:3]}")
+    ev = E["identity_check"]
+    path = os.path.join(os.path.dirname(SCORER_EQUIVALENCE), ev["file"])
+    _require(os.path.isfile(path) and hashlib.sha256(open(path, "rb").read()).hexdigest() == ev["sha256"],
+             f"{path} is missing or changed: the scorer-equivalence record's identity check is not intact (SI-115)")
+    res = json.load(open(path))
+    _require(res["all_columns_identical"] is True and res["n_latents"] >= 3,
+             f"{path}: the identity check did not find every column identical on at least 3 latents")
+
+
 def check_provenance(s, experiments, arms):
     """Code check CR-05, rule side: every score row of one rule input carries the scorer provenance columns, with a
     value (numba_cpu_name may be ''), and all rows share one value per column (scorer_git_sha after SI-54's
@@ -259,6 +292,7 @@ def check_provenance(s, experiments, arms):
             lacking |= s[c].astype(str).str.strip().eq("")
     bad = sorted(s.tag[lacking])
     _require(not bad, f"{len(bad)} score rows of {experiments} lack scorer provenance values, e.g. {bad[:5]}")
+    refuse_unknown_scorer_sites(s, experiments)
     s = s.assign(scorer_git_sha=equivalent_commits(s.scorer_git_sha, arms))
     mixed = {c: sorted(s[c].astype(str).unique()) for c in PROVENANCE_COLS if s[c].astype(str).nunique() > 1}
     _require(not mixed, f"scores of {experiments} mix scorer provenance: "
@@ -549,6 +583,20 @@ def _closest(points, target):
     return best, best_d
 
 
+def pair_targets(zero, pts, label=""):
+    """b0, each arm's best failure-free seed-mean B (M), b_common, b* and the low-signal flag of one task x decoder pair
+    (docs/PREREG.md section 4); pts: {arm: _cell_points}, every point counted."""
+    b0 = _mean([v[0] for v in zero.values()])
+    M = {}
+    for a, points in pts.items():
+        ok = [_mean(list(p["B"].values())) for p in points if not p["n_fail"] and p["B"]]
+        _require(ok, f"{label} {a}: no failure-free lambda")
+        M[a] = max(ok)
+    b_common = min(M.values())
+    return dict(b0=b0, M=M, b_common=b_common, bstar=b0 + Q_BSTAR * (b_common - b0),
+                bstar_low_signal=bool(b_common - b0 < 2 * DELTA_MIN))
+
+
 def r4_stage(out, stage, r1_record, need=None):
     """Matched lambda for every (task, cond, adversarial arm) of the stage (a1: A1 fits; x1: X1 fits).
     need: the 'task|cond|arm' cells that rows of the stage will take a value from; only those can ask for
@@ -560,17 +608,9 @@ def r4_stage(out, stage, r1_record, need=None):
     cells, targets, extensions = {}, {}, []
     for (t, c) in sorted(set(zip(rows.task, rows.cond_i))):
         zero = _zero_ref(out, exp, t, c)
-        b0 = _mean([v[0] for v in zero.values()])
-        pts, M = {}, {}
-        for a in ADV_ARMS:
-            pts[a] = _cell_points(out, exp, t, c, a, sorted(zero))
-            ok = [_mean(list(p["B"].values())) for p in pts[a] if not p["n_fail"] and p["B"]]
-            _require(ok, f"{exp} {t} cond={c} {a}: no failure-free lambda")
-            M[a] = max(ok)
-        b_common = min(M.values())
-        bstar = b0 + Q_BSTAR * (b_common - b0)
-        targets[f"{t}|{c}"] = dict(b0=b0, M=M, b_common=b_common, bstar=bstar,
-                                   bstar_low_signal=bool(b_common - b0 < 2 * DELTA_MIN))
+        pts = {a: _cell_points(out, exp, t, c, a, sorted(zero)) for a in ADV_ARMS}
+        targets[f"{t}|{c}"] = pair_targets(zero, pts, f"{exp} {t} cond={c}")
+        bstar = targets[f"{t}|{c}"]["bstar"]
         for a in ADV_ARMS:
             P = pts[a]
             grid = [p["lam"] for p in P]
