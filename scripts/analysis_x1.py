@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """X1 analysis, ranking design: penalties ranked by biology at matched batch removal, with per-penalty secondary analyses (docs/ANALYSIS_SPEC.md sections 2-12).
 Per pair (task, decoder) the six penalties are ranked by their biology at b*, with leave-one-seed-out standard errors and rank ranges;
-per penalty: frontier area, collapse rate, good-strength width, local minus global batch removal, label transfer, single-strength
-tables and best-of-k; and the sensitivity analyses. The contrast design this script replaced is at the tag prereg-tier12-v3.
+per penalty: hypervolume, share of non-dominated points, collapse rate, good-strength width, local minus global batch removal, label
+transfer, single-strength tables and best-of-k; and the sensitivity analyses. The contrast design this script replaced is at the tag prereg-tier12-v3.
 This script must not be run on any X1 or X13 score before the ranking version is frozen by its own tag (SI-78: an analysis script
 that uses a score examines it).
 
@@ -101,7 +101,7 @@ def tool_rows(x13, task, arm, setting_status=None):
 
 
 def usable(points, mode):
-    """Points the readings and the area use: all of them, or (drop_failed, SI-71 sensitivity) those without a failed run."""
+    """Points the readings, the hypervolume and the non-dominated share use: all of them, or (drop_failed, SI-71 sensitivity) those without a failed run."""
     return {arm: [p for p in pts if mode != "drop_failed" or p["n_fail"] == 0] for arm, pts in points.items()}
 
 
@@ -205,7 +205,7 @@ def read_pair(zero, zero_l, zero_g, arms, arms_l, arms_g, bstar, mode, min_readi
     return {arm: dict(r, local_minus_global=lmg[arm]) for arm, r in rank_one_pair(zero, arms, bstar, min_readings).items()}
 
 
-def area(points, b_ref, c_ref):
+def hypervolume(points, b_ref, c_ref):
     height, total = c_ref, 0.0
     for b, c in sorted(((b, c) for b, c in points if b > b_ref and c > c_ref), reverse=True):
         total += (b - b_ref) * max(0.0, c - height)
@@ -213,13 +213,21 @@ def area(points, b_ref, c_ref):
     return float(total)
 
 
-def read_area(zero, points, scale, corner="collapse"):
-    """One penalty's frontier area over the common batch range `scale` (spec 5); the corner is (b0, c0 - 0.10) or (b0, 0)."""
-    P._require(math.isfinite(scale) and scale > 0, "area scale must be positive")
-    P._require(corner in ("collapse", "zero"), f"unknown area corner {corner}")
+def read_hypervolume(zero, points, scale, corner="collapse"):
+    """One penalty's hypervolume (Zitzler and Thiele 1998; Li et al. 2022) over the common batch range `scale` (spec 5); the corner
+    is (b0, c0 - 0.10) or (b0, 0)."""
+    P._require(math.isfinite(scale) and scale > 0, "hypervolume scale must be positive")
+    P._require(corner in ("collapse", "zero"), f"unknown hypervolume corner {corner}")
     b0, c0 = np.mean(list(zero.values()), axis=0)
     c_ref = c0 - P.COLLAPSE_BIO if corner == "collapse" else 0.0
-    return area([(b, c) for _, b, c, _ in P.window_curve(points)], b0, c_ref) / scale
+    return hypervolume([(b, c) for _, b, c, _ in P.window_curve(points)], b0, c_ref) / scale
+
+
+def read_nondominated(points):
+    """Share of one penalty's points that no other of its points beats on both batch and biology (spec 5.1); needs no b* or corner."""
+    curve = [(b, c) for _, b, c, _ in P.window_curve(points)]
+    n_nd = sum(dominance(p, curve)["dominated_by"] == 0 for p in curve)
+    return dict(share=n_nd / len(curve) if curve else None, n_nondominated=n_nd, n=len(curve))
 
 
 def clopper_pearson(x, n):
@@ -499,8 +507,9 @@ def analyse_pairs(out, exp, seeds, targets, grids, matched, fail_status, latents
         cell = dict(task=task, cond=cond, b0=target["b0"], b_common=target["b_common"], bstar=target["bstar"],
                     low_signal=target["bstar_low_signal"], best_batch=target.get("M"), penalties=penalties,
                     n_points={arm: len(points[arm]) for arm in P.ADV_ARMS},
-                    area=None if target["bstar_low_signal"] else
-                    {arm: read_area(zero, used[arm], target["b_common"] - target["b0"], corner) for arm in P.ADV_ARMS})
+                    hypervolume=None if target["bstar_low_signal"] else
+                    {arm: read_hypervolume(zero, used[arm], target["b_common"] - target["b0"], corner) for arm in P.ADV_ARMS},
+                    nondominated={arm: read_nondominated(used[arm]) for arm in P.ADV_ARMS})
         setting_coverage = [dict(r) for r in baseline_setting_coverage if r["task"] == task] if baseline_setting_coverage is not None else []
         setting_status = ({(r["arm"], float(r["lam"]), str(r["n_latent"])): r["status"] for r in setting_coverage}
                           if baseline_setting_coverage is not None else None)

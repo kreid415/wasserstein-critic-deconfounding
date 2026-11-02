@@ -717,3 +717,12 @@
 - added: 2026-11-02
 - keywords: baselines, scvi_adv, scANVI, sysVI, Harmony, Scanorama, PCA, X13
 - files: docs/RESCOPE_20261102.md, manifests/paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv
+
+## SI-118 · active · method
+- rule: The per-penalty trade-off area is renamed the hypervolume (the hypervolume indicator of Zitzler and Thiele 1998, as used by Li et al. 2022, BMC Bioinformatics 23:460, doi 10.1186/s12859-022-05003-3) and cites both papers. Its corner (b0, c0 - 0.10), the (b0, 0) corner as the sensitivity analysis, and the division by the pair's batch range (b_common - b0) are kept. Li et al.'s share of non-dominated points is added (spec 5.1: per penalty, from the seed-mean points, computed in every pair including low-signal ones, descriptive only). Li et al.'s number of distinct choices is not added, because it needs an arbitrary grid width.
+- source: "rather than use our own area measurement, shouldn't we just use Li et al's" (user, 2026-11-02); choice cards "Keep plain-scVI point (Recommended)" (the corner stays) and "Add non-dominated share only (Recommended)" (the number of distinct choices is not added)
+- disclosure: area values had already been computed by the sweep analysis pipeline on 2026-11-01, in the dev runs under sweep_analysis_dev/, but no value had been quoted in any document when the change was decided.
+- added: 2026-11-02
+- fields added: `hypervolume` (renamed from `area`; same values, null in low-signal pairs) and `nondominated` (per penalty: share, n_nondominated, n; every pair) in each cell of the analysis record; secondary-table columns `hypervolume` (renamed from `area`), `nondominated_share` and `nondominated_n`; paper_numbers keys `hypervolume.<penalty>.<task>.cond<c>` (renamed from `area.*`) and `nondominated_share.<penalty>.<task>.cond<c>`
+- keywords: hypervolume, area, frontier, trade-off, non-dominated, dominance, Zitzler, Thiele, Li, Pareto, corner, distinct choices
+- files: scripts/analysis_x1.py, scripts/sweep_report.py, scripts/dryrun/figures_x1.py, docs/ANALYSIS_SPEC.md, docs/SWEEP_ANALYSIS.md

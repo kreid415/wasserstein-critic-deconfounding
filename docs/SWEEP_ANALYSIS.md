@@ -66,16 +66,17 @@ What the sweep analysis computes, per pair (task x decoder) from the three seeds
   low-signal flag (b_common - b0 < 0.02), by `prereg_rules.pair_targets` (the formula of rule R4, factored out of `r4_stage`).
 - Per penalty: the curve (anchor at plain scVI, then every fitted strength in increasing order, each point the mean over its successful
   runs), the reading at b* (`bio_at_bstar`), reading status, crossings, rank within the pair (bottom places shared, average ties), the
-  three leave-one-seed-out repeats with their standard error and rank range, local minus global batch removal at the crossing, frontier
-  area, collapse rate with the exact interval, good-strength width, label transfer at the matched strength and along the whole curve.
+  three leave-one-seed-out repeats with their standard error and rank range, local minus global batch removal at the crossing,
+  hypervolume (spec 5; null in low-signal pairs), share of non-dominated points with its counts (spec 5.1; given in every pair),
+  collapse rate with the exact interval, good-strength width, label transfer at the matched strength and along the whole curve.
 - Per decoder: mean rank over the ranked real tasks; simulations listed by task.
 - Baselines (as in spec sections 10 and 11): single-setting methods as they are (plain scVI, scvi_adv, scANVI, PCA, the tools' default
   dimensions), transfer setting for Harmony, Scanorama and sysVI, best-of-k per family and its mean over the real tasks, frontier positions.
 - The four sensitivity analyses of spec section 12 (biology without trajectory, per-run reading, points with a failed run dropped,
-  area corner at biology 0).
+  hypervolume corner at biology 0).
 
 `paper_numbers.json` is flat: `{key: {"value", "description"}}`, keys such as `rank.<penalty>.<task>.cond<0|1>`,
-`bio_at_bstar.*`, `mean_rank.cond<c>.<penalty>`, `mean_rank_n_tasks.*`, `collapse_rate.*`, `collapse_ci.*`, `area.*`, `width_decades.*`,
+`bio_at_bstar.*`, `mean_rank.cond<c>.<penalty>`, `mean_rank_n_tasks.*`, `collapse_rate.*`, `collapse_ci.*`, `hypervolume.*`, `nondominated_share.*`, `width_decades.*`,
 `local_minus_global.*`, `label_transfer_f1.*`, `best_of_k_real_mean.cond<c>.<family>.k<k>`, `transfer_strength.*`, `single.*`,
 `n_fits.*`, `n_failed.*`, `n_pairs_no_reading.cond<c>.<penalty>`, `baseline_coverage.<task>.<method>.<expected|scored|failed|missing>`,
 and `_meta.*` (record SHA-256, git commit, partial-tasks and debug flags, baseline completeness).
@@ -129,8 +130,8 @@ Each item: what the specification says, what the code does, why.
     configuration's mean (spec 16.8) and is applied as written; the record gives each family's number of configurations and failed runs.
 12. **Collapse rate (spec 6).** Spec: 30 runs (six grid points x five seeds). Code: every fitted strength x three seeds (30-36 runs); the
     Clopper-Pearson interval as written. Limitation 3 of the spec applies with the smaller count.
-13. **Good-strength width (spec 8) and frontier area (spec 5).** Applied as written over every fitted strength; the width can now span more
-    than the six-point grid allowed.
+13. **Good-strength width (spec 8), hypervolume (spec 5) and share of non-dominated points (spec 5.1).** Applied as written over every fitted strength; the width
+    can now span more than the six-point grid allowed.
 14. **Experiment labels.** The sweep rows are experiment A1, the scvi_adv baseline rows are labelled X1 in the run list and the other
     baselines X13; `analyse_pairs` takes the penalty experiment as a parameter and reads scvi_adv rows by arm. `check_seed_separation`
     still holds (A1 seeds 100-102, X1 seeds 0-4).

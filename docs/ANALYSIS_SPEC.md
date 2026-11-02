@@ -2,7 +2,7 @@
 
 *Status, 2026-10-23. The ranking design of this file replaces the contrast design: one primary contrast (the reference critic's
 biology at b\* minus the discriminator's), pooled over the real tasks in a hierarchical model with a 0.01 margin, a 0.95 posterior
-rule and Holm's correction over six results, plus a co-primary frontier area and a collapse-rate comparison. The first author
+rule and Holm's correction over six results, plus a co-primary hypervolume and a collapse-rate comparison. The first author
 decided the replacement on 2026-10-22 and 2026-10-23 (decisions RD-A to RD-M, Appendix A.4; their ledger entries are still to be
 added to CONSTRAINTS.md). The contrast version of this file, of `scripts/analysis_x1.py` and of `tests/analysis/` is the one at
 the tag `prereg-tier12-v3` (commit 10a1ca5, 2026-10-16); `git show prereg-tier12-v3:docs/ANALYSIS_SPEC.md` prints it.
@@ -48,7 +48,7 @@ question put to the user on 2026-10-14 (Appendix A). PREREG section 9 has a glos
 | Analysis | Data | Data exist |
 |---|---|---|
 | Ranking of the six penalties by biology at matched batch removal, with LOSO standard errors and rank ranges (sections 2-4) | X1 | X1 |
-| Per penalty: trade-off area, collapse rate, local minus global batch removal (sections 5-7) | X1 | X1 |
+| Per penalty: hypervolume, share of non-dominated points, collapse rate, local minus global batch removal (sections 5-7) | X1 | X1 |
 | Per penalty: good-strength width (R3, X1 part; section 8) | X1 | X1 |
 | Per penalty: label transfer (section 9; part of X10, moved from exploratory to reported) | X1 latents, task labels | X1 |
 | R5 placement against plain scVI and standard tools: single-strength tables, best-of-k (sections 10-11) | X13, X1 | X1 |
@@ -90,7 +90,7 @@ above are kept only as a record. (Q1's options and reasons: Appendix A.1.)
   R1 on them with one shared grid per family and decoder, so the grid statements of this bullet predate it. They are not rewritten
   here; the R1 record that exists when the main benchmark is analysed gives the six strengths.]
 - b\* is computed after any R4-x1 extension round: R4 takes each penalty's best batch score from all of its X1 points,
-  extension points included (PREREG section 4), while the readings and the area use only the six grid points. A penalty whose
+  extension points included (PREREG section 4), while the readings, the hypervolume and the share of non-dominated points use only the six grid points. A penalty whose
   six points never reach b\* does not reach it (section 2.2) and takes the bottom places of its pair (section 3.1); any of the six
   penalties can do this. The number of such pairs for each penalty, next to that penalty's best batch score M in
   the R4 record, and the no-pair training-step counts (CF-06) are tabulated by a reporting script written after the runs, not by
@@ -128,7 +128,7 @@ reaches b\* in it (section 3.1). The earlier conditions that every penalty's cur
 leave-one-seed-out readings exist are removed.
 
 **2.4 Failed runs.** Failed runs (status `diverged` or `nonfinite_latent`; user decision SI-71, Q4) are left out of the readings and
-the frontier area: a point is the mean over its successful runs (PREREG section 1 "seed mean"); a point whose runs all failed is
+the hypervolume and the share of non-dominated points: a point is the mean over its successful runs (PREREG section 1 "seed mean"); a point whose runs all failed is
 skipped; every failure counts in the collapse rate (section 6). Sensitivity analysis: points with any failed run removed
 (section 12). (Q4's options and reasons: Appendix A.1.)
 
@@ -174,20 +174,34 @@ A penalty that reaches b\* on the seed-mean curve is ranked even if m < 4. A pen
 has no reading, so its standard error is not defined; its rank range is still reported (first author, 2026-10-23). No interval, test or probability is built from the standard
 error or the range; they describe the data (RD-A).
 
-## 5. Trade-off (frontier) area
+## 5. Hypervolume (trade-off front)
 
-Per penalty, task and decoder (description only; no difference between penalties is tested). The area is the part of the
-batch-biology plane reached or dominated by the penalty's six points (point means as in section 2): the union of rectangles
-[b_ref, B_i] x [c_ref, C_i] over points with B_i > b_ref and C_i > c_ref. It is divided by the pair's common batch range
-(b_common - b0), which expresses it in biology-score units and puts tasks on one scale. Low-signal pairs have no area (the divisor is below 0.02).
+Per penalty, task and decoder (description only; no difference between penalties is tested). This is the hypervolume indicator
+(Zitzler and Thiele 1998) as used by Li et al. (2022, BMC Bioinformatics 23:460, doi 10.1186/s12859-022-05003-3) to judge trade-off
+fronts. The hypervolume is the part of the batch-biology plane reached or dominated by the penalty's six points (point means as in
+section 2): the union of rectangles [b_ref, B_i] x [c_ref, C_i] over points with B_i > b_ref and C_i > c_ref. It is divided by the
+pair's common batch range (b_common - b0), which expresses it in biology-score units and puts tasks on one scale. Low-signal pairs
+have no hypervolume (the divisor is below 0.02).
 
 The corner (b_ref, c_ref) is (b0, c0 - 0.10): scVI's batch score and 0.10 below scVI's biology score, the collapse
 bound of rule R1 (PREREG section 1). Only settings that remove more batch than scVI and keep biology above the collapse
-line add area. Pilot-informed: the corner was chosen after the ranges of B and C in the A1 pilot had been seen (A1's 5
+line add hypervolume. Pilot-informed: the corner was chosen after the ranges of B and C in the A1 pilot had been seen (A1's 5
 non-Sinkhorn arms x 6 cells x 10 lambda = 300 points; rigour review DOC-17; the figures are in Appendix A.1, Q5, and are regenerated by code in
 experiments/doc_numbers_20261015/, whose README lists each number with its script, DOC-R04).
-Sensitivity analysis: the corner (b0, 0) (section 12). (Decision SI-72, Q5, made the area co-primary; RD-F makes it a per-penalty
+Sensitivity analysis: the corner (b0, 0) (section 12). (Decision SI-72, Q5, made the hypervolume co-primary; RD-F makes it a per-penalty
 description. Q5's options and reasons: Appendix A.1.)
+
+**5.1 Share of non-dominated points.** Per penalty, task and decoder, descriptive only (Li et al. 2022). The points are the penalty's
+six point means (section 2.4: a point whose runs all failed is not a point). A point is dominated when another of the same
+penalty's points is at least as good on both the batch and the biology score (within 1e-9, PREREG section 1) and
+better on one of them by more than 1e-9; identical points do not dominate each other. The share is the number of
+points that no other point dominates divided by the number of points (null when there are no points); the counts are reported
+with it. It needs neither b\* nor the corner, so it is computed in every pair, low-signal pairs included, and the point-removal
+sensitivity of section 12 (failed runs) reaches it. Li et al.'s number of distinct choices is not used, because it needs an
+arbitrary grid width (first author, 2026-11-02).
+
+Renamed on 2026-11-02 (first author, SI-118): this measure is called the hypervolume and cites Zitzler and Thiele (1998) and Li et al.
+(2022); the corner, the scale and the low-signal rule are unchanged. The earlier name is kept in Appendix A.
 
 ## 6. Collapse rate (user decision SI-75, Q9; per penalty by RD-F, interval by RD-J)
 
@@ -286,10 +300,10 @@ mean over its successful runs, a point whose runs all failed is skipped, every f
 
 | Sensitivity | Applies to | Change |
 |---|---|---|
-| Biology without trajectory (SI-38) | every analysis that uses C: readings, ranks, standard errors, area, collapse, width, S-based placement (local minus global and label transfer do not use C) | C on immune and immune_hum_mou without trajectory conservation; b\* unchanged (batch only) |
+| Biology without trajectory (SI-38) | every analysis that uses C: readings, ranks, standard errors, hypervolume, share of non-dominated points, collapse, width, S-based placement (local minus global and label transfer do not use C) | C on immune and immune_hum_mou without trajectory conservation; b\* unchanged (batch only) |
 | Per-run reading (option of Q2 not chosen, SI-69) | readings and ranks; local minus global | each run read on its own curve (its own lambda = 0 run as the anchor); in each seed the six penalties are ranked with the rules of section 3.1 (bottom places, average ties) and the five per-seed ranks are averaged (first author, 2026-10-23) |
-| Points with any failed run removed (SI-71) | readings, ranks, standard errors, area, local minus global | a point with a failed run is dropped from the curve; a penalty that then does not reach b\* takes the bottom places |
-| Area corner (b0, 0) (decided 2026-10-15, SI-80) | area | c_ref = 0 instead of c0 - 0.10 |
+| Points with any failed run removed (SI-71) | readings, ranks, standard errors, hypervolume, share of non-dominated points, local minus global | a point with a failed run is dropped from the curve; a penalty that then does not reach b\* takes the bottom places |
+| Hypervolume corner (b0, 0) (decided 2026-10-15, SI-80) | hypervolume | c_ref = 0 instead of c0 - 0.10 |
 
 R1 without trajectory (SI-53) is an A1 re-analysis, already stated in PREREG section 9. The prior-scale and dataset-structure
 sensitivity analyses of the contrast design (pairs first, six independent datasets, prior scales 0.05 and 0.2) are removed with
@@ -333,7 +347,7 @@ still names the contrast sections.
 | Per pair (task, decoder) | b0, b_common, b\*, low-signal flag |
 | Per pair and penalty | reading (or none), reached flag (reading status), crossings, rank (fractional), LOSO standard error and m (or "not available"), the five LOSO readings, lowest and highest rank over the five repeats |
 | Per decoder and penalty | mean rank over the ranked real tasks and the number of real tasks it is over; simulation ranks listed by task |
-| Per penalty, task and decoder | area; collapse count, rate, Clopper-Pearson interval and failure types; width (best strength, window, number of points); local minus global at the crossing; label-transfer macro F1 and the distance of the chosen strength's batch score from b\* |
+| Per penalty, task and decoder | hypervolume; share of non-dominated points (with the counts); collapse count, rate, Clopper-Pearson interval and failure types; width (best strength, window, number of points); local minus global at the crossing; label-transfer macro F1 and the distance of the chosen strength's batch score from b\* |
 | Best-of-k | E_k per task, decoder and method family; per decoder and method the mean over the six real tasks of E_k |
 | Transfer-strength tables | per penalty, Harmony, Scanorama and sysVI: chosen strength or setting, B, C, S (mean and SD over seeds), the task's own best setting and its values, difference of S from plain scVI; scANVI, PCA, plain scVI and `scvi_adv` as they are |
 | Sensitivity analyses | the same quantities under each change of section 12 |
@@ -374,8 +388,8 @@ rule. The open points of the change log were decided by the first author on 2026
    per-run reading (a sensitivity analysis, section 12) a penalty is read once per seed, on that seed's own curve.
 3. Ranks (ranking). Readings are compared with the tolerance 1e-9 (PREREG section 1). Ranks in a LOSO repeat come from the same code as
    the main ranks.
-4. Area (carried over). A pair that is not low-signal always gives a value (0 when no point lies beyond the corner); low-signal
-   pairs get no area.
+4. Hypervolume (carried over). A pair that is not low-signal always gives a value (0 when no point lies beyond the corner); low-signal
+   pairs get no hypervolume. The share of non-dominated points (section 5.1) is given in every pair, low-signal ones included.
 5. Collapse (carried over). All 8 tasks enter: the low-signal flag concerns b\*, which the collapse rate does not use. Counts are over
    the penalty's six grid points; extension rows are not counted.
 6. Local versus global (carried over). A penalty's value exists exactly when its biology reading exists: the local and global scores are
@@ -397,9 +411,9 @@ rule. The open points of the change log were decided by the first author on 2026
    the record counts those that lie strictly between the window's smallest and largest lambda in `n_all_failed_between`,
    because the width spans them although `gap` does not flag them (AN-R13).
 10. Sensitivity analyses (ranking). Each changes one setting and reruns everything it applies to (section 12): trajectory-free C;
-    per-run reading (readings, ranks and local minus global; the area is defined on point means only, section 5, so it has no
-    per-run version: corrected 2026-10-14, AN-05); dropping points with a failed run (readings, ranks, area, local minus global);
-    corner (b0, 0) (area).
+    per-run reading (readings, ranks and local minus global; the hypervolume and the share of non-dominated points are defined on
+    point means only, sections 5 and 5.1, so they have no per-run version: corrected 2026-10-14, AN-05); dropping points with a
+    failed run (readings, ranks, hypervolume, share of non-dominated points, local minus global); corner (b0, 0) (hypervolume).
 11. Label transfer (ranking). Section 9 states every rule (strength choice, classifier, how held-out batches and seeds are
     combined, cross-task summary).
 

@@ -51,7 +51,9 @@ def tables(rec):
                               crossings=r["crossings"], rank=r.get("rank") if ranked else None, rank_lo=r.get("rank_lo") if ranked else None,
                               rank_hi=r.get("rank_hi") if ranked else None, loso_se=r.get("s") if ranked else None,
                               n_loso=r.get("m") if ranked else None, local_minus_global=r["local_minus_global"]))
-            sec.append(dict(task=t, cond=cond, arm=arm, area=None if c["area"] is None else c["area"][arm], collapse_n=col["n"],
+            nd = c["nondominated"][arm]
+            sec.append(dict(task=t, cond=cond, arm=arm, hypervolume=None if c["hypervolume"] is None else c["hypervolume"][arm],
+                            nondominated_share=nd["share"], nondominated_n=nd["n"], collapse_n=col["n"],
                             collapsed=col["collapsed"], collapsed_bio=col["bio"], diverged=col["failed"]["diverged"],
                             nonfinite_latent=col["failed"]["nonfinite_latent"], collapse_rate=col["rate"], collapse_lo=col["lo"],
                             collapse_hi=col["hi"], window_status=w["status"], window_best=w["best"], window_width_decades=w["width"],
@@ -245,7 +247,11 @@ def paper_numbers(rec, T, record_path):
                 put(f"rank_range.{pre}", [r["rank_lo"], r["rank_hi"]], "smallest and largest rank over the leave-one-seed-out repeats")
                 put(f"loso_se.{pre}", r["s"], f"leave-one-seed-out standard error of the reading (null when fewer than {rec['min_readings']} repeats read)")
                 put(f"loso_m.{pre}", r["m"], "leave-one-seed-out repeats with a reading")
-            put(f"area.{pre}", None if c["area"] is None else c["area"][arm], "frontier area over the common batch range (null in low-signal pairs)")
+            put(f"hypervolume.{pre}", None if c["hypervolume"] is None else c["hypervolume"][arm],
+                "hypervolume (Zitzler and Thiele 1998; Li et al. 2022) from the corner (b0, c0 - 0.10) over the common batch range (null in low-signal pairs)")
+            nd = c["nondominated"][arm]
+            put(f"nondominated_share.{pre}", nd["share"],
+                f"share of the penalty's strengths that no other of its strengths beats on both batch and biology ({nd['n_nondominated']} of {nd['n']})")
             col = c["collapse"][arm]
             put(f"collapse_rate.{pre}", col["rate"], f"collapsed runs / runs ({col['collapsed']} of {col['n']})")
             put(f"collapse_ci.{pre}", [col["lo"], col["hi"]], "exact Clopper-Pearson 95% interval of the collapse rate")

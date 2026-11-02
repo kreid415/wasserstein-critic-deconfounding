@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tables and the ranking figure from an analysis_x1.py record (docs/ANALYSIS_SPEC.md sections 3-6).
 
-Writes to <out>: ranking_pairs.csv (one row per task, decoder, penalty), mean_rank.csv, secondary.csv (frontier area, collapse rate with
-its exact interval, good-strength width), fig_ranking.png (biology at b* with rank per task, and mean rank per penalty).
+Writes to <out>: ranking_pairs.csv (one row per task, decoder, penalty), mean_rank.csv, secondary.csv (hypervolume, share of non-dominated points,
+collapse rate with its exact interval, good-strength width), fig_ranking.png (biology at b* with rank per task, and mean rank per penalty).
 Reads only the record; values are copied from it, not recomputed. Only the ranking figure exists so far: Figures 3-6 of the outline are
 still mock-ups (paper/drafts_20261022/make_mock_figures.py), see docs/ANALYSIS_DRYRUN.md.
 
@@ -37,8 +37,9 @@ def tables(rec):
                               bio_at_bstar=r.get("bio"), status=r.get("status"), rank=r.get("rank") if ranked else None,
                               rank_lo=r.get("rank_lo") if ranked else None, rank_hi=r.get("rank_hi") if ranked else None,
                               loso_se=r.get("s") if ranked else None, n_loso=r.get("m") if ranked else None))
-            sec.append(dict(task=c["task"], cond=c["cond"], arm=arm, area=None if c["area"] is None else c["area"][arm],
-                            collapse_rate=col["rate"], collapse_lo=col["lo"], collapse_hi=col["hi"], n_runs=col["n"],
+            nd = c["nondominated"][arm]
+            sec.append(dict(task=c["task"], cond=c["cond"], arm=arm, hypervolume=None if c["hypervolume"] is None else c["hypervolume"][arm],
+                            nondominated_share=nd["share"], nondominated_n=nd["n"], collapse_rate=col["rate"], collapse_lo=col["lo"], collapse_hi=col["hi"], n_runs=col["n"],
                             window_status=w["status"], window_width_decades=w["width"]))
     mean = [dict(cond=int(k), arm=a, mean_rank=v["mean"], n_tasks=v["n_tasks"]) for k, d in rec["ranking"].items()
             for a, v in d["mean_rank"].items()]
