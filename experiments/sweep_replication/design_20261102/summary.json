@@ -1,0 +1,27 @@
+{
+ "n_rows": 855,
+ "n_adversarial": 775,
+ "n_plain": 80,
+ "n_from_committed_x1": 630,
+ "n_new_strength_rows": 145,
+ "ranked_pairs": 13,
+ "low_signal_pairs": [
+  "immune|1",
+  "sim1|1",
+  "sim2|1"
+ ],
+ "cells_without_crossing": [],
+ "multi_crossing_cells": 46,
+ "est_fit_seconds_total": 1640036.6666666667,
+ "est_missing": 255,
+ "est_by_task_h": {
+  "atac_large": 0.0,
+  "atac_small": 70.0,
+  "immune": 72.4,
+  "immune_hum_mou": 0.0,
+  "lung": 113.3,
+  "pancreas": 106.2,
+  "sim1": 39.9,
+  "sim2": 53.7
+ }
+}

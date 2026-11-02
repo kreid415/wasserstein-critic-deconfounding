@@ -1,0 +1,18 @@
+{
+ "plan": "sweep-replication-jhpce",
+ "approved": "2026-11-02 user, choice card: 'Approve budget (Recommended)' for the 855-fit replication (one quick GPU test job first, then the full run). Limits: 5 GPUs, 150 GPU-hours, 2,000 CPU-hours, 96 GB and 48 h per job, expires 16 Nov.",
+ "expires": "2026-11-16",
+ "limits": {
+  "max_cpus_held": 90,
+  "max_gpus_held": 5,
+  "cpu_hours": 2000,
+  "gpu_hours": 150,
+  "max_job_mem_gb": 96,
+  "max_job_time_h": 48,
+  "max_jobs": 1000
+ },
+ "warn_fraction": 0.8,
+ "max_fail_fraction": 0.2,
+ "timeout_expected": false,
+ "time_floor_h": 4
+}

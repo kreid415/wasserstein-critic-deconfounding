@@ -1,0 +1,19 @@
+{
+ "plan": "sweep-baselines-jhpce-scoring",
+ "approved": "2026-11-02 user approved plan 87f26673 (Approve button); its note reads: 'JHPCE scoring budget: 78 tasks, 1 CPU and 48 GB each, at most 40 CPUs held, about 120 CPU-hours, expiring 2026-11-16; atac_large latents that exceed 48 GB are re-asked, not resubmitted.'",
+ "expires": "2026-11-16",
+ "limits": {
+  "max_cpus_held": 40,
+  "max_gpus_held": 0,
+  "cpu_hours": 120,
+  "gpu_hours": 0,
+  "max_job_mem_gb": 48,
+  "max_job_time_h": 6,
+  "max_jobs": 100
+ },
+ "warn_fraction": 0.8,
+ "max_fail_fraction": 0.2,
+ "timeout_expected": false,
+ "time_floor_h": 4,
+ "job_name_prefix": "wcdscore-baselines"
+}
