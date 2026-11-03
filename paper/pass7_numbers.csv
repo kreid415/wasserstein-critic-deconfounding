@@ -1,0 +1,249 @@
+tex_line,number_as_written,source_file,source_key_or_row,source_value
+155,"3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.total,3033
+155,0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_failed.total,0
+155,5,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""5"""
+155,387,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.immune,387
+155,378,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.atac_large,378
+155,1,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""1"""
+155,2,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""2"""
+155,0.638,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.immune.cond1.b0,0.6381673018004433
+155,0.657,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.immune.cond1.b_common,0.6569909962526824
+155,0.019,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.immune.cond1.b_common - pair.immune.cond1.b0,"{""minuend"": 0.6569909962526824, ""subtrahend"": 0.6381673018004433, ""difference"": 0.01882369445223908}"
+155,0.812,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim1.cond1.b0,0.8119601403099188
+155,0.819,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim1.cond1.b_common,0.8188775558554181
+155,0.007,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim1.cond1.b_common - pair.sim1.cond1.b0,"{""minuend"": 0.8188775558554181, ""subtrahend"": 0.8119601403099188, ""difference"": 0.006917415545499295}"
+155,0.656,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim2.cond1.b0,0.6557330442423953
+155,0.665,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim2.cond1.b_common,0.6645641317488905
+155,0.009,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,pair.sim2.cond1.b_common - pair.sim2.cond1.b0,"{""minuend"": 0.6645641317488905, ""subtrahend"": 0.6557330442423953, ""difference"": 0.008831087506495194}"
+155,5,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""5"""
+157,five,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank_n_tasks.cond1.pooled,5
+157,2.20,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.pooled,2.2
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.pooled.atac_small.cond1,1.0
+157,3,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.pooled.lung.cond1,3.0
+157,2.40,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.sinkhorn,2.4
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.sinkhorn.immune_hum_mou.cond1,1.0
+157,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.sinkhorn.atac_large.cond1,5.0
+157,3.00,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.barycenter,3.0
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.barycenter.pancreas.cond1,1.0
+157,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.barycenter.lung.cond1,5.0
+157,3.80,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.reference,3.8
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.reference.atac_large.cond1,1.0
+157,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.reference.immune_hum_mou.cond1,5.0
+157,4.60,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.mmd,4.6
+157,2,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.mmd.lung.cond1,2.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.mmd.immune_hum_mou.cond1,6.0
+157,5.00,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.discriminator,5.0
+157,3,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.discriminator.immune_hum_mou.cond1,3.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.discriminator.pancreas.cond1,6.0
+157,six,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank_n_tasks.cond0.mmd,6
+157,2.17,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.mmd,2.1666666666666665
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.mmd.atac_large.cond0,1.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.mmd.immune.cond0,6.0
+157,3.33,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.reference,3.3333333333333335
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.reference.lung.cond0,1.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.reference.immune_hum_mou.cond0,6.0
+157,3.33,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.pooled,3.3333333333333335
+157,2,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.pooled.immune_hum_mou.cond0,2.0
+157,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.pooled.pancreas.cond0,5.0
+157,3.50,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.discriminator,3.5
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.discriminator.immune.cond0,1.0
+157,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.discriminator.immune_hum_mou.cond0,5.0
+157,4.00,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.barycenter,4.0
+157,1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.barycenter.atac_small.cond0,1.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.barycenter.pancreas.cond0,6.0
+157,4.67,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.sinkhorn,4.666666666666667
+157,3,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.sinkhorn.atac_small.cond0,3.0
+157,6,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,rank.sinkhorn.lung.cond0,6.0
+159,6,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""6"""
+159,0.632,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,bio_at_bstar.pooled.atac_small.cond1,0.6315095204258805
+159,0.631,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,bio_at_bstar.sinkhorn.atac_small.cond1,0.6314338564516955
+159,0.007,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.pooled.atac_small.cond1,0.006994646263067585
+159,0.004,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.sinkhorn.atac_small.cond1,0.004126693196064936
+159,0.622,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,bio_at_bstar.mmd.atac_large.cond0,0.6215166706968677
+159,0.621,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,bio_at_bstar.reference.atac_large.cond0,0.621306904637878
+159,0.010,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.mmd.atac_large.cond0,0.010174259020808473
+159,0.006,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.reference.atac_large.cond0,0.006476389073147541
+159,0.017,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,bio_at_bstar.mmd.atac_small.cond1 - bio_at_bstar.reference.atac_small.cond1,"{""minuend"": 0.6191334539707707, ""subtrahend"": 0.6025157222456387, ""difference"": 0.016617731725132034}"
+159,0.007,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.mmd.atac_small.cond1,0.006804071274124518
+159,0.003,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,loso_se.reference.atac_small.cond1,0.0034055328338090246
+159,1,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""1"""
+159,1,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""1"""
+159,2,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""2"""
+169,3,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""3"""
+169,5,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""5"""
+169,0.674,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/ranking_pairs.csv,"task=atac_large,cond=1,arm=barycenter; column=best_batch",0.6741081953373573
+169,0.815,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/ranking_pairs.csv,"task=atac_large,cond=1,arm=reference; column=best_batch",0.814982276964669
+169,0.466,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/curves.csv,"task=lung,cond=1,arm=barycenter,lam=3000.0; column=B",0.46637046491681816
+169,0.397,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/curves.csv,"task=lung,cond=1,arm=barycenter,lam=3000.0; column=C",0.39654645472010497
+178,4,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""4"""
+178,8,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""8"""
+178,7,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""7"""
+178,0.029,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.discriminator.atac_small.cond1,0.029439506664286873
+178,0.255,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.discriminator.pancreas.cond1,0.2547288187585543
+178,0.060,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.discriminator.atac_small.cond0,0.0595861578778267
+178,0.386,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.discriminator.pancreas.cond0,0.38634952811946227
+178,0.022,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.reference.atac_small.cond1,0.022113604281344585
+178,0.269,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.reference.pancreas.cond1,0.26930366654049226
+178,0.038,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.reference.atac_small.cond0,0.037692945221830615
+178,0.383,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.reference.pancreas.cond0,0.3832756706658115
+178,0.047,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.pooled.atac_small.cond1,0.04685964251596506
+178,0.344,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.pooled.pancreas.cond1,0.3441965450086937
+178,0.074,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.pooled.atac_small.cond0,0.07426082945086389
+178,0.440,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.pooled.pancreas.cond0,0.4400258035723559
+178,0.055,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.barycenter.atac_small.cond1,0.05538102780494783
+178,0.108,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.barycenter.pancreas.cond1,0.10813029076190861
+178,0.072,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.barycenter.immune_hum_mou.cond0,0.07162696841748331
+178,0.128,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.barycenter.pancreas.cond0,0.12766503806271684
+178,0.039,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.mmd.atac_small.cond1,0.038824300282886845
+178,0.178,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.mmd.pancreas.cond1,0.17759189950832047
+178,0.089,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.mmd.atac_small.cond0,0.08931638041189716
+178,0.390,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.mmd.atac_large.cond0,0.38994038613683174
+178,0.060,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.sinkhorn.atac_small.cond1,0.059887124671713456
+178,0.155,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.sinkhorn.pancreas.cond1,0.15548660681255672
+178,0.085,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.sinkhorn.atac_large.cond0,0.0845128445311213
+178,0.192,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,hypervolume.sinkhorn.pancreas.cond0,0.19233207065685126
+178,0.400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.discriminator.lung.cond1,0.4
+178,0.545,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.discriminator.immune.cond1,0.5454545454545454
+178,0.083,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.discriminator.pancreas.cond0,0.08333333333333333
+178,0.583,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.discriminator.immune.cond0,0.5833333333333334
+178,0.364,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.reference.immune.cond1,0.36363636363636365
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.reference.pancreas.cond1,0.6
+178,0.100,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.reference.pancreas.cond0,0.1
+178,0.900,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.reference.atac_large.cond0,0.9
+178,0.364,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.pooled.immune.cond1,0.36363636363636365
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.pooled.immune_hum_mou.cond1,0.6
+178,0.200,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.pooled.pancreas.cond0,0.2
+178,0.700,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.pooled.immune_hum_mou.cond0,0.7
+178,0.200,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.barycenter.immune.cond1,0.2
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.barycenter.lung.cond1,0.6
+178,0.200,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.barycenter.atac_large.cond0,0.2
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.barycenter.lung.cond0,0.6
+178,0.300,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.mmd.atac_large.cond1,0.3
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.mmd.immune_hum_mou.cond1,0.6
+178,0.300,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.mmd.pancreas.cond0,0.3
+178,0.700,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.mmd.immune_hum_mou.cond0,0.7
+178,0.250,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.sinkhorn.immune.cond1,0.25
+178,0.500,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.sinkhorn.immune_hum_mou.cond1,0.5
+178,0.300,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.sinkhorn.pancreas.cond0,0.3
+178,0.600,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,nondominated_share.sinkhorn.immune_hum_mou.cond0,0.6
+178,73\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.discriminator.immune_hum_mou.cond1,0.7333333333333333
+178,54\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.immune_hum_mou.cond1[0],0.5411063486052486
+178,88\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.immune_hum_mou.cond1[1],0.8772051901276452
+178,57\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.reference.atac_small.cond1,0.5666666666666667
+178,37\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.reference.atac_small.cond1[0],0.37427345060922074
+178,75\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.reference.atac_small.cond1[1],0.745392450096737
+178,47\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.pooled.atac_small.cond1,0.4666666666666667
+178,28\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.pooled.atac_small.cond1[0],0.283418079183537
+178,66\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.pooled.atac_small.cond1[1],0.6567447618392659
+178,33\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.barycenter.atac_small.cond1,0.3333333333333333
+178,17\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.barycenter.atac_small.cond1[0],0.17287422152603915
+178,53\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.barycenter.atac_small.cond1[1],0.5281200447898806
+178,27\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_small.cond1,0.26666666666666666
+178,12\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[0],0.1227948098723548
+178,46\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[1],0.45889365139475125
+178,42\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.sinkhorn.atac_small.cond1,0.4166666666666667
+178,26\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.sinkhorn.atac_small.cond1[0],0.2551410483264677
+178,59\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.sinkhorn.atac_small.cond1[1],0.5924347591082235
+178,61\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.discriminator.atac_small.cond0,0.6111111111111112
+178,43\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.atac_small.cond0[0],0.43463804744842544
+178,77\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.atac_small.cond0[1],0.7685755983378573
+178,57\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.reference.atac_small.cond0,0.5666666666666667
+178,37\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.reference.atac_small.cond0[0],0.37427345060922074
+178,75\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.reference.atac_small.cond0[1],0.745392450096737
+178,57\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.pooled.atac_large.cond0,0.5666666666666667
+178,37\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.pooled.atac_large.cond0[0],0.37427345060922074
+178,75\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.pooled.atac_large.cond0[1],0.745392450096737
+178,30\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.barycenter.atac_large.cond0,0.3
+178,15\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.barycenter.atac_large.cond0[0],0.14734518475470101
+178,49\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.barycenter.atac_large.cond0[1],0.4939590414625536
+178,13\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_large.cond0,0.13333333333333333
+178,4\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[0],0.037553496338363315
+178,31\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[1],0.30721835027612676
+178,30\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.sinkhorn.atac_small.cond0,0.3
+178,15\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.sinkhorn.atac_small.cond0[0],0.14734518475470101
+178,49\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.sinkhorn.atac_small.cond0[1],0.4939590414625536
+180,4,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""4"""
+180,7,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""7"""
+180,0.043,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.discriminator.atac_large.cond1,0.04307311618004972
+180,0.041,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.reference.atac_large.cond1,0.0408942008772738
+180,0.043,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.pooled.atac_large.cond1,0.042591487750893386
+180,0.039,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.barycenter.atac_large.cond1,0.038750045152903034
+180,0.036,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.mmd.atac_large.cond1,0.03601794426137772
+180,0.039,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.sinkhorn.atac_large.cond1,0.038672243932933226
+180,0.105,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.discriminator.atac_large.cond0,0.10543530322901457
+180,0.109,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.reference.atac_large.cond0,0.10918413992200088
+180,0.111,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.pooled.atac_large.cond0,0.11125637000182664
+180,0.113,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.barycenter.atac_large.cond0,0.1134608802401944
+180,0.106,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.mmd.atac_large.cond0,0.10597066702171581
+180,0.091,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.sinkhorn.atac_large.cond0,0.0914932073710904
+180,-0.356,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.discriminator.lung.cond1,-0.3559313850450835
+180,-0.289,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,local_minus_global.sinkhorn.lung.cond0,-0.28892507699522196
+180,1,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""1"""
+180,0.752,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.discriminator,0.7517999223394677
+180,0.790,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.reference,0.7897019860575142
+180,0.771,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.pooled,0.7713650594902253
+180,0.796,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.barycenter,0.7960310239072379
+180,0.799,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.mmd,0.7993432399325628
+180,0.769,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond1.sinkhorn,0.768683274357785
+180,0.726,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.discriminator,0.7255628678402993
+180,0.801,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.reference,0.8007802625791696
+180,0.818,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.pooled,0.8175366179159446
+180,0.815,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.barycenter,0.8152669581669271
+180,0.811,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.mmd,0.8112961546113592
+180,0.783,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_mean.cond0.sinkhorn,0.7828460879048875
+180,3,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""3"""
+180,9,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""9"""
+180,1,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""1"""
+180,0.840,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_f1.pooled.atac_small.cond1,0.8396542650511476
+180,0.851,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_f1.sinkhorn.atac_small.cond1,0.8508014327589913
+180,0.024,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_distance.pooled.atac_small.cond1,0.02372013468159917
+180,0.010,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,label_transfer_distance.sinkhorn.atac_small.cond1,0.010195299108429534
+180,0.360,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/label_transfer_curve.csv,"task=lung,cond=1,arm=barycenter,lam=3000.0; column=f1_mean",0.3595905496686879
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.discriminator.immune_hum_mou.cond1,0.0
+182,4.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.discriminator.atac_large.cond1,4.477121254719663
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.discriminator.atac_large.cond0,0.0
+182,3.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.discriminator.lung.cond0,3.4771212547196626
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.reference.atac_small.cond1,0.0
+182,3.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.reference.atac_large.cond1,3.4771212547196626
+182,1.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.reference.atac_small.cond0,1.0
+182,4.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.reference.immune_hum_mou.cond0,4.0
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.pooled.pancreas.cond1,0.0
+182,2.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.pooled.immune.cond1,2.0
+182,0.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.pooled.atac_small.cond0,0.5228787452803376
+182,4.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.pooled.lung.cond0,4.477121254719663
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.barycenter.atac_small.cond1,0.0
+182,3.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.barycenter.pancreas.cond1,3.4771212547196626
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.barycenter.lung.cond0,0.0
+182,2.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.barycenter.atac_large.cond0,2.4771212547196626
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.immune_hum_mou.cond1,0.0
+182,4.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.atac_small.cond1,4.477121254719663
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.immune.cond0,0.0
+182,3.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.atac_large.cond0,3.4771212547196626
+182,2.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.sinkhorn.pancreas.cond1,2.0
+182,5.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.sinkhorn.atac_large.cond1,5.477121254719663
+182,1.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.sinkhorn.atac_small.cond0,1.0
+182,4.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.sinkhorn.immune.cond0,4.477121254719663
+182,5,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""5"""
+182,7,paper/outline.tex,base=5983a6e; inherited figure/table/note/task/metric identifier,"""7"""
+182,4.5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.atac_large.cond1,4.477121254719663
+182,0.0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,width_decades.mmd.immune_hum_mou.cond1,0.0
+182,"3,000",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,best_strength.mmd.pancreas.cond1,3000.0
+182,0.1,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,best_strength.sinkhorn.atac_large.cond0,0.1
+203,eight,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.tasks,"[""atac_large"", ""atac_small"", ""immune"", ""immune_hum_mou"", ""lung"", ""pancreas"", ""sim1"", ""sim2""]"
+203,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds,"[100, 101, 102]"
+203,100,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds[0],100
+203,102,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds[2],102
+43,2.20,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond1.pooled,2.2
+43,five,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank_n_tasks.cond1.pooled,5
+43,2.17,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank.cond0.mmd,2.1666666666666665
+43,six,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,mean_rank_n_tasks.cond0.mmd,6
+44,27\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_small.cond1,0.26666666666666666
+44,12\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[0],0.1227948098723548
+44,46\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[1],0.45889365139475125
+44,13\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_large.cond0,0.13333333333333333
+44,4\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[0],0.037553496338363315
+44,31\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[1],0.30721835027612676
+136,two,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/analysis_sweep.json,min_readings,2
+136,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds,"[100, 101, 102]"
+254,two,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/analysis_sweep.json,min_readings,2
+254,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds,"[100, 101, 102]"
