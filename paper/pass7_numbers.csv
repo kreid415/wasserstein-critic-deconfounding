@@ -240,10 +240,18 @@ tex_line,number_as_written,source_file,source_key_or_row,source_value
 44,27\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_small.cond1,0.26666666666666666
 44,12\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[0],0.1227948098723548
 44,46\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_small.cond1[1],0.45889365139475125
-44,13\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.mmd.atac_large.cond0,0.13333333333333333
-44,4\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[0],0.037553496338363315
-44,31\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.mmd.atac_large.cond0[1],0.30721835027612676
 136,two,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/analysis_sweep.json,min_readings,2
 136,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds,"[100, 101, 102]"
 254,two,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/analysis_sweep.json,min_readings,2
 254,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,_meta.seeds,"[100, 101, 102]"
+44,73\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_rate.discriminator.immune_hum_mou.cond1,0.7333333333333333
+44,54\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.immune_hum_mou.cond1[0],0.5411063486052486
+44,88\%,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,collapse_ci.discriminator.immune_hum_mou.cond1[1],0.8772051901276452
+120,0.03,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/curves.csv,"task=immune,cond=1,arm=discriminator,lam=0.03; column=lam",0.03
+120,Nine,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.immune - n_fits.atac_large,9
+120,"3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.total,3033
+252,0.03,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/tables/curves.csv,"task=immune,cond=1,arm=discriminator,lam=0.03; column=lam",0.03
+252,nine,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.immune - n_fits.atac_large,9
+252,"3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.total,3033
+260,nine,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.immune - n_fits.atac_large,9
+260,"3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis/draft_8595a16/paper_numbers.json,n_fits.total,3033

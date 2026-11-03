@@ -86,3 +86,33 @@ The accepted-text comparison verified that the protected regions are unchanged, 
 1. **Sweep fit total:** the brief names 3,024 fits, but `paper_numbers.json:n_fits.total` is 3,033. `n_fits.immune` is 387; each other task has 378. `SWEEP_ANALYSIS.md`, section 3 item 1, identifies the extra immune batch-conditioned strengths for the discriminator, pooled critic and reference critic. Res-1 reports the artifact total instead of repeating 3,024. Protected earlier design counts still need reconciliation in a later pass.
 2. **Baseline snapshot:** the brief says 302 baseline fits scored; the supplied record has `n_baseline_rows.in_analysis = 303`, `n_baseline_rows.missing = 145`, and no baseline failures. Baseline counts and placement remain placeholders, as requested; neither snapshot count is inserted into the manuscript.
 3. **Unverified claims:** none were added. The sweep does not establish the proposed image-GAN analogy or a causal composition-shift explanation, so Disc-2 makes neither claim; their original prompts and citations are retained only in the flattened old argument. The requested replication and baseline-dependent conclusions remain unfilled.
+
+## Lead edits after review (Claude Science, 2026-11-02)
+
+The draft above was written by Codex: profile MANUSCRIPT_WRITER, model gpt-6-astra, effort high, commit 1dc2a03. The lead read the full diff, checked every number, and made four edits.
+
+| # | Place | Old | New | Why |
+|---|---|---|---|---|
+| A | Disc-2, last sentence | "because regularisation and update steps were not varied independently, they do not identify the divergence itself as the cause of the differences" | "These patterns describe each penalty as it is usually trained, with each adversary's update steps and optimiser at its standard setting (Methods)." | Five critic steps and one discriminator step are each method's standard practice, not a confound (first author, 2026-11-02). |
+| B | Abstract, Results item 5 (line 44) | largest MMD collapse rate per decoder | with the batch-conditioned decoder, the largest real-task collapse rate ranged from 27% (MMD) to 73% (discriminator), with intervals; the label-transfer order differed from the ranking at matched batch removal | Gives the range across penalties instead of one penalty's value. All numbers appear in Res-4. |
+| C | Methods, sweep paragraph (line 120), in place in the Pass 4 text | "3,024 fits in all" | adds the nine fits at strength 0.03 for the discriminator, reference critic and pooled critic on immune with the conditioned decoder, from an earlier strength-extension round (tier12_v2/A1_ext_r4_round1); the analysis reads 3,033 fits; that pair is low-signal and not ranked | Resolves deviation 1: Res-1 reports 3,033 and Methods said 3,024. |
+| D | Supplementary Note 4 (line 252), in place in the Pass 4 new argument | "3,024 in all" | the same nine fits, so the analysis reads 3,033 | Same as C. |
+
+Ledger: the 13%, 4% and 31% rows of line 44 were removed. Rows were added for 73%, 54% and 88% (line 44) and for nine, 0.03 and 3,033 (lines 120 and 252).
+
+Checks by the lead (script draft7/check_pass7_v2.py, run on the workstation against the analysis record):
+- 233 ledger rows were recomputed from paper_numbers.json, analysis_sweep.json and the tables at the written rounding: 0 mismatches.
+- 21 rows are inherited identifiers (figure, note and task numbers) and were not recomputed.
+- A scan of every P7 new argument found 0 numbers without a ledger row.
+- These qualitative claims were checked against the tables:
+  - every ranked curve reaches b* (all statuses "bracketed"; n_pairs_no_reading all 0);
+  - MMD has a lower collapse rate than the discriminator on every real task with the conditioned decoder;
+  - local-minus-global is positive only on the large chromatin-accessibility task, for both decoders;
+  - the lung conditioned barycenter end point (0.466, 0.397) lies below plain scVI (0.633, 0.722);
+  - the Sinkhorn divergence's smallest real-task width is 1.0 decade;
+  - MMD widths with the conditioned decoder are 4.477 decades on both chromatin-accessibility tasks and 0.0 on human-mouse immune.
+| E | Supplementary Note 11, run counts (in place in the Pass 4 text) | "3,024 including 96 edge-strength fits (12 per task)" | adds ", plus nine strength-extension fits on the immune task (3,033 analysed)" | Same as C. |
+| F | Res-2 | one `\replaced[id=P7]{}{}` holding two paragraphs | the first paragraph and the old text in `\replaced[id=P7]`; the second paragraph in its own `\added[id=P7]` after a blank line | The `changes` package cannot take a paragraph break inside its argument; the build failed with "Paragraph ended before \addcontentsline was complete". |
+| G | Disc-4, update-step bullet (line 216) | "Regularisation ... and the number of adversary update steps were not varied: ... so a difference between penalties includes these settings and is not due to the divergence alone." (earlier pass; flattened, its older Pass 2 text is in git) | "Each adversary is trained with its standard settings: the critics take five update steps per encoder step with a gradient penalty, as is usual for Wasserstein critics, and the discriminator takes one, as is usual for discriminators (Methods; Supplementary Note 2). The penalties are therefore compared as they are normally run." | The update-step difference is each method's best practice, not a limitation (first author, 2026-11-02, who had said so before). |
+
+Check: the Res-2 split and edits A to G leave every ledgered number on its line. The lead's number check was rerun on the final text (see the delivery note).
