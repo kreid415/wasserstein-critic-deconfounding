@@ -13,19 +13,19 @@
 
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S3}%
-\includegraphics[width=\textwidth]{figures/figS3.png}
+\includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{figures/figS3.png}
 \caption{Label transfer: F1 per cell type, method and task at the matched strength. Left block of each panel: batch-conditioned decoder (plain scVI, the six penalties and the scvi-tools adversary); right block: unconditioned decoder (plain scVI, which receives no batch information, and the six penalties). Each batch is held out in turn and its cells are predicted from the other batches by a 15-nearest-neighbour classifier; cell types present in one batch only are dropped; a type's F1 is averaged over the held-out batches that contain it and over seeds (three for plain scVI and the penalties, five for the scvi-tools adversary). Penalties are at the strength whose seed-mean batch score is nearest the matched batch removal $b^*$, never chosen by accuracy; plain scVI and the scvi-tools adversary are unmatched. The number in each column label is the distance between the column's seed-mean batch score and $b^*$. Cell types are ordered by their mean F1 over the columns of the panel. The immune task and both simulations with the batch-conditioned decoder are low-signal; they are tabulated here and left out of summaries (Supplementary Note 9).}\label{fig:s3}
 \end{figure}
 
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S4a}%
-\includegraphics[width=\textwidth]{figures/figS4a.png}
+\includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{figures/figS4a.png}
 \caption{Per-metric strength curves, batch-conditioned decoder. Each batch metric (rows 1--5) and biology metric (rows 6--13) of the scIB set, unscaled, against penalty strength on a log scale, seed means over the three sweep seeds, one line per penalty, per task (columns). The dotted line is plain scVI. Each row has one vertical range for all tasks. Cell-cycle conservation exists for the four RNA real tasks and trajectory conservation for the two immune tasks; other panels are empty (Supplementary Note 3).}\label{fig:s4a}
 \end{figure}
 
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S4b}%
-\includegraphics[width=\textwidth]{figures/figS4b.png}
+\includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{figures/figS4b.png}
 \caption{Per-metric strength curves, unconditioned decoder. As Supplementary Figure S4a, with the unconditioned decoder.}\label{fig:s4b}
 \end{figure}
 
