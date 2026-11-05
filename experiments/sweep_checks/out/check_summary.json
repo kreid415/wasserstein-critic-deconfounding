@@ -1,0 +1,65 @@
+{
+ "n_checked": 1770,
+ "n_matched": 1770,
+ "n_mismatched": 0,
+ "tolerance": 1e-09,
+ "max_abs_diff": 2.220446049250313e-16,
+ "by_kind": [
+  {
+   "what": "b_common",
+   "n": 16,
+   "matched": 16
+  },
+  {
+   "what": "hypervolume",
+   "n": 96,
+   "matched": 96
+  },
+  {
+   "what": "mean over 1 real tasks",
+   "n": 3,
+   "matched": 3
+  },
+  {
+   "what": "mean over 5 real tasks",
+   "n": 2,
+   "matched": 2
+  },
+  {
+   "what": "mean over 6 real tasks",
+   "n": 164,
+   "matched": 164
+  },
+  {
+   "what": "non-dominated share",
+   "n": 96,
+   "matched": 96
+  },
+  {
+   "what": "per-task expected best of k (table)",
+   "n": 1329,
+   "matched": 1329
+  },
+  {
+   "what": "single-setting S (none)",
+   "n": 16,
+   "matched": 16
+  },
+  {
+   "what": "single-setting S (pca10)",
+   "n": 16,
+   "matched": 16
+  },
+  {
+   "what": "single-setting S (scanvi)",
+   "n": 16,
+   "matched": 16
+  },
+  {
+   "what": "single-setting S (scvi_adv)",
+   "n": 16,
+   "matched": 16
+  }
+ ],
+ "mismatches": []
+}
