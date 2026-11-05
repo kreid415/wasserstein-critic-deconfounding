@@ -212,8 +212,8 @@ from scipy.stats import beta
 from matplotlib.lines import Line2D
 PEN = ['JS discriminator','reference critic','pooled critic','barycenter critic','MMD','Sinkhorn']
 fig, axs = plt.subplots(1,3,figsize=(W2,10.5*CM),gridspec_kw=dict(left=0.145,right=0.985,bottom=0.2,top=0.88,wspace=0.15))
-titles = ['trade-off area','collapse rate, exact 95% interval','local minus global removal at $b^*$']
-xlabels = ['trade-off area\n(higher = better)','collapse rate (percentage points)\n(lower = better)','local minus global batch removal\n(positive = stronger locally)']
+titles = ['hypervolume','collapse rate, exact 95% interval','local minus global removal at $b^*$']
+xlabels = ['hypervolume\n(higher = better)','collapse rate (percentage points)\n(lower = better)','local minus global batch removal\n(positive = stronger locally)']
 step = 0.085
 ty = (np.arange(6)-2.5)*step   # task slot offsets within a decoder block
 dblock = {0:-0.2,1:0.2}         # decoder block centre (conditioned above)
