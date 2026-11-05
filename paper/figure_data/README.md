@@ -7,3 +7,18 @@
 
 Baselines are 447 of 448 rows: Scanorama on atac_large at strength 80 could not be fitted, so Scanorama has 6 of 7 settings there (Figure 6a draws Scanorama k = 6 as an open marker, 5 of 6 tasks).
 SHA-256 of every file: MANIFEST.sha256 (`sha256sum -c MANIFEST.sha256`).
+
+
+## Added for Supplementary Tables S6-S7 and Figures S1-S6 (branch supp-items; `figure_scripts/make_supp_figures.sh` rebuilds everything)
+
+Copied unchanged from `tables/` of the sweep analysis directory D/sweep_analysis_final_20261105 (same run as above; `figure_scripts/copy_supp_inputs.sh`; SHA-256 in MANIFEST.sha256):
+`ranking_pairs.csv`, `low_signal_pairs.csv` (Table S6, Figures S1, S2, S5), `best_of_k.csv` (Figure S6), `label_transfer.csv`, `label_transfer_curve.csv` (Figure S3), and
+`placement_summary.csv`, the output of `experiments/sweep_checks/check_sweep_placement.py` (branch sweep-paper, commit 3280bd4; the output file itself is not tracked in that repository), copied from `experiments/sweep_checks/out/` of the worktree wt_sweep_paper; its SHA-256 equals that of Claude Science artifact version 13ab3936 (Table S7b).
+
+Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
+| File | Made by | From |
+|---|---|---|
+| `sensitivity_ranks.csv` | `figure_scripts/prep_supp_figure_data.py --only sensitivity` | `analysis_sweep.json` (sha256 197104bb7ebb...) of the sweep analysis, `sensitivity` block |
+| `metric_scores.csv` | `prep_supp_figure_data.py --only metrics` | the 3,480 score files listed in `inputs/scores_list.txt` (sha256 f0ad343ab7df...), joined to `inputs/manifest.tsv`; columns are the individual scIB metrics and the sha256 of the latent each row was scored from |
+| `label_transfer_types.csv` | `figure_scripts/prep_label_transfer_types.py` (scvi-api environment) | the saved latents of the 120 label-transfer rows (checked against the latent sha256 of each score row); the macro F1 recomputed from the per-type values equals `label_transfer.csv` for all 120 rows (1e-9) |
+| `scaling_check_ranks.csv` | `figure_scripts/figS5.py` via `scaling_checks.py` | `metric_scores.csv`; the unscaled reading reproduces the 78 readings and ranks of `ranking_pairs.csv` before any variant is run |

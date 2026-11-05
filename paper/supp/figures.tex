@@ -1,0 +1,42 @@
+% generated; Supplementary Figures S1-S6 (scripts: paper/figure_scripts/figS<n>.py). Figures are \input after the supplementary tables.
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S1}%
+\includegraphics[width=\textwidth]{figures/figS1.png}
+\caption{Simulation tasks, each on its own, both decoders. \textbf{(a)} Batch score against biology score for each penalty's sweep strengths (seed means over seeds 100--102), plain scVI (star), the matched batch removal $b^*$ (dashed line) and the best setting of each standard tool by selection score (open grey markers). \textbf{(b)} Biology score at $b^*$ per penalty with its leave-one-seed-out standard error, and the rank above each point. With the batch-conditioned decoder both simulations are low-signal: their readings are shown with open markers, without standard errors and ranks. Simulations are ranked separately from the real tasks (Supplementary Notes 5 and 6; Supplementary Table S6).}\label{fig:s1}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S2}%
+\includegraphics[width=\textwidth]{figures/figS2.png}
+\caption{Sensitivity of the ranking to the reading rules. Each variant re-reads biology at $b^*$ from the same sweep fits: the per-run reading (each seed read on its own curve and the three per-seed ranks averaged), biology without trajectory conservation on the two immune tasks, and the primary reading with points that contain a failed fit removed (the sweep has no failed fit, so this variant reproduces the primary ranks). \textbf{(a, b)} Mean rank over the ranked real tasks per penalty and decoder. \textbf{(c)} Kendall's $\tau_b$ between the primary ranks of the six penalties and each variant's ranks in each of the 13 ranked task and decoder pairs (simulations included); points at 1 overlap. Descriptive; Supplementary Notes 5 and 6.}\label{fig:s2}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S3}%
+\includegraphics[width=\textwidth]{figures/figS3.png}
+\caption{Label transfer: F1 per cell type, method and task at the matched strength. Left block of each panel: batch-conditioned decoder (plain scVI, the six penalties and the scvi-tools adversary); right block: unconditioned decoder (plain scVI, which receives no batch information, and the six penalties). Each batch is held out in turn and its cells are predicted from the other batches by a 15-nearest-neighbour classifier; cell types present in one batch only are dropped; a type's F1 is averaged over the held-out batches that contain it and over seeds (three for plain scVI and the penalties, five for the scvi-tools adversary). Penalties are at the strength whose seed-mean batch score is nearest the matched batch removal $b^*$, never chosen by accuracy; plain scVI and the scvi-tools adversary are unmatched. The number in each column label is the distance between the column's seed-mean batch score and $b^*$. Cell types are ordered by their mean F1 over the columns of the panel. The immune task and both simulations with the batch-conditioned decoder are low-signal; they are tabulated here and left out of summaries (Supplementary Note 9).}\label{fig:s3}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S4a}%
+\includegraphics[width=\textwidth]{figures/figS4a.png}
+\caption{Per-metric strength curves, batch-conditioned decoder. Each batch metric (rows 1--5) and biology metric (rows 6--13) of the scIB set, unscaled, against penalty strength on a log scale, seed means over the three sweep seeds, one line per penalty, per task (columns). The dotted line is plain scVI. Each row has one vertical range for all tasks. Cell-cycle conservation exists for the four RNA real tasks and trajectory conservation for the two immune tasks; other panels are empty (Supplementary Note 3).}\label{fig:s4a}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S4b}%
+\includegraphics[width=\textwidth]{figures/figS4b.png}
+\caption{Per-metric strength curves, unconditioned decoder. As Supplementary Figure S4a, with the unconditioned decoder.}\label{fig:s4b}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S5}%
+\includegraphics[width=\textwidth]{figures/figS5.png}
+\caption{Scaling checks (exploratory, used for no conclusion). The six penalties are re-ranked at matched batch removal after changing how the metrics are scaled or combined: scIB min-max scaling of each metric over one comparison set per task (every scored fit of the task, both decoders, all penalty strengths, plain scVI and the standard tools); the same with each of the 13 method families left out of the set that fixes the minimum and maximum; z-score standardisation over the same set; and a composite without the three silhouette metrics (batch average silhouette width, cell-type average silhouette width, isolated-label silhouette). The primary reading uses unscaled metrics. Batch and biology scores, $b^*$, the readings and the ranks are recomputed for every variant on the 13 ranked task and decoder pairs. \textbf{(a)} Kendall's $\tau_b$ between the primary ranks and each variant's ranks, one point per pair (leave-one-family-out: one point per pair and family). \textbf{(b, c)} Mean rank over the ranked real tasks per penalty and decoder; the grey bar is the range over the 13 leave-one-family-out runs.}\label{fig:s5}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S6}%
+\includegraphics[width=\textwidth]{figures/figS6.png}
+\caption{Best of $k$ settings per task. Expected best selection score ($0.4\times$batch $+\,0.6\times$biology) among $k$ settings drawn at random, $k=1$ to 6, for each penalty, Harmony, Scanorama and sysVI, one panel per real task and decoder. Plain scVI (black line), scANVI (uses cell-type labels) and the scvi-tools adversary (batch-conditioned decoder only) have one setting. Scanorama at $k=6$ is missing on the large chromatin-accessibility task (open marker at $k=5$), where its 80-neighbour setting could not be fitted. The mean of the batch-conditioned curves over the six real tasks is Figure 6a. Every value is optimistic, because the best setting is chosen and scored on the same data (Supplementary Note 7).}\label{fig:s6}
+\end{figure}

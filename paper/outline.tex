@@ -7,6 +7,7 @@
 \usepackage[authoryear,round]{natbib}
 \usepackage{url}
 \usepackage{graphicx,booktabs,array}
+\usepackage{longtable}% Supplementary Table S6 (paper/supp/tableS6.tex)
 \usepackage{changes}% tracked edits; use \usepackage[final]{changes} for clean text
 \definechangesauthor[name={Pass 3}, color=teal]{P3}
 \definechangesauthor[name={Pass 4}, color=purple]{P4}% sweep-only rescope of 2026-11-02; change log paper/pass4_changelog.md
@@ -510,4 +511,6 @@ PCA (2) & -- & $-0.021$ & n/a & $-0.062$ & $-0.088$ & 0.371 & $-0.028$ \\
 \bibliographystyle{plainnat}
 \bibliography{refs}
 \end{multicols}
+% Supplementary Note 1, Tables S6-S7, Figures S1-S6 (branch supp-items; generated files under paper/supp)
+\input{supp_items}
 \end{document}
