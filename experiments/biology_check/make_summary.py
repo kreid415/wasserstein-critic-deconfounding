@@ -10,6 +10,7 @@ rec = json.load(open(os.path.join(run, "biology_check.json")))
 PEN = ("discriminator", "reference", "pooled", "barycenter", "mmd", "sinkhorn")
 BASE = ("scvi_adv", "scanvi", "sysvi", "harmony", "scanorama", "pca")
 MARK = ("pancreas", "lung", "immune", "immune_hum_mou")
+REAL = (*MARK, "atac_small", "atac_large")  # the six real tasks; seed SD uses the same tasks as the purity column
 
 # --- re-checks (stop on failure)
 fits = pd.concat([pd.read_csv(os.path.join(T, f"{t}_fits.csv")) for t in rec["tasks"]], ignore_index=True)
@@ -40,7 +41,8 @@ def g(x, d=3):
 
 
 def seed_sd(method, decoder, col):
-    s = summ[(summ.method == method) & (summ.decoder == decoder)]
+    s = summ[(summ.method == method) & (summ.decoder == decoder) & summ.task.isin(REAL)]
+    assert s.task.nunique() == len(REAL), (method, decoder, sorted(s.task))
     return s[f"{col}_sd"].mean()
 
 
@@ -59,7 +61,7 @@ for m in BASE:
         continue
     rng = f" [{r.purity_diff.min():+.3f}, {r.purity_diff.max():+.3f}]" if len(r) > 1 else ""
     rows.append((f"{m}, {len(r)} setting{'s' if len(r) > 1 else ''} (mean{', range' if len(r) > 1 else ''})",
-                 r.purity_diff.mean(), summ[summ.method == m].purity_diff_sd.mean(), s.purity_diff.mean(), r.rare_purity_diff.mean(), r.rare_lt_recall_diff.mean(),
+                 r.purity_diff.mean(), summ[(summ.method == m) & summ.task.isin(REAL)].purity_diff_sd.mean(), s.purity_diff.mean(), r.rare_purity_diff.mean(), r.rare_lt_recall_diff.mean(),
                  r.marker_jaccard.mean(), r.marker_jaccard_diff.mean(), int(r.purity_diff_n.max()), int(r.marker_jaccard_n.max()), rng))
 
 # rare-type pattern over (real task, penalty, decoder) cells
@@ -77,7 +79,8 @@ L.append(f"Exploratory and descriptive; rules in `docs/BIOLOGY_CHECK.md` (writte
          f"{len(rec['tasks'])} tasks; no new fits. Penalties at the label-transfer strength (batch score nearest b*), seeds 100-102; "
          "plain scVI both decoders; every scored baseline setting. 15 nearest neighbours in the latent.\n")
 L.append("Differences are from plain scVI (penalties: same decoder and seed; baselines: conditioned plain scVI, mean of 3 seeds). "
-         "Values: mean over tasks of the per-task seed means; 'seed SD' = mean over tasks of the SD over the 3 seeds. Real = 6 real "
+         "Values: mean over tasks of the per-task seed means; 'seed SD' = mean over the 6 real tasks of the SD over the 3 seeds (corrected 2026-11-05; the first version of this page "
+         "averaged all 8 tasks). Real = 6 real "
          "tasks for purity; the rare-type columns average the 4 real tasks that have rare types; markers = the 4 RNA tasks; sim = 2 "
          "simulations. Baselines with several settings: mean over settings (purity range in brackets); their seed SD is over seeds "
          "0-4 (n/a for one-run tools: Harmony, Scanorama, PCA).\n")
