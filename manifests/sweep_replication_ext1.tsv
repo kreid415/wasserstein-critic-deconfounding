@@ -1,0 +1,42 @@
+# replication extension (AGREEMENT.md line 9): next sweep-grid strength above the highest replication strength, seeds 0-4, 8 unreached_low readings; rows copied from the committed X1 manifest wcd_final-review-fixes/paper_manifest_stock_pilot_u5_b10_v3.x1_sinkhorn_redo.tsv
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+X1_atac_small_barycenter_lg4_c0_s0_91744b22	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s1_b952a341	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s2_4ea15548	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s3_664947a8	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s4_58bf4bf8	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	"{""bary_iter"": 10}"
+X1_atac_small_sinkhorn_lg4_c0_s0_7a4ddbe9	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s1_ca8963ec	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s2_d115e123	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s3_f0d347de	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s4_2a2d636b	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_immune_hum_mou_barycenter_lg3_c1_s0_282d0fac	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s1_5ebd813b	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s2_3f410a7b	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s3_2d1f114c	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s4_49c4a447	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	"{""bary_iter"": 10}"
+X1_pancreas_pooled_lg3_c0_s0_d945ecb3	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_lg3_c0_s1_bbb7d8da	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_lg3_c0_s2_8bb835a2	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_lg3_c0_s3_ecc97a19	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_lg3_c0_s4_59b168c5	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_mmd_lg1_c1_s0_5c1226c4	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_lg1_c1_s1_82d753d1	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_lg1_c1_s2_f7d06a99	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_lg1_c1_s3_9401d51f	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_lg1_c1_s4_2e52c9e6	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s0_acf78cfd	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s1_f2cac493	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s2_1671f433	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s3_a7dc574c	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s4_9eff02e7	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_pooled_lg3_c0_s0_8793e662	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_pooled_lg3_c0_s1_6d1fd00f	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_pooled_lg3_c0_s2_8250ebd8	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_pooled_lg3_c0_s3_3aa74c51	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_pooled_lg3_c0_s4_e732f262	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s0_8a01c62c	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s1_5107a6cb	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s2_7448f323	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s3_5a1133f5	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s4_08dec11a	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
