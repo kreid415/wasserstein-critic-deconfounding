@@ -3,3 +3,19 @@
 {"job": "36825656", "batch": "wave1_s4b", "at": "2026-11-02T13:54:55+00:00"}
 {"job": "36825657", "batch": "wave2_s1", "at": "2026-11-02T13:54:55+00:00"}
 {"job": "36825658", "batch": "wave2_s2b", "at": "2026-11-02T13:54:55+00:00"}
+{"job": "36844839", "batch": "helper_replist", "at": "2026-11-03T19:46:32+00:00"}
+{"job": "36844848", "batch": "score_w1_atac_large", "at": "2026-11-03T19:48:38+00:00"}
+{"job": "36844849", "batch": "score_w1_immune_hum_mou", "at": "2026-11-03T19:48:38+00:00"}
+{"job": "36844850", "batch": "score_w1_lung", "at": "2026-11-03T19:48:38+00:00"}
+{"job": "36844851", "batch": "score_w1_pancreas", "at": "2026-11-03T19:48:38+00:00"}
+{"job": "36844852", "batch": "score_w1_sim2", "at": "2026-11-03T19:48:38+00:00"}
+{"ack": "user 2026-11-04 (choice card): Continue with fixes (Recommended): rerun 46 failed scoring tasks and score all remaining JHPCE fits with pancreas 20 GB, lung 14 GB, sim2 36 GB, atac_large 64 GB, immune_hum_mou 48 GB, compute-119 excluded", "at": "2026-11-04T15:28:49+00:00"}
+{"job": "36859456", "batch": "helper_replist2", "at": "2026-11-04T15:29:40+00:00"}
+{"job": "36859470", "batch": "score_w2_atac_large", "at": "2026-11-04T15:30:11+00:00"}
+{"job": "36859471", "batch": "score_w2_immune_hum_mou", "at": "2026-11-04T15:30:11+00:00"}
+{"job": "36859472", "batch": "score_w2_lung", "at": "2026-11-04T15:30:11+00:00"}
+{"job": "36859473", "batch": "score_w2_pancreas", "at": "2026-11-04T15:30:11+00:00"}
+{"job": "36859474", "batch": "score_w2_sim2", "at": "2026-11-04T15:30:11+00:00"}
+{"job": "36889226", "batch": "helper-w3list", "at": "2026-11-05T14:51:39+00:00"}
+{"job": "36889227", "batch": "score-w3-immune_hum_mou", "at": "2026-11-05T14:51:50+00:00"}
+{"job": "36889264", "batch": "helper-sha-scores", "at": "2026-11-05T14:57:42+00:00"}

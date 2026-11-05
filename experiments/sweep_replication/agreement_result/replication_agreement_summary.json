@@ -1,0 +1,26 @@
+{
+ "n_pairs": 13,
+ "n_large_gaps": 4,
+ "sign_kept": 3,
+ "sign_kept_slope_adj": 4,
+ "mean_tau": 0.4256410256410256,
+ "p_value": 0.00048828125,
+ "mean_tau_slope_adj": 0.3743589743589743,
+ "p_value_slope_adj": 0.0013427734375,
+ "n_unreached": 8,
+ "n_readings": 78,
+ "n_near_ties": 160,
+ "n_near_ties_prediction": 160,
+ "near_ties_within_0p04": 127,
+ "n_pairs_tau_positive": 11,
+ "agree": false,
+ "agree_slope_adj": true,
+ "n_manifest": 855,
+ "n_scored": 855,
+ "n_failed_rows": 0,
+ "score_sites": {
+  "workstation|10a1ca5": 270,
+  "jhpce|10a1ca5": 585
+ },
+ "prediction_sha_note": "PREDICTION.json at tag replication-prediction-v1"
+}
