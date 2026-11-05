@@ -57,9 +57,8 @@ def test_regenerates_committed_outline(tmp_path):
     if os.path.exists(rep):
         args += ["--replication", rep]
     pf.main(args)
-    # compare with the commit that last wrote the ledger (Pass 9), so later passes on the outline do not break the check
-    sha = subprocess.run(["git", "log", "-1", "--format=%H", "--", "paper/pass9_numbers.csv"], capture_output=True, text=True,
-                         cwd=REPO, check=True).stdout.strip()
+    # compare with the Pass 9 commit that wrote the ledger; Pass 12 later corrected two source pointers in it (pass12_changelog.md)
+    sha = "fbd41d7"
     show = lambda f: subprocess.run(["git", "show", f"{sha}:{f}"], capture_output=True, text=True, cwd=REPO, check=True).stdout
     assert (tmp_path / "outline.tex").read_text() == show("paper/outline.tex")
     assert (tmp_path / "ledger.csv").read_text() == show("paper/pass9_numbers.csv")
