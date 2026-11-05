@@ -11,7 +11,7 @@ pn = json.load(open(ROOT / "paper/figure_data/paper_numbers.json"))
 v = lambda k: pn[k]["value"]
 ledger = []
 def num(item, key, fmt):
-    ledger.append(dict(item=item, value=format(v(key), fmt), source=f"paper_numbers.json:{key}"))
+    ledger.append(dict(item=item, value=format(v(key), fmt), source=f"paper/figure_data/paper_numbers.json:{key}"))
     return format(v(key), fmt)
 
 bstar = num("b* (ATAC small, unconditioned decoder)", f"pair.{TASK}.cond{COND}.bstar", ".3f")

@@ -1,11 +1,11 @@
 item,value,source,how
-"coverage, independent fits, 30 fits",0.9995,paper/analysis_pass10/coverage_sim_sweep.json,NL10.A_coverage
-"coverage, shared seed threshold, 30 fits",0.88,paper/analysis_pass10/coverage_sim_sweep.json,NL10.B_coverage rounded to 2 decimals
-"coverage, shared seed threshold, 36 fits",0.83,paper/analysis_pass10/coverage_sim_sweep.json,NL12.B_coverage rounded to 2 decimals
-"reference batch types, lung",10 of 17,paper/analysis_pass10/reference_coverage.json,types_in_reference of types_in_task
-"reference batch types, immune_hum_mou",14 of 19,paper/analysis_pass10/reference_coverage.json,types_in_reference of types_in_task
-"reference batch types, sim2",3 of 4,paper/analysis_pass10/reference_coverage.json,types_in_reference of types_in_task
-"planned-benchmark fits, workstation model files",167,"tier12_v3/X1_local/models (file count, workstation, 2026-11-05)",ls models | wc -l; 20 of them also in tier12_v2/X1_local
-"planned-benchmark fits, workstation score files",160,"tier12_v3/X1_local/scores (file count; 13 dated 2026-10-20, 128 dated 2026-10-21, 19 symlinks to the 2026-10-12 scores)",ls scores | wc -l
-"planned-benchmark latents, cluster",405,"CONSTRAINTS.md line 658, docs/PREREG.md section 9 entry of 2026-10-22 item 1 (the user's count; not re-counted)",as recorded
-"planned-benchmark fits, total",about 572,CONSTRAINTS.md line 658,167 + 405 = 572
+"coverage, independent fits, 30 fits",0.9995,paper/analysis_pass10/coverage_sim_sweep.json:NL10.A_coverage,as stored
+"coverage, shared seed threshold, 30 fits",0.88,paper/analysis_pass10/coverage_sim_sweep.json:NL10.B_coverage,rounded to 2 decimals
+"coverage, shared seed threshold, 36 fits",0.83,paper/analysis_pass10/coverage_sim_sweep.json:NL12.B_coverage,rounded to 2 decimals
+"reference batch types, lung",10 of 17,paper/analysis_pass10/reference_coverage.json,lung.types_in_reference of lung.types_in_task
+"reference batch types, immune_hum_mou",14 of 19,paper/analysis_pass10/reference_coverage.json,immune_hum_mou.types_in_reference of immune_hum_mou.types_in_task
+"reference batch types, sim2",3 of 4,paper/analysis_pass10/reference_coverage.json,sim2.types_in_reference of sim2.types_in_task
+"planned-benchmark fits, workstation model files",167,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,rows with dir = models: file listing of D/tier12_v3/X1_local/models made 2026-11-05 (D = data root); 20 of them also in tier12_v2/X1_local; re-traced as pass12 row P01
+"planned-benchmark fits, workstation score files",160,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,"rows with dir = scores (141 files: 13 dated 2026-10-20, 128 dated 2026-10-21; 19 symlinks to the 2026-10-12 scores); pass12 rows P02-P04"
+"planned-benchmark latents, cluster",405,git:98732ff:docs/PREREG.md,section 9 amendment of 2026-10-22: 'About 572 main-benchmark latents exist: 405 on JHPCE scratch' (the user's count; not re-counted); pass12 row P05
+"planned-benchmark fits, total",about 572,git:98732ff:docs/PREREG.md,167 + 405 = 572; the same entry gives 'About 572'; pass12 rows P06-P07

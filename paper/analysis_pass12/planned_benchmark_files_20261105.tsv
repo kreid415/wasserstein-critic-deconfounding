@@ -1,0 +1,328 @@
+dir	name	type	size_bytes	mtime_date	link_target
+models	X1_immune_barycenter_lg1_c1_s0_b03dff3e	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg1_c1_s1_a4e65366	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg1_c1_s2_72ab5e6f	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg1_c1_s3_9296369b	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg2_c1_s0_5d3092e7	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg2_c1_s1_b0b03bf8	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg2_c1_s2_809a8c99	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg2_c1_s3_983f653c	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg3_c1_s0_51544924	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg3_c1_s1_09eb466c	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg3_c1_s2_cac45eb3	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg3_c1_s3_9698e8d5	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg4_c1_s0_32cc2e54	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg4_c1_s1_1cc1d407	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg4_c1_s2_a3137e39	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg4_c1_s3_2469ec6d	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg5_c1_s0_7ffbd191	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg5_c1_s1_7fb9f164	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg5_c1_s2_759b8211	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg5_c1_s3_970deeb3	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg6_c1_s0_4ca18df0	file	4096	2026-10-20	
+models	X1_immune_barycenter_lg6_c1_s1_a9ee2c8c	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg6_c1_s2_693941f0	file	4096	2026-10-21	
+models	X1_immune_barycenter_lg6_c1_s3_015103a6	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg1_c1_s0_122afe99	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg1_c1_s0_122afe99
+models	X1_immune_discriminator_lg1_c1_s1_c9d09b02	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg1_c1_s2_ef140550	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg1_c1_s3_39f3f279	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg1_c1_s4_84fb5172	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg2_c1_s0_48044b0a	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg2_c1_s0_48044b0a
+models	X1_immune_discriminator_lg2_c1_s1_ff15707c	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg2_c1_s2_0c442dae	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg2_c1_s3_ac8c2f56	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg2_c1_s4_4dd33259	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg3_c1_s0_b6cf4f13	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg3_c1_s0_b6cf4f13
+models	X1_immune_discriminator_lg3_c1_s1_b2c94440	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg3_c1_s2_8c1f1fa7	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg3_c1_s3_38c14b44	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg3_c1_s4_5c768c45	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg4_c1_s0_f72943fa	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg4_c1_s0_f72943fa
+models	X1_immune_discriminator_lg4_c1_s1_c0ed6fb4	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg4_c1_s2_b1b2d3de	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg4_c1_s3_d0d6be2b	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg4_c1_s4_bf0356d1	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg5_c1_s0_32ef7970	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg5_c1_s0_32ef7970
+models	X1_immune_discriminator_lg5_c1_s1_18be0f75	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg5_c1_s2_c0436be1	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg5_c1_s3_987e5bec	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg5_c1_s4_d7c477eb	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg6_c1_s0_d5fc9e27	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_discriminator_lg6_c1_s0_d5fc9e27
+models	X1_immune_discriminator_lg6_c1_s1_0e76ceb5	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg6_c1_s2_4a8293d1	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg6_c1_s3_c1a0e713	file	4096	2026-10-21	
+models	X1_immune_discriminator_lg6_c1_s4_1c06f583	file	4096	2026-10-21	
+models	X1_immune_mmd_lg1_c1_s0_a0cf2150	file	4096	2026-10-20	
+models	X1_immune_mmd_lg1_c1_s1_4dbf5511	file	4096	2026-10-21	
+models	X1_immune_mmd_lg1_c1_s2_d33aff2b	file	4096	2026-10-21	
+models	X1_immune_mmd_lg1_c1_s3_e2444fee	file	4096	2026-10-21	
+models	X1_immune_mmd_lg2_c1_s0_7781fedf	file	4096	2026-10-20	
+models	X1_immune_mmd_lg2_c1_s1_cdc6f573	file	4096	2026-10-21	
+models	X1_immune_mmd_lg2_c1_s2_66a45e2b	file	4096	2026-10-21	
+models	X1_immune_mmd_lg2_c1_s3_29292bfc	file	4096	2026-10-21	
+models	X1_immune_mmd_lg3_c1_s0_16791574	file	4096	2026-10-20	
+models	X1_immune_mmd_lg3_c1_s1_1290e7a8	file	4096	2026-10-21	
+models	X1_immune_mmd_lg3_c1_s2_39cf447d	file	4096	2026-10-21	
+models	X1_immune_mmd_lg3_c1_s3_3f4ea990	file	4096	2026-10-21	
+models	X1_immune_mmd_lg4_c1_s0_c6b9f61f	file	4096	2026-10-20	
+models	X1_immune_mmd_lg4_c1_s1_81f9e370	file	4096	2026-10-21	
+models	X1_immune_mmd_lg4_c1_s2_281bfea2	file	4096	2026-10-21	
+models	X1_immune_mmd_lg4_c1_s3_45251842	file	4096	2026-10-21	
+models	X1_immune_mmd_lg5_c1_s0_c05bedf2	file	4096	2026-10-20	
+models	X1_immune_mmd_lg5_c1_s1_5bb420a3	file	4096	2026-10-21	
+models	X1_immune_mmd_lg5_c1_s2_0f04dac3	file	4096	2026-10-21	
+models	X1_immune_mmd_lg5_c1_s3_06509a0c	file	4096	2026-10-21	
+models	X1_immune_mmd_lg6_c1_s0_a34456c1	file	4096	2026-10-20	
+models	X1_immune_mmd_lg6_c1_s1_27ad308a	file	4096	2026-10-21	
+models	X1_immune_mmd_lg6_c1_s2_1be83e84	file	4096	2026-10-21	
+models	X1_immune_mmd_lg6_c1_s3_c5c26edb	file	4096	2026-10-21	
+models	X1_immune_none_l0_c1_s0_c7efda46	symlink	121	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_none_l0_c1_s0_c7efda46
+models	X1_immune_none_l0_c1_s1_87c4a6a3	file	4096	2026-10-20	
+models	X1_immune_none_l0_c1_s2_acba706d	file	4096	2026-10-21	
+models	X1_immune_none_l0_c1_s3_3ed57ae1	file	4096	2026-10-21	
+models	X1_immune_none_l0_c1_s4_62f6f080	file	4096	2026-10-21	
+models	X1_immune_pooled_lg1_c1_s0_a568f635	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg1_c1_s0_a568f635
+models	X1_immune_pooled_lg1_c1_s1_08c57592	file	4096	2026-10-21	
+models	X1_immune_pooled_lg1_c1_s2_a47f8ec7	file	4096	2026-10-21	
+models	X1_immune_pooled_lg1_c1_s3_6ad2927f	file	4096	2026-10-21	
+models	X1_immune_pooled_lg1_c1_s4_1cbfa474	file	4096	2026-10-21	
+models	X1_immune_pooled_lg2_c1_s0_c1055361	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg2_c1_s0_c1055361
+models	X1_immune_pooled_lg2_c1_s1_703057b5	file	4096	2026-10-21	
+models	X1_immune_pooled_lg2_c1_s2_1bbae982	file	4096	2026-10-21	
+models	X1_immune_pooled_lg2_c1_s3_77f6a46f	file	4096	2026-10-21	
+models	X1_immune_pooled_lg3_c1_s0_29b346e1	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg3_c1_s0_29b346e1
+models	X1_immune_pooled_lg3_c1_s1_fa946386	file	4096	2026-10-21	
+models	X1_immune_pooled_lg3_c1_s2_6c325321	file	4096	2026-10-21	
+models	X1_immune_pooled_lg3_c1_s3_8aa7f4ee	file	4096	2026-10-21	
+models	X1_immune_pooled_lg4_c1_s0_0414b640	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg4_c1_s0_0414b640
+models	X1_immune_pooled_lg4_c1_s1_4f2cb893	file	4096	2026-10-21	
+models	X1_immune_pooled_lg4_c1_s2_8252eb67	file	4096	2026-10-21	
+models	X1_immune_pooled_lg4_c1_s3_da14e1c7	file	4096	2026-10-21	
+models	X1_immune_pooled_lg5_c1_s0_1bc8b9c4	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg5_c1_s0_1bc8b9c4
+models	X1_immune_pooled_lg5_c1_s1_8985f823	file	4096	2026-10-21	
+models	X1_immune_pooled_lg5_c1_s2_66a680e7	file	4096	2026-10-21	
+models	X1_immune_pooled_lg5_c1_s3_c48c0ed8	file	4096	2026-10-21	
+models	X1_immune_pooled_lg6_c1_s0_82285e49	symlink	124	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_pooled_lg6_c1_s0_82285e49
+models	X1_immune_pooled_lg6_c1_s1_d1533380	file	4096	2026-10-21	
+models	X1_immune_pooled_lg6_c1_s2_e2008971	file	4096	2026-10-21	
+models	X1_immune_pooled_lg6_c1_s3_4747d0d4	file	4096	2026-10-21	
+models	X1_immune_reference_lg1_c1_s0_c4883078	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg1_c1_s0_c4883078
+models	X1_immune_reference_lg1_c1_s1_37d5ef2f	file	4096	2026-10-21	
+models	X1_immune_reference_lg1_c1_s2_d80e5900	file	4096	2026-10-21	
+models	X1_immune_reference_lg1_c1_s3_2225632f	file	4096	2026-10-21	
+models	X1_immune_reference_lg1_c1_s4_b90a3ee9	file	4096	2026-10-21	
+models	X1_immune_reference_lg2_c1_s0_8f9dab3b	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg2_c1_s0_8f9dab3b
+models	X1_immune_reference_lg2_c1_s1_67ed38c8	file	4096	2026-10-21	
+models	X1_immune_reference_lg2_c1_s2_e5c2cab1	file	4096	2026-10-21	
+models	X1_immune_reference_lg2_c1_s3_6677a92f	file	4096	2026-10-21	
+models	X1_immune_reference_lg2_c1_s4_29546b7b	file	4096	2026-10-21	
+models	X1_immune_reference_lg3_c1_s0_036a042d	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg3_c1_s0_036a042d
+models	X1_immune_reference_lg3_c1_s1_2bcfdb87	file	4096	2026-10-21	
+models	X1_immune_reference_lg3_c1_s2_8e080e85	file	4096	2026-10-21	
+models	X1_immune_reference_lg3_c1_s3_415c7e2b	file	4096	2026-10-21	
+models	X1_immune_reference_lg3_c1_s4_af77484d	file	4096	2026-10-21	
+models	X1_immune_reference_lg4_c1_s0_bc0ea759	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg4_c1_s0_bc0ea759
+models	X1_immune_reference_lg4_c1_s1_5efc1036	file	4096	2026-10-21	
+models	X1_immune_reference_lg4_c1_s2_1741eab0	file	4096	2026-10-21	
+models	X1_immune_reference_lg4_c1_s3_6d8d61c7	file	4096	2026-10-21	
+models	X1_immune_reference_lg4_c1_s4_8e418658	file	4096	2026-10-21	
+models	X1_immune_reference_lg5_c1_s0_b4153932	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg5_c1_s0_b4153932
+models	X1_immune_reference_lg5_c1_s1_ece00172	file	4096	2026-10-21	
+models	X1_immune_reference_lg5_c1_s2_b13ed5e6	file	4096	2026-10-21	
+models	X1_immune_reference_lg5_c1_s3_1aea653a	file	4096	2026-10-21	
+models	X1_immune_reference_lg5_c1_s4_5568f8bd	file	4096	2026-10-21	
+models	X1_immune_reference_lg6_c1_s0_05827d0b	symlink	127	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_reference_lg6_c1_s0_05827d0b
+models	X1_immune_reference_lg6_c1_s1_d2c8a2fb	file	4096	2026-10-21	
+models	X1_immune_reference_lg6_c1_s2_592321bf	file	4096	2026-10-21	
+models	X1_immune_reference_lg6_c1_s3_09351fba	file	4096	2026-10-21	
+models	X1_immune_reference_lg6_c1_s4_9577a1bf	file	4096	2026-10-21	
+models	X1_immune_scvi_adv_l0_c1_s0_aa5b3ee5	symlink	125	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/models/X1_immune_scvi_adv_l0_c1_s0_aa5b3ee5
+models	X1_immune_scvi_adv_l0_c1_s1_808c5eda	file	4096	2026-10-21	
+models	X1_immune_scvi_adv_l0_c1_s2_0bece0b6	file	4096	2026-10-21	
+models	X1_immune_scvi_adv_l0_c1_s3_7a908da4	file	4096	2026-10-21	
+models	X1_immune_scvi_adv_l0_c1_s4_cc0ed65b	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg1_c1_s0_0ee5ec5e	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg1_c1_s1_f8fb8e5c	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg1_c1_s2_62e36d57	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg1_c1_s3_30954b91	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg2_c1_s0_86a07752	file	4096	2026-10-20	
+models	X1_immune_sinkhorn_lg2_c1_s1_427b9a12	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg2_c1_s2_ae63e8e7	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg2_c1_s3_eaae8629	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg3_c1_s0_0b3d7c9d	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg3_c1_s1_4f38c65b	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg3_c1_s2_34f540dd	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg3_c1_s3_189a928a	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg4_c1_s0_aa56da47	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg4_c1_s1_ec415c76	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg4_c1_s2_83995348	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg4_c1_s3_c865acaa	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg5_c1_s0_740d9bda	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg5_c1_s1_e8de6c69	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg5_c1_s2_b74720f5	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg5_c1_s3_2cc94846	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg6_c1_s0_4a4bc363	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg6_c1_s1_fb359e91	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg6_c1_s2_98bc0843	file	4096	2026-10-21	
+models	X1_immune_sinkhorn_lg6_c1_s3_44424be3	file	4096	2026-10-21	
+scores	X1_immune_barycenter_lg1_c1_s0_b03dff3e.csv	file	1142	2026-10-20	
+scores	X1_immune_barycenter_lg1_c1_s1_a4e65366.csv	file	1143	2026-10-21	
+scores	X1_immune_barycenter_lg1_c1_s2_72ab5e6f.csv	file	1143	2026-10-21	
+scores	X1_immune_barycenter_lg1_c1_s3_9296369b.csv	file	1142	2026-10-21	
+scores	X1_immune_barycenter_lg2_c1_s0_5d3092e7.csv	file	1143	2026-10-20	
+scores	X1_immune_barycenter_lg2_c1_s1_b0b03bf8.csv	file	1142	2026-10-21	
+scores	X1_immune_barycenter_lg2_c1_s2_809a8c99.csv	file	1141	2026-10-21	
+scores	X1_immune_barycenter_lg2_c1_s3_983f653c.csv	file	1138	2026-10-21	
+scores	X1_immune_barycenter_lg3_c1_s0_51544924.csv	file	1140	2026-10-20	
+scores	X1_immune_barycenter_lg3_c1_s1_09eb466c.csv	file	1140	2026-10-21	
+scores	X1_immune_barycenter_lg3_c1_s2_cac45eb3.csv	file	1139	2026-10-21	
+scores	X1_immune_barycenter_lg3_c1_s3_9698e8d5.csv	file	1140	2026-10-21	
+scores	X1_immune_barycenter_lg4_c1_s0_32cc2e54.csv	file	1140	2026-10-20	
+scores	X1_immune_barycenter_lg4_c1_s1_1cc1d407.csv	file	1139	2026-10-21	
+scores	X1_immune_barycenter_lg4_c1_s2_a3137e39.csv	file	1142	2026-10-21	
+scores	X1_immune_barycenter_lg4_c1_s3_2469ec6d.csv	file	1140	2026-10-21	
+scores	X1_immune_barycenter_lg5_c1_s0_7ffbd191.csv	file	1142	2026-10-20	
+scores	X1_immune_barycenter_lg5_c1_s1_7fb9f164.csv	file	1140	2026-10-21	
+scores	X1_immune_barycenter_lg5_c1_s2_759b8211.csv	file	1141	2026-10-21	
+scores	X1_immune_barycenter_lg5_c1_s3_970deeb3.csv	file	1142	2026-10-21	
+scores	X1_immune_barycenter_lg6_c1_s0_4ca18df0.csv	file	1142	2026-10-20	
+scores	X1_immune_barycenter_lg6_c1_s1_a9ee2c8c.csv	file	1142	2026-10-21	
+scores	X1_immune_barycenter_lg6_c1_s2_693941f0.csv	file	1141	2026-10-21	
+scores	X1_immune_barycenter_lg6_c1_s3_015103a6.csv	file	1140	2026-10-21	
+scores	X1_immune_discriminator_lg1_c1_s0_122afe99.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg1_c1_s0_122afe99.csv
+scores	X1_immune_discriminator_lg1_c1_s1_c9d09b02.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg1_c1_s2_ef140550.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg1_c1_s3_39f3f279.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg1_c1_s4_84fb5172.csv	file	1149	2026-10-21	
+scores	X1_immune_discriminator_lg2_c1_s0_48044b0a.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg2_c1_s0_48044b0a.csv
+scores	X1_immune_discriminator_lg2_c1_s1_ff15707c.csv	file	1148	2026-10-21	
+scores	X1_immune_discriminator_lg2_c1_s2_0c442dae.csv	file	1149	2026-10-21	
+scores	X1_immune_discriminator_lg2_c1_s3_ac8c2f56.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg2_c1_s4_4dd33259.csv	file	1148	2026-10-21	
+scores	X1_immune_discriminator_lg3_c1_s0_b6cf4f13.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg3_c1_s0_b6cf4f13.csv
+scores	X1_immune_discriminator_lg3_c1_s1_b2c94440.csv	file	1146	2026-10-21	
+scores	X1_immune_discriminator_lg3_c1_s2_8c1f1fa7.csv	file	1146	2026-10-21	
+scores	X1_immune_discriminator_lg3_c1_s3_38c14b44.csv	file	1143	2026-10-21	
+scores	X1_immune_discriminator_lg3_c1_s4_5c768c45.csv	file	1146	2026-10-21	
+scores	X1_immune_discriminator_lg4_c1_s0_f72943fa.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg4_c1_s0_f72943fa.csv
+scores	X1_immune_discriminator_lg4_c1_s1_c0ed6fb4.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg4_c1_s2_b1b2d3de.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg4_c1_s3_d0d6be2b.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg4_c1_s4_bf0356d1.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg5_c1_s0_32ef7970.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg5_c1_s0_32ef7970.csv
+scores	X1_immune_discriminator_lg5_c1_s1_18be0f75.csv	file	1148	2026-10-21	
+scores	X1_immune_discriminator_lg5_c1_s2_c0436be1.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg5_c1_s3_987e5bec.csv	file	1148	2026-10-21	
+scores	X1_immune_discriminator_lg5_c1_s4_d7c477eb.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg6_c1_s0_d5fc9e27.csv	symlink	135	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_discriminator_lg6_c1_s0_d5fc9e27.csv
+scores	X1_immune_discriminator_lg6_c1_s1_0e76ceb5.csv	file	1148	2026-10-21	
+scores	X1_immune_discriminator_lg6_c1_s2_4a8293d1.csv	file	1145	2026-10-21	
+scores	X1_immune_discriminator_lg6_c1_s3_c1a0e713.csv	file	1147	2026-10-21	
+scores	X1_immune_discriminator_lg6_c1_s4_1c06f583.csv	file	1150	2026-10-21	
+scores	X1_immune_mmd_lg1_c1_s0_a0cf2150.csv	file	1124	2026-10-20	
+scores	X1_immune_mmd_lg1_c1_s1_4dbf5511.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg1_c1_s2_d33aff2b.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg1_c1_s3_e2444fee.csv	file	1126	2026-10-21	
+scores	X1_immune_mmd_lg2_c1_s0_7781fedf.csv	file	1125	2026-10-20	
+scores	X1_immune_mmd_lg2_c1_s1_cdc6f573.csv	file	1128	2026-10-21	
+scores	X1_immune_mmd_lg2_c1_s2_66a45e2b.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg2_c1_s3_29292bfc.csv	file	1127	2026-10-21	
+scores	X1_immune_mmd_lg3_c1_s0_16791574.csv	file	1125	2026-10-20	
+scores	X1_immune_mmd_lg3_c1_s1_1290e7a8.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg3_c1_s2_39cf447d.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg3_c1_s3_3f4ea990.csv	file	1125	2026-10-21	
+scores	X1_immune_mmd_lg4_c1_s0_c6b9f61f.csv	file	1128	2026-10-20	
+scores	X1_immune_mmd_lg4_c1_s1_81f9e370.csv	file	1126	2026-10-21	
+scores	X1_immune_mmd_lg4_c1_s2_281bfea2.csv	file	1128	2026-10-21	
+scores	X1_immune_mmd_lg4_c1_s3_45251842.csv	file	1129	2026-10-21	
+scores	X1_immune_mmd_lg5_c1_s0_c05bedf2.csv	file	1129	2026-10-20	
+scores	X1_immune_mmd_lg5_c1_s1_5bb420a3.csv	file	1128	2026-10-21	
+scores	X1_immune_mmd_lg5_c1_s2_0f04dac3.csv	file	1128	2026-10-21	
+scores	X1_immune_mmd_lg5_c1_s3_06509a0c.csv	file	1130	2026-10-21	
+scores	X1_immune_mmd_lg6_c1_s0_a34456c1.csv	file	1128	2026-10-20	
+scores	X1_immune_mmd_lg6_c1_s1_27ad308a.csv	file	1131	2026-10-21	
+scores	X1_immune_mmd_lg6_c1_s2_1be83e84.csv	file	1130	2026-10-21	
+scores	X1_immune_mmd_lg6_c1_s3_c5c26edb.csv	file	1128	2026-10-21	
+scores	X1_immune_none_l0_c1_s0_c7efda46.csv	symlink	125	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_none_l0_c1_s0_c7efda46.csv
+scores	X1_immune_none_l0_c1_s1_87c4a6a3.csv	file	1128	2026-10-21	
+scores	X1_immune_none_l0_c1_s2_acba706d.csv	file	1127	2026-10-21	
+scores	X1_immune_none_l0_c1_s3_3ed57ae1.csv	file	1127	2026-10-21	
+scores	X1_immune_none_l0_c1_s4_62f6f080.csv	file	1127	2026-10-21	
+scores	X1_immune_pooled_lg1_c1_s0_a568f635.csv	symlink	128	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_pooled_lg1_c1_s0_a568f635.csv
+scores	X1_immune_pooled_lg1_c1_s1_08c57592.csv	file	1133	2026-10-21	
+scores	X1_immune_pooled_lg1_c1_s2_a47f8ec7.csv	file	1133	2026-10-21	
+scores	X1_immune_pooled_lg1_c1_s3_6ad2927f.csv	file	1133	2026-10-21	
+scores	X1_immune_pooled_lg2_c1_s0_c1055361.csv	symlink	128	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_pooled_lg2_c1_s0_c1055361.csv
+scores	X1_immune_pooled_lg2_c1_s1_703057b5.csv	file	1134	2026-10-21	
+scores	X1_immune_pooled_lg2_c1_s2_1bbae982.csv	file	1134	2026-10-21	
+scores	X1_immune_pooled_lg2_c1_s3_77f6a46f.csv	file	1135	2026-10-21	
+scores	X1_immune_pooled_lg3_c1_s0_29b346e1.csv	symlink	128	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_pooled_lg3_c1_s0_29b346e1.csv
+scores	X1_immune_pooled_lg3_c1_s1_fa946386.csv	file	1127	2026-10-21	
+scores	X1_immune_pooled_lg3_c1_s2_6c325321.csv	file	1133	2026-10-21	
+scores	X1_immune_pooled_lg3_c1_s3_8aa7f4ee.csv	file	1131	2026-10-21	
+scores	X1_immune_pooled_lg4_c1_s0_0414b640.csv	symlink	128	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_pooled_lg4_c1_s0_0414b640.csv
+scores	X1_immune_pooled_lg4_c1_s1_4f2cb893.csv	file	1134	2026-10-21	
+scores	X1_immune_pooled_lg4_c1_s2_8252eb67.csv	file	1131	2026-10-21	
+scores	X1_immune_pooled_lg4_c1_s3_da14e1c7.csv	file	1129	2026-10-21	
+scores	X1_immune_pooled_lg5_c1_s0_1bc8b9c4.csv	symlink	128	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_pooled_lg5_c1_s0_1bc8b9c4.csv
+scores	X1_immune_pooled_lg5_c1_s1_8985f823.csv	file	1132	2026-10-21	
+scores	X1_immune_pooled_lg5_c1_s2_66a680e7.csv	file	1135	2026-10-21	
+scores	X1_immune_pooled_lg5_c1_s3_c48c0ed8.csv	file	1135	2026-10-21	
+scores	X1_immune_pooled_lg6_c1_s0_82285e49.csv	file	1134	2026-10-20	
+scores	X1_immune_pooled_lg6_c1_s1_d1533380.csv	file	1133	2026-10-21	
+scores	X1_immune_pooled_lg6_c1_s2_e2008971.csv	file	1132	2026-10-21	
+scores	X1_immune_pooled_lg6_c1_s3_4747d0d4.csv	file	1133	2026-10-21	
+scores	X1_immune_reference_lg1_c1_s0_c4883078.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg1_c1_s0_c4883078.csv
+scores	X1_immune_reference_lg1_c1_s1_37d5ef2f.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg1_c1_s2_d80e5900.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg1_c1_s3_2225632f.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg2_c1_s0_8f9dab3b.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg2_c1_s0_8f9dab3b.csv
+scores	X1_immune_reference_lg2_c1_s1_67ed38c8.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg2_c1_s2_e5c2cab1.csv	file	1138	2026-10-21	
+scores	X1_immune_reference_lg2_c1_s3_6677a92f.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg2_c1_s4_29546b7b.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg3_c1_s0_036a042d.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg3_c1_s0_036a042d.csv
+scores	X1_immune_reference_lg3_c1_s1_2bcfdb87.csv	file	1138	2026-10-21	
+scores	X1_immune_reference_lg3_c1_s2_8e080e85.csv	file	1135	2026-10-21	
+scores	X1_immune_reference_lg3_c1_s3_415c7e2b.csv	file	1137	2026-10-21	
+scores	X1_immune_reference_lg4_c1_s0_bc0ea759.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg4_c1_s0_bc0ea759.csv
+scores	X1_immune_reference_lg4_c1_s1_5efc1036.csv	file	1138	2026-10-21	
+scores	X1_immune_reference_lg4_c1_s2_1741eab0.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg4_c1_s3_6d8d61c7.csv	file	1138	2026-10-21	
+scores	X1_immune_reference_lg5_c1_s0_b4153932.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg5_c1_s0_b4153932.csv
+scores	X1_immune_reference_lg5_c1_s1_ece00172.csv	file	1139	2026-10-21	
+scores	X1_immune_reference_lg5_c1_s2_b13ed5e6.csv	file	1140	2026-10-21	
+scores	X1_immune_reference_lg5_c1_s3_1aea653a.csv	file	1141	2026-10-21	
+scores	X1_immune_reference_lg6_c1_s0_05827d0b.csv	symlink	131	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_reference_lg6_c1_s0_05827d0b.csv
+scores	X1_immune_reference_lg6_c1_s1_d2c8a2fb.csv	file	1138	2026-10-21	
+scores	X1_immune_reference_lg6_c1_s2_592321bf.csv	file	1140	2026-10-21	
+scores	X1_immune_scvi_adv_l0_c1_s0_aa5b3ee5.csv	symlink	129	2026-10-20	/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v2/X1_local/scores/X1_immune_scvi_adv_l0_c1_s0_aa5b3ee5.csv
+scores	X1_immune_scvi_adv_l0_c1_s1_808c5eda.csv	file	1134	2026-10-21	
+scores	X1_immune_scvi_adv_l0_c1_s2_0bece0b6.csv	file	1135	2026-10-21	
+scores	X1_immune_scvi_adv_l0_c1_s3_7a908da4.csv	file	1136	2026-10-21	
+scores	X1_immune_scvi_adv_l0_c1_s4_cc0ed65b.csv	file	1134	2026-10-21	
+scores	X1_immune_sinkhorn_lg1_c1_s0_0ee5ec5e.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg1_c1_s1_f8fb8e5c.csv	file	1139	2026-10-21	
+scores	X1_immune_sinkhorn_lg1_c1_s2_62e36d57.csv	file	1138	2026-10-21	
+scores	X1_immune_sinkhorn_lg1_c1_s3_30954b91.csv	file	1136	2026-10-21	
+scores	X1_immune_sinkhorn_lg2_c1_s0_86a07752.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg2_c1_s1_427b9a12.csv	file	1133	2026-10-21	
+scores	X1_immune_sinkhorn_lg2_c1_s2_ae63e8e7.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg2_c1_s3_eaae8629.csv	file	1134	2026-10-21	
+scores	X1_immune_sinkhorn_lg3_c1_s0_0b3d7c9d.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg3_c1_s1_4f38c65b.csv	file	1135	2026-10-21	
+scores	X1_immune_sinkhorn_lg3_c1_s2_34f540dd.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg3_c1_s3_189a928a.csv	file	1136	2026-10-21	
+scores	X1_immune_sinkhorn_lg4_c1_s0_aa56da47.csv	file	1138	2026-10-21	
+scores	X1_immune_sinkhorn_lg4_c1_s1_ec415c76.csv	file	1139	2026-10-21	
+scores	X1_immune_sinkhorn_lg4_c1_s2_83995348.csv	file	1138	2026-10-21	
+scores	X1_immune_sinkhorn_lg4_c1_s3_c865acaa.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg5_c1_s0_740d9bda.csv	file	1140	2026-10-21	
+scores	X1_immune_sinkhorn_lg5_c1_s1_e8de6c69.csv	file	1137	2026-10-21	
+scores	X1_immune_sinkhorn_lg5_c1_s2_b74720f5.csv	file	1140	2026-10-21	
+scores	X1_immune_sinkhorn_lg5_c1_s3_2cc94846.csv	file	1135	2026-10-21	
+scores	X1_immune_sinkhorn_lg6_c1_s0_4a4bc363.csv	file	1139	2026-10-21	
+scores	X1_immune_sinkhorn_lg6_c1_s1_fb359e91.csv	file	1140	2026-10-21	
+scores	X1_immune_sinkhorn_lg6_c1_s2_98bc0843.csv	file	1139	2026-10-21	
+scores	X1_immune_sinkhorn_lg6_c1_s3_44424be3.csv	file	1135	2026-10-21	

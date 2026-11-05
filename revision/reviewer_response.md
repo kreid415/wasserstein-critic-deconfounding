@@ -8,7 +8,10 @@ revised version).
 Rewritten on 2026-11-05 (Pass 9) against `paper/outline.tex` on branch `paper`; it replaces the response of 2026-07-22, which
 described experiments of an earlier design that are not in this paper. Section names below are those of the outline (Methods
 paragraphs by their topic; Results paragraphs Res-1 to Res-8, Res-2b and Res-5b; Discussion paragraphs Disc-1 to Disc-5).
-Every number below is copied from the paper text, whose numbers are listed with their source files in `paper/pass9_numbers.csv`.
+Every number below is copied from the paper text, whose numbers are listed with their source files in `paper/pass9_numbers.csv`
+and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/tools/check_ledger.py` re-reads the ledgers from
+their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. Table numbers are those the PDF prints: the
+number 2 is left free (the strength-range table was removed), so the ranking table is Table 3 and the placement table Table 4.
 
 ## What changed overall
 
@@ -28,7 +31,9 @@ We thank the three reviewers. Their comments led us to redesign the study rather
    baselines paragraph; Res-7, Res-8; Tables 4 and S7; Figure 6).
 4. **A replication across training seeds** refits each penalty at the two sweep strengths around the matched level with five new
    seeds, checked against a prediction and an agreement rule fixed before any of these fits was scored (Methods, "Replication
-   across training seeds"; Res-2b). Its result had not reached this pass of the response; Res-2b and this section are completed from the agreement test output.
+   across training seeds"; Res-2b). The rule's sign-flip test treats the 13 task and decoder pairs as exchangeable, although the
+   two decoders of a task share its data, so its $p$-value is approximate; a sensitivity analysis that flips the signs per task
+   (both decoders together), added after the rule was fixed, is reported beside it. Its result had not reached this pass of the response; Res-2b and this section are completed from the agreement test output.
 5. **Direct biology readouts** per cell type (Methods, direct biology check paragraph; Res-5b; Supplementary Note 12; Table S10).
 6. **Claims scoped to the evidence.** The study is described throughout as an exploratory benchmark on one backbone; the topology
    and reference-bottleneck explanations of the earlier paper are removed, and the limits are listed in Disc-4 and Disc-5.
@@ -108,8 +113,12 @@ penalties as users run them, not the best front a multi-objective solver could f
 **Changed.** The paper is now framed as a benchmark and the mechanistic language about topology and reference bottlenecks is
 removed (title, Background last paragraph, Discussion). The direct biology check now shows which cell types lose most (Res-5b): rare
 types lost purity in 23 of 48 task, penalty and decoder cells, and the largest drop was for the 46 ionocytes of the lung task with
-the batch-conditioned discriminator, whose label-transfer recall fell to 0.326 against 0.797 for plain scVI. We did not analyse
-reference coverage: the reference batch is fixed by a rule (highest cell-type entropy), not varied (Disc-5).
+the batch-conditioned discriminator, whose label-transfer recall fell to 0.326 against 0.797 for plain scVI. On references: the
+reference batch is fixed by a rule (highest cell-type entropy, so that the target does not favour a few cell types) and is not
+varied (Disc-5). We report how much of each task the chosen reference covers (Methods, penalties paragraph): it holds every cell
+type in five of the eight tasks, and 10 of 17 (lung), 14 of 19 (human--mouse immune) and 3 of 4 (simulation 2) in the others, so
+in those three tasks some cells of other batches have no cell of their type in the reference. We did not vary the reference or
+test whether its coverage explains a penalty's performance.
 
 ### R2.4 The benchmark is weak for the strength of the claims
 
@@ -143,7 +152,8 @@ discriminator, and with the batch-conditioned decoder its loss fell more on rare
 **Changed.** The backbone is now stock scVI, the most widely used deep generative model for integration, and every penalty is
 compared with plain scVI and with Harmony, Scanorama, sysVI and scANVI at equal numbers of tries (Res-7, Res-8; Figure 6). With
 the batch-conditioned decoder, a penalty at one strength drawn at random beat plain scVI in 8 of 36 task--penalty cells and the
-best of six strengths in 30 of 36; scANVI, which uses cell-type labels, was exceeded only on pancreas (Res-8). The single backbone
+best of six strengths in 30 of 36, a count that is optimistic because the strengths were chosen and scored on the same data;
+scANVI, which is trained with the cell-type labels that several biology metrics also use, was exceeded only on pancreas (Res-8). The single backbone
 remains a limit, stated in Disc-4.
 
 ### R3.2 Robustness to architecture and hyperparameters
@@ -159,12 +169,14 @@ We did not run an architecture sensitivity analysis.
 
 ### R3.3 Practical guidance
 
-**Added.** Disc-3 and the Conclusions now give guidance supported by the numbers: tune the strength rather than the penalty,
+**Added.** Disc-3 and the Conclusions now give observations from the scores on these eight tasks, not tested on independent
+data: the strength mattered more than the choice of penalty,
 because the penalties were near-tied at matched batch removal (160 of 195 within-pair differences under 0.02) while going from one
-to six tries raised each penalty's mean selection score by 0.012 to 0.053; keep plain scVI with the batch-conditioned decoder as a
-candidate, since a penalty beat it mainly when several strengths were tried; start from the strengths chosen on other task
-families (0.1 to 100 across penalties with the batch-conditioned decoder); check biology directly at the chosen strength; and use
-scANVI when cell-type labels exist.
+to six tries raised each penalty's mean selection score by 0.012 to 0.053; plain scVI with the batch-conditioned decoder remained
+a strong candidate, since a penalty beat it mainly when several strengths were tried and scored on the same data (an optimistic
+reading); the strengths chosen on other task families lay between 0.1 and 100 across penalties with the batch-conditioned
+decoder; the biology was worth checking directly at the chosen strength; and scANVI scored higher than every penalty on most
+tasks when cell-type labels existed, although it is trained with labels that several biology metrics also use.
 
 ### R3.4 Atlas-scale data
 

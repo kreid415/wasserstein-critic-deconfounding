@@ -29,7 +29,10 @@ def test_rerun_on_pre_edit_text_gives_the_outline_and_stops_when_run_twice(tmp_p
         shutil.copy(REPO / rel, tmp_path / rel)
     (tmp_path / "paper/outline.tex").write_text(pre.stdout)
     P10.main(tmp_path)
-    assert (tmp_path / "paper/outline.tex").read_text() == (REPO / "paper/outline.tex").read_text()
-    assert (tmp_path / "paper/pass10_numbers.csv").read_text() == (REPO / "paper/pass10_numbers.csv").read_text()
+    # compare with the Pass 10 commit, not the working files: later passes (11, 12) edit both files
+    def at_p10(rel):
+        return subprocess.run(["git", "-C", str(REPO), "show", f"717cc4c:{rel}"], capture_output=True, text=True, check=True).stdout
+    assert (tmp_path / "paper/outline.tex").read_text() == at_p10("paper/outline.tex")
+    assert (tmp_path / "paper/pass10_numbers.csv").read_text() == at_p10("paper/pass10_numbers.csv")
     with pytest.raises(AssertionError):      # old texts are gone: the script must stop, not pass silently
         P10.main(tmp_path)
