@@ -1,0 +1,21 @@
+{
+ "replicates": 20000,
+ "seed": 7,
+ "seeds_per_fit_set": 3,
+ "NL10": {
+  "fits": 30,
+  "A_target": 0.2883333333333333,
+  "A_coverage": 0.9995,
+  "B_target": 0.16291390728476823,
+  "B_coverage": 0.87535,
+  "control_constant_p0.3_coverage": 0.97295
+ },
+ "NL12": {
+  "fits": 36,
+  "A_target": 0.2840909090909091,
+  "A_coverage": 0.99905,
+  "B_target": 0.1678743961352657,
+  "B_coverage": 0.8285,
+  "control_constant_p0.3_coverage": 0.95475
+ }
+}

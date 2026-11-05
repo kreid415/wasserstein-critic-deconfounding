@@ -39,7 +39,8 @@ for r, c in enumerate(COND_ORDER):
         ax.margins(0.06)
         ax.locator_params(nbins=4)
     fig.text(0.003, axes[r, 0].get_position().y1 + 0.005, "ab"[r], fontsize=10, fontweight="bold", va="bottom")
-axes[0, 0].text(pnv(pn, "pair.pancreas.cond1.bstar"), 1.0, r"$b^{*}$", transform=axes[0, 0].get_xaxis_transform(),
+axes[0, 0].text(pnv(pn, "pair.pancreas.cond1.bstar") + 0.005, 0.03, r"$b^{*}$",  # inside the panel, away from the title
+                transform=axes[0, 0].get_xaxis_transform(),
                 ha="left", va="bottom", fontsize=7, color="#444444")
 h = [Line2D([], [], color=ARM_COLOR[a], marker="o", ms=3, lw=1.2, label=ARM_LABEL[a]) for a in ARMS]
 h += [Line2D([], [], color="black", marker="*", ms=8, lw=0, label="plain scVI")]

@@ -1,0 +1,83 @@
+{
+ "anndata": "0.12.19",
+ "pancreas": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "inDrop1",
+  "entropy": 1.8505036331546276,
+  "cells": 1937,
+  "types_in_reference": 14,
+  "types_in_task": 14,
+  "batches": 9
+ },
+ "lung": {
+  "batch_key": "batch",
+  "celltype_key": "cell_type",
+  "reference": "3",
+  "entropy": 1.8252104227582677,
+  "cells": 462,
+  "types_in_reference": 10,
+  "types_in_task": 17,
+  "batches": 16
+ },
+ "immune": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Oetjen_A",
+  "entropy": 2.408807928435304,
+  "cells": 2586,
+  "types_in_reference": 16,
+  "types_in_task": 16,
+  "batches": 10
+ },
+ "atac_small": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Cusanovich et al. - WholeBrainA_62216",
+  "entropy": 1.6300979785756748,
+  "cells": 3902,
+  "types_in_reference": 7,
+  "types_in_task": 7,
+  "batches": 3
+ },
+ "atac_large": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Cusanovich et al. - WholeBrainA_62816",
+  "entropy": 1.6936394988819765,
+  "cells": 3283,
+  "types_in_reference": 7,
+  "types_in_task": 7,
+  "batches": 11
+ },
+ "immune_hum_mou": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Oetjen_A",
+  "entropy": 2.309545509835252,
+  "cells": 2586,
+  "types_in_reference": 14,
+  "types_in_task": 19,
+  "batches": 23
+ },
+ "sim1": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Batch5",
+  "entropy": 1.700237729008831,
+  "cells": 1761,
+  "types_in_reference": 7,
+  "types_in_task": 7,
+  "batches": 6
+ },
+ "sim2": {
+  "batch_key": "batch",
+  "celltype_key": "celltype",
+  "reference": "Batch4Sub2",
+  "entropy": 0.9582833436159592,
+  "cells": 1676,
+  "types_in_reference": 3,
+  "types_in_task": 4,
+  "batches": 16
+ }
+}

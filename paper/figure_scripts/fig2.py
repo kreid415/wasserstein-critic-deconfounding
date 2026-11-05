@@ -22,7 +22,7 @@ for c in (0, 1):  # a cell is unranked exactly when its task is low-signal
 vmin, vmax = min(bio[0].min(), bio[1].min()), max(bio[0].max(), bio[1].max())
 
 fig = plt.figure(figsize=(WIDTH_IN, 3.6))
-gs = fig.add_gridspec(1, 5, width_ratios=[6, 6, 0.28, 1.5, 5.2], wspace=0.07, left=0.12, right=0.995, top=0.86, bottom=0.33)
+gs = fig.add_gridspec(1, 5, width_ratios=[6, 6, 0.28, 4.6, 4.6], wspace=0.07, left=0.12, right=0.995, top=0.86, bottom=0.33)
 axh = {1: fig.add_subplot(gs[0]), 0: fig.add_subplot(gs[1])}
 axc = fig.add_subplot(gs[2])
 axb = fig.add_subplot(gs[4], sharey=axh[1])
@@ -59,8 +59,10 @@ for i, a in enumerate(ARMS):
         axb.plot(row["mean"], i + dy, mk, color=ARM_COLOR[a], ms=4.5, mec="white", mew=0.5, zorder=3)
     if i: axb.axhline(i - .5, color="#dddddd", lw=0.5, zorder=0)
 axb.set_xlim(0.7, 6.3); axb.set_xticks(range(1, 7))
-axb.tick_params(left=False, labelleft=False)
+axb.tick_params(left=False)  # row labels repeat panel a (shared y axis)
+plt.setp(axb.get_yticklabels(), visible=True)
 axb.spines["left"].set_visible(False)
+axb.yaxis.set_tick_params(labelleft=True)
 axb.set_xlabel("mean rank over ranked real tasks\n\u2190 better (1 = best)")
 axb.set_title("mean rank; bars, range over tasks", loc="left", pad=3)
 axb.plot([], [], "o", color=GREY, ms=4.5, label=COND_LABEL[1] + " (upper of each pair)")
@@ -70,6 +72,6 @@ axb.legend(loc="upper center", bbox_to_anchor=(0.35, -0.42), handletextpad=0.2, 
 key = fig.add_axes([0.12, 0.015, 0.02, 0.05]); key.axis("off")
 key.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor="#e6e6e6", edgecolor="#8a8a8a", hatch="////", lw=0))
 fig.text(0.15, 0.04, "not ranked (low-signal pair)", fontsize=7, va="center")
-panel_letter(axh[1], "a", x=-0.2, y=1.14); panel_letter(axb, "b", x=-0.05, y=1.14)
+panel_letter(axh[1], "a", x=-0.2, y=1.14); panel_letter(axb, "b", x=-0.5, y=1.14)
 check_and_save(fig, "fig2")
 print(mr.round(3).to_string())
