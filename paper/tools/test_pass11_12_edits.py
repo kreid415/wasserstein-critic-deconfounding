@@ -19,7 +19,7 @@ def git_show(rev, rel):
 
 @pytest.mark.parametrize("script, env, start, result, files, extra", [
     ("pass11_edits.py", "PASS11_ROOT", "717cc4c", "0053042", ["paper/outline.tex"], ["paper/figure_data/paper_numbers.json"]),
-    ("pass12_edits.py", "PASS12_ROOT", "0053042", "PASS12",
+    ("pass12_edits.py", "PASS12_ROOT", "0053042", "d207051",
      ["paper/outline.tex", "revision/reviewer_response.md", "paper/lit_search_20261105.md"], []),
 ])
 def test_edit_script_reproduces_its_pass(tmp_path, monkeypatch, script, env, start, result, files, extra):
@@ -34,7 +34,6 @@ def test_edit_script_reproduces_its_pass(tmp_path, monkeypatch, script, env, sta
     monkeypatch.setenv(env, str(tmp_path))
     runpy.run_path(str(TOOLS / script), run_name="__main__")
     for rel in files:
-        want = (REPO / rel).read_text() if result == "PASS12" else git_show(result, rel)
-        assert (tmp_path / rel).read_text() == want, rel
+        assert (tmp_path / rel).read_text() == git_show(result, rel), rel
     with pytest.raises(AssertionError):
         runpy.run_path(str(TOOLS / script), run_name="__main__")
