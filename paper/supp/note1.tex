@@ -30,10 +30,10 @@ and the encoder minimises the bounded fool loss of scvi-tools, the cross-entropy
 
 \noindent\textit{Wasserstein-1 critics.} A critic head $C=(C_1,\dots,C_K)$ (two hidden layers of 128 units, one output per batch) estimates, for each active batch $k$ with target distribution $T_k$, the Kantorovich--Rubinstein dual
 \begin{equation}
-\hat W_k=\frac1{|\mathcal{B}_k|}\sum_{i\in\mathcal{B}_k}C_k(u_i)-\frac1{|T_k|}\sum_{t\in T_k}C_k(t)\;\le\;W_1(\hat P_k,\hat T_k).
+\hat W_k=\frac1{|\mathcal{B}_k|}\sum_{i\in\mathcal{B}_k}C_k(u_i)-\frac1{|T_k|}\sum_{t\in T_k}C_k(t)\;\approx\;W_1(\hat P_k,\hat T_k),
 \label{eq:s1-w1}
 \end{equation}
-The targets are: reference critic, $T_k=\{u_j:s_j=r\}$, the cells of the reference batch $r$, the batch with the highest cell-type entropy $-\sum_c p_{r,c}\log p_{r,c}$ (head $r$ is inactive; this rule uses the cell-type labels); pooled critic, $T_k=\{u_j:j\in\mathcal{B}_{-k}\}$; barycenter critic, $T_k=\hat B$, the support of the Wasserstein-2 barycenter of the batches present in the minibatch,
+where the right-hand side is the distance between the empirical distributions; the dual is a lower bound of it for a 1-Lipschitz $C_k$, which the gradient penalty below enforces softly, so $\hat W_k$ is an estimate and not a bound. The targets are: reference critic, $T_k=\{u_j:s_j=r\}$, the cells of the reference batch $r$, the batch with the highest cell-type entropy $-\sum_c p_{r,c}\log p_{r,c}$ (head $r$ is inactive; this rule uses the cell-type labels); pooled critic, $T_k=\{u_j:j\in\mathcal{B}_{-k}\}$; barycenter critic, $T_k=\hat B$, the support of the Wasserstein-2 barycenter of the batches present in the minibatch,
 \begin{equation}
 \hat B=\arg\min_{B}\;\frac1{K_{\mathrm{pres}}}\sum_{k\ \mathrm{present}} W_2^2(\hat P_k,B),
 \label{eq:s1-bary}
