@@ -1,0 +1,11 @@
+item,value,source
+"b* (ATAC small, unconditioned decoder)",0.522,paper_numbers.json:pair.atac_small.cond0.bstar
+"biology at b*, discriminator",0.666,paper_numbers.json:bio_at_bstar.discriminator.atac_small.cond0
+"biology at b*, reference",0.659,paper_numbers.json:bio_at_bstar.reference.atac_small.cond0
+"biology at b*, mmd",0.692,paper_numbers.json:bio_at_bstar.mmd.atac_small.cond0
+"strengths fitted, discriminator",12,paper_numbers.json:n_strengths.discriminator.atac_small.cond0
+"times the curve crosses b*, discriminator",2,paper_numbers.json:crossings.discriminator.atac_small.cond0
+"strengths fitted, reference",10,paper_numbers.json:n_strengths.reference.atac_small.cond0
+"times the curve crosses b*, reference",2,paper_numbers.json:crossings.reference.atac_small.cond0
+"strengths fitted, mmd",10,paper_numbers.json:n_strengths.mmd.atac_small.cond0
+"times the curve crosses b*, mmd",1,paper_numbers.json:crossings.mmd.atac_small.cond0
