@@ -14,7 +14,7 @@ REPO = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=Tr
                                        (0.115, "sf3", "$+0.115$"), (-0.0004, "sf3", "$0.000$"), (2.5, "g", "2.5"),
                                        (3.0, "g", "3"), (3.3333, "g", "3.33"), (0.1, "lam", "0.1"), (1000.0, "lam", "1,000"),
                                        (448, "d", "448"), ("c4a793f", "s", "c4a793f")])
-def test_fmtv(x, fmt, out):
+def test_fmtv(x, fmt, out):  # test-reason: checks the exact text of each format; the other tests only reach the code paths
     assert pf.fmtv(x, fmt) == out
 
 
@@ -34,6 +34,8 @@ def test_vals_and_apply_fail_loud():
         V.put("b", float("nan"), "f.csv", "row 3")
     with pytest.raises(KeyError):
         V.render("{{missing:f3}}", "s")
+    with pytest.raises(AssertionError):   # a placeholder the pattern cannot parse is left unresolved
+        V.render("{{a:f3 }}", "s")
     tex, starts = pf.apply("x OLD y\nz", [("e", "OLD", "N={{a:f3}}")], V)
     assert tex == "x N=0.500 y\nz" and starts == {"e": 1}
     assert V.rows[-1]["number_as_written"] == "0.500" and V.rows[-1]["source_key_or_row"] == "row 1"
@@ -42,6 +44,8 @@ def test_vals_and_apply_fail_loud():
             pf.apply(text, [("e", "OLD", "N")], V)
     rows = pf.ledger_rows("line one\nN=0.500\n", {"e": 1}, V)
     assert rows[-1]["tex_line"] == 2
+    with pytest.raises(ValueError):   # a number that is not in the text after its snippet's first line
+        pf.ledger_rows("N=0.400\n", {"e": 1}, V)
 
 
 @pytest.mark.skipif(not os.path.isdir(pf.D), reason="result files not on this machine")

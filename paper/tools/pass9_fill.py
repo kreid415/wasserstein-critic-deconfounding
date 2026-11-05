@@ -52,8 +52,7 @@ class Vals:
                                   source_file=e["file"], source_key_or_row=e["key"], source_value=repr(e["value"])))
             return txt
         out = re.sub(r"\{\{([A-Za-z0-9_.\-]+)(?::([a-z0-9]+))?\}\}", sub, template)
-        if "{{" in out:
-            raise ValueError(f"{snippet}: unresolved placeholder in {out[out.index('{{'):][:60]}")
+        assert "{{" not in out, f"{snippet}: unresolved placeholder in {out[out.index('{{'):][:60]}"
         return out
 
 
@@ -86,8 +85,7 @@ def load(a, V):
         q = df
         for k, v in where.items():
             q = q[q[k] == v]
-        if len(q) != 1:
-            raise ValueError(f"{name}: {len(q)} rows in {file} for {where}")
+        assert len(q) == 1, f"{name}: {len(q)} rows in {file} for {where}"
         x = q[col].iloc[0]
         return V.put(name, x.item() if hasattr(x, "item") else x, file,
                      ",".join(f"{k}={v}" for k, v in where.items()) + f" col={col}")
@@ -159,8 +157,8 @@ def load(a, V):
     pef = os.path.join(os.path.dirname(a.placement), "placement_equal_tries.csv")
     pe = pd.read_csv(pef)
     sc = pe[pe.task.isin(REAL) & (pe.tool == "scanvi") & (pe.k == 6) & pe.penalty_better]
-    if set(sc.task) != {"pancreas"} or set(sc.cond) != {1} or len(sc) != 6:
-        raise ValueError("scANVI placement changed: the text says only pancreas, batch-conditioned decoder, all six penalties")
+    assert set(sc.task) == {"pancreas"} and set(sc.cond) == {1} and len(sc) == 6, \
+        "scANVI placement changed: the text says only pancreas, batch-conditioned decoder, all six penalties"
     derived("scanvi_dmin", sc["diff"].min(), pef, "min diff, tool=scanvi, k=6, penalty_better, real tasks (all pancreas, cond 1)")
     derived("scanvi_dmax", sc["diff"].max(), pef, "max diff, tool=scanvi, k=6, penalty_better, real tasks (all pancreas, cond 1)")
     for c in (0, 1):
@@ -274,8 +272,8 @@ def load(a, V):
     derived("bio_rare_cells", len(rp_), bsf, "real task x penalty x decoder rows with rare_purity_diff_mean")
     derived("bio_rare_neg", int((rp_.rare_purity_diff_mean < 0).sum()), bsf, "of those, rare_purity_diff_mean < 0")
     w = rp_.loc[rp_.rare_purity_diff_mean.idxmin()]
-    if (w.task, w.method, w.decoder) != ("lung", "discriminator", "conditioned"):
-        raise ValueError("largest rare-type drop moved; the text names lung, discriminator, conditioned")
+    assert (w.task, w.method, w.decoder) == ("lung", "discriminator", "conditioned"), \
+        "largest rare-type drop moved; the text names lung, discriminator, conditioned"
     derived("bio_rare_worst", w.rare_purity_diff_mean, bsf, "min rare_purity_diff_mean (lung, discriminator, conditioned)")
     derived("bio_lung_lam", w.lam, bsf, "lam of that row (label-transfer strength)")
     ftf = os.path.join(T, "lung_fit_types.csv")
@@ -648,5 +646,5 @@ def main(argv=None):
                           skipped_replication=not a.replication)))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover  # script entry point; tests call main() directly
     main()
