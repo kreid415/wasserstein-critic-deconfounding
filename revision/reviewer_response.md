@@ -10,7 +10,8 @@ described experiments of an earlier design that are not in this paper. Section n
 paragraphs by their topic; Results paragraphs Res-1 to Res-8, Res-2b and Res-5b; Discussion paragraphs Disc-1 to Disc-5).
 Every number below is copied from the paper text, whose numbers are listed with their source files in `paper/pass9_numbers.csv`
 and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/tools/check_ledger.py` re-reads the ledgers from
-their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. Table numbers are those the PDF prints (Pass 13):
+their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. The replication results were added in Pass 14 (2026-11-06;
+numbers in `paper/pass14_numbers.csv`). Table numbers are those the PDF prints (Pass 13):
 the main-text tables are numbered 1 to 3, Table 1 (methods), Table 2 (ranking) and Table 3 (placement); the strength-range table was removed.
 
 ## What changed overall
@@ -33,7 +34,7 @@ We thank the three reviewers. Their comments led us to redesign the study rather
    seeds, checked against a prediction and an agreement rule fixed before any of these fits was scored (Methods, "Replication
    across training seeds"; Res-2b). The rule's sign-flip test treats the 13 task and decoder pairs as exchangeable, although the
    two decoders of a task share its data, so its $p$-value is approximate; a sensitivity analysis that flips the signs per task
-   (both decoders together), added after the rule was fixed, is reported beside it. Its result had not reached this pass of the response; Res-2b and this section are completed from the agreement test output.
+   (both decoders together), added after the rule was fixed, is reported beside it. The agreement rule is met (Res-2b; last section of this response).
 5. **Direct biology readouts** per cell type (Methods, direct biology check paragraph; Res-5b; Supplementary Note 12; Table S10).
 6. **Claims scoped to the evidence.** The study is described throughout as an exploratory benchmark on one backbone; the topology
    and reference-bottleneck explanations of the earlier paper are removed, and the limits are listed in Disc-4 and Disc-5.
@@ -124,7 +125,8 @@ test whether its coverage explains a penalty's performance.
 
 **Changed.** Eight tasks instead of three (pancreas, lung, immune, human--mouse immune, small and large chromatin accessibility,
 two simulations), five standard tools plus plain scVI and the scvi-tools adversary, and an explicitly exploratory framing (Abstract;
-Background last paragraph; Methods, sweep paragraph; Disc-4). We did not add atlas-scale data (see R3.4).
+Background last paragraph; Methods, sweep paragraph; Disc-4). We did not add atlas-scale data (see R3.4). The replication across training seeds (last section) checks the sweep's readings
+on new seeds of the same tasks; it adds no new data.
 
 ### R2.5 The weakness may come from the reference-based design
 
@@ -199,4 +201,30 @@ testing is not added.
 
 ## Replication across training seeds (relevant to R2.2, R2.4, R3.2)
 
-Pending. When this response was written (2026-11-05, Pass 9), the result of the agreement test (whether the four large sweep gaps kept their sign, the mean Kendall rank correlation over the 13 ranked pairs and its permutation $p$, and the readings per task) had not been received. This section, abstract item 7, Res-2b and the Disc-1 bullet will be written from the agreement test output; until then no replication result is claimed anywhere in the paper or in this response.
+**Done (Pass 14, 2026-11-06).** The prediction (the sweep's readings and ranks at $b^*$ in the 13 ranked task and decoder pairs)
+and the agreement rule were committed under the tag `replication-prediction-v1` (commit 3a90d0f) before any replication fit was
+scored. The replication refits the same eight tasks with new seeds (0--4); it uses no new data. All 895 fits were scored
+and 0 failed: the 855 planned fits and 40 fits of the rule's extension step,
+which refits the next sweep strength once where the new-seed means do not bracket $b^*$ (8 readings).
+After that step 77 of the 78 readings reach $b^*$; MMD on pancreas with the batch-conditioned
+decoder still does not (highest new-seed batch score 0.674 against $b^*$ = 0.684) and
+takes the bottom place in its pair, marked as not replicating the crossing.
+
+- Large gaps: all four sweep differences of 0.04 or more kept their sign (4 of 4). The closest to
+  flipping was the barycenter critic minus the reference critic on the small chromatin-accessibility task with the unconditioned
+  decoder (sweep +0.041, replication +0.013).
+- Order: Kendall's $\tau_b$ between the sweep and replication ranks ranged from -0.067 to 0.867 over
+  the 13 pairs (11 positive); the mean was 0.456, one-sided sign-flip $p$ = 0.00049
+  over all $2^{13}$ sign patterns. **The agreement rule is met.**
+- Before the extension step that gap could not be read (the barycenter critic had not reached $b^*$); the other
+  3 kept their sign and the mean $\tau_b$ was 0.426 ($p$ = 0.00049).
+  The rule was met only once the step it prescribes had been run; both results are reported (Res-2b).
+- Sensitivity analyses, not part of the rule and defined after it was fixed: with signs flipped per task (both decoders of a
+  task together, $2^{8}$ patterns) $p$ = 0.0039, the smallest value eight tasks allow; the slope-adjusted reading
+  kept the sign of 4 of the 4 large gaps, mean $\tau_b$ 0.374, $p$ = 0.00073.
+- Near-ties: 155 of the 160 sweep near-ties (differences under 0.02) stayed within
+  $\pm$0.04 on the new seeds. Five seeds resolve within-pair differences of about 0.04, so the replication does not test the
+  order of near-tied penalties; the first-ranked penalty was the same as in the sweep in 6 of 13 pairs.
+
+Where it is reported: abstract (Results), Res-2b, Disc-1 and Supplementary Table S9; the design is in Methods ("Replication
+across training seeds") and Supplementary Notes 4, 10 and 11.

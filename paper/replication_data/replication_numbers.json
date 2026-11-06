@@ -1,0 +1,222 @@
+{
+ "n_fits": {
+  "description": "replication fits in the final result (planned plus extension)",
+  "value": 895
+ },
+ "n_fits_planned": {
+  "description": "replication fits planned before the extension step",
+  "value": 855
+ },
+ "n_fits_extension": {
+  "description": "fits of the rule's extension step",
+  "value": 40
+ },
+ "n_failed": {
+  "description": "failed replication fits",
+  "value": 0
+ },
+ "n_readings": {
+  "description": "penalty readings (13 pairs x 6 penalties)",
+  "value": 78
+ },
+ "n_bracketed_before": {
+  "description": "readings bracketing b* before the extension step",
+  "value": 70
+ },
+ "n_extension_readings": {
+  "description": "readings that needed the extension step",
+  "value": 8
+ },
+ "n_extension_bracketed": {
+  "description": "of those, bracketed after it",
+  "value": 7
+ },
+ "n_reached": {
+  "description": "readings that reach b* in the final result",
+  "value": 77
+ },
+ "unreached_pair": {
+  "description": "the reading that did not replicate the crossing: pair",
+  "value": "pancreas|1"
+ },
+ "unreached_arm": {
+  "description": "... penalty",
+  "value": "mmd"
+ },
+ "unreached_bmax": {
+  "description": "... highest new-seed mean batch score reached",
+  "value": 0.6742895103503566
+ },
+ "unreached_bstar": {
+  "description": "... b* of that pair",
+  "value": 0.6840932932332424
+ },
+ "plain_diff_min": {
+  "description": "plain scVI batch score, seeds 0-4 minus sweep seeds 100-102, 13 ranked pairs: min",
+  "value": -0.0055065088176596
+ },
+ "plain_diff_max": {
+  "description": "... max",
+  "value": 0.00491978373632701
+ },
+ "n_from_plain": {
+  "description": "readings interpolated from plain scVI at seeds 0-4 (lower point strength 0)",
+  "value": 8
+ },
+ "n_from_plain_passed": {
+  "description": "... of which the new-seed mean at the lower refitted strength already reached b*",
+  "value": 7
+ },
+ "absdiff_median": {
+  "description": "|replication - sweep| biology at b*, readings that reach b*: median",
+  "value": 0.004133436145030811
+ },
+ "absdiff_max": {
+  "description": "... max",
+  "value": 0.024054326414287286
+ },
+ "pair_mad_min": {
+  "description": "per-pair mean |replication - sweep| (pairs with six readings): min",
+  "value": 0.0016678499267513
+ },
+ "pair_mad_max": {
+  "description": "... max",
+  "value": 0.0107343273339823
+ },
+ "n_top_same": {
+  "description": "pairs whose first-ranked penalty is the same",
+  "value": 6
+ },
+ "n_rank_same": {
+  "description": "readings with the same rank in sweep and replication",
+  "value": 29
+ },
+ "n_rank_within1": {
+  "description": "readings whose rank moved by at most one place",
+  "value": 56
+ },
+ "n_gaps": {
+  "description": "large sweep gaps (>= 0.04)",
+  "value": 4
+ },
+ "n_gaps_kept": {
+  "description": "large gaps whose sign is kept (raw reading)",
+  "value": 4
+ },
+ "close_gap_pair": {
+  "description": "large gap closest to flipping: pair",
+  "value": "atac_small|0"
+ },
+ "close_gap_sweep": {
+  "description": "... sweep difference",
+  "value": 0.0408828446758832
+ },
+ "close_gap_rep": {
+  "description": "... replication difference",
+  "value": 0.0128137184048284
+ },
+ "tau_min": {
+  "description": "per-pair Kendall tau-b: min",
+  "value": -0.0666666666666666
+ },
+ "tau_max": {
+  "description": "... max",
+  "value": 0.8666666666666666
+ },
+ "n_tau_positive": {
+  "description": "pairs with tau-b > 0",
+  "value": 11
+ },
+ "n_tau_negative": {
+  "description": "pairs with tau-b < 0",
+  "value": 2
+ },
+ "neg_pairs": {
+  "description": "pairs with tau-b < 0",
+  "value": "immune_hum_mou|1; pancreas|1"
+ },
+ "mean_tau": {
+  "description": "mean tau-b over the 13 pairs",
+  "value": 0.45641025641025634
+ },
+ "p_pair": {
+  "description": "one-sided sign-flip p over pairs (the rule's test)",
+  "value": 0.00048828125
+ },
+ "p_pair_hits": {
+  "description": "patterns reaching the observed mean, over pairs",
+  "value": 4
+ },
+ "p_pair_patterns": {
+  "description": "sign patterns over pairs",
+  "value": 8192
+ },
+ "p_task": {
+  "description": "sensitivity: one-sided sign-flip p, signs flipped per task (both decoders together)",
+  "value": 0.00390625
+ },
+ "p_task_hits": {
+  "description": "patterns reaching the observed mean, per task",
+  "value": 1
+ },
+ "p_task_patterns": {
+  "description": "sign patterns over tasks",
+  "value": 256
+ },
+ "n_tasks_tau_sum_positive": {
+  "description": "tasks whose summed tau-b is positive",
+  "value": 8
+ },
+ "agree": {
+  "description": "agreement rule met (final)",
+  "value": true
+ },
+ "n_near_ties": {
+  "description": "sweep near-ties (difference < 0.02)",
+  "value": 160
+ },
+ "near_ties_within": {
+  "description": "near-ties whose replication difference stays within +/-0.04",
+  "value": 155
+ },
+ "near_ties_within_before": {
+  "description": "... before the extension step",
+  "value": 127
+ },
+ "n_gaps_kept_slope": {
+  "description": "large gaps kept, slope-adjusted reading",
+  "value": 4
+ },
+ "mean_tau_slope": {
+  "description": "mean tau-b, slope-adjusted reading",
+  "value": 0.3743589743589743
+ },
+ "p_slope": {
+  "description": "sign-flip p over pairs, slope-adjusted reading",
+  "value": 0.000732421875
+ },
+ "before_n_gaps_defined": {
+  "description": "before the extension step: large gaps with both readings",
+  "value": 3
+ },
+ "before_n_gaps_kept": {
+  "description": "... kept",
+  "value": 3
+ },
+ "before_undefined_pair": {
+  "description": "... the pair of the gap that could not be read",
+  "value": "atac_small|0"
+ },
+ "before_mean_tau": {
+  "description": "before the extension step: mean tau-b",
+  "value": 0.4256410256410256
+ },
+ "before_p": {
+  "description": "before the extension step: sign-flip p over pairs",
+  "value": 0.00048828125
+ },
+ "before_agree": {
+  "description": "before the extension step: rule met as computed",
+  "value": false
+ }
+}
