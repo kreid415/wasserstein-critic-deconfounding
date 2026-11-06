@@ -1,7 +1,7 @@
-# Change summary: Pass 7 draft to Pass 20 (branch `paper`, 2026-11-06)
+# Change summary: Pass 7 draft to Pass 21 (branch `paper`, 2026-11-06)
 
 The Pass 7 draft had the sweep Results and Discussion written around result placeholders, mock Figures 1-6 and no supplement
-bodies. Passes 8-20 filled every result from its source files (numbers listed in `paper/pass9_numbers.csv` to
+bodies. Passes 8-21 filled every result from its source files (numbers listed in `paper/pass9_numbers.csv` to
 `paper/pass17_numbers.csv` and the three supplement ledgers, re-read by `paper/tools/check_ledger.py`, 0 failures), added real
 figures, the whole supplement, the replication result, and the fixes of three rigour reviews. Details: `paper/passNN_changelog.md`; response: `revision/reviewer_response.md`.
 
@@ -18,6 +18,8 @@ figures, the whole supplement, the replication result, and the fixes of three ri
   their text; the Pass 16 number ledger committed (no number changed).
 - Pass 19: AI-tool statement in Methods (tools, what they did, the authors' decisions and checks), as BMC requires.
 - Pass 20: Declarations: ethics wording (re-analysis of public data; not applicable) drafted; no competing interests.
+- Pass 21: Figures 1-6 placed in the text beside the paragraph that first cites each, for editing (to be reversed for the
+  journal's separate-file layout).
 - Pass 17 corrections of the main text from the supplement's sources: replication fits of lung, simulation 2 and pancreas were
   scored on the cluster, their sweep fits on the workstation (Methods); 448 planned baseline fits, 447 fitted and scored (Methods,
   response); ranking-rule dates and the baseline score files that are older than the ranking rules (Methods, Note 10); a causal
