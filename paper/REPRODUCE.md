@@ -111,7 +111,7 @@ python paper/tools/make_replication.py --check     # Table S9 and replication_nu
 python paper/tools/make_supp_tables.py --check-table4
 ```
 Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
-section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-15 from their starting commits and compares with their
+section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-16 from their starting commits and compares with their
 result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper/outline_clean.tex` (generated, never edited by hand;
 `--check` exits 1 when it is out of date).
 
