@@ -538,7 +538,7 @@ def table_s5(manifest, coverage):
         n(c.scored) if c.scored == c.expected else f"{n(c.scored)} of {n(c.expected)}" for c in allb) + r" \\"]
     missing = "; ".join(f"{r.missing} of {dict((a, x) for a, x, _ in TOOLS)[r.arm]} on {TASK_LABEL[r.task]}"
                         for r in coverage.itertuples() if r.missing)
-    num = r">{\raggedleft\arraybackslash}p{0.058\textwidth}"
+    num = r">{\raggedleft\arraybackslash}p{0.074\textwidth}"
     return "\n".join([
         HEAD, OPEN % "S5", r"\setlength{\tabcolsep}{3pt}",
         r"\begin{longtable}{@{}" + P(0.12) + P(0.1) + num * len(TASKS) + "r@{}}",

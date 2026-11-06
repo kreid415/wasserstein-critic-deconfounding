@@ -12,8 +12,9 @@ Every number below is copied from the paper text, whose numbers are listed with 
 and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/tools/check_ledger.py` re-reads the ledgers from
 their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. The replication results were added in Pass 14 (2026-11-06;
 numbers in `paper/pass14_numbers.csv`). Pass 15 (2026-11-06; `paper/pass15_changelog.md`) fixes the points of an independent
-re-review. The supplementary material of this version contains Supplementary Note 1, Tables S6, S7, S9 and S10 and Figures S1-S6;
-the other supplementary notes and tables named below are described in the outline and are not yet written. Table numbers are those the PDF prints (Pass 13):
+re-review. Pass 17 (2026-11-06; `paper/pass17_changelog.md`) adds the finished supplement: the supplementary material of this
+version contains Supplementary Notes 1-12, Tables S1, S2 and S4-S10 and Figures S1-S6 (Table S3, the strength ranges of the
+planned fixed-strength benchmark, was removed with that benchmark). Table numbers are those the PDF prints (Pass 13):
 the main-text tables are numbered 1 to 3, Table 1 (methods), Table 2 (ranking) and Table 3 (placement); the strength-range table was removed.
 
 ## What changed overall
@@ -30,7 +31,7 @@ We thank the three reviewers. Their comments led us to redesign the study rather
    "Penalty-strength sweep"; Res-1). Penalties are compared at matched batch removal, and trade-off curves, hypervolume, the share
    of non-dominated strengths, collapse rates and the range of good strengths describe the rest of each curve (Res-2 to Res-6).
 3. **Standard tools at equal tuning effort.** Plain scVI, scvi-tools' built-in adversary, Harmony, Scanorama, sysVI, scANVI and
-   uncorrected principal components (448 baseline fits) are compared with the penalties at equal numbers of tries (Methods,
+   uncorrected principal components (448 planned baseline fits, 447 fitted and scored) are compared with the penalties at equal numbers of tries (Methods,
    baselines paragraph; Res-7, Res-8; Tables 3 and S7; Figure 6).
 4. **A replication across training seeds** refits each penalty at the two sweep strengths around the matched level with five new
    seeds, checked against a prediction and an agreement rule fixed before any of these fits was scored (Methods, "Replication
