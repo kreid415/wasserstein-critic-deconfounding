@@ -50,7 +50,7 @@ curl -L -o data_download.zip 'https://figshare.com/ndownloader/articles/12420968
 
 ## Usage
 ### Revision pipeline (current, 2026-10)
-The revision experiments (docs/PAPER_PLAN.md, pre-registered rules in docs/PREREG.md, constraints in CONSTRAINTS.md)
+The revision experiments (docs/PAPER_PLAN.md, rules fixed in advance in docs/PREREG.md, constraints in CONSTRAINTS.md)
 run through one path:
 1. `scripts/prep_scib_task.py`: prepped scIB task files (`<task>__scib.h5ad`).
 2. `scripts/build_paper_manifest.py`: the manifest, one row per fit, every setting a column
@@ -62,7 +62,7 @@ run through one path:
    it with `scripts/score_scib_native.py` (scib.metrics.metrics, seeded kBET). X13 CPU baselines are fitted with
    `scripts/run_cpu_baselines.py`.
 4. `scripts/prereg_rules.py`, `scripts/freeze_a1_grid.py`, `scripts/freeze_matched_lambda.py`, `scripts/decide_a2_a3.py`:
-   the pre-registered decision rules R1-R4.
+   the decision rules R1-R4, fixed in advance.
 
 The rejected pre-revision pipeline (`scvi_final_manifest.tsv`, `score_final_config.py` and its drivers) is retired in
 `legacy/` (see legacy/README.md); its files refuse to run.

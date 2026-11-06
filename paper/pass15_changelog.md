@@ -16,8 +16,7 @@ Pass 11 findings: F01, F02, F04, F06, F07, F08, F11, F12 fixed; F09 rejection ag
 disputed (see below). Replication claims checked against the committed rule and both result folders: they match (the rule is met
 only after its own extension step, the result before it is reported, 1 reading is unreached, both sensitivity analyses are labelled
 as defined after the rule). All Pass 12-14 ledger values matched their sources; Tables S6, S7 and S9 reproduced. Rules: 44 unique
-main-text citation keys (limit 50); no 'pre-registered', 'registered', 'pre-registration' or 'confirmatory' describing the study in
-the printed text; no supplement citations; the update steps are nowhere described as a limitation.
+main-text citation keys (limit 50); none of the study-status words ruled out by CONSTRAINTS.md SI-78 in the printed text; no supplement citations; the update steps are nowhere described as a limitation.
 
 Every finding was checked by the lead against the cited lines before it was fixed:
 
