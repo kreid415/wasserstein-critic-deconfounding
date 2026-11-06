@@ -7,8 +7,9 @@ Inputs, read with `git show` from commit a475ea3 (branch sweep-replication) and 
   experiments/sweep_replication/agreement_result/                  the result before the extension step (855 fits)
   paper/figure_data/curves.csv                                     the sweep's plain scVI batch score (strength 0) per task and decoder
 Outputs: paper/supp/tableS9.tex and paper/replication_data/replication_numbers.json ({key: {description, value}}).
-The per-task sign-flip p (a sensitivity analysis added after the agreement rule) is computed here: the mean Kendall tau-b over the 13
-ranked pairs with the signs flipped per task, both decoders of a task together, over all 2^8 patterns (exact, no random numbers).
+Two sign-flip sensitivity analyses, both added after the agreement rule, are computed here: the mean Kendall tau-b over the 13 ranked
+pairs with the signs flipped per task, both decoders of a task together (all 2^8 patterns), and per task family, related tasks and
+both decoders together (all 2^6 patterns; FAMILY below). Both are exact, no random numbers.
 Run from the repository root:  python paper/tools/make_replication.py [--check]   (--check: exit 1 if the committed outputs differ)
 """
 import argparse, hashlib, io, itertools, json, subprocess, sys
@@ -36,6 +37,21 @@ def git_file(folder, name, rev=REV):
     data = show(f"{folder}/{name}")
     assert hashlib.sha256(data).hexdigest() == manifest[name], (folder, name)
     return data
+
+
+# Task families for the family-level sign flip. Real tasks: scripts/prereg_rules.py TASK_FAMILY at the paper's commit (4 families:
+# immune with immune_hum_mou, since all immune cells are in immune_hum_mou; atac_small with atac_large, which share 3,618 cells;
+# docs/ANALYSIS_SPEC.md section 1, docs/PREREG.md glossary 'dataset family', SI-73). TASK_FAMILY has no simulation entry and the
+# two simulations share no data (12,097 and 19,318 cells, ANALYSIS_SPEC: reported per task), so each is its own family.
+FAMILY = {"pancreas": "pancreas", "lung": "lung", "immune": "immune", "immune_hum_mou": "immune",
+          "atac_small": "atac", "atac_large": "atac", "sim1": "sim1", "sim2": "sim2"}
+
+
+def family_groups(tasks):
+    """Family of each task; a task without a family stops the run (a silent drop would shrink the pattern count)."""
+    missing = sorted(set(tasks) - set(FAMILY))
+    assert not missing, f"tasks without a family: {missing}"
+    return [FAMILY[t] for t in tasks]
 
 
 def sign_flip_p(values, groups):
@@ -66,6 +82,8 @@ def numbers(rd, tk, gaps, summ, rd0, summ0, gaps0, curves):
     hits_pair, n_pair = sign_flip_p(tk.tau, range(len(tk)))
     assert abs(hits_pair / n_pair - summ["p_value"]) < 1e-15, (hits_pair, n_pair, summ["p_value"])  # the rule's test, recomputed
     hits_task, n_task = sign_flip_p(tk.tau, tk.task)
+    fam = family_groups(tk.task)
+    hits_fam, n_fam = sign_flip_p(tk.tau, fam)
     plain = curves[curves.lam == 0].groupby(["task", "cond"]).B.agg(["min", "max"])
     assert (plain["max"] - plain["min"]).abs().max() < 1e-12  # one plain scVI curve start per task and decoder
     pd_ = tk.set_index(["task", "cond"]).b0_rep - plain["min"].reindex(pd.MultiIndex.from_frame(tk[["task", "cond"]])).to_numpy()
@@ -124,6 +142,11 @@ def numbers(rd, tk, gaps, summ, rd0, summ0, gaps0, curves):
         "p_task": (hits_task / n_task, "sensitivity: one-sided sign-flip p, signs flipped per task (both decoders together)"),
         "p_task_hits": (hits_task, "patterns reaching the observed mean, per task"),
         "p_task_patterns": (n_task, "sign patterns over tasks"),
+        "p_family": (hits_fam / n_fam, "sensitivity: one-sided sign-flip p, signs flipped per task family (related tasks and both decoders together)"),
+        "p_family_hits": (hits_fam, "patterns reaching the observed mean, per family"),
+        "p_family_patterns": (n_fam, "sign patterns over families"),
+        "n_families": (len(set(fam)), "task families among the ranked pairs"),
+        "n_families_tau_sum_positive": (int((tk.groupby(fam).tau.sum() > 0).sum()), "families whose summed tau-b is positive"),
         "n_tasks_tau_sum_positive": (int((tk.groupby("task").tau.sum() > 0).sum()), "tasks whose summed tau-b is positive"),
         "agree": (bool(summ["agree"]), "agreement rule met (final)"),
         "n_near_ties": (summ["n_near_ties"], "sweep near-ties (difference < 0.02)"),
@@ -228,7 +251,8 @@ def main(argv=None):
     OUT_JSON.write_text(js)
     v = json.loads(js)
     print(f"wrote {OUT_TEX.name} and {OUT_JSON.name}; per-task sign-flip p = {v['p_task']['value']} "
-          f"({v['p_task_hits']['value']} of {v['p_task_patterns']['value']} patterns)")
+          f"({v['p_task_hits']['value']} of {v['p_task_patterns']['value']} patterns), per-family p = {v['p_family']['value']} "
+          f"({v['p_family_hits']['value']} of {v['p_family_patterns']['value']} patterns)")
     return 0
 
 

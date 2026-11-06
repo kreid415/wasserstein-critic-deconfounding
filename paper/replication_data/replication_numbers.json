@@ -163,6 +163,26 @@
   "description": "sign patterns over tasks",
   "value": 256
  },
+ "p_family": {
+  "description": "sensitivity: one-sided sign-flip p, signs flipped per task family (related tasks and both decoders together)",
+  "value": 0.015625
+ },
+ "p_family_hits": {
+  "description": "patterns reaching the observed mean, per family",
+  "value": 1
+ },
+ "p_family_patterns": {
+  "description": "sign patterns over families",
+  "value": 64
+ },
+ "n_families": {
+  "description": "task families among the ranked pairs",
+  "value": 6
+ },
+ "n_families_tau_sum_positive": {
+  "description": "families whose summed tau-b is positive",
+  "value": 6
+ },
  "n_tasks_tau_sum_positive": {
   "description": "tasks whose summed tau-b is positive",
   "value": 8

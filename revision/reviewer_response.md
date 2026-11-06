@@ -37,7 +37,9 @@ We thank the three reviewers. Their comments led us to redesign the study rather
    across training seeds"; Res-2b). The rule's sign-flip test assumes the 13 task and decoder pairs are independent, although the
    two decoders of a task share its data and some tasks are related, so its $p$-value is approximate; a sensitivity analysis that
    flips the signs per task (both decoders together), added after the rule was fixed, is reported beside it and is approximate too,
-   because it still flips the two tasks of a nested pair separately. The agreement rule is met (Res-2b; last section of this response).
+   because it still flips the two tasks of a nested pair separately; a further analysis added after the rule, which flips the signs
+   per task family (the two tasks of each nested pair and both decoders together, six families, $2^{6}$ patterns), gives
+   $p$ = 0.0156 and is approximate too. The agreement rule is met (Res-2b; last section of this response).
 5. **Direct biology readouts** per cell type (Methods, direct biology check paragraph; Res-5b; Supplementary Note 12; Table S10).
 6. **Claims scoped to the evidence.** The study is described throughout as an exploratory benchmark on one backbone; the topology
    and reference-bottleneck explanations of the earlier paper are removed, and the limits are listed in Disc-4 and Disc-5.
@@ -223,7 +225,9 @@ takes the bottom place in its pair, marked as not replicating the crossing.
   3 kept their sign and the mean $\tau_b$ was 0.426 ($p$ = 0.00049).
   The rule was met only once the step it prescribes had been run; both results are reported (Res-2b).
 - Sensitivity analyses, not part of the rule and defined after it was fixed: with signs flipped per task (both decoders of a
-  task together, $2^{8}$ patterns) $p$ = 0.0039, the smallest value eight tasks allow, and still approximate, because the two tasks of a nested pair are flipped separately; the slope-adjusted reading
+  task together, $2^{8}$ patterns) $p$ = 0.0039, the smallest value eight tasks allow, and still approximate, because the two tasks of a nested pair are flipped separately; with signs flipped per task family (the two
+  tasks of each nested pair and both decoders together, $2^{6}$ patterns over six families) $p$ = 0.0156, the smallest value six
+  families allow, also approximate; the slope-adjusted reading
   kept the sign of 4 of the 4 large gaps, mean $\tau_b$ 0.374, $p$ = 0.00073.
 - Near-ties: 155 of the 160 sweep near-ties (differences under 0.02) stayed within
   $\pm 0.04$ on the new seeds. The rule tests only the sign of the four gaps of 0.04 or more (no precision calculation was made), so the replication does not test the

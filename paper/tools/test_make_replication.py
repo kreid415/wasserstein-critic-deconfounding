@@ -18,6 +18,16 @@ def test_sign_flip_p_counts_patterns_per_group(values, groups, expected):  # tes
     assert mr.sign_flip_p(values, groups) == expected
 
 
+def test_family_groups_flip_related_tasks_together_and_unknown_task_stops():  # test-reason: the family map and its fail-loud check, which sign_flip_p's own cases do not reach
+    tasks, taus = ["atac_small", "atac_large", "pancreas"], [1, -1, 1]
+    # hand count: family sums (atac 0, pancreas 1), observed total 1; of the 4 patterns, (+,+) and (-,+) give 1, the others -1 -> 2 of 4
+    assert mr.sign_flip_p(taus, mr.family_groups(tasks)) == (2, 4)
+    assert mr.sign_flip_p(taus, tasks) == (4, 8)  # per task: (+,+,+), (+,-,+), (+,-,-), (-,-,+) reach 1
+    assert sorted(set(mr.family_groups(["immune", "immune_hum_mou", "sim1", "sim2"]))) == ["immune", "sim1", "sim2"]
+    with pytest.raises(AssertionError, match="without a family"):
+        mr.family_groups(["pancreas", "new_task"])
+
+
 def test_strength_and_row_formats():  # test-reason: strengths of 1,000 and more (thousands separator) and a fractional rank, absent from the real table
     assert [mr.lam_str(x) for x in (0, 0.03, 3, 3000)] == ["0", "0.03", "3", "3{,}000"]
     r = pd.Series(dict(arm="mmd", status="bracketed", lam_lo=0.0, lam_hi=0.3, B_lo=0.5, B_hi=0.6, C_lo=0.7, C_hi=0.8,
@@ -35,7 +45,7 @@ def test_outputs_reproduce_and_check_detects_a_change(tmp_path, monkeypatch, cap
     monkeypatch.setattr(mr, "OUT_JSON", tmp_path / "sub" / "replication_numbers.json")
     assert mr.main([]) == 0
     assert (mr.OUT_TEX.read_text(), mr.OUT_JSON.read_text()) == committed
-    assert "per-task sign-flip p = 0.00390625 (1 of 256 patterns)" in capsys.readouterr().out
+    assert "per-task sign-flip p = 0.00390625 (1 of 256 patterns), per-family p = 0.015625 (1 of 64 patterns)" in capsys.readouterr().out
     assert mr.main(["--check"]) == 0
     mr.OUT_TEX.write_text(committed[0].replace("0.456", "0.457", 1) + "x")
     assert mr.main(["--check"]) == 1
