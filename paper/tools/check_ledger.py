@@ -26,7 +26,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = "/home/kendall/experiment_data/wasserstein-critic-deconfounding"
-LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12)]
+LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13)]
 WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen".split())}
 TERM = re.compile(r"^(\|?)([\w.]+)\|?\s*(==|!=|<=|>=|<|>| in )\s*(.*)$")
 
@@ -161,7 +161,23 @@ def fmt_value(v, fmt, written):
     return format(v, fmt)
 
 
-def check_pass12(rows, root, data_root):
+def final_abstract(tex):
+    """The abstract as printed with \\usepackage[final]{changes}: new text of \\replaced, \\added kept, \\deleted and placeholders dropped."""
+    import abstract_words as aw
+    return aw.active_text(aw.abstract(tex), [])
+
+
+def superseded_ids(ledgers, root):
+    """Ids of earlier rows whose location a later ledger (column `supersedes`) has moved; the value is still re-read, the old
+    location (raw source text, which also holds struck old text) is no longer a claim about the printed text."""
+    ids = set()
+    for led in ledgers:
+        rows = list(csv.DictReader(open(Path(root) / led, newline="")))
+        ids |= {r["supersedes"] for r in rows if r.get("supersedes")}
+    return ids
+
+
+def check_pass12(rows, root, data_root, superseded=()):
     values, errors = {}, []
     for r in rows:
         try:
@@ -172,9 +188,12 @@ def check_pass12(rows, root, data_root):
             got = fmt_value(raw, r["fmt"], r["written"])
             if norm(r["written"]) != norm(got):
                 raise LedgerError(f"written {r['written']!r} but source gives {got!r}")
-            if r["location"]:
+            if r["location"] and (r["id"] not in superseded or r.get("supersedes")):
                 f, anchor = r["location"].split("::", 1)
-                if anchor not in (read_source(f, root, data_root) or ""):
+                text = read_source(f.removeprefix("abstract:"), root, data_root) or ""
+                if f.startswith("abstract:"):  # anchor must be in the printed (final) abstract, not in struck old text
+                    text = final_abstract(text)
+                if anchor not in text:
                     raise LedgerError(f"anchor not found in {f}: {anchor[:60]!r}")
                 if r["written"] not in anchor:
                     raise LedgerError(f"written value not inside its anchor: {anchor[:60]!r}")
@@ -209,12 +228,12 @@ def check_keyed(rows, root, data_root, path_col, key_col, val_col):
     return checked, path_only, errors
 
 
-def check_ledger(path, root=ROOT, data_root=DATA_ROOT):
+def check_ledger(path, root=ROOT, data_root=DATA_ROOT, superseded=()):
     """(values re-read, rows checked for the path only, list of errors) for one ledger file."""
     rows = list(csv.DictReader(open(Path(root) / path, newline="")))
     cols = set(rows[0]) if rows else set()
     if "selector" in cols:
-        return check_pass12(rows, Path(root), data_root)
+        return check_pass12(rows, Path(root), data_root, superseded)
     if "source_file" in cols:
         return check_keyed(rows, Path(root), data_root, "source_file", "source_key_or_row", "source_value")
     if "source" in cols:
@@ -229,8 +248,9 @@ def main(argv=None):
     ap.add_argument("--root", default=str(ROOT), help="repository root (default: this checkout)")
     a = ap.parse_args(argv)
     bad = 0
+    sup = superseded_ids(a.ledgers, a.root)
     for led in a.ledgers:
-        n, p, errs = check_ledger(led, a.root, a.data_root)
+        n, p, errs = check_ledger(led, a.root, a.data_root, sup)
         print(f"{led}: {n} values re-read, {p} pointers checked for the path only, {len(errs)} failures")
         for e in errs:
             print("  FAIL", e)

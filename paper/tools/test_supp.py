@@ -34,3 +34,14 @@ def test_s6_row_formats_na_and_not_ranked():
     assert "n/a & 1 & 2.5 & n/a" in mt.row_s6(pd.Series(dict(base, n_loso=1)))        # fewer than two readings: SE and range not given
     low = pd.Series(dict(base, n_loso=float("nan"), loso_se=float("nan"), rank=float("nan"), rank_lo=float("nan"), rank_hi=float("nan"), status="unreached_low"))
     assert "not ranked" in mt.row_s6(low) and r"$^\dagger$" in mt.row_s6(low)
+
+
+def test_supp_tables_cite_main_tables_by_label_and_placement_table_reproduces(tmp_path, monkeypatch, capsys):  # test-reason: runs the two generator functions no other test runs; catches a hard-coded main-text table number coming back
+    monkeypatch.setattr(mt, "OUT", tmp_path)
+    mt.make_s6()
+    mt.make_s7()
+    mt.check_table4()
+    s6, s7 = (tmp_path / "tableS6.tex").read_text(), (tmp_path / "tableS7.tex").read_text()
+    assert r"Table~\ref{tab:3} gives the mean ranks" in s6
+    assert s7.count(r"Table~\ref{tab:4}") == 2 and "Table~4" not in s7
+    assert "reproduced" in capsys.readouterr().out

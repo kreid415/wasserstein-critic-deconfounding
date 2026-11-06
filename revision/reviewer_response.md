@@ -10,8 +10,8 @@ described experiments of an earlier design that are not in this paper. Section n
 paragraphs by their topic; Results paragraphs Res-1 to Res-8, Res-2b and Res-5b; Discussion paragraphs Disc-1 to Disc-5).
 Every number below is copied from the paper text, whose numbers are listed with their source files in `paper/pass9_numbers.csv`
 and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/tools/check_ledger.py` re-reads the ledgers from
-their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. Table numbers are those the PDF prints: the
-number 2 is left free (the strength-range table was removed), so the ranking table is Table 3 and the placement table Table 4.
+their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. Table numbers are those the PDF prints (Pass 13):
+the main-text tables are numbered 1 to 3, Table 1 (methods), Table 2 (ranking) and Table 3 (placement); the strength-range table was removed.
 
 ## What changed overall
 
@@ -28,7 +28,7 @@ We thank the three reviewers. Their comments led us to redesign the study rather
    of non-dominated strengths, collapse rates and the range of good strengths describe the rest of each curve (Res-2 to Res-6).
 3. **Standard tools at equal tuning effort.** Plain scVI, scvi-tools' built-in adversary, Harmony, Scanorama, sysVI, scANVI and
    uncorrected principal components (448 baseline fits) are compared with the penalties at equal numbers of tries (Methods,
-   baselines paragraph; Res-7, Res-8; Tables 4 and S7; Figure 6).
+   baselines paragraph; Res-7, Res-8; Tables 3 and S7; Figure 6).
 4. **A replication across training seeds** refits each penalty at the two sweep strengths around the matched level with five new
    seeds, checked against a prediction and an agreement rule fixed before any of these fits was scored (Methods, "Replication
    across training seeds"; Res-2b). The rule's sign-flip test treats the 13 task and decoder pairs as exchangeable, although the
@@ -130,7 +130,7 @@ Background last paragraph; Methods, sweep paragraph; Disc-4). We did not add atl
 
 **Agreed and tested.** The pooled and barycenter critics use no reference batch (Methods, penalties paragraph). At matched batch
 removal the pooled critic had the best mean rank with the batch-conditioned decoder (2.20) and the reference critic 3.80, whereas
-with the unconditioned decoder the two were tied at 3.33 (Res-2; Table 3). The paper attributes no result to Wasserstein critics in
+with the unconditioned decoder the two were tied at 3.33 (Res-2; Table 2). The paper attributes no result to Wasserstein critics in
 general, and neighbouring readings are often within one standard error (Res-2; Disc-1).
 
 ### R2.6 Biological over-correction is not directly validated

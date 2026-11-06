@@ -1,5 +1,5 @@
 """Figure 4: per-penalty dot plots, one point per real task (n = 6 per decoder) and the mean (black tick).
-(a) hypervolume; (b) collapse rate with exact 95% intervals; (c) local minus global batch removal at b*.
+(a) hypervolume; (b) collapse rate with nominal 95% intervals; (c) local minus global batch removal at b*.
 Within each penalty band: upper row batch-conditioned decoder (circles), lower row unconditioned decoder (squares);
 tasks run top to bottom in the order of Figure 3. Ringed point = the low-signal immune pair with the
 batch-conditioned decoder: kept in the mean in (b) (as in the Results text), excluded from the mean in (c);
@@ -28,7 +28,7 @@ assert round(val("local_minus_global", "discriminator", "lung", 1), 3) == -0.356
 PANELS = [("hypervolume", "hypervolume", "higher = better", True),
           ("collapse_rate", "collapse rate (percentage points)", "lower = better", True),
           ("local_minus_global", "local minus global batch removal", "positive = stronger locally", False)]
-titles = ["hypervolume", "collapse rate, exact 95% interval", r"local minus global removal at $b^{*}$"]
+titles = ["hypervolume", "collapse rate, nominal 95% interval", r"local minus global removal at $b^{*}$"]
 fig, axes = plt.subplots(1, 3, figsize=(WIDTH_IN, 4.6), sharey=True,
                          gridspec_kw=dict(wspace=0.08, left=0.125, right=0.995, top=0.92, bottom=0.2))
 off = np.linspace(-0.12, 0.12, 6)
@@ -56,7 +56,7 @@ for ax, (kind, xlabel, cue, low_in_mean), title in zip(axes, PANELS, titles):
                     xs.append(x)
             ax.plot([np.mean(xs)] * 2, [i + base - 0.15, i + base + 0.15], color="black", lw=1.6, zorder=4,
                     solid_capstyle="butt")
-    ax.set_title(title, loc="left", pad=4)
+    ax.set_title(title, loc="left", pad=4, fontsize=7)  # Pass 13: 7 pt so that the longer panel (b) title clears the panel letter c
     ax.set_xlabel(f"{xlabel}\n({cue})")
     ax.margins(x=0.05)
 axes[0].set_ylim(5.5, -0.5)
