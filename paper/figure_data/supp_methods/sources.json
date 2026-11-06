@@ -1,0 +1,17 @@
+{
+ "data_root": "/home/kendall/experiment_data/wasserstein-critic-deconfounding",
+ "sha256": {
+  "sweep_analysis_final_20261105/inputs/manifest.tsv": "9cc9ae3884aca176e0db8c5ba6d097c8adf73a8c719ca6a365b3367f6b3e710e",
+  "sweep_analysis_final_20261105/inputs/latents.tsv": "ca3e6982a18e9aa1e410cebe26d22e0ed9c993456b825aea7900617b3a7f7de9",
+  "sweep_analysis_final_20261105/inputs/scores_list.txt": "f0ad343ab7df8c32acf22dcc4e4baef3fa010e4cb64f41756d478a8636c0a74f",
+  "sweep_analysis_final_20261105/tables/baseline_coverage.csv": "6095e5bd984eab95e21e6ac9301a81269e35e854b70cb5c88acca1b7ee394702",
+  "git:10a1ca5:docs/prepped_fingerprints_scib.json": "dded7e1a8191f1a76d375aac5a262a8bc10f60d742fe6fc14b9b413110b532fb",
+  "git:3202725:archive/claude-science/2026-10-02/scib_raw_sources.tsv": "f702844918401a021697fe978e685d583fdd91b68c74d0f00ddd488e6daa1ac4",
+  "git:10a1ca5:scripts/score_scib_native.py": "d216507f5286a34f5453b1e03bad920bb63ff1422118193cfae4d016becddad7",
+  "git:10a1ca5:src/wcd_vae/wcd/alignment.py": "2ffd0b7dd0f01cf5368f9c9eb6aaadf9d9af411469178e550ef1153f232225b9",
+  "git:10a1ca5:src/wcd_vae/wcd/adversarial.py": "839e8119a18e02c029c3d74175f93cf8b6c353c8246ee0cbb5bf2a7147528594",
+  "git:8595a16:scripts/prereg_rules.py": "dced444efcbc24becd43e7e2e9fa82b46be0fb60da88b6c182de2ac3ba752fa4",
+  "git:a475ea3:manifests/sweep_replication_x1_ext1.tsv": "b00f7529ef18ad8e9dcd833d137a28c3eaf337f2f3bb51b990f8864a77c812ef",
+  "git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md": "00b609ab5cf2d50a80d1bea31ae84d4d5bfde0770fb77ea47b64376f37e7c8ff"
+ }
+}
