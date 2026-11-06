@@ -21,6 +21,7 @@ TAG = "P22"
 
 def tokens(s):
     """Whitespace-separated tokens that never split a brace group, inline math or a control symbol such as \\ or \\%."""
+    s = s.strip()                                     # inputs are never empty, so the last token is never empty
     out, cur, depth, math, i = [], "", 0, False, 0
     while i < len(s):
         ch = s[i]
@@ -41,8 +42,7 @@ def tokens(s):
         else:
             cur += ch
         i += 1
-    if cur:
-        out.append(cur)
+    out.append(cur)
     assert depth == 0 and not math, s[:80]
     return out
 
