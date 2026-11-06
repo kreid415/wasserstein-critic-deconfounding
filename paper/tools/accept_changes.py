@@ -7,7 +7,7 @@ Why a script: \\usepackage[final]{changes} stops with an xkeyval error ("Use of 
 nested \\replaced of the writer's-outline header (outline.tex line 48), so the clean text is made here instead.
 Method: the preamble (everything before \\begin{document}) is copied unchanged. After it, \\added[..]{x} -> x, \\replaced[..]{new}{old}
 -> new (markup inside `new` is accepted too), \\deleted[..]{x} and \\droppeditem{x} -> nothing; TeX comments are copied verbatim and
-their braces are not counted; an \\item left with no text before the next \\item or \\end{..}, a list left with no
+their braces are not counted; an \\item left with no text (or only a TeX comment) before the next \\item or \\end{..}, a list left with no
 \\item and a \\pp{}{} heading left with no text are removed. Exit 1 if any markup is
 left outside comments, or (with --check) if --out differs from what the script writes. outline_clean.tex is never edited by hand.
 """
@@ -82,7 +82,7 @@ def clean(tex):
     if not sep:
         raise ValueError("no \\begin{document}")
     body = accept(body)
-    body = re.sub(r"\\item\s*(?=\\item\b|\\end\{)", "", body)  # bullets whose only text was deleted
+    body = re.sub(r"\\item(?:\s|%[^\n]*\n)*(?=\\item\b|\\end\{)", "", body)  # bullets left with no text (or only a comment)
     body = re.sub(r"\\begin\{(itemize|enumerate)\}(\[[^\]]*\])?\s*\\end\{\1\}\n?", "", body)  # lists left with no bullet
     body = re.sub(r"\\pp\{\}\{\}\n?", "", body)  # paragraph headings whose title and lead were both deleted
     left = leftover(body)

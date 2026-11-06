@@ -25,12 +25,15 @@ Every finding was checked by the lead against the cited lines before it was fixe
 |---|---|---|---|---|
 | F03 | major | the per-task sign-flip keeps the two decoders of a task together but flips the tasks of the two nested pairs separately, so it does not settle the dependence it was added for | confirmed (`make_replication.py` groups by task; Disc-4 names the nested pairs) | Methods: the rule's test assumption stated (independent pair correlations, symmetric about zero), and the per-task version also called approximate; Res-2b and Disc-1 say the same; response updated. No new analysis in the paper (see "Open for the first author") |
 | F10 | major | Supplementary Tables S1, S2, S4, S5, S8 and Notes 2-12 are described in the supplementary list but not supplied | confirmed (`supp_items.tex` holds Note 1, Tables S6, S7, S9 and Figures S1-S6; Table S10 is in the main file) | the supplementary list and the response now say which items this version contains and that the others are not yet written. Writing them is open (below) |
-| N03 | major | "with five seeds the replication resolves within-pair differences of about 0.04" (Methods, Res-2b, Disc-1, Disc-4, response) has no precision calculation behind it; 0.04 is only the rule's threshold for a large gap (AGREEMENT.md line 13) | confirmed (no calculation in AGREEMENT.md, PREDICTION.json, README.md or the design folder) | each occurrence now says that the rule tests only the sign of the gaps of 0.04 or more and that no precision calculation was made, so the order of closer penalties is not tested. Raised by the reviewer as an open question in its declaration; numbered here |
+| N03 | major | "with five seeds the replication resolves within-pair differences of about 0.04" (Background, Methods, Res-2b, Disc-1, Disc-4, response) has no precision calculation behind it; 0.04 is only the rule's threshold for a large gap (AGREEMENT.md line 13) | confirmed (no calculation in AGREEMENT.md, PREDICTION.json, README.md or the design folder); a sixth occurrence, in the last Background paragraph, was found when the clean PDF was read | each occurrence now says that the rule tests only the sign of the gaps of 0.04 or more and that no precision calculation was made, so the order of closer penalties is not tested. Raised by the reviewer as an open question in its declaration; numbered here |
 | F05 | minor | Disc-4 still says "no strength was chosen from the data" although the replication and single-strength strengths were chosen from sweep scores | confirmed | reworded: the grid was fixed in advance and the sweep reports all ten strengths; the later choices from sweep scores are named |
 | N01 | minor | outline (Note 1 item) and response describe the discriminator loss as an expectation under q(z given x); Supplementary Note 1 and the code use the posterior mean | confirmed (`supp/note1.tex`: every penalty is applied to the posterior mean, u_i = mu_i) | outline item and response now give the posterior-mean form |
 | N02 | minor | Figure S4: the trajectory-conservation row has no label (its first column, pancreas, is empty) | confirmed on the PNG | `figS4.py` puts each row label on the row's first drawn panel; Figure S4 regenerated |
 
 Findings rejected: none.
+
+Follow-up found while building: the supplementary-contents sentence first closed its `\\added` group after `\\par`, which stops
+the tracked build (fixed in 308acdb).
 
 ## Abstract
 
@@ -45,7 +48,7 @@ was 344 and 366).
 therefore written by `paper/tools/accept_changes.py` into `paper/outline_clean.tex` (generated, never edited by hand;
 `--check` exits 1 when it is out of date). Method: preamble copied unchanged; after `\begin{document}` the new text of every
 `\added`/`\replaced` (nested markup included) is kept, `\deleted` and `\droppeditem` are dropped, comments are copied verbatim,
-bullets, lists and `\pp{}{}` headings left empty by deletions are removed, and any markup left over stops the script. Tests in
+bullets (also those left with only a TeX comment), lists and `\pp{}{}` headings left empty by deletions are removed, and any markup left over stops the script. Tests in
 `paper/tools/test_accept_changes.py`, including a check that the clean copy prints the same abstract the word counter reads.
 
 ## Other edits

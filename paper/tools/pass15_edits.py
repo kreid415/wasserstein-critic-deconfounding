@@ -75,6 +75,10 @@ edit("paper/outline.tex", [
          "close, but their order is not tested by it.",
          "Near-tied penalties stayed close, but the rule tests only the sign of the large gaps, so their order is not tested by it "
          "(Methods)."),
+    swap("and it can resolve differences of about 0.04 in biology score within a task and decoder pair, not the smaller differences "
+         "between penalties that sit close together.",
+         "and its rule tests only the sign of the within-pair differences of 0.04 or more (" + NOT_STATED + "), so it does not "
+         "test the order of penalties that sit close together."),
     swap("and resolves differences of about 0.04, it supports", "and its rule tests only the sign of gaps of 0.04 or more, it supports"),
     swap("With five seeds it resolves within-pair differences of about 0.04 in biology score and cannot separate penalties whose "
          "readings differ by less.",

@@ -13,6 +13,7 @@ BODY = r"""A \replaced[id=P9]{\replaced[id=P11]{new}{mid}}{old {braced}} B \adde
 still gone} C % \added{in a comment}
 \begin{itemize}
 \item \deleted{only text}
+\item  % a comment is all that is left
 \item kept
 \end{itemize}
 \pp{\deleted{T}}{\deleted{lead}}
