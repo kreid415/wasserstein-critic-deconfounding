@@ -1,0 +1,5 @@
+pair,a,b,sweep_diff,rep_diff,sign_kept,sign_kept_slope_adj,defined
+atac_small|0,barycenter,reference,0.04088284467588321,0.012813718404828478,True,True,True
+atac_small|1,barycenter,discriminator,0.045884371169151894,0.053287372360544705,True,True,True
+atac_small|1,discriminator,pooled,-0.0461834304473967,-0.03413849490148313,True,True,True
+atac_small|1,discriminator,sinkhorn,-0.04610776647321169,-0.04329919536918081,True,True,True

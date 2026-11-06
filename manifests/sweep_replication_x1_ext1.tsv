@@ -1,0 +1,905 @@
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+# R1 A1 extension, 36 rows (freeze_a1_grid.py)
+# R1 frozen: 2880 X1 rows took their family x decoder grid (freeze_a1_grid.py, record r1_record.json)
+# paper manifest, backbone=stock, design=pilot, uncond_seeds=5, x12_runs=8, bary_iter=10, bary_warm_iter=None; lambda grid [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000]; 'g*' = per-family grid from A1; 'matched*' lambdas are resolved from X1 by scripts/freeze_matched_lambda.py. Rows reusing an X1 fit are omitted (0 of 6930).
+# R4 a1 extension, 9 A1 rows (freeze_matched_lambda.py)
+# R4 a1 frozen: 288 rows resolved (freeze_matched_lambda.py, record r4_a1_record.json)
+# R2/R3 decided: adv_input=mean zstd=0 on 2880 X1 + 1992 follow-up rows (decide_a2_a3.py)
+# fresh-seed replication of the eight-task sweep: two bracketing strengths of the first crossing of b* per ranked pair x penalty, seeds 0-4, plus plain scVI (rescope 2026-11-02, experiments/sweep_replication)
+tag	experiment	task	counts	arm	lam	n_critic	adv_input	zstd	cond	decoder	n_latent	n_layers	n_hidden	likelihood	batch_size	max_epochs	train_size	seed	reference	extra
+X1_atac_large_discriminator_lg1_c0_s0_8f7c4f90	X1	atac_large	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_discriminator_lg1_c0_s1_891403d2	X1	atac_large	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_discriminator_lg1_c0_s2_f1e3edaa	X1	atac_large	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_discriminator_lg1_c0_s3_3fb421f8	X1	atac_large	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_discriminator_lg1_c0_s4_264a920b	X1	atac_large	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_discriminator_lg2_c0_s0_68767fa5	X1	atac_large	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_discriminator_lg2_c0_s1_76e5e162	X1	atac_large	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_discriminator_lg2_c0_s2_145aee12	X1	atac_large	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_discriminator_lg2_c0_s3_6f279a4c	X1	atac_large	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_discriminator_lg2_c0_s4_65d3e997	X1	atac_large	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_reference_lg1_c0_s0_7495c252	X1	atac_large	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_reference_lg1_c0_s1_0462c60d	X1	atac_large	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_reference_lg1_c0_s2_7fbc4f71	X1	atac_large	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_reference_lg1_c0_s3_9f528a39	X1	atac_large	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_reference_lg1_c0_s4_7b3e0c82	X1	atac_large	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_pooled_lg1_c0_s0_9f315359	X1	atac_large	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_pooled_lg1_c0_s1_01d97287	X1	atac_large	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_pooled_lg1_c0_s2_dba244b5	X1	atac_large	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_pooled_lg1_c0_s3_10c52f36	X1	atac_large	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_pooled_lg1_c0_s4_ee3c8049	X1	atac_large	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_barycenter_lg2_c0_s0_2024ec85	X1	atac_large	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c0_s1_af22b520	X1	atac_large	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c0_s2_f0b52222	X1	atac_large	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c0_s3_12ac3dec	X1	atac_large	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c0_s4_9b3eabd6	X1	atac_large	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg3_c0_s0_63ab1675	X1	atac_large	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg3_c0_s1_837b1791	X1	atac_large	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg3_c0_s2_dce45c50	X1	atac_large	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg3_c0_s3_a8d2eb00	X1	atac_large	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg3_c0_s4_845d7d14	X1	atac_large	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{"bary_iter": 10}
+X1_atac_large_mmd_lg1_c0_s0_c19ce45c	X1	atac_large	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_mmd_lg1_c0_s1_02f0eaf5	X1	atac_large	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_mmd_lg1_c0_s2_d4d1cd8f	X1	atac_large	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_mmd_lg1_c0_s3_19533a23	X1	atac_large	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_mmd_lg1_c0_s4_8ecab511	X1	atac_large	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_mmd_lg2_c0_s0_ca3fcbd9	X1	atac_large	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_mmd_lg2_c0_s1_838380ea	X1	atac_large	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_mmd_lg2_c0_s2_78099598	X1	atac_large	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_mmd_lg2_c0_s3_da30452e	X1	atac_large	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_mmd_lg2_c0_s4_4094f987	X1	atac_large	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_sinkhorn_lg4_c0_s0_7d694fd4	X1	atac_large	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_sinkhorn_lg4_c0_s1_91bfa094	X1	atac_large	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_sinkhorn_lg4_c0_s2_53129d14	X1	atac_large	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_sinkhorn_lg4_c0_s3_ef3c43b6	X1	atac_large	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_sinkhorn_lg4_c0_s4_660c8716	X1	atac_large	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_sinkhorn_lg5_c0_s0_e046a2a3	X1	atac_large	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_sinkhorn_lg5_c0_s1_aacf1fe7	X1	atac_large	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_sinkhorn_lg5_c0_s2_e01acdfe	X1	atac_large	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_sinkhorn_lg5_c0_s3_ed104710	X1	atac_large	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_sinkhorn_lg5_c0_s4_9598708d	X1	atac_large	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_discriminator_lg1_c1_s0_fe8c31a4	X1	atac_large	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_discriminator_lg1_c1_s1_8a4148f3	X1	atac_large	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_discriminator_lg1_c1_s2_849a6ee8	X1	atac_large	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_discriminator_lg1_c1_s3_53f09211	X1	atac_large	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_discriminator_lg1_c1_s4_e52b2fb6	X1	atac_large	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_discriminator_lg2_c1_s0_c42d672d	X1	atac_large	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_discriminator_lg2_c1_s1_0973d099	X1	atac_large	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_discriminator_lg2_c1_s2_54ea6b4a	X1	atac_large	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_discriminator_lg2_c1_s3_3a7ea749	X1	atac_large	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_discriminator_lg2_c1_s4_c5e85750	X1	atac_large	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_reference_lg1_c1_s0_be46e9ad	X1	atac_large	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_reference_lg1_c1_s1_33b9487e	X1	atac_large	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_reference_lg1_c1_s2_38c94bfb	X1	atac_large	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_reference_lg1_c1_s3_7dbafa7d	X1	atac_large	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_reference_lg1_c1_s4_4b9c5fcd	X1	atac_large	scib	reference	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_reference_lg2_c1_s0_63b8385a	X1	atac_large	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_reference_lg2_c1_s1_c679312c	X1	atac_large	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_reference_lg2_c1_s2_bf8ed5da	X1	atac_large	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_reference_lg2_c1_s3_2eedec1e	X1	atac_large	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_reference_lg2_c1_s4_5ae372bd	X1	atac_large	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_pooled_lg1_c1_s0_d8f7ba69	X1	atac_large	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_pooled_lg1_c1_s1_a012fb3a	X1	atac_large	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_pooled_lg1_c1_s2_12204e3c	X1	atac_large	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_pooled_lg1_c1_s3_32f68c23	X1	atac_large	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_pooled_lg1_c1_s4_4da4e41f	X1	atac_large	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_pooled_lg2_c1_s0_5dd04c3f	X1	atac_large	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_pooled_lg2_c1_s1_1e425b91	X1	atac_large	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_pooled_lg2_c1_s2_d01d0385	X1	atac_large	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_pooled_lg2_c1_s3_ef07d9a6	X1	atac_large	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_pooled_lg2_c1_s4_48ee5ff8	X1	atac_large	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_barycenter_lg2_c1_s0_9f806a25	X1	atac_large	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c1_s1_02e0e880	X1	atac_large	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c1_s2_95e04e53	X1	atac_large	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c1_s3_ff68b05b	X1	atac_large	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_lg2_c1_s4_201fd7d3	X1	atac_large	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{"bary_iter": 10}
+X1_atac_large_mmd_lg1_c1_s0_287ecf5f	X1	atac_large	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_mmd_lg1_c1_s1_3612cfee	X1	atac_large	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_mmd_lg1_c1_s2_a83456a3	X1	atac_large	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_mmd_lg1_c1_s3_cdf71309	X1	atac_large	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_mmd_lg1_c1_s4_6f3f893f	X1	atac_large	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_mmd_lg2_c1_s0_2499e503	X1	atac_large	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_mmd_lg2_c1_s1_b4b939c5	X1	atac_large	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_mmd_lg2_c1_s2_d7c7c472	X1	atac_large	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_mmd_lg2_c1_s3_7010eac3	X1	atac_large	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_mmd_lg2_c1_s4_62ac7396	X1	atac_large	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_sinkhorn_lg3_c1_s0_a37c21ad	X1	atac_large	scib	sinkhorn	30	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_sinkhorn_lg3_c1_s1_d5d01bed	X1	atac_large	scib	sinkhorn	30	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_sinkhorn_lg3_c1_s2_8b765ec8	X1	atac_large	scib	sinkhorn	30	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_sinkhorn_lg3_c1_s3_699f808d	X1	atac_large	scib	sinkhorn	30	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_sinkhorn_lg3_c1_s4_01c23a6c	X1	atac_large	scib	sinkhorn	30	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_small_discriminator_lg2_c0_s0_8fa9d798	X1	atac_small	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_discriminator_lg2_c0_s1_b548463e	X1	atac_small	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_discriminator_lg2_c0_s2_784a9b6d	X1	atac_small	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_discriminator_lg2_c0_s3_2f87afb2	X1	atac_small	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_discriminator_lg2_c0_s4_3d274e30	X1	atac_small	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_discriminator_lg3_c0_s0_b59025a6	X1	atac_small	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_discriminator_lg3_c0_s1_cefc05bb	X1	atac_small	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_discriminator_lg3_c0_s2_f5222d30	X1	atac_small	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_discriminator_lg3_c0_s3_8dfe11ff	X1	atac_small	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_discriminator_lg3_c0_s4_bdb54116	X1	atac_small	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_reference_lg2_c0_s0_81ec1490	X1	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_reference_lg2_c0_s1_94169225	X1	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_reference_lg2_c0_s2_3a70d9e4	X1	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_reference_lg2_c0_s3_abb9c936	X1	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_reference_lg2_c0_s4_29165f0d	X1	atac_small	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_reference_lg3_c0_s0_740a1cba	X1	atac_small	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_reference_lg3_c0_s1_58552161	X1	atac_small	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_reference_lg3_c0_s2_1d76f057	X1	atac_small	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_reference_lg3_c0_s3_c5f9cbd2	X1	atac_small	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_reference_lg3_c0_s4_d3ee23e2	X1	atac_small	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_pooled_lg2_c0_s0_feba361a	X1	atac_small	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_pooled_lg2_c0_s1_3e00aa23	X1	atac_small	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_pooled_lg2_c0_s2_20ccd051	X1	atac_small	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_pooled_lg2_c0_s3_ea463787	X1	atac_small	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_pooled_lg2_c0_s4_b2d6a44a	X1	atac_small	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_pooled_lg3_c0_s0_aec9066b	X1	atac_small	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_pooled_lg3_c0_s1_a721314c	X1	atac_small	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_pooled_lg3_c0_s2_b326bcbb	X1	atac_small	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_pooled_lg3_c0_s3_cfc6c9e7	X1	atac_small	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_pooled_lg3_c0_s4_122bb28f	X1	atac_small	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_barycenter_lg2_c0_s0_e322f709	X1	atac_small	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg2_c0_s1_ada47528	X1	atac_small	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg2_c0_s2_cbf9c823	X1	atac_small	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg2_c0_s3_872bdb42	X1	atac_small	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg2_c0_s4_8052e711	X1	atac_small	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c0_s0_52b014ac	X1	atac_small	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c0_s1_c01c517c	X1	atac_small	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c0_s2_c8e91a5f	X1	atac_small	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c0_s3_7b5a3ace	X1	atac_small	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c0_s4_d71d558d	X1	atac_small	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_atac_small_mmd_lg2_c0_s0_e7a6823f	X1	atac_small	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_mmd_lg2_c0_s1_3a0785a2	X1	atac_small	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_mmd_lg2_c0_s2_6f7eac4a	X1	atac_small	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_mmd_lg2_c0_s3_39fcec01	X1	atac_small	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_mmd_lg2_c0_s4_e0c62ebd	X1	atac_small	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_mmd_lg3_c0_s0_7e901aba	X1	atac_small	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_mmd_lg3_c0_s1_1ca311bf	X1	atac_small	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_mmd_lg3_c0_s2_329c6aea	X1	atac_small	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_mmd_lg3_c0_s3_d36f3ebb	X1	atac_small	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_mmd_lg3_c0_s4_52e68343	X1	atac_small	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_sinkhorn_lg3_c0_s0_5d006026	X1	atac_small	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_lg3_c0_s1_f1242e90	X1	atac_small	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_lg3_c0_s2_39162cf8	X1	atac_small	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_lg3_c0_s3_de775285	X1	atac_small	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_lg3_c0_s4_724a955f	X1	atac_small	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_discriminator_lg2_c1_s0_3f245790	X1	atac_small	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_discriminator_lg2_c1_s1_da91d1ba	X1	atac_small	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_discriminator_lg2_c1_s2_345895f6	X1	atac_small	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_discriminator_lg2_c1_s3_ac33b0d9	X1	atac_small	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_discriminator_lg2_c1_s4_b14de8b3	X1	atac_small	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_discriminator_lg3_c1_s0_c90cb53a	X1	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_discriminator_lg3_c1_s1_6069ecaa	X1	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_discriminator_lg3_c1_s2_53b441fa	X1	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_discriminator_lg3_c1_s3_604e2ed7	X1	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_discriminator_lg3_c1_s4_ccf0777b	X1	atac_small	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_reference_lg2_c1_s0_0fc5d32f	X1	atac_small	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_reference_lg2_c1_s1_d20e38d2	X1	atac_small	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_reference_lg2_c1_s2_c7e1cdb1	X1	atac_small	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_reference_lg2_c1_s3_c8a6b90d	X1	atac_small	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_reference_lg2_c1_s4_88911961	X1	atac_small	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_pooled_lg2_c1_s0_0b4411e8	X1	atac_small	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_pooled_lg2_c1_s1_eae53f49	X1	atac_small	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_pooled_lg2_c1_s2_68f67c81	X1	atac_small	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_pooled_lg2_c1_s3_e56ed297	X1	atac_small	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_pooled_lg2_c1_s4_686ffb56	X1	atac_small	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_barycenter_lg3_c1_s0_832ec854	X1	atac_small	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c1_s1_91ba3bbc	X1	atac_small	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c1_s2_88b986fd	X1	atac_small	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c1_s3_fcf29778	X1	atac_small	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_lg3_c1_s4_2575ba69	X1	atac_small	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_atac_small_mmd_lg2_c1_s0_0b3abedb	X1	atac_small	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_mmd_lg2_c1_s1_1d8055ac	X1	atac_small	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_mmd_lg2_c1_s2_c0cb68e7	X1	atac_small	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_mmd_lg2_c1_s3_9e8d5176	X1	atac_small	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_mmd_lg2_c1_s4_096bbe21	X1	atac_small	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_mmd_lg3_c1_s0_6bf5ee6d	X1	atac_small	scib	mmd	30	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_mmd_lg3_c1_s1_bf8efb87	X1	atac_small	scib	mmd	30	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_mmd_lg3_c1_s2_af578e16	X1	atac_small	scib	mmd	30	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_mmd_lg3_c1_s3_5631c979	X1	atac_small	scib	mmd	30	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_mmd_lg3_c1_s4_b87c881d	X1	atac_small	scib	mmd	30	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_sinkhorn_lg2_c1_s0_5e9ec203	X1	atac_small	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_lg2_c1_s1_228073b4	X1	atac_small	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_lg2_c1_s2_69e00068	X1	atac_small	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_lg2_c1_s3_5176a3c1	X1	atac_small	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_lg2_c1_s4_219f5d31	X1	atac_small	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_immune_discriminator_lg1_c0_s0_2995d550	X1	immune	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_discriminator_lg1_c0_s1_ce0415b0	X1	immune	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_discriminator_lg1_c0_s2_6e196493	X1	immune	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_discriminator_lg1_c0_s3_34c1a359	X1	immune	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_discriminator_lg1_c0_s4_ae7c22db	X1	immune	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_discriminator_lg2_c0_s0_66fc651b	X1	immune	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_discriminator_lg2_c0_s1_2c64b18e	X1	immune	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_discriminator_lg2_c0_s2_75704b85	X1	immune	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_discriminator_lg2_c0_s3_883cbd24	X1	immune	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_discriminator_lg2_c0_s4_8b45cf50	X1	immune	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_reference_lg1_c0_s0_d00eeeaf	X1	immune	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_reference_lg1_c0_s1_745a2f87	X1	immune	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_reference_lg1_c0_s2_51940234	X1	immune	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_reference_lg1_c0_s3_fa90ddc0	X1	immune	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_reference_lg1_c0_s4_e287372a	X1	immune	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_reference_lg2_c0_s0_77e531ad	X1	immune	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_reference_lg2_c0_s1_fd62afab	X1	immune	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_reference_lg2_c0_s2_ff665a90	X1	immune	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_reference_lg2_c0_s3_231ed98e	X1	immune	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_reference_lg2_c0_s4_fa5e81b9	X1	immune	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_pooled_lg1_c0_s0_c0a2c16c	X1	immune	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_pooled_lg1_c0_s1_0d5392a7	X1	immune	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_pooled_lg1_c0_s2_dc6784d4	X1	immune	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_pooled_lg1_c0_s3_a952eed3	X1	immune	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_pooled_lg1_c0_s4_21a7c227	X1	immune	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_pooled_lg2_c0_s0_7d043c86	X1	immune	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_pooled_lg2_c0_s1_2cbd305c	X1	immune	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_pooled_lg2_c0_s2_42e3997d	X1	immune	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_pooled_lg2_c0_s3_b6d8d1c9	X1	immune	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_pooled_lg2_c0_s4_82f9a437	X1	immune	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_barycenter_lg3_c0_s0_5d80f85d	X1	immune	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg3_c0_s1_f16ba27e	X1	immune	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg3_c0_s2_06708f7f	X1	immune	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg3_c0_s3_aa5b5c41	X1	immune	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg3_c0_s4_4d664e67	X1	immune	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg4_c0_s0_5dab4ebf	X1	immune	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg4_c0_s1_860c0b0e	X1	immune	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg4_c0_s2_bbc36db6	X1	immune	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg4_c0_s3_edfaa716	X1	immune	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{"bary_iter": 10}
+X1_immune_barycenter_lg4_c0_s4_53d6487e	X1	immune	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{"bary_iter": 10}
+X1_immune_mmd_lg2_c0_s0_a1644ce0	X1	immune	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_mmd_lg2_c0_s1_f865909f	X1	immune	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_mmd_lg2_c0_s2_6d29c489	X1	immune	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_mmd_lg2_c0_s3_a84c9edf	X1	immune	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_mmd_lg2_c0_s4_1eb4d6ce	X1	immune	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_mmd_lg3_c0_s0_f139f861	X1	immune	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_mmd_lg3_c0_s1_9c15ed50	X1	immune	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_mmd_lg3_c0_s2_78ebdbe4	X1	immune	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_mmd_lg3_c0_s3_91d99f2f	X1	immune	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_mmd_lg3_c0_s4_7b95b020	X1	immune	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_sinkhorn_lg4_c0_s0_3fc77f27	X1	immune	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_sinkhorn_lg4_c0_s1_bf76d51b	X1	immune	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_sinkhorn_lg4_c0_s2_cd345ef0	X1	immune	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_sinkhorn_lg4_c0_s3_e088497c	X1	immune	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_sinkhorn_lg4_c0_s4_63095ed3	X1	immune	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c0_s0_de6bc357	X1	immune_hum_mou	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c0_s1_1d78e705	X1	immune_hum_mou	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c0_s2_4f2be28e	X1	immune_hum_mou	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c0_s3_2d79ac6d	X1	immune_hum_mou	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c0_s4_25fd0dc2	X1	immune_hum_mou	scib	discriminator	0.03	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_reference_lg1_c0_s0_7324ebe7	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_reference_lg1_c0_s1_7945d349	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_reference_lg1_c0_s2_90ae9b4b	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_reference_lg1_c0_s3_187036ff	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_reference_lg1_c0_s4_f620d0c1	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_reference_lg2_c0_s0_080ea7fd	X1	immune_hum_mou	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_reference_lg2_c0_s1_48d87378	X1	immune_hum_mou	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_reference_lg2_c0_s2_84e9e0b4	X1	immune_hum_mou	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_reference_lg2_c0_s3_844f8e63	X1	immune_hum_mou	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_reference_lg2_c0_s4_03362aa3	X1	immune_hum_mou	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_pooled_lg1_c0_s0_ee687ace	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_pooled_lg1_c0_s1_71804792	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_pooled_lg1_c0_s2_e7a1e90b	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_pooled_lg1_c0_s3_b148ba50	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_pooled_lg1_c0_s4_7df21953	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_pooled_lg2_c0_s0_c4e587eb	X1	immune_hum_mou	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_pooled_lg2_c0_s1_a9a372e7	X1	immune_hum_mou	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_pooled_lg2_c0_s2_e3ed1ca7	X1	immune_hum_mou	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_pooled_lg2_c0_s3_76b77fa5	X1	immune_hum_mou	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_pooled_lg2_c0_s4_dc22e789	X1	immune_hum_mou	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_barycenter_lg4_c0_s0_dacb48cf	X1	immune_hum_mou	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg4_c0_s1_cf9f260b	X1	immune_hum_mou	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg4_c0_s2_95985d62	X1	immune_hum_mou	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg4_c0_s3_6f7573bd	X1	immune_hum_mou	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg4_c0_s4_1d8fafe3	X1	immune_hum_mou	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg5_c0_s0_ba96ce26	X1	immune_hum_mou	scib	barycenter	30	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg5_c0_s1_1fe5c6a3	X1	immune_hum_mou	scib	barycenter	30	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg5_c0_s2_728870c2	X1	immune_hum_mou	scib	barycenter	30	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg5_c0_s3_ef2a7d17	X1	immune_hum_mou	scib	barycenter	30	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg5_c0_s4_c50329e7	X1	immune_hum_mou	scib	barycenter	30	5	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{"bary_iter": 10}
+X1_immune_hum_mou_mmd_lg1_c0_s0_21412988	X1	immune_hum_mou	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_mmd_lg1_c0_s1_2d812035	X1	immune_hum_mou	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_mmd_lg1_c0_s2_1067eb2c	X1	immune_hum_mou	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_mmd_lg1_c0_s3_e8f9520d	X1	immune_hum_mou	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_mmd_lg1_c0_s4_88503107	X1	immune_hum_mou	scib	mmd	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_mmd_lg2_c0_s0_413107a2	X1	immune_hum_mou	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_mmd_lg2_c0_s1_c8dcd325	X1	immune_hum_mou	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_mmd_lg2_c0_s2_f1d072c3	X1	immune_hum_mou	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_mmd_lg2_c0_s3_b13227ac	X1	immune_hum_mou	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_mmd_lg2_c0_s4_3c86488e	X1	immune_hum_mou	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_sinkhorn_lg3_c0_s0_cce809ac	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_sinkhorn_lg3_c0_s1_e6f5e9aa	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_sinkhorn_lg3_c0_s2_32898794	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_sinkhorn_lg3_c0_s3_3da0ad65	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_sinkhorn_lg3_c0_s4_81683578	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c1_s0_028db44f	X1	immune_hum_mou	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c1_s1_125bdff7	X1	immune_hum_mou	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c1_s2_1f05c776	X1	immune_hum_mou	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c1_s3_74852d8b	X1	immune_hum_mou	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_discriminator_lg1_c1_s4_dd4f643f	X1	immune_hum_mou	scib	discriminator	0.1	1	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_reference_lg2_c1_s0_fb44d7b8	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_reference_lg2_c1_s1_6ff4193f	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_reference_lg2_c1_s2_9278b8e5	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_reference_lg2_c1_s3_761add1c	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_reference_lg2_c1_s4_35689041	X1	immune_hum_mou	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_pooled_lg1_c1_s0_f85e38f2	X1	immune_hum_mou	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_pooled_lg1_c1_s1_b8c794c5	X1	immune_hum_mou	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_pooled_lg1_c1_s2_abe11cb9	X1	immune_hum_mou	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_pooled_lg1_c1_s3_edba8c03	X1	immune_hum_mou	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_pooled_lg1_c1_s4_e6b141c0	X1	immune_hum_mou	scib	pooled	0.1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_pooled_lg2_c1_s0_4032fd02	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_pooled_lg2_c1_s1_2109b55d	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_pooled_lg2_c1_s2_9fc995c6	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_pooled_lg2_c1_s3_562c52f6	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_pooled_lg2_c1_s4_014d6a07	X1	immune_hum_mou	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_barycenter_lg2_c1_s0_aaf99b44	X1	immune_hum_mou	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg2_c1_s1_a2dad9f1	X1	immune_hum_mou	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg2_c1_s2_0c79e894	X1	immune_hum_mou	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg2_c1_s3_146f13d2	X1	immune_hum_mou	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_lg2_c1_s4_f205a4d3	X1	immune_hum_mou	scib	barycenter	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{"bary_iter": 10}
+X1_immune_hum_mou_mmd_lg1_c1_s0_53b499ee	X1	immune_hum_mou	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_mmd_lg1_c1_s1_753e3f03	X1	immune_hum_mou	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_mmd_lg1_c1_s2_533cce8e	X1	immune_hum_mou	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_mmd_lg1_c1_s3_30bf698a	X1	immune_hum_mou	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_mmd_lg1_c1_s4_1a9a83b2	X1	immune_hum_mou	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_mmd_lg2_c1_s0_6b1ac4b2	X1	immune_hum_mou	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_mmd_lg2_c1_s1_3c3c48fb	X1	immune_hum_mou	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_mmd_lg2_c1_s2_3470debf	X1	immune_hum_mou	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_mmd_lg2_c1_s3_15aabbb1	X1	immune_hum_mou	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_mmd_lg2_c1_s4_7084da6c	X1	immune_hum_mou	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_sinkhorn_lg2_c1_s0_873b783f	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_sinkhorn_lg2_c1_s1_3e4b5177	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_sinkhorn_lg2_c1_s2_dfceee5b	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_sinkhorn_lg2_c1_s3_cff0ba50	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_sinkhorn_lg2_c1_s4_e2e6776b	X1	immune_hum_mou	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_lung_discriminator_lg2_c0_s0_63eb5d3c	X1	lung	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_discriminator_lg2_c0_s1_5f6ade93	X1	lung	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_discriminator_lg2_c0_s2_b72df131	X1	lung	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_discriminator_lg2_c0_s3_3b883957	X1	lung	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_discriminator_lg2_c0_s4_f5636b91	X1	lung	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_discriminator_lg3_c0_s0_8fe85d1c	X1	lung	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_discriminator_lg3_c0_s1_dde80aac	X1	lung	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_discriminator_lg3_c0_s2_86c9600e	X1	lung	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_discriminator_lg3_c0_s3_3ba38405	X1	lung	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_discriminator_lg3_c0_s4_b3474558	X1	lung	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_reference_lg2_c0_s0_4af49af4	X1	lung	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_reference_lg2_c0_s1_7709b4db	X1	lung	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_reference_lg2_c0_s2_aaa070d9	X1	lung	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_reference_lg2_c0_s3_2ccd0112	X1	lung	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_reference_lg2_c0_s4_b3edd00e	X1	lung	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_reference_lg3_c0_s0_cbd4771f	X1	lung	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_reference_lg3_c0_s1_70bb22ee	X1	lung	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_reference_lg3_c0_s2_f1f0f905	X1	lung	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_reference_lg3_c0_s3_9eacbe97	X1	lung	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_reference_lg3_c0_s4_fc1d5842	X1	lung	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_pooled_lg2_c0_s0_c6e6f2e7	X1	lung	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_pooled_lg2_c0_s1_6bac32dd	X1	lung	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_pooled_lg2_c0_s2_4b9f53dc	X1	lung	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_pooled_lg2_c0_s3_ff86782e	X1	lung	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_pooled_lg2_c0_s4_7dbadf7e	X1	lung	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_pooled_lg3_c0_s0_d07bddac	X1	lung	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_pooled_lg3_c0_s1_8c7ba619	X1	lung	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_pooled_lg3_c0_s2_9dbc14f5	X1	lung	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_pooled_lg3_c0_s3_78cb15c7	X1	lung	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_pooled_lg3_c0_s4_5f3b4760	X1	lung	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_barycenter_lg6_c0_s0_3b72321e	X1	lung	scib	barycenter	100	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg6_c0_s1_f113e0b2	X1	lung	scib	barycenter	100	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg6_c0_s2_c9c4672a	X1	lung	scib	barycenter	100	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg6_c0_s3_45be9dbb	X1	lung	scib	barycenter	100	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg6_c0_s4_c99b449c	X1	lung	scib	barycenter	100	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{"bary_iter": 10}
+X1_lung_mmd_lg2_c0_s0_c4757226	X1	lung	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_mmd_lg2_c0_s1_0d32b0f4	X1	lung	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_mmd_lg2_c0_s2_50bfe1ac	X1	lung	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_mmd_lg2_c0_s3_c7a5f409	X1	lung	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_mmd_lg2_c0_s4_d34b147b	X1	lung	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_mmd_lg3_c0_s0_40d33003	X1	lung	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_mmd_lg3_c0_s1_c01fa93c	X1	lung	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_mmd_lg3_c0_s2_3c3ebad7	X1	lung	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_mmd_lg3_c0_s3_546598c5	X1	lung	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_mmd_lg3_c0_s4_61025187	X1	lung	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_sinkhorn_lg4_c0_s0_48c08021	X1	lung	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_sinkhorn_lg4_c0_s1_dcf53966	X1	lung	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_sinkhorn_lg4_c0_s2_46ba0212	X1	lung	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_sinkhorn_lg4_c0_s3_93f18062	X1	lung	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_sinkhorn_lg4_c0_s4_8d3ad2ea	X1	lung	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_sinkhorn_lg5_c0_s0_70dde150	X1	lung	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_sinkhorn_lg5_c0_s1_c090095c	X1	lung	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_sinkhorn_lg5_c0_s2_657b67ab	X1	lung	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_sinkhorn_lg5_c0_s3_259e1c6d	X1	lung	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_sinkhorn_lg5_c0_s4_538abe0e	X1	lung	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_discriminator_lg2_c1_s0_3d59a250	X1	lung	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_discriminator_lg2_c1_s1_1fe9ed34	X1	lung	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_discriminator_lg2_c1_s2_11b235dc	X1	lung	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_discriminator_lg2_c1_s3_2db52856	X1	lung	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_discriminator_lg2_c1_s4_a64a8cb2	X1	lung	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_discriminator_lg3_c1_s0_5169e647	X1	lung	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_discriminator_lg3_c1_s1_1afc4b22	X1	lung	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_discriminator_lg3_c1_s2_7f1fbe36	X1	lung	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_discriminator_lg3_c1_s3_56d07922	X1	lung	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_discriminator_lg3_c1_s4_9b58f56e	X1	lung	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_reference_lg2_c1_s0_b6ac7bcd	X1	lung	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_reference_lg2_c1_s1_e73c93ed	X1	lung	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_reference_lg2_c1_s2_7ef00f55	X1	lung	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_reference_lg2_c1_s3_77946b9f	X1	lung	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_reference_lg2_c1_s4_82b3278e	X1	lung	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_pooled_lg2_c1_s0_0a2acbab	X1	lung	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_pooled_lg2_c1_s1_b8c21a35	X1	lung	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_pooled_lg2_c1_s2_77d26bcc	X1	lung	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_pooled_lg2_c1_s3_ad34cc3f	X1	lung	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_pooled_lg2_c1_s4_4c3ea218	X1	lung	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_barycenter_lg3_c1_s0_6e8af77b	X1	lung	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg3_c1_s1_80a6013f	X1	lung	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg3_c1_s2_f7a5049f	X1	lung	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg3_c1_s3_43aaba23	X1	lung	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{"bary_iter": 10}
+X1_lung_barycenter_lg3_c1_s4_f2b13c5b	X1	lung	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{"bary_iter": 10}
+X1_lung_mmd_lg1_c1_s0_73bb69d7	X1	lung	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_mmd_lg1_c1_s1_b0168950	X1	lung	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_mmd_lg1_c1_s2_a5db9664	X1	lung	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_mmd_lg1_c1_s3_f25a2d19	X1	lung	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_mmd_lg1_c1_s4_533d165a	X1	lung	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_mmd_lg2_c1_s0_85b4b7fa	X1	lung	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_mmd_lg2_c1_s1_448b361e	X1	lung	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_mmd_lg2_c1_s2_afad8f2f	X1	lung	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_mmd_lg2_c1_s3_86507327	X1	lung	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_mmd_lg2_c1_s4_dadae8ca	X1	lung	scib	mmd	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_sinkhorn_lg2_c1_s0_a2fb024e	X1	lung	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_sinkhorn_lg2_c1_s1_d108cbd2	X1	lung	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_sinkhorn_lg2_c1_s2_c75bf0d6	X1	lung	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_sinkhorn_lg2_c1_s3_9645b3ec	X1	lung	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_sinkhorn_lg2_c1_s4_da893c7e	X1	lung	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_pancreas_discriminator_lg2_c0_s0_f39ae6df	X1	pancreas	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_discriminator_lg2_c0_s1_fac88067	X1	pancreas	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_discriminator_lg2_c0_s2_286447a3	X1	pancreas	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_discriminator_lg2_c0_s3_67e47d08	X1	pancreas	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_discriminator_lg2_c0_s4_a3c7fe59	X1	pancreas	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_discriminator_lg3_c0_s0_38643532	X1	pancreas	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_discriminator_lg3_c0_s1_ec5efc75	X1	pancreas	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_discriminator_lg3_c0_s2_12356066	X1	pancreas	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_discriminator_lg3_c0_s3_f0a101de	X1	pancreas	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_discriminator_lg3_c0_s4_81570c37	X1	pancreas	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_reference_lg2_c0_s0_3200615e	X1	pancreas	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_reference_lg2_c0_s1_c2629fdd	X1	pancreas	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_reference_lg2_c0_s2_13e7a410	X1	pancreas	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_reference_lg2_c0_s3_97dc0eab	X1	pancreas	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_reference_lg2_c0_s4_672e8bfb	X1	pancreas	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_reference_lg3_c0_s0_d5e0046a	X1	pancreas	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_reference_lg3_c0_s1_460e09cb	X1	pancreas	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_reference_lg3_c0_s2_a9572076	X1	pancreas	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_reference_lg3_c0_s3_2b43d79c	X1	pancreas	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_reference_lg3_c0_s4_1423ca4c	X1	pancreas	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_pooled_lg1_c0_s0_d927e322	X1	pancreas	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_lg1_c0_s1_7985536c	X1	pancreas	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_lg1_c0_s2_05598eb9	X1	pancreas	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_lg1_c0_s3_a13a4e23	X1	pancreas	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_lg1_c0_s4_7645d023	X1	pancreas	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_pooled_lg2_c0_s0_638ebfe6	X1	pancreas	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_lg2_c0_s1_86a60de0	X1	pancreas	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_lg2_c0_s2_46ed487c	X1	pancreas	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_lg2_c0_s3_8ec1d7c8	X1	pancreas	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_lg2_c0_s4_74ee1c2e	X1	pancreas	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_barycenter_lg2_c0_s0_54d4860a	X1	pancreas	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg2_c0_s1_2607197a	X1	pancreas	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg2_c0_s2_bf434830	X1	pancreas	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg2_c0_s3_36026ad3	X1	pancreas	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg2_c0_s4_2936b6e1	X1	pancreas	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c0_s0_be8a108e	X1	pancreas	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c0_s1_37bdf005	X1	pancreas	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c0_s2_5a1f81b5	X1	pancreas	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c0_s3_52eaf13c	X1	pancreas	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c0_s4_8cb078bc	X1	pancreas	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_pancreas_mmd_lg2_c0_s0_df672634	X1	pancreas	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_lg2_c0_s1_5ab13c94	X1	pancreas	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_lg2_c0_s2_c94ca6cf	X1	pancreas	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_lg2_c0_s3_569e62d9	X1	pancreas	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_lg2_c0_s4_96f29b68	X1	pancreas	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_mmd_lg3_c0_s0_a29c7a9b	X1	pancreas	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_lg3_c0_s1_909f625b	X1	pancreas	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_lg3_c0_s2_63f6b655	X1	pancreas	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_lg3_c0_s3_6e86661a	X1	pancreas	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_lg3_c0_s4_74910e78	X1	pancreas	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_sinkhorn_lg3_c0_s0_7beac5c5	X1	pancreas	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_lg3_c0_s1_c127716b	X1	pancreas	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_lg3_c0_s2_4dd5cfd0	X1	pancreas	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_lg3_c0_s3_09124982	X1	pancreas	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_lg3_c0_s4_704790cf	X1	pancreas	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_discriminator_lg2_c1_s0_918ef0d1	X1	pancreas	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_discriminator_lg2_c1_s1_a82f37ba	X1	pancreas	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_discriminator_lg2_c1_s2_8662ba4b	X1	pancreas	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_discriminator_lg2_c1_s3_dfec0316	X1	pancreas	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_discriminator_lg2_c1_s4_0d7cb72b	X1	pancreas	scib	discriminator	0.3	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_discriminator_lg3_c1_s0_a3c8e66c	X1	pancreas	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_discriminator_lg3_c1_s1_1410bafb	X1	pancreas	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_discriminator_lg3_c1_s2_fbc26ec5	X1	pancreas	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_discriminator_lg3_c1_s3_4e5e7170	X1	pancreas	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_discriminator_lg3_c1_s4_41c43290	X1	pancreas	scib	discriminator	1	1	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_reference_lg2_c1_s0_b5aa0441	X1	pancreas	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_reference_lg2_c1_s1_809d6d34	X1	pancreas	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_reference_lg2_c1_s2_67e71c2a	X1	pancreas	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_reference_lg2_c1_s3_d7caa0de	X1	pancreas	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_reference_lg2_c1_s4_c7401bc0	X1	pancreas	scib	reference	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_pooled_lg2_c1_s0_3b32d570	X1	pancreas	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_lg2_c1_s1_78f7abb8	X1	pancreas	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_lg2_c1_s2_c0db1aae	X1	pancreas	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_lg2_c1_s3_a55a3b06	X1	pancreas	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_lg2_c1_s4_2b421474	X1	pancreas	scib	pooled	0.3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_barycenter_lg3_c1_s0_35f77b53	X1	pancreas	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c1_s1_8e54aff1	X1	pancreas	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c1_s2_345b956b	X1	pancreas	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c1_s3_284883e9	X1	pancreas	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_lg3_c1_s4_58ddb8a6	X1	pancreas	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_pancreas_sinkhorn_lg2_c1_s0_3de5f21c	X1	pancreas	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_lg2_c1_s1_c9362777	X1	pancreas	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_lg2_c1_s2_b29613d7	X1	pancreas	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_lg2_c1_s3_61030e0f	X1	pancreas	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_lg2_c1_s4_c23c59b3	X1	pancreas	scib	sinkhorn	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_discriminator_lg2_c0_s0_af45aa55	X1	sim1	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_discriminator_lg2_c0_s1_6b3d759f	X1	sim1	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_discriminator_lg2_c0_s2_babe7ed6	X1	sim1	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_discriminator_lg2_c0_s3_22a63f4b	X1	sim1	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_discriminator_lg2_c0_s4_5c0e503c	X1	sim1	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_discriminator_lg3_c0_s0_737dcfeb	X1	sim1	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_discriminator_lg3_c0_s1_7840f3d4	X1	sim1	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_discriminator_lg3_c0_s2_3181f043	X1	sim1	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_discriminator_lg3_c0_s3_8bfc97ce	X1	sim1	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_discriminator_lg3_c0_s4_228d80ef	X1	sim1	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_reference_lg2_c0_s0_7599785e	X1	sim1	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_reference_lg2_c0_s1_f5bdb19d	X1	sim1	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_reference_lg2_c0_s2_892b4756	X1	sim1	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_reference_lg2_c0_s3_de05c87c	X1	sim1	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_reference_lg2_c0_s4_97c0fb48	X1	sim1	scib	reference	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_reference_lg3_c0_s0_590ec590	X1	sim1	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_reference_lg3_c0_s1_c2be7882	X1	sim1	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_reference_lg3_c0_s2_81ed9c01	X1	sim1	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_reference_lg3_c0_s3_91c20a3a	X1	sim1	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_reference_lg3_c0_s4_914359a1	X1	sim1	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_pooled_lg1_c0_s0_18fbca30	X1	sim1	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_pooled_lg1_c0_s1_7c0e6cd0	X1	sim1	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_pooled_lg1_c0_s2_fdec74a5	X1	sim1	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_pooled_lg1_c0_s3_62925c5b	X1	sim1	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_pooled_lg1_c0_s4_7301e311	X1	sim1	scib	pooled	0.3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_pooled_lg2_c0_s0_633c92c9	X1	sim1	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_pooled_lg2_c0_s1_86eecd57	X1	sim1	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_pooled_lg2_c0_s2_ace0c5e7	X1	sim1	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_pooled_lg2_c0_s3_afce98ca	X1	sim1	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_pooled_lg2_c0_s4_5468bffc	X1	sim1	scib	pooled	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_barycenter_lg2_c0_s0_5b6c1f94	X1	sim1	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg2_c0_s1_4237dd83	X1	sim1	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg2_c0_s2_9df73c74	X1	sim1	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg2_c0_s3_8ef3e3ea	X1	sim1	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg2_c0_s4_a903db89	X1	sim1	scib	barycenter	1	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg3_c0_s0_2396385f	X1	sim1	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg3_c0_s1_13a9bb9a	X1	sim1	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg3_c0_s2_e467e802	X1	sim1	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg3_c0_s3_fec77912	X1	sim1	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_sim1_barycenter_lg3_c0_s4_0ad0f3bc	X1	sim1	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_sim1_mmd_lg2_c0_s0_197ea2a2	X1	sim1	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_mmd_lg2_c0_s1_ff34b139	X1	sim1	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_mmd_lg2_c0_s2_b4277458	X1	sim1	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_mmd_lg2_c0_s3_f477b027	X1	sim1	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_mmd_lg2_c0_s4_b25b1a47	X1	sim1	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_mmd_lg3_c0_s0_fe2dc392	X1	sim1	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_mmd_lg3_c0_s1_a5d09f17	X1	sim1	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_mmd_lg3_c0_s2_3ca3167b	X1	sim1	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_mmd_lg3_c0_s3_6a099d74	X1	sim1	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_mmd_lg3_c0_s4_d7403713	X1	sim1	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_sinkhorn_lg3_c0_s0_265f9e91	X1	sim1	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_sinkhorn_lg3_c0_s1_54eae353	X1	sim1	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_sinkhorn_lg3_c0_s2_963f7a9d	X1	sim1	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_sinkhorn_lg3_c0_s3_86e321b0	X1	sim1	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_sinkhorn_lg3_c0_s4_5fc66822	X1	sim1	scib	sinkhorn	3	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_discriminator_lg2_c0_s0_7c5d4db5	X1	sim2	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_discriminator_lg2_c0_s1_f0ff2f43	X1	sim2	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_discriminator_lg2_c0_s2_e3c3822d	X1	sim2	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_discriminator_lg2_c0_s3_43103db5	X1	sim2	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_discriminator_lg2_c0_s4_7c00d2bd	X1	sim2	scib	discriminator	0.1	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_discriminator_lg3_c0_s0_645aff67	X1	sim2	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_discriminator_lg3_c0_s1_e35995b4	X1	sim2	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_discriminator_lg3_c0_s2_33f73f24	X1	sim2	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_discriminator_lg3_c0_s3_f826ce70	X1	sim2	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_discriminator_lg3_c0_s4_c4a70e5f	X1	sim2	scib	discriminator	0.3	1	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_reference_lg3_c0_s0_477f2dfd	X1	sim2	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_reference_lg3_c0_s1_b14e3c94	X1	sim2	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_reference_lg3_c0_s2_e06203b6	X1	sim2	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_reference_lg3_c0_s3_d3b2a413	X1	sim2	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_reference_lg3_c0_s4_8195f4ab	X1	sim2	scib	reference	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_reference_lg4_c0_s0_0987898c	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_reference_lg4_c0_s1_597304cc	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_reference_lg4_c0_s2_aa50d1c6	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_reference_lg4_c0_s3_32f83749	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_reference_lg4_c0_s4_57863d07	X1	sim2	scib	reference	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_pooled_lg3_c0_s0_ae47ee97	X1	sim2	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_pooled_lg3_c0_s1_4d44db2a	X1	sim2	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_pooled_lg3_c0_s2_98b76583	X1	sim2	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_pooled_lg3_c0_s3_1cdbd93c	X1	sim2	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_pooled_lg3_c0_s4_b78219cd	X1	sim2	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_pooled_lg4_c0_s0_f8eca5d9	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_pooled_lg4_c0_s1_171cb73c	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_pooled_lg4_c0_s2_3c1b77bf	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_pooled_lg4_c0_s3_4c5b1045	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_pooled_lg4_c0_s4_14037a45	X1	sim2	scib	pooled	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_barycenter_lg3_c0_s0_51fd2c1c	X1	sim2	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg3_c0_s1_93608356	X1	sim2	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg3_c0_s2_9c0238b3	X1	sim2	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg3_c0_s3_05bd7ee2	X1	sim2	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg3_c0_s4_72420855	X1	sim2	scib	barycenter	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg4_c0_s0_b94d8809	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg4_c0_s1_352cb35b	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg4_c0_s2_a0d992d5	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg4_c0_s3_40f91f54	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_sim2_barycenter_lg4_c0_s4_75c80666	X1	sim2	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_sim2_mmd_lg2_c0_s0_7211aa00	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_mmd_lg2_c0_s1_3c2ffe43	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_mmd_lg2_c0_s2_420abe45	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_mmd_lg2_c0_s3_12317221	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_mmd_lg2_c0_s4_9f494210	X1	sim2	scib	mmd	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_mmd_lg3_c0_s0_2c5df3de	X1	sim2	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_mmd_lg3_c0_s1_6761760a	X1	sim2	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_mmd_lg3_c0_s2_fba70ba4	X1	sim2	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_mmd_lg3_c0_s3_d1eb8b02	X1	sim2	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_mmd_lg3_c0_s4_a4b62d5a	X1	sim2	scib	mmd	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_sinkhorn_lg4_c0_s0_fbc7cf7e	X1	sim2	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg4_c0_s1_0969aec0	X1	sim2	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_sinkhorn_lg4_c0_s2_3af9b11b	X1	sim2	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_sinkhorn_lg4_c0_s3_43feea1c	X1	sim2	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_sinkhorn_lg4_c0_s4_bc301596	X1	sim2	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_large_reference_l0.1_c0_s0_37729778	X1	atac_large	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_reference_l0.1_c0_s1_2eed6f4c	X1	atac_large	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_reference_l0.1_c0_s2_433820fa	X1	atac_large	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_reference_l0.1_c0_s3_f19fe8db	X1	atac_large	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_reference_l0.1_c0_s4_f8b2ca87	X1	atac_large	scib	reference	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_pooled_l0.1_c0_s0_8adeaeb5	X1	atac_large	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_pooled_l0.1_c0_s1_1136215a	X1	atac_large	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_pooled_l0.1_c0_s2_11e4a831	X1	atac_large	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_pooled_l0.1_c0_s3_6c4e4934	X1	atac_large	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_pooled_l0.1_c0_s4_365df94b	X1	atac_large	scib	pooled	0.1	5	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_barycenter_l1_c1_s0_654200c8	X1	atac_large	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_l1_c1_s1_f01147d4	X1	atac_large	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_l1_c1_s2_cffabb0b	X1	atac_large	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_l1_c1_s3_28a9a382	X1	atac_large	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{"bary_iter": 10}
+X1_atac_large_barycenter_l1_c1_s4_52920b6c	X1	atac_large	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{"bary_iter": 10}
+X1_atac_large_sinkhorn_l10_c1_s0_1f09cb98	X1	atac_large	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_sinkhorn_l10_c1_s1_8a29e0d8	X1	atac_large	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_sinkhorn_l10_c1_s2_7bca0401	X1	atac_large	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_sinkhorn_l10_c1_s3_c748c28f	X1	atac_large	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_sinkhorn_l10_c1_s4_b39ab8ff	X1	atac_large	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_small_sinkhorn_l10_c0_s0_a5f29464	X1	atac_small	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_l10_c0_s1_0788d7d9	X1	atac_small	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_l10_c0_s2_20b9ddaf	X1	atac_small	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_l10_c0_s3_7891d9b8	X1	atac_small	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_l10_c0_s4_ab597939	X1	atac_small	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_reference_l1_c1_s0_12c3e4d5	X1	atac_small	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_reference_l1_c1_s1_f544df69	X1	atac_small	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_reference_l1_c1_s2_389fa383	X1	atac_small	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_reference_l1_c1_s3_37973a71	X1	atac_small	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_reference_l1_c1_s4_4f25adab	X1	atac_small	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_pooled_l1_c1_s0_61b5e429	X1	atac_small	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_pooled_l1_c1_s1_eeebd4f5	X1	atac_small	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_pooled_l1_c1_s2_0836cd40	X1	atac_small	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_pooled_l1_c1_s3_0a8410fd	X1	atac_small	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_pooled_l1_c1_s4_840a9b55	X1	atac_small	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_barycenter_l1_c1_s0_841b7ad0	X1	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_l1_c1_s1_8e7be83a	X1	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_l1_c1_s2_6ac55db7	X1	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_l1_c1_s3_eb434e91	X1	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_atac_small_barycenter_l1_c1_s4_afb5e754	X1	atac_small	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_atac_small_sinkhorn_l10_c1_s0_f0408267	X1	atac_small	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_l10_c1_s1_04a47827	X1	atac_small	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_l10_c1_s2_967de2ab	X1	atac_small	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_l10_c1_s3_4a795590	X1	atac_small	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_l10_c1_s4_20b1dd13	X1	atac_small	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_immune_sinkhorn_l10_c0_s0_e25c62cb	X1	immune	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_sinkhorn_l10_c0_s1_26f7ab3e	X1	immune	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_sinkhorn_l10_c0_s2_f3fe20e4	X1	immune	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_sinkhorn_l10_c0_s3_7cd8ee34	X1	immune	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_sinkhorn_l10_c0_s4_10c0ba04	X1	immune	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_hum_mou_discriminator_l0.01_c0_s0_b56e2c5d	X1	immune_hum_mou	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_discriminator_l0.01_c0_s1_06a766b8	X1	immune_hum_mou	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_discriminator_l0.01_c0_s2_a00acf51	X1	immune_hum_mou	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_discriminator_l0.01_c0_s3_e7b866a1	X1	immune_hum_mou	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_discriminator_l0.01_c0_s4_23b6cd56	X1	immune_hum_mou	scib	discriminator	0.01	1	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c0_s0_ce53ab39	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c0_s1_07afbadc	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c0_s2_45d6760f	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c0_s3_b092b8cf	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c0_s4_256d7a18	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_reference_l1_c1_s0_553b7248	X1	immune_hum_mou	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_reference_l1_c1_s1_aecf56b2	X1	immune_hum_mou	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_reference_l1_c1_s2_46ad1eb5	X1	immune_hum_mou	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_reference_l1_c1_s3_f4e7a39a	X1	immune_hum_mou	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_reference_l1_c1_s4_5923d5b8	X1	immune_hum_mou	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_barycenter_l1_c1_s0_898b2937	X1	immune_hum_mou	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_l1_c1_s1_0d1741bd	X1	immune_hum_mou	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_l1_c1_s2_39a72a1a	X1	immune_hum_mou	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_l1_c1_s3_72a12c79	X1	immune_hum_mou	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{"bary_iter": 10}
+X1_immune_hum_mou_barycenter_l1_c1_s4_0791d7ea	X1	immune_hum_mou	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{"bary_iter": 10}
+X1_immune_hum_mou_sinkhorn_l10_c1_s0_d7b50fc0	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c1_s1_ee7b24a9	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c1_s2_3446fe7e	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c1_s3_e390b518	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_sinkhorn_l10_c1_s4_7a995225	X1	immune_hum_mou	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_lung_barycenter_l300_c0_s0_9edc3fa0	X1	lung	scib	barycenter	300	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{"bary_iter": 10}
+X1_lung_barycenter_l300_c0_s1_f8ccbda2	X1	lung	scib	barycenter	300	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{"bary_iter": 10}
+X1_lung_barycenter_l300_c0_s2_b9ee38a3	X1	lung	scib	barycenter	300	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{"bary_iter": 10}
+X1_lung_barycenter_l300_c0_s3_f0b84f81	X1	lung	scib	barycenter	300	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{"bary_iter": 10}
+X1_lung_barycenter_l300_c0_s4_cd734cd3	X1	lung	scib	barycenter	300	5	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{"bary_iter": 10}
+X1_lung_reference_l1_c1_s0_65b291a9	X1	lung	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_reference_l1_c1_s1_381e59ee	X1	lung	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_reference_l1_c1_s2_b89f0e1f	X1	lung	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_reference_l1_c1_s3_51565a3c	X1	lung	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_reference_l1_c1_s4_9823d86c	X1	lung	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_pooled_l1_c1_s0_2b01c997	X1	lung	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_pooled_l1_c1_s1_328a7a03	X1	lung	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_pooled_l1_c1_s2_e2b73746	X1	lung	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_pooled_l1_c1_s3_a37eb51e	X1	lung	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_pooled_l1_c1_s4_50a6a01a	X1	lung	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_barycenter_l1_c1_s0_a8e131e3	X1	lung	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{"bary_iter": 10}
+X1_lung_barycenter_l1_c1_s1_2e06403e	X1	lung	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{"bary_iter": 10}
+X1_lung_barycenter_l1_c1_s2_9ebd8a00	X1	lung	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{"bary_iter": 10}
+X1_lung_barycenter_l1_c1_s3_ce27037e	X1	lung	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{"bary_iter": 10}
+X1_lung_barycenter_l1_c1_s4_bac17f54	X1	lung	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{"bary_iter": 10}
+X1_lung_sinkhorn_l10_c1_s0_c3609193	X1	lung	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_sinkhorn_l10_c1_s1_8705791b	X1	lung	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_sinkhorn_l10_c1_s2_83b88b61	X1	lung	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_sinkhorn_l10_c1_s3_a58b7ec8	X1	lung	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_sinkhorn_l10_c1_s4_22fa3409	X1	lung	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_pancreas_sinkhorn_l10_c0_s0_af4b7211	X1	pancreas	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_l10_c0_s1_8197fe32	X1	pancreas	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_l10_c0_s2_3e1eb66d	X1	pancreas	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_l10_c0_s3_8b739bfd	X1	pancreas	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_l10_c0_s4_7d63712d	X1	pancreas	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_reference_l1_c1_s0_87e2d328	X1	pancreas	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_reference_l1_c1_s1_3368f771	X1	pancreas	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_reference_l1_c1_s2_2624361b	X1	pancreas	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_reference_l1_c1_s3_da0bac9d	X1	pancreas	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_reference_l1_c1_s4_b879a88b	X1	pancreas	scib	reference	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_pooled_l1_c1_s0_03fa9664	X1	pancreas	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_l1_c1_s1_24f2957d	X1	pancreas	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_l1_c1_s2_8b3424d1	X1	pancreas	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_l1_c1_s3_330a5b7c	X1	pancreas	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_l1_c1_s4_52a6b698	X1	pancreas	scib	pooled	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_barycenter_l1_c1_s0_b950643d	X1	pancreas	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_l1_c1_s1_8531c4c5	X1	pancreas	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_l1_c1_s2_7b1b2e32	X1	pancreas	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_l1_c1_s3_dfbe887d	X1	pancreas	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{"bary_iter": 10}
+X1_pancreas_barycenter_l1_c1_s4_855f3ce3	X1	pancreas	scib	barycenter	1	5	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{"bary_iter": 10}
+X1_pancreas_mmd_l0.3_c1_s0_5520bba8	X1	pancreas	scib	mmd	0.3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_l0.3_c1_s1_c117e0e5	X1	pancreas	scib	mmd	0.3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_l0.3_c1_s2_9766138b	X1	pancreas	scib	mmd	0.3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_l0.3_c1_s3_5cb6e0d2	X1	pancreas	scib	mmd	0.3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_l0.3_c1_s4_4631aed3	X1	pancreas	scib	mmd	0.3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_mmd_l1_c1_s0_099d1bf6	X1	pancreas	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_l1_c1_s1_b79eb3c5	X1	pancreas	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_l1_c1_s2_8e87a06f	X1	pancreas	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_l1_c1_s3_505a8da4	X1	pancreas	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_l1_c1_s4_48d79177	X1	pancreas	scib	mmd	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_sinkhorn_l1_c1_s0_a9ae1f3c	X1	pancreas	scib	sinkhorn	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_l1_c1_s1_a019e0e3	X1	pancreas	scib	sinkhorn	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_l1_c1_s2_6cf94b97	X1	pancreas	scib	sinkhorn	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_l1_c1_s3_56ed0808	X1	pancreas	scib	sinkhorn	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_l1_c1_s4_5142702c	X1	pancreas	scib	sinkhorn	1	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_sinkhorn_l10_c0_s0_2d8ccf72	X1	sim1	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_sinkhorn_l10_c0_s1_845efadc	X1	sim1	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_sinkhorn_l10_c0_s2_3f39df5d	X1	sim1	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_sinkhorn_l10_c0_s3_160940a1	X1	sim1	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_sinkhorn_l10_c0_s4_21168fd7	X1	sim1	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_sinkhorn_l10_c0_s0_822d5b69	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_sinkhorn_l10_c0_s1_8a5a35de	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_sinkhorn_l10_c0_s2_1c47ae4d	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_sinkhorn_l10_c0_s3_168c371f	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_sinkhorn_l10_c0_s4_3b6a1978	X1	sim2	scib	sinkhorn	10	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_none_l0_c1_s0_d18f6091	X1	pancreas	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_none_l0_c1_s1_7970558f	X1	pancreas	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_none_l0_c1_s2_aef06d41	X1	pancreas	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_none_l0_c1_s3_a05eb5a8	X1	pancreas	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_none_l0_c1_s4_7c83fe95	X1	pancreas	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_none_l0_c0_s0_444f86ab	X1	pancreas	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_none_l0_c0_s1_70be2e0e	X1	pancreas	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_none_l0_c0_s2_c0b74342	X1	pancreas	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_none_l0_c0_s3_6975fe42	X1	pancreas	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_none_l0_c0_s4_0d8540c0	X1	pancreas	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_lung_none_l0_c1_s0_4f21c092	X1	lung	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_none_l0_c1_s1_ccb161da	X1	lung	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_none_l0_c1_s2_ba199460	X1	lung	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_none_l0_c1_s3_6fedc788	X1	lung	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_none_l0_c1_s4_b48c28c1	X1	lung	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_lung_none_l0_c0_s0_6aa1aff7	X1	lung	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	0	auto	{}
+X1_lung_none_l0_c0_s1_c058ed5a	X1	lung	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	1	auto	{}
+X1_lung_none_l0_c0_s2_36ed55da	X1	lung	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	2	auto	{}
+X1_lung_none_l0_c0_s3_ca2c1fb8	X1	lung	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	3	auto	{}
+X1_lung_none_l0_c0_s4_8989c5a9	X1	lung	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	246	0.9	4	auto	{}
+X1_immune_none_l0_c1_s0_c7efda46	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_none_l0_c1_s1_87c4a6a3	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_none_l0_c1_s2_acba706d	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_none_l0_c1_s3_3ed57ae1	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_none_l0_c1_s4_62f6f080	X1	immune	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_none_l0_c0_s0_db8be738	X1	immune	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	0	auto	{}
+X1_immune_none_l0_c0_s1_cfe70e05	X1	immune	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	1	auto	{}
+X1_immune_none_l0_c0_s2_4cfccabf	X1	immune	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	2	auto	{}
+X1_immune_none_l0_c0_s3_9e1973c2	X1	immune	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	3	auto	{}
+X1_immune_none_l0_c0_s4_1166b035	X1	immune	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	239	0.9	4	auto	{}
+X1_immune_hum_mou_none_l0_c1_s0_c66698bb	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_none_l0_c1_s1_51867c9a	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_none_l0_c1_s2_95e4408f	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_none_l0_c1_s3_d7395f2a	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_none_l0_c1_s4_68549562	X1	immune_hum_mou	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_immune_hum_mou_none_l0_c0_s0_8af1b7b3	X1	immune_hum_mou	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	0	auto	{}
+X1_immune_hum_mou_none_l0_c0_s1_7e84714e	X1	immune_hum_mou	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	1	auto	{}
+X1_immune_hum_mou_none_l0_c0_s2_fac63072	X1	immune_hum_mou	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	2	auto	{}
+X1_immune_hum_mou_none_l0_c0_s3_f1a48ea5	X1	immune_hum_mou	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	3	auto	{}
+X1_immune_hum_mou_none_l0_c0_s4_8247a444	X1	immune_hum_mou	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	82	0.9	4	auto	{}
+X1_sim1_none_l0_c1_s0_6e3ac79a	X1	sim1	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_none_l0_c1_s1_c71de27e	X1	sim1	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_none_l0_c1_s2_4409c08a	X1	sim1	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_none_l0_c1_s3_3518715a	X1	sim1	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_none_l0_c1_s4_da191e2d	X1	sim1	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_none_l0_c0_s0_b0424fb2	X1	sim1	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_none_l0_c0_s1_e408811a	X1	sim1	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_none_l0_c0_s2_98873add	X1	sim1	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_none_l0_c0_s3_58184dd3	X1	sim1	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_none_l0_c0_s4_a69ed938	X1	sim1	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_none_l0_c1_s0_b40bea0b	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_none_l0_c1_s1_9930c892	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_none_l0_c1_s2_fb82d894	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_none_l0_c1_s3_0da94750	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_none_l0_c1_s4_64c3763f	X1	sim2	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_none_l0_c0_s0_7c6426ec	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_none_l0_c0_s1_42acaba4	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_none_l0_c0_s2_10845300	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_none_l0_c0_s3_525e1e6b	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_none_l0_c0_s4_08d944a8	X1	sim2	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_none_l0_c1_s0_731728c3	X1	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_none_l0_c1_s1_011e3e56	X1	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_none_l0_c1_s2_b65c9541	X1	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_none_l0_c1_s3_16bcb489	X1	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_none_l0_c1_s4_aef225fd	X1	atac_small	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_small_none_l0_c0_s0_5bc1b04c	X1	atac_small	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_none_l0_c0_s1_8905a723	X1	atac_small	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_none_l0_c0_s2_758a4aa3	X1	atac_small	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_none_l0_c0_s3_99668b60	X1	atac_small	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_none_l0_c0_s4_ee0a643c	X1	atac_small	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_atac_large_none_l0_c1_s0_2561dc45	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_none_l0_c1_s1_b88a1971	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_none_l0_c1_s2_50285a4b	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_none_l0_c1_s3_b56d3119	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_none_l0_c1_s4_cd1eaa2b	X1	atac_large	scib	none	0	0	mean	0	1	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_large_none_l0_c0_s0_50dd6524	X1	atac_large	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	0	auto	{}
+X1_atac_large_none_l0_c0_s1_23ed1518	X1	atac_large	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	1	auto	{}
+X1_atac_large_none_l0_c0_s2_a5364d95	X1	atac_large	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	2	auto	{}
+X1_atac_large_none_l0_c0_s3_39b3cce3	X1	atac_large	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	3	auto	{}
+X1_atac_large_none_l0_c0_s4_1c5bd81f	X1	atac_large	scib	none	0	0	mean	0	0	SCVI	10	1	128	zinb	128	94	0.9	4	auto	{}
+X1_atac_small_barycenter_lg4_c0_s0_91744b22	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s1_b952a341	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s2_4ea15548	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s3_664947a8	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	"{""bary_iter"": 10}"
+X1_atac_small_barycenter_lg4_c0_s4_58bf4bf8	X1	atac_small	scib	barycenter	10	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	"{""bary_iter"": 10}"
+X1_atac_small_sinkhorn_lg4_c0_s0_7a4ddbe9	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s1_ca8963ec	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s2_d115e123	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s3_f0d347de	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_atac_small_sinkhorn_lg4_c0_s4_2a2d636b	X1	atac_small	scib	sinkhorn	30	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_immune_hum_mou_barycenter_lg3_c1_s0_282d0fac	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	0	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s1_5ebd813b	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	1	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s2_3f410a7b	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	2	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s3_2d1f114c	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	3	auto	"{""bary_iter"": 10}"
+X1_immune_hum_mou_barycenter_lg3_c1_s4_49c4a447	X1	immune_hum_mou	scib	barycenter	3	5	mean	0	1	SCVI	10	1	128	zinb	128	82	0.9	4	auto	"{""bary_iter"": 10}"
+X1_pancreas_pooled_lg3_c0_s0_d945ecb3	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_pooled_lg3_c0_s1_bbb7d8da	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_pooled_lg3_c0_s2_8bb835a2	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_pooled_lg3_c0_s3_ecc97a19	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_pooled_lg3_c0_s4_59b168c5	X1	pancreas	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_mmd_lg1_c1_s0_5c1226c4	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_mmd_lg1_c1_s1_82d753d1	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_mmd_lg1_c1_s2_f7d06a99	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_mmd_lg1_c1_s3_9401d51f	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_mmd_lg1_c1_s4_2e52c9e6	X1	pancreas	scib	mmd	3	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s0_acf78cfd	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s1_f2cac493	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s2_1671f433	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s3_a7dc574c	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_pancreas_sinkhorn_l10_c1_s4_9eff02e7	X1	pancreas	scib	sinkhorn	10	0	mean	0	1	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim1_pooled_lg3_c0_s0_8793e662	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim1_pooled_lg3_c0_s1_6d1fd00f	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim1_pooled_lg3_c0_s2_8250ebd8	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim1_pooled_lg3_c0_s3_3aa74c51	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim1_pooled_lg3_c0_s4_e732f262	X1	sim1	scib	pooled	3	5	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s0_8a01c62c	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	0	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s1_5107a6cb	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	1	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s2_7448f323	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	2	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s3_5a1133f5	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	3	auto	{}
+X1_sim2_sinkhorn_lg5_c0_s4_08dec11a	X1	sim2	scib	sinkhorn	100	0	mean	0	0	SCVI	10	1	128	zinb	128	400	0.9	4	auto	{}

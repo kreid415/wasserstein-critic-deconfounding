@@ -15,3 +15,6 @@ Where each task is fitted and scored (same kind of machine as in the sweep):
 The sweep fitted atac_small, immune and sim1 on the same workstation GPU (the driver was updated on 2026-11-02 from 580.173 to
 580.178), and the other five tasks on JHPCE L40S. JHPCE stage files: /fastscratch/myscratch/kreid/wcd/replication_20261102
 (run_shard.sh, validate_shard.py, shard tag files with shard_tags.sha256); local tag files in D/tier12_v3/sweep_replication/tags.
+
+## Extension step (2026-11-05)
+The agreement rule's extension step (next grid strength outward, once, seeds 0-4) was run for the 8 readings that did not bracket b*: 40 fits, manifests/sweep_replication_ext1.tsv, 15 on the workstation RTX 3080 and 25 on JHPCE L40S (Slurm 36899485), same code 10a1ca5. Result and provenance: agreement_result_with_extension/ (README.md, AGREEMENT_RESULT.md).

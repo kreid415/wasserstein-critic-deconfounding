@@ -19,3 +19,9 @@
 {"job": "36889226", "batch": "helper-w3list", "at": "2026-11-05T14:51:39+00:00"}
 {"job": "36889227", "batch": "score-w3-immune_hum_mou", "at": "2026-11-05T14:51:50+00:00"}
 {"job": "36889264", "batch": "helper-sha-scores", "at": "2026-11-05T14:57:42+00:00"}
+{"ack": "Run all 40, as the rule says (user 2026-11-05)", "at": "2026-11-05T22:01:05+00:00"}
+{"job": "36899485", "batch": "ext_fit_shardE", "at": "2026-11-05T22:01:55+00:00"}
+{"job": "36901327", "batch": "helper-extlist", "at": "2026-11-06T01:07:41+00:00"}
+{"job": "36901360", "batch": "score_ext_immune_hum_mou", "at": "2026-11-06T01:08:55+00:00"}
+{"job": "36901365", "batch": "score_ext_pancreas", "at": "2026-11-06T01:08:55+00:00"}
+{"job": "36901380", "batch": "score_ext_sim2", "at": "2026-11-06T01:08:55+00:00"}

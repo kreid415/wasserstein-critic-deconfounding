@@ -16,3 +16,6 @@ Re-run (from the repo root, on the workstation):
         --scores $D/tier12_v3/sweep_replication/scores $D/sweep_replication/jhpce_scores/scores \
         --failures $D/tier12_v3/sweep_replication/failures.csv $D/sweep_replication/jhpce_scores/failures.csv --out experiments/sweep_replication/agreement_result
     $PY scripts/check_tests.py --base HEAD --src experiments/sweep_replication -- tests/analysis/test_replication_agreement.py tests/analysis/test_score_validity.py
+
+
+> Superseded for the verdict by ../agreement_result_with_extension/ (the rule's extension step was run on 2026-11-05). This folder is the result before that step.
