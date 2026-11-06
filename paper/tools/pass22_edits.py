@@ -9,6 +9,7 @@ Then: python paper/tools/accept_changes.py ; python paper/tools/check_ledger.py"
 import difflib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from accept_changes import accept, group  # noqa: E402
 
 ROOT = Path(os.environ.get("PASS22_ROOT") or Path(__file__).resolve().parents[2])
 TAG = "P22"
+CITE = re.compile(r"\\cite[pt]?\{[^}]*\}")
 
 
 def tokens(s):
@@ -47,11 +49,17 @@ def tokens(s):
     return out
 
 
+def struck(text):
+    """Struck text goes through ulem's strikeout, which breaks on a bare citation; earlier passes box it the same way."""
+    return CITE.sub(lambda m: r"\mbox{" + m.group(0) + "}", text)
+
+
 def tracked(old, new):
     a, b = tokens(old), tokens(new)
     parts = []
     for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
-        o, n = " ".join(a[i1:i2]), " ".join(b[j1:j2])
+        o, n = struck(" ".join(a[i1:i2])), " ".join(b[j1:j2])
+        o = " ".join(a[i1:i2]) if op == "equal" else o
         parts.append({"equal": o, "replace": rf"\replaced[id={TAG}]{{{n}}}{{{o}}}",
                       "delete": rf"\deleted[id={TAG}]{{{o}}}", "insert": rf"\added[id={TAG}]{{{n}}}"}[op])
     return " ".join(parts)
@@ -60,7 +68,7 @@ def tracked(old, new):
 def rewrite(old_line, new):
     acc = accept(old_line).strip()
     if new is None:                                   # struck list item; accept_changes.py drops the empty \item
-        return r"\item " + rf"\deleted[id={TAG}]{{{acc[6:]}}}"
+        return r"\item " + rf"\deleted[id={TAG}]{{{struck(acc[6:])}}}"
     if acc.startswith(r"\item "):
         return r"\item " + tracked(acc[6:], new[6:])
     if acc.startswith(r"\pp{"):
