@@ -42,3 +42,18 @@ def test_ledger_abstract_anchor_reads_printed_text_and_supersedes_moves_the_old_
     assert cl.check_ledger("paper/a.csv", tmp_path, "", sup)[2] == []                 # location of the superseded row is skipped
     errs = cl.check_ledger("paper/b.csv", tmp_path, "", sup)[2]
     assert len(errs) == 1 and errs[0].startswith("n2: anchor not found")             # old text is struck, so not in the printed abstract
+
+
+# test-reason: regression: a row moved by Pass 13 and again by Pass 15 failed its Pass 13 anchor
+def test_ledger_value_moved_twice_is_checked_only_at_its_last_location(tmp_path):
+    (tmp_path / "paper").mkdir()
+    (tmp_path / "paper/outline.tex").write_text(TEX)
+    (tmp_path / "paper/n.json").write_text('{"v": 0.27}')
+    cols = "id,location,written,source,selector,fmt,note,supersedes\n"
+    row = lambda loc, sup: f'k,"{loc}",27\\%,paper/n.json,key=v,.0%,,{sup}\n'
+    for name, loc, sup in [("x", "paper/outline.tex::gone 27\\%", ""), ("y", "paper/outline.tex::also gone 27\\%", "k"),
+                           ("z", "abstract:paper/outline.tex::new text of 27\\% here", "k")]:
+        (tmp_path / f"paper/{name}.csv").write_text(cols + row(loc, sup))
+    args = ["--root", str(tmp_path), "--data-root", ""]
+    assert cl.main(["paper/x.csv", "paper/y.csv", "paper/z.csv"] + args) == 0
+    assert cl.main(["paper/x.csv", "paper/y.csv"] + args) == 1                     # y's anchor is the last location, and it is gone

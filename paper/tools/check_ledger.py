@@ -1,7 +1,7 @@
 """Re-read the paper's number ledgers from their sources; exit 1 on any mismatch or any source pointer that does not resolve.
 
 Usage, from the repository root:  python paper/tools/check_ledger.py [--data-root D] [ledger.csv ...]
-(default ledgers: paper/pass7_numbers.csv and pass9 to pass14).
+(default ledgers: paper/pass7_numbers.csv and pass9 to pass15).
 
 Source pointers: a relative path resolves from the repository root; an absolute path must lie under the data root
 (DATA_ROOT below, re-rooted at --data-root); git:<rev>:<path> reads a committed file with `git show`; a directory resolves but
@@ -26,7 +26,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = "/home/kendall/experiment_data/wasserstein-critic-deconfounding"
-LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13, 14)]
+LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13, 14, 15)]
 WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen".split())}
 TERM = re.compile(r"^(\|?)([\w.]+)\|?\s*(==|!=|<=|>=|<|>| in )\s*(.*)$")
 
@@ -188,7 +188,7 @@ def check_pass12(rows, root, data_root, superseded=()):
             got = fmt_value(raw, r["fmt"], r["written"])
             if norm(r["written"]) != norm(got):
                 raise LedgerError(f"written {r['written']!r} but source gives {got!r}")
-            if r["location"] and (r["id"] not in superseded or r.get("supersedes")):
+            if r["location"] and r["id"] not in superseded:  # `superseded`: ids a later ledger has moved
                 f, anchor = r["location"].split("::", 1)
                 text = read_source(f.removeprefix("abstract:"), root, data_root) or ""
                 if f.startswith("abstract:"):  # anchor must be in the printed (final) abstract, not in struck old text
@@ -248,9 +248,8 @@ def main(argv=None):
     ap.add_argument("--root", default=str(ROOT), help="repository root (default: this checkout)")
     a = ap.parse_args(argv)
     bad = 0
-    sup = superseded_ids(a.ledgers, a.root)
-    for led in a.ledgers:
-        n, p, errs = check_ledger(led, a.root, a.data_root, sup)
+    for i, led in enumerate(a.ledgers):  # a row is retired only by a later ledger, so a value may move more than once
+        n, p, errs = check_ledger(led, a.root, a.data_root, superseded_ids(a.ledgers[i + 1:], a.root))
         print(f"{led}: {n} values re-read, {p} pointers checked for the path only, {len(errs)} failures")
         for e in errs:
             print("  FAIL", e)

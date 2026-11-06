@@ -23,6 +23,7 @@ for c, part in ((1, "a"), (0, "b")):
     for i, (m, lab) in enumerate(ROWS):
         lo, hi = d[m].min(), d[m].max()
         pad = 0.08 * (hi - lo + 1e-9)
+        first = next(j for j, t in enumerate(TASKS) if d[d.task == t][m].notna().any())  # row label on the first drawn panel
         for j, t in enumerate(TASKS):
             ax = axes[i, j]
             g = d[d.task == t]
@@ -35,7 +36,7 @@ for c, part in ((1, "a"), (0, "b")):
                 ax.plot(e.index, e.values, "-o", color=ARM_COLOR[a], ms=1.4, lw=0.8, mew=0, zorder=2)
             ax.set_xscale("log"); ax.set_ylim(lo - pad, hi + pad); ax.locator_params(axis="y", nbins=3)
             ax.tick_params(labelsize=5, length=2)
-            if j == 0: ax.set_ylabel(lab, fontsize=6.5, labelpad=2)
+            if j == first: ax.set_ylabel(lab, fontsize=6.5, labelpad=2)
             if i == 0: ax.set_title(TL[t], loc="left", pad=2, fontsize=6.5)
             last = max(k for k, (mm, _) in enumerate(ROWS) if g[mm].notna().any())
             if i == last:                           # x axis under the lowest drawn panel of each column

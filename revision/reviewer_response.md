@@ -11,7 +11,9 @@ paragraphs by their topic; Results paragraphs Res-1 to Res-8, Res-2b and Res-5b;
 Every number below is copied from the paper text, whose numbers are listed with their source files in `paper/pass9_numbers.csv`
 and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/tools/check_ledger.py` re-reads the ledgers from
 their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. The replication results were added in Pass 14 (2026-11-06;
-numbers in `paper/pass14_numbers.csv`). Table numbers are those the PDF prints (Pass 13):
+numbers in `paper/pass14_numbers.csv`). Pass 15 (2026-11-06; `paper/pass15_changelog.md`) fixes the points of an independent
+re-review. The supplementary material of this version contains Supplementary Note 1, Tables S6, S7, S9 and S10 and Figures S1-S6;
+the other supplementary notes and tables named below are described in the outline and are not yet written. Table numbers are those the PDF prints (Pass 13):
 the main-text tables are numbered 1 to 3, Table 1 (methods), Table 2 (ranking) and Table 3 (placement); the strength-range table was removed.
 
 ## What changed overall
@@ -87,7 +89,7 @@ scVI of at most 0.006, whereas Harmony and PCA were lower.
 reconstruction term is the zero-inflated negative binomial likelihood of scvi-tools. All loss equations (scVI loss, discriminator
 fool loss, the three critics, MMD, Sinkhorn divergence) are collected in Supplementary Note 1, where we use the notation the
 reviewer suggests: the likelihood written with its mean and dispersion per gene, and the discriminator loss written as a
-minimisation over the classifier of the expected cross-entropy under $q(z \mid x)$.
+minimisation over the classifier of the cross-entropy on each cell's posterior mean $u_i=\mu_i$, the input every penalty reads.
 
 ---
 
@@ -220,10 +222,10 @@ takes the bottom place in its pair, marked as not replicating the crossing.
   3 kept their sign and the mean $\tau_b$ was 0.426 ($p$ = 0.00049).
   The rule was met only once the step it prescribes had been run; both results are reported (Res-2b).
 - Sensitivity analyses, not part of the rule and defined after it was fixed: with signs flipped per task (both decoders of a
-  task together, $2^{8}$ patterns) $p$ = 0.0039, the smallest value eight tasks allow; the slope-adjusted reading
+  task together, $2^{8}$ patterns) $p$ = 0.0039, the smallest value eight tasks allow, and still approximate, because the two tasks of a nested pair are flipped separately; the slope-adjusted reading
   kept the sign of 4 of the 4 large gaps, mean $\tau_b$ 0.374, $p$ = 0.00073.
 - Near-ties: 155 of the 160 sweep near-ties (differences under 0.02) stayed within
-  $\pm$0.04 on the new seeds. Five seeds resolve within-pair differences of about 0.04, so the replication does not test the
+  $\pm$0.04 on the new seeds. The rule tests only the sign of the four gaps of 0.04 or more (no precision calculation was made), so the replication does not test the
   order of near-tied penalties; the first-ranked penalty was the same as in the sweep in 6 of 13 pairs.
 
 Where it is reported: abstract (Results), Res-2b, Disc-1 and Supplementary Table S9; the design is in Methods ("Replication

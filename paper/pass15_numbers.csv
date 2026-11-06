@@ -1,0 +1,4 @@
+id,location,written,source,selector,fmt,note,supersedes
+P15A12,abstract:paper/outline.tex::the two sweep strengths bracketing matched batch removal,two,git:replication-prediction-v1:experiments/sweep_replication/replication_design.py,re=take the (two) strengths that bracket it,,abstract (Pass 15 text),A12
+P15D1,"paper/outline.tex::(mean $\tau_b$ 0.456, $p=0.00049$; \replaced[id=P15]",0.456,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=mean_tau,.3f,Disc-1 (Pass 15 text),P14D1
+P15D2,"paper/outline.tex::0.456, $p=0.00049$; \replaced[id=P15]",0.00049,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=p_value,.5f,Disc-1 (Pass 15 text),P14D2
