@@ -1,7 +1,8 @@
 """Re-read the paper's number ledgers from their sources; exit 1 on any mismatch or any source pointer that does not resolve.
 
 Usage, from the repository root:  python paper/tools/check_ledger.py [--data-root D] [ledger.csv ...]
-(default ledgers: paper/pass7_numbers.csv and pass9 to pass16).
+(default ledgers: paper/pass7_numbers.csv, pass9 to pass16, the supplement ledgers supp-methods, supp-analysis and
+supp-records, then pass17; a later ledger may retire an earlier row with `supersedes`).
 
 Source pointers: a relative path resolves from the repository root; an absolute path must lie under the data root
 (DATA_ROOT below, re-rooted at --data-root); git:<rev>:<path> reads a committed file with `git show`; a directory resolves but
@@ -26,7 +27,8 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = "/home/kendall/experiment_data/wasserstein-critic-deconfounding"
-LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13, 14, 15, 16)]
+LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13, 14, 15, 16)] + [
+    f"paper/supp-{part}_numbers.csv" for part in ("methods", "analysis", "records")] + ["paper/pass17_numbers.csv"]
 WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen".split())}
 TERM = re.compile(r"^(\|?)([\w.]+)\|?\s*(==|!=|<=|>=|<|>| in )\s*(.*)$")
 

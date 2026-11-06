@@ -192,6 +192,9 @@ def test_tables_reproduce_the_committed_tables(tmp_path):
     assert "448 & 447" in texts["tableS4.tex"] and "1 of Scanorama on ATAC large" in texts["tableS4.tex"]
     assert "holds all cells and batches of Immune" in texts["tableS1.tex"]                       # containment, not name overlap
     assert "holds all cells and batches of ATAC small" in texts["tableS1.tex"]                   # barcodes with other suffixes
+    assert "Sweep, all & & 378 & 378 & 387 & 378 & 378 & 378 & 378 & 378 & 3,033" in texts["tableS5.tex"]
+    assert "Scanorama & -- & 7 & 7 & 7 & 7 & 6 of 7 & 7 & 7 & 7 & 55 of 56" in texts["tableS5.tex"]          # missing setting
+    assert "447 of 448" in texts["tableS5.tex"] and "scvi-tools adversary & batch-conditioned" in texts["tableS5.tex"]
     assert sm.main(["--check"]) == 0
     assert sm.main(["--out", str(tmp_path)]) == 0 and (tmp_path / "tableS4.tex").read_text() == texts["tableS4.tex"]
     (tmp_path / "tableS1.tex").write_text("changed")
@@ -225,4 +228,11 @@ def test_table_helpers_refuse_disagreeing_fits():
         sm.table_s2(tasks, manifest, pd.concat([settings, adv.assign(value=json.dumps({"cls": "Adam", "param_groups": [{}]}))]))
     part = pd.Series(dict(cells=10, shares_cells_with="sim1:3"))                                   # partial overlap: batches only
     assert sm.relation(part, "sim1", 2, {"sim1": 20}) == "2 batches also in Simulation 1"
+    coverage = pd.read_csv(data / "baseline_coverage.csv")
+    with pytest.raises(ValueError, match="a baseline fit failed"):
+        sm.table_s5(manifest, coverage.assign(failed=1))
+    with pytest.raises(ValueError, match="sweep arms"):
+        sm.table_s5(manifest[manifest.arm != "mmd"], coverage)
+    with pytest.raises(ValueError, match="decoder settings"):
+        sm.table_s5(pd.concat([manifest, manifest[manifest.arm == "pca"].head(1).assign(cond=1, decoder="SCVI")]), coverage)
     assert sm.sci(0.001) == "$10^{-3}$" and sm.sci(0.01) == "0.01" and sm.seeds([0]) == "0" and sm.kl_final(400, 400) == 0.9975

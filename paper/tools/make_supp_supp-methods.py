@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Supplementary Tables S1, S2 and S4 (tasks, training settings, baseline grids) as LaTeX; no typed numbers.
+"""Supplementary Tables S1, S2, S4 and S5 (tasks, training settings, baseline grids, run counts) as LaTeX; no typed numbers.
 
 Step 1, --collect (on the workstation; Python with h5py, numpy and pandas, e.g. the paper-tools environment) reads
   D/prepped_scib/<task>__scib.h5ad                      the eight prepared task files (cells, batches, cell types, nesting)
@@ -12,7 +12,7 @@ Step 1, --collect (on the workstation; Python with h5py, numpy and pandas, e.g. 
 and writes paper/figure_data/supp_methods/ (tasks.csv, settings.csv, manifest.tsv, baseline_coverage.csv,
 sources.json, MANIFEST.sha256, and scib_<version>/: the scib metric files the scorer ran, with their MIT licence). Every training setting in settings.csv is the value recorded in the fits' own latent
 files (the resolved training plan of each fit), counted over all fits.
-Step 2 (default) reads paper/figure_data/supp_methods and writes paper/supp/tableS1.tex, tableS2.tex, tableS4.tex;
+Step 2 (default) reads paper/figure_data/supp_methods and writes paper/supp/tableS1.tex, tableS2.tex, tableS4.tex, tableS5.tex;
 --check exits 1 when a committed table differs from the regenerated one (and writes nothing).
 Usage, from the repository root:
   python paper/tools/make_supp_supp-methods.py --collect [--data-root D]
@@ -51,9 +51,9 @@ SCIB_FILES = ["metrics.py", "pcr.py", "silhouette.py", "lisi.py", "graph_connect
               "clustering.py", "isolated_labels.py", "cell_cycle.py", "trajectory.py"]
 SHARED_COLS = ["n_latent", "n_layers", "n_hidden", "likelihood", "batch_size", "max_epochs", "train_size", "adv_input",
                "zstd", "n_critic"]
-TABLES = ("tableS1.tex", "tableS2.tex", "tableS4.tex")
+TABLES = ("tableS1.tex", "tableS2.tex", "tableS4.tex", "tableS5.tex")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_supp_tables import PEN, PEN_LABEL, REAL, SIMS, TASK_LABEL  # noqa: E402  (labels shared with Tables S6-S7)
+from make_supp_tables import DEC_LABEL, PEN, PEN_LABEL, REAL, SIMS, TASK_LABEL  # noqa: E402  (labels shared with Tables S6-S7)
 
 TASKS = REAL + SIMS
 
@@ -505,15 +505,63 @@ def table_s4(manifest, settings, coverage):
         ""])
 
 
+def table_s5(manifest, coverage):
+    """Run counts per method, decoder and task: sweep fits of the analysed run list (collect checks one score row per
+    run-list row) and baseline fits scored of planned (baseline coverage table)."""
+    if int(coverage.failed.sum()):
+        raise ValueError("a baseline fit failed; Table S5 has no column for failed fits")
+    sweep, base = manifest[manifest.experiment == "A1"], manifest[manifest.experiment != "A1"]
+    if set(sweep.arm) != {"none", *PEN}:
+        raise ValueError(f"sweep arms {sorted(set(sweep.arm))}")
+    cnt = sweep.groupby(["arm", "cond", "task"]).size()
+    lab = dict(PEN_LABEL, none="Plain scVI")
+    body = []
+    for arm in ["none", *PEN]:
+        for cond in (1, 0):
+            row = [int(cnt.get((arm, cond, t), 0)) for t in TASKS]
+            body.append(f"{lab[arm]} & {DEC_LABEL[cond]} & " + " & ".join(map(str, row)) + f" & {n(sum(row))} \\\\")
+    tot = [int((sweep.task == t).sum()) for t in TASKS]
+    body += [r"\midrule", "Sweep, all & & " + " & ".join(map(n, tot)) + f" & {n(sum(tot))} \\\\", r"\midrule"]
+    cov = coverage.groupby(["arm", "task"])[["expected", "scored"]].sum()
+    for arm, label, _ in TOOLS:
+        dec = base[base.arm == arm][["cond", "decoder"]].drop_duplicates()
+        if len(dec) != 1:
+            raise ValueError(f"{arm}: fits with {len(dec)} decoder settings")
+        d = "--" if dec.decoder.iloc[0] == "na" else DEC_LABEL[int(dec.cond.iloc[0])]
+        cells = [cov.loc[(arm, t)] for t in TASKS]
+        cells.append(cov.loc[arm].sum())
+        body.append(f"{label} & {d} & " + " & ".join(
+            n(c.scored) if c.scored == c.expected else f"{n(c.scored)} of {n(c.expected)}" for c in cells) + r" \\")
+    allb = [cov.xs(t, level="task").sum() for t in TASKS]
+    allb.append(cov.sum())
+    body += [r"\midrule", "Baselines, all & & " + " & ".join(
+        n(c.scored) if c.scored == c.expected else f"{n(c.scored)} of {n(c.expected)}" for c in allb) + r" \\"]
+    missing = "; ".join(f"{r.missing} of {dict((a, x) for a, x, _ in TOOLS)[r.arm]} on {TASK_LABEL[r.task]}"
+                        for r in coverage.itertuples() if r.missing)
+    num = r">{\raggedleft\arraybackslash}p{0.058\textwidth}"
+    return "\n".join([
+        HEAD, OPEN % "S5", r"\setlength{\tabcolsep}{3pt}",
+        r"\begin{longtable}{@{}" + P(0.12) + P(0.1) + num * len(TASKS) + "r@{}}",
+        r"\caption{Run counts (Supplementary Note 11): fits per method, decoder and task. Sweep: the fits read by the sweep "
+        r"analysis (the ten strengths, the edge strengths and the strength-extension fits on the immune task, Supplementary "
+        r"Note 4); each was fitted and scored, and none failed (Supplementary Note 11). Baselines: fits scored, with the "
+        r"planned number where it differs (``55 of 56''); -- for tools without a decoder; not fitted: " + (missing or "none")
+        + r" (Supplementary Note 8; Supplementary Table S4 gives the settings). The input and standardisation pilots, the "
+        r"replication across training seeds and the stopped fixed-strength benchmark are counted in Supplementary Note 11, "
+        r"the replication per penalty in Supplementary Table S9.}\label{tab:s5}\\",
+        r"\toprule Method & Decoder & " + " & ".join(TASK_LABEL[t] for t in TASKS) + r" & All \\", r"\midrule",
+        *body, r"\bottomrule", r"\end{longtable}", "}", ""])
+
+
 def build(data=DATA):
-    """Step 2: {file name: LaTeX text} of the three tables from the collected inputs."""
+    """Step 2: {file name: LaTeX text} of the four tables from the collected inputs."""
     data = Path(data)
     tasks = pd.read_csv(data / "tasks.csv", keep_default_na=False).set_index("task").loc[TASKS].reset_index()
     manifest = pd.read_csv(data / "manifest.tsv", sep="\t")
     settings = pd.read_csv(data / "settings.csv", keep_default_na=False)
     coverage = pd.read_csv(data / "baseline_coverage.csv")
     return {"tableS1.tex": table_s1(tasks), "tableS2.tex": table_s2(tasks, manifest, settings),
-            "tableS4.tex": table_s4(manifest, settings, coverage)}
+            "tableS4.tex": table_s4(manifest, settings, coverage), "tableS5.tex": table_s5(manifest, coverage)}
 
 
 def main(argv=None):
