@@ -1,0 +1,11 @@
+id,location,written,source,selector,fmt,note,supersedes
+P16R1,"paper/outline.tex::over six families), $p=0.0156$",0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,"family-level sign-flip p, computed by paper/tools/make_replication.py (Res-2b)",
+P16R2,paper/outline.tex::the observed mean (1 of 64),1,paper/replication_data/replication_numbers.json,key=p_family_hits,d,"patterns reaching the observed mean, per family",
+P16R3,paper/outline.tex::mean (1 of 64),64,paper/replication_data/replication_numbers.json,key=p_family_patterns,d,sign patterns over families (2^6),
+P16R4,paper/outline.tex::positive in all 6 families,6,paper/replication_data/replication_numbers.json,key=n_families_tau_sum_positive,d,families whose summed tau-b is positive,
+P16R5,paper/outline.tex::all $2^{6}$ patterns over six families,six,paper/replication_data/replication_numbers.json,key=n_families,d,task families among the ranked pairs (Res-2b),
+P16R6,paper/outline.tex::all $2^{6}$ sign patterns over six families,six,paper/replication_data/replication_numbers.json,key=n_families,d,task families among the ranked pairs (Methods),
+P16D1,paper/outline.tex::and $p=0.0156$ per task family,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,Disc-1,
+P16L1,revision/reviewer_response.md::$p$ = 0.0156 and is approximate too,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,"reviewer response, summary item 4",
+P16L2,revision/reviewer_response.md::$2^{6}$ patterns over six families) $p$ = 0.0156,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,"reviewer response, replication section",
+P16L3,revision/reviewer_response.md::$2^{6}$ patterns over six families) $p$,six,paper/replication_data/replication_numbers.json,key=n_families,d,"reviewer response, replication section",

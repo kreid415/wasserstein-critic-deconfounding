@@ -119,7 +119,7 @@ python paper/tools/check_ledger.py paper/supp-analysis_numbers.csv   # numbers i
 ```
 Supplement: Notes 2-12 and Tables S1, S2, S4, S5 and S8 are input in the supplementary list of `paper/outline.tex` by
 `paper/tools/pass17_edits.py` (from dc21cfc; it also writes the Pass 17 corrections). Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
-section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-17 from their starting commits and compares with their
+section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-18 from their starting commits and compares with their
 result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper/outline_clean.tex` (generated, never edited by hand;
 `--check` exits 1 when it is out of date).
 
@@ -127,13 +127,13 @@ result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper
 ```
 python paper/tools/check_ledger.py                                     # every ledger value re-read from its source
 python paper/tools/abstract_words.py                                   # abstract word counts (limit 350)
-python scripts/check_tests.py --base a2a2c1c --src paper/tools -- paper/tools   # Pass 17 (earlier passes: --base bfdd82d)
+python scripts/check_tests.py --base 6e97ebf --src paper/tools -- paper/tools   # Pass 18 (Pass 17: --base a2a2c1c; earlier: bfdd82d)
 cd paper && tectonic -X compile outline.tex && tectonic -X compile outline_clean.tex   # tracked and clean PDFs
 pandoc revision/reviewer_response.md -o reviewer_response.pdf --pdf-engine=tectonic      # response PDF (pandoc 3.10)
 sha256sum -c paper/MANIFEST.sha256                                     # from the repository root
 ```
 The PDFs in `paper/build/` were built from the zip of `paper/outline.tex`, `outline_clean.tex`, `refs.bib`, `supp_items.tex`,
-`supp/` and `figures/` at 38279bb (identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
+`supp/` and `figures/` at 7290fb1 (Pass 18; identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
 other checksums; the source checksums in `paper/MANIFEST.sha256` are the ones to compare.
 
 ## 6. Audit of 2026-11-06 (Pass 15)
@@ -157,13 +157,23 @@ by the checksum files named above.
 
 - The command lines of the sweep fits and of the first 855 replication fits and scores are in run logs on the data root, not in the
   repository (5.1, 5.4).
-- Supplementary Notes 2-12 and Tables S1, S2, S4, S5 and S8 are described in the supplementary list but not yet written.
-- Older commits of README.md (before 0596835) contain a browser session cookie in the data-download command; the current README has
-  a plain download command. Removing it from history needs a history rewrite on the remote.
+- Older commits of README.md contain a figshare browser session cookie in the data-download command (also tags
+  prereg-tier12-v1/v2/v3, replication-prediction-v1 and pull-request refs 2-4). Since 2026-11-06 no branch tip has it (Pass 18
+  change log, section Repository); the history was deliberately not rewritten, so the commit IDs cited here stay valid.
+- Until Pass 18, `paper/pass16_numbers.csv` was not committed (`*.csv` is git-ignored), so `check_ledger.py` failed on a fresh
+  clone; it is committed now.
 
-## 7. Checks of Pass 17 (2026-11-06)
+## 8. Checks of Pass 17 (2026-11-06)
 
 Supplement merged and placed (`paper/pass17_changelog.md`): `check_ledger.py` 1,117 values re-read, 507 pointers checked for the
 path only, 0 failures; `check_tests.py --base a2a2c1c --src paper/tools`: OK, 82 passed, no WARN; supplement generators `--check`
 identical; tracked PDF 64 pages and clean PDF 55 pages built with tectonic from the saved zip, 13 of 13 figures, no failing log
 class; response PDF 8 pages.
+
+## 9. Checks of Pass 18 (2026-11-06)
+
+Supplementary Table S11 numbered, supplementary headings kept with their text, Pass 16 ledger committed
+(`paper/pass18_changelog.md`): `check_ledger.py` from a fresh clone on the workstation: 1,117 values re-read, 507 pointers checked
+for the path only, 0 failures; tests 83 passed there; `check_tests.py --base 6e97ebf --src paper/tools`: OK, no WARN; tracked PDF 64
+pages and clean PDF 55 pages built with tectonic from the saved zip, 13 of 13 figures, no failing log class; every page of the
+tracked PDF viewed; response PDF 8 pages.
