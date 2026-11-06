@@ -91,7 +91,7 @@ edit("paper/outline.tex", [
     # F10: say which supplementary items this document contains
     ("\\textbf{Supplementary Notes}\n",
      "\\added[id=P15]{\\noindent This document contains Supplementary Note 1, Tables S6, S7, S9 and S10 and Figures S1--S6; the other "
-     "notes and tables listed below are described here and are not yet written.\\par}\n\\textbf{Supplementary Notes}\n"),
+     "notes and tables listed below are described here and are not yet written.}\\par\n\\textbf{Supplementary Notes}\n"),
 ])
 
 edit("revision/reviewer_response.md", [
