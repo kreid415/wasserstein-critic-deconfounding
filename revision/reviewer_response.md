@@ -13,7 +13,7 @@ and, from Pass 12, `paper/pass12_numbers.csv` (every abstract number; `paper/too
 their sources). Updated in Pass 12 (2026-11-05) after the Pass 11 rigour review. The replication results were added in Pass 14 (2026-11-06;
 numbers in `paper/pass14_numbers.csv`). Pass 15 (2026-11-06; `paper/pass15_changelog.md`) fixes the points of an independent
 re-review. Pass 17 (2026-11-06; `paper/pass17_changelog.md`) adds the finished supplement: the supplementary material of this
-version contains Supplementary Notes 1-12, Tables S1, S2 and S4-S10 and Figures S1-S6 (Table S3, the strength ranges of the
+version contains Supplementary Notes 1-12, Tables S1, S2 and S4-S11 and Figures S1-S6 (Table S3, the strength ranges of the
 planned fixed-strength benchmark, was removed with that benchmark). Table numbers are those the PDF prints (Pass 13):
 the main-text tables are numbered 1 to 3, Table 1 (methods), Table 2 (ranking) and Table 3 (placement); the strength-range table was removed.
 
