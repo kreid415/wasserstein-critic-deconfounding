@@ -17,4 +17,5 @@ for n in 1 2 3 4 5 6; do $PY paper/figure_scripts/figS$n.py; done               
 grep -q " scaling_check_ranks.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum scaling_check_ranks.csv >> MANIFEST.sha256)
 (cd paper/figure_data && sha256sum -c MANIFEST.sha256)
 $PY paper/tools/make_supp_tables.py --check-table4                                         # 5 tables S6, S7 (+ positive control against Table 4)
+$PY paper/tools/make_supp_supp-analysis.py                                                 # 5b Table S8 and the label-transfer table of Note 9
 (cd paper/figures && grep -v ' figS' MANIFEST.sha256 > MANIFEST.tmp && sha256sum figS*.png >> MANIFEST.tmp && mv MANIFEST.tmp MANIFEST.sha256)   # 6 (PNG only: the PDF files carry a creation time stamp, so their bytes change on every run)

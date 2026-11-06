@@ -109,6 +109,8 @@ bash paper/figure_scripts/make_figures.sh          # Figures 1-6 from paper/figu
 bash paper/figure_scripts/make_supp_figures.sh     # copies inputs from $D and sweep-paper, Figures S1-S6, Tables S6-S7
 python paper/tools/make_replication.py --check     # Table S9 and replication_numbers.json from sweep-replication a475ea3
 python paper/tools/make_supp_tables.py --check-table4
+python paper/tools/make_supp_supp-analysis.py                         # Table S8 and the label-transfer table of Supplementary Note 9
+python paper/tools/check_ledger.py paper/supp-analysis_numbers.csv   # numbers in Supplementary Notes 4-7 and 9
 ```
 Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
 section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-16 from their starting commits and compares with their
