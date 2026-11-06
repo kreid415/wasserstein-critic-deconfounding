@@ -1,0 +1,2064 @@
+{
+ "baseline_rows_missing": [
+  "X13_atac_large_scanorama_l80_c0_s0_f7f8daa2"
+ ],
+ "git": {
+  "065a486": {
+   "commit": "065a486",
+   "date": "2026-10-22T22:25:18-04:00",
+   "tag": false
+  },
+  "2113ec7": {
+   "commit": "2113ec7",
+   "date": "2026-11-01T21:45:49-05:00",
+   "tag": false
+  },
+  "2bc5b00": {
+   "commit": "2bc5b00",
+   "date": "2026-11-01T20:16:09-05:00",
+   "tag": false
+  },
+  "57241a2": {
+   "commit": "57241a2",
+   "date": "2026-10-18T10:52:15-04:00",
+   "tag": false
+  },
+  "5d01da0": {
+   "commit": "5d01da0",
+   "date": "2026-10-22T22:34:07-04:00",
+   "tag": false
+  },
+  "639c302": {
+   "commit": "639c302",
+   "date": "2026-11-05T09:57:53-05:00",
+   "tag": false
+  },
+  "648f7e8": {
+   "commit": "648f7e8",
+   "date": "2026-11-05T17:00:11-05:00",
+   "tag": false
+  },
+  "803ed80": {
+   "commit": "803ed80",
+   "date": "2026-11-05T13:31:41-05:00",
+   "tag": false
+  },
+  "8595a16": {
+   "commit": "8595a16",
+   "date": "2026-11-02T15:15:32-05:00",
+   "tag": false
+  },
+  "8e32bb2": {
+   "commit": "8e32bb2",
+   "date": "2026-11-01T21:39:39-05:00",
+   "tag": false
+  },
+  "98732ff": {
+   "commit": "98732ff",
+   "date": "2026-10-22T08:24:58-04:00",
+   "tag": false
+  },
+  "9faac6e": {
+   "commit": "9faac6e",
+   "date": "2026-11-05T19:41:12-05:00",
+   "tag": false
+  },
+  "a475ea3": {
+   "commit": "a475ea3",
+   "date": "2026-11-05T20:56:32-05:00",
+   "tag": false
+  },
+  "f618484": {
+   "commit": "f618484",
+   "date": "2026-11-05T18:50:46-05:00",
+   "tag": false
+  },
+  "prereg-tier12-v1": {
+   "commit": "129142b",
+   "date": "2026-10-03T15:07:32-04:00",
+   "tag": true
+  },
+  "prereg-tier12-v2": {
+   "commit": "c88cce3",
+   "date": "2026-10-04T17:42:47-04:00",
+   "tag": true
+  },
+  "prereg-tier12-v3": {
+   "commit": "10a1ca5",
+   "date": "2026-10-16T17:48:50-04:00",
+   "tag": true
+  },
+  "prereg-x6-v1": {
+   "commit": "635be7f",
+   "date": "2026-10-21T12:03:38-04:00",
+   "tag": true
+  },
+  "replication-prediction-v1": {
+   "commit": "3a90d0f",
+   "date": "2026-11-02T11:03:27-05:00",
+   "tag": true
+  }
+ },
+ "provenance": [
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-02",
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-02"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "harmony",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "input_pilot",
+   "n_fits": 54,
+   "n_scored": 54,
+   "score_date": [
+    "2026-10-10"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 54
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "input_pilot",
+   "n_fits": 54,
+   "n_scored": 54,
+   "score_date": [
+    "2026-10-10"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 54
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-02"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "pca",
+   "n_fits": 2,
+   "n_scored": 2,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 2
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [],
+   "fit_device": [
+    "latent not on the workstation"
+   ],
+   "fit_versions": [
+    "{}"
+   ],
+   "group": "replication",
+   "n_fits": 130,
+   "n_scored": 130,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 130
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "replication",
+   "n_fits": 140,
+   "n_scored": 140,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 140
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "replication",
+   "n_fits": 70,
+   "n_scored": 70,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 70
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [],
+   "fit_device": [
+    "latent not on the workstation"
+   ],
+   "fit_versions": [
+    "{}"
+   ],
+   "group": "replication",
+   "n_fits": 130,
+   "n_scored": 130,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 130
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [],
+   "fit_device": [
+    "latent not on the workstation"
+   ],
+   "fit_versions": [
+    "{}"
+   ],
+   "group": "replication",
+   "n_fits": 130,
+   "n_scored": 130,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 130
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [],
+   "fit_device": [
+    "latent not on the workstation"
+   ],
+   "fit_versions": [
+    "{}"
+   ],
+   "group": "replication",
+   "n_fits": 145,
+   "n_scored": 145,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 145
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "replication",
+   "n_fits": 75,
+   "n_scored": 75,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 75
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [],
+   "fit_device": [
+    "latent not on the workstation"
+   ],
+   "fit_versions": [
+    "{}"
+   ],
+   "group": "replication",
+   "n_fits": 75,
+   "n_scored": 75,
+   "score_date": [
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 75
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 6,
+   "n_scored": 6,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 6
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-02"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "CPU AMD Ryzen 5 3600 6-Core Processor"
+   ],
+   "fit_versions": [
+    "{\"anndata\": \"0.11.4\", \"harmony-pytorch\": \"0.1.7\", \"numpy\": \"1.26.4\", \"scanorama\": \"1.7.4\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\", \"torch\": \"2.4.1+cu121\"}"
+   ],
+   "group": "scanorama",
+   "n_fits": 7,
+   "n_scored": 7,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 7
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-06",
+    "2026-10-07"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-06"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scanvi",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-07"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-12",
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 1,
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 4
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-06"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-06"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "scvi_adv",
+   "n_fits": 5,
+   "n_scored": 5,
+   "score_date": [
+    "2026-10-06"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 5
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "standardisation_pilot",
+   "n_fits": 90,
+   "n_scored": 90,
+   "score_date": [
+    "2026-10-10",
+    "2026-10-19",
+    "2026-10-20"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 90
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "standardisation_pilot",
+   "n_fits": 90,
+   "n_scored": 90,
+   "score_date": [
+    "2026-10-10",
+    "2026-10-11",
+    "2026-10-20"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 90
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-28",
+    "2026-10-29",
+    "2026-10-30"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-04",
+    "2026-10-05",
+    "2026-10-09",
+    "2026-10-17",
+    "2026-10-19"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 387,
+   "n_scored": 387,
+   "score_date": [
+    "2026-10-05",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-10",
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 387
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-28",
+    "2026-10-29"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 377,
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 1
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-29",
+    "2026-10-30"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-28"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-18",
+    "2026-10-19"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5",
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sweep",
+   "n_fits": 378,
+   "n_scored": 378,
+   "score_date": [
+    "2026-10-28",
+    "2026-10-29"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 378
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 30
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_large"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "atac_small"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-11-01"
+   ],
+   "score_where": {
+    "AMD EPYC 7702 64-Core Processor (jhpce)": 30
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "immune_hum_mou"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-10-06",
+    "2026-10-07"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "lung"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-10-06"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "pancreas"
+  },
+  {
+   "fit_commit": [
+    "10a1ca5"
+   ],
+   "fit_device": [
+    "NVIDIA GeForce RTX 3080"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu130\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-11-03"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "10a1ca5"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim1"
+  },
+  {
+   "fit_commit": [
+    "c88cce3"
+   ],
+   "fit_device": [
+    "NVIDIA L40S"
+   ],
+   "fit_versions": [
+    "{\"scvi-tools\": \"1.4.2\", \"torch\": \"2.13.0+cu126\"}"
+   ],
+   "group": "sysvi",
+   "n_fits": 30,
+   "n_scored": 30,
+   "score_date": [
+    "2026-10-07"
+   ],
+   "score_where": {
+    "AMD Ryzen 5 3600 6-Core Processor (workstation)": 30
+   },
+   "scorer_commit": [
+    "c88cce3"
+   ],
+   "scorer_versions": [
+    "{\"R_kBET\": \"0.99.6\", \"anndata\": \"0.11.4\", \"numba\": \"0.66.0\", \"numpy\": \"1.26.4\", \"pynndescent\": \"0.5.13\", \"rpy2\": \"3.6.7\", \"scanpy\": \"1.11.5\", \"scib\": \"1.1.7\", \"scikit-learn\": \"1.9.0\"}"
+   ],
+   "task": "sim2"
+  }
+ ],
+ "versions": {
+  "Harmony, Scanorama, PCA": {
+   "anndata": "0.11.4",
+   "harmony-pytorch": "0.1.7",
+   "numpy": "1.26.4",
+   "scanorama": "1.7.4",
+   "scanpy": "1.11.5",
+   "scib": "1.1.7",
+   "scikit-learn": "1.9.0",
+   "torch": "2.4.1+cu121"
+  },
+  "biology check": {
+   "anndata": "0.12.19",
+   "numpy": "2.4.6",
+   "pandas": "2.3.3",
+   "python": "3.11.15",
+   "scanpy": "1.11.5",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.17.1"
+  },
+  "fitting, JHPCE": {
+   "anndata": "0.12.19",
+   "lightning": "2.6.5",
+   "numba": "0.67.0",
+   "numpy": "2.4.6",
+   "pandas": "2.3.3",
+   "pynndescent": "0.6.0",
+   "pyro-ppl": "1.9.1",
+   "scanpy": "1.11.5",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.17.1",
+   "scvi-tools": "1.4.2",
+   "torch": "2.13.0+cu126"
+  },
+  "fitting, workstation": {
+   "anndata": "0.12.19",
+   "lightning": "2.6.5",
+   "numba": "0.67.0",
+   "numpy": "2.4.6",
+   "pandas": "2.3.3",
+   "pynndescent": "0.6.0",
+   "pyro-ppl": "1.9.1",
+   "python": "3.11.15",
+   "scanpy": "1.11.5",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.17.1",
+   "scvi-tools": "1.4.2",
+   "torch": "2.13.0+cu130"
+  },
+  "scoring": {
+   "R_kBET": "0.99.6",
+   "anndata": "0.11.4",
+   "numba": "0.66.0",
+   "numpy": "1.26.4",
+   "pandas": "1.5.3",
+   "pynndescent": "0.5.13",
+   "python": "3.11.15",
+   "r-base": "4.5.2",
+   "rpy2": "3.6.7",
+   "scanpy": "1.11.5",
+   "scib": "1.1.7",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.14.1"
+  },
+  "sweep analysis": {
+   "anndata": "0.12.19",
+   "lightning": "2.6.5",
+   "numba": "0.67.0",
+   "numpy": "2.4.6",
+   "pandas": "2.3.3",
+   "pynndescent": "0.6.0",
+   "pyro-ppl": "1.9.1",
+   "python": "3.11.15",
+   "scanpy": "1.11.5",
+   "scikit-learn": "1.9.0",
+   "scipy": "1.17.1",
+   "scvi-tools": "1.4.2",
+   "torch": "2.13.0"
+  }
+ }
+}
