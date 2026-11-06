@@ -1,72 +1,57 @@
-# STATUS: where the project stands (2026-11-05, evening)
+# STATUS: where the project stands (2026-11-06)
 
-This file replaces the 2026-10-16 snapshot (still readable in git history at fe6776a). Where this file and a newer
-notebook page or branch disagree, trust the newer one. Every number below was read from a file named next to it;
-numbers marked "provisional" rest on a partial local copy.
+This file replaces the 2026-11-05 evening snapshot (b7c99d3; older ones in git history). Where this file and a newer change log
+or branch disagree, trust the newer one. Numbers below are copied from the files named next to them.
 
-## 1. What the paper is now
+## 1. What the paper is
 
-An exploratory benchmark of six alignment penalties added to scVI (JS discriminator, reference critic, pooled critic,
-barycenter critic, MMD, Sinkhorn divergence) against plain scVI and standard tools (scvi-tools adversary, scANVI, sysVI,
-Harmony, Scanorama, PCA). It is not a discriminator-versus-critic comparison. The planned fixed-strength benchmark was
-dropped on 2026-11-02 and replaced by the sweep below plus a replication across training seeds. Submission target:
-BMC Bioinformatics (resubmission, review BIOINF-2026-1434).
+An exploratory benchmark of six alignment penalties added to scVI (JS discriminator, reference, pooled and barycenter Wasserstein
+critics, MMD, Sinkhorn divergence) against plain scVI and standard tools (scvi-tools adversary, scANVI, sysVI, Harmony, Scanorama,
+PCA), read at matched batch removal over a penalty-strength sweep, with a replication across training seeds. Target journal:
+**BMC Bioinformatics**, Research article (confirmed by the user 2026-11-06). The earlier version was rejected at Bioinformatics
+(BIOINF-2026-1434); `revision/reviewer_response.md` answers those reviews. The outline already follows the BMC structure
+(Background, Methods, Results, Discussion, Conclusions, Declarations with the BMC subheadings).
 
-## 2. Penalty-strength sweep (done, analysed)
+## 2. Experiments: all done, nothing left to run
 
-- Design: 8 tasks, 10 strengths in half-decade steps (0.1 to 3,000), 2 decoders (batch label given or not), seeds 100-102;
-  3,024 fits including 96 edge-strength fits (12 per task), plus 9 extension fits on the immune task; 3,033 analysed, 0
-  failed (`paper/outline.tex`, Res-1, Pass 7).
-- Analysis: final run at `sweep_analysis_final_20261105` (code commit 8595a16 on `sweep-paper`, `paper_numbers.json` with 2,999 keys; under the
-  data root `/home/kendall/experiment_data/wasserstein-critic-deconfounding`). The earlier draft is `sweep_analysis/draft_8595a16`. Paper numbers are
-  traced in `paper/pass7_numbers.csv` and `paper/pass9_numbers.csv`.
-- Code of the sweep: tag `prereg-tier12-v3` (the name is kept as an identifier) = 10a1ca5.
+- Sweep: 8 tasks, strengths 0.1-3,000 in half-decade steps plus edge strengths, 2 decoders, seeds 100-102; 3,033 fits analysed, 0
+  failed. Final analysis commit 8595a16 (`sweep-paper`), independent placement check 3280bd4. Sweep code: tag `prereg-tier12-v3`
+  = 10a1ca5 (tag name kept as an identifier).
+- Baselines: 447 of 448 planned fits fitted and scored; Scanorama with 80 neighbours on the large ATAC task could not be fitted
+  and is reported as missing.
+- Replication across training seeds (branch `sweep-replication`, a475ea3): 895 fits (855 + 40 extension fits the committed rule
+  requires), all scored. The agreement rule is met: 4 of 4 large-gap signs kept, mean Kendall tau-b 0.456 over 13 pairs,
+  sign-flip p = 0.00049; before the extension step 3 of 4 (one undefined), tau-b 0.426. 77 of 78 readings reach b*. Sensitivity
+  analyses defined after the rule: per task p = 0.0039, per task family p = 0.0156. Results in
+  `experiments/sweep_replication/agreement_result_with_extension/`.
+- Direct biology check (exploratory): branch `biology-check`, 83c452e; Res-5b, Supplementary Note 12, Table S10.
 
-## 3. Replication across training seeds (all 855 fitted and scored; extension running)
+## 3. Paper: branch `paper`, Pass 18 (2ff8608)
 
-- 855 fits, seeds 0-4, at the two grid strengths that bracket the first crossing of b* for each of the 13 ranked task-and-decoder pairs.
-  Prediction and agreement rule were committed before any replication score was read (commit 3a90d0f, tag `replication-prediction-v1`).
-- 855 of 855 fitted and scored (commit 803ed80 on branch `sweep-replication`, last 40 immune_hum_mou fits scored by Slurm job 36889227).
-  Agreement tables: commit 61c440d (`replication_readings`, `replication_task_readings`, `replication_large_gaps`). Read the result from those
-  files and `experiments/sweep_replication/`, not from this page.
-- Extension: 40 further fits (the next sweep-grid strength above the highest replication strength for the 8 readings that did not reach b*, seeds 0-4), as
-  the committed rule in `AGREEMENT.md` line 9 requires; the user decided on 2026-11-05 to run it. Run list commit 648f7e8; launchers commit f268ea7
-  (15 fits on the workstation, 25 on the cluster as Slurm job 36899485). Running when this file was written; the count of scored extension fits is not known here.
-- Paper: Res-2b, abstract item 7 and the Disc-1 bullet and closing sentence hold placeholders (6 `\res`) until the agreement result, with the
-  extension, is written in by the agent that owns them.
+- Text, figures (1-6, S1-S6) and the whole supplement are written: Supplementary Notes 1-12, Tables S1, S2 and S4-S11 (S3 removed
+  with the dropped fixed-strength benchmark; S11 is the label-transfer table of Note 9, numbered in Pass 18).
+- Checks at Pass 18 (`paper/pass18_changelog.md`): `paper/tools/check_ledger.py` 1,117 values re-read from their sources, 0
+  failures (needs the data root, workstation); tests 83 passed; abstract 328 words (limit 350); tracked PDF 64 pages, clean PDF 55
+  pages, 13 of 13 figures, no failing log class; every page of both PDFs viewed across Passes 17-18. Built PDFs in `paper/build/`;
+  re-run commands in `paper/REPRODUCE.md`; checksums in `paper/MANIFEST.sha256`.
+- Change history: `paper/passNN_changelog.md` (one per pass) and `paper/change_summary.md`.
 
-## 4. Baselines (447 of 448 scored, 0 failed)
+## 4. Repository
 
-- Planned 448 fits: scvi-tools adversary 40, scANVI 40, sysVI 240, Harmony 56, Scanorama 56, PCA 16 (`paper/pass4_changelog.md`).
-- One setting is not fitted: Scanorama with 80 neighbours on atac_large (two failed attempts in
-  `sweep_baselines/attempts/X13_atac_large_scanorama_l80_c0_s0_f7f8daa2.jsonl`: killed after 7,585 s, then a scipy error after 13,064 s). The final sweep
-  analysis reads 447 of 448 (`paper/figure_data/README.md`); the paper reports Scanorama with five of its six settings on that task (Table 4 note, Figure 6a open marker).
+- 2026-11-06: the figshare browser session cookie in the README download command was removed from the tips of the 27 branches that
+  still had it (`main` included; one commit each, no history rewrite, by the user's decision). Old commits, 4 tags and pull-request
+  refs 2-4 still contain it; invalidating the figshare session is the user's step. Local worktrees of those branches are one commit
+  behind GitHub: `git pull` before working on them.
+- `*.tex` and `*.csv` are git-ignored repo-wide: add paper sources and ledgers with `git add -f` (Pass 18 found the Pass 16 ledger
+  had never been committed).
 
-## 5. Sweep analysis and biology check (both done)
+## 5. Next steps (all with the authors)
 
-- Sweep analysis: final run, commit 8595a16; independent placement check at 3280bd4 (`experiments/sweep_checks/`).
-- Biology check (exploratory, rules written after the sweep scores were read): branch `biology-check`, results commit 83c452e (run of 2026-11-05 at code
-  commit c4a793f, 783 saved fits, no new fits); in the paper as Res-5b, Supplementary Note 12 and Table S10. Known fault: `docs/biology_check/summary.md`
-  labels its seed SD as real-task values but averages it over all 8 tasks (`make_summary.py`, `seed_sd`); Table S10 uses the six-real-task value and was
-  checked against `tables/summary.csv` in Pass 10. The summary page is not corrected.
+1. Fill the seven `\tbd` items: AI-tool statement, ethics wording, release tag and commit, competing interests, funding,
+   authors' contributions, acknowledgements (kept empty on purpose until the first author's final draft).
+2. Then: tag the release, write the tag and commit into the availability statement, rebuild both PDFs from the saved zip
+   (doc-build-gate), re-run `check_ledger.py`, regenerate `paper/MANIFEST.sha256`.
+3. Log out of all figshare sessions (or change the figshare password) so the cookie in old commits is useless.
 
-## 6. Paper, branch `paper`, Pass 10 (717cc4c)
-
-- Pass 9 (fbd41d7, decf7dc): sweep, placement and biology-check placeholders filled; reviewer response rewritten (replication section pending).
-- Pass 10 (717cc4c, log `paper/pass10_changelog.md`, numbers `paper/pass10_numbers.csv`): branch `paper-figures` merged; Figures 2-6 are real (scripts
-  `paper/figure_scripts/`, inputs `paper/figure_data/`), Figure 1 is still a placeholder schematic. Captions reconciled with the text; Figure 2b row labels and the
-  Figure 3a b* label fixed. `\tbd` items answered from records: literature search repeated 2026-11-05, reference-batch cell-type coverage, coverage
-  simulation for ten strengths and three seeds (0.88 and 0.83 with a shared seed threshold), Sinkhorn refit provenance, rule dates, planned-benchmark fit counts
-  (about 572; the cluster share of 405 is the repository record's, not re-counted), availability commits.
-- Build: tectonic 0.16.9, 29 pages, 6 of 6 figures, no undefined citations or references, 4 underfull boxes.
-- Remaining placeholders: 6 `\res` (replication) and 7 active `\tbd` that only the authors can answer: LLM-tool statement, ethics wording, release tag and
-  commit, competing interests, funding, authors' contributions, acknowledgements.
-
-## 7. Next steps
-
-1. Wait for the 40 extension fits, score them, and fill Res-2b, abstract item 7, Disc-1 and the response's replication section (agent that owns the agreement test).
-2. First author: answer the seven `\tbd` questions (list in `paper/pass10_changelog.md` section 5); make the release tag after the replication text is in.
-3. Run the final doc-build-gate build from the extracted zip, save the PDF and zip, and send the response.
-
-Resume with: `git fetch --all --tags`; read `CONSTRAINTS.md` (active rules, SI-78 on wording, SI-114 on the dropped Background paragraph)
-and the newest `paper/pass*_changelog.md`.
+Resume with: `git fetch --all --tags`; read `CONSTRAINTS.md` (branch `paper`; SI-78 on wording) and the newest
+`paper/pass*_changelog.md`.
