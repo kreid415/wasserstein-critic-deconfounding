@@ -1,0 +1,271 @@
+experiment,arm,field,value,n_fits
+A1,barycenter,fit.adv_hidden,128,480
+A1,barycenter,fit.adv_input,"""mean""",480
+A1,barycenter,fit.adv_steps,5,480
+A1,barycenter,fit.adversary,"""barycenter""",480
+A1,barycenter,fit.bary_iter,10,480
+A1,barycenter,fit.bary_warm_iter,null,480
+A1,barycenter,fit.bary_weights,"""equal""",480
+A1,barycenter,fit.critic_betas,"[0.0, 0.9]",480
+A1,barycenter,fit.critic_lr,0.0001,480
+A1,barycenter,fit.disc_lr,0.001,480
+A1,barycenter,fit.eps,0.01,480
+A1,barycenter,fit.gradient_penalty,true,480
+A1,barycenter,fit.lambda_gp,10.0,480
+A1,barycenter,fit.lr,0.001,480
+A1,barycenter,fit.max_kl_weight,1.0,480
+A1,barycenter,fit.min_kl_weight,0.0,480
+A1,barycenter,fit.n_epochs_kl_warmup,400,480
+A1,barycenter,fit.n_steps_kl_warmup,null,480
+A1,barycenter,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",480
+A1,barycenter,fit.optimizer1,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.0, 0.9], ""eps"": 1e-08, ""lr"": 0.0001, ""weight_decay"": 0}]}",480
+A1,barycenter,fit.optimizer_name,"""Adam""",480
+A1,barycenter,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",480
+A1,barycenter,fit.r1_gamma,null,480
+A1,barycenter,fit.spectral_norm,false,480
+A1,barycenter,fit.weight_decay,1e-06,480
+A1,barycenter,fit.zstd,false,480
+A1,barycenter,version.scvi-tools,"""1.4.2""",480
+A1,discriminator,fit.adv_hidden,128,531
+A1,discriminator,fit.adv_input,"""mean""",531
+A1,discriminator,fit.adv_steps,1,531
+A1,discriminator,fit.adversary,"""discriminator""",531
+A1,discriminator,fit.bary_iter,10,531
+A1,discriminator,fit.bary_warm_iter,null,531
+A1,discriminator,fit.bary_weights,"""equal""",531
+A1,discriminator,fit.critic_betas,"[0.0, 0.9]",531
+A1,discriminator,fit.critic_lr,0.0001,531
+A1,discriminator,fit.disc_lr,0.001,531
+A1,discriminator,fit.eps,0.01,531
+A1,discriminator,fit.gradient_penalty,false,531
+A1,discriminator,fit.lambda_gp,null,531
+A1,discriminator,fit.lr,0.001,531
+A1,discriminator,fit.max_kl_weight,1.0,531
+A1,discriminator,fit.min_kl_weight,0.0,531
+A1,discriminator,fit.n_epochs_kl_warmup,400,531
+A1,discriminator,fit.n_steps_kl_warmup,null,531
+A1,discriminator,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",531
+A1,discriminator,fit.optimizer1,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",531
+A1,discriminator,fit.optimizer_name,"""Adam""",531
+A1,discriminator,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",531
+A1,discriminator,fit.r1_gamma,null,531
+A1,discriminator,fit.spectral_norm,false,531
+A1,discriminator,fit.weight_decay,1e-06,531
+A1,discriminator,fit.zstd,false,531
+A1,discriminator,version.scvi-tools,"""1.4.2""",531
+A1,mmd,fit.adv_hidden,128,480
+A1,mmd,fit.adv_input,"""mean""",480
+A1,mmd,fit.adv_steps,0,480
+A1,mmd,fit.adversary,"""mmd""",480
+A1,mmd,fit.bary_iter,10,480
+A1,mmd,fit.bary_warm_iter,null,480
+A1,mmd,fit.bary_weights,"""equal""",480
+A1,mmd,fit.critic_betas,"[0.0, 0.9]",480
+A1,mmd,fit.critic_lr,0.0001,480
+A1,mmd,fit.disc_lr,0.001,480
+A1,mmd,fit.eps,0.01,480
+A1,mmd,fit.gradient_penalty,false,480
+A1,mmd,fit.lambda_gp,null,480
+A1,mmd,fit.lr,0.001,480
+A1,mmd,fit.max_kl_weight,1.0,480
+A1,mmd,fit.min_kl_weight,0.0,480
+A1,mmd,fit.n_epochs_kl_warmup,400,480
+A1,mmd,fit.n_steps_kl_warmup,null,480
+A1,mmd,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",480
+A1,mmd,fit.optimizer_name,"""Adam""",480
+A1,mmd,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",480
+A1,mmd,fit.r1_gamma,null,480
+A1,mmd,fit.spectral_norm,false,480
+A1,mmd,fit.weight_decay,1e-06,480
+A1,mmd,fit.zstd,false,480
+A1,mmd,version.scvi-tools,"""1.4.2""",480
+A1,none,fit.adversarial_classifier,false,48
+A1,none,fit.adversary,"""none""",48
+A1,none,fit.eps,0.01,48
+A1,none,fit.lr,0.001,48
+A1,none,fit.max_kl_weight,1.0,48
+A1,none,fit.min_kl_weight,0.0,48
+A1,none,fit.n_epochs_kl_warmup,400,48
+A1,none,fit.n_steps_kl_warmup,null,48
+A1,none,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",48
+A1,none,fit.optimizer_name,"""Adam""",48
+A1,none,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",48
+A1,none,fit.scale_adversarial_loss,"""auto""",48
+A1,none,fit.weight_decay,1e-06,48
+A1,none,version.scvi-tools,"""1.4.2""",48
+A1,pooled,fit.adv_hidden,128,483
+A1,pooled,fit.adv_input,"""mean""",483
+A1,pooled,fit.adv_steps,5,483
+A1,pooled,fit.adversary,"""pooled""",483
+A1,pooled,fit.bary_iter,10,483
+A1,pooled,fit.bary_warm_iter,null,483
+A1,pooled,fit.bary_weights,"""equal""",483
+A1,pooled,fit.critic_betas,"[0.0, 0.9]",483
+A1,pooled,fit.critic_lr,0.0001,483
+A1,pooled,fit.disc_lr,0.001,483
+A1,pooled,fit.eps,0.01,483
+A1,pooled,fit.gradient_penalty,true,483
+A1,pooled,fit.lambda_gp,10.0,483
+A1,pooled,fit.lr,0.001,483
+A1,pooled,fit.max_kl_weight,1.0,483
+A1,pooled,fit.min_kl_weight,0.0,483
+A1,pooled,fit.n_epochs_kl_warmup,400,483
+A1,pooled,fit.n_steps_kl_warmup,null,483
+A1,pooled,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",483
+A1,pooled,fit.optimizer1,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.0, 0.9], ""eps"": 1e-08, ""lr"": 0.0001, ""weight_decay"": 0}]}",483
+A1,pooled,fit.optimizer_name,"""Adam""",483
+A1,pooled,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",483
+A1,pooled,fit.r1_gamma,null,483
+A1,pooled,fit.spectral_norm,false,483
+A1,pooled,fit.weight_decay,1e-06,483
+A1,pooled,fit.zstd,false,483
+A1,pooled,version.scvi-tools,"""1.4.2""",483
+A1,reference,fit.adv_hidden,128,483
+A1,reference,fit.adv_input,"""mean""",483
+A1,reference,fit.adv_steps,5,483
+A1,reference,fit.adversary,"""reference""",483
+A1,reference,fit.bary_iter,10,483
+A1,reference,fit.bary_warm_iter,null,483
+A1,reference,fit.bary_weights,"""equal""",483
+A1,reference,fit.critic_betas,"[0.0, 0.9]",483
+A1,reference,fit.critic_lr,0.0001,483
+A1,reference,fit.disc_lr,0.001,483
+A1,reference,fit.eps,0.01,483
+A1,reference,fit.gradient_penalty,true,483
+A1,reference,fit.lambda_gp,10.0,483
+A1,reference,fit.lr,0.001,483
+A1,reference,fit.max_kl_weight,1.0,483
+A1,reference,fit.min_kl_weight,0.0,483
+A1,reference,fit.n_epochs_kl_warmup,400,483
+A1,reference,fit.n_steps_kl_warmup,null,483
+A1,reference,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",483
+A1,reference,fit.optimizer1,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.0, 0.9], ""eps"": 1e-08, ""lr"": 0.0001, ""weight_decay"": 0}]}",483
+A1,reference,fit.optimizer_name,"""Adam""",483
+A1,reference,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",483
+A1,reference,fit.r1_gamma,null,483
+A1,reference,fit.spectral_norm,false,483
+A1,reference,fit.weight_decay,1e-06,483
+A1,reference,fit.zstd,false,483
+A1,reference,version.scvi-tools,"""1.4.2""",483
+A1,sinkhorn,fit.adv_hidden,128,528
+A1,sinkhorn,fit.adv_input,"""mean""",528
+A1,sinkhorn,fit.adv_steps,0,528
+A1,sinkhorn,fit.adversary,"""sinkhorn""",528
+A1,sinkhorn,fit.bary_iter,10,528
+A1,sinkhorn,fit.bary_warm_iter,null,528
+A1,sinkhorn,fit.bary_weights,"""equal""",528
+A1,sinkhorn,fit.critic_betas,"[0.0, 0.9]",528
+A1,sinkhorn,fit.critic_lr,0.0001,528
+A1,sinkhorn,fit.disc_lr,0.001,528
+A1,sinkhorn,fit.eps,0.01,528
+A1,sinkhorn,fit.gradient_penalty,false,528
+A1,sinkhorn,fit.lambda_gp,null,528
+A1,sinkhorn,fit.lr,0.001,528
+A1,sinkhorn,fit.max_kl_weight,1.0,528
+A1,sinkhorn,fit.min_kl_weight,0.0,528
+A1,sinkhorn,fit.n_epochs_kl_warmup,400,528
+A1,sinkhorn,fit.n_steps_kl_warmup,null,528
+A1,sinkhorn,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",528
+A1,sinkhorn,fit.optimizer_name,"""Adam""",528
+A1,sinkhorn,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",528
+A1,sinkhorn,fit.r1_gamma,null,528
+A1,sinkhorn,fit.spectral_norm,false,528
+A1,sinkhorn,fit.weight_decay,1e-06,528
+A1,sinkhorn,fit.zstd,false,528
+A1,sinkhorn,version.scvi-tools,"""1.4.2""",528
+X1,scvi_adv,fit.adversarial_classifier,true,40
+X1,scvi_adv,fit.adversary,"""scvi_adv""",40
+X1,scvi_adv,fit.eps,0.01,40
+X1,scvi_adv,fit.lr,0.001,40
+X1,scvi_adv,fit.max_kl_weight,1.0,40
+X1,scvi_adv,fit.min_kl_weight,0.0,40
+X1,scvi_adv,fit.n_epochs_kl_warmup,400,40
+X1,scvi_adv,fit.n_steps_kl_warmup,null,40
+X1,scvi_adv,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",40
+X1,scvi_adv,fit.optimizer1,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",40
+X1,scvi_adv,fit.optimizer_name,"""Adam""",40
+X1,scvi_adv,fit.plan_class,"""WassersteinAdversarialTrainingPlan""",40
+X1,scvi_adv,fit.scale_adversarial_loss,"""auto""",40
+X1,scvi_adv,fit.weight_decay,1e-06,40
+X1,scvi_adv,version.scvi-tools,"""1.4.2""",40
+X13,harmony,tool.fresh_process,true,56
+X13,harmony,tool.n_comps,10,48
+X13,harmony,tool.n_comps,50,8
+X13,harmony,tool.n_jobs,1,56
+X13,harmony,tool.theta,0.0,8
+X13,harmony,tool.theta,0.5,8
+X13,harmony,tool.theta,1.0,8
+X13,harmony,tool.theta,2.0,16
+X13,harmony,tool.theta,4.0,8
+X13,harmony,tool.theta,8.0,8
+X13,harmony,version.anndata,"""0.11.4""",56
+X13,harmony,version.harmony-pytorch,"""0.1.7""",56
+X13,harmony,version.numpy,"""1.26.4""",56
+X13,harmony,version.scanorama,"""1.7.4""",56
+X13,harmony,version.scanpy,"""1.11.5""",56
+X13,harmony,version.scib,"""1.1.7""",56
+X13,harmony,version.scikit-learn,"""1.9.0""",56
+X13,harmony,version.torch,"""2.4.1+cu121""",56
+X13,pca,tool.n_comps,10,8
+X13,pca,tool.n_comps,50,8
+X13,pca,version.anndata,"""0.11.4""",16
+X13,pca,version.harmony-pytorch,"""0.1.7""",16
+X13,pca,version.numpy,"""1.26.4""",16
+X13,pca,version.scanorama,"""1.7.4""",16
+X13,pca,version.scanpy,"""1.11.5""",16
+X13,pca,version.scib,"""1.1.7""",16
+X13,pca,version.scikit-learn,"""1.9.0""",16
+X13,pca,version.torch,"""2.4.1+cu121""",16
+X13,scanorama,tool.dimred,10,47
+X13,scanorama,tool.dimred,100,8
+X13,scanorama,tool.knn,10,8
+X13,scanorama,tool.knn,2,8
+X13,scanorama,tool.knn,20,16
+X13,scanorama,tool.knn,40,8
+X13,scanorama,tool.knn,5,8
+X13,scanorama,tool.knn,80,7
+X13,scanorama,version.anndata,"""0.11.4""",55
+X13,scanorama,version.harmony-pytorch,"""0.1.7""",55
+X13,scanorama,version.numpy,"""1.26.4""",55
+X13,scanorama,version.scanorama,"""1.7.4""",55
+X13,scanorama,version.scanpy,"""1.11.5""",55
+X13,scanorama,version.scib,"""1.1.7""",55
+X13,scanorama,version.scikit-learn,"""1.9.0""",55
+X13,scanorama,version.torch,"""2.4.1+cu121""",55
+X13,scanvi,scanvi.eps,0.01,40
+X13,scanvi,scanvi.lr,0.001,40
+X13,scanvi,scanvi.max_kl_weight,1.0,40
+X13,scanvi,scanvi.min_kl_weight,0.0,40
+X13,scanvi,scanvi.n_epochs_kl_warmup,400,40
+X13,scanvi,scanvi.n_steps_kl_warmup,null,40
+X13,scanvi,scanvi.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",40
+X13,scanvi,scanvi.optimizer_name,"""Adam""",40
+X13,scanvi,scanvi.plan_class,"""GuardedSemiSupervisedTrainingPlan""",40
+X13,scanvi,scanvi.weight_decay,1e-06,40
+X13,scanvi,scvi_pretraining.eps,0.01,40
+X13,scanvi,scvi_pretraining.lr,0.001,40
+X13,scanvi,scvi_pretraining.max_kl_weight,1.0,40
+X13,scanvi,scvi_pretraining.min_kl_weight,0.0,40
+X13,scanvi,scvi_pretraining.n_epochs_kl_warmup,400,40
+X13,scanvi,scvi_pretraining.n_steps_kl_warmup,null,40
+X13,scanvi,scvi_pretraining.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",40
+X13,scanvi,scvi_pretraining.optimizer_name,"""Adam""",40
+X13,scanvi,scvi_pretraining.plan_class,"""GuardedTrainingPlan""",40
+X13,scanvi,scvi_pretraining.weight_decay,1e-06,40
+X13,scanvi,version.scvi-tools,"""1.4.2""",40
+X13,sysvi,fit.eps,0.01,240
+X13,sysvi,fit.lr,0.001,240
+X13,sysvi,fit.max_kl_weight,1.0,240
+X13,sysvi,fit.min_kl_weight,0.0,240
+X13,sysvi,fit.n_epochs_kl_warmup,0,240
+X13,sysvi,fit.n_steps_kl_warmup,0,240
+X13,sysvi,fit.optimizer0,"{""cls"": ""Adam"", ""param_groups"": [{""amsgrad"": false, ""betas"": [0.9, 0.999], ""eps"": 0.01, ""lr"": 0.001, ""weight_decay"": 1e-06}]}",240
+X13,sysvi,fit.optimizer_name,"""Adam""",240
+X13,sysvi,fit.plan_class,"""GuardedTrainingPlan""",240
+X13,sysvi,fit.weight_decay,1e-06,240
+X13,sysvi,version.scvi-tools,"""1.4.2""",240
+replication,all,manifest.seed,"[0, 1, 2, 3, 4]",895
+code,mmd,BW_MULTIPLIERS,"[0.25, 0.5, 1.0, 2.0, 4.0]",0
+code,sinkhorn,SINKHORN_BLUR_FRAC,0.05,0
+code,adversary head,hidden_layers,2,0
+input pilots,all,manifest.seed,"[100, 101, 102]",0
