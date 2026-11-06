@@ -8,6 +8,7 @@
 \usepackage[authoryear,round]{natbib}
 \usepackage{url}
 \usepackage{graphicx,booktabs,array}
+\usepackage{needspace}% keeps supplementary headings with their text (Pass 18)
 \usepackage{longtable}% Supplementary Table S6 (paper/supp/tableS6.tex)
 \usepackage{changes}% tracked edits; use \usepackage[final]{changes} for clean text
 \definechangesauthor[name={Pass 3}, color=teal]{P3}
@@ -257,22 +258,22 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \noindent Every supplementary note and table listed here is in this document: Supplementary Notes 2--12 and Tables S1, S2, S4, S5 and S8 are printed below in the place of their entries (Table S11 within Note 9); Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows Table~\ref{tab:4}. Table S3 (strength ranges of the planned fixed-strength benchmark) was removed with that benchmark, and its number is not used.\par
 % Pass 17: the supplementary tables input in this list step the table counter; it is restored after the list (main tables 1-3)
 \newcounter{maintables}\setcounter{maintables}{\value{table}}\let\mainTheHtable\theHtable\renewcommand{\theHtable}{supp.\arabic{table}}%
-\textbf{Supplementary Notes}
+\Needspace{5\baselineskip}\textbf{Supplementary Notes}
 \begin{itemize}
 \item Supplementary Note 1, model and loss equations: notation, with the reconstruction term written per gene $g$ as $p_{\mathrm{ZINB}}(x_g \mid \mu_g, \theta_g, \pi_g)$ (mean, dispersion, dropout) and the discriminator loss as $\min_{h}\, \frac{1}{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\mathcal{L}_{\mathrm{CE}}(h(u_i), s_i)$ on the posterior mean $u_i=\mu_i$ of cell $i$ in minibatch $\mathcal{B}$, for batch label $s_i$; scVI loss (zero-inflated negative binomial reconstruction, Kullback--Leibler (KL) term and KL weight schedule); discriminator fool loss as in scvi-tools (Jensen--Shannon type); the three Wasserstein-1 critics with gradient penalty weight 10: reference (each batch against the reference batch, chosen as the batch with the highest cell-type entropy, which uses labels), pooled (each batch against all others), barycenter (each batch against the minibatch Wasserstein barycenter, an average distribution); barycenter target construction and solver (Wasserstein-2, at most 10 iterations, threshold $10^{-7}$); maximum mean discrepancy (MMD) with multi-scale Gaussian kernel (the squared MMD of each batch against the cells of all other batches in the minibatch, as a biased V-statistic, averaged over the batches present; the kernel is the mean of five Gaussian kernels $\exp(-\lVert z-z'\rVert^2/2\sigma^2)$ with $\sigma=\sqrt{d}\,m$ for $m\in\{0.25,0.5,1,2,4\}$, so for $d=10$ latent dimensions the bandwidths are $\sigma=0.79$, $1.58$, $3.16$, $6.32$ and $12.65$; they are fixed in advance and not tuned, and the MMD results hold for this kernel); debiased Sinkhorn divergence (entropy-regularised optimal transport; not W1 at the smoothing used; Euclidean cost, entropic smoothing $0.05\sqrt{2d}$ for latent dimension $d$, float64, marginal error $10^{-4}$, cap of 500,000 iterations); scvi-tools adversarial classifier (conditioned decoder only; 32 hidden units, weight one minus the KL weight); plain scVI as strength zero; each critic head has two hidden layers of 128 units with one output per batch.
 \end{itemize}
-\input{supp/note2}\par
-\input{supp/note3}\par
-\input{supp/note4}\par
-\input{supp/note5}\par
-\input{supp/note6}\par
-\input{supp/note7}\par
-\input{supp/note8}\par
-\input{supp/note9}\par
-\input{supp/note10}\par
-\input{supp/note11}\par
-\input{supp/note12}\par
-\textbf{Supplementary Tables}
+\Needspace{5\baselineskip}\input{supp/note2}\par
+\Needspace{5\baselineskip}\input{supp/note3}\par
+\Needspace{5\baselineskip}\input{supp/note4}\par
+\Needspace{5\baselineskip}\input{supp/note5}\par
+\Needspace{5\baselineskip}\input{supp/note6}\par
+\Needspace{5\baselineskip}\input{supp/note7}\par
+\Needspace{5\baselineskip}\input{supp/note8}\par
+\Needspace{5\baselineskip}\input{supp/note9}\par
+\Needspace{5\baselineskip}\input{supp/note10}\par
+\Needspace{5\baselineskip}\input{supp/note11}\par
+\Needspace{5\baselineskip}\input{supp/note12}\par
+\Needspace{5\baselineskip}\textbf{Supplementary Tables}
 \input{supp/tableS1}\par
 \input{supp/tableS2}\par
 \input{supp/tableS4}\par
@@ -288,7 +289,7 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \end{itemize}
 
 \setcounter{table}{\value{maintables}}\let\theHtable\mainTheHtable% Pass 17: main tables continue at their own numbers
-\textbf{Supplementary Figures}
+\Needspace{5\baselineskip}\textbf{Supplementary Figures}
 \begin{itemize}
 \item Figure S1, simulation tasks: trade-off curves and per-task ranking at $b^*$, each simulation on its own.
 \item Figure S2, sensitivity: ranking under alternative readings (per-run reading, biology without trajectory conservation on the two immune tasks, points with a failed fit removed).

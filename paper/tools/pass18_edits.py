@@ -1,6 +1,8 @@
 """Pass 18 edits (2026-11-06): the label-transfer table of Supplementary Note 9 becomes Supplementary Table S11
 (numbered caption written by paper/tools/make_supp_supp-analysis.py), and the text that names the supplementary tables
-says so. The two outline sentences sit inside Pass 17's \\replaced[id=P17]{...}{...} and `changes` cannot nest, so they are
+says so; each supplementary sub-heading and each Note 2-12 input is kept with the text after it (\\Needspace, package
+needspace), because the Pass 18 page check found a heading as the last line of a page (Note 10 in the tracked copy, the
+"Supplementary Notes" sub-heading in the clean copy). The two outline sentences sit inside Pass 17's \\replaced[id=P17]{...}{...} and `changes` cannot nest, so they are
 amended inside the P17 text (no P18 mark); paper/pass18_changelog.md records it. Every old text must occur exactly once or the
 script stops; no numbers are written.
 Run from the repository root:  python paper/tools/pass18_edits.py   (PASS18_ROOT overrides the root of the edited files)
@@ -20,7 +22,11 @@ def edit(path, pairs):
     p.write_text(s)
 
 
+KEEP = r"\Needspace{5\baselineskip}"
 edit("paper/outline.tex", [
+    ("\\usepackage{longtable}%", "\\usepackage{needspace}% keeps supplementary headings with their text (Pass 18)\n\\usepackage{longtable}%"),
+    *[(f"\n\\textbf{{Supplementary {k}}}", f"\n{KEEP}\\textbf{{Supplementary {k}}}") for k in ("Notes", "Tables", "Figures")],
+    *[(f"\n\\input{{supp/note{k}}}\\par", f"\n{KEEP}\\input{{supp/note{k}}}\\par") for k in range(2, 13)],
     ("Supplementary Notes 1--12, Tables S1, S2 and S4--S10, Figures S1--S6}{",
      "Supplementary Notes 1--12, Tables S1, S2 and S4--S11, Figures S1--S6}{"),
     ("Tables S1, S2, S4, S5 and S8 are printed below in the place of their entries;",
