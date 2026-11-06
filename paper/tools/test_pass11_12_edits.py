@@ -25,7 +25,7 @@ def git_show(rev, rel):
      ["paper/outline.tex", "paper/supp/tableS6.tex", "paper/supp/tableS7.tex", "paper/tools/make_supp_tables.py", "revision/reviewer_response.md"], []),
     ("pass14_edits.py", "PASS14_ROOT", "5856fd5", "5dc2c8d",
      ["paper/outline.tex", "paper/supp_items.tex", "revision/reviewer_response.md"], ["paper/replication_data/replication_numbers.json"]),
-    ("pass15_edits.py", "PASS15_ROOT", "bfdd82d", "308acdb", ["paper/outline.tex", "revision/reviewer_response.md"], []),
+    ("pass15_edits.py", "PASS15_ROOT", "bfdd82d", "0a5548f", ["paper/outline.tex", "revision/reviewer_response.md"], []),
 ])
 def test_edit_script_reproduces_its_pass(tmp_path, monkeypatch, script, env, start, result, files, extra):
     if script == "pass12_edits.py" and not DATA_ROOT.is_dir():
