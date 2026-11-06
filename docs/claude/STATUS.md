@@ -26,7 +26,7 @@ PCA), read at matched batch removal over a penalty-strength sweep, with a replic
   `experiments/sweep_replication/agreement_result_with_extension/`.
 - Direct biology check (exploratory): branch `biology-check`, 83c452e; Res-5b, Supplementary Note 12, Table S10.
 
-## 3. Paper: branch `paper`, Pass 18 (2ff8608)
+## 3. Paper: branch `paper`, Pass 19 (f20fe27)
 
 - Text, figures (1-6, S1-S6) and the whole supplement are written: Supplementary Notes 1-12, Tables S1, S2 and S4-S11 (S3 removed
   with the dropped fixed-strength benchmark; S11 is the label-transfer table of Note 9, numbered in Pass 18).
@@ -34,6 +34,8 @@ PCA), read at matched batch removal over a penalty-strength sweep, with a replic
   failures (needs the data root, workstation); tests 83 passed; abstract 328 words (limit 350); tracked PDF 64 pages, clean PDF 55
   pages, 13 of 13 figures, no failing log class; every page of both PDFs viewed across Passes 17-18. Built PDFs in `paper/build/`;
   re-run commands in `paper/REPRODUCE.md`; checksums in `paper/MANIFEST.sha256`.
+- Pass 19: the AI-tool statement is written in Methods (*Use of large language models*; BMC requires LLM use to be documented in
+  Methods); same checks, 0 ledger failures, PDFs 64 and 55 pages.
 - Change history: `paper/passNN_changelog.md` (one per pass) and `paper/change_summary.md`.
 
 ## 4. Repository
@@ -47,8 +49,9 @@ PCA), read at matched batch removal over a penalty-strength sweep, with a replic
 
 ## 5. Next steps (all with the authors)
 
-1. Fill the seven `\tbd` items: AI-tool statement, ethics wording, release tag and commit, competing interests, funding,
-   authors' contributions, acknowledgements (kept empty on purpose until the first author's final draft).
+1. Fill the six `\tbd` items: ethics wording, release tag and commit, competing interests, funding, authors' contributions,
+   acknowledgements (kept empty on purpose until the first author's final draft). Optionally add model versions to the AI-tool
+   statement.
 2. Then: tag the release, write the tag and commit into the availability statement, rebuild both PDFs from the saved zip
    (doc-build-gate), re-run `check_ledger.py`, regenerate `paper/MANIFEST.sha256`.
 3. Log out of all figshare sessions (or change the figshare password) so the cookie in old commits is useless.
