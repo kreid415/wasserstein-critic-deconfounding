@@ -105,6 +105,14 @@ edit("revision/reviewer_response.md", [
      "the other supplementary notes and tables named below are described in the outline and are not yet written."),
     ("minimisation over the classifier of the expected cross-entropy under $q(z \\mid x)$.",
      "minimisation over the classifier of the cross-entropy on each cell's posterior mean $u_i=\\mu_i$, the input every penalty reads."),
+    ("The rule's sign-flip test treats the 13 task and decoder pairs as exchangeable, although the\n"
+     "   two decoders of a task share its data, so its $p$-value is approximate; a sensitivity analysis that flips the signs per task\n"
+     "   (both decoders together), added after the rule was fixed, is reported beside it.",
+     "The rule's sign-flip test assumes the 13 task and decoder pairs are independent, although the\n"
+     "   two decoders of a task share its data and some tasks are related, so its $p$-value is approximate; a sensitivity analysis that\n"
+     "   flips the signs per task (both decoders together), added after the rule was fixed, is reported beside it and is approximate too,\n"
+     "   because it still flips the two tasks of a nested pair separately."),
+    ("  $\\pm$0.04 on the new seeds.", "  $\\pm 0.04$ on the new seeds."),  # pandoc reads no math when the closing $ is followed by a digit
     ("the smallest value eight tasks allow;",
      "the smallest value eight tasks allow, and still approximate, because the two tasks of a nested pair are flipped separately;"),
     ("Five seeds resolve within-pair differences of about 0.04, so the replication does not test the",

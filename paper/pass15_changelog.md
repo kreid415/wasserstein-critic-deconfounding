@@ -32,7 +32,9 @@ Every finding was checked by the lead against the cited lines before it was fixe
 
 Findings rejected: none.
 
-Follow-up found while building: the supplementary-contents sentence first closed its `\\added` group after `\\par`, which stops
+Follow-up found when the response PDF was read: item 4 of "What changed overall" still called the 13 pairs exchangeable and did
+not say the per-task version is approximate (F03, now reworded like Methods); `$\pm$0.04` did not render in pandoc (now `$\pm 0.04$`).
+Follow-up found while building: the supplementary-contents sentence first closed its `\added` group after `\par`, which stops
 the tracked build (fixed in 308acdb).
 
 ## Abstract
