@@ -33,6 +33,10 @@ D/sweep_analysis_final_20261105 (commit 8595a16; SHA-256 added to `paper/figure_
 3. Note 6, related tasks. The description says the large chromatin-accessibility task contains the small task. The repository says the two
    tasks share 3,618 cells (`docs/ANALYSIS_SPEC.md` section 1); the small task has three batches (3,618, 3,750 and 3,902 cells) and the
    large task eleven (`docs/prepped_fingerprints_scib.json`), so containment is not supported. Note 6 says the tasks share 3,618 cells.
+   **Corrected in Pass 17 (2026-11-06; `paper/pass17_changelog.md`):** this item was wrong. Matched by batch and barcode, every one
+   of the 11,270 cells of the small task is in the large task with the same cell-type label (supp-methods' matching, Table S1);
+   3,618 of them (the 10x Genomics batch) also match by cell name, which is the count `docs/ANALYSIS_SPEC.md` gives. Note 6 now
+   says the large task contains the small one.
 4. Note 5, analyses that keep low-signal pairs. The description lists the share of non-dominated strengths and the collapse rate. The
    good-strength width, the single-strength placement and the best of k settings also keep them (they use the selection score, not b*;
    `ANALYSIS_SPEC.md` sections 8 and 11); label transfer tabulates them and leaves them out of the cross-task means. Note 5 lists all.

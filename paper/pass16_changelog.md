@@ -16,7 +16,7 @@ Families (`FAMILY` in `make_replication.py`; 6 among the 13 pairs):
 | pancreas | pancreas | 2 | `scripts/prereg_rules.py` `TASK_FAMILY` (4 real-task families) |
 | lung | lung | 2 | same |
 | immune | immune, immune_hum_mou | 3 | same; all 33,506 immune cells are in immune_hum_mou (`docs/ANALYSIS_SPEC.md` section 1) |
-| atac | atac_small, atac_large | 4 | same; the two share 3,618 cells (`docs/ANALYSIS_SPEC.md` section 1; `docs/PREREG.md` glossary 'dataset family', SI-73) |
+| atac | atac_small, atac_large | 4 | same; the large task holds all 11,270 cells of the small one, 3,618 of them under identical names (corrected in Pass 17; `docs/ANALYSIS_SPEC.md` section 1 counts only the name matches; `docs/PREREG.md` glossary 'dataset family', SI-73) |
 | sim1 | sim1 | 1 | not in `TASK_FAMILY`; own family (see below) |
 | sim2 | sim2 | 1 | not in `TASK_FAMILY`; own family (see below) |
 

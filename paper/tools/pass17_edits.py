@@ -11,6 +11,9 @@ them wrong. Every old text must occur exactly once or the script stops. Numbers 
 - Supplementary Note 6: the large chromatin-accessibility task holds all cells of the small one (it does not merely share
   3,618). Supplementary Note 10: the family-level sign-flip p filled in; the early baseline score files stated.
 - Response: the supplement is supplied; 448 planned and 447 scored baseline fits.
+- Review fixes (findings R01-R06): Methods replication sentence without the causal clause; uncertainty rule points to Note 6 and
+  the secondary rules to Notes 7 and 9; Note 3 trajectory conservation (largest connected component); Note 5 (a full-seed curve
+  always reaches b*); the earlier change logs of supp-analysis and Pass 16 marked where Pass 17 corrects the ATAC statement.
 Run from the repository root:  python paper/tools/pass17_edits.py   (PASS17_ROOT overrides the root of the edited files)
 Then: python paper/tools/accept_changes.py ; python paper/tools/abstract_words.py ; python paper/tools/check_ledger.py"""
 import os
@@ -69,8 +72,7 @@ def wire_in(block):
             keep = []
         out += [r"\begin{itemize}\item \deleted[id=P17]{" + accept(text).strip() + r"}\end{itemize}",
                 r"\input{" + target[0] + "}"]
-    if keep:
-        out += [r"\begin{itemize}", *keep, r"\end{itemize}"]
+    assert not keep  # the block ends with a blank line, which closes the last list
     used = [l for l in out if l.startswith(r"\input{")]
     assert len(used) == len(FILES), used
     return "\n".join(out)
@@ -115,7 +117,7 @@ edit("paper/outline.tex", [
     # Supplementary material heading and the Pass 15 note
     (OLD_HEAD, r"\replaced[id=P17]{Supplementary Notes 1--12, Tables S1, S2 and S4--S10, Figures S1--S6}{" + accept(OLD_HEAD) + "}"),
     (r"\added[id=P15]{\noindent " + OLD_P15 + "}",
-     r"\noindent\replaced[id=P17]{Every supplementary note and table listed here is in this document: Supplementary Notes 2--12 and "
+     r"\noindent \replaced[id=P17]{Every supplementary note and table listed here is in this document: Supplementary Notes 2--12 and "
      r"Tables S1, S2, S4, S5 and S8 are printed below in the place of their entries; Supplementary Note 1, Tables S6, S7 and S9 "
      r"and Figures S1--S6 follow the main figures and tables, and Table S10 follows Table~\ref{tab:4}. Table S3 (strength ranges "
      r"of the planned fixed-strength benchmark) was removed with that benchmark, and its number is not used.}{" + OLD_P15 + "}"),
@@ -139,6 +141,43 @@ edit("paper/supp/note10.tex", [
      "Score files of some baseline fits on four of these tasks are older: those of the scvi-tools adversary, scANVI and sysVI on "
      "lung, pancreas and simulation 2 are dated 6 and 7 October, and at least one of the scvi-tools adversary on the "
      "human--mouse immune task 12 October (Supplementary Note 11, Table A)."),
+])
+# review fixes (Codex rigour review of 3a24699, findings R01-R06; paper/pass17_changelog.md)
+edit("paper/outline.tex", [
+    ("never from its biology scores, so the biology read on the new fits is not shaped by the choice.",
+     r"never from its biology scores\deleted[id=P17]{, so the biology read on the new fits is not shaped by the choice}."),
+    ("the penalty is ranked either way (Supplementary Note 5).",
+     r"the penalty is ranked either way (Supplementary Note \replaced[id=P17]{6}{5})."),
+    ("each rule is given in full in Supplementary Note 7.",
+     r"each rule is given in full in Supplementary Note\replaced[id=P17]{s 7 and 9}{ 7}."),
+])
+edit("paper/supp/note3.tex", [
+    ("diffusion pseudotime is recomputed on the embedding from a root cell that scib chooses from the file's pseudotime and cell "
+     "types; values above 1 are set to 0,",
+     "diffusion pseudotime is recomputed on the embedding, within the largest connected component of its neighbourhood graph, from "
+     "a root cell that scib chooses from the file's pseudotime and cell types; values above 1, and the values of cells outside that "
+     "component, are set to 0,"),
+])
+edit("paper/supp/note5.tex", [
+    (r"\textit{Every curve reaches $b^*$ when no fit fails.}", r"\textit{Every full-seed curve reaches $b^*$.}"),
+    (r"A penalty can fail to reach $b^*$ only through failed fits (its best strength is then not a point), in a leave-one-seed-out "
+     r"repeat, or when $b_{\mathrm{common}}\le b_0$, which makes the pair low-signal (below).",
+     r"Because $M$ is taken over strengths with no failed fit, it is a point of the curve, so a full-seed curve can fail to reach "
+     r"$b^*$ only when $b_{\mathrm{common}}\le b_0$, which makes the pair low-signal (below); a curve read with one seed left out, "
+     r"or on new seeds, is read against the fixed $b^*$ and need not reach it."),
+])
+edit("paper/supp-analysis_changelog.md", [
+    ("so containment is not supported. Note 6 says the tasks share 3,618 cells.",
+     "so containment is not supported. Note 6 says the tasks share 3,618 cells.\n"
+     "   **Corrected in Pass 17 (2026-11-06; `paper/pass17_changelog.md`):** this item was wrong. Matched by batch and barcode, every one\n"
+     "   of the 11,270 cells of the small task is in the large task with the same cell-type label (supp-methods' matching, Table S1);\n"
+     "   3,618 of them (the 10x Genomics batch) also match by cell name, which is the count `docs/ANALYSIS_SPEC.md` gives. Note 6 now\n"
+     "   says the large task contains the small one."),
+])
+edit("paper/pass16_changelog.md", [
+    ("same; the two share 3,618 cells (`docs/ANALYSIS_SPEC.md` section 1; `docs/PREREG.md` glossary 'dataset family', SI-73) |",
+     "same; the large task holds all 11,270 cells of the small one, 3,618 of them under identical names (corrected in Pass 17; "
+     "`docs/ANALYSIS_SPEC.md` section 1 counts only the name matches; `docs/PREREG.md` glossary 'dataset family', SI-73) |"),
 ])
 edit("revision/reviewer_response.md", [
     ("re-review. The supplementary material of this version contains Supplementary Note 1, Tables S6, S7, S9 and S10 and Figures S1-S6;\n"
