@@ -261,27 +261,27 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \begin{itemize}
 \item Supplementary Note 1, model and loss equations: notation, with the reconstruction term written per gene $g$ as $p_{\mathrm{ZINB}}(x_g \mid \mu_g, \theta_g, \pi_g)$ (mean, dispersion, dropout) and the discriminator loss as $\min_{h}\, \frac{1}{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\mathcal{L}_{\mathrm{CE}}(h(u_i), s_i)$ on the posterior mean $u_i=\mu_i$ of cell $i$ in minibatch $\mathcal{B}$, for batch label $s_i$; scVI loss (zero-inflated negative binomial reconstruction, Kullback--Leibler (KL) term and KL weight schedule); discriminator fool loss as in scvi-tools (Jensen--Shannon type); the three Wasserstein-1 critics with gradient penalty weight 10: reference (each batch against the reference batch, chosen as the batch with the highest cell-type entropy, which uses labels), pooled (each batch against all others), barycenter (each batch against the minibatch Wasserstein barycenter, an average distribution); barycenter target construction and solver (Wasserstein-2, at most 10 iterations, threshold $10^{-7}$); maximum mean discrepancy (MMD) with multi-scale Gaussian kernel (the squared MMD of each batch against the cells of all other batches in the minibatch, as a biased V-statistic, averaged over the batches present; the kernel is the mean of five Gaussian kernels $\exp(-\lVert z-z'\rVert^2/2\sigma^2)$ with $\sigma=\sqrt{d}\,m$ for $m\in\{0.25,0.5,1,2,4\}$, so for $d=10$ latent dimensions the bandwidths are $\sigma=0.79$, $1.58$, $3.16$, $6.32$ and $12.65$; they are fixed in advance and not tuned, and the MMD results hold for this kernel); debiased Sinkhorn divergence (entropy-regularised optimal transport; not W1 at the smoothing used; Euclidean cost, entropic smoothing $0.05\sqrt{2d}$ for latent dimension $d$, float64, marginal error $10^{-4}$, cap of 500,000 iterations); scvi-tools adversarial classifier (conditioned decoder only; 32 hidden units, weight one minus the KL weight); plain scVI as strength zero; each critic head has two hidden layers of 128 units with one output per batch.
 \end{itemize}
-\input{supp/note2}
-\input{supp/note3}
-\input{supp/note4}
-\input{supp/note5}
-\input{supp/note6}
-\input{supp/note7}
-\input{supp/note8}
-\input{supp/note9}
-\input{supp/note10}
-\input{supp/note11}
-\input{supp/note12}
+\input{supp/note2}\par
+\input{supp/note3}\par
+\input{supp/note4}\par
+\input{supp/note5}\par
+\input{supp/note6}\par
+\input{supp/note7}\par
+\input{supp/note8}\par
+\input{supp/note9}\par
+\input{supp/note10}\par
+\input{supp/note11}\par
+\input{supp/note12}\par
 \textbf{Supplementary Tables}
-\input{supp/tableS1}
-\input{supp/tableS2}
-\input{supp/tableS4}
-\input{supp/tableS5}
+\input{supp/tableS1}\par
+\input{supp/tableS2}\par
+\input{supp/tableS4}\par
+\input{supp/tableS5}\par
 \begin{itemize}
 \item Table S6, ranking detail: biology at $b^*$ per penalty, task and decoder with leave-one-seed-out standard errors, ranks and the range of each rank over the three repeats, a separate table of low-signal pairs, and the pairs where a penalty's curve does not reach $b^*$ marked.
 \item Table S7, single-strength placement for the unconditioned decoder (the counterpart of Table~\ref{tab:4}): selection score per method and real task at the strength (for Harmony, Scanorama and sysVI, the setting) chosen on other task families, with the task's own best strength or setting in parentheses.
 \end{itemize}
-\input{supp/tableS8}
+\input{supp/tableS8}\par
 \begin{itemize}
 \item Table S9, replication across training seeds: per penalty, task and decoder, the two bracketing strengths, the batch and biology means over seeds 0--4 at each, the batch score reached, biology at $b^*$ on the new seeds beside the sweep reading, the replication rank beside the sweep rank, and cells that needed the extra outward strength or did not replicate the crossing; Kendall's $\tau_b$ per pair; the four large sweep gaps with their sign on the new seeds; plain scVI at seeds 0--4 beside the sweep's plain scVI per task and decoder.
 \item Table S10, direct biology check: per method and decoder, the mean over the six real tasks of neighbourhood purity minus plain scVI's with its seed spread, rare-type purity and label-transfer recall minus plain scVI's, and marker-gene Jaccard overlap with its difference from plain scVI (typeset after Table~\ref{tab:4}); per-task, per-cell-type and confusion tables in the repository.

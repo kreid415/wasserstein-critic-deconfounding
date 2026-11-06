@@ -71,7 +71,7 @@ def wire_in(block):
             out += [r"\begin{itemize}", *keep, r"\end{itemize}"]
             keep = []
         out += [r"\begin{itemize}\item \deleted[id=P17]{" + accept(text).strip() + r"}\end{itemize}",
-                r"\input{" + target[0] + "}"]
+                r"\input{" + target[0] + r"}\par"]  # \par: in the clean copy two inputs are adjacent
     assert not keep  # the block ends with a blank line, which closes the last list
     used = [l for l in out if l.startswith(r"\input{")]
     assert len(used) == len(FILES), used
