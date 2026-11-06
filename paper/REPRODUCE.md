@@ -119,7 +119,7 @@ python paper/tools/check_ledger.py paper/supp-analysis_numbers.csv   # numbers i
 ```
 Supplement: Notes 2-12 and Tables S1, S2, S4, S5 and S8 are input in the supplementary list of `paper/outline.tex` by
 `paper/tools/pass17_edits.py` (from dc21cfc; it also writes the Pass 17 corrections). Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
-section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-21 from their starting commits and compares with their
+section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-22 from their starting commits and compares with their
 result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper/outline_clean.tex` (generated, never edited by hand;
 `--check` exits 1 when it is out of date).
 
@@ -127,13 +127,13 @@ result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper
 ```
 python paper/tools/check_ledger.py                                     # every ledger value re-read from its source
 python paper/tools/abstract_words.py                                   # abstract word counts (limit 350)
-python scripts/check_tests.py --base 95f44c4 --src paper/tools -- paper/tools   # Pass 21 (Pass 20: f20fe27; Pass 19: 2ff8608; Pass 18: 6e97ebf; Pass 17: a2a2c1c; earlier: bfdd82d)
+python scripts/check_tests.py --base 93a209c --src paper/tools -- paper/tools   # Pass 22 (Pass 21: 95f44c4; Pass 20: f20fe27; Pass 19: 2ff8608; Pass 18: 6e97ebf; Pass 17: a2a2c1c; earlier: bfdd82d)
 cd paper && tectonic -X compile outline.tex && tectonic -X compile outline_clean.tex   # tracked and clean PDFs
 pandoc revision/reviewer_response.md -o reviewer_response.pdf --pdf-engine=tectonic      # response PDF (pandoc 3.10)
 sha256sum -c paper/MANIFEST.sha256                                     # from the repository root
 ```
 The PDFs in `paper/build/` were built from the zip of `paper/outline.tex`, `outline_clean.tex`, `refs.bib`, `supp_items.tex`,
-`supp/` and `figures/` at the Pass 21 edit commits (identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
+`supp/` and `figures/` at the Pass 22 edit commits (identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
 other checksums; the source checksums in `paper/MANIFEST.sha256` are the ones to compare.
 
 ## 6. Audit of 2026-11-06 (Pass 15)
@@ -195,3 +195,10 @@ tectonic from the saved zip, 13 of 13 figures, no failing log class; every chang
 Main figures placed in the text for editing (`paper/pass21_changelog.md`; layout only): `check_ledger.py` on the workstation: OK, 0
 failures; `check_tests.py --base 95f44c4 --src paper/tools`: OK, no WARN; tracked PDF 64 pages and clean PDF 54 pages built with
 tectonic from the saved zip, 13 of 13 figures, no failing log class; main-text pages of both PDFs viewed.
+
+## 13. Checks of Pass 22 (2026-11-06)
+
+Wordiness cut in the main text, content kept (`paper/pass22_changelog.md`): `check_ledger.py` on the workstation: 1,122 values
+re-read, 0 failures (pass22_numbers.csv re-points 5 rows); `check_tests.py --base 93a209c --src paper/tools`: OK, no WARN; tracked
+PDF 63 pages and clean PDF 54 pages built with tectonic from the saved zip, 13 of 13 figures, no failing log class; main-text pages
+of both PDFs viewed.
