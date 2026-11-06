@@ -35,6 +35,7 @@ def git_show(rev, rel):
     ("pass19_edits.py", "PASS19_ROOT", "2ff8608", "4a3213e", ["paper/outline.tex"], []),
     ("pass20_edits.py", "PASS20_ROOT", "f20fe27", "d28b747", ["paper/outline.tex"], []),
     ("pass21_edits.py", "PASS21_ROOT", "95f44c4", "4b68a7d", ["paper/outline.tex"], []),
+    ("pass22_edits.py", "PASS22_ROOT", "93a209c", "a18ffce", ["paper/outline.tex"], []),
 ])
 def test_edit_script_reproduces_its_pass(tmp_path, monkeypatch, script, env, start, result, files, extra):
     if script == "pass12_edits.py" and not DATA_ROOT.is_dir():
