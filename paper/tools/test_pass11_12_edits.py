@@ -1,4 +1,4 @@
-"""Pass 11 to Pass 16 edit scripts re-run in a temporary copy on the text they started from; each must reproduce the committed
+"""Pass 11 to Pass 17 edit scripts re-run in a temporary copy on the text they started from; each must reproduce the committed
 result and must stop when run a second time (its old texts are gone)."""
 import os, runpy, shutil, subprocess
 from pathlib import Path
@@ -27,6 +27,9 @@ def git_show(rev, rel):
      ["paper/outline.tex", "paper/supp_items.tex", "revision/reviewer_response.md"], ["paper/replication_data/replication_numbers.json"]),
     ("pass15_edits.py", "PASS15_ROOT", "bfdd82d", "79aa263", ["paper/outline.tex", "revision/reviewer_response.md"], []),
     ("pass16_edits.py", "PASS16_ROOT", "0e79c46", "a11ac79", ["paper/outline.tex", "revision/reviewer_response.md"], []),
+    ("pass17_edits.py", "PASS17_ROOT", "dc21cfc", "38279bb",
+     ["paper/outline.tex", "paper/supp/note3.tex", "paper/supp/note5.tex", "paper/supp/note6.tex", "paper/supp/note10.tex",
+      "paper/supp-analysis_changelog.md", "paper/pass16_changelog.md", "revision/reviewer_response.md"], []),
 ])
 def test_edit_script_reproduces_its_pass(tmp_path, monkeypatch, script, env, start, result, files, extra):
     if script == "pass12_edits.py" and not DATA_ROOT.is_dir():

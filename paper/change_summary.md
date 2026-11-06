@@ -1,15 +1,25 @@
-# Change summary: Pass 7 draft to Pass 15 (branch `paper`, 2026-11-06)
+# Change summary: Pass 7 draft to Pass 17 (branch `paper`, 2026-11-06)
 
 The Pass 7 draft had the sweep Results and Discussion written around result placeholders, mock Figures 1-6 and no supplement
-bodies. Passes 8-15 filled every result from its source files (numbers listed in `paper/pass9_numbers.csv` to
-`paper/pass15_numbers.csv`, re-read by `paper/tools/check_ledger.py`, 0 failures), added real figures and supplement items, the
-replication result, and the fixes of two rigour reviews. Details: `paper/passNN_changelog.md`; response: `revision/reviewer_response.md`.
+bodies. Passes 8-17 filled every result from its source files (numbers listed in `paper/pass9_numbers.csv` to
+`paper/pass17_numbers.csv` and the three supplement ledgers, re-read by `paper/tools/check_ledger.py`, 0 failures), added real
+figures, the whole supplement, the replication result, and the fixes of three rigour reviews. Details: `paper/passNN_changelog.md`; response: `revision/reviewer_response.md`.
 
 ## Whole paper
 - Results, Discussion and Conclusions filled from the sweep, the placement check and the direct biology check (Pass 9).
 - Figures 2-6 drawn from the sweep analysis (Pass 10) and Figure 1 (model schematic and one real sweep example, Pass 11).
-- Supplement: Note 1 (all loss equations), Tables S6, S7, S9, S10, Figures S1-S6 (supp-items branch, Passes 13-14). Notes 2-12 and
-  Tables S1, S2, S4, S5, S8 are still described only (Pass 15 says so in the paper and the response).
+- Supplement: Note 1 (all loss equations), Tables S6, S7, S9, S10, Figures S1-S6 (supp-items branch, Passes 13-14); Notes 2-12 and
+  Tables S1, S2, S4 and S8 written on three branches (supp-methods, supp-analysis, supp-records) and merged and placed in the paper
+  in Pass 17, with Table S5 (run counts) generated in Pass 17. Every listed note and table is now supplied; Table S3 was removed with
+  the planned fixed-strength benchmark.
+- Pass 16: family-level sign-flip sensitivity analysis of the replication (six families, 64 patterns, p = 0.0156), labelled as
+  defined after the rule, in Methods, Res-2b, Disc-1 and the response.
+- Pass 17 corrections of the main text from the supplement's sources: replication fits of lung, simulation 2 and pancreas were
+  scored on the cluster, their sweep fits on the workstation (Methods); 448 planned baseline fits, 447 fitted and scored (Methods,
+  response); ranking-rule dates and the baseline score files that are older than the ranking rules (Methods, Note 10); a causal
+  clause about the replication's strength choice removed; two cross-references fixed. Supplement: the large ATAC task contains all
+  11,270 cells of the small one (Note 6). Codex rigour review: 0 blockers, 2 major, 4 minor, all fixed
+  (`paper/pass17_changelog.md`).
 - Abstract cut to the BMC limit: 328 words, 348 by a hyphen-split count (Passes 13 and 15); main tables numbered 1 to 3 (Pass 13).
 - Clean copy with changes accepted, written by `paper/tools/accept_changes.py` (Pass 15).
 
@@ -37,7 +47,8 @@ replication result, and the fixes of two rigour reviews. Details: `paper/passNN_
   (Res-7, Res-8, Table 3, Figure 6, Table S7; Pass 9).
 - **R3.2 robustness:** one-backbone limitation stated (Pass 8); replication across training seeds filled in (Pass 14): the rule
   was met only after its own extension step (40 fits), the result before that step is also reported, one reading did not reach
-  b*. Pass 15 states that both sign-flip p-values are approximate and that no precision calculation was made for the replication.
+  b*. Pass 15 states that both sign-flip p-values are approximate and that no precision calculation was made for the replication;
+  Pass 16 adds the family-level sign-flip analysis (p = 0.0156, also approximate).
 - **R3.3 practical guidance:** Disc-3 and the Conclusions give observations tied to numbers, not tested on independent data (Pass 9).
 - **R3.4 atlas-scale data, R3 minor 1-2:** stated as limits; label transfer and the biology check added (Pass 9).
 

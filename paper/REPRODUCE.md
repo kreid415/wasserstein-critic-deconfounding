@@ -1,7 +1,8 @@
 # Reproducing the paper (BMC Bioinformatics resubmission, branch `paper`)
 
 Repository: github.com/kreid415/wasserstein-critic-deconfounding. Every number in the paper is listed with its source in the
-ledgers `paper/pass7_numbers.csv` and `paper/pass9_numbers.csv` to `paper/pass15_numbers.csv`, which
+ledgers `paper/pass7_numbers.csv`, `paper/pass9_numbers.csv` to `paper/pass16_numbers.csv`, the supplement ledgers
+`paper/supp-methods_numbers.csv`, `supp-analysis_numbers.csv`, `supp-records_numbers.csv` and `paper/pass17_numbers.csv`, which
 `paper/tools/check_ledger.py` re-reads from those sources. `D` below is the data root
 `/home/kendall/experiment_data/wasserstein-critic-deconfounding` on the workstation; it holds the inputs, fits and scores, which are
 not committed (they are large). Paths of the form `$D/code/wt_*` are git worktrees of this repository at the commits named.
@@ -15,7 +16,7 @@ not committed (they are large). Paths of the form `$D/code/wt_*` are git worktre
 | independent check of the sweep placement numbers | sweep-paper | 3280bd4 | same |
 | replication across training seeds, with the rule's extension step | sweep-replication | a475ea3 (prediction and rule: tag `replication-prediction-v1`, 3a90d0f) | `$D/code/wt_sweep_replication` |
 | direct biology check (run at c4a793f; summary page fixed at 697cc6c) | biology-check | 697cc6c | `$D/code/wt_biology_check` |
-| figures, supplement tables, paper text, PDFs | paper | this commit (Pass 15 commits from 0596835 on) | `$D/code/wcd_paper` |
+| figures, supplement tables, paper text, PDFs | paper | this commit (Pass 15 commits from 0596835 on; supplement merged and placed in Pass 17) | `$D/code/wcd_paper` |
 
 ## 2. Data provenance
 
@@ -110,10 +111,15 @@ bash paper/figure_scripts/make_supp_figures.sh     # copies inputs from $D and s
 python paper/tools/make_replication.py --check     # Table S9 and replication_numbers.json from sweep-replication a475ea3
 python paper/tools/make_supp_tables.py --check-table4
 python paper/tools/make_supp_supp-analysis.py                         # Table S8 and the label-transfer table of Supplementary Note 9
+python paper/tools/make_supp_supp-methods.py --collect                # inputs of Tables S1, S2, S4, S5 from $D (paper/figure_data/supp_methods)
+python paper/tools/make_supp_supp-methods.py --check                  # Tables S1, S2, S4 and S5 (run counts) identical to the committed ones
+python paper/tools/make_supp_supp-records.py collect                  # facts of Notes 10-11 from $D and git (paper/supp/supp-records_facts.json)
+python paper/tools/make_supp_supp-records.py --check                  # generated blocks of Supplementary Notes 10 and 11 up to date
 python paper/tools/check_ledger.py paper/supp-analysis_numbers.csv   # numbers in Supplementary Notes 4-7 and 9
 ```
-Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
-section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-16 from their starting commits and compares with their
+Supplement: Notes 2-12 and Tables S1, S2, S4, S5 and S8 are input in the supplementary list of `paper/outline.tex` by
+`paper/tools/pass17_edits.py` (from dc21cfc; it also writes the Pass 17 corrections). Text passes: each `paper/tools/passNN_edits.py` rewrites the text from the commit its change log names (`paper/passNN_changelog.md`,
+section "Re-run"); `paper/tools/test_pass11_12_edits.py` re-runs Passes 11-17 from their starting commits and compares with their
 result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper/outline_clean.tex` (generated, never edited by hand;
 `--check` exits 1 when it is out of date).
 
@@ -121,13 +127,13 @@ result commits. Clean copy: `python paper/tools/accept_changes.py` writes `paper
 ```
 python paper/tools/check_ledger.py                                     # every ledger value re-read from its source
 python paper/tools/abstract_words.py                                   # abstract word counts (limit 350)
-python scripts/check_tests.py --base bfdd82d --src paper/tools -- paper/tools
+python scripts/check_tests.py --base a2a2c1c --src paper/tools -- paper/tools   # Pass 17 (earlier passes: --base bfdd82d)
 cd paper && tectonic -X compile outline.tex && tectonic -X compile outline_clean.tex   # tracked and clean PDFs
 pandoc revision/reviewer_response.md -o reviewer_response.pdf --pdf-engine=tectonic      # response PDF (pandoc 3.10)
 sha256sum -c paper/MANIFEST.sha256                                     # from the repository root
 ```
 The PDFs in `paper/build/` were built from the zip of `paper/outline.tex`, `outline_clean.tex`, `refs.bib`, `supp_items.tex`,
-`supp/` and `figures/` at 76c4dab (identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
+`supp/` and `figures/` at 38279bb (identical to this commit for those files). PDF bytes carry a creation time, so a rebuild has
 other checksums; the source checksums in `paper/MANIFEST.sha256` are the ones to compare.
 
 ## 6. Audit of 2026-11-06 (Pass 15)
@@ -154,3 +160,10 @@ by the checksum files named above.
 - Supplementary Notes 2-12 and Tables S1, S2, S4, S5 and S8 are described in the supplementary list but not yet written.
 - Older commits of README.md (before 0596835) contain a browser session cookie in the data-download command; the current README has
   a plain download command. Removing it from history needs a history rewrite on the remote.
+
+## 7. Checks of Pass 17 (2026-11-06)
+
+Supplement merged and placed (`paper/pass17_changelog.md`): `check_ledger.py` 1,117 values re-read, 507 pointers checked for the
+path only, 0 failures; `check_tests.py --base a2a2c1c --src paper/tools`: OK, 82 passed, no WARN; supplement generators `--check`
+identical; tracked PDF 64 pages and clean PDF 55 pages built with tectonic from the saved zip, 13 of 13 figures, no failing log
+class; response PDF 8 pages.
