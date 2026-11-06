@@ -26,7 +26,7 @@ PCA), read at matched batch removal over a penalty-strength sweep, with a replic
   `experiments/sweep_replication/agreement_result_with_extension/`.
 - Direct biology check (exploratory): branch `biology-check`, 83c452e; Res-5b, Supplementary Note 12, Table S10.
 
-## 3. Paper: branch `paper`, Pass 21 (93a209c)
+## 3. Paper: branch `paper`, Pass 22 (045e62c)
 
 - Text, figures (1-6, S1-S6) and the whole supplement are written: Supplementary Notes 1-12, Tables S1, S2 and S4-S11 (S3 removed
   with the dropped fixed-strength benchmark; S11 is the label-transfer table of Note 9, numbered in Pass 18).
@@ -39,6 +39,8 @@ PCA), read at matched batch removal over a penalty-strength sweep, with a replic
 - Pass 20: Declarations: ethics wording drafted (re-analysis of public data; not applicable), no competing interests.
 - Pass 21 (editing layout): Figures 1-6 sit in the text beside the paragraph that first cites each; clean PDF 54 pages.
   Reverse this for the BMC submission (figures as separate files).
+- Pass 22: wordiness cut in Background, Methods, Results and Discussion (9,407 -> 9,022 words), content kept and checked
+  pair by pair by a second model; ledger 1,122 values, 0 failures.
 - Change history: `paper/passNN_changelog.md` (one per pass) and `paper/change_summary.md`.
 
 ## 4. Repository
