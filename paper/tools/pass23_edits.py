@@ -167,6 +167,9 @@ def move_table2(s):
     hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
     assert len(hd) == 1 and hd[0].count("S4--S11,") == 1
     s = s.replace(hd[0], hd[0].replace("S4--S11,", rf"S4--\replaced[id={p22.TAG}]{{S12}}{{S11}},"))
+    # the writer's note sits inside \\added[id=P12]{}; changes cannot nest, so it is amended in place (change log)
+    assert s.count('Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, Table \\ref{tab:3} the ranking and Table \\ref{tab:4} the placement table)') == 1
+    s = s.replace('Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, Table \\ref{tab:3} the ranking and Table \\ref{tab:4} the placement table)', 'Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, the ranking table, since Pass 23 Supplementary Table \\ref{tab:3}, and Table \\ref{tab:4} the placement table)')
     edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures", "Tables S6, S7, S9 and S12 and Figures"),
                                   ("(Note 1, Tables S6, S7 and S9, Figures", "(Note 1, Tables S6, S7, S9 and S12, Figures"),
                                   ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n\\clearpage\n\\input{supp/tableS12}\n")])
