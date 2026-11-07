@@ -10,7 +10,10 @@ Main-text Tables 1-3 repeat main-text content (user rule SI-115: no repeated inf
 Supplementary Tables S13 (methods), S12 (ranking) and S14 (placement); each label moves with its table.
 Res-3: a main claim with numbers from paper/tools/res3_curve_numbers.py leads; the ATAC-large sentence names its decoder and
 the full range of the other penalties; the repeated 'no failed fits' sentences go (Res-1 says it); the Figure 3 caption follows
-the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6b). Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6b).
+Figure 3 then became a dot summary (user choice): biology minus plain scVI at b* and at the strongest setting; the curve
+figure moved to Supplementary Figure S7 (figure_scripts/figS7.py); Figure 4 and 5 captions now point to Figure 2a for the
+task order. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
@@ -49,9 +52,11 @@ EDITS = [  # (old source line, new printed text)
     ('\\item Table \\ref{tab:3}: \\replaced{benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, \\added{mean biology at $b^*$, }simulation ranks, tasks not ranked, tasks ranked.}{primary results (primary comparison, trade-off area, collapse rate, per decoder): estimate, interval, probabilities, call, evaluable tasks.}',
      None),
     ('The real-task curves overlapped near plain scVI and around many matched \\replaced[id=P22]{readings}{readings,} but differed more at stronger penalties (Figure 3; curve construction in Supplementary Note 5). With the batch-conditioned decoder, the lung and pancreas curves were close near $b^*$, whereas the discriminator lost more biology at stronger settings. On the large chromatin-accessibility task, the barycenter critic reached a lower maximum batch score, 0.674, than the reference critic, \\replaced[id=P22]{0.815; this}{0.815. This} shorter batch-removal range did not reflect failed fits or failure to reach $b^*$. At the strongest fitted setting on lung with the batch-conditioned decoder, the barycenter critic ended at batch and biology scores of 0.466 and 0.397, below plain scVI on both scores. With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas several penalties increased both scores over part of their strength range. \\replaced[id=P22]{A}{Thus, a} curve could \\added[id=P22]{therefore} turn back or lose biology after reaching the matched level; no real-task curve ended early because of failed fits.',
-     "The penalties' trade-off curves lay close together up to the matched level and separated at stronger settings (Figure 3; curve construction in Supplementary Note 5): over the 11 ranked real task and decoder pairs, biology at $b^*$ differed between penalties by a median of 0.025, against 0.213 at each penalty's strongest fitted setting. The barycenter critic reached the lowest biology score of the six penalties in all 12 real task and decoder pairs (0.287 to 0.516); on lung with the batch-conditioned decoder its strongest setting ended below plain scVI on both scores (batch 0.466 and biology 0.397, against 0.633 and 0.722). It also had the shortest batch-removal range on the large chromatin-accessibility task with the batch-conditioned decoder (highest batch score 0.674; the other penalties 0.683 to 0.834). With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas every penalty raised both scores over part of its strength range."),
+     "The penalties kept similar biology up to the matched level and differed at stronger settings (Figure 3; trade-off curves in Supplementary Figure S7, built as in Supplementary Note 5): over the 11 ranked real task and decoder pairs, biology at $b^*$ differed between penalties by a median of 0.025, against 0.213 at each penalty's strongest fitted setting. The barycenter critic reached the lowest biology score of the six penalties in all 12 real task and decoder pairs (0.287 to 0.516); on lung with the batch-conditioned decoder its strongest setting ended below plain scVI on both scores (batch 0.466 and biology 0.397, against 0.633 and 0.722). It also had the shortest batch-removal range on the large chromatin-accessibility task with the batch-conditioned decoder (highest batch score 0.674; the other penalties 0.683 to 0.834). With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas every penalty raised both scores over part of its strength range."),
     ("\\caption{\\replaced[id=P10]{Batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; no real-task curve ended early because of failed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, each standard tool at its best setting by selection score (0.4 batch plus 0.6 biology) among the settings run; scANVI uses cell-type labels. Panels in a column share axes.}{MOCK -- synthetic data. Batch removal against biology kept in the six real tasks (columns) for the conditioned (a) and unconditioned (b) decoder. Each line joins plain scVI (star) and one penalty's sweep strengths by seed-mean scores (three seeds); a curve ending early marks collapsed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, standard tools at their best setting.}}",
-     "\\caption{Batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. The standard tools are placed in Figure 6b. Panels in a column share axes.}"),
+     "\\caption{Biology kept by each penalty relative to plain scVI, at the matched batch removal $b^*$ (filled dots) and at the penalty's strongest fitted setting (open dots), with the batch-conditioned (a) and the unconditioned decoder (b). One dot per real task: biology score minus plain scVI's with the same decoder (higher is better); grey line, no change. Filled dots are drawn for the ranked tasks only (the immune task with the batch-conditioned decoder is low-signal); open dots for all six real tasks. The full trade-off curves are in Supplementary Figure S7.}"),
+    ("\\pp{Res-3}{Figure 3 shows each method's trade-off between batch removal and biology in every real task.}",
+     '\\pp{Res-3}{Figure 3 compares the biology each penalty keeps at the matched level with the biology it keeps at its strongest setting.}'),
 ]
 
 
@@ -211,7 +216,7 @@ def move_tables(s):
     s = tracked_line(s, r"\noindent Every supplementary note and table listed here", [
         ("Supplementary Notes 2--12 and", "Supplementary Notes 2--13 and"),
         ("Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows "
-         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S6, follow "
+         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S7, follow "
          "the main figures.")])
     s = tracked_line(s, r"\item Table S7, single-strength placement",
                      [(r"(the counterpart of Table~\ref{tab:4})", r"(the counterpart of Supplementary Table~\ref{tab:4})")])
@@ -239,8 +244,8 @@ def move_tables(s):
     assert s.count(old_n) == 1
     s = s.replace(old_n, r"Pass 13 numbered the main-text tables 1 to 3 (the methods, the ranking and the placement table; since "
                   r"Pass 23 they are Supplementary Tables \ref{tab:1}, \ref{tab:3} and \ref{tab:4})")
-    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures", "Tables S6, S7, S9 and S12-S14 and Figures"),
-                                  ("(Note 1, Tables S6, S7 and S9, Figures", "(Note 1, Tables S6, S7, S9 and S12--S14, Figures"),
+    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures S1-S6", "Tables S6, S7, S9 and S12-S14 and Figures S1-S7"),
+                                  ("(Note 1, Tables S6, S7 and S9, Figures S1--S6)", "(Note 1, Tables S6, S7, S9 and S12--S14, Figures S1--S7)"),
                                   ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n" + "".join(
                                       f"\\clearpage\n\\input{{supp/table{n}}}\n" for n in ("S12", "S13", "S14")))])
     edit("paper/supp/tableS6.tex", [("Table~\\ref{tab:3} gives the mean ranks", "Supplementary Table~\\ref{tab:3} gives the mean ranks")])
@@ -258,6 +263,38 @@ def move_tables(s):
     return s
 
 
+FIGS7 = r"""
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S7}%
+\includegraphics[width=\textwidth]{figures/figS7.png}
+\caption{Trade-off curves (the main-text Figure 3 until Pass 23): batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. Panels in a column share axes. Figure 3 summarises these curves at $b^*$ and at the strongest setting.}
+\end{figure}
+"""
+
+
+def move_figure3(s):
+    """Figure 3 becomes the dot summary of Res-3; the curve figure moves to Supplementary Figure S7 (user choice)."""
+    for start in (r"\caption{Secondary summaries per penalty", r"\caption{Width of each penalty's range"):
+        s = tracked_line(s, start, [("in the order of Figure 3 from top to bottom", "in the order of Figure 2a from top to bottom")])
+    s = tracked_line(s, r"\item Figure 3:", [(accept([l for l in s.split("\n") if accept(l).startswith(r"\item Figure 3:")][0])
+                                               .strip()[len(r"\item Figure 3: "):],
+                                               "biology score minus plain scVI's per penalty and decoder, one dot per real task, at "
+                                               "matched batch removal $b^*$ and at the strongest fitted setting.")])
+    item_s6 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure S6, best of $k$ settings per task")]
+    assert len(item_s6) == 1
+    s = s.replace(item_s6[0], item_s6[0] + "\n" + rf"\item \added[id={p22.TAG}]{{Figure S7, trade-off curves (the former main-text "
+                  "Figure 3): batch score against biology score per penalty, task and decoder, with plain scVI, $b^*$ and the "
+                  "strongest fitted setting marked.}", 1)
+    hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
+    assert len(hd) == 1 and hd[0].count("Figures S1--S6") == 1
+    s = s.replace(hd[0], hd[0].replace("Figures S1--S6", rf"Figures S1--\replaced[id={p22.TAG}]{{S7}}{{S6}}"))
+    edit("paper/supp/figures.tex", [("Supplementary Figures S1-S6", "Supplementary Figures S1-S7")])
+    (ROOT / "paper/supp/figures.tex").write_text((ROOT / "paper/supp/figures.tex").read_text() + FIGS7)
+    edit("paper/figure_scripts/make_supp_figures.sh", [("for n in 1 2 3 4 5 6; do", "for n in 1 2 3 4 5 6 7; do"),
+                                                       ("and Figures S1-S6 (PNG", "and Figures S1-S7 (PNG")])
+    return s
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
@@ -268,6 +305,7 @@ def main():
         s = s.replace("\n" + old + "\n", "\n" + line + "\n", 1)
     s = move_res2b(s)
     s = move_tables(s)
+    s = move_figure3(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

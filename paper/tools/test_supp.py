@@ -42,6 +42,6 @@ def test_supp_tables_cite_main_tables_by_label_and_placement_table_reproduces(tm
     mt.make_s7()
     mt.check_table4()
     s6, s7 = (tmp_path / "tableS6.tex").read_text(), (tmp_path / "tableS7.tex").read_text()
-    assert r"Table~\ref{tab:3} gives the mean ranks" in s6
+    assert r"Supplementary Table~\ref{tab:3} gives the mean ranks" in s6
     assert s7.count(r"Table~\ref{tab:4}") == 2 and "Table~4" not in s7
     assert "reproduced" in capsys.readouterr().out

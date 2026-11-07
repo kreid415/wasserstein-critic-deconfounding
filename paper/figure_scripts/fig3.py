@@ -1,7 +1,7 @@
-"""Figure 3: batch score against biology score for each penalty's sweep strengths, six real tasks x two decoders.
-Curves: figure_data/curves.csv (seed means, joined from plain scVI at strength 0 upward);
-dashed line: b* from paper_numbers.json; open circle: each penalty's strongest fitted setting; grey panel: low-signal pair.
-Pass 23: the standard tools are no longer drawn (Figure 6b places them; user rule SI-115, no repeats in the main text)."""
+"""Figure 3: biology kept by each penalty relative to plain scVI, at the matched batch removal b* (filled dots, ranked real
+tasks) and at the penalty's strongest fitted setting (open dots, all six real tasks), one panel per decoder.
+Reads figure_data/curves.csv (seed means per strength; plain scVI is strength 0) and figure_data/ranking_pairs.csv (biology at b*).
+The full trade-off curves are Supplementary Figure S7 (figS7.py). Pass 23, user choice among two drafts."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -9,40 +9,34 @@ from figcommon import *
 from matplotlib.lines import Line2D
 
 apply_style()
-pn = load_pn()
 cv = pd.read_csv(DATA / "curves.csv")
-low = {c: set(pnv(pn, f"low_signal_tasks.cond{c}")) for c in (0, 1)}
-assert cv[cv.task.isin(REAL_TASKS)].n_fail.sum() == 0      # no real-task curve ends early because of failed fits
-fig, axes = plt.subplots(2, 6, figsize=(WIDTH_IN, 4.1), sharex="col", sharey="col",
-                         gridspec_kw=dict(wspace=0.38, hspace=0.12, left=0.105, right=0.995, top=0.915, bottom=0.2))
-for r, c in enumerate(COND_ORDER):
-    for j, t in enumerate(REAL_TASKS):
-        ax = axes[r, j]
-        d = cv[(cv.task == t) & (cv.cond == c)]
-        for a in ARMS:
-            e = d[d.arm == a].sort_values("lam")
-            ax.plot(e.B, e.C, "-o", color=ARM_COLOR[a], ms=2.2, lw=1.0, mew=0, zorder=2)
-            ax.plot(e.B.iloc[-1], e.C.iloc[-1], "o", mfc="white", mec=ARM_COLOR[a], ms=4.2, mew=1.0, zorder=4)  # strongest setting
-        p0 = d[d.lam == 0].iloc[0]
-        ax.plot(p0.B, p0.C, "*", color="black", ms=8, zorder=5, mec="white", mew=0.4)
-        ax.axvline(pnv(pn, f"pair.{t}.cond{c}.bstar"), color="#444444", ls="--", lw=0.7, zorder=1)
-        if t in low[c]:  # low-signal pair: shown, not ranked
-            ax.set_facecolor("#f0f0f0")
-            ax.text(0.97, 0.03, "low-signal,\nnot ranked", transform=ax.transAxes, ha="right", va="bottom", fontsize=6, color=GREY)
-        if r == 0: ax.set_title(TASK_LABEL[t], loc="left", pad=3)
-        if r == 1: ax.set_xlabel("batch score")
-        if j == 0: ax.set_ylabel(COND_LABEL[c] + "\nbiology score")
-        ax.margins(0.06)
-        ax.locator_params(nbins=4)
-    fig.text(0.003, axes[r, 0].get_position().y1 + 0.005, "ab"[r], fontsize=10, fontweight="bold", va="bottom")
-axes[0, 0].text(pnv(pn, "pair.pancreas.cond1.bstar") + 0.005, 0.03, r"$b^{*}$",  # inside the panel, away from the title
-                transform=axes[0, 0].get_xaxis_transform(),
-                ha="left", va="bottom", fontsize=7, color="#444444")
-h = [Line2D([], [], color=ARM_COLOR[a], marker="o", ms=3, lw=1.2, label=ARM_LABEL[a]) for a in ARMS]
-h += [Line2D([], [], color="black", marker="*", ms=8, lw=0, label="plain scVI")]
-h += [Line2D([], [], color=GREY, marker="o", mfc="white", ms=4.2, mew=1.0, lw=0, label="strongest setting"),
-      Line2D([], [], color="#444444", ls="--", lw=0.7, label=r"matched batch removal $b^{*}$")]
-fig.legend(handles=h, loc="lower center", ncol=5, bbox_to_anchor=(0.5, 0.0), columnspacing=1.0, handletextpad=0.3)
-fig.text(0.995, 0.999, "higher = better on both axes", ha="right", va="top", fontsize=7, color=GREY)
+rp = pd.read_csv(DATA / "ranking_pairs.csv")
+cv, rp = cv[cv.task.isin(REAL_TASKS)], rp[rp.task.isin(REAL_TASKS)]
+assert cv.n_fail.sum() == 0
+plain = cv[cv.lam == 0].groupby(["task", "cond"]).C.first()
+rp = rp[rp["rank"].notna()].assign(d=lambda x: [r.bio_at_bstar - plain[(r.task, r.cond)] for r in x.itertuples()])
+st = cv[cv.lam > 0].sort_values("lam").groupby(["task", "cond", "arm"]).tail(1)
+st = st.assign(d=[r.C - plain[(r.task, r.cond)] for r in st.itertuples()])
+
+fig, axes = plt.subplots(1, 2, figsize=(WIDTH_IN, 2.9), sharey=True, sharex=True,
+                         gridspec_kw=dict(wspace=0.08, left=0.15, right=0.99, top=0.8, bottom=0.17))
+for ax, c in zip(axes, COND_ORDER):
+    ax.axvline(0, color="#bbbbbb", lw=0.6, zorder=1)
+    for i, a in enumerate(ARMS):
+        b, s = rp[(rp.cond == c) & (rp.arm == a)], st[(st.cond == c) & (st.arm == a)]
+        assert len(s) == 6 and len(b) in (5, 6)
+        ax.scatter(b.d, [i - 0.15] * len(b), s=14, color=ARM_COLOR[a], lw=0, zorder=3)
+        ax.scatter(s.d, [i + 0.15] * len(s), s=14, facecolor="white", edgecolor=ARM_COLOR[a], lw=0.9, zorder=3)
+        if i: ax.axhline(i - .5, color="#e6e6e6", lw=0.5, zorder=0)
+    ax.set_ylim(5.5, -0.5); ax.set_yticks(range(6)); ax.set_yticklabels([ARM_LABEL[a] for a in ARMS])
+    ax.set_title(f"{COND_LABEL[c]} ({rp[rp.cond == c].task.nunique()} ranked tasks)", loc="left", pad=3)
+    ax.set_xlabel("biology score minus plain scVI's (higher = better)")
+    ax.spines["left"].set_visible(False); ax.tick_params(left=False)
+    ax.margins(x=0.04)
+for k, ax in enumerate(axes):
+    fig.text(ax.get_position().x0 - (0.13 if k == 0 else 0.01), 0.86, "ab"[k], fontsize=10, fontweight="bold", va="bottom")
+fig.legend(handles=[Line2D([], [], marker="o", color=GREY, lw=0, ms=4, label=r"at matched batch removal $b^{*}$"),
+                    Line2D([], [], marker="o", mfc="white", mec=GREY, lw=0, ms=4, label="at the strongest fitted setting")],
+           loc="upper center", bbox_to_anchor=(0.57, 0.995), ncol=2, frameon=False)
 check_and_save(fig, "fig3")
-print(len(cv[cv.task.isin(REAL_TASKS)]), sorted((t, c) for c in low for t in low[c] if t in REAL_TASKS))
+print(rp.groupby("cond").d.agg(["min", "max"]).round(3).to_dict(), st.groupby("cond").d.agg(["min", "max"]).round(3).to_dict())

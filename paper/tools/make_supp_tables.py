@@ -111,7 +111,7 @@ def make_s6():
              rf"the penalty's seed-mean curve crosses $b^*$; the reading is taken at the first crossing. {unreached} "
              rf"{pairs} task and decoder pairs are ranked; the immune task and both simulations with the batch-conditioned decoder "
              rf"are low-signal and are in Part B. Simulations are ranked separately from the real tasks "
-             rf"(Supplementary Notes 5 and 6; Table~\ref{{tab:3}} gives the mean ranks).")
+             rf"(Supplementary Notes 5 and 6; Supplementary Table~\ref{{tab:3}} gives the mean ranks).")
     cap_b = (rf"Low-signal task and decoder pairs ({low_pairs}; the gap between plain scVI's batch score and the highest batch score "
              rf"every penalty reaches is under 0.02): biology score at $b^*$ read in the same way, not ranked and without standard errors "
              rf"(Supplementary Note 5).")
@@ -205,10 +205,10 @@ def make_s7():
     cond = 0
     a, _ = tabular_s7a(cond)
     b = tabular_s7b(cond)
-    cap = (r"Placement with the unconditioned decoder (counterpart of Table~\ref{tab:4} and of Figure~6). \textbf{(a)} Mean selection score "
+    cap = (r"Placement with the unconditioned decoder (counterpart of Supplementary Table~\ref{tab:4} and of Figure~6). \textbf{(a)} Mean selection score "
            r"($0.4\times$batch $+\,0.6\times$biology) per method and real task at the strength (Harmony, Scanorama, sysVI: the setting) with the best mean "
            r"selection score on real tasks of other task families (related tasks never choose for each other); in parentheses, the task's own best "
-           r"strength or setting (optimistic bound). Plain scVI here receives no batch information. The scvi-tools adversary is run with the batch-conditioned decoder only and is not shown. scANVI (uses cell-type labels), PCA and the three tools have no decoder, so their values equal those of Table~\ref{tab:4}. The last column counts the real "
+           r"strength or setting (optimistic bound). Plain scVI here receives no batch information. The scvi-tools adversary is run with the batch-conditioned decoder only and is not shown. scANVI (uses cell-type labels), PCA and the three tools have no decoder, so their values equal those of Supplementary Table~\ref{tab:4}. The last column counts the real "
            r"tasks (of six) on which the method's score exceeds plain scVI's, at the transferred strength and, in parentheses, at the own best. "
            r"\textbf{(b)} Number of real tasks on which the penalty's expected best selection score among $k$ randomly drawn settings exceeds "
            r"that of the tool at $k$ settings of its own, $k=1$ and $k=6$; Scanorama at $k=6$ is compared on the five tasks where all six of its settings exist "
@@ -220,8 +220,8 @@ def make_s7():
 
 
 def check_table4():
-    """The cond=1 table must equal the placement table (label tab:4) of the outline (cell strings)."""
-    txt = (ROOT / "outline.tex").read_text()
+    """The cond=1 table must equal the placement table (label tab:4, Supplementary Table S14) (cell strings)."""
+    txt = (ROOT / "supp/tableS14.tex").read_text()  # Pass 23: moved from the outline
     blk = txt.split(r"\label{tab:4}")[1].split(r"\end{tabular}")[0]
     ref = {}
     for ln in blk.splitlines():
