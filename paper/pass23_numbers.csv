@@ -1,0 +1,9 @@
+id,location,written,source,selector,fmt,note,supersedes
+P23N01,paper/outline.tex::In 44 of the 55 pairs of penalties,44,paper/figure_data/res2_seed_noise.json,key=all.gaps_below_larger_se,,"Res-2: neighbouring readings closer than the larger LOSO SE, all real pairs",
+P23N02,paper/outline.tex::In 44 of the 55 pairs of penalties,55,paper/figure_data/res2_seed_noise.json,key=all.neighbour_gaps,,"Res-2: neighbouring pairs, 11 ranked real task-decoder pairs x 5",
+P23N03,"paper/outline.tex::(17 of 25 with the batch-conditioned decoder, 27 of 30 with the unconditioned decoder)",17,paper/figure_data/res2_seed_noise.json,key=batch_conditioned.gaps_below_larger_se,,Res-2: batch-conditioned decoder,
+P23N04,"paper/outline.tex::(17 of 25 with the batch-conditioned decoder, 27 of 30 with the unconditioned decoder)",25,paper/figure_data/res2_seed_noise.json,key=batch_conditioned.neighbour_gaps,,Res-2: batch-conditioned decoder,
+P23N05,"paper/outline.tex::(17 of 25 with the batch-conditioned decoder, 27 of 30 with the unconditioned decoder)",27,paper/figure_data/res2_seed_noise.json,key=unconditioned.gaps_below_larger_se,,Res-2: unconditioned decoder,
+P23N06,"paper/outline.tex::(17 of 25 with the batch-conditioned decoder, 27 of 30 with the unconditioned decoder)",30,paper/figure_data/res2_seed_noise.json,key=unconditioned.neighbour_gaps,,Res-2: unconditioned decoder,
+P23N07,paper/outline.tex::and 2 of the 11 first places stayed first,2,paper/figure_data/res2_seed_noise.json,key=all.first_places_stable,,Res-2: first places with rank 1 in all three LOSO repeats (rank_lo = rank_hi = 1),
+P23N08,paper/outline.tex::and 2 of the 11 first places stayed first,11,paper/figure_data/res2_seed_noise.json,key=all.first_places,,Res-2: ranked real task-decoder pairs,

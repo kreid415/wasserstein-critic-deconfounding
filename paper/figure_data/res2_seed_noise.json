@@ -1,0 +1,20 @@
+{
+ "batch_conditioned": {
+  "neighbour_gaps": 25,
+  "gaps_below_larger_se": 17,
+  "first_places": 5,
+  "first_places_stable": 1
+ },
+ "unconditioned": {
+  "neighbour_gaps": 30,
+  "gaps_below_larger_se": 27,
+  "first_places": 6,
+  "first_places_stable": 1
+ },
+ "all": {
+  "neighbour_gaps": 55,
+  "gaps_below_larger_se": 44,
+  "first_places": 11,
+  "first_places_stable": 2
+ }
+}
