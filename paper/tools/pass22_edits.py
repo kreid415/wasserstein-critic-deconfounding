@@ -96,4 +96,5 @@ def main():
     p.write_text(s)
 
 
-main()
+if __name__ == "__main__":  # pass 23 imports rewrite() from here
+    main()
