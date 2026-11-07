@@ -550,3 +550,10 @@
 - added: 2026-10-23
 - keywords: image GAN, image generation, lucic2018gans, GAN losses, equal tuning, Background
 - files: paper/outline.tex, paper/paper.tex
+
+## SI-115 · active · content
+- rule: Main-text information must not be repeated. When a table, figure or paragraph repeats what another main-text item already shows, move the repeat to the supplement (example: the ranking table, former Table 2, repeated Figure 2b and Supplementary Table S6 and became Supplementary Table S12 in Pass 23). Supplementary analyses (fit completion, the replication across seeds) also go to the supplement, with one short line in the Results.
+- source: "information should not be redundant, move repeats to the supplement"; "res-1 should be in the supplement, and should be a short line in the results"; "this seems like supplementary analysis" (user, 2026-11-07)
+- added: 2026-11-07
+- keywords: redundant, repeat, duplicate, supplement, main text, move to supplement
+- files: paper/outline.tex, paper/supp/
