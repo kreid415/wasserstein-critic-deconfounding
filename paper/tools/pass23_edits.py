@@ -7,12 +7,16 @@ Res-2b: the replication paragraph moves to a new Supplementary Note 13 (written 
 ranks of paper/tools/replication_mean_ranks.py added); one paragraph stays in the Results. Abstract, Disc-1 and Conclusions: the sweep leaders stay and a clause says that
 the leaders changed on the replication's new seeds (user decision 2026-11-07).
 Main-text Tables 1-3 repeat main-text content (user rule SI-115: no repeated information in the main text), so they move to
-Supplementary Tables S13 (methods), S12 (ranking) and S14 (placement); each label moves with its table. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+Supplementary Tables S13 (methods), S12 (ranking) and S14 (placement); each label moves with its table.
+Res-3: a main claim with numbers from paper/tools/res3_curve_numbers.py leads; the ATAC-large sentence names its decoder and
+the full range of the other penalties; the repeated 'no failed fits' sentences go (Res-1 says it); the Figure 3 caption follows
+the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6b). Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
 Run from the repository root:  python paper/tools/pass23_edits.py   (PASS23_ROOT overrides the root of the edited files)
 Then: python paper/tools/accept_changes.py ; python paper/tools/check_ledger.py"""
+import difflib
 import json
 import os
 import sys
@@ -44,6 +48,10 @@ EDITS = [  # (old source line, new printed text)
      '\\pp{Res-2}{Penalties are ranked by the biology they keep at matched batch removal (Figure 2; Supplementary Table \\ref{tab:3}).}'),
     ('\\item Table \\ref{tab:3}: \\replaced{benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, \\added{mean biology at $b^*$, }simulation ranks, tasks not ranked, tasks ranked.}{primary results (primary comparison, trade-off area, collapse rate, per decoder): estimate, interval, probabilities, call, evaluable tasks.}',
      None),
+    ('The real-task curves overlapped near plain scVI and around many matched \\replaced[id=P22]{readings}{readings,} but differed more at stronger penalties (Figure 3; curve construction in Supplementary Note 5). With the batch-conditioned decoder, the lung and pancreas curves were close near $b^*$, whereas the discriminator lost more biology at stronger settings. On the large chromatin-accessibility task, the barycenter critic reached a lower maximum batch score, 0.674, than the reference critic, \\replaced[id=P22]{0.815; this}{0.815. This} shorter batch-removal range did not reflect failed fits or failure to reach $b^*$. At the strongest fitted setting on lung with the batch-conditioned decoder, the barycenter critic ended at batch and biology scores of 0.466 and 0.397, below plain scVI on both scores. With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas several penalties increased both scores over part of their strength range. \\replaced[id=P22]{A}{Thus, a} curve could \\added[id=P22]{therefore} turn back or lose biology after reaching the matched level; no real-task curve ended early because of failed fits.',
+     "The penalties' trade-off curves lay close together up to the matched level and separated at stronger settings (Figure 3; curve construction in Supplementary Note 5): over the 11 ranked real task and decoder pairs, biology at $b^*$ differed between penalties by a median of 0.025, against 0.213 at each penalty's strongest fitted setting. The barycenter critic reached the lowest biology score of the six penalties in all 12 real task and decoder pairs (0.287 to 0.516); on lung with the batch-conditioned decoder its strongest setting ended below plain scVI on both scores (batch 0.466 and biology 0.397, against 0.633 and 0.722). It also had the shortest batch-removal range on the large chromatin-accessibility task with the batch-conditioned decoder (highest batch score 0.674; the other penalties 0.683 to 0.834). With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas every penalty raised both scores over part of its strength range."),
+    ("\\caption{\\replaced[id=P10]{Batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; no real-task curve ended early because of failed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, each standard tool at its best setting by selection score (0.4 batch plus 0.6 biology) among the settings run; scANVI uses cell-type labels. Panels in a column share axes.}{MOCK -- synthetic data. Batch removal against biology kept in the six real tasks (columns) for the conditioned (a) and unconditioned (b) decoder. Each line joins plain scVI (star) and one penalty's sweep strengths by seed-mean scores (three seeds); a curve ending early marks collapsed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, standard tools at their best setting.}}",
+     "\\caption{Batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. The standard tools are placed in Figure 6b. Panels in a column share axes.}"),
 ]
 
 
@@ -53,6 +61,11 @@ def rewrite(old, new):
         inner_old, _ = group(accept(old).strip(), len("\\caption"))
         inner_new, _ = group(new, len("\\caption"))
         return "\\caption{" + p22.tracked(inner_old, inner_new) + "}"
+    acc = accept(old).strip()
+    if new and not acc.startswith(("\\item ", "\\pp{")):  # a paragraph rewritten throughout reads better as one replacement
+        a, b = p22.tokens(acc), p22.tokens(new)
+        if difflib.SequenceMatcher(None, a, b, autojunk=False).ratio() < 0.5:
+            return rf"\replaced[id={p22.TAG}]{{{new}}}{{{p22.struck(acc)}}}"
     return p22.rewrite(old, new)
 
 

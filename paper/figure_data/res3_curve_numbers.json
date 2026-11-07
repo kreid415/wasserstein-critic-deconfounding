@@ -1,0 +1,19 @@
+{
+ "n_ranked_pairs": 11,
+ "median_spread_at_bstar": 0.025,
+ "median_spread_at_strongest": 0.213,
+ "n_pairs_wider_at_strongest": 11,
+ "n_real_pairs": 12,
+ "n_pairs_barycenter_lowest": 12,
+ "barycenter_lowest_min": 0.287,
+ "barycenter_lowest_max": 0.516,
+ "lung_bary_end_batch": 0.466,
+ "lung_bary_end_bio": 0.397,
+ "lung_plain_batch": 0.633,
+ "lung_plain_bio": 0.722,
+ "atac_large_bary_max_batch": 0.674,
+ "atac_large_others_max_batch_min": 0.683,
+ "atac_large_others_max_batch_max": 0.834,
+ "pancreas_uncond_penalties_both_up": 6,
+ "n_penalties": 6
+}
