@@ -107,6 +107,7 @@ Committed copy of the outputs with checksums: `docs/biology_check/` (`MANIFEST.s
 ### 5.6 Figures, supplement tables and paper text (branch paper; Python of the paper-tools environment)
 ```
 python paper/tools/pareto_frontier.py             # Pass 23: Pareto frontier and hypervolume up to b_common (inputs of Figure 4 and Table S8)
+python paper/tools/collapse_common_range.py       # Pass 23: collapse rate up to b_common, rebuilt per fit from metric_scores.csv (Figure 5a, Table S8, Res-4)
 bash paper/figure_scripts/make_figures.sh          # Figures 1-7 from paper/figure_data (checks its MANIFEST.sha256 first)
 bash paper/figure_scripts/make_supp_figures.sh     # copies inputs from $D and sweep-paper, Figures S1-S6, Tables S6-S7
 python paper/tools/make_replication.py --check     # Table S9 and replication_numbers.json from sweep-replication a475ea3

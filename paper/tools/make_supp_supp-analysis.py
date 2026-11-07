@@ -4,6 +4,7 @@
 Inputs (paper/figure_data, checksums in its MANIFEST.sha256; sweep analysis of 2026-11-05, commit 8595a16):
   secondary.csv                          Table S8: hypervolume, non-dominated share, collapse counts and interval, failure types, good-strength window
   pareto_frontier.csv                    Table S8: hypervolume up to the highest common batch score (written by paper/tools/pareto_frontier.py, Pass 23)
+  collapse_common_range.csv              Table S8: collapse rate in the common batch range (written by paper/tools/collapse_common_range.py, Pass 23)
   ranking_pairs.csv, low_signal_pairs.csv  b*, local minus global at b* (the analysis record's value), ranked or low-signal pair
   metric_scores.csv                      local and global batch removal at b*, re-read from the per-fit metrics on the same curves and
                                          checked against the record's local minus global (stops on a difference above 1e-9)
@@ -87,22 +88,24 @@ def local_global(pairs):
 
 
 # ------------------------------------------------------------------ Table S8
-def row_s8(s, lg, hv1):
+def row_s8(s, lg, hv1, cc):
     nd = round(s.nondominated_share * s.nondominated_n)       # secondary.csv: nondominated_n is the number of points
     assert math.isclose(nd, s.nondominated_share * s.nondominated_n, abs_tol=1e-9)
     hv = "n/a" if pd.isna(s.hypervolume) else f3(s.hypervolume)
     assert pd.isna(s.hypervolume) == (hv1 is None), (s.task, s.cond, s.arm)
     hv = ("n/a" if hv1 is None else f3(hv1)) + " & " + hv
     ci = f"{100 * s.collapse_rate:.0f} ({100 * s.collapse_lo:.0f}--{100 * s.collapse_hi:.0f})"
+    assert s.diverged == s.nonfinite_latent == 0 and cc.n_all == s.collapse_n and cc.k_all == s.collapsed, (s.task, s.cond, s.arm)
+    cic = f"{int(cc.n_common)} & {100 * cc.rate_common:.0f} ({100 * cc.lo_common:.0f}--{100 * cc.hi_common:.0f})"
     assert s.window_status == "ok", (s.task, s.cond, s.arm)
     width = f"{s.window_width_decades:.1f}" + (r"$^\ast$" if s.window_gap else "")
     loc, glo = lg
     return (f"{PEN_LABEL[s.arm]} & {hv} & {nd}/{int(s.nondominated_n)} & {int(s.collapse_n)} & {ci} & "
-            f"{int(s.diverged)}/{int(s.nonfinite_latent)} & {lam(s.window_best)} & {width} & {int(s.window_n_points)} & "
+            f"{cic} & {lam(s.window_best)} & {width} & {int(s.window_n_points)} & "
             f"{f3(loc)} & {f3(glo)} & {fs(loc - glo)} \\\\")
 
 
-def blocks_s8(sec, pairs, lg, tasks, hv1):
+def blocks_s8(sec, pairs, lg, tasks, hv1, cc):
     lines = []
     for cond in (1, 0):
         for t in tasks:
@@ -110,10 +113,10 @@ def blocks_s8(sec, pairs, lg, tasks, hv1):
             if p.empty:
                 continue
             assert len(p) == 6 and set(p.arm) == set(PEN), (t, cond)
-            lines += [r"\midrule", rf"\multicolumn{{13}}{{@{{}}l}}{{\textit{{{TASK_LABEL[t]}, {DEC_LABEL[cond]} decoder; "
+            lines += [r"\midrule", rf"\multicolumn{{14}}{{@{{}}l}}{{\textit{{{TASK_LABEL[t]}, {DEC_LABEL[cond]} decoder; "
                                     rf"$b^*={f3(p.bstar.iloc[0])}$}}}} \\"]
             g = sec[(sec.task == t) & (sec.cond == cond)]
-            lines += [row_s8(g[g.arm == a].iloc[0], lg[(t, cond, a)], hv1.get((t, cond, a))) for a in PEN]
+            lines += [row_s8(g[g.arm == a].iloc[0], lg[(t, cond, a)], hv1.get((t, cond, a)), cc.loc[(t, cond, a)]) for a in PEN]
     return "\n".join(lines)
 
 
@@ -125,6 +128,8 @@ def make_s8():
     pf = read("pareto_frontier.csv")  # paper/tools/pareto_frontier.py (Pass 23): hypervolume up to b_common
     hv1 = {(r.task, r.cond, r.arm): r.hypervolume_to_common for r in pf.itertuples()}
     assert len(hv1) == sec.hypervolume.notna().sum()
+    cc = read("collapse_common_range.csv").set_index(["task", "cond", "arm"])  # paper/tools/collapse_common_range.py (Pass 23)
+    assert len(cc) == len(sec)
     n_gap, n_fail = int(sec.window_gap.sum()), int((sec.diverged + sec.nonfinite_latent).sum())
     counts = sorted(sec.collapse_n.unique())
     cap = (r"Secondary results per penalty, task and decoder (definitions in Supplementary Note 7; all descriptive). "
@@ -132,26 +137,28 @@ def make_s8():
            r"by the penalty's sweep points beyond the reference point (plain scVI's batch score, plain scVI's biology score minus 0.10), "
            r"with batch scores above the highest common batch score counted at it, divided by the batch gap that sets $b^*$; HV$_{\mathrm{all}}$: "
            r"the same without that cap, so that batch removal beyond the highest common batch score adds area; n/a in low-signal pairs. Non-dom.: strengths that no other strength of the penalty beats on both scores, of all its strengths. "
-           rf"Collapse: number of fits $n$ ({', '.join(str(int(c)) for c in counts[:-1])} or {int(counts[-1])}: all strengths times three seeds) and the "
+           rf"Coll.\ all: number of fits $n$ ({', '.join(str(int(c)) for c in counts[:-1])} or {int(counts[-1])}: all strengths times three seeds) and the "
            r"percentage that failed or lost 0.10 or more biology against the same seed's plain scVI, with the exact (Clopper--Pearson) 95\% "
-           r"interval, which is nominal because the fits of one seed share one threshold. Failed: diverged and non-finite-latent fits "
-           rf"({n_fail} in all). Best: the strength with the highest mean selection score; Width: decades spanned by the strengths whose mean "
+           r"interval, which is nominal because the fits of one seed share one threshold; "
+           rf"{n_fail} fits diverged or had a non-finite latent, so every collapse is a loss of biology. $n_{{\mathrm{{c}}}}$ and Coll.\ common: "
+           r"the same for the fits at strengths whose mean batch score is at most the highest common batch score (the range of Figure 4 "
+           r"and of the main-text collapse rate, Figure 5a). Best: the strength with the highest mean selection score; Width: decades spanned by the strengths whose mean "
            r"selection score is at least the lower end of the best strength's 95\% $t$ interval; $^\ast$ a strength inside that span falls "
            rf"below the bound ({n_gap} windows); Good: number of such strengths. Local and global: mean of the three neighbourhood metrics "
            r"(iLISI, kBET, graph connectivity) and of the two whole-embedding metrics (principal-component regression, batch ASW) read at the "
            r"first crossing of $b^*$ with the same interpolation as the biology reading; since $3\,\mathrm{local}+2\,\mathrm{global}=5b^*$ there, "
            r"local $=b^*+0.4\,(\mathrm{L}-\mathrm{G})$. \textbf{Part B}: low-signal pairs, shown for completeness and left out of every "
            r"summary that uses $b^*$ (Supplementary Note 5).")
-    head = (r"\toprule Penalty & HV & HV$_{\mathrm{all}}$ & Non-dom. & $n$ & Collapse \% (95\% CI) & Failed & Best & Width & Good & Local & Global & L$-$G \\")
+    head = (r"\toprule Penalty & HV & HV$_{\mathrm{all}}$ & Non-dom. & $n$ & Coll.\ all \% (95\% CI) & $n_{\mathrm{c}}$ & Coll.\ common \% (95\% CI) & Best & Width & Good & Local & Global & L$-$G \\")
     tex = [r"% generated by paper/tools/make_supp_supp-analysis.py; do not edit",
            r"{\scriptsize\renewcommand{\tablename}{Supplementary Table}\renewcommand{\thetable}{S8}%",
            r"\setlength{\tabcolsep}{3pt}\setlength{\LTcapwidth}{\textwidth}",
-           r"\begin{longtable}{@{}lrrrrrrrrrrrr@{}}",
+           r"\begin{longtable}{@{}lrrrrrrrrrrrrr@{}}",
            rf"\caption{{{cap}}}\label{{tab:s8}}\\", head, r"\midrule", r"\endfirsthead",
-           head.replace(r"\toprule", r"\toprule\multicolumn{13}{@{}l}{\textit{Supplementary Table S8, continued}} \\" + "\n"),
+           head.replace(r"\toprule", r"\toprule\multicolumn{14}{@{}l}{\textit{Supplementary Table S8, continued}} \\" + "\n"),
            r"\endhead",
-           r"\multicolumn{13}{@{}l}{\textbf{Part A: ranked pairs}} \\", blocks_s8(sec, rk, lg, REAL + SIMS, hv1),
-           r"\midrule", r"\multicolumn{13}{@{}l}{\textbf{Part B: low-signal pairs (not ranked)}} \\", blocks_s8(sec, low, lg, REAL + SIMS, hv1),
+           r"\multicolumn{14}{@{}l}{\textbf{Part A: ranked pairs}} \\", blocks_s8(sec, rk, lg, REAL + SIMS, hv1, cc),
+           r"\midrule", r"\multicolumn{14}{@{}l}{\textbf{Part B: low-signal pairs (not ranked)}} \\", blocks_s8(sec, low, lg, REAL + SIMS, hv1, cc),
            r"\\ \bottomrule", r"\end{longtable}}",
            r"\addtocounter{table}{-1}% the caption stepped the main table counter; S8 is numbered by hand"]
     (OUT / "tableS8.tex").write_text("\n".join(tex) + "\n")

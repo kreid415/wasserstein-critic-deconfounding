@@ -355,10 +355,6 @@ def add_pareto(s):
     assert s.count(anchor) == 1
     s = s.replace(anchor, anchor + rf"\pp{{\added[id={T}]{{Res-3b}}}}{{\added[id={T}]{{{head}}}}}" + "\n"
                   + rf"\added[id={T}]{{{body}}}" + "\n\n" + FIG4.replace("CAPTION", rf"\added[id={T}]{{{cap}}}"))
-    hv = [l for l in s.split("\n") if accept(l).startswith("The secondary summaries varied across real tasks")]
-    assert len(hv) == 1
-    hv_sent = re.search(r"Hypervolume ranges with the batch-conditioned and unconditioned decoders.*?Sinkhorn divergence "
-                        r"[0-9.]+--[0-9.]+ and [0-9.]+--[0-9.]+\. ", accept(hv[0])).group(0)
     lines = [  # (line start, [(old, new)]) on accepted text, tracked
         (r"\qquad For each penalty we also report",
          [("plane that a penalty's sweep points reach beyond a reference point at plain scVI's batch score and 0.10 below its biology "
@@ -368,14 +364,6 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\pp{Res-4}{", [("Hypervolume, share of non-dominated strengths and collapse rate give three further views of each penalty "
-                           "(Figure 4a,b, Supplementary Table S8).",
-                           "The share of non-dominated strengths and the collapse rate give two further views of each penalty "
-                           "(Figure 5a, Supplementary Table S8).")]),
-        ("The secondary summaries varied across real tasks",
-         [("(Figure 4; Supplementary Table S8;", "(Figure 5a; Supplementary Table S8;"), (hv_sent, ""),
-          ("The corresponding ranges of the share of non-dominated strengths were",
-           "Ranges of the share of non-dominated strengths with the batch-conditioned and unconditioned decoders, respectively, were")]),
         (r"\pp{Res-5}{", [("(Figure 4c;", "(Figure 5b;")]),
         ("At $b^*$, every penalty had more global than local", [("(Figure 4c;", "(Figure 5b;")]),
         (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
@@ -393,8 +381,10 @@ def add_pareto(s):
            "the batch-conditioned decoder, so that point is absent and the mean is over five tasks. (b) Collapse rate", " (a) Collapse rate"),
           ("(c) Local minus global", "(b) Local minus global")]),
     ]
-    for start, pairs in lines:
-        s = tracked_line(s, start, pairs)
+    extra = collapse_edits(s)
+    for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
+        s = tracked_line(s, start, pairs + extra.pop(start, []))
+    assert not extra
     item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
     assert len(item5) == 1
     s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
@@ -436,6 +426,100 @@ def add_pareto(s):
     return s
 
 
+def collapse_text(cc):
+    """Res-4 heading and paragraph: collapse rate in the common batch range (figure_data/collapse_common_range.json)."""
+    pc = lambda v: f"{100 * v:.0f}"
+    lab = dict(NAMES)
+    med = {c: sorted(((cc[f"cond{c}.{a}"]["median"], a) for a, _ in NAMES), key=lambda x: -x[0]) for c in (0, 1)}
+    def listing(c):
+        nz = [f"{pc(v)}\\% for {lab[a]}" for v, a in med[c] if v > 0]
+        z = [a for v, a in med[c] if v == 0]
+        return ", ".join(nz[:-1]) + (" and " if not z else ", ") + nz[-1] + (f" and 0\\% for the other {len(z)}" if z else "")
+    lst0 = listing(0).replace("the other 3", "the other three")
+    d = cc["cond1.discriminator"]
+    assert max(cc[f"cond1.{a}"]["max"] for a, _ in NAMES) == d["max"] and d["max_tasks"] == ["immune_hum_mou"]
+    assert all(cc[f"cond1.{a}"]["max_tasks"] == ["atac_small"] for a, _ in NAMES if a != "discriminator")
+    assert cc["cond0.barycenter"]["k_beyond"] == cc["cond1.barycenter"]["k_beyond"] == 0
+    head = (r"The collapse rate counts how often a penalty's fits lose 0.10 or more biology (Figure 5a; the share of "
+            r"non-dominated strengths is in Supplementary Table S8).")
+    body = (r"We count the fits at strengths whose mean batch score is at most the highest common batch score, the range of "
+            r"Figure 4; rates over all strengths are in Supplementary Table S8 (Methods). With the batch-conditioned decoder, the "
+            rf"median collapse rate over the six real tasks was {listing(1)}; with the unconditioned decoder it was {lst0}. The "
+            rf"highest rate with the batch-conditioned decoder was the discriminator's, {pc(d['max'])}\% ({pc(d['max_lo'])}\%--"
+            rf"{pc(d['max_hi'])}\%, nominal 95\% interval) on the human--mouse immune task; the other five penalties peaked on the "
+            rf"small chromatin-accessibility task. MMD collapsed less often than the discriminator on "
+            rf"{cc['cond1_mmd_below_discriminator']} of the {cc['cond1_n_tasks']} real tasks with that decoder, although it ranked "
+            rf"above the discriminator at $b^*$ on only {cc['cond1_mmd_ranked_above_discriminator']} of the {cc['cond1_n_ranked']} "
+            r"ranked tasks. Every collapse was a loss of biology; no fit failed. Over all strengths, "
+            rf"{d['k_beyond']} of the discriminator's {d['k_all']} collapses with the batch-conditioned decoder and "
+            rf"{cc['cond0.discriminator']['k_beyond']} of {cc['cond0.discriminator']['k_all']} with the unconditioned decoder lay "
+            r"beyond the highest common batch score, against none of the barycenter critic's, whose strongest setting sets that "
+            r"score. These summaries include the low-signal immune pair.")
+    return head, body
+
+
+def collapse_edits(s):
+    """Pairs for the lines the collapse-rate change touches (user choice: main text in the common batch range)."""
+    cc = json.loads((ROOT / "paper/figure_data/collapse_common_range.json").read_text())
+    head, body = collapse_text(cc)
+    pc = lambda v: f"{100 * v:.0f}"
+    m, d = cc["cond1.mmd"], cc["cond1.discriminator"]
+    assert min(cc[f"cond1.{a}"]["max"] for a, _ in NAMES) == m["max"]
+    old_head = [accept(l) for l in s.split("\n") if accept(l).startswith(r"\pp{Res-4}{")]
+    old_body = [accept(l).strip() for l in s.split("\n") if accept(l).startswith("The secondary summaries varied across real tasks")]
+    assert len(old_head) == len(old_body) == 1
+    return {
+        r"\pp{Res-4}{": [(old_head[0][len(r"\pp{Res-4}{"):-1], head)],
+        "The secondary summaries varied across real tasks": [(old_body[0], body)],
+        r"\qquad For each penalty we also report": [
+            ("the collapse rate is the collapsed share of a penalty's fits in a task and decoder, with exact binomial",
+             "the collapse rate is the collapsed share of a penalty's fits in a task and decoder at strengths whose mean batch score "
+             "is at most the highest common batch score (the range of Figure 4; all strengths in Supplementary Table S8), with "
+             "exact binomial")],
+        r"\caption{Secondary summaries per penalty": [
+            ("black tick, mean over tasks.", "black tick, median over tasks."),
+            ("(a) Collapse rate in percentage points with nominal 95\\% intervals (lower is better); the mean includes",
+             "(a) Collapse rate up to the highest common batch score, in percentage points, with nominal 95\\% intervals (lower is "
+             "better); the median includes"),
+            ("positive means stronger local removal; the mean excludes", "positive means stronger local removal; the median excludes")],
+        r"\item Figure 4:": [("one point per real task and the mean:", "one point per real task and the median:"),
+                             ("(a) collapse rate with 95\\% intervals", "(a) collapse rate up to the highest common batch score with "
+                              "95\\% intervals")],
+        r"\item With the batch-conditioned decoder, the largest collapse rate": [
+            ("With the batch-conditioned decoder, the largest collapse rate on a real task ranged from 27\\% (12\\%--46\\%) for MMD "
+             "to 73\\% (54\\%--88\\%) for the discriminator",
+             "Up to the highest common batch score, collapse rates with the batch-conditioned decoder peaked at "
+             f"{pc(m['max'])}\\% ({pc(m['max_lo'])}\\%--{pc(m['max_hi'])}\\%) for MMD and {pc(d['max'])}\\% "
+             f"({pc(d['max_lo'])}\\%--{pc(d['max_hi'])}\\%) for the discriminator")],
+        r"\item The collapse-rate intervals are nominal": [
+            ("(30; 33 for the discriminator, the reference critic and the pooled critic on the immune task with the "
+             "batch-conditioned decoder, which have additional strengths; 36 where edge strengths were fitted)",
+             f"({cc['n_common_min']} to {cc['n_common_max']} up to the highest common batch score; over all strengths 30, 33 for "
+             "the discriminator, the reference critic and the pooled critic on the immune task with the batch-conditioned decoder, "
+             "which have additional strengths, and 36 where edge strengths were fitted)"),
+            ("it does not bound the coverage", "it covers only 30 and 36 fits and does not bound the coverage")],
+    }
+
+
+def collapse_supp():
+    """Supplementary Notes 7 and 10 for the common-range collapse rate (after add_pareto, which writes Note 10 item g)."""
+    cc = json.loads((ROOT / "paper/figure_data/collapse_common_range.json").read_text())
+    edit("paper/supp/note7.tex", [
+        ("Each rate has an exact binomial (Clopper--Pearson) 95\\% interval.",
+         "Each rate has an exact binomial (Clopper--Pearson) 95\\% interval. The main text and Figure 5a count only the fits at "
+         r"strengths whose mean batch score over the three seeds is at most $b_{\mathrm{common}}$, the range of Figure 4 "
+         rf"({cc['n_common_min']} to {cc['n_common_max']} fits per real task and decoder pair), because many collapses lie beyond "
+         r"it at strengths that only some penalties reach; Supplementary Table S8 gives the rate over all strengths beside it. "
+         r"This restriction was chosen after all scores had been read (Supplementary Note 10)."),
+        ("because the collapse rate does not use $b^*$.",
+         r"because the collapse rate does not use $b^*$ (the common range uses $b_{\mathrm{common}}$, which every pair has).")])
+    edit("paper/supp/note10.tex", [
+        ("the uncapped hypervolume is reported beside it (Supplementary Table S8).",
+         "the uncapped hypervolume is reported beside it (Supplementary Table S8); (h) the restriction of the main-text collapse "
+         "rate to the same range, chosen on 7 November 2026 after all collapse rates had been read; the rate over all strengths "
+         "is reported beside it (Supplementary Table S8).")])
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
@@ -448,6 +532,7 @@ def main():
     s = move_tables(s)
     s = move_figure3(s)
     s = add_pareto(s)
+    collapse_supp()
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

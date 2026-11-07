@@ -28,6 +28,7 @@ Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
 | File | Script | Used by |
 |---|---|---|
 | pareto_frontier.csv, pareto_frontier_median.csv, pareto_frontier.json | pareto_frontier.py (from curves.csv, paper_numbers.json, secondary.csv; checks that the uncapped hypervolume reproduces secondary.csv) | Figure 4, Supplementary Table S8 (HV, HV_all), Res-3b, Supplementary Note 7 |
+| collapse_common_range.csv, collapse_common_range.json | collapse_common_range.py (from metric_scores.csv, curves.csv, paper_numbers.json, secondary.csv, ranking_pairs.csv; checks that the per-fit rebuild reproduces the collapse counts of secondary.csv) | Figure 5a, Supplementary Table S8 (Coll. common), Res-4, abstract, Supplementary Note 7 |
 | res2_seed_noise.json | res2_seed_noise.py | Res-2 |
 | replication_mean_ranks.json | replication_mean_ranks.py | Supplementary Note 13, Res-2b |
 | res3_curve_numbers.json | res3_curve_numbers.py | Res-3 |

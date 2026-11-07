@@ -1,0 +1,145 @@
+{
+ "cond0.barycenter": {
+  "median": 0.2,
+  "max": 0.3,
+  "max_lo": 0.147,
+  "max_hi": 0.494,
+  "max_tasks": [
+   "atac_large"
+  ],
+  "k_beyond": 0,
+  "k_all": 35
+ },
+ "cond0.discriminator": {
+  "median": 0.111,
+  "max": 0.333,
+  "max_lo": 0.118,
+  "max_hi": 0.616,
+  "max_tasks": [
+   "immune_hum_mou"
+  ],
+  "k_beyond": 47,
+  "k_all": 59
+ },
+ "cond0.mmd": {
+  "median": 0.0,
+  "max": 0.0,
+  "max_lo": 0.0,
+  "max_hi": 0.218,
+  "max_tasks": [
+   "atac_large",
+   "atac_small",
+   "immune",
+   "immune_hum_mou",
+   "lung",
+   "pancreas"
+  ],
+  "k_beyond": 9,
+  "k_all": 9
+ },
+ "cond0.pooled": {
+  "median": 0.0,
+  "max": 0.222,
+  "max_lo": 0.028,
+  "max_hi": 0.6,
+  "max_tasks": [
+   "immune_hum_mou"
+  ],
+  "k_beyond": 31,
+  "k_all": 36
+ },
+ "cond0.reference": {
+  "median": 0.097,
+  "max": 0.333,
+  "max_lo": 0.075,
+  "max_hi": 0.701,
+  "max_tasks": [
+   "atac_large"
+  ],
+  "k_beyond": 27,
+  "k_all": 37
+ },
+ "cond0.sinkhorn": {
+  "median": 0.0,
+  "max": 0.143,
+  "max_lo": 0.03,
+  "max_hi": 0.363,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 12,
+  "k_all": 15
+ },
+ "cond1.barycenter": {
+  "median": 0.233,
+  "max": 0.333,
+  "max_lo": 0.173,
+  "max_hi": 0.528,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 0,
+  "k_all": 39
+ },
+ "cond1.discriminator": {
+  "median": 0.342,
+  "max": 0.556,
+  "max_lo": 0.308,
+  "max_hi": 0.785,
+  "max_tasks": [
+   "immune_hum_mou"
+  ],
+  "k_beyond": 67,
+  "k_all": 91
+ },
+ "cond1.mmd": {
+  "median": 0.028,
+  "max": 0.095,
+  "max_lo": 0.012,
+  "max_hi": 0.304,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 6,
+  "k_all": 11
+ },
+ "cond1.pooled": {
+  "median": 0.206,
+  "max": 0.429,
+  "max_lo": 0.218,
+  "max_hi": 0.66,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 29,
+  "k_all": 52
+ },
+ "cond1.reference": {
+  "median": 0.111,
+  "max": 0.542,
+  "max_lo": 0.328,
+  "max_hi": 0.744,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 17,
+  "k_all": 39
+ },
+ "cond1.sinkhorn": {
+  "median": 0.242,
+  "max": 0.424,
+  "max_lo": 0.255,
+  "max_hi": 0.608,
+  "max_tasks": [
+   "atac_small"
+  ],
+  "k_beyond": 1,
+  "k_all": 51
+ },
+ "cond1_mmd_below_discriminator": 5,
+ "cond1_n_tasks": 6,
+ "cond1_mmd_ranked_above_discriminator": 3,
+ "cond1_n_ranked": 5,
+ "n_common_min": 6,
+ "n_common_max": 33
+}
