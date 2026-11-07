@@ -20,6 +20,7 @@ line must occur exactly once or the script stops.
 Run from the repository root:  python paper/tools/pass23_edits.py   (PASS23_ROOT overrides the root of the edited files)
 Then: python paper/tools/accept_changes.py ; python paper/tools/check_ledger.py"""
 import difflib
+import re
 import json
 import os
 import sys
@@ -295,6 +296,146 @@ def move_figure3(s):
     return s
 
 
+def pareto_text(pf):
+    """Res-3b paragraph and Figure 4 caption, numbers from figure_data/pareto_frontier.json (paper/tools/pareto_frontier.py)."""
+    f = lambda v: f"{v:.3f}"
+    d = pf["text"]
+    n = pf["n_real_pairs"]
+    assert pf["n_pairs_barycenter_reach_1"] == n and set(pf["n_pairs_reach_beyond_1"].values()) == {0, n}
+    assert [a for a, v in pf["n_pairs_reach_beyond_1"].items() if v == 0] == ["barycenter"]
+    head = r"Each penalty's Pareto frontier gives the most biology it kept at each level of batch removal (Figure 4)."
+    body = (r"We scaled batch removal per task and decoder so that 0 is plain scVI, 0.5 is $b^*$ and 1 is the highest batch score "
+            r"every penalty reaches, and took at each level the best biology among a penalty's strengths at that level or beyond "
+            rf"(Methods). Up to $b^*$, the median frontier over the ranked real tasks stayed within {f(pf['max_abs_front_up_to_bstar'])} "
+            r"of plain scVI's biology for every penalty and decoder (Figure 4a,b). At the highest common batch score, the "
+            rf"discriminator's median frontier with the batch-conditioned decoder was {f(d['drop_at_common_cond1_discriminator'])} below plain scVI, "
+            rf"against {f(d['drop_at_common_cond1_others_min'])}--{f(d['drop_at_common_cond1_others_max'])} for the other penalties; with the unconditioned decoder, the six frontiers "
+            rf"ended {f(d['drop_at_common_cond0_min'])}--{f(d['drop_at_common_cond0_max'])} below. The hypervolume up to that level, the area under a "
+            r"task's frontier above 0.10 below plain scVI's biology (0.10 when plain scVI's biology is kept throughout), had medians of "
+            rf"{f(pf['hv_median_others_min'])}--{f(pf['hv_median_others_max'])} for every penalty and decoder except the discriminator "
+            rf"with the batch-conditioned decoder, {f(pf['cond1.discriminator']['hv_median'])} (Figure 4c,d; Supplementary Table S8). "
+            rf"The barycenter critic's batch removal ended at the highest common batch score in all {n} ranked pairs, so it set that "
+            rf"level, whereas every other penalty reached beyond it in all {n} (Supplementary Note 7). Each frontier takes the best "
+            r"strength at each level after scoring, so it is optimistic, and differences of the size seen at $b^*$ were often within "
+            r"the leave-one-seed-out standard error (Res-2).")
+    cap = (rf"Pareto frontier of each penalty over the ranked real tasks ({pf['n_tasks']['1']} with the batch-conditioned decoder, a "
+           rf"and c; {pf['n_tasks']['0']} with the unconditioned decoder, b and d; the low-signal immune pair is excluded). Batch "
+           r"removal is scaled per task so that 0 is plain scVI, 0.5 is matched batch removal $b^*$ (dashed line) and 1 is the highest "
+           r"batch score every penalty reaches. (a, b) Best biology score reachable at each level or beyond, minus plain scVI's, "
+           r"median over tasks, from seed means over three seeds. (c, d) Hypervolume up to the highest common batch score, the area "
+           r"under each task's frontier above 0.10 below plain scVI's biology (higher is better; dashed line, 0.10, plain scVI's "
+           r"biology kept throughout); dots, tasks; black tick, median. The frontiers are assembled after scoring and are optimistic.")
+    return head, body, cap
+
+
+FIG4 = """% ---------------------------------------------------------------- Figure 4 (Pass 23: Pareto frontier)
+\\begin{figure}[!htbp]
+\\centering
+\\includegraphics[width=\\textwidth]{figures/fig4.png}
+\\caption{CAPTION}
+\\label{fig:4}
+\\end{figure}
+
+"""
+
+
+def add_pareto(s):
+    """New main Figure 4, the Pareto frontier with its hypervolume (user choice, version A: hypervolume capped at b_common);
+    the old Figures 4-6 become Figures 5-7 and the old Figure 4 loses its hypervolume panel (rule SI-115, no repeats)."""
+    pf = json.loads((ROOT / "paper/figure_data/pareto_frontier.json").read_text())
+    head, body, cap = pareto_text(pf)
+    T = p22.TAG
+    # figure files and labels (untracked: not printed)
+    for old, new in [("6", "7"), ("5", "6"), ("4", "5")]:
+        for a, b in [(f"{{figures/fig{old}.png}}", f"{{figures/fig{new}.png}}"), (f"\\label{{fig:{old}}}", f"\\label{{fig:{new}}}"),
+                     (f"{MARK}Figure {old}\n", f"{MARK}Figure {new}\n")]:
+            assert s.count(a) == 1, a
+            s = s.replace(a, b)
+    anchor = "\\label{fig:3}\n\\end{figure}\n\n"
+    assert s.count(anchor) == 1
+    s = s.replace(anchor, anchor + rf"\pp{{\added[id={T}]{{Res-3b}}}}{{\added[id={T}]{{{head}}}}}" + "\n"
+                  + rf"\added[id={T}]{{{body}}}" + "\n\n" + FIG4.replace("CAPTION", rf"\added[id={T}]{{{cap}}}"))
+    hv = [l for l in s.split("\n") if accept(l).startswith("The secondary summaries varied across real tasks")]
+    assert len(hv) == 1
+    hv_sent = re.search(r"Hypervolume ranges with the batch-conditioned and unconditioned decoders.*?Sinkhorn divergence "
+                        r"[0-9.]+--[0-9.]+ and [0-9.]+--[0-9.]+\. ", accept(hv[0])).group(0)
+    lines = [  # (line start, [(old, new)]) on accepted text, tracked
+        (r"\qquad For each penalty we also report",
+         [("plane that a penalty's sweep points reach beyond a reference point at plain scVI's batch score and 0.10 below its biology "
+           "score, divided by the batch gap that sets $b^*$ so that tasks share one scale.",
+           "plane that a penalty's sweep points reach beyond a reference point at plain scVI's batch score and 0.10 below its biology "
+           "score, with batch scores above the highest common batch score counted at it so that every penalty is measured over the "
+           "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
+           "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
+           "values in Supplementary Table S8).")]),
+        (r"\pp{Res-4}{", [("Hypervolume, share of non-dominated strengths and collapse rate give three further views of each penalty "
+                           "(Figure 4a,b, Supplementary Table S8).",
+                           "The share of non-dominated strengths and the collapse rate give two further views of each penalty "
+                           "(Figure 5a, Supplementary Table S8).")]),
+        ("The secondary summaries varied across real tasks",
+         [("(Figure 4; Supplementary Table S8;", "(Figure 5a; Supplementary Table S8;"), (hv_sent, ""),
+          ("The corresponding ranges of the share of non-dominated strengths were",
+           "Ranges of the share of non-dominated strengths with the batch-conditioned and unconditioned decoders, respectively, were")]),
+        (r"\pp{Res-5}{", [("(Figure 4c;", "(Figure 5b;")]),
+        ("At $b^*$, every penalty had more global than local", [("(Figure 4c;", "(Figure 5b;")]),
+        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
+        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
+        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 7b;")]),
+        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 7a;")]),
+        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 7a)")]),
+        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 7a.")]),
+        (r"\item Figure 6:", [("Figure 6:", "Figure 7:")]),
+        (r"\item Figure 5:", [("Figure 5:", "Figure 6:")]),
+        (r"\item Figure 4:", [("Figure 4:", "Figure 5:"), ("(a) hypervolume; (b) collapse rate", "(a) collapse rate"),
+                              ("(c) local minus global", "(b) local minus global")]),
+        (r"\caption{Secondary summaries per penalty",
+         [(" (a) Hypervolume of the strength curve (higher is better); it is not evaluable (n.e.) for the low-signal immune pair with "
+           "the batch-conditioned decoder, so that point is absent and the mean is over five tasks. (b) Collapse rate", " (a) Collapse rate"),
+          ("(c) Local minus global", "(b) Local minus global")]),
+    ]
+    for start, pairs in lines:
+        s = tracked_line(s, start, pairs)
+    item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
+    assert len(item5) == 1
+    s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
+                  r"ranked real tasks of the best biology reachable at each scaled batch level, and the hypervolume up to the highest "
+                  "common batch score per task.}\n" + item5[0], 1)
+    w = r"\replaced[id=P9]{\replaced[id=P11]{Figures 1--6 are drawn from the sweep analysis"
+    assert s.count(w) == 1
+    i = s.index(w) + len(r"\replaced[id=P9]")
+    j = group(s, i)[1]
+    j = group(s, j)[1]  # end of the outer \replaced's second argument
+    s = s[:j] + rf"\added[id={T}]{{ Figure 4, the Pareto frontier, was added in Pass 23, so Figures 1--7 are drawn from the sweep " \
+        "analysis.}" + s[j:]
+    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 7a. Every")])
+    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~7). \\textbf{(a)}")])
+    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~7). \textbf{(a)}")])
+    edit("paper/supp/note7.tex", [
+        ("left out of the means of Figure 4c.", "left out of the means of Figure 5b."),
+        ("(Figure 6a; per-task", "(Figure 7a; per-task"),
+        ("The hypervolume is reported per penalty, task and decoder; the analysis record also holds it with the reference point at "
+         "biology 0, a sensitivity analysis not used in the paper.",
+         "The paper reports the hypervolume up to the highest common batch score: each point's batch score is capped at "
+         r"$b_{\mathrm{common}}$ before the rectangles are formed, so that every penalty is measured over the same batch range, from "
+         r"plain scVI to the highest batch score all six reach. In the scaled batch $x=(B-b_0)/(b_{\mathrm{common}}-b_0)$ it is the "
+         r"area from $x=0$ to 1 under the penalty's Pareto frontier, the highest biology score minus plain scVI's among its "
+         r"strengths with scaled batch at least $x$, above $-0.10$; a penalty that keeps plain scVI's biology throughout scores 0.10 "
+         r"(Figure 4, which shows the median frontier over the ranked real tasks). Without the cap, the hypervolume over all "
+         r"strengths (HV$_{\mathrm{all}}$ in Supplementary Table S8) also counts batch removal beyond $b_{\mathrm{common}}$; the "
+         rf"barycenter critic reaches $b_{{\mathrm{{common}}}}$ and no further in all {pf['n_real_pairs']} ranked real pairs, while "
+         r"every other penalty reaches beyond it, so the uncapped value favours the penalties that reach furthest. The cap was "
+         r"chosen after all scores had been read (Supplementary Note 10). Both values are reported per penalty, task and decoder; the "
+         r"analysis record also holds the uncapped value with the reference point at biology 0, a sensitivity analysis not used in "
+         r"the paper.")])
+    edit("paper/supp/note10.tex", [
+        ("(f) the hypervolume's name and the share of non-dominated strengths (2 November, above).",
+         "(f) the hypervolume's name and the share of non-dominated strengths (2 November, above); (g) the Pareto frontier of "
+         "Figure 4 and the cap of the hypervolume at the highest common batch score (Supplementary Note 7), chosen on 7 November "
+         "2026 after all sweep scores and the uncapped hypervolume had been read; the uncapped hypervolume is reported beside it "
+         "(Supplementary Table S8).")])
+    return s
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
@@ -306,6 +447,7 @@ def main():
     s = move_res2b(s)
     s = move_tables(s)
     s = move_figure3(s)
+    s = add_pareto(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

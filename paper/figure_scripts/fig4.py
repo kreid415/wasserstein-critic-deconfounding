@@ -1,10 +1,10 @@
-"""Figure 4: per-penalty dot plots, one point per real task (n = 6 per decoder) and the mean (black tick).
-(a) hypervolume; (b) collapse rate with nominal 95% intervals; (c) local minus global batch removal at b*.
-Within each penalty band: upper row batch-conditioned decoder (circles), lower row unconditioned decoder (squares);
-tasks run top to bottom in the order of Figure 3. Ringed point = the low-signal immune pair with the
-batch-conditioned decoder: kept in the mean in (b) (as in the Results text), excluded from the mean in (c);
-hypervolume is not evaluable (n.e.) for it, so it is absent from (a).
-Reads only figure_data/paper_numbers.json."""
+"""Figure 4 (Pass 23, new; user choice, version A): each penalty's Pareto frontier of batch removal against biology.
+(a, b) median over the ranked real tasks of the best biology reachable, minus plain scVI's, at batch removal x or beyond,
+with batch removal scaled per task as x = (B - b0) / (b_common - b0) (0 = plain scVI, 0.5 = b*, 1 = the highest batch score
+every penalty reaches); (c, d) hypervolume up to b_common per task (dots) and its median (tick): the area under that task's
+frontier from x = 0 to 1 above 0.10 below plain scVI. Batch-conditioned decoder (a, c), unconditioned decoder (b, d); the
+low-signal immune pair is excluded. Reads figure_data/pareto_frontier_median.csv and pareto_frontier.csv, written by
+paper/tools/pareto_frontier.py from curves.csv, paper_numbers.json and secondary.csv."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -12,66 +12,52 @@ from figcommon import *
 from matplotlib.lines import Line2D
 
 apply_style()
-pn = load_pn()
-LOW = {(t, c) for c in (0, 1) for t in pnv(pn, f"low_signal_tasks.cond{c}") if t in REAL_TASKS}
-assert LOW == {("immune", 1)}
+med = pd.read_csv(DATA / "pareto_frontier_median.csv")
+per = pd.read_csv(DATA / "pareto_frontier.csv")
+per = per[per.task.isin(REAL_TASKS)]
+n_tasks = med.groupby("cond").n_tasks.max()
+assert dict(n_tasks) == {0: 6, 1: 5} and set(per.groupby("cond").task.nunique()) == {5, 6}
 
-def val(kind, a, t, c):
-    return pnv(pn, f"{kind}.{a}.{t}.cond{c}")
-
-# checks against numbers quoted in the Results text (Pass 8 outline)
-hv = [val("hypervolume", "discriminator", t, 1) for t in REAL_TASKS if val("hypervolume", "discriminator", t, 1) is not None]
-assert (round(min(hv), 3), round(max(hv), 3)) == (0.029, 0.255)
-assert round(val("collapse_rate", "discriminator", "immune_hum_mou", 1), 2) == 0.73
-assert round(val("local_minus_global", "discriminator", "lung", 1), 3) == -0.356
-
-PANELS = [("hypervolume", "hypervolume", "higher = better", True),
-          ("collapse_rate", "collapse rate (percentage points)", "lower = better", True),
-          ("local_minus_global", "local minus global batch removal", "positive = stronger locally", False)]
-titles = ["hypervolume", "collapse rate, nominal 95% interval", r"local minus global removal at $b^{*}$"]
-fig, axes = plt.subplots(1, 3, figsize=(WIDTH_IN, 4.6), sharey=True,
-                         gridspec_kw=dict(wspace=0.08, left=0.125, right=0.995, top=0.92, bottom=0.2))
-off = np.linspace(-0.12, 0.12, 6)
-for ax, (kind, xlabel, cue, low_in_mean), title in zip(axes, PANELS, titles):
+fig = plt.figure(figsize=(WIDTH_IN, 5.0))
+gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1], hspace=0.55, wspace=0.08, left=0.13, right=0.98, top=0.93, bottom=0.16)
+top = [fig.add_subplot(gs[0, 0])]
+top.append(fig.add_subplot(gs[0, 1], sharey=top[0]))
+low = [fig.add_subplot(gs[1, 0])]
+low.append(fig.add_subplot(gs[1, 1], sharex=low[0], sharey=low[0]))
+for k, (ax, c) in enumerate(zip(top, COND_ORDER)):
+    for a in ARMS:
+        m = med[(med.cond == c) & (med.arm == a)]
+        ax.plot(m.x, m["median"], color=ARM_COLOR[a], lw=1.5, drawstyle="steps-post")
+    ax.axhline(0, color="#999999", lw=0.6, zorder=0)
+    ax.axvline(0.5, color="#444444", ls="--", lw=0.7, zorder=0)
+    ax.text(0.515, 0.97, r"$b^{*}$", transform=ax.get_xaxis_transform(), fontsize=7, va="top", color="#444444")
+    ax.set_xlim(0, 1)
+    ax.set_title(f"{COND_LABEL[c]} ({n_tasks[c]} ranked tasks)", loc="left", pad=3)
+    if k == 0:
+        ax.set_ylabel("best biology reachable\nminus plain scVI's (median)")
+    else:
+        ax.tick_params(labelleft=False)
+fig.text(0.555, top[0].get_position().y0 - 0.06, r"batch removal, scaled per task (0 = plain scVI, 0.5 = $b^{*}$, "
+         "1 = the highest batch score every penalty reaches)", ha="center", va="top", fontsize=7)
+for k, (ax, c) in enumerate(zip(low, COND_ORDER)):
     for i, a in enumerate(ARMS):
-        if i: ax.axhline(i - .5, color="#dddddd", lw=0.5, zorder=0)
-        for c, base, mk in ((1, -0.22, "o"), (0, 0.22, "s")):
-            ys, xs = [], []
-            for j, t in enumerate(REAL_TASKS):
-                y = i + base + off[j]
-                x = val(kind, a, t, c)
-                if x is None:  # hypervolume is null (not evaluable, n.e.) in low-signal pairs
-                    assert kind == "hypervolume" and (t, c) in LOW
-                    ax.text(0.015, y, "n.e.", transform=ax.get_yaxis_transform(), fontsize=5.5, color=GREY, va="center", ha="left")
-                    continue
-                scale = 100 if kind == "collapse_rate" else 1
-                x *= scale
-                if kind == "collapse_rate":
-                    lo, hi = [v * 100 for v in val("collapse_ci", a, t, c)]
-                    ax.plot([lo, hi], [y, y], color=ARM_COLOR[a], lw=0.6, alpha=0.5, zorder=1)
-                ringed = (t, c) in LOW
-                ax.plot(x, y, mk, color=ARM_COLOR[a], ms=3.6, mec="black" if ringed else "white",
-                        mew=0.9 if ringed else 0.3, zorder=3)
-                if low_in_mean or not ringed:
-                    xs.append(x)
-            ax.plot([np.mean(xs)] * 2, [i + base - 0.15, i + base + 0.15], color="black", lw=1.6, zorder=4,
-                    solid_capstyle="butt")
-    ax.set_title(title, loc="left", pad=4, fontsize=7)  # Pass 13: 7 pt so that the longer panel (b) title clears the panel letter c
-    ax.set_xlabel(f"{xlabel}\n({cue})")
-    ax.margins(x=0.05)
-axes[0].set_ylim(5.5, -0.5)
-axes[0].set_yticks(range(6)); axes[0].set_yticklabels([ARM_LABEL[a] for a in ARMS])
-axes[0].tick_params(axis="y", length=0)
-for ax in axes[1:]: ax.tick_params(left=False)
-axes[1].set_xlim(-3, 103)
-axes[0].set_xlim(-0.075, 0.46)
-axes[0].spines["bottom"].set_bounds(0, 0.45)
-axes[0].set_xticks([0, 0.1, 0.2, 0.3, 0.4])
-axes[2].axvline(0, color="#444444", ls="--", lw=0.7, zorder=0)
-for ax, L in zip(axes, "abc"): panel_letter(ax, L, x=-0.02 if L != "a" else -0.02, y=1.04)
-h = [Line2D([], [], marker="o", color=GREY, lw=0, ms=4, label=COND_LABEL[1] + " (upper row)"),
-     Line2D([], [], marker="s", color=GREY, lw=0, ms=4, label=COND_LABEL[0] + " (lower row)"),
-     Line2D([], [], color="black", lw=1.6, label="mean over tasks"),
-     Line2D([], [], marker="o", mfc="none", color="white", mec="black", mew=0.8, lw=0, ms=7, label="low-signal immune pair")]
-fig.legend(handles=h, loc="lower center", ncol=4, bbox_to_anchor=(0.55, 0.0), columnspacing=1.2, handletextpad=0.3)
+        v = per[(per.cond == c) & (per.arm == a)].hypervolume_to_common
+        ax.scatter(v, [i] * len(v), s=14, color=ARM_COLOR[a], lw=0, zorder=3)
+        ax.plot([v.median()] * 2, [i - 0.3, i + 0.3], color="black", lw=1.6, zorder=4, solid_capstyle="butt")
+        if i:
+            ax.axhline(i - .5, color="#e6e6e6", lw=0.5, zorder=0)
+    ax.axvline(0.10, color="#999999", ls="--", lw=0.6, zorder=0)
+    ax.set_ylim(5.5, -0.5)
+    ax.set_yticks(range(6))
+    ax.set_yticklabels([ARM_LABEL[a] for a in ARMS])
+    ax.tick_params(left=False, labelleft=(k == 0))
+    ax.spines["left"].set_visible(False)
+    ax.set_xlim(0, 0.13)
+fig.text(0.555, low[0].get_position().y0 - 0.06, "hypervolume up to the highest common batch score (higher = better; "
+         "0.10 = plain scVI's biology kept throughout); dots, tasks; tick, median", ha="center", va="top", fontsize=7)
+for L, ax in zip("abcd", top + low):
+    p = ax.get_position()
+    fig.text(p.x0 - (0.1 if ax in (top[0], low[0]) else 0.03), p.y1 + 0.035, L, fontsize=10, fontweight="bold")
+fig.legend(handles=[Line2D([], [], color=ARM_COLOR[a], lw=1.8, label=ARM_LABEL[a]) for a in ARMS],
+           loc="lower center", ncol=6, bbox_to_anchor=(0.5, 0.0), frameon=False)
 check_and_save(fig, "fig4")

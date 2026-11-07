@@ -1,4 +1,4 @@
-# Inputs of Figures 1-6 (copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
+# Inputs of Figures 1-7 (copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
 
 | File | Source |
 |---|---|
@@ -22,3 +22,12 @@ Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
 | `metric_scores.csv` | `prep_supp_figure_data.py --only metrics` | the 3,480 score files listed in `inputs/scores_list.txt` (sha256 f0ad343ab7df...), joined to `inputs/manifest.tsv`; columns are the individual scIB metrics and the sha256 of the latent each row was scored from |
 | `label_transfer_types.csv` | `figure_scripts/prep_label_transfer_types.py` (scvi-api environment) | the saved latents of the 120 label-transfer rows (checked against the latent sha256 of each score row); the macro F1 recomputed from the per-type values equals `label_transfer.csv` for all 120 rows (1e-9) |
 | `scaling_check_ranks.csv` | `figure_scripts/figS5.py` via `scaling_checks.py` | `metric_scores.csv`; the unscaled reading reproduces the 78 readings and ranks of `ranking_pairs.csv` before any variant is run |
+
+## Derived in Pass 23 (written by scripts in `paper/tools/`, not copies; not in MANIFEST.sha256)
+
+| File | Script | Used by |
+|---|---|---|
+| pareto_frontier.csv, pareto_frontier_median.csv, pareto_frontier.json | pareto_frontier.py (from curves.csv, paper_numbers.json, secondary.csv; checks that the uncapped hypervolume reproduces secondary.csv) | Figure 4, Supplementary Table S8 (HV, HV_all), Res-3b, Supplementary Note 7 |
+| res2_seed_noise.json | res2_seed_noise.py | Res-2 |
+| replication_mean_ranks.json | replication_mean_ranks.py | Supplementary Note 13, Res-2b |
+| res3_curve_numbers.json | res3_curve_numbers.py | Res-3 |
