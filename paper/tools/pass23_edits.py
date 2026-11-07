@@ -6,8 +6,8 @@ decoder; the three worked examples of close readings become counts from paper/to
 Res-2b: the replication paragraph moves to a new Supplementary Note 13 (written by this script, with the replication mean
 ranks of paper/tools/replication_mean_ranks.py added); one paragraph stays in the Results. Abstract, Disc-1 and Conclusions: the sweep leaders stay and a clause says that
 the leaders changed on the replication's new seeds (user decision 2026-11-07).
-Table 2 (ranking) repeats Figure 2b and Supplementary Table S6, so it moves to Supplementary Table S12 (user rule: no
-repeated information in the main text); the label tab:3 moves with it. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+Main-text Tables 1-3 repeat main-text content (user rule SI-115: no repeated information in the main text), so they move to
+Supplementary Tables S13 (methods), S12 (ranking) and S14 (placement); each label moves with its table. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
@@ -127,8 +127,19 @@ def move_res2b(s):
     return s.replace(hd[0], accept(hd[0]).replace("Notes 1--12,", rf"Notes 1--\replaced[id={p22.TAG}]{{13}}{{12}},"))
 
 
-T2_START = "% ---------------------------------------------------------------- Table 3\n"
-T2_END = "% ---------------------------------------------------------------- Table 4\n"
+MARK = "% ---------------------------------------------------------------- "
+MOVES = [  # (start marker, next marker, label, supplementary number, word fixes, why it repeats)
+    ("Table 1\n", "Table 2 (removed in Pass 4)\n", "tab:1", "S13",
+     [("with the conditioned decoder", "with the batch-conditioned decoder", 1)],
+     "it repeated the Methods text, Figure 1a and Supplementary Table S2"),
+    ("Table 3\n", "Table 4\n", "tab:3", "S12",
+     [("& conditioned &", "& batch-conditioned &", 6), ("with the conditioned decoder (--)", "with the batch-conditioned decoder (--)", 1)],
+     "it repeated Figure 2b and Supplementary Table S6"),
+    ("Table 4\n", "Supplementary Table S10 (Pass 9)\n", "tab:4", "S14",
+     [("real task, conditioned decoder,", "real task, batch-conditioned decoder,", 1)],
+     "it repeated Figure 6b and the Res-7 counts"),
+]
+OLD_NUMBER = {"tab:1": 1, "tab:3": 2, "tab:4": 3}  # printed numbers before Pass 23
 
 
 def edit(path, pairs):
@@ -140,42 +151,96 @@ def edit(path, pairs):
     p.write_text(s)
 
 
-def move_table2(s):
-    """Main-text Table 2 (label tab:3, the ranking) repeats Figure 2b and Supplementary Table S6, so it moves to the
-    supplement as Supplementary Table S12; the label tab:3 moves with it, so every \\ref follows."""
-    i, j = s.index(T2_START), s.index(T2_END)
+def move_table(s, start, end, label, snum, fixes, why):
+    """Move one main-text table to the supplement as Supplementary Table <snum>; its label moves with it."""
+    i, j = s.index(MARK + start), s.index(MARK + end)
     block = s[i:j]
     b, e = block.index("\\begin{table}[t]"), block.index("\\end{table}") + len("\\end{table}")
     table = accept(block[b:e])
-    for old, new in [("& conditioned &", "& batch-conditioned &"), ("with the conditioned decoder (--)", "with the batch-conditioned decoder (--)")]:
-        assert old in table, old
+    for old, new, n in fixes:
+        assert table.count(old) == n, (old, table.count(old))
         table = table.replace(old, new)
-    assert table.count("\\caption{") == 1 and table.count("\\label{tab:3}") == 1
+    assert table.count("\\caption{") == 1 and table.count("\\label{%s}" % label) == 1
     table = table.replace("\\centering\\small\n", "\\centering\\scriptsize\\renewcommand{\\tablename}{Supplementary Table}"
-                          "\\renewcommand{\\thetable}{S12}%\n", 1)
-    assert "renewcommand{\\thetable}{S12}" in table
-    (ROOT / "paper/supp/tableS12.tex").write_text("% Supplementary Table S12: the main-text ranking table (former Table 2), moved by "
-                                                 "paper/tools/pass23_edits.py; values unchanged.\n" + table + "\n")
+                          "\\renewcommand{\\thetable}{%s}%%\n" % snum, 1)
+    assert "renewcommand{\\thetable}{%s}" % snum in table
+    (ROOT / f"paper/supp/table{snum}.tex").write_text(f"% Supplementary Table {snum}: the former main-text Table "
+                                                     f"{OLD_NUMBER[label]}, moved by paper/tools/pass23_edits.py; values unchanged.\n"
+                                                     + table + "\n")
     commented = "".join("%" + l + "\n" for l in block[b:e].split("\n"))
-    s = s[:i] + block[:b] + (f"\\noindent\\deleted[id={p22.TAG}]{{Table 2 (benchmark ranking) moved to Supplementary Table S12; it "
-                             "repeated Figure 2b and Supplementary Table S6.}\n") + commented + block[e:].lstrip("\n") + s[j:]
-    item_s10 = [l for l in s.split("\n") if l.startswith(r"\item \added[id=P9]{Table S10, direct biology check")]
+    note = (f"\\noindent\\deleted[id={p22.TAG}]{{Table {OLD_NUMBER[label]} moved to Supplementary Table {snum}; {why}.}}\n")
+    return s[:i] + block[:b] + note + commented + block[e:].lstrip("\n") + s[j:]
+
+
+def tracked_line(s, startswith, pairs):
+    """Rewrite the one line that (accepted) starts with `startswith`, applying `pairs` to its accepted text, as tracked changes."""
+    hits = [l for l in s.split("\n") if accept(l).startswith(startswith)]
+    assert len(hits) == 1, (startswith, len(hits))
+    new = accept(hits[0]).strip()
+    for old, rep in pairs:
+        assert new.count(old) == 1, (old, new.count(old))
+        new = new.replace(old, rep)
+    line = rewrite(hits[0], new)
+    assert " ".join(accept(line).split()) == " ".join(new.split())
+    return s.replace(hits[0], line, 1)
+
+
+def move_tables(s):
+    """Main-text Tables 1-3 repeat main-text content (user rule SI-115), so all three move to the supplement."""
+    for m in MOVES:
+        s = move_table(s, *m)
+    # references: the main text now has no tables
+    s = tracked_line(s, r"\qquad Each method adds a fixed penalty", [(r"(Table~\ref{tab:1})", r"(Supplementary Table~\ref{tab:1})")])
+    s = tracked_line(s, r"\pp{Res-7}", [(r"(Table \ref{tab:4}, Figure 6b)", r"(Figure 6b; Supplementary Table \ref{tab:4})")])
+    s = tracked_line(s, r"\item At the strength chosen on real tasks of other families",
+                     [(r"; Table \ref{tab:4})", r"; Supplementary Table \ref{tab:4})"),
+                      (r"which Table \ref{tab:4} prints", r"which Supplementary Table \ref{tab:4} prints")])
+    s = tracked_line(s, r"\noindent Every supplementary note and table listed here", [
+        ("Supplementary Notes 2--12 and", "Supplementary Notes 2--13 and"),
+        ("Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows "
+         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S6, follow "
+         "the main figures.")])
+    s = tracked_line(s, r"\item Table S7, single-strength placement",
+                     [(r"(the counterpart of Table~\ref{tab:4})", r"(the counterpart of Supplementary Table~\ref{tab:4})")])
+    s = tracked_line(s, r"\item Table S10, direct biology check", [(r"(typeset after Table~\ref{tab:4})", "(typeset after the main figures)")])
+    for start in (r"\item Table \ref{tab:1}:", r"\item Table \ref{tab:4}:"):  # list of main-text tables (tab:3 is struck in EDITS)
+        hits = [l for l in s.split("\n") if accept(l).startswith(start)]
+        assert len(hits) == 1, start
+        s = s.replace(hits[0], p22.rewrite(hits[0], None), 1)
+    item_s10 = [l for l in s.split("\n") if accept(l).startswith(r"\item Table S10, direct biology check")]
     assert len(item_s10) == 1
-    s = s.replace(item_s10[0], item_s10[0] + "\n" + rf"\item \added[id={p22.TAG}]{{Table S12, benchmark ranking (the former "
-                  "main-text Table 2): mean rank per penalty and decoder over the ranked real tasks, range over tasks, mean "
-                  "biology at $b^*$, simulation ranks, tasks not ranked and tasks ranked.}", 1)
+    s = s.replace(item_s10[0], item_s10[0] + "\n" + "\n".join(rf"\item \added[id={p22.TAG}]{{{t}}}" for t in [
+        "Table S12, benchmark ranking (the former main-text Table 2): mean rank per penalty and decoder over the ranked real "
+        "tasks, range over tasks, mean biology at $b^*$, simulation ranks, tasks not ranked and tasks ranked.",
+        "Table S13, alignment methods (the former main-text Table 1): alignment term, network, update steps, gradient penalty "
+        "and sweep strengths.",
+        "Table S14, single-strength placement with the batch-conditioned decoder (the former main-text Table 3): selection "
+        "score per method and real task at the strength chosen on other task families, with the task's own best in "
+        "parentheses."]), 1)
     hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
     assert len(hd) == 1 and hd[0].count("S4--S11,") == 1
-    s = s.replace(hd[0], hd[0].replace("S4--S11,", rf"S4--\replaced[id={p22.TAG}]{{S12}}{{S11}},"))
-    # the writer's note sits inside \\added[id=P12]{}; changes cannot nest, so it is amended in place (change log)
-    assert s.count('Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, Table \\ref{tab:3} the ranking and Table \\ref{tab:4} the placement table)') == 1
-    s = s.replace('Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, Table \\ref{tab:3} the ranking and Table \\ref{tab:4} the placement table)', 'Pass 13 numbers the main-text tables 1 to 3 (Table \\ref{tab:1} the methods, the ranking table, since Pass 23 Supplementary Table \\ref{tab:3}, and Table \\ref{tab:4} the placement table)')
-    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures", "Tables S6, S7, S9 and S12 and Figures"),
-                                  ("(Note 1, Tables S6, S7 and S9, Figures", "(Note 1, Tables S6, S7, S9 and S12, Figures"),
-                                  ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n\\clearpage\n\\input{supp/tableS12}\n")])
+    s = s.replace(hd[0], hd[0].replace("S4--S11,", rf"S4--\replaced[id={p22.TAG}]{{S14}}{{S11}},"))
+    # the writer's note sits inside \added[id=P12]{}; changes cannot nest, so it is amended in place (change log)
+    old_n = (r"Pass 13 numbers the main-text tables 1 to 3 (Table \ref{tab:1} the methods, Table \ref{tab:3} the ranking and "
+             r"Table \ref{tab:4} the placement table)")
+    assert s.count(old_n) == 1
+    s = s.replace(old_n, r"Pass 13 numbered the main-text tables 1 to 3 (the methods, the ranking and the placement table; since "
+                  r"Pass 23 they are Supplementary Tables \ref{tab:1}, \ref{tab:3} and \ref{tab:4})")
+    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures", "Tables S6, S7, S9 and S12-S14 and Figures"),
+                                  ("(Note 1, Tables S6, S7 and S9, Figures", "(Note 1, Tables S6, S7, S9 and S12--S14, Figures"),
+                                  ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n" + "".join(
+                                      f"\\clearpage\n\\input{{supp/table{n}}}\n" for n in ("S12", "S13", "S14")))])
     edit("paper/supp/tableS6.tex", [("Table~\\ref{tab:3} gives the mean ranks", "Supplementary Table~\\ref{tab:3} gives the mean ranks")])
     edit("paper/supp/note6.tex", [("(Table~\\ref{tab:3})", "(Supplementary Table~\\ref{tab:3})")])
-    edit("paper/tools/make_supp_tables.py", [(r"6; Table~\ref{{tab:3}} gives", r"6; Supplementary Table~\ref{{tab:3}} gives")])
+    edit("paper/supp/note8.tex", [("(Table~\\ref{tab:4} and Supplementary Table~S7)", "(Supplementary Tables~\\ref{tab:4} and S7)")])
+    edit("paper/supp/tableS7.tex", [("(counterpart of Table~\\ref{tab:4} and", "(counterpart of Supplementary Table~\\ref{tab:4} and"),
+                                    ("equal those of Table~\\ref{tab:4}.", "equal those of Supplementary Table~\\ref{tab:4}.")])
+    edit("paper/tools/make_supp_tables.py", [
+        (r"6; Table~\ref{{tab:3}} gives", r"6; Supplementary Table~\ref{{tab:3}} gives"),
+        (r"(counterpart of Table~\ref{tab:4} and", r"(counterpart of Supplementary Table~\ref{tab:4} and"),
+        (r"equal those of Table~\ref{tab:4}.", r"equal those of Supplementary Table~\ref{tab:4}."),
+        ('txt = (ROOT / "outline.tex").read_text()', 'txt = (ROOT / "supp/tableS14.tex").read_text()  # Pass 23: moved from the outline'),
+        ("placement table (label tab:4) of the outline", "placement table (label tab:4, Supplementary Table S14)")])
     edit("paper/tools/test_supp.py", [(r'r"Table~\ref{tab:3} gives the mean ranks"', r'r"Supplementary Table~\ref{tab:3} gives the mean ranks"')])
     return s
 
@@ -189,7 +254,7 @@ def main():
         assert " ".join(accept(line).split()) == " ".join((new or r"\item").split()), old[:80]
         s = s.replace("\n" + old + "\n", "\n" + line + "\n", 1)
     s = move_res2b(s)
-    s = move_table2(s)
+    s = move_tables(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

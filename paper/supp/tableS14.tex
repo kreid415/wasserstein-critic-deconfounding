@@ -1,0 +1,27 @@
+% Supplementary Table S14: the former main-text Table 3, moved by paper/tools/pass23_edits.py; values unchanged.
+\begin{table}[t]
+\centering\scriptsize\renewcommand{\tablename}{Supplementary Table}\renewcommand{\thetable}{S14}%
+\caption{Single-strength placement: mean selection score over seeds (three for plain scVI and the penalties; five for the scvi-tools adversary, scANVI and sysVI; one run for Harmony, Scanorama and PCA) ($0.4\times$batch $+\,0.6\times$biology) per method and real task, batch-conditioned decoder, at the strength with the best mean selection score on real tasks of other families (related tasks never choose for each other). Values in parentheses use the task's own best strength (optimistic bound). Harmony, Scanorama and sysVI are placed by the same rule, at the setting chosen on real tasks of other families, with the task's own best setting in parentheses; scANVI and principal-component analysis (PCA) run at one setting, so no choice is made; scANVI uses cell-type labels. Unconditioned decoder in Supplementary Table S7. Scanorama on the large chromatin-accessibility task has five of its six settings (80 neighbours could not be fitted). The immune task is low-signal with this decoder. Values are rounded to three decimals: the Sinkhorn divergence on pancreas (0.6846) is 0.0004 below plain scVI (0.6850) and counts as not exceeding it.}
+\label{tab:4}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Method & Pancreas & Lung & Immune & ATAC small & ATAC large & Human--mouse immune \\
+\midrule
+Plain scVI & 0.685 & 0.686 & 0.686 & 0.677 & 0.556 & 0.595 \\
+scvi-tools adversary & 0.688 & 0.683 & 0.708 & 0.673 & 0.564 & 0.588 \\
+JS discriminator & 0.683 (0.708) & 0.690 (0.690) & 0.723 (0.724) & 0.664 (0.703) & 0.577 (0.582) & 0.573 (0.595) \\
+Reference critic & 0.692 (0.700) & 0.689 (0.690) & 0.704 (0.725) & 0.666 (0.682) & 0.595 (0.606) & 0.575 (0.598) \\
+Pooled critic & 0.697 (0.709) & 0.694 (0.694) & 0.725 (0.725) & 0.679 (0.689) & 0.601 (0.601) & 0.589 (0.597) \\
+Barycenter critic & 0.687 (0.700) & 0.689 (0.693) & 0.700 (0.721) & 0.683 (0.683) & 0.569 (0.591) & 0.593 (0.594) \\
+MMD & 0.700 (0.702) & 0.694 (0.694) & 0.719 (0.721) & 0.668 (0.672) & 0.598 (0.608) & 0.591 (0.601) \\
+Sinkhorn & 0.685 (0.701) & 0.694 (0.697) & 0.722 (0.724) & 0.679 (0.683) & 0.575 (0.591) & 0.591 (0.602) \\
+\midrule
+Harmony & 0.706 (0.710) & 0.621 (0.621) & 0.664 (0.664) & 0.576 (0.587) & 0.552 (0.558) & 0.520 (0.531) \\
+Scanorama & 0.600 (0.613) & 0.598 (0.600) & 0.685 (0.692) & 0.517 (0.538) & 0.510 (0.522) & 0.524 (0.525) \\
+sysVI & 0.723 (0.726) & 0.649 (0.653) & 0.685 (0.700) & 0.533 (0.571) & 0.511 (0.537) & 0.501 (0.542) \\
+scANVI (labels) & 0.696 & 0.740 & 0.743 & 0.748 & 0.656 & 0.619 \\
+PCA (uncorrected) & 0.577 & 0.585 & 0.565 & 0.490 & 0.527 & 0.478 \\
+\bottomrule
+\end{tabular}
+\end{table}
