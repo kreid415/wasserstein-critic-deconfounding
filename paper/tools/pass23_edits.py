@@ -5,7 +5,9 @@ decoder; the three worked examples of close readings become counts from paper/to
 (paper/figure_data/res2_seed_noise.json); the simulation orders move to Supplementary Figure S1, which shows them.
 Res-2b: the replication paragraph moves to a new Supplementary Note 13 (written by this script, with the replication mean
 ranks of paper/tools/replication_mean_ranks.py added); one paragraph stays in the Results. Abstract, Disc-1 and Conclusions: the sweep leaders stay and a clause says that
-the leaders changed on the replication's new seeds (user decision 2026-11-07). Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+the leaders changed on the replication's new seeds (user decision 2026-11-07).
+Table 2 (ranking) repeats Figure 2b and Supplementary Table S6, so it moves to Supplementary Table S12 (user rule: no
+repeated information in the main text); the label tab:3 moves with it. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
@@ -38,12 +40,16 @@ EDITS = [  # (old source line, new printed text)
      '\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic  with the batch-conditioned decoder, closely followed  by the Sinkhorn divergence, and MMD  with the unconditioned decoder. Task-level orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard error, so these descriptive rankings  do not establish a consistent ordering across tasks. The secondary summaries  gave different orders again: MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder, and the local-versus-global readings favoured no single penalty. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part, but the leaders changed: on the new seeds the Sinkhorn divergence had the best mean rank with the batch-conditioned decoder and the pooled critic with the unconditioned decoder, while the discriminator stayed last with the batch-conditioned decoder (Res-2b; Supplementary Note 13).}'),
     ("\\item \\added[id=P3]{On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried\\added[id=P12]{ and scored on the same data}; scANVI, which uses cell-type labels, was exceeded only on pancreas.}",
      "\\item On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties, and on new training seeds the Sinkhorn divergence and the pooled critic led instead. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried and scored on the same data; scANVI, which uses cell-type labels, was exceeded only on pancreas."),
+    ('\\pp{Res-2}{\\replaced{Penalties are ranked by the biology they keep at matched batch removal (Figure 2, Table \\ref{tab:3}).}{The premise check reports how separable batches are before integration and how adversary gradients behave in training (Figure 2).}}',
+     '\\pp{Res-2}{Penalties are ranked by the biology they keep at matched batch removal (Figure 2; Supplementary Table \\ref{tab:3}).}'),
+    ('\\item Table \\ref{tab:3}: \\replaced{benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, \\added{mean biology at $b^*$, }simulation ranks, tasks not ranked, tasks ranked.}{primary results (primary comparison, trade-off area, collapse rate, per decoder): estimate, interval, probabilities, call, evaluable tasks.}',
+     None),
 ]
 
 
 def rewrite(old, new):
     """Captions are tracked inside \\caption{} so the caption command itself is never struck."""
-    if new.startswith("\\caption{"):
+    if new and new.startswith("\\caption{"):
         inner_old, _ = group(accept(old).strip(), len("\\caption"))
         inner_new, _ = group(new, len("\\caption"))
         return "\\caption{" + p22.tracked(inner_old, inner_new) + "}"
@@ -121,15 +127,66 @@ def move_res2b(s):
     return s.replace(hd[0], accept(hd[0]).replace("Notes 1--12,", rf"Notes 1--\replaced[id={p22.TAG}]{{13}}{{12}},"))
 
 
+T2_START = "% ---------------------------------------------------------------- Table 3\n"
+T2_END = "% ---------------------------------------------------------------- Table 4\n"
+
+
+def edit(path, pairs):
+    p = ROOT / path
+    s = p.read_text()
+    for old, new in pairs:
+        assert s.count(old) == 1, (path, s.count(old), old[:100])
+        s = s.replace(old, new)
+    p.write_text(s)
+
+
+def move_table2(s):
+    """Main-text Table 2 (label tab:3, the ranking) repeats Figure 2b and Supplementary Table S6, so it moves to the
+    supplement as Supplementary Table S12; the label tab:3 moves with it, so every \\ref follows."""
+    i, j = s.index(T2_START), s.index(T2_END)
+    block = s[i:j]
+    b, e = block.index("\\begin{table}[t]"), block.index("\\end{table}") + len("\\end{table}")
+    table = accept(block[b:e])
+    for old, new in [("& conditioned &", "& batch-conditioned &"), ("with the conditioned decoder (--)", "with the batch-conditioned decoder (--)")]:
+        assert old in table, old
+        table = table.replace(old, new)
+    assert table.count("\\caption{") == 1 and table.count("\\label{tab:3}") == 1
+    table = table.replace("\\centering\\small\n", "\\centering\\scriptsize\\renewcommand{\\tablename}{Supplementary Table}"
+                          "\\renewcommand{\\thetable}{S12}%\n", 1)
+    assert "renewcommand{\\thetable}{S12}" in table
+    (ROOT / "paper/supp/tableS12.tex").write_text("% Supplementary Table S12: the main-text ranking table (former Table 2), moved by "
+                                                 "paper/tools/pass23_edits.py; values unchanged.\n" + table + "\n")
+    commented = "".join("%" + l + "\n" for l in block[b:e].split("\n"))
+    s = s[:i] + block[:b] + (f"\\noindent\\deleted[id={p22.TAG}]{{Table 2 (benchmark ranking) moved to Supplementary Table S12; it "
+                             "repeated Figure 2b and Supplementary Table S6.}\n") + commented + block[e:].lstrip("\n") + s[j:]
+    item_s10 = [l for l in s.split("\n") if l.startswith(r"\item \added[id=P9]{Table S10, direct biology check")]
+    assert len(item_s10) == 1
+    s = s.replace(item_s10[0], item_s10[0] + "\n" + rf"\item \added[id={p22.TAG}]{{Table S12, benchmark ranking (the former "
+                  "main-text Table 2): mean rank per penalty and decoder over the ranked real tasks, range over tasks, mean "
+                  "biology at $b^*$, simulation ranks, tasks not ranked and tasks ranked.}", 1)
+    hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
+    assert len(hd) == 1 and hd[0].count("S4--S11,") == 1
+    s = s.replace(hd[0], hd[0].replace("S4--S11,", rf"S4--\replaced[id={p22.TAG}]{{S12}}{{S11}},"))
+    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures", "Tables S6, S7, S9 and S12 and Figures"),
+                                  ("(Note 1, Tables S6, S7 and S9, Figures", "(Note 1, Tables S6, S7, S9 and S12, Figures"),
+                                  ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n\\clearpage\n\\input{supp/tableS12}\n")])
+    edit("paper/supp/tableS6.tex", [("Table~\\ref{tab:3} gives the mean ranks", "Supplementary Table~\\ref{tab:3} gives the mean ranks")])
+    edit("paper/supp/note6.tex", [("(Table~\\ref{tab:3})", "(Supplementary Table~\\ref{tab:3})")])
+    edit("paper/tools/make_supp_tables.py", [(r"6; Table~\ref{{tab:3}} gives", r"6; Supplementary Table~\ref{{tab:3}} gives")])
+    edit("paper/tools/test_supp.py", [(r'r"Table~\ref{tab:3} gives the mean ranks"', r'r"Supplementary Table~\ref{tab:3} gives the mean ranks"')])
+    return s
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
     for old, new in EDITS:
         assert s.count("\n" + old + "\n") == 1, old[:80]
         line = rewrite(old, new)
-        assert " ".join(accept(line).split()) == " ".join(new.split()), old[:80]
+        assert " ".join(accept(line).split()) == " ".join((new or r"\item").split()), old[:80]
         s = s.replace("\n" + old + "\n", "\n" + line + "\n", 1)
     s = move_res2b(s)
+    s = move_table2(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

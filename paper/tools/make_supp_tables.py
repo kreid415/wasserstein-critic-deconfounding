@@ -111,7 +111,7 @@ def make_s6():
              rf"the penalty's seed-mean curve crosses $b^*$; the reading is taken at the first crossing. {unreached} "
              rf"{pairs} task and decoder pairs are ranked; the immune task and both simulations with the batch-conditioned decoder "
              rf"are low-signal and are in Part B. Simulations are ranked separately from the real tasks "
-             rf"(Supplementary Notes 5 and 6; Table~\ref{{tab:3}} gives the mean ranks).")
+             rf"(Supplementary Notes 5 and 6; Supplementary Table~\ref{{tab:3}} gives the mean ranks).")
     cap_b = (rf"Low-signal task and decoder pairs ({low_pairs}; the gap between plain scVI's batch score and the highest batch score "
              rf"every penalty reaches is under 0.02): biology score at $b^*$ read in the same way, not ranked and without standard errors "
              rf"(Supplementary Note 5).")

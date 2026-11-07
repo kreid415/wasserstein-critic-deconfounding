@@ -185,7 +185,7 @@
 \hd{Results}{1,500 words; \replaced{8}{10} paragraphs\added[id=P5]{ plus one for the replication across training seeds}\added[id=P9]{ and one for the direct biology check}}
 \pp{Res-1}{\replaced[id=P22]{Which}{We first report which} fits \replaced[id=P22]{completed,}{completed} and where batch removal could be matched.}
 All 3,033 sweep fits \deleted[id=P23]{completed, with 0 failed fits across the penalties} and \replaced[id=P23]{447 of}{decoders (Supplementary Table S5). The analysis includes 387 fits on the immune task and 378 on each other task; the immune total includes additional strengths for the discriminator, the reference critic and the pooled critic with the batch-conditioned decoder. Of the} 448 baseline \replaced[id=P23]{fits}{fits, 447} were \replaced[id=P23]{scored,}{scored} and \replaced[id=P23]{every}{0 failed: the scvi-tools adversary 40 of 40, scANVI 40 of 40, sysVI 240 of 240, Harmony 56 of 56, Scanorama 55 of 56 and PCA 16 of 16. The remaining fit, Scanorama with 80 neighbours on the large chromatin-accessibility task, could not be fitted (it ran out of memory, and a retry stopped at a 32-bit sparse-matrix index limit); it is reported as an incomplete setting, not as a failed fit, so on that task Scanorama is placed with five of its six settings (Supplementary Table S5). The low-signal pairs were the immune task and both simulations with the batch-conditioned decoder: plain scVI and the highest common batch scores were 0.638 and 0.657 (gap 0.019) for the immune task; 0.812 and 0.819 (gap 0.007) for simulation 1; 0.656 and 0.665 (gap 0.009) for simulation 2. Every} penalty reached $b^*$ in every task and decoder \replaced[id=P23]{pair;}{pair, including} the \added[id=P23]{immune task and both simulations were} low-signal \replaced[id=P23]{with}{pairs, so none received a bottom rank for a missing full-seed reading; low-signal pairs are reported separately under} the \replaced[id=P23]{batch-conditioned decoder}{Methods rule} (Supplementary \replaced[id=P23]{Notes 5, 8 and 11; Supplementary Table S5).}{Note 5).}
-\pp{Res-2}{\replaced{Penalties are ranked by the biology they keep at matched batch removal (Figure 2, Table \ref{tab:3}).}{The premise check reports how separable batches are before integration and how adversary gradients behave in training (Figure 2).}}
+\pp{Res-2}{Penalties are ranked by the biology they keep at matched batch removal (Figure \replaced[id=P23]{2; Supplementary}{2,} Table \ref{tab:3}).}
 \added[id=P23]{The order of the penalties depended on the decoder: MMD had the fifth-best mean rank with the batch-conditioned decoder and the best with the unconditioned decoder, and the Sinkhorn divergence the second-best and the worst.} With the batch-conditioned decoder, the ranking rested on five real tasks. Mean ranks (range across those tasks) were the pooled critic 2.20 (1--3); the Sinkhorn divergence 2.40 (1--5); the barycenter critic 3.00 (1--5); the reference critic 3.80 (1--5); MMD 4.60 (2--6); the discriminator 5.00 (3--6). With the unconditioned decoder, all six real tasks contributed: MMD 2.17 (1--6); the reference critic 3.33 (1--6); the pooled critic 3.33 (2--5); the discriminator 3.50 (1--5); the barycenter critic 4.00 (1--6); the Sinkhorn divergence 4.67 (3--6). The Sinkhorn divergence ranked first most often with the batch-conditioned decoder, on the human--mouse immune and lung tasks; the discriminator ranked last on the small chromatin-accessibility, lung and pancreas tasks. With the unconditioned decoder, MMD ranked first most often, on the large chromatin-accessibility, human--mouse immune and pancreas tasks; the reference critic ranked last on the small chromatin-accessibility and human--mouse immune tasks, and the Sinkhorn divergence on the large chromatin-accessibility and lung tasks.
 
 % ---------------------------------------------------------------- Figure 2
@@ -328,7 +328,7 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \pp{\added[id=P3]{Acknowledgements}}{\added[id=P3]{\tbd{acknowledgements}}}
 \pp{\added[id=P3]{Authors' information (optional)}}{\added[id=P3]{Not applicable.}}
 
-\hd{Supplementary material}{Supplementary Notes 1--\replaced[id=P23]{13}{12}, Tables S1, S2 and S4--S11, Figures S1--S6}
+\hd{Supplementary material}{Supplementary Notes 1--\replaced[id=P23]{13}{12}, Tables S1, S2 and S4--\replaced[id=P23]{S12}{S11}, Figures S1--S6}
 \noindent \replaced[id=P17]{Every supplementary note and table listed here is in this document: Supplementary Notes 2--12 and Tables S1, S2, S4, S5 and S8 are printed below in the place of their entries (Table S11 within Note 9); Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows Table~\ref{tab:4}. Table S3 (strength ranges of the planned fixed-strength benchmark) was removed with that benchmark, and its number is not used.}{This document contains Supplementary Note 1, Tables S6, S7, S9 and S10 and Figures S1--S6; the other notes and tables listed below are described here and are not yet written.}\par
 % Pass 17: the supplementary tables input in this list step the table counter; it is restored after the list (main tables 1-3)
 \newcounter{maintables}\setcounter{maintables}{\value{table}}\let\mainTheHtable\theHtable\renewcommand{\theHtable}{supp.\arabic{table}}%
@@ -386,6 +386,7 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \begin{itemize}
 \item \added[id=P5]{Table S9, replication across training seeds: per penalty, task and decoder, the two bracketing strengths, the batch and biology means over seeds 0--4 at each, the batch score reached, biology at $b^*$ on the new seeds beside the sweep reading, the replication rank beside the sweep rank, and cells that needed the extra outward strength or did not replicate the crossing; Kendall's $\tau_b$ per pair; the four large sweep gaps with their sign on the new seeds; plain scVI at seeds 0--4 beside the sweep's plain scVI per task and decoder.}
 \item \added[id=P9]{Table S10, direct biology check: per method and decoder, the mean over the six real tasks of neighbourhood purity minus plain scVI's with its seed spread, rare-type purity and label-transfer recall minus plain scVI's, and marker-gene Jaccard overlap with its difference from plain scVI (typeset after Table~\ref{tab:4}); per-task, per-cell-type and confusion tables in the repository.}
+\item \added[id=P23]{Table S12, benchmark ranking (the former main-text Table 2): mean rank per penalty and decoder over the ranked real tasks, range over tasks, mean biology at $b^*$, simulation ranks, tasks not ranked and tasks ranked.}
 \end{itemize}
 
 \setcounter{table}{\value{maintables}}\let\theHtable\mainTheHtable% Pass 17: main tables continue at their own numbers
@@ -410,7 +411,7 @@ Across the real tasks, including the low-signal immune pair, good-strength width
 \item Figure 6: (a) expected best selection score against number of tries\added[id=P3]{, mean over the six real tasks of each method's per-task curve}; (b) batch against biology score at single strength.
 \item Table \ref{tab:1}: methods: alignment term, network, update steps, \replaced{sweep strengths}{follow-up variants}.
 \item \deleted[id=P4]{Former Table 2: pilot strength ranges per penalty family and decoder (provisional, from the earlier three-task pilot; to be replaced by the all-task pilot; cited by the Methods strength-pilot paragraph).} % Pass 4: removed with the confirmatory benchmark; number 2 left free, renumbering is the first author's call
-\item Table \ref{tab:3}: \replaced{benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, \added{mean biology at $b^*$, }simulation ranks, tasks not ranked, tasks ranked.}{primary results (primary comparison, trade-off area, collapse rate, per decoder): estimate, interval, probabilities, call, evaluable tasks.}
+\item \deleted[id=P23]{Table \ref{tab:3}: benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, mean biology at $b^*$, simulation ranks, tasks not ranked, tasks ranked.}
 \item Table \ref{tab:4}: single-strength placement: selection score per method, decoder, task.
 \end{itemize}
 
@@ -464,31 +465,31 @@ scvi-tools adversary & scvi-tools adversarial batch classifier (reference method
 
 % ---------------------------------------------------------------- Table 3
 % Pass 13: no counter reset; the main-text tables print as Tables 1, 2, 3 (labels tab:1, tab:3, tab:4 keep their Pass 9 names)
-\begin{table}[t]
-\centering\small
-\caption{\replaced{\deleted[id=P9]{MOCK -- placeholder values. }Benchmark ranking of the six penalties by biology score at matched batch removal $b^*$. Mean rank over the real tasks that are not low-signal (rank 1 is best; tied penalties share the average rank, and a penalty whose curve does not reach $b^*$ takes the bottom rank) and its range over tasks; mean biology score at $b^*$; ranks in simulation 1 and simulation 2, which are ranked separately; real tasks not ranked (low-signal) and number of real tasks ranked, of six. Per-task values are in Supplementary Table S6.\added[id=P9]{ Range, lowest and highest rank over the ranked real tasks; biology, mean over those tasks of the biology score at $b^*$; the simulations are low-signal with the conditioned decoder (--); ranked, real tasks ranked of six.}}{MOCK -- placeholder values. Primary results, reference critic minus discriminator, pooled over the six real tasks. Estimate and 95\% posterior interval; posterior probabilities that the difference lies below $-m$, within $\pm m$, and above $m$ (margin $m=0.01$ for biology at $b^*$ and trade-off area, 5 percentage points for collapse rate); call (direction, practical equivalence or inconclusive); number of evaluable real tasks of six.}}
-\label{tab:3}
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llrrrrrlc@{}}
-\toprule
-Penalty & Decoder & Mean rank & Range & Biology & Sim.\ 1 rank & Sim.\ 2 rank & Not ranked & Ranked \\
-\midrule
-JS discriminator & conditioned & 5.00 & 3--6 & 0.629 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 3.50 & 1--5 & 0.649 & 1 & 1 & none & 6/6 \\
-Reference critic & conditioned & 3.80 & 1--5 & 0.640 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 3.33 & 1--6 & 0.646 & 2 & 4 & none & 6/6 \\
-Pooled critic & conditioned & 2.20 & 1--3 & 0.644 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 3.33 & 2--5 & 0.651 & 5 & 2 & none & 6/6 \\
-Barycenter critic & conditioned & 3.00 & 1--5 & 0.646 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 4.00 & 1--6 & 0.650 & 6 & 5 & none & 6/6 \\
-MMD & conditioned & 4.60 & 2--6 & 0.638 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 2.17 & 1--6 & 0.655 & 3 & 3 & none & 6/6 \\
-Sinkhorn & conditioned & 2.40 & 1--5 & 0.645 & -- & -- & immune & 5/6 \\
-                  & unconditioned & 4.67 & 3--6 & 0.645 & 4 & 6 & none & 6/6 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
+\noindent\deleted[id=P23]{Table 2 (benchmark ranking) moved to Supplementary Table S12; it repeated Figure 2b and Supplementary Table S6.}
+%\begin{table}[t]
+%\centering\small
+%\caption{\replaced{\deleted[id=P9]{MOCK -- placeholder values. }Benchmark ranking of the six penalties by biology score at matched batch removal $b^*$. Mean rank over the real tasks that are not low-signal (rank 1 is best; tied penalties share the average rank, and a penalty whose curve does not reach $b^*$ takes the bottom rank) and its range over tasks; mean biology score at $b^*$; ranks in simulation 1 and simulation 2, which are ranked separately; real tasks not ranked (low-signal) and number of real tasks ranked, of six. Per-task values are in Supplementary Table S6.\added[id=P9]{ Range, lowest and highest rank over the ranked real tasks; biology, mean over those tasks of the biology score at $b^*$; the simulations are low-signal with the conditioned decoder (--); ranked, real tasks ranked of six.}}{MOCK -- placeholder values. Primary results, reference critic minus discriminator, pooled over the six real tasks. Estimate and 95\% posterior interval; posterior probabilities that the difference lies below $-m$, within $\pm m$, and above $m$ (margin $m=0.01$ for biology at $b^*$ and trade-off area, 5 percentage points for collapse rate); call (direction, practical equivalence or inconclusive); number of evaluable real tasks of six.}}
+%\label{tab:3}
+%\setlength{\tabcolsep}{3pt}
+%\begin{tabular}{@{}llrrrrrlc@{}}
+%\toprule
+%Penalty & Decoder & Mean rank & Range & Biology & Sim.\ 1 rank & Sim.\ 2 rank & Not ranked & Ranked \\
+%\midrule
+%JS discriminator & conditioned & 5.00 & 3--6 & 0.629 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 3.50 & 1--5 & 0.649 & 1 & 1 & none & 6/6 \\
+%Reference critic & conditioned & 3.80 & 1--5 & 0.640 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 3.33 & 1--6 & 0.646 & 2 & 4 & none & 6/6 \\
+%Pooled critic & conditioned & 2.20 & 1--3 & 0.644 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 3.33 & 2--5 & 0.651 & 5 & 2 & none & 6/6 \\
+%Barycenter critic & conditioned & 3.00 & 1--5 & 0.646 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 4.00 & 1--6 & 0.650 & 6 & 5 & none & 6/6 \\
+%MMD & conditioned & 4.60 & 2--6 & 0.638 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 2.17 & 1--6 & 0.655 & 3 & 3 & none & 6/6 \\
+%Sinkhorn & conditioned & 2.40 & 1--5 & 0.645 & -- & -- & immune & 5/6 \\
+%                  & unconditioned & 4.67 & 3--6 & 0.645 & 4 & 6 & none & 6/6 \\
+%\bottomrule
+%\end{tabular}
+%\end{table}
 % ---------------------------------------------------------------- Table 4
 \begin{table}[t]
 \centering\small

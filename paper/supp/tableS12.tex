@@ -1,0 +1,25 @@
+% Supplementary Table S12: the main-text ranking table (former Table 2), moved by paper/tools/pass23_edits.py; values unchanged.
+\begin{table}[t]
+\centering\scriptsize\renewcommand{\tablename}{Supplementary Table}\renewcommand{\thetable}{S12}%
+\caption{Benchmark ranking of the six penalties by biology score at matched batch removal $b^*$. Mean rank over the real tasks that are not low-signal (rank 1 is best; tied penalties share the average rank, and a penalty whose curve does not reach $b^*$ takes the bottom rank) and its range over tasks; mean biology score at $b^*$; ranks in simulation 1 and simulation 2, which are ranked separately; real tasks not ranked (low-signal) and number of real tasks ranked, of six. Per-task values are in Supplementary Table S6. Range, lowest and highest rank over the ranked real tasks; biology, mean over those tasks of the biology score at $b^*$; the simulations are low-signal with the batch-conditioned decoder (--); ranked, real tasks ranked of six.}
+\label{tab:3}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrrrlc@{}}
+\toprule
+Penalty & Decoder & Mean rank & Range & Biology & Sim.\ 1 rank & Sim.\ 2 rank & Not ranked & Ranked \\
+\midrule
+JS discriminator & batch-conditioned & 5.00 & 3--6 & 0.629 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 3.50 & 1--5 & 0.649 & 1 & 1 & none & 6/6 \\
+Reference critic & batch-conditioned & 3.80 & 1--5 & 0.640 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 3.33 & 1--6 & 0.646 & 2 & 4 & none & 6/6 \\
+Pooled critic & batch-conditioned & 2.20 & 1--3 & 0.644 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 3.33 & 2--5 & 0.651 & 5 & 2 & none & 6/6 \\
+Barycenter critic & batch-conditioned & 3.00 & 1--5 & 0.646 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 4.00 & 1--6 & 0.650 & 6 & 5 & none & 6/6 \\
+MMD & batch-conditioned & 4.60 & 2--6 & 0.638 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 2.17 & 1--6 & 0.655 & 3 & 3 & none & 6/6 \\
+Sinkhorn & batch-conditioned & 2.40 & 1--5 & 0.645 & -- & -- & immune & 5/6 \\
+                  & unconditioned & 4.67 & 3--6 & 0.645 & 4 & 6 & none & 6/6 \\
+\bottomrule
+\end{tabular}
+\end{table}
