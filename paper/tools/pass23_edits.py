@@ -2,12 +2,15 @@
 Res-1: the fit-completion paragraph moves to the supplement (Supplementary Notes 5, 8 and 11 and Table S5 already hold every
 number in it) and one sentence stays in the Results. Res-2: an opening sentence states that the order depends on the
 decoder; the three worked examples of close readings become counts from paper/tools/res2_seed_noise.py
-(paper/figure_data/res2_seed_noise.json); the simulation orders move to Supplementary Figure S1, which shows them. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+(paper/figure_data/res2_seed_noise.json); the simulation orders move to Supplementary Figure S1, which shows them.
+Res-2b: the replication paragraph moves to a new Supplementary Note 13 (written by this script, with the replication mean
+ranks of paper/tools/replication_mean_ranks.py added); one paragraph stays in the Results. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
 Run from the repository root:  python paper/tools/pass23_edits.py   (PASS23_ROOT overrides the root of the edited files)
 Then: python paper/tools/accept_changes.py ; python paper/tools/check_ledger.py"""
+import json
 import os
 import sys
 from pathlib import Path
@@ -40,6 +43,77 @@ def rewrite(old, new):
     return p22.rewrite(old, new)
 
 
+NAMES = [("discriminator", "the discriminator"), ("reference", "the reference critic"), ("pooled", "the pooled critic"),
+         ("barycenter", "the barycenter critic"), ("mmd", "MMD"), ("sinkhorn", "the Sinkhorn divergence")]
+NOTE13_HEADS = ["Rule", "Fits", "Readings", "Agreement", "Sensitivity analyses", "Near-ties and slope-adjusted reading"]
+
+
+def res2b_block(s):
+    """The Res-2b heading line and its six \\item lines (the replication paragraph moved to Supplementary Note 13)."""
+    lines = s.split("\n")
+    i = [k for k, l in enumerate(lines) if l.startswith(r"\pp{\added[id=P5]{Res-2b}")]
+    assert len(i) == 1 and lines[i[0] + 1] == r"\begin{itemize}" and lines[i[0] + 8] == r"\end{itemize}"
+    items = lines[i[0] + 2:i[0] + 8]
+    assert all(l.startswith(r"\item ") for l in items)
+    return lines[i[0]], items
+
+
+def note13(items, rep, mr):
+    texts = [accept(l)[len(r"\item "):].strip() for l in items]
+    sweep_first = {d: min((a for a, _ in NAMES), key=lambda a: mr[d][a]["sweep"]) for d in mr}
+    assert sweep_first == {"batch_conditioned": "pooled", "unconditioned": "mmd"}  # named in the sentence below
+    assert texts[0].startswith("Rule: ") and texts[0].count("in this paragraph") == 1
+    texts[0] = "The " + texts[0][len("Rule: the "):].replace("in this paragraph", "in this note")
+    order = lambda d: ", ".join(f"{name} {mr[d][a]['replication']:.2f} ({mr[d][a]['sweep']:.2f})" for a, name in NAMES)
+    ranks = (f"Mean ranks over the ranked real tasks on the new seeds, recomputed from the replication ranks of Supplementary "
+             f"Table~S9 (sweep mean ranks in brackets), were, with the batch-conditioned decoder ({mr['batch_conditioned']['n_tasks']}"
+             f" tasks), {order('batch_conditioned')}; with the unconditioned decoder ({mr['unconditioned']['n_tasks']} tasks), "
+             f"{order('unconditioned')}. The penalty with the best mean rank changed with both decoders: "
+             f"{dict(NAMES)[mr['batch_conditioned']['replication_first']]} replaced the pooled critic with the batch-conditioned "
+             f"decoder, and {dict(NAMES)[mr['unconditioned']['replication_first']]} replaced MMD with the unconditioned decoder. "
+             "These mean ranks are descriptive, are not part of the agreement rule and were computed after the replication had "
+             "been read (\\texttt{paper/tools/replication\\_mean\\_ranks.py}).")
+    body = "\n\n".join(rf"\noindent\textit{{{h}.}} {t}" for h, t in zip(NOTE13_HEADS + ["Mean ranks on the new seeds"],
+                                                                         texts + [ranks]))
+    return ("% Supplementary Note 13: replication across training seeds. Written by paper/tools/pass23_edits.py from the Res-2b\n"
+            "% paragraph of the main text (moved here in Pass 23) and paper/figure_data/replication_mean_ranks.json; do not edit.\n"
+            "\\medskip\\noindent\\textbf{Supplementary Note 13. Replication across training seeds.}\\par\\smallskip\n"
+            "\\begingroup\\small\\setlength{\\parskip}{3pt}\n" + body + "\n\\par\n\\endgroup\n")
+
+
+def res2b_line(rep, mr):
+    first = {d: dict(NAMES)[mr[d]["replication_first"]] for d in mr}
+    return (f"A replication on {rep['n_fits']} new fits (seeds 0--4) met its agreement rule only after the extension step that the "
+            f"rule prescribes: all four large sweep gaps kept their sign, and the sweep and replication orders were "
+            f"positively correlated (mean Kendall's $\\tau_b$ {rep['mean_tau']:.3f}, $p={rep['p_pair']:.5f}$). The first-ranked "
+            f"penalty changed in {rep['n_readings'] // 6 - rep['n_top_same']} of {rep['n_readings'] // 6} pairs, and by mean rank "
+            f"on the new seeds {first['batch_conditioned']} led with the batch-conditioned decoder "
+            f"({mr['batch_conditioned'][mr['batch_conditioned']['replication_first']]['replication']:.2f}) and "
+            f"{first['unconditioned']} with the unconditioned decoder "
+            f"({mr['unconditioned'][mr['unconditioned']['replication_first']]['replication']:.2f}) (Supplementary Note 13, "
+            f"Supplementary Table S9).")
+
+
+def move_res2b(s):
+    rep = {k: v["value"] if isinstance(v, dict) and "value" in v else v for k, v in
+           json.loads((ROOT / "paper/replication_data/replication_numbers.json").read_text()).items()}
+    mr = json.loads((ROOT / "paper/figure_data/replication_mean_ranks.json").read_text())
+    assert rep["n_gaps_kept"] == rep["n_gaps"] == 4 and rep["agree"] and not rep["before_agree"]
+    head, items = res2b_block(s)
+    (ROOT / "paper/supp/note13.tex").write_text(note13(items, rep, mr))
+    old = "\n".join([head, r"\begin{itemize}"] + items) + "\n"
+    new = "\n".join([head, rf"\added[id={p22.TAG}]{{{res2b_line(rep, mr)}}}", r"\begin{itemize}"] +
+                    [p22.rewrite(l, None) for l in items]) + "\n"
+    assert s.count(old) == 1
+    s = s.replace(old, new)
+    note12 = "\\Needspace{5\\baselineskip}\\input{supp/note12}\\par\n"
+    assert s.count(note12) == 1
+    s = s.replace(note12, note12 + "\\Needspace{5\\baselineskip}\\input{supp/note13}\\par\n")
+    hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
+    assert len(hd) == 1 and accept(hd[0]).count("Notes 1--12,") == 1
+    return s.replace(hd[0], accept(hd[0]).replace("Notes 1--12,", rf"Notes 1--\replaced[id={p22.TAG}]{{13}}{{12}},"))
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
@@ -48,6 +122,7 @@ def main():
         line = rewrite(old, new)
         assert " ".join(accept(line).split()) == " ".join(new.split()), old[:80]
         s = s.replace("\n" + old + "\n", "\n" + line + "\n", 1)
+    s = move_res2b(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

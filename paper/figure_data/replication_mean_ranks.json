@@ -1,0 +1,60 @@
+{
+ "batch_conditioned": {
+  "n_tasks": 5,
+  "discriminator": {
+   "replication": 5.2,
+   "sweep": 5.0
+  },
+  "reference": {
+   "replication": 2.6,
+   "sweep": 3.8
+  },
+  "pooled": {
+   "replication": 3.6,
+   "sweep": 2.2
+  },
+  "barycenter": {
+   "replication": 3.6,
+   "sweep": 3.0
+  },
+  "mmd": {
+   "replication": 3.8,
+   "sweep": 4.6
+  },
+  "sinkhorn": {
+   "replication": 2.2,
+   "sweep": 2.4
+  },
+  "replication_first": "sinkhorn",
+  "replication_second": "reference"
+ },
+ "unconditioned": {
+  "n_tasks": 6,
+  "discriminator": {
+   "replication": 3.0,
+   "sweep": 3.5
+  },
+  "reference": {
+   "replication": 3.833,
+   "sweep": 3.333
+  },
+  "pooled": {
+   "replication": 2.667,
+   "sweep": 3.333
+  },
+  "barycenter": {
+   "replication": 4.167,
+   "sweep": 4.0
+  },
+  "mmd": {
+   "replication": 3.167,
+   "sweep": 2.167
+  },
+  "sinkhorn": {
+   "replication": 4.167,
+   "sweep": 4.667
+  },
+  "replication_first": "pooled",
+  "replication_second": "discriminator"
+ }
+}
