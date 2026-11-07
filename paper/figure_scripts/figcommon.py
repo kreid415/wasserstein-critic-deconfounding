@@ -81,6 +81,50 @@ def check_and_save(fig, stem, exts=("png", "pdf")):
     return bad
 
 
+def decoder_dot_panels(value, xlabel, low_in_median, ci=None, scale=1.0, zero_line=False, height=3.4, bottom=0.2):
+    """One panel per decoder (batch-conditioned a, unconditioned b), one row per penalty, one dot per real task (tasks in
+    the order of Figure 2a, top to bottom within a row) and a black median tick; value(a, t, c) and ci(a, t, c) -> (lo, hi).
+    The low-signal immune pair is ringed and enters the median only if low_in_median. Pass 23 (Figures 5 and 6)."""
+    from matplotlib.lines import Line2D
+    pn = load_pn()
+    low = {(t, c) for c in (0, 1) for t in pnv(pn, f"low_signal_tasks.cond{c}") if t in REAL_TASKS}
+    assert low == {("immune", 1)}
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH_IN, height), sharey=True, sharex=True,
+                             gridspec_kw=dict(wspace=0.08, left=0.15, right=0.98, top=0.86, bottom=bottom))
+    off = np.linspace(-0.27, 0.27, len(REAL_TASKS))
+    for ax, c in zip(axes, COND_ORDER):
+        for i, a in enumerate(ARMS):
+            if i:
+                ax.axhline(i - .5, color="#e6e6e6", lw=0.5, zorder=0)
+            xs = []
+            for j, t in enumerate(REAL_TASKS):
+                y, x, ringed = i + off[j], scale * value(a, t, c), (t, c) in low
+                if ci is not None:
+                    lo, hi = ci(a, t, c)
+                    ax.plot([scale * lo, scale * hi], [y, y], color=ARM_COLOR[a], lw=0.6, alpha=0.5, zorder=1)
+                ax.plot(x, y, "o", color=ARM_COLOR[a], ms=3.4, mec="black" if ringed else "white", mew=0.9 if ringed else 0.3,
+                        zorder=3)
+                if low_in_median or not ringed:
+                    xs.append(x)
+            ax.plot([np.median(xs)] * 2, [i - 0.38, i + 0.38], color="black", lw=1.6, zorder=4, solid_capstyle="butt")
+        if zero_line:
+            ax.axvline(0, color="#444444", ls="--", lw=0.7, zorder=0)
+        ax.set_title(COND_LABEL[c], loc="left", pad=3)
+        ax.set_xlabel(xlabel)
+        ax.spines["left"].set_visible(False)
+        ax.tick_params(left=False)
+    axes[0].set_ylim(5.5, -0.5)
+    axes[0].set_yticks(range(6))
+    axes[0].set_yticklabels([ARM_LABEL[a] for a in ARMS])
+    for k, ax in enumerate(axes):
+        fig.text(ax.get_position().x0 - (0.13 if k == 0 else 0.01), 0.9, "ab"[k], fontsize=10, fontweight="bold", va="bottom")
+    h = [Line2D([], [], color="black", lw=1.6, label="median over tasks"),
+         Line2D([], [], marker="o", mfc="none", color="white", mec="black", mew=0.8, lw=0, ms=6,
+                label="low-signal immune pair" + ("" if low_in_median else " (not in the median)"))]
+    fig.legend(handles=h, loc="lower center", ncol=2, bbox_to_anchor=(0.57, 0.0), frameon=False)
+    return fig, axes
+
+
 def mean_rank_table(pn):
     """Mean rank and range over the ranked real tasks, per (cond, arm), recomputed from per-task ranks."""
     rows = []

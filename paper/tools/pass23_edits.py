@@ -339,14 +339,42 @@ FIG4 = """% ---------------------------------------------------------------- Fig
 """
 
 
+def whole(s, start, new):
+    """Pair that replaces the whole accepted text of the line starting with `start` (for tracked_line)."""
+    hits = [accept(l).strip() for l in s.split("\n") if accept(l).startswith(start)]
+    assert len(hits) == 1, start
+    return hits[0], new
+
+
+CAP5 = (r"Collapse rate per penalty up to the highest common batch score, with the batch-conditioned decoder (a) and the "
+        r"unconditioned decoder (b): the percentage of a penalty's fits, at strengths whose mean batch score is at most the highest "
+        r"batch score every penalty reaches, that lose 0.10 or more biology against the same seed's plain scVI (lower is better; "
+        r"rates over all strengths in Supplementary Table S8). One point per real task, in the order of Figure 2a from top to "
+        r"bottom within each row, with its nominal exact 95\% interval; black tick, median over the six real tasks, including the "
+        r"low-signal immune pair with the batch-conditioned decoder (ringed).")
+CAP6 = (r"Local minus global batch removal at matched batch removal $b^*$ per penalty, with the batch-conditioned decoder (a) and "
+        r"the unconditioned decoder (b). Local removal is the mean of the three neighbourhood batch metrics and global removal the "
+        r"mean of the two whole-embedding metrics (Supplementary Note 7); positive means stronger local removal. One point per real "
+        r"task, in the order of Figure 2a from top to bottom within each row; black tick, median over the ranked real tasks; the "
+        r"ringed low-signal immune pair with the batch-conditioned decoder is not in the median.")
+FIG6 = """% ---------------------------------------------------------------- Figure 6 (Pass 23: local versus global, split from the former Figure 4)
+\\begin{figure}[!htbp]
+\\centering
+\\includegraphics[width=\\textwidth]{figures/fig6.png}
+\\caption{CAPTION}
+\\label{fig:6}
+\\end{figure}"""
+
+
 def add_pareto(s):
     """New main Figure 4, the Pareto frontier with its hypervolume (user choice, version A: hypervolume capped at b_common);
-    the old Figures 4-6 become Figures 5-7 and the old Figure 4 loses its hypervolume panel (rule SI-115, no repeats)."""
+    the old Figure 4 splits into Figure 5 (collapse rate) and Figure 6 (local versus global; user choice, one topic per figure),
+    so the old Figures 5-6 become Figures 7-8, and the hypervolume panel moves to Figure 4 (rule SI-115, no repeats)."""
     pf = json.loads((ROOT / "paper/figure_data/pareto_frontier.json").read_text())
     head, body, cap = pareto_text(pf)
     T = p22.TAG
     # figure files and labels (untracked: not printed)
-    for old, new in [("6", "7"), ("5", "6"), ("4", "5")]:
+    for old, new in [("6", "8"), ("5", "7"), ("4", "5")]:
         for a, b in [(f"{{figures/fig{old}.png}}", f"{{figures/fig{new}.png}}"), (f"\\label{{fig:{old}}}", f"\\label{{fig:{new}}}"),
                      (f"{MARK}Figure {old}\n", f"{MARK}Figure {new}\n")]:
             assert s.count(a) == 1, a
@@ -364,22 +392,20 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\pp{Res-5}{", [("(Figure 4c;", "(Figure 5b;")]),
-        ("At $b^*$, every penalty had more global than local", [("(Figure 4c;", "(Figure 5b;")]),
-        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
-        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
-        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 7b;")]),
-        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 7a;")]),
-        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 7a)")]),
-        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 7a.")]),
-        (r"\item Figure 6:", [("Figure 6:", "Figure 7:")]),
-        (r"\item Figure 5:", [("Figure 5:", "Figure 6:")]),
-        (r"\item Figure 4:", [("Figure 4:", "Figure 5:"), ("(a) hypervolume; (b) collapse rate", "(a) collapse rate"),
-                              ("(c) local minus global", "(b) local minus global")]),
-        (r"\caption{Secondary summaries per penalty",
-         [(" (a) Hypervolume of the strength curve (higher is better); it is not evaluable (n.e.) for the low-signal immune pair with "
-           "the batch-conditioned decoder, so that point is absent and the mean is over five tasks. (b) Collapse rate", " (a) Collapse rate"),
-          ("(c) Local minus global", "(b) Local minus global")]),
+        (r"\pp{Res-5}{", [("(Figure 4c;", "(Figure 6;")]),
+        (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 7.")]),
+        ("At $b^*$, every penalty had more global than local", [("(Figure 4c;", "(Figure 6;")]),
+        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 7)")]),
+        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 7;")]),
+        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 8b;")]),
+        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 8a;")]),
+        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 8a)")]),
+        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 8a.")]),
+        (r"\item Figure 6:", [("Figure 6:", "Figure 8:")]),
+        (r"\item Figure 5:", [("Figure 5:", "Figure 7:")]),
+        (r"\item Figure 4:", [whole(s, r"\item Figure 4:", r"\item Figure 5: collapse rate up to the highest common batch score per "
+                                    r"penalty, one panel per decoder, one point per real task with its 95\% interval and the median.")]),
+        (r"\caption{Secondary summaries per penalty", [whole(s, r"\caption{Secondary summaries per penalty", "\\caption{" + CAP5 + "}")]),
     ]
     extra = collapse_edits(s)
     for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
@@ -389,20 +415,24 @@ def add_pareto(s):
     assert len(item5) == 1
     s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
                   r"ranked real tasks of the best biology reachable at each scaled batch level, and the hypervolume up to the highest "
-                  "common batch score per task.}\n" + item5[0], 1)
+                  "common batch score per task.}\n" + item5[0] + "\n" + rf"\item \added[id={T}]{{Figure 6: local minus global "
+                  r"batch removal at $b^*$ per penalty, one panel per decoder, one point per real task and the median.}", 1)
+    res5 = [l for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
+    assert len(res5) == 1
+    s = s.replace(res5[0], res5[0] + "\n\n" + FIG6.replace("CAPTION", rf"\added[id={T}]{{{CAP6}}}"), 1)
     w = r"\replaced[id=P9]{\replaced[id=P11]{Figures 1--6 are drawn from the sweep analysis"
     assert s.count(w) == 1
     i = s.index(w) + len(r"\replaced[id=P9]")
     j = group(s, i)[1]
     j = group(s, j)[1]  # end of the outer \replaced's second argument
-    s = s[:j] + rf"\added[id={T}]{{ Figure 4, the Pareto frontier, was added in Pass 23, so Figures 1--7 are drawn from the sweep " \
-        "analysis.}" + s[j:]
-    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 7a. Every")])
-    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~7). \\textbf{(a)}")])
-    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~7). \textbf{(a)}")])
+    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the former Figure 4 was split into " \
+        "Figures 5 and 6, so Figures 1--8 are drawn from the sweep analysis.}" + s[j:]
+    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 8a. Every")])
+    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~8). \\textbf{(a)}")])
+    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~8). \textbf{(a)}")])
     edit("paper/supp/note7.tex", [
-        ("left out of the means of Figure 4c.", "left out of the means of Figure 5b."),
-        ("(Figure 6a; per-task", "(Figure 7a; per-task"),
+        ("left out of the means of Figure 4c.", "left out of the medians of Figure 6."),
+        ("(Figure 6a; per-task", "(Figure 8a; per-task"),
         ("The hypervolume is reported per penalty, task and decoder; the analysis record also holds it with the reference point at "
          "biology 0, a sensitivity analysis not used in the paper.",
          "The paper reports the hypervolume up to the highest common batch score: each point's batch score is capped at "
@@ -440,7 +470,7 @@ def collapse_text(cc):
     assert max(cc[f"cond1.{a}"]["max"] for a, _ in NAMES) == d["max"] and d["max_tasks"] == ["immune_hum_mou"]
     assert all(cc[f"cond1.{a}"]["max_tasks"] == ["atac_small"] for a, _ in NAMES if a != "discriminator")
     assert cc["cond0.barycenter"]["k_beyond"] == cc["cond1.barycenter"]["k_beyond"] == 0
-    head = (r"The collapse rate counts how often a penalty's fits lose 0.10 or more biology (Figure 5a; the share of "
+    head = (r"The collapse rate counts how often a penalty's fits lose 0.10 or more biology (Figure 5; the share of "
             r"non-dominated strengths is in Supplementary Table S8).")
     body = (r"We count the fits at strengths whose mean batch score is at most the highest common batch score, the range of "
             r"Figure 4; rates over all strengths are in Supplementary Table S8 (Methods). With the batch-conditioned decoder, the "
@@ -476,15 +506,6 @@ def collapse_edits(s):
              "the collapse rate is the collapsed share of a penalty's fits in a task and decoder at strengths whose mean batch score "
              "is at most the highest common batch score (the range of Figure 4; all strengths in Supplementary Table S8), with "
              "exact binomial")],
-        r"\caption{Secondary summaries per penalty": [
-            ("black tick, mean over tasks.", "black tick, median over tasks."),
-            ("(a) Collapse rate in percentage points with nominal 95\\% intervals (lower is better); the mean includes",
-             "(a) Collapse rate up to the highest common batch score, in percentage points, with nominal 95\\% intervals (lower is "
-             "better); the median includes"),
-            ("positive means stronger local removal; the mean excludes", "positive means stronger local removal; the median excludes")],
-        r"\item Figure 4:": [("one point per real task and the mean:", "one point per real task and the median:"),
-                             ("(a) collapse rate with 95\\% intervals", "(a) collapse rate up to the highest common batch score with "
-                              "95\\% intervals")],
         r"\item With the batch-conditioned decoder, the largest collapse rate": [
             ("With the batch-conditioned decoder, the largest collapse rate on a real task ranged from 27\\% (12\\%--46\\%) for MMD "
              "to 73\\% (54\\%--88\\%) for the discriminator",
@@ -506,7 +527,7 @@ def collapse_supp():
     cc = json.loads((ROOT / "paper/figure_data/collapse_common_range.json").read_text())
     edit("paper/supp/note7.tex", [
         ("Each rate has an exact binomial (Clopper--Pearson) 95\\% interval.",
-         "Each rate has an exact binomial (Clopper--Pearson) 95\\% interval. The main text and Figure 5a count only the fits at "
+         "Each rate has an exact binomial (Clopper--Pearson) 95\\% interval. The main text and Figure 5 count only the fits at "
          r"strengths whose mean batch score over the three seeds is at most $b_{\mathrm{common}}$, the range of Figure 4 "
          rf"({cc['n_common_min']} to {cc['n_common_max']} fits per real task and decoder pair), because many collapses lie beyond "
          r"it at strengths that only some penalties reach; Supplementary Table S8 gives the rate over all strengths beside it. "

@@ -142,7 +142,7 @@ def make_s8():
            r"interval, which is nominal because the fits of one seed share one threshold; "
            rf"{n_fail} fits diverged or had a non-finite latent, so every collapse is a loss of biology. $n_{{\mathrm{{c}}}}$ and Coll.\ common: "
            r"the same for the fits at strengths whose mean batch score is at most the highest common batch score (the range of Figure 4 "
-           r"and of the main-text collapse rate, Figure 5a). Best: the strength with the highest mean selection score; Width: decades spanned by the strengths whose mean "
+           r"and of the main-text collapse rate, Figure 5). Best: the strength with the highest mean selection score; Width: decades spanned by the strengths whose mean "
            r"selection score is at least the lower end of the best strength's 95\% $t$ interval; $^\ast$ a strength inside that span falls "
            rf"below the bound ({n_gap} windows); Good: number of such strengths. Local and global: mean of the three neighbourhood metrics "
            r"(iLISI, kBET, graph connectivity) and of the two whole-embedding metrics (principal-component regression, batch ASW) read at the "
