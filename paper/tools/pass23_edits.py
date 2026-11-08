@@ -217,7 +217,7 @@ def move_tables(s):
     s = tracked_line(s, r"\noindent Every supplementary note and table listed here", [
         ("Supplementary Notes 2--12 and", "Supplementary Notes 2--13 and"),
         ("Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows "
-         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S7, follow "
+         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S8, follow "
          "the main figures.")])
     s = tracked_line(s, r"\item Table S7, single-strength placement",
                      [(r"(the counterpart of Table~\ref{tab:4})", r"(the counterpart of Supplementary Table~\ref{tab:4})")])
@@ -352,29 +352,47 @@ CAP5 = (r"Collapse rate per penalty up to the highest common batch score, with t
         r"rates over all strengths in Supplementary Table S8). One point per real task, in the order of Figure 2a from top to "
         r"bottom within each row, with its nominal exact 95\% interval; black tick, median over the six real tasks, including the "
         r"low-signal immune pair with the batch-conditioned decoder (ringed).")
-CAP6 = (r"Local minus global batch removal at matched batch removal $b^*$ per penalty, with the batch-conditioned decoder (a) and "
+CAP6 = (r"Local minus global batch removal (panel c of the main-text Figure 4 until Pass 23) at matched batch removal $b^*$ per penalty, with the batch-conditioned decoder (a) and "
         r"the unconditioned decoder (b). Local removal is the mean of the three neighbourhood batch metrics and global removal the "
         r"mean of the two whole-embedding metrics (Supplementary Note 7); positive means stronger local removal. One point per real "
         r"task, in the order of Figure 2a from top to bottom within each row; black tick, median over the ranked real tasks; the "
         r"ringed low-signal immune pair with the batch-conditioned decoder is not in the median.")
-FIG6 = """% ---------------------------------------------------------------- Figure 6 (Pass 23: local versus global, split from the former Figure 4)
-\\begin{figure}[!htbp]
-\\centering
-\\includegraphics[width=\\textwidth]{figures/fig6.png}
-\\caption{CAPTION}
-\\label{fig:6}
-\\end{figure}"""
+FIGS8 = r"""
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S8}%
+\includegraphics[width=\textwidth]{figures/figS8.png}
+\caption{CAPTION}
+\end{figure}
+"""
+
+
+def res5_pair(s):
+    """Res-5: the local-versus-global readings shrink to one sentence (figure moved to Supplementary Figure S8, user choice);
+    numbers from figure_data/res5_local_global.json (paper/tools/res5_local_global.py)."""
+    lg = json.loads((ROOT / "paper/figure_data/res5_local_global.json").read_text())
+    assert lg["positive_tasks"] == ["atac_large"] and lg["n_positive_pairs"] == 2
+    line = [accept(l) for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
+    assert len(line) == 1
+    old = line[0].split("In the same penalty order")[0]
+    new = (r"At $b^*$, every penalty removed batch effects more globally than locally on every ranked real task except the large "
+           r"chromatin-accessibility task, where local removal was stronger with both decoders. Within a task and decoder, the six "
+           rf"penalties' local-minus-global readings differed by at most {lg['within_pair_spread_max']:.3f}, whereas their medians "
+           rf"ranged from ${lg['pair_median_min']:.3f}$ to ${lg['pair_median_max']:.3f}$ across the {lg['n_ranked_pairs']} ranked "
+           r"pairs, so the reading describes the task rather than the penalty (Supplementary Figure S8; Methods and Supplementary "
+           r"Note 7). ")
+    return old, new
 
 
 def add_pareto(s):
     """New main Figure 4, the Pareto frontier with its hypervolume (user choice, version A: hypervolume capped at b_common);
-    the old Figure 4 splits into Figure 5 (collapse rate) and Figure 6 (local versus global; user choice, one topic per figure),
-    so the old Figures 5-6 become Figures 7-8, and the hypervolume panel moves to Figure 4 (rule SI-115, no repeats)."""
+    the old Figure 4 keeps only its collapse panel as Figure 5 (user choice, one topic per figure), its local-versus-global panel
+    moves to Supplementary Figure S8 (user choice: the penalties barely differ) and its hypervolume panel to Figure 4 (rule SI-115,
+    no repeats), so the old Figures 5-6 become Figures 6-7."""
     pf = json.loads((ROOT / "paper/figure_data/pareto_frontier.json").read_text())
     head, body, cap = pareto_text(pf)
     T = p22.TAG
     # figure files and labels (untracked: not printed)
-    for old, new in [("6", "8"), ("5", "7"), ("4", "5")]:
+    for old, new in [("6", "7"), ("5", "6"), ("4", "5")]:
         for a, b in [(f"{{figures/fig{old}.png}}", f"{{figures/fig{new}.png}}"), (f"\\label{{fig:{old}}}", f"\\label{{fig:{new}}}"),
                      (f"{MARK}Figure {old}\n", f"{MARK}Figure {new}\n")]:
             assert s.count(a) == 1, a
@@ -392,17 +410,16 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\pp{Res-5}{", [("(Figure 4c;", "(Figure 6;")]),
-        (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 7.")]),
-        ("At $b^*$, every penalty had more global than local", [("(Figure 4c;", "(Figure 6;")]),
-        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 7)")]),
-        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 7;")]),
-        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 8b;")]),
-        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 8a;")]),
-        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 8a)")]),
-        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 8a.")]),
-        (r"\item Figure 6:", [("Figure 6:", "Figure 8:")]),
-        (r"\item Figure 5:", [("Figure 5:", "Figure 7:")]),
+        (r"\pp{Res-5}{", [("(Figure 4c;", "(Supplementary Figure S8;")]),
+        (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 6.")]),
+        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
+        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
+        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 7b;")]),
+        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 7a;")]),
+        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 7a)")]),
+        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 7a.")]),
+        (r"\item Figure 6:", [("Figure 6:", "Figure 7:")]),
+        (r"\item Figure 5:", [("Figure 5:", "Figure 6:")]),
         (r"\item Figure 4:", [whole(s, r"\item Figure 4:", r"\item Figure 5: collapse rate up to the highest common batch score per "
                                     r"penalty, one panel per decoder, one point per real task with its 95\% interval and the median.")]),
         (r"\caption{Secondary summaries per penalty", [whole(s, r"\caption{Secondary summaries per penalty", "\\caption{" + CAP5 + "}")]),
@@ -411,28 +428,43 @@ def add_pareto(s):
     for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
         s = tracked_line(s, start, pairs + extra.pop(start, []))
     assert not extra
+    old5, new5 = res5_pair(s)
+    hit = [l for l in s.split("\n") if accept(l).startswith(old5[:60])]
+    assert len(hit) == 1 and accept(hit[0]).startswith(old5)
+    line5 = rf"\replaced[id={T}]{{{new5.strip()}}}{{{p22.struck(old5.strip())}}} " + accept(hit[0])[len(old5):]
+    assert " ".join(accept(line5).split()) == " ".join((new5 + accept(hit[0])[len(old5):]).split())
+    s = s.replace(hit[0], line5, 1)
     item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
     assert len(item5) == 1
     s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
                   r"ranked real tasks of the best biology reachable at each scaled batch level, and the hypervolume up to the highest "
-                  "common batch score per task.}\n" + item5[0] + "\n" + rf"\item \added[id={T}]{{Figure 6: local minus global "
-                  r"batch removal at $b^*$ per penalty, one panel per decoder, one point per real task and the median.}", 1)
-    res5 = [l for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
-    assert len(res5) == 1
-    s = s.replace(res5[0], res5[0] + "\n\n" + FIG6.replace("CAPTION", rf"\added[id={T}]{{{CAP6}}}"), 1)
+                  "common batch score per task.}\n" + item5[0], 1)
+    s7 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure S7, trade-off curves")]
+    assert len(s7) == 1
+    s = s.replace(s7[0], s7[0] + "\n" + rf"\item \added[id={T}]{{Figure S8, local minus global batch removal at $b^*$ per "
+                  "penalty, one panel per decoder, one point per real task and the median.}", 1)
+    hd = rf"Figures S1--\replaced[id={T}]{{S7}}{{S6}}"
+    assert s.count(hd) == 1
+    s = s.replace(hd, rf"Figures S1--\replaced[id={T}]{{S8}}{{S6}}")
+    (ROOT / "paper/supp/figures.tex").write_text((ROOT / "paper/supp/figures.tex").read_text() + FIGS8.replace("CAPTION", CAP6))
+    edit("paper/supp/figures.tex", [("Supplementary Figures S1-S7", "Supplementary Figures S1-S8")])
+    edit("paper/figure_scripts/make_supp_figures.sh", [("for n in 1 2 3 4 5 6 7; do", "for n in 1 2 3 4 5 6 7 8; do"),
+                                                       ("and Figures S1-S7 (PNG", "and Figures S1-S8 (PNG")])
+    edit("paper/supp_items.tex", [("and S12-S14 and Figures S1-S7", "and S12-S14 and Figures S1-S8"),
+                                  ("S12--S14, Figures S1--S7)", "S12--S14, Figures S1--S8)")])
     w = r"\replaced[id=P9]{\replaced[id=P11]{Figures 1--6 are drawn from the sweep analysis"
     assert s.count(w) == 1
     i = s.index(w) + len(r"\replaced[id=P9]")
     j = group(s, i)[1]
     j = group(s, j)[1]  # end of the outer \replaced's second argument
-    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the former Figure 4 was split into " \
-        "Figures 5 and 6, so Figures 1--8 are drawn from the sweep analysis.}" + s[j:]
-    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 8a. Every")])
-    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~8). \\textbf{(a)}")])
-    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~8). \textbf{(a)}")])
+    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the local-versus-global panel of the " \
+        "former Figure 4 moved to Supplementary Figure S8, so Figures 1--7 are drawn from the sweep analysis.}" + s[j:]
+    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 7a. Every")])
+    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~7). \\textbf{(a)}")])
+    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~7). \textbf{(a)}")])
     edit("paper/supp/note7.tex", [
-        ("left out of the means of Figure 4c.", "left out of the medians of Figure 6."),
-        ("(Figure 6a; per-task", "(Figure 8a; per-task"),
+        ("left out of the means of Figure 4c.", "left out of the medians of Supplementary Figure S8."),
+        ("(Figure 6a; per-task", "(Figure 7a; per-task"),
         ("The hypervolume is reported per penalty, task and decoder; the analysis record also holds it with the reference point at "
          "biology 0, a sensitivity analysis not used in the paper.",
          "The paper reports the hypervolume up to the highest common batch score: each point's batch score is capped at "

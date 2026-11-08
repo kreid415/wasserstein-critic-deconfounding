@@ -1,7 +1,7 @@
 """Supplementary Figure S7 (the main-text Figure 3 until Pass 23): batch score against biology score for each penalty's sweep strengths, six real tasks x two decoders.
 Curves: figure_data/curves.csv (seed means, joined from plain scVI at strength 0 upward);
 dashed line: b* from paper_numbers.json; open circle: each penalty's strongest fitted setting; grey panel: low-signal pair.
-Pass 23: the standard tools are no longer drawn (Figure 8b places them; user rule SI-115, no repeats in the main text)."""
+Pass 23: the standard tools are no longer drawn (Figure 7b places them; user rule SI-115, no repeats in the main text)."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))

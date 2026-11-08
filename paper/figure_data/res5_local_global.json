@@ -1,0 +1,11 @@
+{
+ "n_ranked_pairs": 11,
+ "positive_tasks": [
+  "atac_large"
+ ],
+ "n_positive_pairs": 2,
+ "within_pair_spread_max": 0.047,
+ "within_pair_spread_min": 0.007,
+ "pair_median_min": -0.487,
+ "pair_median_max": 0.108
+}
