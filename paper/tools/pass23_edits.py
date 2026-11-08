@@ -380,8 +380,6 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\pp{Res-5}{", [whole(s, r"\pp{Res-5}{", r"\pp{Res-5}{We then report the label-transfer check (Supplementary "
-                                                  r"Figure S3).}")]),
         (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 6.")]),
         (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
         ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
@@ -396,19 +394,23 @@ def add_pareto(s):
         (r"\caption{Secondary summaries per penalty", [whole(s, r"\caption{Secondary summaries per penalty", "\\caption{" + CAP5 + "}")]),
     ]
     extra = collapse_edits(s)
-    for k, v in drop_local_global(s).items():
+    for k, v in list(drop_local_global(s).items()) + list(merge_res5(s).items()):
         extra[k] = extra.get(k, []) + v
     for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
         s = tracked_line(s, start, pairs + extra.pop(start, []))
     assert not extra
-    hit = [l for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
-    assert len(hit) == 1
-    old5, rest = accept(hit[0]).split("In the same penalty order, ", 1)
-    order = ("In the order discriminator, reference critic, pooled critic, barycenter critic, MMD and Sinkhorn divergence, ")
-    line5 = (rf"\deleted[id={T}]{{{p22.struck(old5.strip())}}} \replaced[id={T}]{{{order.strip()}}}{{In the same penalty order,}} "
-             + rest)
-    assert " ".join(accept(line5).split()) == " ".join((order + rest).split())
-    s = s.replace(hit[0], line5, 1)
+    for start in (r"\pp{Res-5}{", "At $b^*$, every penalty had more global than local"):  # Res-5 merged into Res-5b (user choice)
+        hit = [l for l in s.split("\n") if accept(l).startswith(start)]
+        assert len(hit) == 1
+        a = accept(hit[0]).strip()
+        if start.startswith(r"\pp"):
+            line = rf"\pp{{\deleted[id={T}]{{Res-5}}}}{{\deleted[id={T}]{{{p22.struck(a[len(start):-1])}}}}}"
+        else:
+            line = rf"\deleted[id={T}]{{{p22.struck(a)}}}"
+        assert accept(line).strip() in ("", r"\pp{}{}")
+        s = s.replace(hit[0], line, 1)
+    assert s.count(r"\pp{Res-5b}{") == 1  # the label of the merged section (merge_res5); p22.rewrite keeps labels fixed
+    s = s.replace(r"\pp{Res-5b}{", rf"\pp{{\replaced[id={T}]{{Res-5}}{{Res-5b}}}}{{")
     item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
     assert len(item5) == 1
     s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
@@ -574,6 +576,36 @@ NOTE7_LG = (r"\noindent\textit{Local versus global batch removal.} Local removal
             r"reach $b^*$ has no value. Low-signal pairs are shown separately (Part B of Supplementary Table S8) and left out of the "
             r"means of Figure 4c. Supplementary Table S8 also gives $L$ and $G$, recomputed from the per-fit metrics on the same "
             r"curves and equal to the analysis record's $L-G$ within $10^{-9}$." + "\n\n")
+
+def merge_res5(s):
+    """Res-5 (label transfer) merges into Res-5b (direct biology check), which becomes Res-5 (user choice, 8 November 2026);
+    label transfer is reported per task against plain scVI, not as cross-task mean F1 (rule against pooled raw scores).
+    Numbers from figure_data/res5_label_transfer.json (paper/tools/res5_label_transfer.py)."""
+    lt = json.loads((ROOT / "paper/figure_data/res5_label_transfer.json").read_text())
+    n0, n1 = lt["n_pairs"]["0"], lt["n_pairs"]["1"]
+    assert lt["cond0_disc_below_plain"] == lt["cond0_disc_last"] == n0 and (lt["cond1_disc_place_min"], lt["cond1_disc_place_max"]) == (1, 6)
+    f = lambda v: f"{v:.3f}" if v >= 0 else f"${v:.3f}$"
+    words = {5: "five", 6: "six"}
+    text = (r"Label transfer predicts the cell types of each held-out batch from the other batches, on each penalty's embedding at "
+            rf"the strength nearest $b^*$ (Methods; Supplementary Note 9). With the unconditioned decoder, the discriminator's macro "
+            rf"F1 was below plain scVI's on all {words[n0]} real tasks (median difference {f(lt['cond0_disc_median_diff'])}) and the "
+            rf"lowest of the six penalties on each; with the batch-conditioned decoder it placed from first to last over the "
+            rf"{words[n1]} ranked tasks (median difference {f(lt['cond1_disc_median_diff'])}). The other penalties' median "
+            rf"differences from plain scVI were between {f(lt['others_median_diff_min'])} and +{lt['others_median_diff_max']:.3f} "
+            r"with either decoder (Supplementary Figure S3). Within a task, the penalties' label-transfer order did not follow their "
+            rf"biology order at $b^*$ (Kendall $\tau_b$ median {f(lt['tau_median'])}, range {f(lt['tau_min'])} to "
+            rf"{f(lt['tau_max'])} over the {lt['n_ranked_pairs']} ranked pairs). The label-transfer embeddings lay at most "
+            rf"{lt['distance_max']:.3f} from $b^*$ in batch score (median {lt['distance_median']:.3f}), so they were not exactly matched. Along the full strength curves, "
+            r"label transfer also deteriorated at some strong settings: the barycenter critic ended at 0.360 on lung with the "
+            r"batch-conditioned decoder.")
+    return {
+        r"\pp{Res-5b}{": [whole(s, r"\pp{Res-5b}{", r"\pp{Res-5b}{Label transfer and a direct biology check read biology per cell "
+                                                    r"type (Supplementary Figure S3 and Supplementary Table S10).}")],
+        "This check is exploratory and descriptive": [
+            ("This check is exploratory and descriptive:", text + " The direct biology check is exploratory and descriptive:"),
+            ("and the lowest mean label-transfer F1 with both decoders (Res-5);",
+             "and the lowest label transfer on every real task with the unconditioned decoder (above);")],
+    }
 
 
 def main():

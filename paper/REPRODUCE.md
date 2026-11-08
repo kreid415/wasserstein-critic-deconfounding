@@ -114,6 +114,7 @@ python paper/tools/make_replication.py --check     # Table S9 and replication_nu
 python paper/tools/replication_mean_ranks.py      # Pass 23: new-seed mean ranks from Table S9 (Supplementary Note 13)
 python paper/tools/res2_seed_noise.py             # Pass 23: Res-2 seed-noise counts
 python paper/tools/res3_curve_numbers.py          # Pass 23: Res-3 curve numbers
+python paper/tools/res5_label_transfer.py         # Pass 23: Res-5 label transfer per task against plain scVI
 python paper/tools/make_supp_tables.py --check-table4
 python paper/tools/make_supp_supp-analysis.py                         # Table S8 and the label-transfer table of Supplementary Note 9
 python paper/tools/make_supp_supp-methods.py --collect                # inputs of Tables S1, S2, S4, S5 from $D (paper/figure_data/supp_methods)

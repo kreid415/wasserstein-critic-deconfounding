@@ -14,3 +14,8 @@ Claims deleted from the paper (not moved). Each ledger row that pointed at one i
   removal was the mean of three neighbourhood metrics (iLISI, kBET and graph connectivity), global removal the mean of two
   whole-embedding metrics (PCR and batch ASW), with batch score B = (3 local + 2 global)/5. The deviation is recorded in
   Supplementary Note 10 ("An analysis removed").
+- Label transfer as cross-task mean macro F1 per penalty and decoder (removed 2026-11-08, user choice: a raw score averaged
+  across tasks), the small chromatin-accessibility example of label-transfer distances (0.840 and 0.851 at 0.024 and 0.010 from
+  b*) and the sentence that these orders differed from the biology ranking. Replaced in the merged Res-5 by per-task differences
+  from plain scVI, the within-task Kendall tau_b against biology at b*, and the range of distances (paper/tools/res5_label_transfer.py).
+  The Kendall tau_b values first proposed in the walkthrough (-0.07 and 0.28) compared cross-task mean F1 with mean rank and are not used.
