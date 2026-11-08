@@ -357,12 +357,13 @@ def add_pareto(s):
     """New main Figure 4, the Pareto frontier with its hypervolume (user choice, version A: hypervolume capped at b_common);
     the old Figure 4 keeps only its collapse panel as Figure 5 (user choice, one topic per figure), its hypervolume panel moves to
     Figure 4 (rule SI-115, no repeats) and its local-versus-global panel is removed with that analysis (drop_local_global), so the
-    old Figures 5-6 become Figures 6-7."""
+    good-strength width figure (old Figure 5) is removed with that analysis (drop_width), so the old Figure 6 keeps its number."""
     pf = json.loads((ROOT / "paper/figure_data/pareto_frontier.json").read_text())
     head, body, cap = pareto_text(pf)
     T = p22.TAG
     # figure files and labels (untracked: not printed)
-    for old, new in [("6", "7"), ("5", "6"), ("4", "5")]:
+    s = drop_width_figure(s)
+    for old, new in [("4", "5")]:
         for a, b in [(f"{{figures/fig{old}.png}}", f"{{figures/fig{new}.png}}"), (f"\\label{{fig:{old}}}", f"\\label{{fig:{new}}}"),
                      (f"{MARK}Figure {old}\n", f"{MARK}Figure {new}\n")]:
             assert s.count(a) == 1, a
@@ -380,15 +381,7 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 6.")]),
-        (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
-        ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
-        (r"\pp{Res-7}{", [("(Figure 6b;", "(Figure 7b;")]),
-        (r"\pp{Res-8}{", [("(Figure 6a;", "(Figure 7a;")]),
-        (r"\item With the batch-conditioned decoder, a penalty's expected best", [("(Figure 6a)", "(Figure 7a)")]),
-        (r"\item Figure S6, best of $k$", [("is Figure 6a.", "is Figure 7a.")]),
-        (r"\item Figure 6:", [("Figure 6:", "Figure 7:")]),
-        (r"\item Figure 5:", [("Figure 5:", "Figure 6:")]),
+        (r"\item Figure 1:", [("Second cut, after Figure 5.", "First to move to the supplement if pages run short.")]),
         (r"\item Figure 4:", [whole(s, r"\item Figure 4:", r"\item Figure 5: collapse rate up to the highest common batch score per "
                                     r"penalty, one panel per decoder, one point per real task with its 95\% interval and the median.")]),
         (r"\caption{Secondary summaries per penalty", [whole(s, r"\caption{Secondary summaries per penalty", "\\caption{" + CAP5 + "}")]),
@@ -399,7 +392,8 @@ def add_pareto(s):
     for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
         s = tracked_line(s, start, pairs + extra.pop(start, []))
     assert not extra
-    for start in (r"\pp{Res-5}{", "At $b^*$, every penalty had more global than local"):  # Res-5 merged into Res-5b (user choice)
+    for start in (r"\pp{Res-5}{", "At $b^*$, every penalty had more global than local",  # Res-5 merged into Res-5b (user choice)
+                  r"\pp{Res-6}{", "Across the real tasks, including the low-signal immune pair, good-strength widths"):  # drop_width
         hit = [l for l in s.split("\n") if accept(l).startswith(start)]
         assert len(hit) == 1
         a = accept(hit[0]).strip()
@@ -409,6 +403,11 @@ def add_pareto(s):
             line = rf"\deleted[id={T}]{{{p22.struck(a)}}}"
         assert accept(line).strip() in ("", r"\pp{}{}")
         s = s.replace(hit[0], line, 1)
+    for old, new in (("Res-7", "Res-6"), ("Res-8", "Res-7")):  # Res-6 (good-strength width) removed; later labels close the gap
+        hit = [l for l in s.split("\n") if accept(l).startswith(rf"\pp{{{old}}}{{")]
+        assert len(hit) == 1
+        _, j = group(hit[0], len(r"\pp"))
+        s = s.replace(hit[0], rf"\pp{{\replaced[id={T}]{{{new}}}{{{old}}}}}" + hit[0][j:], 1)
     assert s.count(r"\pp{Res-5b}{") == 1  # the label of the merged section (merge_res5); p22.rewrite keeps labels fixed
     s = s.replace(r"\pp{Res-5b}{", rf"\pp{{\replaced[id={T}]{{Res-5}}{{Res-5b}}}}{{")
     item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
@@ -421,13 +420,10 @@ def add_pareto(s):
     i = s.index(w) + len(r"\replaced[id=P9]")
     j = group(s, i)[1]
     j = group(s, j)[1]  # end of the outer \replaced's second argument
-    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the local-versus-global analysis " \
-        "(panel c of the former Figure 4) was removed, so Figures 1--7 are drawn from the sweep analysis.}" + s[j:]
-    edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 7a. Every")])
-    edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~7). \\textbf{(a)}")])
-    edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~7). \textbf{(a)}")])
+    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added, and the local-versus-global analysis " \
+        "(panel c of the former Figure 4) and the good-strength width (the former Figure 5) were removed, so Figures 1--6 are " \
+        "drawn from the sweep analysis.}" + s[j:]
     edit("paper/supp/note7.tex", [
-        ("(Figure 6a; per-task", "(Figure 7a; per-task"),
         ("The hypervolume is reported per penalty, task and decoder; the analysis record also holds it with the reference point at "
          "biology 0, a sensitivity analysis not used in the paper.",
          "The paper reports the hypervolume up to the highest common batch score: each point's batch score is capped at "
@@ -536,6 +532,28 @@ def collapse_supp():
          "is reported beside it (Supplementary Table S8).")])
 
 
+def width_def(s):
+    """The Methods sentence that defines the good-strength width (removed with that analysis)."""
+    m = [accept(l) for l in s.split("\n") if accept(l).startswith(r"\qquad For each penalty we also report")]
+    assert len(m) == 1
+    i = m[0].index("The good-strength width is")
+    return m[0][i:m[0].index("The hypervolume", i)]
+
+
+def drop_width_figure(s):
+    """The good-strength width figure (Figure 5 before Pass 23) is removed with that analysis (user choice, 8 November 2026)."""
+    i = s.index(MARK + "Figure 5\n")
+    b = s.index("\\begin{figure}", i)
+    e = s.index("\\end{figure}", b) + len("\\end{figure}")
+    assert "figures/fig5.png" in s[b:e] and "range of good strengths" in accept(s[b:e])
+    commented = "".join("%" + l + "\n" for l in s[b:e].split("\n"))
+    note = rf"\noindent\deleted[id={p22.TAG}]{{Figure 5 (good-strength width) removed with that analysis.}}" + "\n"
+    s = s[:i] + MARK + "Figure 5 (good-strength width; removed in Pass 23)\n" + note + commented + s[e:].lstrip("\n")
+    item = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5: good-strength width")]
+    assert len(item) == 1
+    return s.replace(item[0], p22.rewrite(item[0], None), 1)
+
+
 def drop_local_global(s):
     """The local-versus-global analysis is removed from the paper (user choice, 8 November 2026: the six penalties did not differ
     on it); the deviation is recorded in Supplementary Note 10. Returns tracked pairs per line; edits the supplement."""
@@ -552,18 +570,28 @@ def drop_local_global(s):
                                    "the hypervolume, whose divisor is the gap (Supplementary Note 7), and the cross-task label-transfer "
                                    "means")])
     edit("paper/supp/note10.tex", [(r"\item \emph{Limitations.}",
-                                    r"\item \emph{An analysis removed.} The ranking-analysis rules also defined a local-versus-global "
-                                    r"reading: at $b^*$, the mean of the three neighbourhood batch metrics minus the mean of the two "
-                                    r"whole-embedding batch metrics. It is not reported: the first author removed it on 8 November 2026, "
-                                    r"after all scores had been read, because the six penalties did not differ on it within a task. "
-                                    r"Its values remain in the analysis record (\texttt{local\_minus\_global} in "
-                                    r"\texttt{paper/figure\_data/paper\_numbers.json})." + "\n" + r"\item \emph{Limitations.}")])
+                                    r"\item \emph{Analyses removed.} The ranking-analysis rules also defined a local-versus-global "
+                                    r"reading (at $b^*$, the mean of the three neighbourhood batch metrics minus the mean of the two "
+                                    r"whole-embedding batch metrics) and a good-strength width (the span, in decades, of the strengths "
+                                    r"whose mean selection score reaches the lower end of the 95\% interval of the best strength's mean). "
+                                    r"Neither is reported: the first author removed them on 8 November 2026, after all scores had been "
+                                    r"read, because the six penalties did not differ on the first within a task and the second mostly "
+                                    r"reflected the seed-to-seed spread of the best strength. Their values remain in the analysis record "
+                                    r"(\texttt{local\_minus\_global} in \texttt{paper/figure\_data/paper\_numbers.json}; the "
+                                    r"\texttt{window} columns of \texttt{secondary.csv})." + "\n" + r"\item \emph{Limitations.}")])
+    edit("paper/supp/note5.tex", [("the collapse rate, the good-strength width, the single-strength placement",
+                                   "the collapse rate, the single-strength placement")])
+    n7 = (ROOT / "paper/supp/note7.tex").read_text()
+    i = n7.index(r"\noindent\textit{Good-strength width.}")
+    edit("paper/supp/note7.tex", [(n7[i:n7.index("\n\n", i) + 2], "")])
     return {
         r"\qquad For each penalty we also report": [
-            ("six descriptive views", "five descriptive views"), ("local versus global batch removal,", "")],
+            ("six descriptive views", "four descriptive views"), ("local versus global batch removal,", ""),
+            ("width of the range of good strengths, ", ""), (width_def(s), "")],
         r"\qquad Local removal is the mean": [(meth_old, "")],
         r"\pp{Disc-2}{": [("Local-versus-global differences varied by task, suggesting no common local-removal explanation for the "
-                            "ranking. ", "")],
+                            "ranking. ", ""),
+                           (" and in how broadly useful strengths are spread over the fitted range", "")],
     }
 
 

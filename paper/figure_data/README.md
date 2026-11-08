@@ -1,4 +1,4 @@
-# Inputs of Figures 1-7 (copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
+# Inputs of Figures 1-6 (copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
 
 | File | Source |
 |---|---|

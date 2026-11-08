@@ -19,3 +19,10 @@ Claims deleted from the paper (not moved). Each ledger row that pointed at one i
   b*) and the sentence that these orders differed from the biology ranking. Replaced in the merged Res-5 by per-task differences
   from plain scVI, the within-task Kendall tau_b against biology at b*, and the range of distances (paper/tools/res5_label_transfer.py).
   The Kendall tau_b values first proposed in the walkthrough (-0.07 and 0.28) compared cross-task mean F1 with mean rank and are not used.
+- Good-strength width (removed 2026-11-08, user choice: it mostly reflected the seed-to-seed spread of the best strength,
+  Spearman 0.61 between width and that strength's interval half-width). Removed: Res-6 (Results labels Res-7 and Res-8 became
+  Res-6 and Res-7), the former Figure 5 (so the placement figure keeps the number 6), the Methods definition, the Disc-2 clause,
+  the Note 5 mention, the Best, Width and Good columns of Supplementary Table S8 and the Supplementary Note 7 paragraph. That
+  paragraph defined the window by the lower end of the best strength's 95% t interval (t quantile 0.975, n=3 fits), flagged
+  windows with a gap (19 of the 96 windows), and noted that the widest window spans 5.5 decades. Recorded in Supplementary Note 10
+  ("Analyses removed"); values remain in the window columns of secondary.csv.
