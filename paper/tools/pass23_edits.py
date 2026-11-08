@@ -45,7 +45,7 @@ EDITS = [  # (old source line, new printed text)
     ('\\item \\replaced[id=P14]{A replication across training seeds kept the sign of all four large within-pair differences (mean rank correlation 0.456, $p=0.00049$).}{[result: whether the replication across training seeds agrees with the sweep: the sign of the four large within-pair differences and the mean rank correlation over the 13 ranked pairs.]}',
      '\\item A replication across training seeds kept the sign of all four large within-pair differences (mean rank correlation 0.456, $p=0.00049$), but on new seeds the Sinkhorn divergence and the pooled critic led, and the discriminator stayed last with the batch-conditioned decoder.'),
     ('\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic \\deleted[id=P22]{ranked highest} with the batch-conditioned decoder, \\added[id=P22]{closely} followed \\deleted[id=P22]{closely} by the Sinkhorn divergence, \\replaced[id=P22]{and}{whereas} MMD \\deleted[id=P22]{ranked highest} with the unconditioned decoder. \\replaced[id=P22]{Task-level}{The task-level} orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard \\replaced[id=P22]{error, so these}{error. These} descriptive rankings \\deleted[id=P22]{therefore} do not establish a consistent ordering across tasks. The secondary summaries \\deleted[id=P22]{also} gave different \\replaced[id=P22]{orders again:}{orders:} MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder, and the local-versus-global readings \\replaced[id=P22]{favoured no single}{did not give a consistent advantage to one} penalty. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part (Res-2b).}',
-     '\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic  with the batch-conditioned decoder, closely followed  by the Sinkhorn divergence, and MMD  with the unconditioned decoder. Task-level orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard error, so these descriptive rankings  do not establish a consistent ordering across tasks. The secondary summaries  gave different orders again: MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder, and the local-versus-global readings favoured no single penalty. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part, but the leaders changed: on the new seeds the Sinkhorn divergence had the best mean rank with the batch-conditioned decoder and the pooled critic with the unconditioned decoder, while the discriminator stayed last with the batch-conditioned decoder (Res-2b; Supplementary Note 13).}'),
+     '\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic  with the batch-conditioned decoder, closely followed  by the Sinkhorn divergence, and MMD  with the unconditioned decoder. Task-level orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard error, so these descriptive rankings  do not establish a consistent ordering across tasks. The secondary summaries  gave different orders again: MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part, but the leaders changed: on the new seeds the Sinkhorn divergence had the best mean rank with the batch-conditioned decoder and the pooled critic with the unconditioned decoder, while the discriminator stayed last with the batch-conditioned decoder (Res-2b; Supplementary Note 13).}'),
     ("\\item \\added[id=P3]{On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried\\added[id=P12]{ and scored on the same data}; scANVI, which uses cell-type labels, was exceeded only on pancreas.}",
      "\\item On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties, and on new training seeds the Sinkhorn divergence and the pooled critic led instead. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried and scored on the same data; scANVI, which uses cell-type labels, was exceeded only on pancreas."),
     ('\\pp{Res-2}{\\replaced{Penalties are ranked by the biology they keep at matched batch removal (Figure 2, Table \\ref{tab:3}).}{The premise check reports how separable batches are before integration and how adversary gradients behave in training (Figure 2).}}',
@@ -217,7 +217,7 @@ def move_tables(s):
     s = tracked_line(s, r"\noindent Every supplementary note and table listed here", [
         ("Supplementary Notes 2--12 and", "Supplementary Notes 2--13 and"),
         ("Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows "
-         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S8, follow "
+         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S7, follow "
          "the main figures.")])
     s = tracked_line(s, r"\item Table S7, single-strength placement",
                      [(r"(the counterpart of Table~\ref{tab:4})", r"(the counterpart of Supplementary Table~\ref{tab:4})")])
@@ -352,42 +352,12 @@ CAP5 = (r"Collapse rate per penalty up to the highest common batch score, with t
         r"rates over all strengths in Supplementary Table S8). One point per real task, in the order of Figure 2a from top to "
         r"bottom within each row, with its nominal exact 95\% interval; black tick, median over the six real tasks, including the "
         r"low-signal immune pair with the batch-conditioned decoder (ringed).")
-CAP6 = (r"Local minus global batch removal (panel c of the main-text Figure 4 until Pass 23) at matched batch removal $b^*$ per penalty, with the batch-conditioned decoder (a) and "
-        r"the unconditioned decoder (b). Local removal is the mean of the three neighbourhood batch metrics and global removal the "
-        r"mean of the two whole-embedding metrics (Supplementary Note 7); positive means stronger local removal. One point per real "
-        r"task, in the order of Figure 2a from top to bottom within each row; black tick, median over the ranked real tasks; the "
-        r"ringed low-signal immune pair with the batch-conditioned decoder is not in the median.")
-FIGS8 = r"""
-\begin{figure}[p]
-\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S8}%
-\includegraphics[width=\textwidth]{figures/figS8.png}
-\caption{CAPTION}
-\end{figure}
-"""
-
-
-def res5_pair(s):
-    """Res-5: the local-versus-global readings shrink to one sentence (figure moved to Supplementary Figure S8, user choice);
-    numbers from figure_data/res5_local_global.json (paper/tools/res5_local_global.py)."""
-    lg = json.loads((ROOT / "paper/figure_data/res5_local_global.json").read_text())
-    assert lg["positive_tasks"] == ["atac_large"] and lg["n_positive_pairs"] == 2
-    line = [accept(l) for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
-    assert len(line) == 1
-    old = line[0].split("In the same penalty order")[0]
-    new = (r"At $b^*$, every penalty removed batch effects more globally than locally on every ranked real task except the large "
-           r"chromatin-accessibility task, where local removal was stronger with both decoders. Within a task and decoder, the six "
-           rf"penalties' local-minus-global readings differed by at most {lg['within_pair_spread_max']:.3f}, whereas their medians "
-           rf"ranged from ${lg['pair_median_min']:.3f}$ to ${lg['pair_median_max']:.3f}$ across the {lg['n_ranked_pairs']} ranked "
-           r"pairs, so the reading describes the task rather than the penalty (Supplementary Figure S8; Methods and Supplementary "
-           r"Note 7). ")
-    return old, new
-
 
 def add_pareto(s):
     """New main Figure 4, the Pareto frontier with its hypervolume (user choice, version A: hypervolume capped at b_common);
-    the old Figure 4 keeps only its collapse panel as Figure 5 (user choice, one topic per figure), its local-versus-global panel
-    moves to Supplementary Figure S8 (user choice: the penalties barely differ) and its hypervolume panel to Figure 4 (rule SI-115,
-    no repeats), so the old Figures 5-6 become Figures 6-7."""
+    the old Figure 4 keeps only its collapse panel as Figure 5 (user choice, one topic per figure), its hypervolume panel moves to
+    Figure 4 (rule SI-115, no repeats) and its local-versus-global panel is removed with that analysis (drop_local_global), so the
+    old Figures 5-6 become Figures 6-7."""
     pf = json.loads((ROOT / "paper/figure_data/pareto_frontier.json").read_text())
     head, body, cap = pareto_text(pf)
     T = p22.TAG
@@ -410,7 +380,8 @@ def add_pareto(s):
            "same batch range, divided by the batch gap that sets $b^*$ so that tasks share one scale; it is the area under the "
            "penalty's Pareto frontier, the best biology among its strengths at or beyond each batch level (Figure 4; uncapped "
            "values in Supplementary Table S8).")]),
-        (r"\pp{Res-5}{", [("(Figure 4c;", "(Supplementary Figure S8;")]),
+        (r"\pp{Res-5}{", [whole(s, r"\pp{Res-5}{", r"\pp{Res-5}{We then report the label-transfer check (Supplementary "
+                                                  r"Figure S3).}")]),
         (r"\item Figure 1:", [("Second cut, after Figure 5.", "Second cut, after Figure 6.")]),
         (r"\pp{Res-6}{", [("(Figure 5)", "(Figure 6)")]),
         ("Across the real tasks, including the low-signal immune pair, good-strength widths", [("(Figure 5;", "(Figure 6;")]),
@@ -425,45 +396,35 @@ def add_pareto(s):
         (r"\caption{Secondary summaries per penalty", [whole(s, r"\caption{Secondary summaries per penalty", "\\caption{" + CAP5 + "}")]),
     ]
     extra = collapse_edits(s)
+    for k, v in drop_local_global(s).items():
+        extra[k] = extra.get(k, []) + v
     for start, pairs in lines + [(k, []) for k in extra if k not in dict(lines)]:
         s = tracked_line(s, start, pairs + extra.pop(start, []))
     assert not extra
-    old5, new5 = res5_pair(s)
-    hit = [l for l in s.split("\n") if accept(l).startswith(old5[:60])]
-    assert len(hit) == 1 and accept(hit[0]).startswith(old5)
-    line5 = rf"\replaced[id={T}]{{{new5.strip()}}}{{{p22.struck(old5.strip())}}} " + accept(hit[0])[len(old5):]
-    assert " ".join(accept(line5).split()) == " ".join((new5 + accept(hit[0])[len(old5):]).split())
+    hit = [l for l in s.split("\n") if accept(l).startswith("At $b^*$, every penalty had more global than local")]
+    assert len(hit) == 1
+    old5, rest = accept(hit[0]).split("In the same penalty order, ", 1)
+    order = ("In the order discriminator, reference critic, pooled critic, barycenter critic, MMD and Sinkhorn divergence, ")
+    line5 = (rf"\deleted[id={T}]{{{p22.struck(old5.strip())}}} \replaced[id={T}]{{{order.strip()}}}{{In the same penalty order,}} "
+             + rest)
+    assert " ".join(accept(line5).split()) == " ".join((order + rest).split())
     s = s.replace(hit[0], line5, 1)
     item5 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure 5:")]
     assert len(item5) == 1
     s = s.replace(item5[0], rf"\item \added[id={T}]{{Figure 4: Pareto frontier per penalty and decoder, the median over the "
                   r"ranked real tasks of the best biology reachable at each scaled batch level, and the hypervolume up to the highest "
                   "common batch score per task.}\n" + item5[0], 1)
-    s7 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure S7, trade-off curves")]
-    assert len(s7) == 1
-    s = s.replace(s7[0], s7[0] + "\n" + rf"\item \added[id={T}]{{Figure S8, local minus global batch removal at $b^*$ per "
-                  "penalty, one panel per decoder, one point per real task and the median.}", 1)
-    hd = rf"Figures S1--\replaced[id={T}]{{S7}}{{S6}}"
-    assert s.count(hd) == 1
-    s = s.replace(hd, rf"Figures S1--\replaced[id={T}]{{S8}}{{S6}}")
-    (ROOT / "paper/supp/figures.tex").write_text((ROOT / "paper/supp/figures.tex").read_text() + FIGS8.replace("CAPTION", CAP6))
-    edit("paper/supp/figures.tex", [("Supplementary Figures S1-S7", "Supplementary Figures S1-S8")])
-    edit("paper/figure_scripts/make_supp_figures.sh", [("for n in 1 2 3 4 5 6 7; do", "for n in 1 2 3 4 5 6 7 8; do"),
-                                                       ("and Figures S1-S7 (PNG", "and Figures S1-S8 (PNG")])
-    edit("paper/supp_items.tex", [("and S12-S14 and Figures S1-S7", "and S12-S14 and Figures S1-S8"),
-                                  ("S12--S14, Figures S1--S7)", "S12--S14, Figures S1--S8)")])
     w = r"\replaced[id=P9]{\replaced[id=P11]{Figures 1--6 are drawn from the sweep analysis"
     assert s.count(w) == 1
     i = s.index(w) + len(r"\replaced[id=P9]")
     j = group(s, i)[1]
     j = group(s, j)[1]  # end of the outer \replaced's second argument
-    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the local-versus-global panel of the " \
-        "former Figure 4 moved to Supplementary Figure S8, so Figures 1--7 are drawn from the sweep analysis.}" + s[j:]
+    s = s[:j] + rf"\added[id={T}]{{ In Pass 23 Figure 4, the Pareto frontier, was added and the local-versus-global analysis " \
+        "(panel c of the former Figure 4) was removed, so Figures 1--7 are drawn from the sweep analysis.}" + s[j:]
     edit("paper/supp/figures.tex", [("is Figure 6a. Every", "is Figure 7a. Every")])
     edit("paper/supp/tableS7.tex", [("and of Figure~6). \\textbf{(a)}", "and of Figure~7). \\textbf{(a)}")])
     edit("paper/tools/make_supp_tables.py", [(r"and of Figure~6). \textbf{(a)}", r"and of Figure~7). \textbf{(a)}")])
     edit("paper/supp/note7.tex", [
-        ("left out of the means of Figure 4c.", "left out of the medians of Supplementary Figure S8."),
         ("(Figure 6a; per-task", "(Figure 7a; per-task"),
         ("The hypervolume is reported per penalty, task and decoder; the analysis record also holds it with the reference point at "
          "biology 0, a sensitivity analysis not used in the paper.",
@@ -571,6 +532,48 @@ def collapse_supp():
          "the uncapped hypervolume is reported beside it (Supplementary Table S8); (h) the restriction of the main-text collapse "
          "rate to the same range, chosen on 7 November 2026 after all collapse rates had been read; the rate over all strengths "
          "is reported beside it (Supplementary Table S8).")])
+
+
+def drop_local_global(s):
+    """The local-versus-global analysis is removed from the paper (user choice, 8 November 2026: the six penalties did not differ
+    on it); the deviation is recorded in Supplementary Note 10. Returns tracked pairs per line; edits the supplement."""
+    meth = [accept(l) for l in s.split("\n") if accept(l).startswith(r"\qquad Local removal is the mean")]
+    assert len(meth) == 1
+    meth_old = meth[0].split("Label transfer holds", 1)[0][len("\\qquad "):]
+    assert meth_old.startswith("Local removal") and meth_old.endswith("at its crossing of $b^*$. ")
+    edit("paper/supp/note7.tex", [(NOTE7_LG, "")])
+    edit("paper/supp/note3.tex", [(r" For the local and global split, $B_{\mathrm{local}}$ is the mean of the three neighbourhood metrics "
+                                   r"(iLISI, kBET and graph connectivity) and $B_{\mathrm{global}}$ the mean of the two whole-embedding "
+                                   r"metrics (PCR and batch ASW), so that $B=(3B_{\mathrm{local}}+2B_{\mathrm{global}})/5$.", "")])
+    edit("paper/supp/note5.tex", [("the hypervolume, whose divisor is the gap (Supplementary Note 7), the summaries of the local versus "
+                                   "global reading and the cross-task label-transfer means",
+                                   "the hypervolume, whose divisor is the gap (Supplementary Note 7), and the cross-task label-transfer "
+                                   "means")])
+    edit("paper/supp/note10.tex", [(r"\item \emph{Limitations.}",
+                                    r"\item \emph{An analysis removed.} The ranking-analysis rules also defined a local-versus-global "
+                                    r"reading: at $b^*$, the mean of the three neighbourhood batch metrics minus the mean of the two "
+                                    r"whole-embedding batch metrics. It is not reported: the first author removed it on 8 November 2026, "
+                                    r"after all scores had been read, because the six penalties did not differ on it within a task. "
+                                    r"Its values remain in the analysis record (\texttt{local\_minus\_global} in "
+                                    r"\texttt{paper/figure\_data/paper\_numbers.json})." + "\n" + r"\item \emph{Limitations.}")])
+    return {
+        r"\qquad For each penalty we also report": [
+            ("six descriptive views", "five descriptive views"), ("local versus global batch removal,", "")],
+        r"\qquad Local removal is the mean": [(meth_old, "")],
+        r"\pp{Disc-2}{": [("Local-versus-global differences varied by task, suggesting no common local-removal explanation for the "
+                            "ranking. ", "")],
+    }
+
+
+NOTE7_LG = (r"\noindent\textit{Local versus global batch removal.} Local removal $L$ is the mean of the three neighbourhood batch "
+            r"metrics (graph iLISI, kBET and graph connectivity) and global removal $G$ the mean of the two whole-embedding metrics "
+            r"(principal-component regression on batch and batch ASW), so that the batch score is exactly $B=(3L+2G)/5$. For each "
+            r"penalty, task and decoder, $L$ and $G$ are read on their curves of seed means at the same crossing as the biology "
+            r"reading, with the same interpolation weights, and the value reported is $L-G$. At the crossing $B=b^*$, so "
+            r"$L-G=2.5\,(L-b^*)$: at matched batch removal, more local removal means less global removal. A penalty that does not "
+            r"reach $b^*$ has no value. Low-signal pairs are shown separately (Part B of Supplementary Table S8) and left out of the "
+            r"means of Figure 4c. Supplementary Table S8 also gives $L$ and $G$, recomputed from the per-fit metrics on the same "
+            r"curves and equal to the analysis record's $L-G$ within $10^{-9}$." + "\n\n")
 
 
 def main():
