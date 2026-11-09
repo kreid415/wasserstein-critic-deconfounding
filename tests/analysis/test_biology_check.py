@@ -422,3 +422,22 @@ def test_command_line_stops(world, tmp_path, monkeypatch, case, match):  # test-
     with pytest.raises(P.PreregError, match=match):
         B.main(argv)
     assert not (tmp_path / "out" / "tables").exists()
+
+
+def test_strengths_option(world, cli, tmp_path):  # test-reason: --strengths replaces the matched strengths of the penalty fits, is recorded with its SHA-256, and a file that misses a row stops the run
+    matched = world["L"]["matched"]
+    assert {lam for (t, _, _), lam in matched.items() if t == "sim1"} != {10.0}       # the strengths below differ from the matched ones
+    assert json.load(open(os.path.join(cli["out"], "biology_check.json")))["strengths"] is None
+    rows = pd.DataFrame([(t, c, a, 10.0) for (t, c, a) in matched], columns=["task", "cond", "arm", "lam"])
+    path, out = str(tmp_path / "strengths.csv"), str(tmp_path / "out")
+    rows.to_csv(path, index=False)
+    argv = ["--inputs", world["inputs"], "--prepped-dir", world["prepped"], "--out-dir", out, "--jobs", "1", "--tasks", "sim1", "--strengths", path]
+    assert B.main(argv) == 0
+    rec = json.load(open(os.path.join(out, "biology_check.json")))
+    assert rec["strengths"] == dict(path=path, sha256=P.sha256(path)) and rec["argv"] == argv
+    assert len(rec["matched"]) == 12 and {m["lam"] for m in rec["matched"]} == {10.0}
+    fits = pd.read_csv(os.path.join(out, "tables", "sim1_fits.csv"))
+    assert set(fits.lam[fits.method.isin(P.ADV_ARMS)]) == {10.0} and (fits.method.isin(P.ADV_ARMS).sum() == 36)
+    rows.iloc[1:].to_csv(path, index=False)
+    with pytest.raises(P.PreregError, match="strengths must list"):
+        B.main(argv[:5] + [str(tmp_path / "out2")] + argv[6:])

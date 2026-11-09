@@ -19,7 +19,11 @@ their SHA-256 checks are the sweep analysis's own. Expression and labels: `D/pre
   x task: the single sweep strength used for label transfer in `docs/SWEEP_ANALYSIS.md` section 3 item 7 (spec 9; the
   "Supp Note 9" rule): the failure-free strength whose seed-mean batch score is nearest b*, ties to the smaller strength
   (`analysis_sweep.sweep_targets`). The choice uses batch scores only; no readout of this check takes part in it. All three seeds
-  (100, 101, 102). Low-signal pairs are included and flagged.
+  (100, 101, 102). Low-signal pairs are included and flagged. **Changed on 2026-11-09, after the first results of this check had been
+  read:** the penalty fits are read at the first crossing of b* instead (`--strengths CSV`, written by `paper/tools/first_crossing_strength.py` of
+  the paper repository: from plain scVI up the penalty's strengths, the first point whose seed-mean batch score is at least b*; of that
+  point and the one before it the one nearer b*, ties to the smaller strength, or that point when the one before is plain scVI), and
+  `biology_check.json` records the file's path and SHA-256; without `--strengths` the script still uses the rule above.
 - **Plain scVI**: both decoders, seeds 100-102 (the reference, section 3).
 - **Baselines**: every scored row of the committed baseline run list, at each of its settings: scvi_adv, scANVI, sysVI (each setting
   x seeds 0-4), Harmony, Scanorama, PCA (one run per setting). A setting is (method, strength or knob value, latent dimension).

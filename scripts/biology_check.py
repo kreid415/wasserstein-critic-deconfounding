@@ -4,7 +4,9 @@ Per fit and cell type: neighbourhood purity, label-transfer recall and confusion
 15 nearest neighbours; each as a difference from plain scVI. Exploratory and descriptive: no new fits, no test.
 
 Usage: python scripts/biology_check.py --inputs <dir written by sweep_inputs.py> --prepped-dir <dir of <task>__scib.h5ad>
-           --out-dir <new directory> [--jobs 6] [--tasks T ...]
+           --out-dir <new directory> [--jobs 6] [--tasks T ...] [--strengths CSV]
+--strengths: CSV with columns task, cond, arm, lam (one row per penalty, task and decoder of the inputs); the penalty fits use these
+strengths instead of the matched ones. The record keeps the file's path and SHA-256.
 """
 import argparse
 import importlib.metadata
@@ -171,8 +173,18 @@ def load_sweep(inputs_dir):
                 coverage=pd.read_csv(os.path.join(i, "baseline_coverage.csv")))
 
 
+def read_strengths(path, matched):
+    """--strengths: {(task, cond, arm): strength} from a CSV with columns task, cond, arm, lam; it must list exactly the keys of `matched`."""
+    s = pd.read_csv(path, float_precision="round_trip")      # the default parser can change the last digit, and the fits are picked by exact equality
+    P._require({"task", "cond", "arm", "lam"} <= set(s.columns) and s.lam.notna().all(), f"{path}: strengths need columns task, cond, arm, lam and a strength in every row")
+    got = {(t, int(c), a): float(lam) for t, c, a, lam in zip(s.task, s.cond, s.arm, s.lam)}
+    P._require(len(got) == len(s) and got.keys() == matched.keys(),
+               f"{path}: strengths must list each penalty, task and decoder of the inputs exactly once ({len(s)} rows, {len(matched)} expected)")
+    return got
+
+
 def select_fits(out, matched, latents):
-    """The fits of the check (docs section 1): penalties at the matched strength, plain scVI, every scored baseline row."""
+    """The fits of the check (docs section 1): penalties at the matched strength (or the --strengths one), plain scVI, every scored baseline row."""
     ok = out[out.status == "ok"]
     a1 = ok[ok.experiment == S.EXP]
     pen = a1[a1.arm.isin(P.ADV_ARMS)]
@@ -349,12 +361,14 @@ def main(argv=None):
     ap.add_argument("--out-dir", required=True, help="must not exist")
     ap.add_argument("--jobs", type=int, default=6)
     ap.add_argument("--tasks", nargs="+", default=None, help="default: every task of the inputs")
+    ap.add_argument("--strengths", default=None, help="CSV with columns task, cond, arm, lam: the penalty strengths to use instead of the matched ones")
     a = ap.parse_args(argv)
     P._require(not os.path.exists(a.out_dir), f"output directory {a.out_dir} exists")
     L = load_sweep(a.inputs)
     tasks = sorted(set(a.tasks or L["info"]["tasks"]))
     P._require(set(tasks) <= set(L["info"]["tasks"]), f"tasks {sorted(set(tasks) - set(L['info']['tasks']))} are not in the inputs")
-    fits = select_fits(L["out"], L["matched"], L["latents"])
+    strengths = read_strengths(a.strengths, L["matched"]) if a.strengths else L["matched"]
+    fits = select_fits(L["out"], strengths, L["latents"])
     prepped = {t: os.path.join(a.prepped_dir, f"{t}__scib.h5ad") for t in tasks}
     for t in tasks:      # every stop that does not need a fit comes before the first one
         _check_counts(t, fits[fits.task == t], L["coverage"])
@@ -375,7 +389,7 @@ def main(argv=None):
     summarise_by_method(summary, P.REAL_TASKS).to_csv(os.path.join(tables, "summary_by_method.csv"), index=False)
     B = L["out"].set_index("tag").B
     matched = []
-    for (t, cond, arm), lam in sorted(L["matched"].items()):
+    for (t, cond, arm), lam in sorted(strengths.items()):
         if t in tasks:
             target = L["targets"][f"{t}|{cond}"]
             score = float(B[fits.tag[(fits.task == t) & (fits.method == arm) & (fits.decoder == DECODER[cond])]].mean())
@@ -389,6 +403,7 @@ def main(argv=None):
                   constants=dict(K=K, RARE_FRAC=RARE_FRAC, N_MARKERS=N_MARKERS, MIN_MARKER_CELLS=MIN_MARKER_CELLS,
                                  MARKER_TASKS=list(MARKER_TASKS)),
                   inputs=sha, prepped={p: P.sha256(p) for p in prepped.values()}, matched=matched,
+                  strengths=dict(path=a.strengths, sha256=P.sha256(a.strengths)) if a.strengths else None,
                   counts={t: {m: int(n) for m, n in fits[fits.task == t].method.value_counts().sort_index().items()} for t in tasks})
     with open(os.path.join(a.out_dir, "biology_check.json"), "w") as f:
         json.dump(record, f, indent=1, sort_keys=True, allow_nan=False)

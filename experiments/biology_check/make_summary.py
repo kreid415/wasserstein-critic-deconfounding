@@ -72,11 +72,14 @@ worst = rp.loc[rp.rare_purity_diff_mean.idxmin()]
 rare_tasks = sorted(set(rp.task))
 n_rare_types = {t: int(fits[fits.task == t].n_rare.iloc[0]) for t in rec["tasks"]}
 
+st = rec.get("strengths")     # present from 2026-11-09 (null without --strengths)
+at = (f"the strengths of `{os.path.basename(st['path'])}` (SHA-256 {st['sha256'][:12]}; docs/BIOLOGY_CHECK.md section 1)" if st
+      else "the label-transfer strength (batch score nearest b*)")
 L = []
 L.append("# Direct biology check on the saved sweep embeddings (reviewer comment R2.6)\n")
 L.append(f"Exploratory and descriptive; rules in `docs/BIOLOGY_CHECK.md` (written after sweep scores were read, before any value of this "
          f"check was computed). Code commit `{rec['git_commit'][:7]}` (tree clean: {not rec['git_dirty']}). {n_fits} saved fits on "
-         f"{len(rec['tasks'])} tasks; no new fits. Penalties at the label-transfer strength (batch score nearest b*), seeds 100-102; "
+         f"{len(rec['tasks'])} tasks; no new fits. Penalties at {at}, seeds 100-102; "
          "plain scVI both decoders; every scored baseline setting. 15 nearest neighbours in the latent.\n")
 L.append("Differences are from plain scVI (penalties: same decoder and seed; baselines: conditioned plain scVI, mean of 3 seeds). "
          "Values: mean over tasks of the per-task seed means; 'seed SD' = mean over the 6 real tasks of the SD over the 3 seeds (corrected 2026-11-05; the first version of this page "
