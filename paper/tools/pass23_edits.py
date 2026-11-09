@@ -12,11 +12,13 @@ Res-3: a main claim with numbers from paper/tools/res3_curve_numbers.py leads; t
 the full range of the other penalties; the repeated 'no failed fits' sentences go (Res-1 says it); the Figure 3 caption follows
 the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6).
 Figure 3 then became a dot summary (user choice): biology minus plain scVI at b* and at the strongest setting; the curve
-figure moved to Supplementary Figure S7 (figure_scripts/figS7.py); Figure 4 and 5 captions now point to Figure 2a for the
-task order. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
+figure took the number of the best-of-k figure, Supplementary Figure S6 (figure_scripts/figS6.py); Figure 4 and 5 captions now point
+to Figure 2a for the task order. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
 Figure 6: panel a (expected best score against number of tries) is cut from the main text (user choice 2026-11-09); the figure
-keeps the former panel b, and Supplementary Figure S6 and the Res-7 text keep the best-of-k comparison (cut_fig6a).
+keeps the former panel b (cut_fig6a). The same day the rest of the best-of-k analysis followed (drop_best_of_k): Res-8, its Methods
+definition, the Discussion and Conclusions sentences that cite it, Supplementary Figure S6 (best of k per task), Supplementary Table S7
+panel b, the Note 7 paragraph and the Note 5 and 10 mentions; Note 10 records it under "Analyses removed".
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
 Run from the repository root:  python paper/tools/pass23_edits.py   (PASS23_ROOT overrides the root of the edited files)
@@ -49,15 +51,15 @@ EDITS = [  # (old source line, new printed text)
     ('\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic \\deleted[id=P22]{ranked highest} with the batch-conditioned decoder, \\added[id=P22]{closely} followed \\deleted[id=P22]{closely} by the Sinkhorn divergence, \\replaced[id=P22]{and}{whereas} MMD \\deleted[id=P22]{ranked highest} with the unconditioned decoder. \\replaced[id=P22]{Task-level}{The task-level} orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard \\replaced[id=P22]{error, so these}{error. These} descriptive rankings \\deleted[id=P22]{therefore} do not establish a consistent ordering across tasks. The secondary summaries \\deleted[id=P22]{also} gave different \\replaced[id=P22]{orders again:}{orders:} MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder, and the local-versus-global readings \\replaced[id=P22]{favoured no single}{did not give a consistent advantage to one} penalty. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part (Res-2b).}',
      '\\pp{Disc-1}{The penalty with the best mean rank depended on the decoder: the pooled critic  with the batch-conditioned decoder, closely followed  by the Sinkhorn divergence, and MMD  with the unconditioned decoder. Task-level orders varied, and many neighbouring biology readings were within a leave-one-seed-out standard error, so these descriptive rankings  do not establish a consistent ordering across tasks. The secondary summaries  gave different orders again: MMD had relatively low collapse rates despite ranking near the bottom with the batch-conditioned decoder. This exploratory comparison on eight tasks with three seeds (100--102) supports a decoder-specific description of the sweep; the replication across training seeds, on new seeds of the same tasks, kept the four large within-pair gaps and agreed with the pair orders in part, but the leaders changed: on the new seeds the Sinkhorn divergence had the best mean rank with the batch-conditioned decoder and the pooled critic with the unconditioned decoder, while the discriminator stayed last with the batch-conditioned decoder (Res-2b; Supplementary Note 13).}'),
     ("\\item \\added[id=P3]{On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried\\added[id=P12]{ and scored on the same data}; scANVI, which uses cell-type labels, was exceeded only on pancreas.}",
-     "\\item On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties, and on new training seeds the Sinkhorn divergence and the pooled critic led instead. At equal numbers of tries with the batch-conditioned decoder, the penalties exceeded Harmony, Scanorama and sysVI on most real tasks and plain scVI mainly when several strengths were tried and scored on the same data; scANVI, which uses cell-type labels, was exceeded only on pancreas."),
+     "\\item On eight tasks of the single-cell integration benchmark, six alignment penalties added to one scVI model kept similar biology at matched batch removal: the best mean rank was the pooled critic's with the batch-conditioned decoder (2.20) and MMD's with the unconditioned decoder (2.17), but 160 of the 195 within-pair differences were under 0.02, so the ranking does not separate most penalties, and on new training seeds the Sinkhorn divergence and the pooled critic led instead. At the strength chosen on other task families with the batch-conditioned decoder, the penalties exceeded plain scVI on 3 to 5 of six real tasks (median difference $+0.006$), whereas Harmony, Scanorama and sysVI exceeded it on 1, 0 and 1 of six."),
     ('\\pp{Res-2}{\\replaced{Penalties are ranked by the biology they keep at matched batch removal (Figure 2, Table \\ref{tab:3}).}{The premise check reports how separable batches are before integration and how adversary gradients behave in training (Figure 2).}}',
      '\\pp{Res-2}{Penalties are ranked by the biology they keep at matched batch removal (Figure 2; Supplementary Table \\ref{tab:3}).}'),
     ('\\item Table \\ref{tab:3}: \\replaced{benchmark ranking: mean rank per penalty and decoder over the real tasks that are not low-signal, range over tasks, \\added{mean biology at $b^*$, }simulation ranks, tasks not ranked, tasks ranked.}{primary results (primary comparison, trade-off area, collapse rate, per decoder): estimate, interval, probabilities, call, evaluable tasks.}',
      None),
     ('The real-task curves overlapped near plain scVI and around many matched \\replaced[id=P22]{readings}{readings,} but differed more at stronger penalties (Figure 3; curve construction in Supplementary Note 5). With the batch-conditioned decoder, the lung and pancreas curves were close near $b^*$, whereas the discriminator lost more biology at stronger settings. On the large chromatin-accessibility task, the barycenter critic reached a lower maximum batch score, 0.674, than the reference critic, \\replaced[id=P22]{0.815; this}{0.815. This} shorter batch-removal range did not reflect failed fits or failure to reach $b^*$. At the strongest fitted setting on lung with the batch-conditioned decoder, the barycenter critic ended at batch and biology scores of 0.466 and 0.397, below plain scVI on both scores. With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas several penalties increased both scores over part of their strength range. \\replaced[id=P22]{A}{Thus, a} curve could \\added[id=P22]{therefore} turn back or lose biology after reaching the matched level; no real-task curve ended early because of failed fits.',
-     "The penalties kept similar biology up to the matched level and differed at stronger settings (Figure 3; trade-off curves in Supplementary Figure S7, built as in Supplementary Note 5): over the 11 ranked real task and decoder pairs, biology at $b^*$ differed between penalties by a median of 0.025, against 0.213 at each penalty's strongest fitted setting. The barycenter critic reached the lowest biology score of the six penalties in all 12 real task and decoder pairs (0.287 to 0.516); on lung with the batch-conditioned decoder its strongest setting ended below plain scVI on both scores (batch 0.466 and biology 0.397, against 0.633 and 0.722). It also had the shortest batch-removal range on the large chromatin-accessibility task with the batch-conditioned decoder (highest batch score 0.674; the other penalties 0.683 to 0.834). With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas every penalty raised both scores over part of its strength range."),
+     "The penalties kept similar biology up to the matched level and differed at stronger settings (Figure 3; trade-off curves in Supplementary Figure S6, built as in Supplementary Note 5): over the 11 ranked real task and decoder pairs, biology at $b^*$ differed between penalties by a median of 0.025, against 0.213 at each penalty's strongest fitted setting. The barycenter critic reached the lowest biology score of the six penalties in all 12 real task and decoder pairs (0.287 to 0.516); on lung with the batch-conditioned decoder its strongest setting ended below plain scVI on both scores (batch 0.466 and biology 0.397, against 0.633 and 0.722). It also had the shortest batch-removal range on the large chromatin-accessibility task with the batch-conditioned decoder (highest batch score 0.674; the other penalties 0.683 to 0.834). With the unconditioned decoder, the chromatin-accessibility curves lost biology as batch removal increased, whereas on pancreas every penalty raised both scores over part of its strength range."),
     ("\\caption{\\replaced[id=P10]{Batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; no real-task curve ended early because of failed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, each standard tool at its best setting by selection score (0.4 batch plus 0.6 biology) among the settings run; scANVI uses cell-type labels. Panels in a column share axes.}{MOCK -- synthetic data. Batch removal against biology kept in the six real tasks (columns) for the conditioned (a) and unconditioned (b) decoder. Each line joins plain scVI (star) and one penalty's sweep strengths by seed-mean scores (three seeds); a curve ending early marks collapsed fits. Dashed line, matched batch removal $b^*$. Grey open symbols, standard tools at their best setting.}}",
-     "\\caption{Biology kept by each penalty relative to plain scVI, at the matched batch removal $b^*$ (filled dots) and at the penalty's strongest fitted setting (open dots), with the batch-conditioned (a) and the unconditioned decoder (b). One dot per real task: biology score minus plain scVI's with the same decoder (higher is better); grey line, no change. Filled dots are drawn for the ranked tasks only (the immune task with the batch-conditioned decoder is low-signal); open dots for all six real tasks. The full trade-off curves are in Supplementary Figure S7.}"),
+     "\\caption{Biology kept by each penalty relative to plain scVI, at the matched batch removal $b^*$ (filled dots) and at the penalty's strongest fitted setting (open dots), with the batch-conditioned (a) and the unconditioned decoder (b). One dot per real task: biology score minus plain scVI's with the same decoder (higher is better); grey line, no change. Filled dots are drawn for the ranked tasks only (the immune task with the batch-conditioned decoder is low-signal); open dots for all six real tasks. The full trade-off curves are in Supplementary Figure S6.}"),
     ("\\pp{Res-3}{Figure 3 shows each method's trade-off between batch removal and biology in every real task.}",
      '\\pp{Res-3}{Figure 3 compares the biology each penalty keeps at the matched level with the biology it keeps at its strongest setting.}'),
 ]
@@ -158,7 +160,7 @@ MOVES = [  # (start marker, next marker, label, supplementary number, word fixes
      "it repeated Figure 2b and Supplementary Table S6"),
     ("Table 4\n", "Supplementary Table S10 (Pass 9)\n", "tab:4", "S14",
      [("real task, conditioned decoder,", "real task, batch-conditioned decoder,", 1)],
-     "it repeated Figure 6 and the Res-7 counts"),
+     "it repeated Figure 6 and the Res-6 counts"),
 ]
 OLD_NUMBER = {"tab:1": 1, "tab:3": 2, "tab:4": 3}  # printed numbers before Pass 23
 
@@ -219,7 +221,7 @@ def move_tables(s):
     s = tracked_line(s, r"\noindent Every supplementary note and table listed here", [
         ("Supplementary Notes 2--12 and", "Supplementary Notes 2--13 and"),
         ("Supplementary Note 1, Tables S6, S7 and S9 and Figures S1--S6 follow the main figures and tables, and Table S10 follows "
-         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S7, follow "
+         r"Table~\ref{tab:4}.", "Table S10, then Supplementary Note 1, Tables S6, S7, S9 and S12--S14 and Figures S1--S6, follow "
          "the main figures.")])
     s = tracked_line(s, r"\item Table S7, single-strength placement",
                      [(r"(the counterpart of Table~\ref{tab:4})", r"(the counterpart of Supplementary Table~\ref{tab:4})")])
@@ -247,8 +249,8 @@ def move_tables(s):
     assert s.count(old_n) == 1
     s = s.replace(old_n, r"Pass 13 numbered the main-text tables 1 to 3 (the methods, the ranking and the placement table; since "
                   r"Pass 23 they are Supplementary Tables \ref{tab:1}, \ref{tab:3} and \ref{tab:4})")
-    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures S1-S6", "Tables S6, S7, S9 and S12-S14 and Figures S1-S7"),
-                                  ("(Note 1, Tables S6, S7 and S9, Figures S1--S6)", "(Note 1, Tables S6, S7, S9 and S12--S14, Figures S1--S7)"),
+    edit("paper/supp_items.tex", [("Tables S6, S7 and S9 and Figures S1-S6", "Tables S6, S7, S9 and S12-S14 and Figures S1-S6"),
+                                  ("(Note 1, Tables S6, S7 and S9, Figures S1--S6)", "(Note 1, Tables S6, S7, S9 and S12--S14, Figures S1--S6)"),
                                   ("\\input{supp/tableS9}\n", "\\input{supp/tableS9}\n" + "".join(
                                       f"\\clearpage\n\\input{{supp/table{n}}}\n" for n in ("S12", "S13", "S14")))])
     edit("paper/supp/tableS6.tex", [("Table~\\ref{tab:3} gives the mean ranks", "Supplementary Table~\\ref{tab:3} gives the mean ranks")])
@@ -266,17 +268,18 @@ def move_tables(s):
     return s
 
 
-FIGS7 = r"""
+FIGS6 = r"""
 \begin{figure}[p]
-\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S7}%
-\includegraphics[width=\textwidth]{figures/figS7.png}
-\caption{Trade-off curves (the main-text Figure 3 until Pass 23): batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. Panels in a column share axes. Figure 3 summarises these curves at $b^*$ and at the strongest setting.}
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S6}%
+\includegraphics[width=\textwidth]{figures/figS6.png}
+\caption{Trade-off curves (the main-text Figure 3 until Pass 23): batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. Panels in a column share axes. Figure 3 summarises these curves at $b^*$ and at the strongest setting.}\label{fig:s6}
 \end{figure}
 """
 
 
 def move_figure3(s):
-    """Figure 3 becomes the dot summary of Res-3; the curve figure moves to Supplementary Figure S7 (user choice)."""
+    """Figure 3 becomes the dot summary of Res-3; the curve figure moves to Supplementary Figure S6, the number of the best-of-k
+    figure that drop_best_of_k deletes (user choice)."""
     for start in (r"\caption{Secondary summaries per penalty", r"\caption{Width of each penalty's range"):
         s = tracked_line(s, start, [("in the order of Figure 3 from top to bottom", "in the order of Figure 2a from top to bottom")])
     s = tracked_line(s, r"\item Figure 3:", [(accept([l for l in s.split("\n") if accept(l).startswith(r"\item Figure 3:")][0])
@@ -284,52 +287,34 @@ def move_figure3(s):
                                                "biology score minus plain scVI's per penalty and decoder, one dot per real task, at "
                                                "matched batch removal $b^*$ and at the strongest fitted setting.")])
     item_s6 = [l for l in s.split("\n") if accept(l).startswith(r"\item Figure S6, best of $k$ settings per task")]
-    assert len(item_s6) == 1
-    s = s.replace(item_s6[0], item_s6[0] + "\n" + rf"\item \added[id={p22.TAG}]{{Figure S7, trade-off curves (the former main-text "
+    assert len(item_s6) == 1  # the number passes to the trade-off figure; the best-of-k figure is deleted in drop_best_of_k
+    old_item = p22.struck(accept(item_s6[0]).strip()[len(r"\item "):])
+    s = s.replace(item_s6[0], rf"\item \replaced[id={p22.TAG}]{{Figure S6, trade-off curves (the former main-text "
                   "Figure 3): batch score against biology score per penalty, task and decoder, with plain scVI, $b^*$ and the "
-                  "strongest fitted setting marked.}", 1)
-    hd = [l for l in s.split("\n") if l.startswith(r"\hd{Supplementary material}")]
-    assert len(hd) == 1 and hd[0].count("Figures S1--S6") == 1
-    s = s.replace(hd[0], hd[0].replace("Figures S1--S6", rf"Figures S1--\replaced[id={p22.TAG}]{{S7}}{{S6}}"))
-    edit("paper/supp/figures.tex", [("Supplementary Figures S1-S6", "Supplementary Figures S1-S7")])
-    (ROOT / "paper/supp/figures.tex").write_text((ROOT / "paper/supp/figures.tex").read_text() + FIGS7)
-    edit("paper/figure_scripts/make_supp_figures.sh", [("for n in 1 2 3 4 5 6; do", "for n in 1 2 3 4 5 6 7; do"),
-                                                       ("and Figures S1-S6 (PNG", "and Figures S1-S7 (PNG")])
+                  rf"strongest fitted setting marked.}}{{{old_item}}}", 1)
+    figs = (ROOT / "paper/supp/figures.tex").read_text()
+    i = figs.index(r"\renewcommand{\thefigure}{S6}%")
+    b, e = figs.rindex("\\begin{figure}[p]", 0, i), figs.index("\\end{figure}", i) + len("\\end{figure}")
+    assert "figures/figS6.png" in figs[b:e] and r"\caption{Best of $k$ settings per task." in figs[b:e] and figs[e:] == "\n"
+    (ROOT / "paper/supp/figures.tex").write_text(figs[:b] + FIGS6.strip("\n") + figs[e:])
     return s
 
 
 def cut_fig6a(s):
     """Panel a of Figure 6 (expected best selection score against number of tries) is cut from the main text (user choice,
     9 November 2026: a curve that rises with k only shows that tuning helps); the figure keeps the former panel b and becomes
-    one panel. Supplementary Figure S6 keeps the per-task curves and takes the caption details, the Results keep the numbers as
-    text. The Res-6 reference to Figure 6b is edited in move_tables, because that line is rewritten there."""
+    one panel. The rest of the best-of-k analysis follows in drop_best_of_k. The Res-6 reference to Figure 6b is edited in
+    move_tables, because that line is rewritten there."""
     cap = [accept(l).strip() for l in s.split("\n") if accept(l).startswith(r"\caption{Placement against plain scVI and standard tools")]
     assert len(cap) == 1
     a, b = cap[0].index("(a) "), cap[0].index("(b) ")
     assert "(b) Batch against biology score for each real task" in cap[0] and cap[0].count("(a) ") == cap[0].count("(b) ") == 1
-    S6 = "(per-task curves in Supplementary Figure S6)"
     for start, pairs in [
         (r"\caption{Placement against plain scVI and standard tools", [(cap[0][a:b + 4], "")]),
-        (r"\pp{Res-8}{", [("(Figure 6a; per-task curves in Supplementary Figure S6)", S6)]),
-        (r"\item With the batch-conditioned decoder, a penalty's expected best selection score at one try", [("(Figure 6a)", S6)]),
-        (r"\item Figure S6, best of $k$ settings per task",
-         [("the mean of these curves over the six real tasks is Figure 6a.",
-           "the Results use the mean of these curves over the six real tasks, batch-conditioned decoder.")]),
         (r"\item Figure 6:", [("(a) expected best selection score against number of tries, mean over the six real tasks of each "
                                "method's per-task curve; (b) batch", "batch")]),
     ]:
         s = tracked_line(s, start, pairs)
-    edit("paper/supp/note7.tex", [("with the number of tasks shown (Figure 6a; per-task curves in Supplementary Figure S6)",
-                                   r"with the number of tasks in \texttt{paper/figure\_data/best\_of\_k\_real\_mean.csv} "
-                                   "(per-task curves in Supplementary Figure S6)")])
-    edit("paper/supp/figures.tex", [(
-        "The mean of the batch-conditioned curves over the six real tasks is Figure 6a. ",
-        "The Results use the mean of the batch-conditioned curves over the six real tasks: plain scVI scored 0.648; at $k=1$ every "
-        "penalty except MMD scored below plain scVI, and the other penalties first exceeded it at $k=2$ (pooled critic, barycenter "
-        "critic, Sinkhorn divergence), 3 (reference critic) and 4 (discriminator). That mean covers the tasks where a method has at "
-        "least $k$ settings, so Scanorama's mean at $k=6$ covers five tasks. Harmony and sysVI have six settings and each penalty "
-        "ten (the discriminator, the reference critic and the pooled critic have an eleventh on the immune task only) or, for the "
-        "Sinkhorn divergence, twelve; the curves here stop at $k=6$, the number of settings of Harmony, Scanorama and sysVI. ")])
     return s
 
 
@@ -440,7 +425,7 @@ def add_pareto(s):
             line = rf"\deleted[id={T}]{{{p22.struck(a)}}}"
         assert accept(line).strip() in ("", r"\pp{}{}")
         s = s.replace(hit[0], line, 1)
-    for old, new in (("Res-7", "Res-6"), ("Res-8", "Res-7")):  # Res-6 (good-strength width) removed; later labels close the gap
+    for old, new in (("Res-7", "Res-6"),):  # Res-6 (good-strength width) removed; the next label closes the gap (Res-8 goes: drop_best_of_k)
         hit = [l for l in s.split("\n") if accept(l).startswith(rf"\pp{{{old}}}{{")]
         assert len(hit) == 1
         _, j = group(hit[0], len(r"\pp"))
@@ -673,6 +658,126 @@ def merge_res5(s):
     }
 
 
+def drop_s7b():
+    """Supplementary Table S7 loses panel b (real tasks on which a penalty's expected best selection score beats a tool's at k = 1
+    and k = 6), in the generator and in the table it wrote; the caption keeps its two references to Supplementary Table S14."""
+    mt = (ROOT / "paper/tools/make_supp_tables.py").read_text()
+    edit("paper/tools/make_supp_tables.py", [
+        (mt[mt.index("def tabular_s7b(cond=0):"):mt.index("def make_s7():")], ""),
+        ("  placement_summary.csv                     Table S7b (real tasks on which a penalty beats a tool, k = 1 and k = 6)\n", ""),
+        ("  transfer_strength.csv, single_methods.csv Table S7a (selection score", "  transfer_strength.csv, single_methods.csv Table S7 (selection score"),
+        ("    b = tabular_s7b(cond)\n", ""),
+        (r"\textbf{(a)} Mean selection score ", "Mean selection score "),
+        ('''           r"\\textbf{(b)} Number of real tasks on which the penalty's expected best selection score among $k$ randomly drawn settings exceeds "
+           r"that of the tool at $k$ settings of its own, $k=1$ and $k=6$; Scanorama at $k=6$ is compared on the five tasks where all six of its settings exist "
+           r"(the 80-neighbour setting could not be fitted on the large chromatin-accessibility task). Counts are descriptive (Supplementary Notes 7 and 8).")''',
+         '''           r"Counts are descriptive (Supplementary Notes 7 and 8).")'''),
+        (r'''r"\textbf{(a)}\\[2pt]", a, r"\\[6pt]", r"\textbf{(b)}\\[2pt]", b, r"\end{table}"]''', 'a, r"\\end{table}"]')])
+    t7 = (ROOT / "paper/supp/tableS7.tex").read_text()
+    cap_b, cap_end = t7.index(r" \textbf{(b)} Number of real tasks"), t7.index("Counts are descriptive")
+    edit("paper/supp/tableS7.tex", [
+        (t7[t7.index("\\\\[6pt]\n\\textbf{(b)}"):t7.index(r"\end{table}")], ""),
+        (t7[cap_b:cap_end - 1], ""),
+        (r"\textbf{(a)} Mean selection score ", "Mean selection score "),
+        ("\\textbf{(a)}\\\\[2pt]\n", "")])
+
+
+def drop_best_of_k(s):
+    """The best-of-k analysis is removed from the paper (user choice, 9 November 2026): the expected best selection score among k of
+    a method's settings drawn at random, k = 1 to 6 (equal numbers of tries). It mostly shows that tuning a strength helps, its
+    one-try value depends on the width of the strength grid (0.1 to 3,000), and Res-6 (each method at one strength chosen on other
+    task families) already compares the penalties with plain scVI and the standard tools. Removed: Res-8 (this analysis' result
+    paragraph), its Methods definition, Supplementary Figure S6 (the trade-off curves take its number, move_figure3), Supplementary
+    Table S7 panel b, the Note 7 paragraph and the Note 5 and 10 mentions. The Abstract, Discussion and Conclusions sentences that
+    cited it are rewritten on Res-3 and Res-6, with numbers that are already in the paper. Note 10 records the removal."""
+    T = p22.TAG
+    head = [l for l in s.split("\n") if accept(l).startswith(r"\pp{Res-8}{")]
+    assert len(head) == 1
+    body = accept(head[0]).strip()[len(r"\pp{Res-8}{"):-1]
+    s = s.replace(head[0], rf"\pp{{\deleted[id={T}]{{Res-8}}}}{{\deleted[id={T}]{{{p22.struck(body)}}}}}", 1)
+    for start in (r"\item Rule: each method gets the expected best selection score",  # the item struck in Pass 22 stays as it is
+                  r"\item With the batch-conditioned decoder, a penalty's expected best selection score at one try"):
+        hit = [l for l in s.split("\n") if accept(l).startswith(start)]
+        assert len(hit) == 1
+        s = s.replace(hit[0], p22.rewrite(hit[0], None), 1)
+    for start, pairs in [
+        (r"\item With this decoder, a penalty at one strength drawn at random",
+         [("a penalty at one strength drawn at random exceeded plain scVI's selection score on at most 3 of six real tasks, and the best "
+           "of six strengths on 4 to 6; at six tries every penalty exceeded Harmony and sysVI on 5 of six real tasks.",
+           "at the strength chosen on other task families, the penalties exceeded plain scVI's selection score on 3 to 5 of six real "
+           "tasks (median difference $+0.006$); Harmony, Scanorama and sysVI exceeded it on 1, 0 and 1.")]),
+        (r"\item \textbf{Conclusions:}",
+         [("penalties were near-tied at matched batch removal (160 of 195 within-pair differences under 0.02); a penalty exceeded "
+           "batch-conditioned plain scVI mainly when several strengths were tried and scored on the same data, an optimistic gain;",
+           "biology at matched batch removal differed between penalties by a median of 0.025, against 0.213 at each penalty's "
+           "strongest setting (160 of 195 within-pair differences under 0.02);")]),
+        (r"\qquad The main analysis is a descriptive ranking",
+         [("compared with plain scVI's, at one strength not tuned on the task and as the expected best of $k$ tries (below).",
+           "compared with plain scVI's at one strength not tuned on the task (below).")]),
+        (r"\qquad We place the penalties against plain scVI",
+         [("placement compares methods at equal numbers of tries (a try is one setting of a method, fitted and scored), by the "
+           "expected best selection score among $k$ settings drawn at random, and is descriptive. Each penalty is also scored at one "
+           "strength not tuned on that task, the strength with",
+           "placement is descriptive and compares each method at one setting not tuned on that task. For a penalty this is the "
+           "strength with")]),
+        (r"\pp{Disc-3}{",
+         [("and 4 were 0.04 or more. With the batch-conditioned decoder, going from one to six tries raised each penalty's mean "
+           "expected best selection score over the real tasks by 0.012 to 0.053, whereas at six tries the six penalties' means spanned "
+           "only 0.661 to 0.666. Added to scVI as it is usually run, with the batch-conditioned decoder, a penalty at one strength "
+           "drawn at random rarely beat plain scVI (8 of 36 task--penalty cells); the best of six strengths did in 30 of 36, by small "
+           "margins (real-task means 0.661--0.666 against 0.648).",
+           "and 4 were 0.04 or more. Over the 11 ranked real pairs, biology at $b^*$ differed between penalties by a median of 0.025, "
+           "against 0.213 at each penalty's strongest fitted setting (Res-3). Added to scVI as it is usually run, with the "
+           "batch-conditioned decoder, a penalty at the strength chosen on other task families exceeded plain scVI's selection score "
+           "on 3 to 5 of six real tasks, with a median difference of $+0.006$, and 11 of the 36 differences were smaller than 0.005 "
+           "in size (Res-6).")]),
+        (r"\item When to add a penalty:",
+         [("when several strengths can be fitted and scored on the task, because the real-task mean of the best of $k$ first exceeded "
+           "batch-conditioned plain scVI at 1 (MMD) to 4 (discriminator) tries.",
+           "the gain over batch-conditioned plain scVI was small, because at the strength chosen on other task families the penalties "
+           "exceeded it on 3 to 5 of six real tasks, with a median difference of $+0.006$ (Res-6)."),
+          ("Standard tools: at equal tries the penalties exceeded Harmony, Scanorama and sysVI on most real tasks, but not scANVI, which "
+           "uses cell-type labels and was exceeded only on pancreas at six tries. These are optimistic best-of-$k$ readings on eight "
+           "scIB tasks.",
+           "Standard tools: at their transferred settings, Harmony, Scanorama and sysVI exceeded batch-conditioned plain scVI on 1, 0 "
+           "and 1 of six real tasks (Res-6). These are descriptive readings on eight scIB tasks.")]),
+        (r"\item Observations for scVI users",
+         [("the strength mattered more than the choice of penalty, and plain scVI with the batch-conditioned decoder remained a "
+           "strong candidate, since a penalty at one strength drawn at random beat it in 8 of 36 task--penalty cells and the best of "
+           "six strengths in 30, a count that is optimistic because the strengths were chosen and scored on the same data;",
+           "the strength mattered more than the choice of penalty (biology at $b^*$ differed between penalties by a median of 0.025, "
+           "against 0.213 at each penalty's strongest fitted setting), and plain scVI with the batch-conditioned decoder remained a "
+           "strong candidate, since at the strength chosen on other task families a penalty exceeded it on 3 to 5 of six real tasks, "
+           "with a median difference of $+0.006$;")]),
+    ]:
+        s = tracked_line(s, start, pairs)
+    n7 = (ROOT / "paper/supp/note7.tex").read_text()
+    i = n7.index(r"\noindent\textit{Best of $k$ settings.}")
+    edit("paper/supp/note7.tex", [(n7[i - 1:n7.index(r"\par\endgroup", i)], ""),
+                                  ("window, local_minus_global, choose_lambda, best_of_k);", "window, local_minus_global, choose_lambda);")])
+    edit("paper/supp/note5.tex", [("the collapse rate, the single-strength placement and the best of $k$ settings (Supplementary Note 7)",
+                                   "the collapse rate and the single-strength placement (Supplementary Note 7)")])
+    edit("paper/supp/note10.tex", [
+        ("single-strength placement, best-of-$k$ and the sensitivity analyses)", "single-strength placement and the sensitivity analyses)"),
+        (r" Scanorama's best-of-$k$ curve on that task stops at $k=5$ (Supplementary Figure S6).", ""),
+        (r"batch metrics) and a good-strength width (the span", r"batch metrics), a good-strength width (the span"),
+        (r"of the best strength's mean). Neither is reported: the first author removed them on 8 November 2026, after all scores had "
+         r"been read, because the six penalties did not differ on the first within a task and the second mostly reflected the "
+         r"seed-to-seed spread of the best strength. Their values remain in the analysis record (\texttt{local\_minus\_global} in "
+         r"\texttt{paper/figure\_data/paper\_numbers.json}; the \texttt{window} columns of \texttt{secondary.csv}).",
+         r"of the best strength's mean) and a best-of-$k$ comparison (the expected best selection score among $k$ of a method's "
+         r"settings drawn at random, $k=1$ to 6, which compared methods with different numbers of settings at equal numbers of "
+         r"tries). None is reported: the first author removed the first two on 8 November 2026 and the third on 9 November 2026, "
+         r"after all scores had been read, because the six penalties did not differ on the first within a task, the second mostly "
+         r"reflected the seed-to-seed spread of the best strength, and the third mostly shows that tuning a strength helps and its "
+         r"one-try value depends on the width of the strength grid (0.1 to 3,000); the comparison with plain scVI and the standard "
+         r"tools rests on the single-strength placement (Supplementary Note 7). Their values remain in the analysis record "
+         r"(\texttt{local\_minus\_global} in \texttt{paper/figure\_data/paper\_numbers.json}; the \texttt{window} columns of "
+         r"\texttt{secondary.csv}; \texttt{best\_of\_k.csv} and \texttt{best\_of\_k\_real\_mean.csv} in \texttt{paper/figure\_data}).")])
+    drop_s7b()
+    return s
+
+
 def main():
     p = ROOT / "paper/outline.tex"
     s = p.read_text()
@@ -687,6 +792,7 @@ def main():
     s = cut_fig6a(s)
     s = add_pareto(s)
     collapse_supp()
+    s = drop_best_of_k(s)
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
     assert s.count(anchor) == 1
     s = s.replace(anchor, "\\definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log "

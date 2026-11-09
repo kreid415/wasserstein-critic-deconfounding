@@ -1,7 +1,7 @@
 """Figure 6, batch-conditioned decoder: batch against biology score per real task (one panel per task, 2 x 3) at the single
 strength (or setting) chosen on other task families (figure_data/transfer_strength.csv: penalties, Harmony, Scanorama, sysVI)
 and the fixed settings in figure_data/single_methods.csv (plain scVI none|0|10, scVI adversary, scANVI, PCA pca|0|10).
-Pass 23: the former panel a, a score curve against the number of settings tried, is cut; Supplementary Figure S6 keeps its per-task curves."""
+Pass 23: the former panel a, a score curve against the number of settings tried, is cut with the whole best-of-k analysis (paper/pass23_changelog.md)."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))

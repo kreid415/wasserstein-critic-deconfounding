@@ -1,7 +1,7 @@
 """Figure 3: biology kept by each penalty relative to plain scVI, at the matched batch removal b* (filled dots, ranked real
 tasks) and at the penalty's strongest fitted setting (open dots, all six real tasks), one panel per decoder.
 Reads figure_data/curves.csv (seed means per strength; plain scVI is strength 0) and figure_data/ranking_pairs.csv (biology at b*).
-The full trade-off curves are Supplementary Figure S7 (figS7.py). Pass 23, user choice among two drafts."""
+The full trade-off curves are Supplementary Figure S6 (figS6.py). Pass 23, user choice among two drafts."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))

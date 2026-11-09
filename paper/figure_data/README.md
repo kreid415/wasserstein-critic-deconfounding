@@ -5,16 +5,16 @@
 | paper_numbers.json | Claude Science artifact 52c258c0-4e2f-4eae-b277-36d219820e7d, version v1b0c059e (paper_numbers.json of the sweep analysis, 2,999 keys); analysis commit 8595a169ed853db61eaf54501fb42f6735dea911 on sweep-paper, `_meta.git_dirty` false |
 | curves.csv, baseline_points.csv, best_of_k_real_mean.csv, transfer_strength.csv, single_methods.csv | `tables/` of the workstation directory /home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105 (same run, 2026-11-05); SHA-256 of the originals checked against these copies on 2026-11-05 |
 
-Baselines are 447 of 448 rows: Scanorama on atac_large at strength 80 could not be fitted, so Scanorama has 6 of 7 settings there (in `best_of_k_real_mean.csv` Scanorama at k = 6 is the mean of 5 of 6 tasks; Supplementary Figure S6 draws its missing setting as an open marker at k = 5).
-Since Pass 23 no figure script reads `best_of_k_real_mean.csv`: Figure 6 no longer draws the mean curves (the former panel a, moved to the supplementary figure's caption and the Res-7 text). Its values are the six-task means quoted in the Results (0.648 for plain scVI, 0.609 to 0.653 at one try, 0.661 to 0.666 at six), so it stays here.
+Baselines are 447 of 448 rows: Scanorama on atac_large at strength 80 could not be fitted, so Scanorama has 6 of 7 settings there (in `best_of_k_real_mean.csv` Scanorama at k = 6 is the mean of 5 of 6 tasks).
+Since Pass 23 no figure or table reads `best_of_k.csv`, `best_of_k_real_mean.csv` or `placement_summary.csv`: the best-of-k analysis (the expected best selection score among k settings, k = 1 to 6) was removed from the paper (`paper/pass23_changelog.md`, Removed claims), and with it the former Figure 6a, Supplementary Figure S6 (best of k per task) and panel b of Supplementary Table S7. The files stay here as the analysis record, with their checksums in MANIFEST.sha256.
 SHA-256 of every file: MANIFEST.sha256 (`sha256sum -c MANIFEST.sha256`).
 
 
 ## Added for Supplementary Tables S6-S7 and Figures S1-S6 (branch supp-items; `figure_scripts/make_supp_figures.sh` rebuilds everything)
 
 Copied unchanged from `tables/` of the sweep analysis directory D/sweep_analysis_final_20261105 (same run as above; `figure_scripts/copy_supp_inputs.sh`; SHA-256 in MANIFEST.sha256):
-`ranking_pairs.csv`, `low_signal_pairs.csv` (Table S6, Figures S1, S2, S5), `best_of_k.csv` (Figure S6), `label_transfer.csv`, `label_transfer_curve.csv` (Figure S3), `secondary.csv` (Supplementary Table S8; added on branch supp-analysis), and
-`placement_summary.csv`, the output of `experiments/sweep_checks/check_sweep_placement.py` (branch sweep-paper, commit 3280bd4; the output file itself is not tracked in that repository), copied from `experiments/sweep_checks/out/` of the worktree wt_sweep_paper; its SHA-256 equals that of Claude Science artifact version 13ab3936 (Table S7b).
+`ranking_pairs.csv`, `low_signal_pairs.csv` (Table S6, Figures S1, S2, S5), `best_of_k.csv` (read by no figure or table since Pass 23), `label_transfer.csv`, `label_transfer_curve.csv` (Figure S3), `secondary.csv` (Supplementary Table S8; added on branch supp-analysis), and
+`placement_summary.csv`, the output of `experiments/sweep_checks/check_sweep_placement.py` (branch sweep-paper, commit 3280bd4; the output file itself is not tracked in that repository), copied from `experiments/sweep_checks/out/` of the worktree wt_sweep_paper; its SHA-256 equals that of Claude Science artifact version 13ab3936 (read by no table since Pass 23: it fed panel b of Supplementary Table S7, removed with the best-of-k analysis).
 
 Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
 | File | Made by | From |
