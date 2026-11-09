@@ -1,6 +1,6 @@
 """Supplementary Figure S6: best of k settings per task. Expected best selection score (0.4 batch + 0.6 biology) among k settings drawn at random,
-k = 1 to 6, one panel per real task and decoder (figure_data/best_of_k.csv, per task; Figure 6a is the mean of these curves over the six real tasks,
-batch-conditioned decoder). Penalties continue their curves only to k = 6, the number of settings of Harmony, Scanorama and sysVI. Plain scVI, the
+k = 1 to 6, one panel per real task and decoder (figure_data/best_of_k.csv, per task; the Results use the mean of these curves over the six real
+tasks, batch-conditioned decoder, from figure_data/best_of_k_real_mean.csv; until Pass 23 Figure 6 also drew that mean). Penalties continue their curves only to k = 6, the number of settings of Harmony, Scanorama and sysVI. Plain scVI, the
 scVI adversary and scANVI have one setting (k = 1)."""
 import sys
 from pathlib import Path

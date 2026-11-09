@@ -1,4 +1,4 @@
-# Pass 23 change log (2026-11-06 to 2026-11-08, tracked id P23, blue)
+# Pass 23 change log (2026-11-06 to 2026-11-09, tracked id P23, blue)
 
 Branch `paper-pass23-wip`, starting point Pass 22 (045e62c). A result-by-result walkthrough of the Results with the first author;
 every change below is the user's decision. All edits are made by `paper/tools/pass23_edits.py` from 045e62c; numbers come from
@@ -26,3 +26,21 @@ Claims deleted from the paper (not moved). Each ledger row that pointed at one i
   paragraph defined the window by the lower end of the best strength's 95% t interval (t quantile 0.975, n=3 fits), flagged
   windows with a gap (19 of the 96 windows), and noted that the widest window spans 5.5 decades. Recorded in Supplementary Note 10
   ("Analyses removed"); values remain in the window columns of secondary.csv.
+
+## Figure 6 panel (a) moved to the supplement
+
+- Figure 6, panel (a), the expected best selection score among k settings against the number of tries (mean over the six real
+  tasks), is cut from the main text (2026-11-09, first author's decision: a best-of-k curve that rises with k only shows that
+  tuning helps). Figure 6 is now the former panel (b) alone, batch against biology score per real task at the single strength
+  chosen on other task families (`paper/figure_scripts/fig6.py`, which no longer reads `best_of_k_real_mean.csv`).
+- Kept: Supplementary Figure S6 (per-task best-of-k curves, figure unchanged); the Res-7 numbers as text (plain scVI 0.648;
+  0.609 to 0.653 at one try; 0.661 to 0.666 at six tries; the tries at which each penalty first exceeded plain scVI), which now
+  cite Supplementary Figure S6; `paper/figure_data/best_of_k_real_mean.csv`.
+- Moved to the Supplementary Figure S6 caption: the six-task mean of plain scVI (0.648), the k = 1 and first-exceeded
+  statements, the six-task mean covering five tasks for Scanorama at k = 6, and the numbers of settings (Harmony and sysVI six;
+  penalties ten, with an eleventh on the immune task only for three, and twelve for the Sinkhorn divergence). Not moved, because
+  no panel draws them any more: "each curve is drawn up to the largest k for which all six tasks have k settings" and "penalty
+  curves beyond k = 6 are shown for completeness" (Supplementary Note 7 states that comparisons stop at k = 6).
+- References: "Figure 6b" is now "Figure 6" (Res-6, Table S14 note, Figure list); "Figure 6a" is replaced by Supplementary
+  Figure S6 (Res-7, Figure S6 list item, Supplementary Note 7, Figure S6 caption). Ledger rows P23F01-03 read the numbers now
+  in the Figure S6 caption.

@@ -10,11 +10,13 @@ Main-text Tables 1-3 repeat main-text content (user rule SI-115: no repeated inf
 Supplementary Tables S13 (methods), S12 (ranking) and S14 (placement); each label moves with its table.
 Res-3: a main claim with numbers from paper/tools/res3_curve_numbers.py leads; the ATAC-large sentence names its decoder and
 the full range of the other penalties; the repeated 'no failed fits' sentences go (Res-1 says it); the Figure 3 caption follows
-the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6b).
+the redrawn figure (strongest settings marked, low-signal panel grey, standard tools left to Figure 6).
 Figure 3 then became a dot summary (user choice): biology minus plain scVI at b* and at the strongest setting; the curve
 figure moved to Supplementary Figure S7 (figure_scripts/figS7.py); Figure 4 and 5 captions now point to Figure 2a for the
 task order. Figure 2: the caption follows the redrawn figure (panel a has tasks as rows
 and the decoders stacked; panel b stacks the decoders, sorts penalties best first and reverses the rank axis).
+Figure 6: panel a (expected best score against number of tries) is cut from the main text (user choice 2026-11-09); the figure
+keeps the former panel b, and Supplementary Figure S6 and the Res-7 text keep the best-of-k comparison (cut_fig6a).
 Each edited line is rewritten as word-level tracked changes against its printed (accepted) old text, as in Pass 22. Every old
 line must occur exactly once or the script stops.
 Run from the repository root:  python paper/tools/pass23_edits.py   (PASS23_ROOT overrides the root of the edited files)
@@ -156,7 +158,7 @@ MOVES = [  # (start marker, next marker, label, supplementary number, word fixes
      "it repeated Figure 2b and Supplementary Table S6"),
     ("Table 4\n", "Supplementary Table S10 (Pass 9)\n", "tab:4", "S14",
      [("real task, conditioned decoder,", "real task, batch-conditioned decoder,", 1)],
-     "it repeated Figure 6b and the Res-7 counts"),
+     "it repeated Figure 6 and the Res-7 counts"),
 ]
 OLD_NUMBER = {"tab:1": 1, "tab:3": 2, "tab:4": 3}  # printed numbers before Pass 23
 
@@ -210,7 +212,7 @@ def move_tables(s):
         s = move_table(s, *m)
     # references: the main text now has no tables
     s = tracked_line(s, r"\qquad Each method adds a fixed penalty", [(r"(Table~\ref{tab:1})", r"(Supplementary Table~\ref{tab:1})")])
-    s = tracked_line(s, r"\pp{Res-7}", [(r"(Table \ref{tab:4}, Figure 6b)", r"(Figure 6b; Supplementary Table \ref{tab:4})")])
+    s = tracked_line(s, r"\pp{Res-7}", [(r"(Table \ref{tab:4}, Figure 6b)", r"(Figure 6; Supplementary Table \ref{tab:4})")])
     s = tracked_line(s, r"\item At the strength chosen on real tasks of other families",
                      [(r"; Table \ref{tab:4})", r"; Supplementary Table \ref{tab:4})"),
                       (r"which Table \ref{tab:4} prints", r"which Supplementary Table \ref{tab:4} prints")])
@@ -293,6 +295,41 @@ def move_figure3(s):
     (ROOT / "paper/supp/figures.tex").write_text((ROOT / "paper/supp/figures.tex").read_text() + FIGS7)
     edit("paper/figure_scripts/make_supp_figures.sh", [("for n in 1 2 3 4 5 6; do", "for n in 1 2 3 4 5 6 7; do"),
                                                        ("and Figures S1-S6 (PNG", "and Figures S1-S7 (PNG")])
+    return s
+
+
+def cut_fig6a(s):
+    """Panel a of Figure 6 (expected best selection score against number of tries) is cut from the main text (user choice,
+    9 November 2026: a curve that rises with k only shows that tuning helps); the figure keeps the former panel b and becomes
+    one panel. Supplementary Figure S6 keeps the per-task curves and takes the caption details, the Results keep the numbers as
+    text. The Res-6 reference to Figure 6b is edited in move_tables, because that line is rewritten there."""
+    cap = [accept(l).strip() for l in s.split("\n") if accept(l).startswith(r"\caption{Placement against plain scVI and standard tools")]
+    assert len(cap) == 1
+    a, b = cap[0].index("(a) "), cap[0].index("(b) ")
+    assert "(b) Batch against biology score for each real task" in cap[0] and cap[0].count("(a) ") == cap[0].count("(b) ") == 1
+    S6 = "(per-task curves in Supplementary Figure S6)"
+    for start, pairs in [
+        (r"\caption{Placement against plain scVI and standard tools", [(cap[0][a:b + 4], "")]),
+        (r"\pp{Res-8}{", [("(Figure 6a; per-task curves in Supplementary Figure S6)", S6)]),
+        (r"\item With the batch-conditioned decoder, a penalty's expected best selection score at one try", [("(Figure 6a)", S6)]),
+        (r"\item Figure S6, best of $k$ settings per task",
+         [("the mean of these curves over the six real tasks is Figure 6a.",
+           "the Results use the mean of these curves over the six real tasks, batch-conditioned decoder.")]),
+        (r"\item Figure 6:", [("(a) expected best selection score against number of tries, mean over the six real tasks of each "
+                               "method's per-task curve; (b) batch", "batch")]),
+    ]:
+        s = tracked_line(s, start, pairs)
+    edit("paper/supp/note7.tex", [("with the number of tasks shown (Figure 6a; per-task curves in Supplementary Figure S6)",
+                                   r"with the number of tasks in \texttt{paper/figure\_data/best\_of\_k\_real\_mean.csv} "
+                                   "(per-task curves in Supplementary Figure S6)")])
+    edit("paper/supp/figures.tex", [(
+        "The mean of the batch-conditioned curves over the six real tasks is Figure 6a. ",
+        "The Results use the mean of the batch-conditioned curves over the six real tasks: plain scVI scored 0.648; at $k=1$ every "
+        "penalty except MMD scored below plain scVI, and the other penalties first exceeded it at $k=2$ (pooled critic, barycenter "
+        "critic, Sinkhorn divergence), 3 (reference critic) and 4 (discriminator). That mean covers the tasks where a method has at "
+        "least $k$ settings, so Scanorama's mean at $k=6$ covers five tasks. Harmony and sysVI have six settings and each penalty "
+        "ten (the discriminator, the reference critic and the pooled critic have an eleventh on the immune task only) or, for the "
+        "Sinkhorn divergence, twelve; the curves here stop at $k=6$, the number of settings of Harmony, Scanorama and sysVI. ")])
     return s
 
 
@@ -647,6 +684,7 @@ def main():
     s = move_res2b(s)
     s = move_tables(s)
     s = move_figure3(s)
+    s = cut_fig6a(s)
     s = add_pareto(s)
     collapse_supp()
     anchor = "\\definechangesauthor[name={Pass 22}, color=red]{P22}"
