@@ -8,6 +8,8 @@ cd "$(dirname "$0")/../.."
 PY=${PY:-python}
 SCVI_PY=${SCVI_PY:-/home/kendall/.claude-science/conda/envs/scvi-api/bin/python}
 bash paper/figure_scripts/copy_supp_inputs.sh                                              # 1 unchanged copies of sweep tables + sha256
+$PY paper/tools/first_crossing_strength.py                                                 # 1b first_crossing_strength.csv (strength read at the first crossing of b*)
+$PY paper/tools/label_transfer_first_crossing.py                                           # 1c label_transfer.csv at those strengths (reads analysis_sweep.json of the sweep analysis directory)
 $PY paper/figure_scripts/prep_supp_figure_data.py                                          # 2 sensitivity_ranks.csv, metric_scores.csv
 $SCVI_PY paper/figure_scripts/prep_label_transfer_types.py --jobs 8                        # 3 label_transfer_types.csv (about 15 min on 8 cores)
 for f in sensitivity_ranks metric_scores label_transfer_types; do                          # derived files: checksum recorded once

@@ -630,8 +630,9 @@ NOTE7_LG = (r"\noindent\textit{Local versus global batch removal.} Local removal
 def merge_res5(s):
     """Res-5 (label transfer) merges into Res-5b (direct biology check), which becomes Res-5 (user choice, 8 November 2026);
     label transfer is reported per task against plain scVI, not as cross-task mean F1 (rule against pooled raw scores).
-    Numbers from figure_data/res5_label_transfer.json (paper/tools/res5_label_transfer.py)."""
-    lt = json.loads((ROOT / "paper/figure_data/res5_label_transfer.json").read_text())
+    Numbers from figure_data/res5_label_transfer_nearest_any_crossing.json (paper/tools/res5_label_transfer.py run on
+    label_transfer_nearest_any_crossing.csv, the table this pass used; since 2026-11-09 res5_label_transfer.json is read at the first crossing)."""
+    lt = json.loads((Path(__file__).resolve().parents[2] / "paper/figure_data/res5_label_transfer_nearest_any_crossing.json").read_text())   # not ROOT: PASS23_ROOT holds only the edited files
     n0, n1 = lt["n_pairs"]["0"], lt["n_pairs"]["1"]
     assert lt["cond0_disc_below_plain"] == lt["cond0_disc_last"] == n0 and (lt["cond1_disc_place_min"], lt["cond1_disc_place_max"]) == (1, 6)
     f = lambda v: f"{v:.3f}" if v >= 0 else f"${v:.3f}$"

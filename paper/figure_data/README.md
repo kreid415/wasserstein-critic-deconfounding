@@ -13,7 +13,7 @@ SHA-256 of every file: MANIFEST.sha256 (`sha256sum -c MANIFEST.sha256`).
 ## Added for Supplementary Tables S6-S7 and Figures S1-S6 (branch supp-items; `figure_scripts/make_supp_figures.sh` rebuilds everything)
 
 Copied unchanged from `tables/` of the sweep analysis directory D/sweep_analysis_final_20261105 (same run as above; `figure_scripts/copy_supp_inputs.sh`; SHA-256 in MANIFEST.sha256):
-`ranking_pairs.csv`, `low_signal_pairs.csv` (Table S6, Figures S1, S2, S5), `best_of_k.csv` (read by no figure or table since Pass 23), `label_transfer.csv`, `label_transfer_curve.csv` (Figure S3), `secondary.csv` (Supplementary Table S8; added on branch supp-analysis), and
+`ranking_pairs.csv`, `low_signal_pairs.csv` (Table S6, Figures S1, S2, S5), `best_of_k.csv` (read by no figure or table since Pass 23), `label_transfer_nearest_any_crossing.csv` (the sweep analysis's `label_transfer.csv`, kept for the record; since 2026-11-09 `label_transfer.csv` is rebuilt from it, see below), `label_transfer_curve.csv` (Figure S3), `secondary.csv` (Supplementary Table S8; added on branch supp-analysis), and
 `placement_summary.csv`, the output of `experiments/sweep_checks/check_sweep_placement.py` (branch sweep-paper, commit 3280bd4; the output file itself is not tracked in that repository), copied from `experiments/sweep_checks/out/` of the worktree wt_sweep_paper; its SHA-256 equals that of Claude Science artifact version 13ab3936 (read by no table since Pass 23: it fed panel b of Supplementary Table S7, removed with the best-of-k analysis).
 
 Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
@@ -21,8 +21,17 @@ Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
 |---|---|---|
 | `sensitivity_ranks.csv` | `figure_scripts/prep_supp_figure_data.py --only sensitivity` | `analysis_sweep.json` (sha256 197104bb7ebb...) of the sweep analysis, `sensitivity` block |
 | `metric_scores.csv` | `prep_supp_figure_data.py --only metrics` | the 3,480 score files listed in `inputs/scores_list.txt` (sha256 f0ad343ab7df...), joined to `inputs/manifest.tsv`; columns are the individual scIB metrics and the sha256 of the latent each row was scored from |
-| `label_transfer_types.csv` | `figure_scripts/prep_label_transfer_types.py` (scvi-api environment) | the saved latents of the 120 label-transfer rows (checked against the latent sha256 of each score row); the macro F1 recomputed from the per-type values equals `label_transfer.csv` for all 120 rows (1e-9) |
+| `label_transfer_types.csv` | `figure_scripts/prep_label_transfer_types.py` (scvi-api environment) | the saved latents of the 120 label-transfer rows (checked against the latent sha256 of each score row); the macro F1 recomputed from the per-type values equals `label_transfer.csv` for all 120 rows (1e-9). The committed copy was made from `label_transfer_nearest_any_crossing.csv`; it must be re-made from the rebuilt `label_transfer.csv` (below) |
 | `scaling_check_ranks.csv` | `figure_scripts/figS5.py` via `scaling_checks.py` | `metric_scores.csv`; the unscaled reading reproduces the 78 readings and ranks of `ranking_pairs.csv` before any variant is run |
+
+## Label transfer at the first crossing of b* (2026-11-09; changed after the first results had been read)
+
+The paper reads each penalty where its batch-score curve first reaches the matched batch removal b*. Label transfer had used the failure-free strength whose seed-mean batch score is nearest b* at any crossing, which for some penalties is a collapsed strength far past the first crossing. Rule, in `paper/tools/first_crossing_strength.py`: from plain scVI (strength 0) up the penalty's strengths, take the first point with batch score at least b*; of that point and the one before it choose the one nearer b* (a tie goes to the smaller strength), or the upper one when the one before is plain scVI. 31 of the 96 penalty rows changed strength.
+
+| File | Script | From |
+|---|---|---|
+| first_crossing_strength.csv (not in MANIFEST.sha256) | `paper/tools/first_crossing_strength.py` | curves.csv, ranking_pairs.csv, low_signal_pairs.csv |
+| label_transfer.csv (in MANIFEST.sha256; same columns and row order as before) | `paper/tools/label_transfer_first_crossing.py` | penalty rows: label_transfer_curve.csv at the strengths of first_crossing_strength.csv, with n_runs and not_evaluable read from analysis_sweep.json of the sweep analysis; plain scVI and scvi_adv rows: label_transfer_nearest_any_crossing.csv |
 
 ## Derived in Pass 23 (written by scripts in `paper/tools/`, not copies; not in MANIFEST.sha256)
 

@@ -1,0 +1,20 @@
+{
+ "n_ranked_pairs": 11,
+ "n_pairs": {
+  "0": 6,
+  "1": 5
+ },
+ "cond0_disc_below_plain": 6,
+ "cond0_disc_last": 6,
+ "cond0_disc_median_diff": -0.06,
+ "cond1_disc_median_diff": -0.006,
+ "cond1_disc_place_min": 1,
+ "cond1_disc_place_max": 6,
+ "others_median_diff_min": -0.016,
+ "others_median_diff_max": 0.001,
+ "tau_median": 0.067,
+ "tau_min": -0.867,
+ "tau_max": 0.6,
+ "distance_max": 0.026,
+ "distance_median": 0.004
+}

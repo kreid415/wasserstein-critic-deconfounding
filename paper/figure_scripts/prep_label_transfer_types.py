@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Per-cell-type F1 of label transfer at the matched strength, for Supplementary Figure S3 (written to paper/figure_data/label_transfer_types.csv).
+"""Per-cell-type F1 of label transfer at the strength of each row of label_transfer.csv (since 2026-11-09 the first crossing of b*, see
+paper/tools/label_transfer_first_crossing.py), for Supplementary Figure S3 (written to paper/figure_data/label_transfer_types.csv).
 
 The sweep analysis stores only the macro F1 of each label-transfer fit (figure_data/label_transfer.csv). This script repeats the
 same classifier on the same saved embeddings and keeps the F1 of every cell type: cell types present in one batch only are dropped,
