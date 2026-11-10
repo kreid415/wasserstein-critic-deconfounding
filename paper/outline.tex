@@ -26,6 +26,7 @@
 \definechangesauthor[name={Pass 17}, color=olive]{P17}% finished supplement placed in the list, main-text corrections; change log paper/pass17_changelog.md, numbers in paper/pass17_numbers.csv
 \definechangesauthor[name={Pass 19}, color=blue]{P19}% AI-tool statement in Methods; change log paper/pass19_changelog.md
 \definechangesauthor[name={Pass 20}, color=blue]{P20}% Declarations: ethics wording, competing interests; change log paper/pass20_changelog.md
+\definechangesauthor[name={Pass 25}, color=purple]{P25}% Supplementary Figure S3 redrawn as F1 minus plain scVI's; change log paper/pass25_changelog.md
 \definechangesauthor[name={Pass 24}, color=pink]{P24}% referee reviews before submission; change log paper/pass24_changelog.md
 \definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log paper/pass23_changelog.md
 \definechangesauthor[name={Pass 22}, color=red]{P22}% cut wordiness, content kept; change log paper/pass22_changelog.md
@@ -421,7 +422,7 @@
 \item Figure S1, simulation tasks: trade-off curves and per-task \replaced{ranking at $b^*$}{primary comparison}, each simulation on its own.
 \item Figure S2, sensitivity: \replaced{ranking under alternative readings (per-run reading, biology without trajectory conservation on the two immune tasks, points with a failed fit removed).}{pooled estimates under prior scales 0.05, 0.1 and 0.2, and with low-signal tasks dropped.}
 \item \deleted{Figure S3, premise-check detail: AUC per batch and task; gradient norm and discriminator accuracy per epoch at each strength.}
-\item Figure S\replaced{3}{4}, label transfer: F1 per cell type, method and task at matched strength, with the gap to $b^*$.
+\item \replaced[id=P25]{Figure S3, label transfer: F1 minus plain scVI's with the same decoder, as macro F1 per penalty and real task and per cell type, at the first-crossing strength; plain scVI's own F1 is printed.}{Figure S3, label transfer: F1 per cell type, method and task at matched strength, with the gap to $b^*$.}
 \item \replaced[id=P24]{Figures S4a and S4b,}{Figure S4,} per-metric strength curves: each batch and biology metric against strength, per \replaced[id=P24]{method, with the batch-conditioned (S4a)}{method} and \replaced[id=P24]{the unconditioned decoder (S4b).}{decoder.}
 \item Figure S\replaced{5}{6}, scaling checks.
 \item Figure S6, trade-off \replaced[id=P24]{curves:}{curves (the former main-text Figure 3):} batch score against biology score per penalty, task and decoder, with plain scVI, $b^*$ and the strongest fitted setting marked.

@@ -27,6 +27,7 @@
 \definechangesauthor[name={Pass 17}, color=olive]{P17}% finished supplement placed in the list, main-text corrections; change log paper/pass17_changelog.md, numbers in paper/pass17_numbers.csv
 \definechangesauthor[name={Pass 19}, color=blue]{P19}% AI-tool statement in Methods; change log paper/pass19_changelog.md
 \definechangesauthor[name={Pass 20}, color=blue]{P20}% Declarations: ethics wording, competing interests; change log paper/pass20_changelog.md
+\definechangesauthor[name={Pass 25}, color=purple]{P25}% Supplementary Figure S3 redrawn as F1 minus plain scVI's; change log paper/pass25_changelog.md
 \definechangesauthor[name={Pass 24}, color=pink]{P24}% referee reviews before submission; change log paper/pass24_changelog.md
 \definechangesauthor[name={Pass 23}, color=blue]{P23}% Results walkthrough decisions; change log paper/pass23_changelog.md
 \definechangesauthor[name={Pass 22}, color=red]{P22}% cut wordiness, content kept; change log paper/pass22_changelog.md
@@ -345,7 +346,7 @@ With the batch-conditioned decoder, the penalties scored above plain scVI's sele
 \begin{itemize}
 \item Figure S1, simulation tasks: trade-off curves and per-task ranking at $b^*$, each simulation on its own.
 \item Figure S2, sensitivity: ranking under alternative readings (per-run reading, biology without trajectory conservation on the two immune tasks, points with a failed fit removed).
-\item Figure S3, label transfer: F1 per cell type, method and task at matched strength, with the gap to $b^*$.
+\item Figure S3, label transfer: F1 minus plain scVI's with the same decoder, as macro F1 per penalty and real task and per cell type, at the first-crossing strength; plain scVI's own F1 is printed.
 \item Figures S4a and S4b, per-metric strength curves: each batch and biology metric against strength, per method, with the batch-conditioned (S4a) and the unconditioned decoder (S4b).
 \item Figure S5, scaling checks.
 \item Figure S6, trade-off curves: batch score against biology score per penalty, task and decoder, with plain scVI, $b^*$ and the strongest fitted setting marked.

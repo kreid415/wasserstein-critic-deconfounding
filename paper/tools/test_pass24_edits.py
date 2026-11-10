@@ -16,6 +16,7 @@ import abstract_words as aw  # noqa: E402
 import make_supp_tables as mt  # noqa: E402
 
 START = "24f2665"
+RESULT = "1cea7ef"  # the Pass 24 result; Pass 25 edits three of these files, so the script is compared with this commit
 EDITED = ["paper/outline.tex", "paper/supp_items.tex", "paper/supp/figures.tex", "paper/supp/note1.tex", "paper/supp/note5.tex",
           "paper/supp/note6.tex", "paper/supp/note7.tex", "paper/supp/note8.tex", "paper/supp/note9.tex", "paper/supp/note10.tex",
           "paper/supp/note13.tex", "paper/supp/tableS13.tex"]
@@ -34,7 +35,8 @@ def test_pass24_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     monkeypatch.setenv("PASS24_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass24_edits.py"), run_name="__main__")
     for rel in EDITED:
-        assert (tmp_path / rel).read_text() == (REPO / rel).read_text(), rel
+        committed = subprocess.run(["git", "-C", str(REPO), "show", f"{RESULT}:{rel}"], capture_output=True, text=True).stdout
+        assert (tmp_path / rel).read_text() == committed, rel
     assert "limit 5700" in capsys.readouterr().out
     words, _ = aw.count((tmp_path / "paper/outline.tex").read_text())
     assert 0 < len(words) <= 330 and words[0] == "Background:" and "Question:" not in words   # three prose parts

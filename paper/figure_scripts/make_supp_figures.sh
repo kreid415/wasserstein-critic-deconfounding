@@ -17,6 +17,7 @@ for f in sensitivity_ranks metric_scores label_transfer_types; do               
 done
 for n in 1 2 3 4 5 6 7 8; do $PY paper/figure_scripts/figS$n.py; done                      # 4 figures (S5 also writes scaling_check_ranks.csv; S7, S8 read paper/figure_data only)
 grep -q " scaling_check_ranks.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum scaling_check_ranks.csv >> MANIFEST.sha256)
+grep -q " figS3_values.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum figS3_values.csv >> MANIFEST.sha256)   # written by figS3.py (Pass 25)
 (cd paper/figure_data && sha256sum -c MANIFEST.sha256)
 $PY paper/tools/make_supp_tables.py --check-table4                                         # 5 tables S6, S7 (+ positive control against Table 4)
 $PY paper/tools/make_supp_supp-analysis.py                                                 # 5b Table S8 and the label-transfer table of Note 9

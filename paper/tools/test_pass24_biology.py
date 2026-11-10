@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import matplotlib as mpl
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -64,18 +65,36 @@ def test_ledger_mean_uses_only_selected_rows():  # test-reason: known mean of un
     assert cl.evaluate(text, "where=method==a ; col=value ; agg=mean", {}) == 4
 
 
-def test_figs3_reads_rebuilt_types_and_renders(tmp_path, monkeypatch):  # test-reason: runs Figure S3, which had no test; ensures every first-crossing column still plots and both formats are written
+def test_figs3_reads_rebuilt_types_and_renders(tmp_path, monkeypatch):  # test-reason: runs Figure S3, which had no test; ensures every first-crossing column still plots, both formats are written, figS3_values.csv holds the plotted differences and the drawn medians are the medians of its macro rows over the ranked tasks
     scripts = bio.DATA.parent / "figure_scripts"
     sys.path.insert(0, str(scripts))
     import figcommon
+    data = tmp_path / "figure_data"                     # the script writes figS3_values.csv next to its inputs: keep the repository copy untouched
+    data.mkdir()
+    for name in ("label_transfer_types.csv", "label_transfer.csv", "low_signal_pairs.csv"):
+        shutil.copyfile(bio.DATA / name, data / name)
     monkeypatch.setattr(figcommon, "OUT", tmp_path)
+    monkeypatch.setattr(figcommon, "DATA", data)
     with mpl.rc_context():
         result = runpy.run_path(str(scripts / "figS3.py"), run_name="__main__")
     fig = result["fig"]
-    assert len(fig.axes) == 9
-    assert all(ax.images[0].get_array().shape[1] == 15 for ax in fig.axes[:8])
+    assert len(fig.axes) == 9                           # panels a and b, six heat maps, one colour bar
+    for ax in fig.axes[2:8]:                            # 2 plain-F1 columns + 13 method columns per task
+        assert sum(np.asarray(m.get_array()).shape[1] for m in ax.collections) == 15
     for ext in ("png", "pdf"):
         assert (tmp_path / f"figS3.{ext}").stat().st_size > 0
+    v = pd.read_csv(data / "figS3_values.csv")
+    assert list(v.columns) == ["cond", "task", "arm", "celltype", "f1", "f1_plain", "diff"] and len(v) == 1092
+    assert (v["diff"] - (v.f1 - v.f1_plain)).abs().max() < 1e-12
+    types = v[v.celltype != "macro F1"]
+    drawn = np.sort(np.concatenate([np.asarray(m.get_array()).ravel() for ax in fig.axes[2:8] for m in ax.collections if m.get_cmap().name == "RdBu"]))
+    assert drawn == pytest.approx(np.sort(types["diff"].to_numpy()), abs=1e-12)          # the heat maps draw exactly the table's per-type differences
+    macro = v[v.celltype == "macro F1"]
+    med = macro[~((macro.task == "immune") & (macro.cond == 1))].groupby(["cond", "arm"])["diff"].median()
+    for ax, c in zip(fig.axes[:2], (1, 0)):
+        ticks = [ln for ln in ax.lines if ln.get_linewidth() == 1.6]
+        arms = figcommon.ARMS + (["scvi_adv"] if c == 1 else [])
+        assert [t.get_xdata()[0] for t in ticks] == pytest.approx([med[(c, a)] for a in arms], abs=1e-12)
 
 
 def test_table_s10_tracked_cells_do_not_span_columns():  # test-reason: a word diff once wrapped several cells in one tracked-change argument, which breaks the tracked PDF build only
