@@ -557,3 +557,17 @@
 - added: 2026-11-07
 - keywords: redundant, repeat, duplicate, supplement, main text, move to supplement
 - files: paper/outline.tex, paper/supp/
+
+## SI-119 · active · format
+- rule: The figures keep the six penalty colours as they are (the Okabe-Ito set in paper/figure_scripts/figcommon.py): no marker shape per penalty, no line styles and no new palette are added, although Figures 3, 4, S1 panel a, S4a, S4b, S6 and S9 tell the six penalties apart by colour only (colour-blindness audit of 2026-11-10). Do not add a second cue to these figures unless the first author asks.
+- source: "Change nothing" (user, 2026-11-10, answering whether to add one marker shape per penalty)
+- added: 2026-11-10
+- keywords: colour blind, color blind, marker shape, palette, Okabe-Ito, line style
+- files: paper/figure_scripts/*.py
+
+## SI-120 · active · format
+- rule: Figure 2 panel a is coloured by the biology score at b* minus the median of the six penalties in the same task row and decoder (option 2), not by the absolute biology score and not by the difference from plain scVI's biology (option 1, discussed and not chosen). Ranks, the hatched low-signal row and panel b stay as they are.
+- source: "use option 2" (user, 2026-11-10)
+- added: 2026-11-10
+- keywords: Figure 2, fig2, panel a, row median, colour scale
+- files: paper/figure_scripts/fig2.py, paper/outline.tex

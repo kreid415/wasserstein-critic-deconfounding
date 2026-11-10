@@ -17,14 +17,15 @@ sys.path.insert(0, str(TOOLS))
 from accept_changes import accept  # noqa: E402
 
 START = "9db2382"
+RESULT = "6282edb"  # the Pass 27 result; Pass 28 edits paper/outline.tex, so that file is compared with this commit
 EDITED = ["paper/outline.tex", "paper/supp/note7.tex", "paper/supp/tableS7.tex", "paper/supp/tableS8.tex",
           "paper/tools/make_supp_tables.py", "paper/tools/make_supp_supp-analysis.py"]
 
 
-def start_file(rel):
-    r = subprocess.run(["git", "-C", str(REPO), "show", f"{START}:{rel}"], capture_output=True)
+def start_file(rel, commit=START):
+    r = subprocess.run(["git", "-C", str(REPO), "show", f"{commit}:{rel}"], capture_output=True)
     if r.returncode:
-        pytest.skip(f"{START} not available")  # pragma: no cover  # shallow copies lack the history
+        pytest.skip(f"{commit} not available")  # pragma: no cover  # shallow copies lack the history
     return r.stdout
 
 
@@ -37,11 +38,12 @@ def test_pass27_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     monkeypatch.setenv("PASS27_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass27_edits.py"), run_name="__main__")
     for rel in EDITED:
-        assert (tmp_path / rel).read_text() == (REPO / rel).read_text(), rel
+        result = start_file(rel, RESULT).decode() if rel == "paper/outline.tex" else (REPO / rel).read_text()
+        assert (tmp_path / rel).read_text() == result, rel
     assert "Table 1 included, 412 words (limit 450)" in capsys.readouterr().out
     # outline.tex: the printed text differs from 9db2382 in the new author line, the history sentence, Res-4, Res-6, the collapse float,
     # the placement float's three lines and two figure-list items, nowhere else
-    raw = (REPO / "paper/outline.tex").read_text()
+    raw = start_file("paper/outline.tex", RESULT).decode()
     changed = [ln for ln in difflib.ndiff(accept(start["paper/outline.tex"]).split("\n"), accept(raw).split("\n")) if ln[:2] in ("+ ", "- ")]
     assert len(changed) == 34 and changed[0].startswith(r"+ \definechangesauthor[name={Pass 27}") and "{P27}" in changed[0]
     live = re.sub(r"(?m)(?<!\\)%.*$", "", accept(raw))        # printed text without TeX comments

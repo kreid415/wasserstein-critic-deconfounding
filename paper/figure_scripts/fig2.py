@@ -1,6 +1,9 @@
 """Figure 2: ranking of the six penalties by biology kept at matched batch removal b*.
-(a) biology score at b* (colour) and rank among the penalties (number), tasks as rows and penalties as columns, one block per
-decoder (batch-conditioned above, unconditioned below); colour bar under the panel;
+(a) rank among the penalties (number) and biology score at b* minus the median of the six penalties in the same task row and
+decoder (colour; diverging map PuOr_r, orange above the row median, purple below, centred at 0, limits +-the largest absolute
+value over the ranked rows of both decoders rounded up to two decimals, one scale for both blocks; each number black or white,
+whichever contrasts more with its cell by the WCAG relative-luminance formula), tasks as rows and penalties as columns, one
+block per decoder (batch-conditioned above, unconditioned below); colour bar under the panel;
 (b) mean rank over the ranked real tasks with the range over tasks, one block per decoder beside its block in (a), penalties
 sorted by mean rank (best first), rank axis reversed (1 = best at the right).
 Reads only figure_data/paper_numbers.json (sweep analysis 8595a16)."""
@@ -22,18 +25,21 @@ assert not np.isnan(bio[0]).any() and not np.isnan(bio[1]).any()
 for c in (0, 1):  # a row is unranked exactly when its task is low-signal
     for i, t in enumerate(REAL_TASKS):
         assert np.isnan(rank[c][i, :]).all() == (t in low[c]), (c, t)
-vmin, vmax = min(bio[0].min(), bio[1].min()), max(bio[0].max(), bio[1].max())
+# colour: biology score minus the median of the six penalties in the same row (task and decoder)
+diff = {c: bio[c] - np.median(bio[c], axis=1, keepdims=True) for c in (0, 1)}
+ranked = {c: ~np.isnan(rank[c]).all(axis=1) for c in (0, 1)}
+lim = np.ceil(round(max(np.abs(diff[c][ranked[c]]).max() for c in (0, 1)) * 100, 9)) / 100  # up to two decimals
 
 fig = plt.figure(figsize=(WIDTH_IN, 5.6))
 TOP, BOTTOM, GAP = 0.93, 0.22, 0.065           # the two decoder blocks share these rows in (a) and (b)
 BH = (TOP - BOTTOM - GAP) / 2
 ROWS = {1: TOP - BH, 0: BOTTOM}               # batch-conditioned block above, unconditioned below
 A_X, A_W, B_X, B_W = 0.19, 0.31, 0.68, 0.305
-cmap = plt.get_cmap("viridis")
+cmap = plt.get_cmap("PuOr_r")                 # orange above the row median, purple below
 axa, axb = {}, {}
 for c in COND_ORDER:
     ax = axa[c] = fig.add_axes([A_X, ROWS[c], A_W, BH])
-    im = ax.pcolormesh(np.arange(-0.5, 6), np.arange(-0.5, 6), bio[c], cmap=cmap, vmin=vmin, vmax=vmax,
+    im = ax.pcolormesh(np.arange(-0.5, 6), np.arange(-0.5, 6), diff[c], cmap=cmap, vmin=-lim, vmax=lim,
                        edgecolors="white", linewidth=1.0)
     for i in range(6):
         for j in range(6):
@@ -41,9 +47,11 @@ for c in COND_ORDER:
                 ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, facecolor="#e6e6e6", edgecolor="#8a8a8a",
                                            hatch="////", lw=0, zorder=3))
             else:
-                v = (bio[c][i, j] - vmin) / (vmax - vmin)
+                # WCAG relative luminance of the cell; black or white, whichever has the higher contrast ratio
+                lum = np.dot([0.2126, 0.7152, 0.0722], [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4
+                                                         for x in im.to_rgba(diff[c][i, j])[:3]])
                 ax.text(j, i, f"{rank[c][i, j]:g}", ha="center", va="center", fontsize=7, zorder=4,
-                        color="black" if v > 0.45 else "white")
+                        color="black" if (lum + 0.05) / 0.05 >= 1.05 / (lum + 0.05) else "white")
     ax.set_xlim(-0.5, 5.5); ax.set_ylim(5.5, -0.5)
     ax.set_yticks(range(6)); ax.set_yticklabels([TASK_LABEL[t] for t in REAL_TASKS])
     ax.set_xticks(range(6))
@@ -72,9 +80,9 @@ for c in COND_ORDER:
 axb[COND_ORDER[-1]].set_xlabel("rank over tasks (1 = best); best penalty first\ndot, mean; bar, range over tasks",
                                fontsize=7, ha="right", x=1.0)
 
-cax = fig.add_axes([A_X + 0.03, 0.075, A_W - 0.06, 0.014])
-cb = fig.colorbar(im, cax=cax, orientation="horizontal"); cb.outline.set_visible(False)
-cb.set_label(r"biology score at $b^{*}$", fontsize=7, labelpad=2); cb.ax.tick_params(labelsize=6, length=2)
+cax = fig.add_axes([A_X + 0.12, 0.075, A_W - 0.12, 0.014])  # right of the key text, so the longer label clears it
+cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=[-lim, 0, lim]); cb.outline.set_visible(False)
+cb.set_label(r"biology score at $b^{*}$ minus the row median", fontsize=7, labelpad=2); cb.ax.tick_params(labelsize=6, length=2)
 key = fig.add_axes([0.02, 0.012, 0.02, 0.022]); key.axis("off")
 key.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor="#e6e6e6", edgecolor="#8a8a8a", hatch="////", lw=0))
 fig.text(0.05, 0.023, "not ranked (low-signal pair)", fontsize=7, va="center")
