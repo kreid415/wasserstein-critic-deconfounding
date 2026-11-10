@@ -8,6 +8,7 @@
 \usepackage[authoryear,round]{natbib}
 \usepackage{url}
 \usepackage{graphicx,booktabs,array}
+\usepackage{adjustbox}% Table S10 fits the text width in the tracked copy (Pass 24)
 \usepackage{needspace}% keeps supplementary headings with their text (Pass 18)
 \usepackage{longtable}% Supplementary Table S6 (paper/supp/tableS6.tex)
 \usepackage{changes}% tracked edits; use \usepackage[final]{changes} for clean text
@@ -471,24 +472,24 @@ With the batch-conditioned decoder, the penalties scored above plain scVI's sele
 \caption{Direct biology check (exploratory; rules written after the sweep scores had been read; Supplementary Note 12). Penalties use the first-crossing strengths of Supplementary Note 9. Means over the six real tasks of per-task seed means. Purity and rare-type columns are differences from plain scVI (penalties and plain scVI: same decoder and seed; baselines: conditioned plain scVI, mean of seeds 100--102). Seed SD, mean over the six real tasks of the SD of the purity difference over seeds (n/a for one-run tools). Rare types on the four real tasks that have them; marker-gene Jaccard on the four RNA tasks. Baselines with several settings: mean over settings (number of settings in parentheses; Scanorama has six on the large chromatin-accessibility task). scANVI uses cell-type labels.}
 \label{tab:s10}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llrrrrrr@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}llrrrrrr@{}}
 \toprule
 Method & Decoder & Purity diff. & Seed SD & Rare purity diff. & Rare recall diff. & Marker Jaccard & Jaccard diff. \\
 \midrule
 JS discriminator & conditioned & $-0.013$ & 0.009 & $0.000$ & $+0.001$ & 0.395 & $-0.003$ \\
  & unconditioned & $-0.001$ & 0.006 & $+0.001$ & $+0.006$ & 0.394 & $+0.004$ \\
 Reference critic & conditioned & $-0.004$ & 0.007 & $-0.002$ & $+0.005$ & 0.399 & $0.000$ \\
-& unconditioned & $-0.004$ & 0.008 & $+0.002$ & $+0.008$ & 0.394 & $+0.003$ \\
+ & unconditioned & $-0.004$ & 0.008 & $+0.002$ & $+0.008$ & 0.394 & $+0.003$ \\
 Pooled critic & conditioned & $-0.005$ & 0.008 & $-0.002$ & $+0.013$ & 0.396 & $-0.003$ \\
-& unconditioned & $+0.001$ & 0.005 & $+0.010$ & $+0.011$ & 0.390 & $-0.001$ \\
-Barycenter critic & conditioned &  $-0.004$ & 0.009 & $-0.002$ & $+0.002$ & 0.394 & $-0.005$ \\
-& unconditioned & $-0.002$ & 0.007 & $+0.014$ & $+0.014$ & 0.392 & $+0.002$ \\
-MMD & conditioned & $-0.004$ & 0.005 & $-0.001$  & $+0.007$ & 0.392 & $-0.007$ \\
-& unconditioned & $-0.004$ & 0.005 & $+0.001$ & $+0.003$ & 0.394 & $+0.003$ \\
+ & unconditioned & $+0.001$ & 0.005 & $+0.010$ & $+0.011$ & 0.390 & $-0.001$ \\
+Barycenter critic & conditioned & $-0.004$ & 0.009 & $-0.002$ & $+0.002$ & 0.394 & $-0.005$ \\
+ & unconditioned & $-0.002$ & 0.007 & $+0.014$ & $+0.014$ & 0.392 & $+0.002$ \\
+MMD & conditioned & $-0.004$ & 0.005 & $-0.001$ & $+0.007$ & 0.392 & $-0.007$ \\
+ & unconditioned & $-0.004$ & 0.005 & $+0.001$ & $+0.003$ & 0.394 & $+0.003$ \\
 Sinkhorn & conditioned & $-0.004$ & 0.004 & $+0.004$ & $+0.010$ & 0.393 & $-0.006$ \\
-& unconditioned & $0.000$ & 0.005 & $+0.010$ & $+0.014$ & 0.395 & $+0.004$ \\
+ & unconditioned & $0.000$ & 0.005 & $+0.010$ & $+0.014$ & 0.395 & $+0.004$ \\
 Plain scVI & conditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.399 & $0.000$ \\
-& unconditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.391 & $0.000$ \\
+ & unconditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.391 & $0.000$ \\
 \midrule
 scvi-tools adversary (1) & conditioned & $-0.007$ & 0.009 & $-0.001$ & $+0.013$ & 0.398 & $-0.001$ \\
 scANVI (labels) (1) & -- & $+0.115$ & 0.003 & $+0.069$ & $+0.061$ & 0.390 & $-0.008$ \\
@@ -497,7 +498,7 @@ Harmony (7) & -- & $-0.141$ & n/a & $-0.234$ & $-0.330$ & 0.367 & $-0.031$ \\
 Scanorama (7) & -- & $-0.049$ & n/a & $-0.076$ & $-0.087$ & 0.382 & $-0.017$ \\
 PCA (2) & -- & $-0.021$ & n/a & $-0.062$ & $-0.088$ & 0.371 & $-0.028$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table}
 \clearpage
 \vspace{4pt}

@@ -1,5 +1,6 @@
 """First-crossing biology summaries, provenance checks, Table S10 and Figure S3."""
 import json
+import re
 import runpy
 import shutil
 import subprocess
@@ -75,3 +76,15 @@ def test_figs3_reads_rebuilt_types_and_renders(tmp_path, monkeypatch):  # test-r
     assert all(ax.images[0].get_array().shape[1] == 15 for ax in fig.axes[:8])
     for ext in ("png", "pdf"):
         assert (tmp_path / f"figS3.{ext}").stat().st_size > 0
+
+
+def test_table_s10_tracked_cells_do_not_span_columns():  # test-reason: a word diff once wrapped several cells in one tracked-change argument, which breaks the tracked PDF build only
+    tex = (bio.DATA.parent / "outline.tex").read_text()
+    block = tex[tex.index("Method & Decoder & Purity diff."):]
+    block = block[:block.index(r"\bottomrule")]
+    args = re.findall(r"\\(?:replaced|added|deleted)\[id=P24\]((?:\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})+)", block)
+    assert args, "no tracked cells found"
+    assert not any("&" in a for a in args), args
+    import pass24_edits as p24
+    assert p24.track_row("A & $-0.1$ & 2 \\\\", "A & $-0.2$ & 2 \\\\") == "A & \\replaced[id=P24]{$-0.2$}{$-0.1$} & 2 \\\\"
+    assert accept(p24.track_row("& x & 1 \\\\", "& y & 1 \\\\")) == "& y & 1 \\\\"

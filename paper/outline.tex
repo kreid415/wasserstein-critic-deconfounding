@@ -7,6 +7,7 @@
 \usepackage[authoryear,round]{natbib}
 \usepackage{url}
 \usepackage{graphicx,booktabs,array}
+\usepackage{adjustbox}% Table S10 fits the text width in the tracked copy (Pass 24)
 \usepackage{needspace}% keeps supplementary headings with their text (Pass 18)
 \usepackage{longtable}% Supplementary Table S6 (paper/supp/tableS6.tex)
 \usepackage{changes}% tracked edits; use \usepackage[final]{changes} for clean text
@@ -553,24 +554,24 @@
 \caption{Direct biology check (exploratory; rules written after the sweep scores had been read; Supplementary Note 12). \added[id=P24]{Penalties use the first-crossing strengths of Supplementary Note 9.} Means over the six real tasks of per-task seed means. Purity and rare-type columns are differences from plain scVI (penalties and plain scVI: same decoder and seed; baselines: conditioned plain scVI, mean of seeds 100--102). Seed SD, mean over the six real tasks of the SD of the purity difference over seeds (n/a for one-run tools). Rare types on the four real tasks that have them; marker-gene Jaccard on the four RNA tasks. Baselines with several settings: mean over settings (number of settings in parentheses; Scanorama has six on the large chromatin-accessibility task). scANVI uses cell-type labels.}
 \label{tab:s10}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llrrrrrr@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}llrrrrrr@{}}
 \toprule
 Method & Decoder & Purity diff. & Seed SD & Rare purity diff. & Rare recall diff. & Marker Jaccard & Jaccard diff. \\
 \midrule
-JS discriminator & conditioned & \replaced[id=P24]{$-0.013$}{$-0.052$} & \replaced[id=P24]{0.009}{0.030 & $-0.107$ & $-0.121$ & 0.398} & $0.000$ \added[id=P24]{& $+0.001$ & 0.395 & $-0.003$} \\
-\replaced[id=P24]{ & unconditioned & $-0.001$ & 0.006 & $+0.001$ & $+0.006$ & 0.394 & $+0.004$ \\}{& unconditioned & $-0.077$ & 0.028 & $-0.076$ & $-0.129$ & 0.392 & $+0.001$ \\}
+JS discriminator & conditioned & \replaced[id=P24]{$-0.013$}{$-0.052$} & \replaced[id=P24]{0.009}{0.030} & \replaced[id=P24]{$0.000$}{$-0.107$} & \replaced[id=P24]{$+0.001$}{$-0.121$} & \replaced[id=P24]{0.395}{0.398} & \replaced[id=P24]{$-0.003$}{$0.000$} \\
+ & unconditioned & \replaced[id=P24]{$-0.001$}{$-0.077$} & \replaced[id=P24]{0.006}{0.028} & \replaced[id=P24]{$+0.001$}{$-0.076$} & \replaced[id=P24]{$+0.006$}{$-0.129$} & \replaced[id=P24]{0.394}{0.392} & \replaced[id=P24]{$+0.004$}{$+0.001$} \\
 Reference critic & conditioned & $-0.004$ & \replaced[id=P24]{0.007}{0.008} & $-0.002$ & $+0.005$ & 0.399 & $0.000$ \\
-& unconditioned & \replaced[id=P24]{$-0.004$}{$-0.011$} & \replaced[id=P24]{0.008}{0.011} & $+0.002$ & $+0.008$ & 0.394 & $+0.003$ \\
+ & unconditioned & \replaced[id=P24]{$-0.004$}{$-0.011$} & \replaced[id=P24]{0.008}{0.011} & $+0.002$ & $+0.008$ & 0.394 & $+0.003$ \\
 Pooled critic & conditioned & \replaced[id=P24]{$-0.005$}{$-0.019$} & 0.008 & \replaced[id=P24]{$-0.002$}{$-0.024$} & \replaced[id=P24]{$+0.013$}{$-0.036$} & \replaced[id=P24]{0.396}{0.398} & \replaced[id=P24]{$-0.003$}{$-0.001$} \\
-& unconditioned & $+0.001$ & 0.005 & $+0.010$ & $+0.011$ & 0.390 & $-0.001$ \\
-Barycenter critic & conditioned & \deleted[id=P24]{$-0.007$ & 0.007 &} $-0.004$ & \replaced[id=P24]{0.009}{$+0.001$} & \replaced[id=P24]{$-0.002$}{0.395} & \replaced[id=P24]{$+0.002$ & 0.394 & $-0.005$}{$-0.003$} \\
-& unconditioned & \replaced[id=P24]{$-0.002$}{$+0.001$} & 0.007 & \replaced[id=P24]{$+0.014$}{$+0.010$} & \replaced[id=P24]{$+0.014$}{$+0.005$} & \replaced[id=P24]{0.392}{0.391} & \replaced[id=P24]{$+0.002$}{$0.000$} \\
-MMD & conditioned & \added[id=P24]{$-0.004$ & 0.005 &} $-0.001$ \deleted[id=P24]{& 0.006 & $+0.003$} & $+0.007$ & \replaced[id=P24]{0.392}{0.397} & \replaced[id=P24]{$-0.007$}{$-0.001$} \\
-& unconditioned & $-0.004$ & 0.005 & $+0.001$ & $+0.003$ & 0.394 & $+0.003$ \\
+ & unconditioned & $+0.001$ & 0.005 & $+0.010$ & $+0.011$ & 0.390 & $-0.001$ \\
+Barycenter critic & conditioned & \replaced[id=P24]{$-0.004$}{$-0.007$} & \replaced[id=P24]{0.009}{0.007} & \replaced[id=P24]{$-0.002$}{$-0.004$} & \replaced[id=P24]{$+0.002$}{$+0.001$} & \replaced[id=P24]{0.394}{0.395} & \replaced[id=P24]{$-0.005$}{$-0.003$} \\
+ & unconditioned & \replaced[id=P24]{$-0.002$}{$+0.001$} & 0.007 & \replaced[id=P24]{$+0.014$}{$+0.010$} & \replaced[id=P24]{$+0.014$}{$+0.005$} & \replaced[id=P24]{0.392}{0.391} & \replaced[id=P24]{$+0.002$}{$0.000$} \\
+MMD & conditioned & \replaced[id=P24]{$-0.004$}{$-0.001$} & \replaced[id=P24]{0.005}{0.006} & \replaced[id=P24]{$-0.001$}{$+0.003$} & $+0.007$ & \replaced[id=P24]{0.392}{0.397} & \replaced[id=P24]{$-0.007$}{$-0.001$} \\
+ & unconditioned & $-0.004$ & 0.005 & $+0.001$ & $+0.003$ & 0.394 & $+0.003$ \\
 Sinkhorn & conditioned & \replaced[id=P24]{$-0.004$}{$-0.022$} & \replaced[id=P24]{0.004}{0.008} & \replaced[id=P24]{$+0.004$}{$+0.006$} & \replaced[id=P24]{$+0.010$}{$+0.002$} & \replaced[id=P24]{0.393}{0.394} & \replaced[id=P24]{$-0.006$}{$-0.005$} \\
-& unconditioned & \replaced[id=P24]{$0.000$}{$-0.033$} & \replaced[id=P24]{0.005}{0.008} & \replaced[id=P24]{$+0.010$}{$-0.045$} & \replaced[id=P24]{$+0.014$}{$-0.079$} & \replaced[id=P24]{0.395}{0.397} & \replaced[id=P24]{$+0.004$}{$+0.006$} \\
+ & unconditioned & \replaced[id=P24]{$0.000$}{$-0.033$} & \replaced[id=P24]{0.005}{0.008} & \replaced[id=P24]{$+0.010$}{$-0.045$} & \replaced[id=P24]{$+0.014$}{$-0.079$} & \replaced[id=P24]{0.395}{0.397} & \replaced[id=P24]{$+0.004$}{$+0.006$} \\
 Plain scVI & conditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.399 & $0.000$ \\
-& unconditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.391 & $0.000$ \\
+ & unconditioned & $0.000$ & 0.000 & $0.000$ & $0.000$ & 0.391 & $0.000$ \\
 \midrule
 scvi-tools adversary (1) & conditioned & $-0.007$ & 0.009 & $-0.001$ & $+0.013$ & 0.398 & $-0.001$ \\
 scANVI (labels) (1) & -- & $+0.115$ & 0.003 & $+0.069$ & $+0.061$ & 0.390 & $-0.008$ \\
@@ -579,7 +580,7 @@ Harmony (7) & -- & $-0.141$ & n/a & $-0.234$ & $-0.330$ & 0.367 & $-0.031$ \\
 Scanorama (7) & -- & $-0.049$ & n/a & $-0.076$ & $-0.087$ & 0.382 & $-0.017$ \\
 PCA (2) & -- & $-0.021$ & n/a & $-0.062$ & $-0.088$ & 0.371 & $-0.028$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table}
 \clearpage
 \vspace{4pt}

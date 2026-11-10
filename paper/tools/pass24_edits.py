@@ -531,8 +531,35 @@ def first_crossing_biology(s):
     data_rows = [ln for ln in old_rows if " & " in accept(ln) and not ln.startswith("Method &")]
     assert len(data_rows) == 20
     for old, new in zip(data_rows, table_lines(summarize())):
-        s = s.replace(old, p23.rewrite(old, new), 1)
+        s = s.replace(old, track_row(old, new), 1)
+    # the tracked copy shows old and new values side by side, so the table may exceed the text width there;
+    # max width shrinks it only when it is too wide (the clean table fits and is unchanged)
+    tab, endtab = r"\begin{tabular}{@{}llrrrrrr@{}}", r"\end{tabular}"
+    i = s.index(tab, s.index(r"\label{tab:s10}")); j = s.index(endtab, i) + len(endtab)
+    s = s[:i] + r"\begin{adjustbox}{max width=\textwidth}" + s[i:j] + r"\end{adjustbox}" + s[j:]
+    pre = r"\usepackage{graphicx,booktabs,array}"
+    assert s.count(pre) == 1
+    s = s.replace(pre, pre + "\n" + r"\usepackage{adjustbox}% Table S10 fits the text width in the tracked copy (Pass 24)")
     return s
+
+
+
+def track_row(old, new):
+    """Track a table row cell by cell, so no tracked-change argument spans a column separator."""
+    assert old == accept(old), "table row already carries tracked changes"
+    end = " " + chr(92) * 2
+    assert old.endswith(end) and new.endswith(end)
+    oc, nc = old[:-len(end)].split("&"), new[:-len(end)].split("&")
+    assert len(oc) == len(nc), (old, new)
+    out = []
+    for o, n in zip(oc, nc):
+        if o.strip() == n.strip():
+            out.append(n)
+        else:
+            lead, core = n[:len(n) - len(n.lstrip())], n.strip()
+            tail = n[len(n.rstrip()):]
+            out.append(f"{lead}\\replaced[id=P24]{{{core}}}{{{o.strip()}}}{tail}")
+    return "&".join(out) + end
 
 
 SUPP_LIST_ITEMS = [  # (key of the line, new printed text or None to strike, lines added after it)
