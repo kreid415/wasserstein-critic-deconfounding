@@ -1,4 +1,4 @@
-"""Tests of the Pass 24 figure scripts: Figures 3-5 and Supplementary Figures S7-S8 (run from the repository root:
+"""Tests of the Pass 24 figure scripts: Figures 3-4 (Pass 27 numbering) and Supplementary Figures S7-S8 (run from the repository root:
 python -m pytest paper/tools/test_pass24_figures.py)."""
 import runpy
 import sys
@@ -30,16 +30,8 @@ def test_fig3_is_the_two_frontier_panels_only(tmp_path, monkeypatch):  # test-re
     assert [t.get_text() for t in fig.texts if len(t.get_text()) == 1] == ["a", "b"]
 
 
-def test_fig4_is_the_collapse_rate_in_percent(tmp_path, monkeypatch):  # test-reason: runs fig4.py, which no other test runs; catches the old axis label that called a rate in percent "percentage points"
+def test_fig4_is_the_per_task_placement_panels(tmp_path, monkeypatch):  # test-reason: runs fig4.py, which no other test runs; catches a lost or extra task panel after the renumbering from Figure 6 (Pass 24) and Figure 5 (Pass 27, when the collapse-rate figure became Table 1: its percent scale is tested in test_table1.py)
     fig, read, _ = run_script("fig4", tmp_path, monkeypatch)
-    assert read == ["collapse_common_range.csv"]
-    assert len(fig.axes) == 2
-    for ax in fig.axes:
-        assert "%" in ax.get_xlabel() and "percentage points" not in ax.get_xlabel()
-
-
-def test_fig5_is_the_per_task_placement_panels(tmp_path, monkeypatch):  # test-reason: runs fig5.py, which no other test runs; catches a lost or extra task panel after the renumbering from Figure 6
-    fig, read, _ = run_script("fig5", tmp_path, monkeypatch)
     assert read == ["single_methods.csv", "transfer_strength.csv"]
     assert len(fig.axes) == len(figcommon.REAL_TASKS)
 

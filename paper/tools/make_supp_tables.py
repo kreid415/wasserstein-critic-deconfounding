@@ -183,7 +183,7 @@ def tabular_s7a(cond, with_counts=True):
 def make_s7():
     cond = 0
     a, _ = tabular_s7a(cond)
-    cap = (r"Placement with the unconditioned decoder (counterpart of Supplementary Table~\ref{tab:4} and of Figure~5). Mean selection score "
+    cap = (r"Placement with the unconditioned decoder (counterpart of Supplementary Table~\ref{tab:4} and of Figure~4). Mean selection score "
            r"($0.4\times$batch $+\,0.6\times$biology) per method and real task at the strength (Harmony, Scanorama, sysVI: the setting) with the best mean "
            r"selection score on real tasks of other task families (related tasks never choose for each other); in parentheses, the task's own best "
            r"strength or setting (optimistic bound). Plain scVI here receives no batch information. The scvi-tools adversary is run with the batch-conditioned decoder only and is not shown. scANVI (uses cell-type labels), sysVI, Harmony, Scanorama and PCA were not run in the two decoder settings, so their values are repeated unchanged from Supplementary Table~\ref{tab:4}. The last column counts the real "
