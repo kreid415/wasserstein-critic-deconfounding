@@ -70,10 +70,7 @@ def figures(s):
     lines = s.split("\n")
     hit = [i for i, ln in enumerate(lines) if ln.startswith(CAPTION_START)]
     assert len(hit) == 1 and lines[hit[0]].endswith(r"\label{fig:s3}"), hit
-    head, tail = r"\caption{", r"}\label{fig:s3}"
-    old_inner = lines[hit[0]][len(head):-len(tail)]
-    assert CAPTION.startswith(head) and CAPTION.endswith("}")
-    lines[hit[0]] = head + r"\replaced[id=P25]{" + CAPTION[len(head):-1] + "}{" + old_inner + "}" + tail  # tracked copy shows the caption change
+    lines[hit[0]] = CAPTION + r"\label{fig:s3}"  # supplement files are input as they are by both builds, so no tracked markup here
     return "\n".join(lines)
 
 
