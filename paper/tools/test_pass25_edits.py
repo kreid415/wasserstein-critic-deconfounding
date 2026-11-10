@@ -13,6 +13,7 @@ sys.path.insert(0, str(TOOLS))
 from accept_changes import accept  # noqa: E402
 
 START = "1cea7ef"
+RESULT = "a33ccc6"  # the Pass 25 result; Pass 26 edits paper/outline.tex, so the script is compared with this commit
 EDITED = ["paper/outline.tex", "paper/supp/figures.tex", "paper/supp/note9.tex"]
 
 
@@ -28,7 +29,8 @@ def test_pass25_script_reproduces_the_committed_files(tmp_path, monkeypatch):  #
     monkeypatch.setenv("PASS25_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass25_edits.py"), run_name="__main__")
     for rel in EDITED:
-        assert (tmp_path / rel).read_text() == (REPO / rel).read_text(), rel
+        committed = subprocess.run(["git", "-C", str(REPO), "show", f"{RESULT}:{rel}"], capture_output=True, text=True).stdout
+        assert (tmp_path / rel).read_text() == committed, rel
     after = (tmp_path / "paper/outline.tex").read_text()
     main = lambda t: t[t.index(r"\begin{document}"):t.index(r"\hd{Supplementary material}")]
     assert main(after) == main(start["paper/outline.tex"])        # no change before the supplementary material heading

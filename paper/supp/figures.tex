@@ -1,4 +1,4 @@
-% generated; Supplementary Figures S1-S8 (scripts: paper/figure_scripts/figS<n>.py). Figures are \input after the supplementary tables.
+% generated; Supplementary Figures S1-S9 (scripts: paper/figure_scripts/figS<n>.py). Figures are \input after the supplementary tables.
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S1}%
 \includegraphics[width=\textwidth]{figures/figS1.png}
@@ -51,4 +51,10 @@
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S8}%
 \includegraphics[width=\textwidth]{figures/figS8.png}
 \caption{Hypervolume up to the highest common batch score per penalty, with the batch-conditioned decoder (a; five ranked real tasks) and the unconditioned decoder (b; six real tasks): the area under each task's Pareto frontier (Figure 3) above 0.10 below plain scVI's biology, from plain scVI to the highest batch score every penalty reaches (higher is better; dashed line, 0.10, plain scVI's biology kept throughout); dots, tasks; black tick, median. The axis shows every task. Values with and without the cap are in Supplementary Table S8 (Supplementary Note 7).}\label{fig:s8}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S9}%
+\includegraphics[width=0.6\textwidth]{figures/figS9.png}
+\caption{How biology is read at the matched batch removal $b^*$ (Methods; Supplementary Note 5). ATAC small with the unconditioned decoder, three of the six penalties (JS discriminator, reference critic and MMD), means over three seeds (100--102). Batch score (top) and biology score (bottom) against penalty strength on a log scale; plain scVI (star) is drawn at strength 0, on the left, beyond an axis break. Biology is read where the batch score first reaches $b^*$ (dashed line), interpolating between neighbouring strengths (open circles, joined by dotted lines); later crossings (grey x) are not used. The legend gives each penalty's biology score at $b^*$. The plotted values are in \texttt{figS9\_points.csv} and the readings in \texttt{figS9\_reading.csv}, in \texttt{paper/figure\_data}.}\label{fig:s9}
 \end{figure}

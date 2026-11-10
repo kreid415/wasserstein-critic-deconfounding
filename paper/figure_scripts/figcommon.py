@@ -64,7 +64,7 @@ def panel_letter(ax, letter, dx=-0.0, dy=0.0, x=-0.12, y=1.08):
 
 
 def check_and_save(fig, stem, exts=("png", "pdf")):
-    """Overlap check (figure-style 9.1), then PNG (300 dpi) and PDF (Figure 1 also writes SVG)."""
+    """Overlap check (figure-style 9.1), then PNG (300 dpi) and PDF (Figure 1 also writes SVG); no creation time in PDF or SVG."""
     fig.canvas.draw()
     r = fig.canvas.get_renderer()
     ticks = {t for ax in fig.axes for t in ax.get_xticklabels() + ax.get_yticklabels()}
@@ -75,8 +75,9 @@ def check_and_save(fig, stem, exts=("png", "pdf")):
     bad += [(t.get_text(), "spine") for t, bt in texts for ax in fig.axes for s in ax.spines.values()
             if s.get_visible() and bt.overlaps(s.get_window_extent(r)) and t.axes is not ax]
     OUT.mkdir(exist_ok=True)
+    no_stamp = {"svg": {"Date": None}, "pdf": {"CreationDate": None}}   # no creation time: the files are byte-reproducible
     for e in exts:
-        fig.savefig(OUT / f"{stem}.{e}", dpi=300, **({"metadata": {"Date": None}} if e == "svg" else {}))
+        fig.savefig(OUT / f"{stem}.{e}", dpi=300, **({"metadata": no_stamp[e]} if e in no_stamp else {}))
     print(f"{stem}: saved; text overlaps: {bad}")
     return bad
 

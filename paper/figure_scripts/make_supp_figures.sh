@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Rebuild Supplementary Tables S6-S7 and Figures S1-S8 (PNG 300 dpi + PDF in paper/figures/, LaTeX in paper/supp/). Run from the repository root on the workstation
-# (steps 1-3 read the sweep analysis directory D/sweep_analysis_final_20261105 and the saved latents; steps 4-6 read paper/figure_data only, and so do Figures S7 and S8 in step 4).
+# Rebuild Supplementary Tables S6-S7 and Figures S1-S9 (PNG 300 dpi + PDF in paper/figures/, LaTeX in paper/supp/). Run from the repository root on the workstation
+# (steps 1-3 read the sweep analysis directory D/sweep_analysis_final_20261105 and the saved latents; steps 4-6 read paper/figure_data only, and so do Figures S7, S8 and S9 in step 4).
 # Environments: SCVI_PY = the scvi-api conda environment (scikit-learn 1.9.0, pandas 2.3.3; label transfer only); PY = Python with matplotlib, pandas, scipy, numpy
 # (versions in figure_scripts/ENVIRONMENT_supp.txt). No random numbers are used except a fixed-seed jitter of dots in Figure S5a.
 set -euo pipefail
@@ -15,9 +15,12 @@ $SCVI_PY paper/figure_scripts/prep_label_transfer_types.py --jobs 8             
 for f in sensitivity_ranks metric_scores label_transfer_types; do                          # derived files: checksum recorded once
   grep -q " $f.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum "$f.csv" >> MANIFEST.sha256)
 done
-for n in 1 2 3 4 5 6 7 8; do $PY paper/figure_scripts/figS$n.py; done                      # 4 figures (S5 also writes scaling_check_ranks.csv; S7, S8 read paper/figure_data only)
+for n in 1 2 3 4 5 6 7 8 9; do $PY paper/figure_scripts/figS$n.py; done                    # 4 figures (S5 also writes scaling_check_ranks.csv; S9 writes figS9_points.csv and figS9_reading.csv; S7-S9 read paper/figure_data only)
 grep -q " scaling_check_ranks.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum scaling_check_ranks.csv >> MANIFEST.sha256)
 grep -q " figS3_values.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum figS3_values.csv >> MANIFEST.sha256)   # written by figS3.py (Pass 25)
+for f in figS9_points figS9_reading; do                                                    # written by figS9.py (Pass 26; the former fig1b_points.csv and fig1b_reading.csv)
+  grep -q " $f.csv$" paper/figure_data/MANIFEST.sha256 || (cd paper/figure_data && sha256sum "$f.csv" >> MANIFEST.sha256)
+done
 (cd paper/figure_data && sha256sum -c MANIFEST.sha256)
 $PY paper/tools/make_supp_tables.py --check-table4                                         # 5 tables S6, S7 (+ positive control against Table 4)
 $PY paper/tools/make_supp_supp-analysis.py                                                 # 5b Table S8 and the label-transfer table of Note 9
