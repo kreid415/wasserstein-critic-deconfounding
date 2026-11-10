@@ -49,9 +49,12 @@ def active_text(s, dropped):
 
 
 def abstract(tex):
-    block = tex.split(r"\hd{Abstract}", 1)[1].split(r"\end{enumerate}", 1)[0]
+    """Source of the abstract: after the heading's budget argument, up to the keywords line. Until Pass 23 the abstract was a
+    numbered list; since Pass 24 it is three paragraphs after the struck list, so list environments and \\vspace are dropped."""
+    block = tex.split(r"\hd{Abstract}", 1)[1]
+    block = re.split(r"\n[^\n]*Keywords:", block[group(block, 0)[1]:], maxsplit=1)[0]
     block = re.sub(r"(?m)(?<!\\)%.*$", "", block)
-    return re.sub(r"^\[[^\]]*\]", "", block.split(r"\begin{enumerate}", 1)[1])
+    return re.sub(r"\\(begin|end)\{enumerate\}(\[[^\]]*\])?|\\vspace\{[^}]*\}", " ", block)
 
 
 def count(tex):

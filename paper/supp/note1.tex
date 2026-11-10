@@ -22,7 +22,7 @@ with $\ell_i$ the observed library size (scvi-tools' default), $\rho(z_i,s_i)$ t
 \min_h\;\mathcal{L}_D=\frac1{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\mathcal{L}_{\mathrm{CE}}\big(h(u_i),s_i\big),\qquad \mathcal{L}_{\mathrm{CE}}(h(u),s)=-\log\mathrm{softmax}(h(u))_s ,
 \label{eq:s1-disc}
 \end{equation}
-and the encoder minimises the bounded fool loss of scvi-tools, the cross-entropy between the prediction and the uniform distribution over the other $K-1$ batches,
+and the encoder minimises the fool loss of scvi-tools, the cross-entropy between the prediction and the uniform distribution over the other $K-1$ batches (a Jensen--Shannon-type objective; the loss is not bounded above and is not the Jensen--Shannon divergence itself),
 \begin{equation}
 \mathcal{A}_{\mathrm{JS}}=-\frac1{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\frac1{K-1}\sum_{k\neq s_i}\log\mathrm{softmax}\big(h(u_i)\big)_k .
 \label{eq:s1-fool}
@@ -49,6 +49,8 @@ with $\lambda_{\mathrm{GP}}=10$, $\varepsilon_i\sim\mathrm{U}(0,1)$ and $t_i$ dr
 \label{eq:s1-aw}
 \end{equation}
 where the reference cells (reference critic) and the cells of the other batches (pooled critic) are not detached and so receive gradient, while the barycenter support is a constant. No spectral normalisation is used.
+
+\noindent\textit{Reference batch.} The reference critic's reference batch is the batch with the highest cell-type entropy, ties going to the larger batch. The entropy rule prefers the batch whose cell types are most evenly represented, so that the target does not favour a few cell types, as a merely large batch, the other obvious choice, may do when a few cell types dominate it. The chosen reference holds every cell type in five of the eight tasks, and 10 of 17 (lung), 14 of 19 (human--mouse immune) and 3 of 4 (simulation 2) in the others, so in those three tasks some cells of other batches have no cell of their type in the reference (\texttt{paper/analysis\_pass10/reference\_coverage.json}).
 
 \noindent\textit{Maximum mean discrepancy.} Each batch is compared with the cells of all other batches in the minibatch, with the squared MMD as a biased (V-statistic) estimate,
 \begin{equation}

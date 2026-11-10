@@ -23,7 +23,7 @@ def test_tables_generate_and_local_global_check_refuses_a_wrong_record(tmp_path,
     assert sa.make_s8()["rows"] == 96 and sa.make_note9()["rows"] == 120
     s8, n9 = (tmp_path / "tableS8.tex").read_text(), (tmp_path / "note9_table.tex").read_text()
     assert s8.count(r"decoder; $b^*=") == 16 and r"\addtocounter{table}{-1}" in s8   # 16 pairs; main table numbers untouched
-    assert n9.count("Plain scVI &") == 16 + 1 and "(low-signal)" in n9                                  # 16 blocks plus the summary row
+    assert n9.count("Plain scVI &") == 16 and "(low-signal)" in n9                                      # 16 blocks (the cross-task summary row was removed in Pass 24)
     assert r"\renewcommand{\thetable}{S11}" in n9 and r"\label{tab:s11}" in n9 and r"\addtocounter{table}{-1}" in n9
     rk = sa.read("ranking_pairs.csv").head(1).copy()
     rk.loc[rk.index[0], "local_minus_global"] += 1e-6

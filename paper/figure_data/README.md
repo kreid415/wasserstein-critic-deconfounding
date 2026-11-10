@@ -1,4 +1,4 @@
-# Inputs of Figures 1-6 (copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
+# Inputs of Figures 1-5 and Supplementary Figures S7-S8 (Pass 24 numbering; copied unchanged; the figure scripts read nothing else; Figure 1 panel b reads only paper_numbers.json and curves.csv)
 
 | File | Source |
 |---|---|
@@ -28,8 +28,8 @@ Derived (scripts record the inputs; SHA-256 in MANIFEST.sha256):
 
 | File | Script | Used by |
 |---|---|---|
-| pareto_frontier.csv, pareto_frontier_median.csv, pareto_frontier.json | pareto_frontier.py (from curves.csv, paper_numbers.json, secondary.csv; checks that the uncapped hypervolume reproduces secondary.csv) | Figure 4, Supplementary Table S8 (HV, HV_all), Res-3b, Supplementary Note 7 |
-| collapse_common_range.csv, collapse_common_range.json | collapse_common_range.py (from metric_scores.csv, curves.csv, paper_numbers.json, secondary.csv, ranking_pairs.csv; checks that the per-fit rebuild reproduces the collapse counts of secondary.csv) | Figure 5, Supplementary Table S8 (Coll. common), Res-4, abstract, Supplementary Note 7 |
+| pareto_frontier.csv, pareto_frontier_median.csv, pareto_frontier.json | pareto_frontier.py (from curves.csv, paper_numbers.json, secondary.csv; checks that the uncapped hypervolume reproduces secondary.csv) | Figure 3, Supplementary Figure S8, Supplementary Table S8 (HV, HV_all), Res-3b, Supplementary Note 7 |
+| collapse_common_range.csv, collapse_common_range.json | collapse_common_range.py (from metric_scores.csv, curves.csv, paper_numbers.json, secondary.csv, ranking_pairs.csv; checks that the per-fit rebuild reproduces the collapse counts of secondary.csv) | Figure 4, Supplementary Table S8 (Coll. common), Res-4, abstract, Supplementary Note 7 |
 | res2_seed_noise.json | res2_seed_noise.py | Res-2 |
 | res5_label_transfer.json | res5_label_transfer.py (from label_transfer.csv, ranking_pairs.csv) | Res-5 |
 | replication_mean_ranks.json | replication_mean_ranks.py | Supplementary Note 13, Res-2b |

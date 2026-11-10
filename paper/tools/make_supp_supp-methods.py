@@ -401,7 +401,8 @@ def table_s2(tasks, manifest, settings):
                        f"{setting(settings, 'none', 'fit.max_kl_weight', 'A1'):g} over {warm} epochs (scvi-tools "
                        "default); the penalty is not scaled by it"),
         ("Adversary input", ("posterior mean" if one["adv_input"] == "mean" else "posterior sample")
-         + (", no per-dimension standardisation" if one["zstd"] == 0 else ", standardised per dimension")),
+         + (", no per-dimension standardisation" if one["zstd"] == 0 else ", standardised per dimension")
+         + " (the six penalties; the scvi-tools adversary reads a posterior sample, as in scvi-tools; Supplementary Note 1)"),
         ("Scored embedding", "posterior mean of every cell (training and validation cells)")]
     d, rows = int(one["n_latent"]), [("Plain scVI", "--", "--", "--", r"strength $\lambda=0$")]
     for a in PEN:

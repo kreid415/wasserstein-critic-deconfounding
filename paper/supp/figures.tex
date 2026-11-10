@@ -1,4 +1,4 @@
-% generated; Supplementary Figures S1-S6 (scripts: paper/figure_scripts/figS<n>.py). Figures are \input after the supplementary tables.
+% generated; Supplementary Figures S1-S8 (scripts: paper/figure_scripts/figS<n>.py). Figures are \input after the supplementary tables.
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S1}%
 \includegraphics[width=\textwidth]{figures/figS1.png}
@@ -32,11 +32,23 @@
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S5}%
 \includegraphics[width=\textwidth]{figures/figS5.png}
-\caption{Scaling checks (exploratory, used for no conclusion). The six penalties are re-ranked at matched batch removal after changing how the metrics are scaled or combined: scIB min-max scaling of each metric over one comparison set per task (every scored fit of the task, both decoders, all penalty strengths, plain scVI and the standard tools); the same with each of the 13 method families left out of the set that fixes the minimum and maximum; z-score standardisation over the same set; and a composite without the three silhouette metrics (batch average silhouette width, cell-type average silhouette width, isolated-label silhouette). The primary reading uses unscaled metrics. Batch and biology scores, $b^*$, the readings and the ranks are recomputed for every variant on the 13 ranked task and decoder pairs. \textbf{(a)} Kendall's $\tau_b$ between the primary ranks and each variant's ranks, one point per pair (leave-one-family-out: one point per pair and family). \textbf{(b, c)} Mean rank over the ranked real tasks per penalty and decoder; the grey bar is the range over the 13 leave-one-family-out runs.}\label{fig:s5}
+\caption{Scaling checks (exploratory; the penalty with the best mean rank changes under some of them, Discussion). The six penalties are re-ranked at matched batch removal after changing how the metrics are scaled or combined: scIB min-max scaling of each metric over one comparison set per task (every scored fit of the task, both decoders, all penalty strengths, plain scVI and the standard tools); the same with each of the 13 method families left out of the set that fixes the minimum and maximum; z-score standardisation over the same set; and a composite without the three silhouette metrics (batch average silhouette width, cell-type average silhouette width, isolated-label silhouette). The primary reading uses unscaled metrics. Batch and biology scores, $b^*$, the readings and the ranks are recomputed for every variant on the 13 ranked task and decoder pairs. \textbf{(a)} Kendall's $\tau_b$ between the primary ranks and each variant's ranks, one point per pair (leave-one-family-out: one point per pair and family). \textbf{(b, c)} Mean rank over the ranked real tasks per penalty and decoder; the grey bar is the range over the 13 leave-one-family-out runs.}\label{fig:s5}
 \end{figure}
 
 \begin{figure}[p]
 \centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S6}%
 \includegraphics[width=\textwidth]{figures/figS6.png}
-\caption{Trade-off curves (the main-text Figure 3 until Pass 23): batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. Panels in a column share axes. Figure 3 summarises these curves at $b^*$ and at the strongest setting.}\label{fig:s6}
+\caption{Trade-off curves: batch score against biology score for the six real tasks (columns) with the batch-conditioned decoder (a) and the unconditioned decoder (b). Each line joins plain scVI (star) and one penalty's fitted strengths in increasing order, by mean scores over three seeds; the open circle marks the strongest fitted setting. Dashed line, matched batch removal $b^*$. Grey panel, the low-signal immune pair, which is not ranked. Panels in a column share axes. Supplementary Figure S7 summarises these curves at $b^*$ and at the strongest setting.}\label{fig:s6}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S7}%
+\includegraphics[width=\textwidth]{figures/figS7.png}
+\caption{Biology kept by each penalty relative to plain scVI, at the matched batch removal $b^*$ (filled dots) and at the penalty's strongest fitted setting (open dots), with the batch-conditioned (a) and the unconditioned decoder (b). One dot per real task: biology score minus plain scVI's with the same decoder (higher is better); grey line, no change. Filled dots are drawn for the ranked tasks only (the immune task with the batch-conditioned decoder is low-signal); open dots for all six real tasks. The full trade-off curves are in Supplementary Figure S6.}\label{fig:s7}
+\end{figure}
+
+\begin{figure}[p]
+\centering\renewcommand{\figurename}{Supplementary Figure}\renewcommand{\thefigure}{S8}%
+\includegraphics[width=\textwidth]{figures/figS8.png}
+\caption{Hypervolume up to the highest common batch score per penalty, with the batch-conditioned decoder (a; five ranked real tasks) and the unconditioned decoder (b; six real tasks): the area under each task's Pareto frontier (Figure 3) above 0.10 below plain scVI's biology, from plain scVI to the highest batch score every penalty reaches (higher is better; dashed line, 0.10, plain scVI's biology kept throughout); dots, tasks; black tick, median. The axis shows every task. Values with and without the cap are in Supplementary Table S8 (Supplementary Note 7).}\label{fig:s8}
 \end{figure}

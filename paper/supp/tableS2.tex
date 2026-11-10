@@ -13,7 +13,7 @@ Training split & 90\% of cells for training, the rest for validation; no early s
 Minibatch & 128 cells \\
 Encoder and decoder optimiser & Adam, learning rate $10^{-3}$, betas (0.9, 0.999), epsilon 0.01, weight decay $10^{-6}$ \\
 KL warm-up & linear from 0 to 1 over 400 epochs (scvi-tools default); the penalty is not scaled by it \\
-Adversary input & posterior mean, no per-dimension standardisation \\
+Adversary input & posterior mean, no per-dimension standardisation (the six penalties; the scvi-tools adversary reads a posterior sample, as in scvi-tools; Supplementary Note 1) \\
 Scored embedding & posterior mean of every cell (training and validation cells) \\
 \bottomrule
 \end{longtable}
