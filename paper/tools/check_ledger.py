@@ -14,7 +14,7 @@ carries no value. Ledger formats:
 - pass10/pass11 (item, value, source): source is <path> or <path>:<JSON key>; with a key, the value is re-read and compared with
   `value` at the precision written.
 Selector clauses, separated by ' ; ': key=<JSON key> | where=<term>&<term> (terms: col==v, col!=v, col in a|b, col<v, |col|<v,
-also > <= >=) with col=<column> and agg=value|min|max|count|nunique|sum|argmax:<col>|argmin:<col> | pairdiff=<col> with
+also > <= >=) with col=<column> and agg=value|min|max|count|nunique|sum|mean|argmax:<col>|argmin:<col> | pairdiff=<col> with
 group=<cols> and optional lt=<x> (count of within-group pairs, |difference| < x) | re=<regex> (group 1, else the whole match) |
 expr=<python expression over the raw values of earlier rows, by id>.  fmt: a format spec (.3f, .0%, d, ',d'), len, range_n
 ("a-b" -> b-a+1), present (a design statement: the re= pattern must be found; `written` is then checked only at its location)
@@ -137,7 +137,7 @@ def evaluate(text, sel, values):
         if len(s) != 1:
             raise LedgerError(f"{len(s)} rows selected, expected 1")
         return s.iloc[0].item() if hasattr(s.iloc[0], "item") else s.iloc[0]
-    return {"min": s.min, "max": s.max, "nunique": s.nunique, "sum": s.sum}[agg]()
+    return {"min": s.min, "max": s.max, "nunique": s.nunique, "sum": s.sum, "mean": s.mean}[agg]()
 
 
 def norm(s):

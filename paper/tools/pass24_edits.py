@@ -1,7 +1,6 @@
 """Pass 24 edits (2026-11-09, tracked id P24): pre-submission edits from the two referee reviews (merged review sections A-C,
-approved by the first author on 2026-11-09 except D1, label transfer and the direct biology check, which is being recomputed;
-Res-5, the Conclusions item on the direct biology check, Note 12, Table S10, Figure S3 and the label-transfer paragraph of
-Methods are therefore not edited). Change log paper/pass24_changelog.md; numbers in paper/pass24_numbers.csv.
+approved by the first author on 2026-11-09; Part b implements D1, re-reading label transfer and the direct biology check at
+the first crossing). Change log paper/pass24_changelog.md; numbers in paper/pass24_numbers.csv.
 D2: 'strength mattered more than penalty choice' becomes the narrower statement (similar biology at matched batch removal,
 differences mainly at strong settings; 0.025 and 0.213 are ranges between the highest and lowest penalty). D3: Res-6 is prose
 (counts once, 'scored above', near-tie caveat, no own-best count, scANVI and scvi-tools adversary sentences). D4: Figure 3 (dot
@@ -13,22 +12,24 @@ Supplementary Notes 1, 4, 10 and 13, which already hold most of it); the abstrac
 macro F1 leaves Notes 5 and 9 (Table S11: paper/tools/make_supp_supp-analysis.py) and is recorded in Note 10.
 Each edited line of the outline is rewritten as word-level tracked changes against its printed (accepted) old text, as in
 Passes 22 and 23; supplement files are edited in place. Every old text must occur exactly once or the script stops, and it
-stops if the main text (Background to Conclusions, figures excluded) exceeds 5,700 words or the main captions 450.
+stops if the main text (Background to Conclusions, figures excluded) exceeds 5,500 words or the main captions 450.
 Run from the repository root:  python paper/tools/pass24_edits.py   (PASS24_ROOT overrides the root of the edited files)
 Then: python paper/tools/accept_changes.py ; python paper/tools/check_ledger.py"""
 import os
 import re
 import sys
+import subprocess
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pass22_edits as p22  # noqa: E402
 import pass23_edits as p23  # noqa: E402  (its rewrite() and whole-line helpers)
 from accept_changes import accept  # noqa: E402
+from biology_check_table import summarize, table_lines  # noqa: E402
 
 ROOT = Path(os.environ.get("PASS24_ROOT") or Path(__file__).resolve().parents[2])
 p22.TAG = T = "P24"  # rewrite() marks its changes with this tag
-MAIN_LIMIT, CAPTION_LIMIT = 5700, 450
+MAIN_LIMIT, CAPTION_LIMIT = 5500, 450
 MARK = p23.MARK
 
 
@@ -66,7 +67,7 @@ WHOLE = {  # rewritten throughout: one tracked replacement, so the new text is c
     r"\qquad \textbf{Penalty-strength sweep.}", "A replication on 895 new fits",
     "The penalties kept similar biology up to the matched level and differed at stronger settings",
     "We scaled batch removal per task and decoder", "We count the fits at strengths whose mean batch score",
-    r"\caption{Pareto frontier of each penalty"}
+    r"\caption{Pareto frontier of each penalty", "Label transfer predicts the cell types of each held-out batch"}
 
 
 def rewrite_line(s, key, new=None, pairs=()):
@@ -467,6 +468,73 @@ ABBREVIATIONS = (r"ATAC, assay for transposase-accessible chromatin; GAN, genera
                  r"Wasserstein-1; WGAN-GP, Wasserstein generative adversarial network with gradient penalty.")
 
 # ------------------------------------------------------------------ supplement lists
+STRENGTH_RULE = (r"of the two fitted strengths that bracket the first crossing of $b^*$, the one whose seed-mean batch score "
+                 r"is nearer $b^*$ (ties to the smaller strength), or the upper one when the lower is plain scVI")
+RES5 = (
+    r"At first-crossing strengths (Methods), label-transfer macro F1 with the unconditioned decoder was below plain scVI's "
+    r"for the discriminator on five of six real tasks (median difference $-0.002$), and lowest among the penalties on three. "
+    r"With the batch-conditioned decoder its median difference was 0.000 over the five ranked tasks. The other penalties' "
+    r"median differences were $-0.006$ to $+0.001$ with either decoder. Their label-transfer order did not follow their biology "
+    r"order at $b^*$ (median Kendall $\tau_b=-0.067$ over the 11 ranked pairs). The selected embeddings were near $b^*$, "
+    r"rather than exactly matched (batch-score distance at most 0.073, median 0.005); plain scVI uses its own unmatched embedding "
+    r"(Supplementary Note 9). The direct check is exploratory and descriptive (Supplementary Note 12). Over the six real tasks, "
+    r"mean neighbourhood purity minus plain scVI's was $-0.013$ for the discriminator with the batch-conditioned decoder and "
+    r"$-0.001$ with the unconditioned decoder; the other penalties ranged from $-0.005$ to $+0.001$. Harmony, averaged over "
+    r"its settings, differed from batch-conditioned plain scVI by $-0.141$, and scANVI, trained with the labels, by $+0.115$. "
+    r"Rare types lost purity in 21 of 48 task, penalty and decoder comparisons. Marker-gene overlap was 0.390 to 0.399 for "
+    r"every penalty and plain scVI, with differences at most 0.007. These readouts show small average changes at the first "
+    r"crossing, without a consistent disadvantage for the discriminator across decoders. The earlier reading, which took some "
+    r"penalties at strengths far past the first crossing, had shown larger losses for the discriminator (both readings and "
+    r"per-cell-type detail in Supplementary Note 12).")
+NOTE10_STRENGTH = (
+    r"\item \emph{Strength rule changed after the first readings.} On 9 November 2026, after the first label-transfer and "
+    r"direct-biology-check results had been read, the first author changed their strength rule from the failure-free strength "
+    r"nearest $b^*$ on any crossing to the first-crossing rule: " + STRENGTH_RULE + r". This makes their strengths follow the "
+    r"crossing used by the ranking; batch scores alone choose the strength. Both readings are given in Supplementary Note 12. "
+    r"The earlier label-transfer table and summary are kept as \texttt{label\_transfer\_nearest\_any\_crossing.csv} and "
+    r"\texttt{res5\_label\_transfer\_nearest\_any\_crossing.json} in \texttt{paper/figure\_data}; the earlier biology "
+    r"tables are in \texttt{paper/figure\_data/biology\_check\_nearest\_any\_crossing/tables}. The new strengths and biology "
+    r"outputs are \texttt{first\_crossing\_strength.csv} and \texttt{biology\_check\_first\_crossing/} there.")
+
+
+def first_crossing_biology(s):
+    s = rewrite_line(s, r"\qquad  Label transfer holds", r"\qquad Label transfer predicts each held-out batch's cell types "
+                     r"from the other batches with a 15-nearest-neighbour classifier. For each penalty the rule is: " + STRENGTH_RULE +
+                     r". This rule replaced the strength nearest $b^*$ on any crossing after the first results had been read "
+                     r"(Supplementary Notes 9 and 10); accuracy never chooses the strength.")
+    s = rewrite_line(s, r"\qquad A direct biology check reads", r"\qquad A direct biology check reads neighbourhood purity, "
+                     r"the share of each cell's 15 nearest neighbours with its cell-type label, averaged within types; purity "
+                     r"and label-transfer recall for rare types (under 1\% of a task's cells); marker preservation, the Jaccard "
+                     r"overlap of each type's top 20 markers from the original and neighbour-averaged expression on the four RNA "
+                     r"tasks; and label-transfer confusion. Penalties follow the label-transfer rule: " + STRENGTH_RULE +
+                     r". This replaces the earlier strength nearest $b^*$ on any crossing (Supplementary Note 10); baselines use every "
+                     r"setting. Differences are from plain scVI, with no new fits. The check is exploratory: its rules followed "
+                     r"the sweep scores and its strength rule changed after its first results (Supplementary Note 12).")
+    s = rewrite_line(s, r"\pp{Res-5}{", r"\pp{Res-5}{Label transfer and the direct biology check show small average changes "
+                     r"from plain scVI at the first crossing (Supplementary Figure S3 and Supplementary Table S10).}")
+    s = rewrite_line(s, "Label transfer predicts the cell types of each held-out batch", RES5)
+    s = rewrite_line(s, r"\pp{Disc-2}{", pairs=[
+        (r"Label-transfer scores did not follow the matched-biology ranking either, and their batch-score distances from $b^*$ "
+         r"limit direct comparisons.", r"At first-crossing strengths, label transfer showed small median changes from plain "
+         r"scVI and did not follow the matched-biology ranking; unequal batch-score distances from $b^*$ limit comparisons.")])
+    s = rewrite_line(s, r"\item Observations for scVI users", pairs=[
+        (r"the biology was worth checking directly at the chosen strength, because the discriminator lost the most neighbourhood "
+         r"purity in the direct biology check ($-0.052$ against plain scVI, $-0.107$ for rare types, batch-conditioned decoder)",
+         r"the direct biology check showed small average changes from plain scVI at first-crossing strengths, without a "
+         r"consistent disadvantage for the discriminator across decoders (Res-5)")])
+    s = rewrite_line(s, r"\item Repository github.com/kreid415", pairs=[("biology check at commit c4a793f", "biology check at commit 8073db6")])
+    s = rewrite_line(s, r"\caption{Direct biology check", pairs=[
+        ("Means over the six real tasks", "Penalties use the first-crossing strengths of Supplementary Note 9. Means over the six real tasks")])
+    start = s.index("Method & Decoder & Purity diff.")
+    end = s.index(r"\bottomrule", start)
+    old_rows = s[start:end].splitlines()
+    data_rows = [ln for ln in old_rows if " & " in accept(ln) and not ln.startswith("Method &")]
+    assert len(data_rows) == 20
+    for old, new in zip(data_rows, table_lines(summarize())):
+        s = s.replace(old, p23.rewrite(old, new), 1)
+    return s
+
+
 SUPP_LIST_ITEMS = [  # (key of the line, new printed text or None to strike, lines added after it)
     ("Table S12, benchmark ranking (the former main-text Table 2)", [(" (the former main-text Table 2)", "")], []),
     ("Table S13, alignment methods (the former main-text Table 1)", [(" (the former main-text Table 1)", "")], []),
@@ -511,6 +579,7 @@ def outline(s):
     s = rewrite_line(s, r"\pp{Res-3b}{", pairs=[("(Figure 4)", "(Figure 3)")])
     s = rewrite_line(s, r"\pp{Res-4}{", pairs=[("(Figure 5;", "(Figure 4;")])
     s = rewrite_line(s, r"\item Observations for scVI users", pairs=CONCLUSIONS_PAIRS)
+    s = first_crossing_biology(s)
     for key in (r"\item Rule: each penalty, and each of Harmony", r"\item At the strength chosen on real tasks of other families",
                 r"\item The replication across training seeds met its agreement rule", r"\item When to add a penalty:",
                 r"\item Figure 6:"):
@@ -603,7 +672,7 @@ def supplement():
         ("and the cross-task label-transfer means (Supplementary Note 9).", "and the label-transfer summaries (Supplementary Note 9)."),
         ("the collapse rate and the single-strength placement (Supplementary Note 7).",
          "the collapse rate and the single-strength placement (Supplementary Note 7). The direct biology check, which also reads the "
-         "strength nearest $b^*$, keeps them in its summaries over the six real tasks (Supplementary Note 12).")])
+         "first-crossing strength (Supplementary Note 9), keeps them in its summaries over the six real tasks (Supplementary Note 12).")])
     edit("paper/supp/note6.tex", [
         ("they are exploratory and used for no conclusion.",
          "they are exploratory, and min--max scaling and z-scores change the penalty with the best mean rank, a limitation stated "
@@ -633,6 +702,11 @@ def supplement():
          "real tasks, Scanorama with 100 dimensions on 1 and principal-component analysis with 50 components on 1, whereas "
          "Harmony and Scanorama at their transferred 10-dimension settings did so on 1 and 0 (Supplementary Table~\\ref{tab:4}).")])
     edit("paper/supp/note9.tex", [
+        (r"the strength with no failed fit whose seed-mean batch score is nearest $b^*$, ties to the smaller strength, edge and "
+         r"extension strengths included (Supplementary Note 5)",
+         STRENGTH_RULE + r", using failure-free strengths, edge and extension strengths included (Supplementary Note 5). "
+         r"This replaced the earlier strength nearest $b^*$ on any crossing after the first results had been read "
+         r"(Supplementary Note 10)"),
         ("Harmony, Scanorama, sysVI, scANVI and PCA are not label-transferred.",
          "Harmony, Scanorama, sysVI, scANVI and PCA are not part of this analysis; the direct biology check reads their "
          "label-transfer recall and confusion (Supplementary Note 12)."),
@@ -640,8 +714,20 @@ def supplement():
          "(five with the batch-conditioned decoder, six with the unconditioned decoder). Low-signal pairs are tabulated and marked "
          "but not summarised;",
          "Label transfer is reported per task, against plain scVI with the same decoder; no mean over tasks is computed. Low-signal "
-         "pairs are tabulated and marked and are left out of the per-task comparisons of the main text;")])
+         "pairs are tabulated and marked and are left out of the per-task comparisons of the main text;"),
+        (r"\input{supp/note9_table}",
+         r"\noindent\textit{First-crossing results.} The discriminator's median macro-F1 difference from plain scVI was "
+         r"0.000 over the five ranked real tasks with the batch-conditioned decoder and $-0.002$ over the six real tasks with "
+         r"the unconditioned decoder (below plain scVI on five, lowest among penalties on three). Other penalties' median "
+         r"differences ranged from $-0.006$ to $+0.001$. Kendall's $\tau_b$ with the biology order at $b^*$ had median "
+         r"$-0.067$, range $-0.733$ to 0.600, over the 11 ranked real pairs. The selected penalties' batch-score distances "
+         r"from $b^*$ had median 0.005 and maximum 0.073. Both strength readings are compared in Supplementary Note 12." +
+         "\n\n" + r"\input{supp/note9_table}")])
+    edit("paper/supp/note9.tex", [
+        ("of the matched strength, " + STRENGTH_RULE, "at the first crossing: " + STRENGTH_RULE),
+        (r"Note 10), with its three sweep seeds", r"Note 10). We use its three sweep seeds")])
     edit("paper/supp/note10.tex", [
+        (r"\item \emph{Limitations.}", NOTE10_STRENGTH + "\n" + r"\item \emph{Limitations.}"),
         ("(g) the Pareto frontier of Figure 4 and the cap", "(g) the Pareto frontier of Figure 3 and the cap"),
         ('the ranking specification names them as exploratory checks used for no conclusion but does not define',
          'the ranking specification lists them as exploratory checks without a role in the conclusions and does not define'),  # D6: Figure S5 now informs a stated limitation
@@ -663,13 +749,69 @@ def supplement():
         (" Equations in Supplementary Note 1;", " The discriminator, the reference critic and the pooled critic were also fitted at "
                                                "strength 0.03 on the immune task with the batch-conditioned decoder "
                                                "(Supplementary Note 4). Equations in Supplementary Note 1;")])
+    first_crossing_supplement()
+
+
+def first_crossing_supplement():
+    edit("paper/supp/figures.tex", [
+        ("F1 per cell type, method and task at the matched strength.",
+         "F1 per cell type, method and task at the first-crossing strength."),
+        (r"Penalties are at the strength whose seed-mean batch score is nearest the matched batch removal $b^*$, never chosen "
+         r"by accuracy;", "For each penalty the rule is: " + STRENGTH_RULE + r", never chosen by accuracy (Supplementary Note 9);")])
+    # Note 12 is newly edited in Part b; read the same fixed starting text as the other Pass 24 edits.
+    source = subprocess.run(["git", "-C", str(Path(__file__).resolve().parents[2]), "show", "24f2665:paper/supp/note12.tex"],
+                            capture_output=True, text=True, check=True).stdout
+    source = source.replace(r"the failure-free sweep strength whose seed-mean batch score is nearest $b^*$, ties to the "
+                            r"smaller strength; the choice uses batch scores only", STRENGTH_RULE +
+                            r"; failure-free strengths, chosen from batch scores only")
+    old = (r"The per-task, per-fit, per-type and confusion tables, the record (with the SHA-256 of every input) and the one-page "
+           r"summary are in \texttt{docs/biology\_check/} on branch \texttt{biology-check}, with their checksums in "
+           r"\texttt{docs/biology\_check/MANIFEST.sha256}.")
+    new = (r"The first-crossing run used code commit 8073db6, which adds a strengths-file option to the same check. Its "
+           r"per-task, per-fit, per-type and confusion tables, input checksums, record and summary are kept in "
+           r"\texttt{paper/figure\_data/biology\_check\_first\_crossing/}, with its original \texttt{MANIFEST.sha256}. "
+           r"The earlier \texttt{summary.csv} and \texttt{summary\_by\_method.csv} are kept in "
+           r"\texttt{paper/figure\_data/biology\_check\_nearest\_any\_crossing/tables/}.")
+    assert source.count(old) == 1
+    source = source.replace(old, new)
+    comparison = []
+    import pandas as pd
+    from biology_check_table import DATA, PEN, LABEL, signed
+    old_rows = pd.read_csv(DATA / "biology_check_nearest_any_crossing/tables/summary_by_method.csv")
+    for r in summarize()["rows"]:
+        if r["method"] not in PEN:
+            continue
+        o = old_rows[(old_rows.task_group == "real") & (old_rows.method == r["method"]) & (old_rows.decoder == r["decoder"])].iloc[0]
+        comparison.append(f"{LABEL[r['method']]} & {r['decoder']} & {signed(o.purity_diff)} & {signed(r['purity_diff'])} & "
+                          f"{signed(o.rare_purity_diff)} & {signed(r['rare_purity_diff'])} " + r"\\")
+    both = (r"\noindent\textit{Both strength readings.} On 9 November 2026, after the first results had been read, the first "
+            r"author changed the strength rule for label transfer and this check (Supplementary Note 10). The earlier reading "
+            r"chose the strength nearest $b^*$ on any crossing; some were far past the first crossing. The new rule is: " +
+            STRENGTH_RULE + r". The table compares mean differences from plain scVI over the real tasks; rare types use only "
+            r"the tasks that have them. The discriminator's larger losses in the earlier reading did not hold at the first "
+            r"crossing across decoders." + "\n\n" +
+            r"{\scriptsize\begin{tabular}{@{}llrrrr@{}}" + "\n" + r"\toprule" + "\n" +
+            r"Penalty & Decoder & Purity, earlier & Purity, first & Rare purity, earlier & Rare purity, first \\" + "\n" +
+            r"\midrule" + "\n" + "\n".join(comparison) + "\n" + r"\bottomrule\end{tabular}}" + "\n\n" +
+            r"\noindent For label transfer, the discriminator's median macro-F1 difference from plain scVI changed from "
+            r"$-0.006$ to 0.000 with the batch-conditioned decoder and from $-0.060$ to $-0.002$ with the unconditioned "
+            r"decoder. The other penalties' median differences ranged from $-0.016$ to $+0.001$ earlier and from $-0.006$ "
+            r"to $+0.001$ at the first crossing. These summaries leave out low-signal pairs (Supplementary Note 9)." + "\n\n" +
+            r"\noindent\textit{Per-cell-type results at the first crossing.} Rare-type purity was below plain scVI in 21 of "
+            r"48 task, penalty and decoder comparisons. For the lung task's 46 ionocytes, the batch-conditioned discriminator "
+            r"at strength 0.3 had a purity difference of $+0.022$ and label-transfer recall 0.812, against 0.797 for plain "
+            r"scVI. Its earlier large loss for these cells therefore does not describe its first-crossing strength. Full "
+            r"per-type F1 is in Supplementary Figure S3; each task's \texttt{fit\_types.csv} and \texttt{confusion.csv} "
+            r"tables in the new run give purity, recall, marker overlap and the types mistaken for each other.")
+    source = source.replace("\n\\par\n\\endgroup", "\n\n" + both + "\n\\par\n\\endgroup")
+    (ROOT / "paper/supp/note12.tex").write_text(source)
 
 
 def main():
     p = ROOT / "paper/outline.tex"
     s = outline(p.read_text())
     n_main, n_cap = budget(s)
-    print(f"main text {n_main} words (limit {MAIN_LIMIT}); main-figure captions {n_cap} words (limit {CAPTION_LIMIT})")
+    print(f"main text {n_main} words (limit {MAIN_LIMIT}; Part a: limit 5700); main-figure captions {n_cap} words (limit {CAPTION_LIMIT})")
     assert n_main <= MAIN_LIMIT and n_cap <= CAPTION_LIMIT, (n_main, n_cap)
     p.write_text(s)
     supplement()

@@ -1,0 +1,1153 @@
+{
+ "argv": [
+  "--inputs",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs",
+  "--prepped-dir",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib",
+  "--out-dir",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261109_first_crossing/run",
+  "--jobs",
+  "6",
+  "--strengths",
+  "/home/kendall/offload_work/wcd_res5/paper/paper/figure_data/first_crossing_strength.csv"
+ ],
+ "constants": {
+  "K": 15,
+  "MARKER_TASKS": [
+   "pancreas",
+   "lung",
+   "immune",
+   "immune_hum_mou"
+  ],
+  "MIN_MARKER_CELLS": 10,
+  "N_MARKERS": 20,
+  "RARE_FRAC": 0.01
+ },
+ "counts": {
+  "atac_large": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 6,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "atac_small": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "immune": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "immune_hum_mou": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "lung": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "pancreas": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "sim1": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  },
+  "sim2": {
+   "barycenter": 6,
+   "discriminator": 6,
+   "harmony": 7,
+   "mmd": 6,
+   "pca": 2,
+   "pooled": 6,
+   "reference": 6,
+   "scanorama": 7,
+   "scanvi": 5,
+   "scvi": 6,
+   "scvi_adv": 5,
+   "sinkhorn": 6,
+   "sysvi": 30
+  }
+ },
+ "git_commit": "8073db6df0ecbff220c621176ef89a5a78b8cb47",
+ "git_dirty": false,
+ "inputs": {
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/baseline_coverage.csv": "cb9dcacb2a4d986a6fda6fa6691a49515dec9ff809770c26c349296425121790",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/failures.csv": "42e583aa4cf8f8c5e2abe638f1e47f3a82cae0fe02d1542533474e1652d9159e",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/inputs.json": "749904f95a03c2e78d9f8494e8d62988df9f182b7c415130c418eae8ae71f68f",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/latents.tsv": "ca3e6982a18e9aa1e410cebe26d22e0ed9c993456b825aea7900617b3a7f7de9",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/manifest.tsv": "9cc9ae3884aca176e0db8c5ba6d097c8adf73a8c719ca6a365b3367f6b3e710e",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/biology_check_20261105/inputs/scores_list.txt": "f0ad343ab7df8c32acf22dcc4e4baef3fa010e4cb64f41756d478a8636c0a74f"
+ },
+ "matched": [
+  {
+   "batch_score": 0.5476437649869812,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.0019618434710411137,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.541395898806839,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.008209709651183283,
+   "lam": 0.03,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.5559603626228156,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.006354754164793253,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.5534921395484723,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.0038865310904500072,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.5471519286057062,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.0024536798523161485,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "reference",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.5428624678406876,
+   "bstar": 0.5496056084580223,
+   "decoder": "unconditioned",
+   "distance": 0.00674314061733472,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6388782012928585,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.007176695225249552,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6168253345879636,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.014876171479645373,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6121526149541006,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.019548891113508438,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6442126423395463,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.01251113627193734,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6159002463298506,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.015801259737758366,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "reference",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.6260998472267576,
+   "bstar": 0.631701506067609,
+   "decoder": "conditioned",
+   "distance": 0.005601658840851398,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "atac_large"
+  },
+  {
+   "batch_score": 0.5462034252242592,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.024113567358004517,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.44865457808386616,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.07343527978238856,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.5392352793009798,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.017145421434725083,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.5093592935788309,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.012730564287423807,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.495613243878646,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.0264766139876087,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.5280396673008821,
+   "bstar": 0.5220898578662547,
+   "decoder": "unconditioned",
+   "distance": 0.005949809434627418,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7410071526170326,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.005030792110267135,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7514538282257742,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.005415883498474439,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7563795683976274,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.010341623670327649,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7223178100457006,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.02372013468159917,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7210465973585828,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.024991347368717,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "reference",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.7358426456188703,
+   "bstar": 0.7460379447272998,
+   "decoder": "conditioned",
+   "distance": 0.010195299108429534,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "atac_small"
+  },
+  {
+   "batch_score": 0.526273924897915,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.0043257254002609935,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.5323590845885088,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.001759434290332762,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.5216338536769511,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.008965796621224875,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.5390049173030428,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.008405267004866768,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.533144217264253,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.0025445669660769665,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.5253618471494675,
+   "bstar": 0.530599650298176,
+   "decoder": "unconditioned",
+   "distance": 0.005237803148708475,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.6492626478118347,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.001683498785271853,
+   "lam": 1.0,
+   "low_signal": true,
+   "method": "barycenter",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.6477294919702782,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.0001503429437152981,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "discriminator",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.6488784398395077,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.0012992908129447756,
+   "lam": 10.0,
+   "low_signal": true,
+   "method": "mmd",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.64408634119431,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.00349280783225292,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "pooled",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.6474659187040663,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.00011323032249654919,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "reference",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.6464218853271245,
+   "bstar": 0.6475791490265629,
+   "decoder": "conditioned",
+   "distance": 0.00115726369943836,
+   "lam": 3.0,
+   "low_signal": true,
+   "method": "sinkhorn",
+   "task": "immune"
+  },
+  {
+   "batch_score": 0.45432303999112955,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.003877760001523234,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.4521720772376767,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.0017267972480703997,
+   "lam": 0.03,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.44763602200258085,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.002809257987025471,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.4481832342825514,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.002262045707054905,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.44736070408346235,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.0030845759061439715,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "reference",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.4518813797840237,
+   "bstar": 0.4504452799896063,
+   "decoder": "unconditioned",
+   "distance": 0.0014360997944173892,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5538418675559241,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.00021580006436716648,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5546925462212074,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.0010664787296504885,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5483066490126355,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.005319418478921478,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5561144164664356,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.002488348974878596,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5520260759645651,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.0015999915269918619,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "reference",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5527305729486266,
+   "bstar": 0.553626067491557,
+   "decoder": "conditioned",
+   "distance": 0.000895494542930364,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "immune_hum_mou"
+  },
+  {
+   "batch_score": 0.5188358361751751,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.016004130105648384,
+   "lam": 100.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.5289687935332079,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.005871172747615616,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.5430935944174021,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.008253628136578595,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.515193590600712,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.019646375680111516,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.5353076847568948,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.00046771847607129935,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.5205484736397679,
+   "bstar": 0.5348399662808235,
+   "decoder": "unconditioned",
+   "distance": 0.01429149264105567,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.6475145656227058,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.00023949957523161647,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.6432873618337849,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.004466703364152558,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.650074587345825,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.0023205221478875826,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.6469882576528218,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.000765807545115682,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.647127941183797,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.0006261240141404167,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "reference",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.646235431265108,
+   "bstar": 0.6477540651979374,
+   "decoder": "conditioned",
+   "distance": 0.0015186339328294718,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "lung"
+  },
+  {
+   "batch_score": 0.4980824491116729,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.005633209784815685,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.4877266238518387,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.00472261547501851,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.4766633606826182,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.01578587864423897,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.4964655500129771,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.004016310686119906,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.4901347581757462,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.002314481151110992,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.48851530020395045,
+   "bstar": 0.4924492393268572,
+   "decoder": "unconditioned",
+   "distance": 0.003933939122906738,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.6831211836446959,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.0009721095885465436,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.6808608934784761,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.003232399754766302,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.68745700300899,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.0033637097757476253,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.6788412715016571,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.0052520217315853435,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.6838786937265207,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.00021459950672175765,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "reference",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.6894259184711927,
+   "bstar": 0.6840932932332424,
+   "decoder": "conditioned",
+   "distance": 0.005332625237950306,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "pancreas"
+  },
+  {
+   "batch_score": 0.4168788840015282,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 0.04756247490985238,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.3395618864523191,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 0.02975452263935674,
+   "lam": 0.1,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.32066614607552635,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 0.0486502630161495,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.3694095606362244,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 9.315154454853092e-05,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.3245000399323455,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 0.04481636915933035,
+   "lam": 1.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.3601604659551034,
+   "bstar": 0.36931640909167585,
+   "decoder": "unconditioned",
+   "distance": 0.00915594313657242,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.8171356110242685,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.0017167629415999475,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "barycenter",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.8380144608532984,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.022595612770629936,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "discriminator",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.8188775558554181,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.003458707772749592,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "mmd",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.8260916421026959,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.01067279402002741,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "pooled",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.824441223005769,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.00902237492310054,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "reference",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.8179444528360559,
+   "bstar": 0.8154188480826685,
+   "decoder": "conditioned",
+   "distance": 0.002525604753387367,
+   "lam": 0.3,
+   "low_signal": true,
+   "method": "sinkhorn",
+   "task": "sim1"
+  },
+  {
+   "batch_score": 0.38558624076519327,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.06728434563299496,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "barycenter",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.38217164916326873,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.06386975403107042,
+   "lam": 0.3,
+   "low_signal": false,
+   "method": "discriminator",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.2615560027777286,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.056745892354469696,
+   "lam": 10.0,
+   "low_signal": false,
+   "method": "mmd",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.3101960632488367,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.008105831883361614,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "pooled",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.2939673111153504,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.024334584016847904,
+   "lam": 3.0,
+   "low_signal": false,
+   "method": "reference",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.38591440371039165,
+   "bstar": 0.3183018951321983,
+   "decoder": "unconditioned",
+   "distance": 0.06761250857819334,
+   "lam": 30.0,
+   "low_signal": false,
+   "method": "sinkhorn",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.6559051834618498,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.004243404533793127,
+   "lam": 0.3,
+   "low_signal": true,
+   "method": "barycenter",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.6721089315818439,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.011960343586201017,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "discriminator",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.6659501852695228,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.005801597273879855,
+   "lam": 10.0,
+   "low_signal": true,
+   "method": "mmd",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.6593156977735899,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.0008328902220530177,
+   "lam": 0.3,
+   "low_signal": true,
+   "method": "pooled",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.6548243564697533,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.005324231525889567,
+   "lam": 0.1,
+   "low_signal": true,
+   "method": "reference",
+   "task": "sim2"
+  },
+  {
+   "batch_score": 0.658333823853294,
+   "bstar": 0.6601485879956429,
+   "decoder": "conditioned",
+   "distance": 0.0018147641423489347,
+   "lam": 0.3,
+   "low_signal": true,
+   "method": "sinkhorn",
+   "task": "sim2"
+  }
+ ],
+ "prepped": {
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/atac_large__scib.h5ad": "7bfddbe8e1d7c09637c61ed4974ce35b66463e115fe2bb9fc87552c52ac33269",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/atac_small__scib.h5ad": "6ddc6fc25645bb9ab4dd2e4a5538731aaaa33f2232729baef8300a715a2d814a",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/immune__scib.h5ad": "3d8596256dc6cf9d17b91e974aa27842711c4b1817d53b772d324914b74834e3",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/immune_hum_mou__scib.h5ad": "60fa7788342ebcdd551e63e42017b0b398453151b640af5412074ee4c75ccdaa",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/lung__scib.h5ad": "1b7ad36e535be6628bd3c9dc072552415cc0dac1ae698092a779119d1c31cf64",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/pancreas__scib.h5ad": "d172898be6d237f6698d0723813644b2afc283276bb429e84debf4256bdeeaa9",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/sim1__scib.h5ad": "5c25226fd56187f3826cd661dcabe9ffc00cefb14d5fd92cfd8a65932c9523f0",
+  "/home/kendall/experiment_data/wasserstein-critic-deconfounding/prepped_scib/sim2__scib.h5ad": "6e5533ccd18558eb645339e6488e08d20f5cd0d2bb7eb48ade98d0fbf78576ea"
+ },
+ "strengths": {
+  "path": "/home/kendall/offload_work/wcd_res5/paper/paper/figure_data/first_crossing_strength.csv",
+  "sha256": "eff8231f99cee9bf9adbcc32c3f3f671ac4a6e24f9d8a37512b23b96589aa2f8"
+ },
+ "tasks": [
+  "atac_large",
+  "atac_small",
+  "immune",
+  "immune_hum_mou",
+  "lung",
+  "pancreas",
+  "sim1",
+  "sim2"
+ ],
+ "versions": {
+  "anndata": "0.12.19",
+  "numpy": "2.4.6",
+  "pandas": "2.3.3",
+  "python": "3.11.15",
+  "scanpy": "1.11.5",
+  "scipy": "1.17.1",
+  "sklearn": "1.9.0"
+ }
+}

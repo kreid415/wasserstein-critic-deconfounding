@@ -5,7 +5,7 @@ Codex gpt-6-astra; fable, Claude Code claude-fable-5-1), merged in `merged_revie
 every recommendation on 2026-11-09 except D1 (label transfer and the direct biology check read some penalties at a strength
 past the first crossing of b*), which is being recomputed. Res-5, the Conclusions item on the direct biology check (iii),
 Supplementary Note 12, Supplementary Table S10, Supplementary Figure S3 and the label-transfer paragraph of Methods are
-therefore not edited (checked byte for byte against 24f2665).
+therefore not edited in Part a (checked byte for byte against 24f2665). Part b below completes D1 with the first-crossing data.
 
 All text edits are made by `paper/tools/pass24_edits.py` on the 24f2665 text (word-level tracked changes in `paper/outline.tex`,
 in-place edits of the supplement files it lists); `paper/outline_clean.tex` is written by `paper/tools/accept_changes.py`.
@@ -158,3 +158,122 @@ the approved scope and were not edited (rule: no edits to existing tests):
 `fig6.py`, `fig6.png` and `fig6.pdf` are still on disk: file deletion was refused in this session; delete them. New files under
 the root .gitignore patterns need `git add -f`: `paper/supp/tableS15.tex`, `paper/pass24_numbers.csv`, `paper/figures/figS7.png`,
 `paper/figures/figS8.png`.
+
+## Part b: label transfer and biology at the first crossing (9 November 2026, P24)
+
+The first author changed the strength rule after reading the first results. Both label transfer and the direct biology check
+now use, of the two fitted strengths bracketing the first crossing of b*, the one whose seed-mean batch score is nearer b*
+(ties to the smaller strength), or the upper one when the lower is plain scVI. The earlier rule chose the strength nearest b*
+on any crossing, sometimes far past the first crossing. Supplementary Note 10 records this deviation and where both readings
+are kept. Methods and Notes 9 and 12 give the rule explicitly. The main ranking is unchanged.
+
+The new check's tables, summary, record and original manifest are copied unchanged from
+`biology_check_20261109_first_crossing/run`, code commit `8073db6`, into `paper/figure_data/biology_check_first_crossing/`.
+The earlier `summary.csv` and `summary_by_method.csv` are in `paper/figure_data/biology_check_nearest_any_crossing/tables/`.
+`paper/tools/biology_check_table.py` checks the strengths-file hash and each penalty's selected strength, then regenerates
+`res5_biology.json`. Its `table_lines` function supplies Table S10 to `pass24_edits.py`; the latter still reproduces the
+committed text from 24f2665 with tracked author P24. Table S11 and Figure S3 were regenerated from the rebuilt label-transfer
+tables. The Figure S3 caption names the first-crossing strength. README and both figure-data and figure manifests follow.
+
+Headline changes, read from the archived tables and the two label-transfer summaries:
+
+| Readout against plain scVI | Earlier, nearest on any crossing | First crossing |
+|---|---:|---:|
+| Discriminator median label-transfer macro F1, batch-conditioned | -0.006 | 0.000 |
+| Discriminator median label-transfer macro F1, unconditioned | -0.060 | -0.002 |
+| Unconditioned discriminator below plain scVI / lowest among penalties, real tasks | 6 / 6 | 5 / 3 |
+| Discriminator mean purity, batch-conditioned | -0.052 | -0.013 |
+| Discriminator mean purity, unconditioned | -0.077 | -0.001 |
+| Sinkhorn mean purity, batch-conditioned | -0.022 | -0.004 |
+| Sinkhorn mean purity, unconditioned | -0.033 | 0.000 |
+| Discriminator mean rare-type purity, batch-conditioned | -0.107 | 0.000 |
+| Rare-type purity losses, task by penalty by decoder comparisons | 23 / 48 | 21 / 48 |
+| Other penalties' median label-transfer differences, range over decoders | -0.016 to +0.001 | -0.006 to +0.001 |
+| Label-transfer versus biology order, median Kendall tau_b | 0.067 | -0.067 |
+| Label-transfer batch-score distance from b*, maximum / median | 0.026 / 0.004 | 0.073 / 0.005 |
+
+The former finding that the discriminator consistently lost more biology does not hold across decoders at the first crossing.
+Res-5 says this plainly, keeps the scANVI and Harmony comparisons, and leaves per-cell-type detail to Note 12. Disc-2 and
+Conclusions now support only the small average changes observed here. Note 12 compares both purity readings for every penalty
+and decoder and both discriminator label-transfer medians. It also reports the first-crossing result for lung ionocytes.
+
+Ledger: current numbers, including every cell of Tables S10 and S11, have Part b rows in `pass24_numbers.csv` with paper-branch
+sources. The old `P23T` rows now point to the preserved any-crossing summary and are retired by later rows. The old Pass 9
+biology rows have stable `P9B` ids and retirement notes; their sources are the earlier paper-branch summary tables, or the
+original committed check for removed per-type details. Part b retirement rows identify these historical records explicitly.
+The moved Note 9 and Note 12 seed claims are superseded. The ledger's general CSV selector now supports means, so Table S10's
+seed spreads and baseline averages are checked directly from the copied tables.
+
+Printed length: Res-5, including its lead, 275 words; main text 5,439 (limit 5,500); main captions 434 (limit 450).
+No existing test or test configuration was edited. Added tests check summary reproduction, the selected-strength checks,
+Table S10, the mean selector and Figure S3. No fits, new analyses, external writes or changes under `revision/` or `paper/build/`.
+
+
+Part b validation: `python paper/tools/accept_changes.py`, `python paper/tools/accept_changes.py --check`,
+`python paper/tools/check_ledger.py`, `python paper/tools/abstract_words.py`, `python -m pytest -q paper/tools`, and
+`python scripts/check_tests.py --base b622d1d --src paper/tools --src paper/figure_scripts -- paper/tools` all exit 0.
+The suite has 123 passing tests; the coverage check reports no WARN. Abstract: 324 words. Data, original-run and figure
+checksums match; `git diff --check` exits 0.
+
+### Part b file inventory
+
+Changed existing files:
+
+- `paper/figure_data/MANIFEST.sha256`
+- `paper/figure_data/README.md`
+- `paper/figure_scripts/figS3.py`
+- `paper/figures/MANIFEST.sha256`
+- `paper/figures/figS3.pdf`
+- `paper/figures/figS3.png`
+- `paper/outline.tex`
+- `paper/outline_clean.tex`
+- `paper/pass23_numbers.csv`
+- `paper/pass24_changelog.md`
+- `paper/pass24_numbers.csv`
+- `paper/pass9_numbers.csv`
+- `paper/supp/figures.tex`
+- `paper/supp/note10.tex`
+- `paper/supp/note12.tex`
+- `paper/supp/note5.tex`
+- `paper/supp/note9.tex`
+- `paper/supp/note9_table.tex`
+- `paper/tools/check_ledger.py`
+- `paper/tools/make_supp_supp-analysis.py`
+- `paper/tools/pass24_edits.py`
+
+New files (including ignored CSV files, which the lead must add):
+
+- `paper/figure_data/biology_check_first_crossing/MANIFEST.sha256`
+- `paper/figure_data/biology_check_first_crossing/biology_check.json`
+- `paper/figure_data/biology_check_first_crossing/summary.md`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_large_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_large_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_large_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_small_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_small_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/atac_small_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_hum_mou_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_hum_mou_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/immune_hum_mou_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/lung_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/lung_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/lung_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/pancreas_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/pancreas_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/pancreas_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim1_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim1_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim1_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim2_confusion.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim2_fit_types.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/sim2_fits.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/summary.csv`
+- `paper/figure_data/biology_check_first_crossing/tables/summary_by_method.csv`
+- `paper/figure_data/biology_check_nearest_any_crossing/tables/summary.csv`
+- `paper/figure_data/biology_check_nearest_any_crossing/tables/summary_by_method.csv`
+- `paper/figure_data/res5_biology.json`
+- `paper/tools/biology_check_table.py`
+- `paper/tools/test_pass24_biology.py`

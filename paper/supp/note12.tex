@@ -5,7 +5,7 @@
 \begingroup\small\setlength{\parskip}{3pt}
 \noindent\textit{Status.} The direct biology check is exploratory and descriptive. Its rules (\texttt{docs/BIOLOGY\_CHECK.md}, branch \texttt{biology-check}) were written on 5 November 2026 (commit 639c302), after the sweep scores had been read (the batch and biology scores of every sweep fit, $b^*$, the matched strengths and the label-transfer macro F1 at the matched strength) and before any value of this check was computed. It makes no new fits, runs no test and makes no claim of significance; every value is reported per method with its spread over seeds. The code is \texttt{scripts/biology\_check.py} at commit c4a793f, which made the run of 5 November; commit 697cc6c changed only the one-page summary and the script that writes it (the summary's seed spread had been averaged over all eight tasks instead of the six real tasks).
 
-\noindent\textit{Fits.} For each penalty, decoder and task, the label-transfer strength of Supplementary Note 9 (the failure-free sweep strength whose seed-mean batch score is nearest $b^*$, ties to the smaller strength; the choice uses batch scores only), with seeds 100--102; plain scVI with both decoders, seeds 100--102; and every scored baseline row at each of its settings (the scvi-tools adversary, scANVI and sysVI with seeds 0--4; Harmony, Scanorama and PCA one run per setting). In all 783 saved fits on the eight tasks; low-signal pairs are included and flagged. The fits, latent files and their SHA-256 checks are those of the sweep analysis, read with its code, and the expression and labels are the prepared task files.
+\noindent\textit{Fits.} For each penalty, decoder and task, the label-transfer strength of Supplementary Note 9 (of the two fitted strengths that bracket the first crossing of $b^*$, the one whose seed-mean batch score is nearer $b^*$ (ties to the smaller strength), or the upper one when the lower is plain scVI; failure-free strengths, chosen from batch scores only), with seeds 100--102; plain scVI with both decoders, seeds 100--102; and every scored baseline row at each of its settings (the scvi-tools adversary, scANVI and sysVI with seeds 0--4; Harmony, Scanorama and PCA one run per setting). In all 783 saved fits on the eight tasks; low-signal pairs are included and flagged. The fits, latent files and their SHA-256 checks are those of the sweep analysis, read with its code, and the expression and labels are the prepared task files.
 
 \noindent\textit{Neighbours.} For each cell, its 15 nearest other cells by Euclidean distance in the saved latent, the cell itself excluded. The same lists serve the purity and the smoothing below.
 
@@ -21,6 +21,30 @@
 
 \noindent\textit{Checks that stop the run.} The latent's SHA-256 equals the one its score file records; the cell order and the labels match the task file; the number of fits per task matches the list above; every penalty and plain-scVI fit has its seed-matched reference; purity and Jaccard overlap lie in $[0,1]$; no value is missing where a readout is defined; and the macro F1 recomputed from the confusion predictions equals the label-transfer F1 of Supplementary Note 9.
 
-\noindent\textit{Results.} Supplementary Table~\ref{tab:s10} gives, per method and decoder, the mean over the six real tasks of the purity difference with its seed spread, the rare-type purity and recall differences, and the marker-gene overlap with its difference from plain scVI. The per-task, per-fit, per-type and confusion tables, the record (with the SHA-256 of every input) and the one-page summary are in \texttt{docs/biology\_check/} on branch \texttt{biology-check}, with their checksums in \texttt{docs/biology\_check/MANIFEST.sha256}.
+\noindent\textit{Results.} Supplementary Table~\ref{tab:s10} gives, per method and decoder, the mean over the six real tasks of the purity difference with its seed spread, the rare-type purity and recall differences, and the marker-gene overlap with its difference from plain scVI. The first-crossing run used code commit 8073db6, which adds a strengths-file option to the same check. Its per-task, per-fit, per-type and confusion tables, input checksums, record and summary are kept in \texttt{paper/figure\_data/biology\_check\_first\_crossing/}, with its original \texttt{MANIFEST.sha256}. The earlier \texttt{summary.csv} and \texttt{summary\_by\_method.csv} are kept in \texttt{paper/figure\_data/biology\_check\_nearest\_any\_crossing/tables/}.
+
+\noindent\textit{Both strength readings.} On 9 November 2026, after the first results had been read, the first author changed the strength rule for label transfer and this check (Supplementary Note 10). The earlier reading chose the strength nearest $b^*$ on any crossing; some were far past the first crossing. The new rule is: of the two fitted strengths that bracket the first crossing of $b^*$, the one whose seed-mean batch score is nearer $b^*$ (ties to the smaller strength), or the upper one when the lower is plain scVI. The table compares mean differences from plain scVI over the real tasks; rare types use only the tasks that have them. The discriminator's larger losses in the earlier reading did not hold at the first crossing across decoders.
+
+{\scriptsize\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Penalty & Decoder & Purity, earlier & Purity, first & Rare purity, earlier & Rare purity, first \\
+\midrule
+JS discriminator & conditioned & $-0.052$ & $-0.013$ & $-0.107$ & $0.000$ \\
+JS discriminator & unconditioned & $-0.077$ & $-0.001$ & $-0.076$ & $+0.001$ \\
+Reference critic & conditioned & $-0.004$ & $-0.004$ & $-0.002$ & $-0.002$ \\
+Reference critic & unconditioned & $-0.011$ & $-0.004$ & $+0.002$ & $+0.002$ \\
+Pooled critic & conditioned & $-0.019$ & $-0.005$ & $-0.024$ & $-0.002$ \\
+Pooled critic & unconditioned & $+0.001$ & $+0.001$ & $+0.010$ & $+0.010$ \\
+Barycenter critic & conditioned & $-0.007$ & $-0.004$ & $-0.004$ & $-0.002$ \\
+Barycenter critic & unconditioned & $+0.001$ & $-0.002$ & $+0.010$ & $+0.014$ \\
+MMD & conditioned & $-0.001$ & $-0.004$ & $+0.003$ & $-0.001$ \\
+MMD & unconditioned & $-0.004$ & $-0.004$ & $+0.001$ & $+0.001$ \\
+Sinkhorn & conditioned & $-0.022$ & $-0.004$ & $+0.006$ & $+0.004$ \\
+Sinkhorn & unconditioned & $-0.033$ & $0.000$ & $-0.045$ & $+0.010$ \\
+\bottomrule\end{tabular}}
+
+\noindent For label transfer, the discriminator's median macro-F1 difference from plain scVI changed from $-0.006$ to 0.000 with the batch-conditioned decoder and from $-0.060$ to $-0.002$ with the unconditioned decoder. The other penalties' median differences ranged from $-0.016$ to $+0.001$ earlier and from $-0.006$ to $+0.001$ at the first crossing. These summaries leave out low-signal pairs (Supplementary Note 9).
+
+\noindent\textit{Per-cell-type results at the first crossing.} Rare-type purity was below plain scVI in 21 of 48 task, penalty and decoder comparisons. For the lung task's 46 ionocytes, the batch-conditioned discriminator at strength 0.3 had a purity difference of $+0.022$ and label-transfer recall 0.812, against 0.797 for plain scVI. Its earlier large loss for these cells therefore does not describe its first-crossing strength. Full per-type F1 is in Supplementary Figure S3; each task's \texttt{fit\_types.csv} and \texttt{confusion.csv} tables in the new run give purity, recall, marker overlap and the types mistaken for each other.
 \par
 \endgroup

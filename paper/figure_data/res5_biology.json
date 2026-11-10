@@ -1,0 +1,232 @@
+{
+ "rows": [
+  {
+   "method": "discriminator",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0088681898401012,
+   "purity_diff": -0.0133913699024517,
+   "rare_purity_diff": -0.0004344730296411,
+   "rare_lt_recall_diff": 0.0007520650786015,
+   "marker_jaccard": 0.395274181674293,
+   "marker_jaccard_diff": -0.0032643687616017
+  },
+  {
+   "method": "discriminator",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.006323139750150732,
+   "purity_diff": -0.0012097626810744,
+   "rare_purity_diff": 0.0014023221132763,
+   "rare_lt_recall_diff": 0.0063561650905396,
+   "marker_jaccard": 0.3943209738125135,
+   "marker_jaccard_diff": 0.0035215702636305
+  },
+  {
+   "method": "reference",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.006680313319745266,
+   "purity_diff": -0.0043699236450673,
+   "rare_purity_diff": -0.0024259213970776,
+   "rare_lt_recall_diff": 0.0048573416723702,
+   "marker_jaccard": 0.3986612582778611,
+   "marker_jaccard_diff": 0.0001227078419663
+  },
+  {
+   "method": "reference",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.0080672650530413,
+   "purity_diff": -0.0042640227918567,
+   "rare_purity_diff": 0.00234848001998,
+   "rare_lt_recall_diff": 0.0077431104278313,
+   "marker_jaccard": 0.3942462899735604,
+   "marker_jaccard_diff": 0.0034468864246775
+  },
+  {
+   "method": "pooled",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.008101949712306933,
+   "purity_diff": -0.0047390771803379,
+   "rare_purity_diff": -0.0018496334571985,
+   "rare_lt_recall_diff": 0.0126057331224216,
+   "marker_jaccard": 0.395548240150304,
+   "marker_jaccard_diff": -0.0029903102855907
+  },
+  {
+   "method": "pooled",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.004751425926327066,
+   "purity_diff": 0.000647055029738,
+   "rare_purity_diff": 0.0099298926690672,
+   "rare_lt_recall_diff": 0.0107025923525906,
+   "marker_jaccard": 0.3898954324442009,
+   "marker_jaccard_diff": -0.000903971104682
+  },
+  {
+   "method": "barycenter",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0091262992374206,
+   "purity_diff": -0.0044166910157874,
+   "rare_purity_diff": -0.0023884225033386,
+   "rare_lt_recall_diff": 0.0020520639607237,
+   "marker_jaccard": 0.3937721689917278,
+   "marker_jaccard_diff": -0.0047663814441669
+  },
+  {
+   "method": "barycenter",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.006507406181087483,
+   "purity_diff": -0.0016885546032262,
+   "rare_purity_diff": 0.0137425509351093,
+   "rare_lt_recall_diff": 0.0139340000668579,
+   "marker_jaccard": 0.3923297503790843,
+   "marker_jaccard_diff": 0.0015303468302014
+  },
+  {
+   "method": "mmd",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0045463915321644335,
+   "purity_diff": -0.0038274768159038,
+   "rare_purity_diff": -0.0005241453366949,
+   "rare_lt_recall_diff": 0.0069843241120451,
+   "marker_jaccard": 0.3918477402784917,
+   "marker_jaccard_diff": -0.006690810157403
+  },
+  {
+   "method": "mmd",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.005260657471647133,
+   "purity_diff": -0.0035840924180081,
+   "rare_purity_diff": 0.0007479183650802,
+   "rare_lt_recall_diff": 0.0030722308044679,
+   "marker_jaccard": 0.3936639470724174,
+   "marker_jaccard_diff": 0.0028645435235344
+  },
+  {
+   "method": "sinkhorn",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0036681672642199666,
+   "purity_diff": -0.0037681943528115,
+   "rare_purity_diff": 0.0044838585001973,
+   "rare_lt_recall_diff": 0.0104598212368326,
+   "marker_jaccard": 0.392953802584279,
+   "marker_jaccard_diff": -0.0055847478516157
+  },
+  {
+   "method": "sinkhorn",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.005396719272744033,
+   "purity_diff": 3.833451137657661e-05,
+   "rare_purity_diff": 0.0104735330468207,
+   "rare_lt_recall_diff": 0.0140276094488426,
+   "marker_jaccard": 0.3950085056774969,
+   "marker_jaccard_diff": 0.004209102128614
+  },
+  {
+   "method": "scvi",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0,
+   "purity_diff": 0.0,
+   "rare_purity_diff": 0.0,
+   "rare_lt_recall_diff": 0.0,
+   "marker_jaccard": 0.3985385504358947,
+   "marker_jaccard_diff": 0.0
+  },
+  {
+   "method": "scvi",
+   "decoder": "unconditioned",
+   "settings": 1,
+   "seed_sd": 0.0,
+   "purity_diff": 0.0,
+   "rare_purity_diff": 0.0,
+   "rare_lt_recall_diff": 0.0,
+   "marker_jaccard": 0.390799403548883,
+   "marker_jaccard_diff": 0.0
+  },
+  {
+   "method": "scvi_adv",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.008945778199092601,
+   "purity_diff": -0.0070257828474486,
+   "rare_purity_diff": -0.000766191154096,
+   "rare_lt_recall_diff": 0.0133945858664783,
+   "marker_jaccard": 0.3979625495504583,
+   "marker_jaccard_diff": -0.0005760008854364
+  },
+  {
+   "method": "scanvi",
+   "decoder": "conditioned",
+   "settings": 1,
+   "seed_sd": 0.0029553164591150497,
+   "purity_diff": 0.1152660547182172,
+   "rare_purity_diff": 0.0688805165036605,
+   "rare_lt_recall_diff": 0.0612323231205825,
+   "marker_jaccard": 0.3904245705372614,
+   "marker_jaccard_diff": -0.0081139798986332
+  },
+  {
+   "method": "sysvi",
+   "decoder": "conditioned",
+   "settings": 6,
+   "seed_sd": 0.02323946633594709,
+   "purity_diff": -0.0404172454971327,
+   "rare_purity_diff": -0.0446723816199379,
+   "rare_lt_recall_diff": -0.07807317472363114,
+   "marker_jaccard": 0.39161876588892036,
+   "marker_jaccard_diff": -0.006919784546974232
+  },
+  {
+   "method": "harmony",
+   "decoder": "none",
+   "settings": 7,
+   "seed_sd": null,
+   "purity_diff": -0.14056045297053693,
+   "rare_purity_diff": -0.23402858557906162,
+   "rare_lt_recall_diff": -0.33012049620704625,
+   "marker_jaccard": 0.36735216413828725,
+   "marker_jaccard_diff": -0.03118638629760751
+  },
+  {
+   "method": "scanorama",
+   "decoder": "none",
+   "settings": 7,
+   "seed_sd": null,
+   "purity_diff": -0.049339408573580955,
+   "rare_purity_diff": -0.07601066245890055,
+   "rare_lt_recall_diff": -0.08652122694828768,
+   "marker_jaccard": 0.3816927990071967,
+   "marker_jaccard_diff": -0.016845751428697885
+  },
+  {
+   "method": "pca",
+   "decoder": "none",
+   "settings": 2,
+   "seed_sd": null,
+   "purity_diff": -0.0207177563834459,
+   "rare_purity_diff": -0.062305572171807946,
+   "rare_lt_recall_diff": -0.0878003665072506,
+   "marker_jaccard": 0.37090636382694575,
+   "marker_jaccard_diff": -0.02763218660894895
+  }
+ ],
+ "rare_cells": 48,
+ "rare_negative": 21,
+ "ionocytes": {
+  "n": 46,
+  "purity_diff": 0.021739130434782566,
+  "recall": 0.8115942028985508,
+  "plain_recall": 0.7971014492753623
+ }
+}

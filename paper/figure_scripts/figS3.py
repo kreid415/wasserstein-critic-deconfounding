@@ -1,7 +1,7 @@
-"""Supplementary Figure S3: label transfer, F1 per cell type, method and task at the matched strength (figure_data/label_transfer_types.csv, made by
+"""Supplementary Figure S3: label transfer, F1 per cell type, method and task at the first-crossing strength (figure_data/label_transfer_types.csv, made by
 prep_label_transfer_types.py from the same embeddings and classifier as figure_data/label_transfer.csv; the macro F1 recomputed from the per-type values equals the stored
 one for all 120 rows). Each held-out batch is predicted from the other batches by a 15-nearest-neighbour classifier; a type's F1 is averaged over the held-out batches that
-contain it and over the three seeds (five for the scvi-tools adversary). Penalties are at the strength whose batch score is nearest b* (never chosen by accuracy); plain
+contain it and over the three seeds (five for the scvi-tools adversary). Penalties use the nearer endpoint of the first crossing of b* (the upper endpoint when the lower is plain scVI; never chosen by accuracy); plain
 scVI and the scvi-tools adversary are unmatched. The number under each column is the distance between that column's seed-mean batch score and b*."""
 import sys
 from pathlib import Path
