@@ -20,7 +20,7 @@ CAPTION = (r"Collapse rate (percent) of each penalty on the six real tasks, with
            r"Fits are counted at strengths whose mean batch score is at most the highest batch score every penalty reaches. Each cell "
            r"gives the rate and, in parentheses, the collapsed fits over the fits counted; Median is the median of the six rates "
            r"(lower is better). $^\dagger$\,Low-signal pair with the batch-conditioned decoder (the highest common batch score is "
-           r"less than 0.02 above plain scVI's; Supplementary Note 5), included in the median. Exact 95\% intervals and the rates "
+           r"less than 0.02 above plain scVI's; Supplementary Note 5), included in the median. Nominal 95\% intervals and the rates "
            r"over all strengths are in Supplementary Table S8.")
 
 

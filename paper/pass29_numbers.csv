@@ -1,0 +1,5 @@
+id,location,written,source,selector,fmt,note,supersedes
+P29_1,paper/outline.tex::160 of the 195 within-pair differences in biology at $b^*$,160,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/ranking_pairs.csv,"pairdiff=bio_at_bstar ; group=task,cond ; lt=0.02",,Res-2 near-tie count (Pass 29; as P24_A41),
+P29_2,paper/outline.tex::160 of the 195 within-pair differences in biology at $b^*$,195,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/ranking_pairs.csv,"pairdiff=bio_at_bstar ; group=task,cond",,Res-2 near-tie count (Pass 29; as P24_A42),
+P29_3,paper/outline.tex::were under 0.02 and 4 were 0.04 or more,4,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_large_gaps.csv,agg=count,d,Res-2 differences of 0.04 or more (Pass 29; as P24_P14A2),
+P29_4,paper/outline.tex::$p=0.0156$ over the six task families,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,Res-2b family-level p (Pass 29; as P24_P16D1),

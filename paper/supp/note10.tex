@@ -43,7 +43,7 @@ Date (New York) & Commit (tag) & Rule record or change \\
 (i) three seeds (100--102) instead of five, so the leave-one-seed-out analysis has three repeats and its standard error is reported where at least 2 of the 3 repeats give a reading (the specification asked for 4 of 5);
 (ii) every fitted strength is a point of a penalty's curve (10 to 12 strengths) instead of the six strengths of the strength-grid record;
 (iii) $b^*$, the highest batch score reached by every penalty and the low-signal flag are computed from the sweep's own rows with the specification's formula, because no matched-strength record exists for the sweep;
-(iv) the label-transfer strength is chosen among every fitted strength by the same rule (the failure-free strength whose seed-mean batch score is nearest $b^*$, ties to the smaller strength), and label transfer is computed on every penalty fit, the matched-strength table being read from those results;
+(iv) the label-transfer strength is chosen among every fitted strength by the same rule (the failure-free strength whose seed-mean batch score is nearest $b^*$, ties to the smaller strength), and label transfer is computed on every penalty fit, the matched-strength table being read from those results (this strength rule was later replaced by the first-crossing rule described below);
 (v) a strength is eligible as the transfer strength across tasks when it was fitted and is failure-free in every training task and was also fitted in the held-out task;
 (vi) the baselines enter as scored, with a coverage table, instead of the analysis refusing an incomplete set;
 (vii) baseline settings keep their own seeds (five for the scvi-tools adversary, scANVI and sysVI; one run for Harmony, Scanorama and PCA);

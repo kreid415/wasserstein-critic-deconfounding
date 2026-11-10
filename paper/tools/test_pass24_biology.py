@@ -38,7 +38,7 @@ def test_biology_summary_and_printed_s10(tmp_path, monkeypatch):  # test-reason:
     figures.write_text(subprocess.run(["git", "show", "24f2665:paper/supp/figures.tex"],
                                       check=True, text=True, capture_output=True).stdout)
     p24.first_crossing_supplement()
-    assert (tmp_path / "paper/supp/note12.tex").read_text() == (bio.DATA.parent / "supp/note12.tex").read_text()
+    assert (tmp_path / "paper/supp/note12.tex").read_text() == subprocess.run(["git", "show", "bec1ece:paper/supp/note12.tex"], check=True, text=True, capture_output=True).stdout  # the Pass 28 state: Pass 29 edits Note 12
 
 
 @pytest.mark.parametrize("bad", ["hash", "strength"])

@@ -19,6 +19,7 @@ from accept_changes import accept  # noqa: E402
 from test_pass24_figures import figcommon, run_script  # noqa: E402
 
 START = "6282edb"
+RESULT = "bec1ece"  # the Pass 28 result; Pass 29 edits paper/outline.tex, so the script is compared with this commit
 OLD = [r"(a) Biology score at $b^*$ (colour) and rank within each task row (number) for each real task,",
        r"(a) heatmap of biology score at $b^*$ (colour) and rank (number) for the six penalties in each real task,"]
 NEW = [r"(a) Rank within each task row (number) for each real task, and biology score at $b^*$ minus the median of the six penalties "
@@ -35,7 +36,10 @@ def test_pass28_script_reproduces_the_committed_outline(tmp_path, monkeypatch, c
     (tmp_path / "paper/outline.tex").write_text(r.stdout)
     monkeypatch.setenv("PASS28_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass28_edits.py"), run_name="__main__")
-    raw = (REPO / "paper/outline.tex").read_text()
+    res = subprocess.run(["git", "-C", str(REPO), "show", f"{RESULT}:paper/outline.tex"], capture_output=True, text=True)
+    if res.returncode:
+        pytest.skip(f"{RESULT} not available")  # pragma: no cover  # shallow copies lack the history
+    raw = res.stdout
     assert (tmp_path / "paper/outline.tex").read_text() == raw
     assert [p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*") if p.is_file()] == ["paper/outline.tex"]
     assert "Table 1 included, 422 words (limit 450)" in capsys.readouterr().out

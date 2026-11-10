@@ -29,7 +29,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = "/home/kendall/experiment_data/wasserstein-critic-deconfounding"
 LEDGERS = [f"paper/pass{n}_numbers.csv" for n in (7, 9, 10, 11, 12, 13, 14, 15, 16)] + [
     f"paper/supp-{part}_numbers.csv" for part in ("methods", "analysis", "records")] + ["paper/pass17_numbers.csv", "paper/pass22_numbers.csv",
-                                                                                  "paper/pass23_numbers.csv", "paper/pass24_numbers.csv"]
+                                                                                  "paper/pass23_numbers.csv", "paper/pass24_numbers.csv",
+                                                                                  "paper/pass29_numbers.csv"]
 WORDS = {w: str(i) for i, w in enumerate("zero one two three four five six seven eight nine ten eleven twelve thirteen".split())}
 TERM = re.compile(r"^(\|?)([\w.]+)\|?\s*(==|!=|<=|>=|<|>| in )\s*(.*)$")
 
