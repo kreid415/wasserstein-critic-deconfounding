@@ -357,23 +357,10 @@ def table_s1(tasks):
                        for r in tasks.itertuples() if r.nonint_batches)
     return "\n".join([
         HEAD, OPEN % "S1", r"\setlength{\tabcolsep}{3pt}", r"\begin{longtable}{@{}" + P(0.11) + P(0.08) + "r" + P(0.11) + "r" + P(0.08) + "l" + P(0.27) + "@{}}",
-        r"\caption{Tasks: the eight integration tasks of the single-cell integration benchmark scIB (main-text "
-        r"reference; figshare article 12420968, version 8), as prepared for every fit and score. ``Batches'': number "
-        r"of batches of the batch variable used (scIB's name in parentheses); for simulation 2 these are sub-batches, "
-        r"nested in the batches whose number follows ``in''. ``Features'': training features, scIB's highly variable "
-        r"genes for RNA and all gene-activity features for the chromatin-accessibility tasks, of the genes in the file. "
-        r"``Non-integer'': batches whose counts, used as distributed, hold non-integer values (" + nonint + r"). "
-        r"``Family'': tasks of one family never choose a strength or setting for each other in the single-strength "
-        r"placement; the simulations belong to no family and are ranked separately. Shared batches are counted by "
-        r"batch name, shared cells by batch and barcode (the cell name up to its first hyphen). Part B: the downloaded file, its figshare file id and MD5 checksum (checked at download), and the "
-        r"SHA-256 checksum of the prepared file; the prepared files also match the content fingerprints committed in "
-        r"\texttt{docs/prepped\_fingerprints\_scib.json} at commit " + CODE + r".}\label{tab:s1}\\",
+        r"\caption{Integration tasks from scIB, figshare article 12420968, version 8. Batches gives the batch variable and its size; simulation 2 uses sub-batches nested within the stated parent batches. Features are selected RNA genes or all gene-activity features. Non-integer gives batches with non-integer counts, retained as distributed (Supplementary Note 3). Family identifies related tasks, which cannot choose settings for one another. Shared cells are matched by batch and barcode, ignoring the suffix after the first hyphen.}\label{tab:s1}\\",
         r"\toprule Task & Kind & Cells & Batches & Cell types & Features & Non-integer & Family; shared batches \\",
         r"\midrule", r"\multicolumn{8}{@{}l}{\textbf{Part A: task contents}} \\", r"\midrule", *body, r"\bottomrule",
-        r"\end{longtable}", r"\begin{longtable}{@{}lllll@{}}",
-        r"\multicolumn{5}{@{}l}{\textbf{Part B: files and checksums}} \\", r"\toprule",
-        r"Task & File & figshare id & MD5 of download & SHA-256 of prepared file \\", r"\midrule", *ck,
-        r"\bottomrule", r"\end{longtable}", "}", ""])
+        r"\end{longtable}", "}", ""])
 
 
 def table_s2(tasks, manifest, settings):
@@ -440,12 +427,7 @@ def table_s2(tasks, manifest, settings):
     return "\n".join([
         HEAD, OPEN % "S2", r"\setlength{\tabcolsep}{3pt}",
         r"\begin{longtable}{@{}" + P(0.2) + P(0.76) + "@{}}",
-        r"\caption{Hyperparameters and training settings (Supplementary Note 2). Every value is the one recorded in the "
-        r"fits' own latent files (the resolved training plan of each fit), and every fit of a method has the same value. "
-        r"Part A: settings shared by every scVI-backbone fit (plain scVI, the six penalties and the scvi-tools "
-        r"adversary); Part B: settings that differ by method, each method's standard setting; Part C: settings by task; "
-        r"Part D: seeds. The loss of each penalty is in Supplementary Note 1, the baselines' settings in Supplementary "
-        r"Table S4.}\label{tab:s2}\\",
+        r"\caption{Training settings shared across methods (Part A), that differ by method (Part B), determined by task (Part C) and used for seeds (Part D). Plain scVI, the penalties and the scvi-tools adversary share the backbone settings. Supplementary Notes 1 and 2 give losses and training procedures; Supplementary Table S4 gives baseline settings.}\label{tab:s2}\\",
         r"\toprule", r"\multicolumn{2}{@{}l}{\textbf{Part A: shared settings}} \\", r"\midrule",
         *[f"{k} & {v} \\\\" for k, v in shared], r"\bottomrule", r"\end{longtable}",
         r"\begin{longtable}{@{}" + P(0.13) + P(0.09) + P(0.35) + P(0.09) + P(0.28) + "@{}}",
@@ -494,13 +476,7 @@ def table_s4(manifest, settings, coverage):
     return "\n".join([
         HEAD, OPEN % "S4", r"\setlength{\tabcolsep}{3pt}",
         r"\begin{longtable}{@{}" + P(0.11) + P(0.1) + P(0.1) + "r" + P(0.09) + "lrr" + P(0.15) + P(0.08) + "@{}}",
-        r"\caption{Baseline grids (Supplementary Note 8), on each of the eight tasks. ``Grid'': the settings of the "
-        r"varied knob at the main embedding size (``Dims'', latent or principal-component dimensions), each run on "
-        r"every task; ``Sensitivity'': a further setting at the tool's default embedding size, not used to choose a "
-        r"setting. ``Planned'' and ``Scored'' count fits over the eight tasks and all seeds; not fitted: "
-        + (missing or "none") + r". The neural baselines use the scVI-backbone settings of Supplementary Table S2 "
-        r"(epochs, minibatch, training split, hidden units and latent size of each task); the other tools read the same "
-        r"training features.}\label{tab:s4}\\",
+        r"\caption{Baseline settings on all eight tasks. Grid gives the varied parameter at the primary embedding size, Dims. Sensitivity settings use each tool's default embedding size and do not enter selection. Planned and Scored count fits across tasks and seeds. Missing: " + (missing or "none") + r". Neural baselines share the task settings in Supplementary Table S2; other tools use the same training features (Supplementary Note 8).}\label{tab:s4}\\",
         r"\toprule Tool & Knob & Grid & Dims & Sensitivity & Seeds & Planned & Scored & Input & Version \\", r"\midrule",
         *body, r"\midrule", f"All & & & & & & {planned} & {scored} & & \\\\", r"\bottomrule", r"\end{longtable}", "}",
         ""])
@@ -543,13 +519,7 @@ def table_s5(manifest, coverage):
     return "\n".join([
         HEAD, OPEN % "S5", r"\setlength{\tabcolsep}{3pt}",
         r"\begin{longtable}{@{}" + P(0.12) + P(0.1) + num * len(TASKS) + "r@{}}",
-        r"\caption{Run counts (Supplementary Note 11): fits per method, decoder and task. Sweep: the fits read by the sweep "
-        r"analysis (the ten strengths, the edge strengths and the strength-extension fits on the immune task, Supplementary "
-        r"Note 4); each was fitted and scored, and none failed (Supplementary Note 11). Baselines: fits scored, with the "
-        r"planned number where it differs (``55 of 56''); -- for tools without a decoder; not fitted: " + (missing or "none")
-        + r" (Supplementary Note 8; Supplementary Table S4 gives the settings). The input and standardisation pilots, the "
-        r"replication across training seeds and the stopped fixed-strength benchmark are counted in Supplementary Note 11, "
-        r"the replication per penalty in Supplementary Table S9.}\label{tab:s5}\\",
+        r"\caption{Fits by method, decoder and task, including every sweep strength. All sweep fits were scored and none failed. Baseline entries give scored fits, with planned counts where different. A dash denotes no decoder. Scanorama with 80 neighbours on ATAC large could not be fitted. Supplementary Notes 4, 8 and 11 describe designs and coverage; Supplementary Table S9 gives replication results.}\label{tab:s5}\\",
         r"\toprule Method & Decoder & " + " & ".join(TASK_LABEL[t] for t in TASKS) + r" & All \\", r"\midrule",
         *body, r"\bottomrule", r"\end{longtable}", "}", ""])
 

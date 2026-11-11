@@ -1,0 +1,722 @@
+id,location,written,source,selector,fmt,note,supersedes
+SM2_39,,82,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; col=epochs ; agg=min,,"dependency of an expr= row above, copied unchanged without location",
+SM2_40,,246,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; col=epochs ; agg=max,,"dependency of an expr= row above, copied unchanged without location",
+SM2_AUX1,,400,paper/figure_data/supp_methods/tasks.csv,where=cells<20000 ; col=epochs ; agg=max,,"dependency of an expr= row above, copied unchanged without location",
+SM2_AUX2,,400,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==none&field==fit.n_epochs_kl_warmup ; col=value,,"dependency of an expr= row above, copied unchanged without location",
+SA4_09,,378,paper/figure_data/paper_numbers.json,key=n_fits.pancreas,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_10,,6,paper/figure_data/metric_scores.csv,where=experiment==A1&task==pancreas&arm==none ; agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_11,,12,paper/figure_data/metric_scores.csv,where=experiment==A1&task==pancreas&lam in 0.01|0.03|10000.0|30000.0 ; agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_13,,Nine,paper/figure_data/metric_scores.csv,where=experiment==A1&task==immune&cond==1&lam==0.03 ; agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_15,,"3,033",paper/figure_data/paper_numbers.json,key=n_fits.total,",d","dependency of an expr= row above, copied unchanged without location",
+SA4_17,,8,paper/figure_data/paper_numbers.json,key=_meta.tasks,len,"dependency of an expr= row above, copied unchanged without location",
+SA4_28,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_sinkhorn/ledger/A1__atac_small+immune+sim1__tags-a19e4683640a.csv,agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_30,,180,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_sinkhorn/ledger/A1__atac_small+immune+sim1__tags-a19e4683640a.csv,where=state==scored ; agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_31,,2026-10-17T12:11:09-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_sinkhorn/ledger/A1__atac_small+immune+sim1__tags-a19e4683640a.csv,agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_32,,2026-10-18T13:54:36-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_sinkhorn/ledger/A1__atac_small+immune+sim1__tags-a19e4683640a.csv,agg=max ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_33,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_ext_r1_sinkhorn_round1/ledger/A1__atac_small+immune+sim1__tags-aee757165808.csv,agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_36,,18,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_ext_r1_sinkhorn_round1/ledger/A1__atac_small+immune+sim1__tags-aee757165808.csv,where=state==scored ; agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA4_37,,2026-10-19T12:31:58-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_ext_r1_sinkhorn_round1/ledger/A1__atac_small+immune+sim1__tags-aee757165808.csv,agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_37b,,2026-10-19T13:25:45-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_ext_r1_sinkhorn_round1/ledger/A1__atac_small+immune+sim1__tags-aee757165808.csv,agg=max ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C1d,,2026-10-22T09:27:36-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__lung__tags-22be99ea6502.csv,where=fit_started!=nan ; agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C1,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__lung__tags-22be99ea6502.csv,where=git_sha!=nan ; agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C2d,,2026-10-22T10:29:06-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__pancreas__tags-a6efc1a44c2c.csv,where=fit_started!=nan ; agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C2,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__pancreas__tags-a6efc1a44c2c.csv,where=git_sha!=nan ; agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C3d,,2026-10-22T10:29:06-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__sim2__tags-94a5340b140b.csv,where=fit_started!=nan ; agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C3,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/ledger/A1__sim2__tags-94a5340b140b.csv,where=git_sha!=nan ; agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C4d,,2026-10-22T09:10:25-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/_harvests/jhpce_views_20261028/ledger/A1__atac_large__tags-32532edd410d.csv,where=fit_started!=nan ; agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C4,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/_harvests/jhpce_views_20261028/ledger/A1__atac_large__tags-32532edd410d.csv,where=git_sha!=nan ; agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C5d,,2026-10-22T08:48:47-0400,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/_harvests/jhpce_views_20261028/ledger/A1__immune_hum_mou__tags-e76c97f4f450.csv,where=fit_started!=nan ; agg=min ; col=fit_started,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C5x,,10a1ca5874fbcdc033b148525b5e71d866306bdb,/home/kendall/experiment_data/wasserstein-critic-deconfounding/jhpce_tier12/pilot5_jhpce/_harvests/jhpce_views_20261028/ledger/A1__immune_hum_mou__tags-e76c97f4f450.csv,where=git_sha!=nan ; agg=max ; col=git_sha,,"dependency of an expr= row above, copied unchanged without location",
+SA4_C5,,10a1ca5874fbcdc033b148525b5e71d866306bdb,,"expr=SA4_C1 if SA4_C1 == SA4_C2 == SA4_C3 == SA4_C4 == SA4_C5x else ""mixed""",,"dependency of an expr= row above, copied unchanged without location",
+SA4_55,,786cb8c839070b4cc58ae9c032eee5b3a5ba018938ed6380f2c6cbfb8e73d989,git:a475ea3:experiments/sweep_replication/PREDICTION.json,key=source.sha256,,"dependency of an expr= row above, copied unchanged without location",
+SA5_14,,0.638,paper/figure_data/low_signal_pairs.csv,where=task==immune&arm==mmd ; agg=value ; col=b0,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA5_15,,0.657,paper/figure_data/low_signal_pairs.csv,where=task==immune&arm==mmd ; agg=value ; col=b_common,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA5_17,,0.812,paper/figure_data/low_signal_pairs.csv,where=task==sim1&arm==mmd ; agg=value ; col=b0,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA5_18,,0.819,paper/figure_data/low_signal_pairs.csv,where=task==sim1&arm==mmd ; agg=value ; col=b_common,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA5_20,,0.656,paper/figure_data/low_signal_pairs.csv,where=task==sim2&arm==mmd ; agg=value ; col=b0,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA5_21,,0.665,paper/figure_data/low_signal_pairs.csv,where=task==sim2&arm==mmd ; agg=value ; col=b_common,.3f,"dependency of an expr= row above, copied unchanged without location",
+SA6_12,,78,paper/figure_data/ranking_pairs.csv,agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA6_14,,18,paper/figure_data/low_signal_pairs.csv,agg=count,d,"dependency of an expr= row above, copied unchanged without location",
+SA7_20,,0.9995,paper/analysis_pass10/coverage_sim_sweep.json,key=NL10.A_coverage,,"dependency of an expr= row above, copied unchanged without location",
+SA7_21,,0.99905,paper/analysis_pass10/coverage_sim_sweep.json,key=NL12.A_coverage,,"dependency of an expr= row above, copied unchanged without location",
+SA7_23,,0.88,paper/analysis_pass10/coverage_sim_sweep.json,key=NL10.B_coverage,.2f,"dependency of an expr= row above, copied unchanged without location",
+SA7_24,,0.83,paper/analysis_pass10/coverage_sim_sweep.json,key=NL12.B_coverage,.2f,"dependency of an expr= row above, copied unchanged without location",
+SA7_25,,0.97,paper/analysis_pass10/coverage_sim_sweep.json,key=NL10.control_constant_p0.3_coverage,.2f,"dependency of an expr= row above, copied unchanged without location",
+SA7_26,,0.95,paper/analysis_pass10/coverage_sim_sweep.json,key=NL12.control_constant_p0.3_coverage,.2f,"dependency of an expr= row above, copied unchanged without location",
+SA7_26b,,20000,paper/analysis_pass10/coverage_sim_sweep.json,key=replicates,d,"dependency of an expr= row above, copied unchanged without location",
+N10_05h,,3000,git:98732ff:docs/PREREG.md,re=ten\s+base\s+strengths\s+0\.1\s+to\s+(3000),,"dependency of an expr= row above, copied unchanged without location",
+N10_89,,12,git:98732ff:docs/PREREG.md,re=the\s+(12)\s+fits\s+that\s+the\s+first\s+extension\s+round,,"dependency of an expr= row above, copied unchanged without location",
+N10_95,,387,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==sweep_fits&task==immune ; col=n ; agg=value,d,"dependency of an expr= row above, copied unchanged without location",
+N10_96,,378,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==sweep_fits&task==atac_small ; col=n ; agg=value,d,"dependency of an expr= row above, copied unchanged without location",
+N10_103,,895,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_manifest,d,"dependency of an expr= row above, copied unchanged without location",
+N10_104,,855,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=n_manifest,d,"dependency of an expr= row above, copied unchanged without location",
+P23S01,,895,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_scored,d,"dependency of an expr= row above, copied unchanged without location",
+P23S03,,855,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=n_manifest,d,"dependency of an expr= row above, copied unchanged without location",
+P30-0001,,1.4.2,paper/figure_data/supp_methods/settings.csv,"re=A1,none,version\.scvi-tools,""""""(1\.4\.2)""""""",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_01
+P30-0002,,10,paper/figure_data/supp_methods/manifest.tsv,where=experiment==A1 ; col=n_latent ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_02
+P30-0003,,one,paper/figure_data/supp_methods/manifest.tsv,where=experiment==A1 ; col=n_layers ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_03
+P30-0004,paper/supp/note2.tex::of 128 units,128,paper/figure_data/supp_methods/manifest.tsv,where=experiment==A1 ; col=n_hidden ; agg=max,,re-anchored in the rewritten supplement,SM2_04
+P30-0005,paper/supp/note2.tex::a 90\% training,90\%,paper/figure_data/supp_methods/manifest.tsv,where=experiment==A1 ; col=train_size ; agg=max,.0%,re-anchored in the rewritten supplement,SM2_05
+P30-0006,"paper/supp/note2.tex::learning rate $10^{-3}$, epsilon",$10^{-3}$,paper/figure_data/supp_methods/settings.csv,"re=A1,none,fit\.optimizer0,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,re-anchored in the rewritten supplement,SM2_07
+P30-0007,paper/supp/note2.tex::epsilon 0.01 and,0.01,paper/figure_data/supp_methods/settings.csv,"re=A1,none,fit\.optimizer0,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,re-anchored in the rewritten supplement,SM2_08
+P30-0008,paper/supp/note2.tex::weight decay $10^{-6}$.,$10^{-6}$,paper/figure_data/supp_methods/settings.csv,"re=A1,none,fit\.optimizer0,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,re-anchored in the rewritten supplement,SM2_09
+P30-0009,,0,paper/figure_data/supp_methods/manifest.tsv,where=experiment==A1&arm==none ; col=lam ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_10
+P30-0010,,one,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==discriminator&field==fit.adv_steps ; col=value,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_11
+P30-0011,,five,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==reference&field==fit.adv_steps ; col=value,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_12a
+P30-0012,,five,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==pooled&field==fit.adv_steps ; col=value,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_12b
+P30-0013,,five,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==barycenter&field==fit.adv_steps ; col=value,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_12c
+P30-0014,,10,paper/figure_data/supp_methods/settings.csv,"re=A1,reference,fit\.lambda_gp,(10)\.0,",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_13a
+P30-0015,,10,paper/figure_data/supp_methods/settings.csv,"re=A1,pooled,fit\.lambda_gp,(10)\.0,",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_13b
+P30-0016,,10,paper/figure_data/supp_methods/settings.csv,"re=A1,barycenter,fit\.lambda_gp,(10)\.0,",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_13c
+P30-0017,,$10^{-3}$,paper/figure_data/supp_methods/settings.csv,"re=A1,discriminator,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_14a
+P30-0018,,0.01,paper/figure_data/supp_methods/settings.csv,"re=A1,discriminator,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_14b
+P30-0019,,$10^{-6}$,paper/figure_data/supp_methods/settings.csv,"re=A1,discriminator,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.9, 0\.999\], """"eps"""": 0\.01, """"lr"""": 0\.001, """"weight_decay"""": 1e-06\}\]\}""",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_14c
+P30-0020,paper/supp/note2.tex::rate $10^{-4}$ and,$10^{-4}$,paper/figure_data/supp_methods/settings.csv,"re=A1,reference,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.0, 0\.9\], """"eps"""": 1e-08, """"lr"""": 0\.0001, """"weight_decay"""": 0\}\]\}""",present,re-anchored in the rewritten supplement,SM2_15a
+P30-0021,paper/supp/note2.tex::rate $10^{-4}$ and,$10^{-4}$,paper/figure_data/supp_methods/settings.csv,"re=A1,pooled,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.0, 0\.9\], """"eps"""": 1e-08, """"lr"""": 0\.0001, """"weight_decay"""": 0\}\]\}""",present,re-anchored in the rewritten supplement,SM2_15b
+P30-0022,paper/supp/note2.tex::rate $10^{-4}$ and,$10^{-4}$,paper/figure_data/supp_methods/settings.csv,"re=A1,barycenter,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.0, 0\.9\], """"eps"""": 1e-08, """"lr"""": 0\.0001, """"weight_decay"""": 0\}\]\}""",present,re-anchored in the rewritten supplement,SM2_15c
+P30-0023,paper/supp/note2.tex::0 and 0.9. These,0.9,paper/figure_data/supp_methods/settings.csv,"re=A1,barycenter,fit\.optimizer1,""\{""""cls"""": """"Adam"""", """"param_groups"""": \[\{""""amsgrad"""": false, """"betas"""": \[0\.0, 0\.9\], """"eps"""": 1e-08, """"lr"""": 0\.0001, """"weight_decay"""": 0\}\]\}""",present,re-anchored in the rewritten supplement,SM2_15d
+P30-0024,,three,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=A2: (3) arms x 2 tasks x 2 decoders x 3 lambda x 3 seeds,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_16
+P30-0025,,five,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=A3: (5) arms x 2 x 2 x 3 x 3,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_17
+P30-0026,paper/supp/note2.tex::seeds 100--102 and,100--102,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=seed: (100-102),,re-anchored in the rewritten supplement,SM2_18
+P30-0027,,three,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=x 2 decoders x (3) lambda x 3 seeds,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_19
+P30-0028,,two-thirds,git:10a1ca5:scripts/prereg_rules.py,re=need = math\.ceil\(2 \* n / 3\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_20
+P30-0029,paper/supp/note2.tex::exceed 0.01 and,0.01,git:2168d75:docs/prereg/r2r3_record.json,key=constants.ROPE,,re-anchored in the rewritten supplement,SM2_21
+P30-0030,paper/supp/note2.tex::improvement $-0.004$ with,-0.004,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R2.mean_D,.3f,re-anchored in the rewritten supplement,SM2_22
+P30-0031,,9,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R2.n_evaluable,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_23
+P30-0032,,12,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R2.n_cells,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_24
+P30-0033,paper/supp/note2.tex::gave $-0.003$ with,-0.003,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R3.mean_D,.3f,re-anchored in the rewritten supplement,SM2_25
+P30-0034,,14,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R3.n_evaluable,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_26
+P30-0035,,20,git:2168d75:docs/prereg/r2r3_record.json,key=decisions.R3.n_cells,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_27
+P30-0036,,-0.001,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R2.mean_D,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_28
+P30-0037,,12,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R2.n_evaluable,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_29
+P30-0038,,12,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R2.n_cells,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_30
+P30-0039,,+0.001,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R3.mean_D,+.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_31
+P30-0040,,17,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R3.n_evaluable,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_32
+P30-0041,,20,git:cea50ca:docs/prereg/r2r3_record.json,key=decisions.R3.n_cells,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_33
+P30-0042,,400,paper/tools/make_supp_supp-methods.py,"re=def epochs_rule\(n_cells, cap=400, decay_at=20000\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_34
+P30-0043,"paper/supp/note2.tex::lasts $\min(400,\mathrm{round}(20000\times400/n))$ epochs",20000,paper/tools/make_supp_supp-methods.py,"re=def epochs_rule\(n_cells, cap=400, decay_at=20000\)",present,re-anchored in the rewritten supplement,SM2_35
+P30-0044,,400,paper/figure_data/supp_methods/tasks.csv,where=cells<20000 ; col=epochs ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_36
+P30-0045,,four,paper/figure_data/supp_methods/tasks.csv,where=cells<20000 ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_37
+P30-0046,,"20,000",paper/tools/make_supp_supp-methods.py,re=decay_at=20000,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_38
+P30-0047,,82,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; col=epochs ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_39
+P30-0048,,246,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; col=epochs ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_40
+P30-0049,,four,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_41
+P30-0050,paper/supp/note2.tex::reaching $(E-1)/400$ in,400,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==none&field==fit.n_epochs_kl_warmup ; col=value,,re-anchored in the rewritten supplement,SM2_42
+P30-0051,,zero,paper/tools/make_supp_supp-methods.py,re=0-based epoch E-1,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_43
+P30-0052,,400,paper/figure_data/supp_methods/settings.csv,where=experiment==A1&arm==none&field==fit.n_epochs_kl_warmup ; col=value,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_44
+P30-0053,,0.9975,,expr=(SM2_AUX1-1)/int(SM2_AUX2),.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_45
+P30-0054,,four,paper/figure_data/supp_methods/tasks.csv,where=epochs==400 ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_46
+P30-0055,,0.2025,,expr=(SM2_39-1)/int(SM2_AUX2),.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_47
+P30-0056,,0.6125,,expr=(SM2_40-1)/int(SM2_AUX2),.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_48
+P30-0057,,four,paper/figure_data/supp_methods/tasks.csv,where=epochs<400 ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_49
+P30-0058,paper/supp/note3.tex::scib 1.1.7 scores,1.1.7,git:10a1ca5:scripts/score_scib_native.py,re=scib (1\.1\.7),,re-anchored in the rewritten supplement,SM3_01
+P30-0059,,0,paper/figure_data/supp_methods/tasks.csv,where=task!=sim2 ; col=metric_min ; agg=min,.0f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_02
+P30-0060,,1,paper/figure_data/supp_methods/tasks.csv,col=metric_max ; agg=max,.0f,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_03
+P30-0061,paper/supp/note3.tex::minimum was $-0.00003$.,-0.00003,paper/figure_data/supp_methods/tasks.csv,where=task==sim2 ; col=metric_min,.5f,re-anchored in the rewritten supplement,SM3_04
+P30-0062,,two,paper/figure_data/supp_methods/tasks.csv,where=task==sim2 ; col=fits_below_zero,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_05
+P30-0063,,15,git:10a1ca5:scripts/score_scib_native.py,"re=sc\.pp\.neighbors\(integ, use_rep=""X_emb""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_07
+P30-0064,,50,paper/figure_data/supp_methods/scib_1.1.7/pcr.py,"re=def pcr_comparison\(\s+adata_pre,\s+adata_post,\s+covariate,\s+embed=None,\s+n_comps=50,",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_08
+P30-0065,,15,paper/figure_data/supp_methods/scib_1.1.7/lisi.py,"re=n_neighbors=(15), use_rep=use_rep",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_09
+P30-0066,,90,paper/figure_data/supp_methods/scib_1.1.7/lisi.py,"re=def ilisi_graph\(\s+adata,\s+batch_key,\s+type_,\s+use_rep=""X_emb"",\s+k0=(90),",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_10
+P30-0067,,30,paper/figure_data/supp_methods/scib_1.1.7/lisi.py,re=perplexity = np\.floor\(n_neighbors / 3\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_11
+P30-0068,,50,paper/figure_data/supp_methods/scib_1.1.7/kbet.py,"re=n_neighbors=(50), use_rep=embed",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_12
+P30-0069,,10,paper/figure_data/supp_methods/scib_1.1.7/kbet.py,re=\{label_key\}>=(10) and,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_13
+P30-0070,,3,paper/figure_data/supp_methods/scib_1.1.7/kbet.py,re=comp_size_thresh = (3) \* k0,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_15
+P30-0071,paper/supp/note3.tex::least 75\% of,75\%,paper/figure_data/supp_methods/scib_1.1.7/kbet.py,re=len\(idx_nonan\) / len\(labs\) >= 0\.75,present,re-anchored in the rewritten supplement,SM3_16
+P30-0072,,0,git:10a1ca5:scripts/score_scib_native.py,re=KBET_SEED_DEFAULT = (0),,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_17
+P30-0073,,ten,paper/figure_data/supp_methods/scib_1.1.7/clustering.py,"re=resolutions = get_resolutions\(n=10, max=2\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_18a
+P30-0074,,0.2,paper/figure_data/supp_methods/scib_1.1.7/clustering.py,"re=resolutions = get_resolutions\(n=10, max=2\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_18b
+P30-0075,,0.4,paper/figure_data/supp_methods/scib_1.1.7/clustering.py,"re=resolutions = get_resolutions\(n=10, max=2\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_18c
+P30-0076,,2.0,paper/figure_data/supp_methods/scib_1.1.7/clustering.py,"re=resolutions = get_resolutions\(n=10, max=2\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_18d
+P30-0077,,ten,paper/figure_data/supp_methods/scib_1.1.7/clustering.py,"re=resolutions = get_resolutions\(n=10, max=2\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_19
+P30-0078,,50,paper/figure_data/supp_methods/scib_1.1.7/cell_cycle.py,"re=organism=""mouse"",\s+n_comps=(50),",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_20
+P30-0079,,1,paper/figure_data/supp_methods/scib_1.1.7/trajectory.py,"re=adata_post_ti2\.obs\[""dpt_pseudotime""\] > (1), ""dpt_pseudotime""\s+\] = 0",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_21
+P30-0080,,0,paper/figure_data/supp_methods/scib_1.1.7/trajectory.py,"re=adata_post_ti2\.obs\[""dpt_pseudotime""\] > 1, ""dpt_pseudotime""\s+\] = (0)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_22
+P30-0081,,0,paper/figure_data/supp_methods/scib_1.1.7/trajectory.py,"re=setting trajectory conservation metric to 0\.""\)\s+return (0)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_23
+P30-0082,,eight,paper/figure_data/supp_methods/tasks.csv,agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_24
+P30-0083,,seven,paper/figure_data/supp_methods/tasks.csv,where=task==pancreas ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_25
+P30-0084,,seven,paper/figure_data/supp_methods/tasks.csv,where=task==lung ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_26
+P30-0085,,eight,paper/figure_data/supp_methods/tasks.csv,where=task==immune ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_27
+P30-0086,,eight,paper/figure_data/supp_methods/tasks.csv,where=task==immune_hum_mou ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_28
+P30-0087,,two,paper/figure_data/supp_methods/tasks.csv,where=modality==atac ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_29
+P30-0088,,six,paper/figure_data/supp_methods/tasks.csv,where=task==atac_small ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_30
+P30-0089,,six,paper/figure_data/supp_methods/tasks.csv,where=task==atac_large ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_31
+P30-0090,,two,paper/figure_data/supp_methods/tasks.csv,where=kind==simulated ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_32
+P30-0091,,six,paper/figure_data/supp_methods/tasks.csv,where=task==sim1 ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_33
+P30-0092,,six,paper/figure_data/supp_methods/tasks.csv,where=task==sim2 ; col=n_bio,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_34
+P30-0093,,five,git:10a1ca5:scripts/score_scib_native.py,"re=BATCH_METRICS = \[""PCR_batch"", ""ASW_label/batch"", ""iLISI"", ""graph_conn"", ""kBET""\]",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_35
+P30-0094,,0.4,git:8595a16:scripts/analysis_x1.py,"re=W_B, W_C = (0\.4), 0\.6",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_36
+P30-0095,,0.6,git:8595a16:scripts/analysis_x1.py,"re=W_B, W_C = 0\.4, (0\.6)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_37
+P30-0096,,0,git:10a1ca5:scripts/score_scib_native.py,re=per-metric min-max scaling,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_38
+P30-0097,,1,git:10a1ca5:scripts/score_scib_native.py,re=per-metric min-max scaling,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_39
+P30-0098,,three,git:8595a16:scripts/analysis_x1.py,"re=LOCAL = \(""iLISI"", ""kBET"", ""graph_conn""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_40
+P30-0099,,two,git:8595a16:scripts/analysis_x1.py,"re=GLOBAL = \(""PCR_batch"", ""ASW_label/batch""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_41
+P30-0100,,3,git:8595a16:scripts/analysis_x1.py,"re=LOCAL = \(""iLISI"", ""kBET"", ""graph_conn""\)\nGLOBAL = \(""PCR_batch"", ""ASW_label/batch""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_42a
+P30-0101,,2,git:8595a16:scripts/analysis_x1.py,"re=LOCAL = \(""iLISI"", ""kBET"", ""graph_conn""\)\nGLOBAL = \(""PCR_batch"", ""ASW_label/batch""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_42b
+P30-0102,,5,git:8595a16:scripts/analysis_x1.py,"re=LOCAL = \(""iLISI"", ""kBET"", ""graph_conn""\)\nGLOBAL = \(""PCR_batch"", ""ASW_label/batch""\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_42c
+P30-0103,"paper/supp/note3.tex::figshare article 12420968, version",12420968,paper/REPRODUCE.md,re=doi:10\.6084/m9\.figshare\.(12420968)\.v8,,re-anchored in the rewritten supplement,SM3_43
+P30-0104,,8,paper/REPRODUCE.md,re=doi:10\.6084/m9\.figshare\.12420968\.v(8),,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_44
+P30-0105,"paper/supp/note3.tex::and 2,000 highly","2,000",paper/figure_data/supp_methods/tasks.csv,where=modality==rna ; col=features ; agg=min,",d",re-anchored in the rewritten supplement,SM3_45
+P30-0106,"paper/supp/note3.tex::and 2,000 highly","2,000",paper/figure_data/supp_methods/tasks.csv,where=modality==rna ; col=features ; agg=max,",d",re-anchored in the rewritten supplement,SM3_46
+P30-0107,,20,git:10a1ca5:scripts/prep_scib_task.py,"re=flavor=""cell_ranger"",\s+n_bins=(20)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_47
+P30-0108,"paper/supp/note3.tex::all 3,429 or","3,429",paper/figure_data/supp_methods/tasks.csv,where=task==atac_small ; col=features,",d",re-anchored in the rewritten supplement,SM3_48
+P30-0109,"paper/supp/note3.tex::or 3,580 gene-activity","3,580",paper/figure_data/supp_methods/tasks.csv,where=task==atac_large ; col=features,",d",re-anchored in the rewritten supplement,SM3_49
+P30-0110,,18,paper/figure_data/supp_methods/tasks.csv,col=nonint_batches ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_50
+P30-0111,,four,paper/figure_data/supp_methods/tasks.csv,where=nonint_batches>0 ; agg=count,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_51
+P30-0112,,twelve,paper/figure_data/supp_methods/tasks.csv,where=task==lung ; col=nonint_batches,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_52
+P30-0113,,10,git:10a1ca5:scripts/prep_scib_task.py,"re=lung (10)x batches          normalised, not counts",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_53
+P30-0114,,Six,paper/figure_data/supp_methods/baseline_coverage.csv,col=arm ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_01
+P30-0115,,eight,paper/figure_data/supp_methods/baseline_coverage.csv,col=task ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_02
+P30-0116,,10,git:10a1ca5:scripts/fit_paper_config.py,"re=m\.train\(max_epochs=int\(min\(10, max\(2, round\(common\[""max_epochs""\] / 3\.0\)\)\)\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_03
+P30-0117,,2,git:10a1ca5:scripts/fit_paper_config.py,"re=m\.train\(max_epochs=int\(min\(10, max\(2, round\(common\[""max_epochs""\] / 3\.0\)\)\)\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_04
+P30-0118,,3,git:10a1ca5:scripts/fit_paper_config.py,"re=m\.train\(max_epochs=int\(min\(10, max\(2, round\(common\[""max_epochs""\] / 3\.0\)\)\)\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_05
+P30-0119,,10,,"expr=min(10, max(2, int(SM2_39 / 3.0 + 0.5)))",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_06
+P30-0120,"paper/supp/note8.tex::1, 2, 5, 10, 20 and 50","1, 2, 5, 10, 20 and 50",git:10a1ca5:scripts/build_paper_manifest.py,"re=for w in \[1, 2, 5, 10, 20, 50\]",present,re-anchored in the rewritten supplement,SM8_07
+P30-0121,,1,paper/figure_data/supp_methods/manifest.tsv,where=arm==sysvi ; col=lam ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_08
+P30-0122,,50,paper/figure_data/supp_methods/manifest.tsv,where=arm==sysvi ; col=lam ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_09
+P30-0123,,2,git:10a1ca5:scripts/fit_paper_config.py,re=z_distance_cycle_weight \(= lam; scvi-tools default (2)\.0\),,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_10
+P30-0124,,five,paper/figure_data/supp_methods/manifest.tsv,where=arm in scvi_adv|scanvi|sysvi ; col=seed ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_11
+P30-0125,,0,paper/figure_data/supp_methods/manifest.tsv,where=arm in scvi_adv|scanvi|sysvi ; col=seed ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_12
+P30-0126,,4,paper/figure_data/supp_methods/manifest.tsv,where=arm in scvi_adv|scanvi|sysvi ; col=seed ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_13
+P30-0127,paper/supp/note8.tex::harmony-pytorch 0.1.7 on,0.1.7,paper/figure_data/supp_methods/settings.csv,"re=X13,harmony,version\.harmony-pytorch,""""""(0\.1\.7)""""""",,re-anchored in the rewritten supplement,SM8_14
+P30-0128,,10,paper/figure_data/supp_methods/manifest.tsv,where=arm==harmony ; col=n_latent ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_15
+P30-0129,,0,git:10a1ca5:scripts/run_cpu_baselines.py,"re=theta 0 = no penalty, default 2",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_16
+P30-0130,,2,git:10a1ca5:scripts/run_cpu_baselines.py,"re=theta 0 = no penalty, default (2)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_17
+P30-0131,"paper/supp/note8.tex::0, 0.5, 1, 2, 4 and 8","0, 0.5, 1, 2, 4 and 8",git:10a1ca5:scripts/run_cpu_baselines.py,"re=harmony    theta in \{0, 0\.5, 1, 2, 4, 8\} at 10 PCs",present,re-anchored in the rewritten supplement,SM8_18
+P30-0132,,0,paper/figure_data/supp_methods/manifest.tsv,where=arm==harmony&n_latent==10 ; col=lam ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_19
+P30-0133,,8,paper/figure_data/supp_methods/manifest.tsv,where=arm==harmony&n_latent==10 ; col=lam ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_20
+P30-0134,paper/supp/note8.tex::Scanorama 1.7.4 gives,1.7.4,paper/figure_data/supp_methods/settings.csv,"re=X13,scanorama,version\.scanorama,""""""(1\.7\.4)""""""",,re-anchored in the rewritten supplement,SM8_22
+P30-0135,,10,paper/figure_data/supp_methods/manifest.tsv,where=arm==scanorama ; col=n_latent ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_23
+P30-0136,"paper/supp/note8.tex::2, 5, 10, 20, 40 and 80","2, 5, 10, 20, 40 and 80",git:10a1ca5:scripts/run_cpu_baselines.py,"re=scanorama  knn in \{2, 5, 10, 20, 40, 80\} at dimred 10",present,re-anchored in the rewritten supplement,SM8_24
+P30-0137,,2,paper/figure_data/supp_methods/manifest.tsv,where=arm==scanorama&n_latent==10 ; col=lam ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_25
+P30-0138,,80,paper/figure_data/supp_methods/manifest.tsv,where=arm==scanorama&n_latent==10 ; col=lam ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_26
+P30-0139,,20,git:10a1ca5:scripts/run_cpu_baselines.py,"re=Methods: knn nearest\s+neighbours for mutual matching, default (20)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_27
+P30-0140,,10,paper/figure_data/supp_methods/manifest.tsv,where=arm==pca ; col=n_latent ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_28
+P30-0141,,0,paper/figure_data/supp_methods/manifest.tsv,where=arm in harmony|scanorama|pca ; col=seed ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_29
+P30-0142,,one,git:10a1ca5:scripts/run_cpu_baselines.py,re=harmonize\(n_jobs\)\); tests/x13,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_30
+P30-0143,,Three,paper/figure_data/supp_methods/manifest.tsv,where=n_latent>10 ; col=arm ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_31
+P30-0144,,2,paper/figure_data/supp_methods/manifest.tsv,where=arm==harmony&n_latent==50 ; col=lam ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_32
+P30-0145,,50,paper/figure_data/supp_methods/manifest.tsv,where=arm==harmony ; col=n_latent ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_33
+P30-0146,,50,paper/figure_data/supp_methods/manifest.tsv,where=arm==pca ; col=n_latent ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_36
+P30-0147,,one,paper/figure_data/supp_methods/manifest.tsv,where=arm==scanvi ; col=lam ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_37
+P30-0148,,one,paper/figure_data/supp_methods/manifest.tsv,where=arm==pca&n_latent==10 ; col=lam ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_38
+P30-0149,paper/supp/note8.tex::Of 448 planned,448,paper/figure_data/supp_methods/baseline_coverage.csv,col=expected ; agg=sum,,re-anchored in the rewritten supplement,SM8_39
+P30-0150,,eight,paper/figure_data/supp_methods/baseline_coverage.csv,col=task ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_40
+P30-0151,,40,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==scvi_adv ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41a
+P30-0152,,40,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==scanvi ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41b
+P30-0153,,240,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==sysvi ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41c
+P30-0154,,56,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==harmony ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41d
+P30-0155,,56,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==scanorama ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41e
+P30-0156,,16,paper/figure_data/supp_methods/baseline_coverage.csv,where=arm==pca ; col=expected ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_41f
+P30-0157,,three,paper/figure_data/supp_methods/manifest.tsv,where=n_latent>10 ; col=arm ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_42
+P30-0158,,447,paper/figure_data/supp_methods/baseline_coverage.csv,col=scored ; agg=sum,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_43
+P30-0159,"paper/supp/note8.tex::fits, 447 were",447,paper/figure_data/supp_methods/manifest.tsv,where=experiment!=A1 ; agg=count,,re-anchored in the rewritten supplement,SM8_44
+P30-0160,,80,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=X13_atac_large_scanorama_l(80)_c0_s0,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_45
+P30-0161,,32,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=OOM / (32)-bit-index error,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_46
+P30-0162,,5,git:10a1ca5:CONSTRAINTS.md,"re=knn in \{(5), 10, 20, 40, 80, 160\} at dimred 10",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_47
+P30-0163,,160,git:10a1ca5:CONSTRAINTS.md,"re=knn in \{5, 10, 20, 40, 80, (160)\} at dimred 10",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_48
+P30-0164,,160,git:10a1ca5:CONSTRAINTS.md,re=on immune_hum_mou knn (160) did not finish within 8 h,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_49
+P30-0165,,8,git:10a1ca5:CONSTRAINTS.md,re=did not finish within (8) h,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_50
+P30-0166,,43.9,git:10a1ca5:CONSTRAINTS.md,re=reached (43\.9) GB,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_51
+P30-0167,,80,git:10a1ca5:CONSTRAINTS.md,re=knn (80) took 2\.1 h,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_52
+P30-0168,,2.1,git:10a1ca5:CONSTRAINTS.md,re=took (2\.1) h,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_53
+P30-0169,,23.2,git:10a1ca5:CONSTRAINTS.md,re=and (23\.2) GB,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_54
+P30-0170,,4 October 2026,git:10a1ca5:CONSTRAINTS.md,"re=Use knn 2-80 \(Recommended\)"" \(user, ask_user answer to ""The SI-37 timing finished[^\n]*2026-10-04\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_55
+P30-0171,,2,git:10a1ca5:CONSTRAINTS.md,"re=knn in \{(2), 5, 10, 20, 40, 80\} at dimred 10",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_56
+P30-0172,,80,git:10a1ca5:CONSTRAINTS.md,"re=knn in \{2, 5, 10, 20, 40, (80)\} at dimred 10",,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_57
+P30-0173,,four,git:10a1ca5:scripts/prereg_rules.py,re=switch = bool\(coverage and beats_rope and per_group_pos and f_alt <= f_def\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_51
+P30-0174,,two,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=A2/A3 pilots \(PREREG sec\. 3\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_52
+P30-0175,,Two,git:10a1ca5:experiments/A2A3_pilot/PREFLIGHT.md,re=A2/A3 pilots \(PREREG sec\. 3\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM2_53
+P30-0176,,0,paper/figure_data/supp_methods/scib_1.1.7/ari.py,re=return \(index - expected_index\) / \(max_index - expected_index\),present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_54
+P30-0177,,half,paper/figure_data/supp_methods/scib_1.1.7/metrics.py,re=subsample=0\.5,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_55
+P30-0178,,one,git:10a1ca5:scripts/prep_scib_task.py,"re=a\.obs\[""batch""\] = pd\.Categorical\(batches\)\s+a\.obs\[""celltype""\]",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM3_56
+P30-0179,"paper/supp/note8.tex::uses scvi-tools 1.4.2, its",1.4.2,paper/figure_data/supp_methods/settings.csv,"re=X13,sysvi,version\.scvi-tools,""""""(1\.4\.2)""""""",,re-anchored in the rewritten supplement,SM8_58
+P30-0180,,one,git:10a1ca5:scripts/scvi_adversarial_plan.py,re=kappa = 1 - kl_weight,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_59
+P30-0181,,three,paper/figure_data/supp_methods/manifest.tsv,where=arm in scvi_adv|scanvi|sysvi ; col=arm ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,SM8_60
+P30-0182,,100,paper/figure_data/paper_numbers.json,key=_meta.seeds.0,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_02
+P30-0183,,101,paper/figure_data/paper_numbers.json,key=_meta.seeds.1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_03
+P30-0184,,102,paper/figure_data/paper_numbers.json,key=_meta.seeds.2,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_04
+P30-0185,paper/supp/note4.tex::were 0.01 and,0.01,paper/figure_data/curves.csv,where=task==pancreas&cond==0&arm==discriminator&lam>0 ; agg=min ; col=lam,,re-anchored in the rewritten supplement,SA4_05
+P30-0186,,0.03,paper/figure_data/curves.csv,where=task==pancreas&cond==0&arm==discriminator&lam>0.01&lam<0.1 ; agg=value ; col=lam,,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_06
+P30-0187,"paper/supp/note4.tex::and 10,000 and","10,000",paper/figure_data/curves.csv,where=task==pancreas&cond==1&arm==sinkhorn&lam>3000&lam<30000 ; agg=value ; col=lam,",d",re-anchored in the rewritten supplement,SA4_07
+P30-0188,"paper/supp/note4.tex::and 30,000 for","30,000",paper/figure_data/curves.csv,where=task==pancreas&cond==1&arm==sinkhorn ; agg=max ; col=lam,",d",re-anchored in the rewritten supplement,SA4_08
+P30-0189,,378,paper/figure_data/paper_numbers.json,key=n_fits.pancreas,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_09
+P30-0190,,6,paper/figure_data/metric_scores.csv,where=experiment==A1&task==pancreas&arm==none ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_10
+P30-0191,,12,paper/figure_data/metric_scores.csv,where=experiment==A1&task==pancreas&lam in 0.01|0.03|10000.0|30000.0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_11
+P30-0192,,360,,expr=SA4_09 - SA4_10 - SA4_11,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_12
+P30-0193,,Nine,paper/figure_data/metric_scores.csv,where=experiment==A1&task==immune&cond==1&lam==0.03 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_13
+P30-0194,"paper/supp/note4.tex::All 3,033 fits","3,033",paper/figure_data/paper_numbers.json,key=n_fits.total,",d",re-anchored in the rewritten supplement,SA4_15
+P30-0195,,"3,024",,expr=SA4_15 - SA4_13,",d",no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_14
+P30-0196,,96,,expr=SA4_11 * sum(1 for _ in SA4_17),d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_16
+P30-0197,,387,paper/figure_data/paper_numbers.json,key=n_fits.immune,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_18
+P30-0198,,ten,paper/figure_data/paper_numbers.json,key=n_strengths.mmd.pancreas.cond1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_19
+P30-0199,,twelve,paper/figure_data/paper_numbers.json,key=n_strengths.discriminator.pancreas.cond0,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_20
+P30-0200,,11,paper/figure_data/paper_numbers.json,key=n_strengths.pooled.immune.cond1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_21
+P30-0201,,"3,033",paper/figure_data/paper_numbers.json,key=n_fits.total,",d",no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_22
+P30-0202,,36,git:8595a16:docs/PREREG.md,re=their (36) fits of\s+the first extension round,,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_23
+P30-0203,,3080,git:a475ea3:experiments/sweep_replication/README.md,re=workstation RTX (3080),,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_24
+P30-0204,,L40S,git:8595a16:docs/PREREG.md,"re=JHPCE (L40S) graphics cards, one job per dataset",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_25
+P30-0205,,528,paper/figure_data/metric_scores.csv,where=experiment==A1&arm==sinkhorn ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_26
+P30-0206,,66,paper/figure_data/metric_scores.csv,where=experiment==A1&arm==sinkhorn&task==lung ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_27
+P30-0207,,180,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_sinkhorn/ledger/A1__atac_small+immune+sim1__tags-a19e4683640a.csv,where=state==scored ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_30
+P30-0208,,17,,expr=int(SA4_31[8:10]),d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_34
+P30-0209,,18,,expr=int(SA4_32[8:10]),d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_35
+P30-0210,,18,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/A1_ext_r1_sinkhorn_round1/ledger/A1__atac_small+immune+sim1__tags-aee757165808.csv,where=state==scored ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_36
+P30-0211,,19,,expr=int(SA4_37[8:10]) if SA4_37[:10] == SA4_37b[:10] else -1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_38
+P30-0212,,198,,expr=SA4_30 + SA4_36,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_39
+P30-0213,,10a1ca5,,"expr=SA4_28[:7] if SA4_28 == SA4_33 == SA4_C5 else ""mixed""",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_29
+P30-0214,,22,,"expr=min(int(x[8:10]) for x in (SA4_C1d, SA4_C2d, SA4_C3d, SA4_C4d, SA4_C5d))",d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_40
+P30-0215,,13,git:a475ea3:experiments/sweep_replication/design_20261102/summary.json,key=ranked_pairs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_41
+P30-0216,"paper/supp/note4.tex::new seeds, 0--4, for",0--4,git:a475ea3:experiments/sweep_replication/replication_design.py,re=X1 rows \(seeds (0-4)\),,re-anchored in the rewritten supplement,SA4_42
+P30-0217,,46,git:a475ea3:experiments/sweep_replication/design_20261102/summary.json,key=multi_crossing_cells,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_43
+P30-0218,,78,paper/figure_data/ranking_pairs.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_44
+P30-0219,"paper/supp/note4.tex::lowest strength, 0.1, already",0.1,paper/figure_data/curves.csv,where=task==immune_hum_mou&cond==1&arm==discriminator&lam>0 ; agg=min ; col=lam,,re-anchored in the rewritten supplement,SA4_45
+P30-0220,paper/supp/note4.tex::gave 855 planned,855,git:a475ea3:experiments/sweep_replication/design_20261102/summary.json,key=n_rows,d,re-anchored in the rewritten supplement,SA4_46
+P30-0221,paper/supp/note4.tex::fits: 775 penalty,775,git:a475ea3:experiments/sweep_replication/design_20261102/summary.json,key=n_adversarial,d,re-anchored in the rewritten supplement,SA4_47
+P30-0222,,80,git:a475ea3:experiments/sweep_replication/design_20261102/summary.json,key=n_plain,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_48
+P30-0223,,855,git:a475ea3:experiments/sweep_replication/README.md,re=\((855) rows,,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_50
+P30-0224,,2113ec7,git:2113ec7:experiments/sweep_replication/replication_design.py,re=Replication design from the eight-task penalty-strength sweep,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_51
+P30-0225,,4,git:a475ea3:experiments/sweep_replication/PREDICTION.json,key=large_gaps,len,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_52
+P30-0226,,3a90d0f,git:a475ea3:experiments/sweep_replication/README.md,"re=tag replication-prediction-v1, commit (3a90d0f)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_53
+P30-0227,,a361ba2,git:a475ea3:experiments/sweep_replication/PREDICTION.json,"re=""code"": ""sweep-paper (a361ba2)""",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_54
+P30-0228,,786cb8c8,,expr=SA4_55[:8],,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_56
+P30-0229,,786cb8c8,paper/figure_data/MANIFEST.sha256,re=(786cb8c8)39070b4cc58ae9c032eee5b3a5ba018938ed6380f2c6cbfb8e73d989  ranking_pairs\.csv,,no longer printed with this meaning in the rewritten supplement; value still re-read,SA4_57
+P30-0230,,0.401,paper/figure_data/curves.csv,where=task==atac_small&cond==0&lam==1.0 ; agg=min ; col=B,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_01
+P30-0231,,0.714,paper/figure_data/curves.csv,where=task==atac_small&cond==0&lam==1.0 ; agg=max ; col=B,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_03
+P30-0232,,0.402,paper/figure_data/curves.csv,where=task==atac_small&cond==0&arm==mmd&lam==0.0 ; agg=value ; col=B,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_04
+P30-0233,,three,paper/figure_data/paper_numbers.json,key=_meta.seeds,len,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_05
+P30-0234,"paper/supp/note5.tex::within $10^{-9}$, or",10^{-9},git:8595a16:docs/ANALYSIS_SPEC.md,re=Readings within 1e-9 are equal,present,re-anchored in the rewritten supplement,SA5_06
+P30-0235,,0,paper/figure_data/paper_numbers.json,key=n_failed.total,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_07
+P30-0236,,"3,033",paper/figure_data/paper_numbers.json,key=n_fits.total,",d",no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_08
+P30-0237,,96,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==reading_status_bracketed ; agg=sum ; col=n,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_09
+P30-0238,paper/supp/note5.tex::than 0.01 above,0.01,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/analysis_sweep.json,key=constants.DELTA_MIN,.2f,re-anchored in the rewritten supplement,SA5_11
+P30-0239,,Three,paper/figure_data/low_signal_pairs.csv,agg=nunique ; col=task,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA5_13
+P30-0240,paper/supp/note5.tex::scores 0.638 and,0.638,paper/figure_data/low_signal_pairs.csv,where=task==immune&arm==mmd ; agg=value ; col=b0,.3f,re-anchored in the rewritten supplement,SA5_14
+P30-0241,"paper/supp/note5.tex::0.638 and 0.657, gap",0.657,paper/figure_data/low_signal_pairs.csv,where=task==immune&arm==mmd ; agg=value ; col=b_common,.3f,re-anchored in the rewritten supplement,SA5_15
+P30-0242,"paper/supp/note5.tex::0.657, gap 0.019; simulation",0.019,,expr=SA5_15 - SA5_14,.3f,re-anchored in the rewritten supplement,SA5_16
+P30-0243,paper/supp/note5.tex::has 0.812 and,0.812,paper/figure_data/low_signal_pairs.csv,where=task==sim1&arm==mmd ; agg=value ; col=b0,.3f,re-anchored in the rewritten supplement,SA5_17
+P30-0244,"paper/supp/note5.tex::0.812 and 0.819, gap",0.819,paper/figure_data/low_signal_pairs.csv,where=task==sim1&arm==mmd ; agg=value ; col=b_common,.3f,re-anchored in the rewritten supplement,SA5_18
+P30-0245,"paper/supp/note5.tex::0.819, gap 0.007; simulation",0.007,,expr=SA5_18 - SA5_17,.3f,re-anchored in the rewritten supplement,SA5_19
+P30-0246,paper/supp/note5.tex::has 0.656 and,0.656,paper/figure_data/low_signal_pairs.csv,where=task==sim2&arm==mmd ; agg=value ; col=b0,.3f,re-anchored in the rewritten supplement,SA5_20
+P30-0247,"paper/supp/note5.tex::0.656 and 0.665, gap",0.665,paper/figure_data/low_signal_pairs.csv,where=task==sim2&arm==mmd ; agg=value ; col=b_common,.3f,re-anchored in the rewritten supplement,SA5_21
+P30-0248,"paper/supp/note5.tex::0.665, gap 0.009. No",0.009,,expr=SA5_21 - SA5_20,.3f,re-anchored in the rewritten supplement,SA5_22
+P30-0249,,three,paper/figure_data/paper_numbers.json,key=_meta.seeds,len,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_01
+P30-0250,,46,paper/figure_data/ranking_pairs.csv,where=crossings>1 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_02
+P30-0251,,78,paper/figure_data/ranking_pairs.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_03
+P30-0252,,32,paper/figure_data/ranking_pairs.csv,where=crossings==1 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_04
+P30-0253,,35,paper/figure_data/ranking_pairs.csv,where=crossings==2 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_05
+P30-0254,,6,paper/figure_data/ranking_pairs.csv,where=crossings==3 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_06
+P30-0255,,5,paper/figure_data/ranking_pairs.csv,where=crossings==4 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_07
+P30-0256,,2,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/analysis_sweep.json,key=min_readings,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_08
+P30-0257,,3,paper/figure_data/ranking_pairs.csv,agg=min ; col=n_loso,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_09
+P30-0258,,78,paper/figure_data/ranking_pairs.csv,where=n_loso>=3 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_10
+P30-0259,,four,git:8595a16:docs/SWEEP_ANALYSIS.md,re=reported only when m >= 4 of the 5 repeats,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_11
+P30-0260,,13,,expr=SA6_12 // 6,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_13
+P30-0261,,16,,expr=(SA6_12 + SA6_14) // 6,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_15
+P30-0262,,five,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/mean_rank.csv,where=cond==1&arm==mmd ; agg=value ; col=n_tasks,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_16
+P30-0263,paper/supp/note6.tex::within $10^{-9}$ tie,10^{-9},git:8595a16:docs/ANALYSIS_SPEC.md,re=Readings within 1e-9 are equal,present,re-anchored in the rewritten supplement,SA6_17
+P30-0264,,2.5,git:8595a16:docs/ANALYSIS_SPEC.md,re=two tied for 2nd both get 2\.5,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_18
+P30-0265,,21,git:8595a16:docs/ANALYSIS_SPEC.md,re=always sum to 21,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_19
+P30-0266,,five,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/mean_rank.csv,where=cond==1&arm==mmd ; agg=value ; col=n_tasks,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_20
+P30-0267,,six,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/mean_rank.csv,where=cond==0&arm==mmd ; agg=value ; col=n_tasks,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_21
+P30-0268,"paper/supp/note6.tex::all 33,506 immune","33,506",git:8595a16:docs/ANALYSIS_SPEC.md,"re=all (33,506) immune cells are in immune_hum_mou",,re-anchored in the rewritten supplement,SA6_22
+P30-0269,,"3,618",git:8595a16:docs/ANALYSIS_SPEC.md,"re=atac_small and atac_large share (3,618) cells",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA6_23
+P30-0270,,0.10,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/analysis_sweep.json,key=constants.COLLAPSE_BIO,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_03
+P30-0271,,0.02,git:8595a16:docs/ANALYSIS_SPEC.md,re=low-signal when b_common - b0 < 0\.02,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_04
+P30-0272,,10^{-9},git:8595a16:docs/ANALYSIS_SPEC.md,"re=within 1e-9, PREREG section 1\) and",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_05
+P30-0273,paper/supp/note7.tex::least 0.10 below,0.10,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/analysis_sweep.json,key=constants.COLLAPSE_BIO,.2f,re-anchored in the rewritten supplement,SA7_06
+P30-0274,,30,paper/figure_data/secondary.csv,agg=min ; col=collapse_n,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_07
+P30-0275,,33,paper/figure_data/secondary.csv,where=task==immune&cond==1&arm==pooled ; agg=value ; col=collapse_n,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_08
+P30-0276,,eleven,paper/figure_data/paper_numbers.json,key=n_strengths.pooled.immune.cond1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_09
+P30-0277,,36,paper/figure_data/secondary.csv,agg=max ; col=collapse_n,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_10
+P30-0278,,95,git:8595a16:scripts/analysis_x1.py,re=beta\.ppf\(0\.025,present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_11
+P30-0279,,7,paper/analysis_pass10/coverage_sim_sweep.json,key=seed,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_13
+P30-0280,"paper/supp/note7.tex::and 20,000 replicates","20,000",paper/analysis_pass10/coverage_sim_sweep.json,key=replicates,",d",re-anchored in the rewritten supplement,SA7_14
+P30-0281,,30,paper/analysis_pass10/coverage_sim_sweep.json,key=NL10.fits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_15
+P30-0282,,36,paper/analysis_pass10/coverage_sim_sweep.json,key=NL12.fits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_16
+P30-0283,"paper/supp/note7.tex::0.0, 0.0, 0.05, 0.2, 0.6, 0.95","0.0, 0.0, 0.05, 0.2, 0.6, 0.95",paper/analysis_pass10/coverage_sim_sweep.py,re=pA6 = np\.array\(\[([^\]]*)\]\),,re-anchored in the rewritten supplement,SA7_17
+P30-0284,"paper/supp/note7.tex::0.0, 0.0, 0.0, 0.1, 0.15, 0.2, 0.55","0.0, 0.0, 0.0, 0.1, 0.15, 0.2, 0.55",paper/analysis_pass10/coverage_sim_sweep.py,re=thr6 = np\.array\(\[([^\]]*)\]\),,re-anchored in the rewritten supplement,SA7_18
+P30-0285,paper/supp/note7.tex::probability 0.3 and,0.3,paper/analysis_pass10/coverage_sim_sweep.py,"re=rng\.random\(\(NS, NL\)\) < (0\.3)",,re-anchored in the rewritten supplement,SA7_19
+P30-0286,paper/supp/note7.tex::least 0.999 with,0.999,,"expr=math.floor(min(SA7_20, SA7_21) * 1000) / 1000",.3f,re-anchored in the rewritten supplement,SA7_22
+P30-0287,paper/supp/note7.tex::at most 0.003. These,0.003,,"expr=math.ceil(1000 * max(math.sqrt(p * (1 - p) / SA7_26b) for p in (SA7_20, SA7_21, SA7_23, SA7_24, SA7_25, SA7_26))) / 1000",.3f,re-anchored in the rewritten supplement,SA7_27
+P30-0288,,0.975,git:8595a16:scripts/analysis_x1.py,"re=stats\.t\.ppf\((0\.975), n - 1\)",,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_28
+P30-0289,,3,paper/figure_data/paper_numbers.json,key=_meta.seeds,len,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_29
+P30-0290,,19,paper/figure_data/secondary.csv,where=window_gap==True ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_30
+P30-0291,,96,paper/figure_data/secondary.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_31
+P30-0292,,5.5,paper/figure_data/secondary.csv,agg=max ; col=window_width_decades,.1f,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_32
+P30-0293,,10,paper/figure_data/best_of_k.csv,where=family in discriminator|reference|pooled|barycenter|mmd|sinkhorn ; agg=min ; col=n_configs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_34
+P30-0294,,12,paper/figure_data/best_of_k.csv,where=family in discriminator|reference|pooled|barycenter|mmd|sinkhorn ; agg=max ; col=n_configs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_35
+P30-0295,,six,paper/figure_data/best_of_k.csv,where=family in harmony|sysvi ; agg=min ; col=n_configs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_36
+P30-0296,,five,paper/figure_data/best_of_k.csv,where=family==scanorama&task==atac_large ; agg=max ; col=n_configs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_37
+P30-0297,,80,paper/figure_data/README.md,re=Scanorama on atac_large at strength (80) could not be fitted,,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_38
+P30-0298,,6,paper/figure_data/best_of_k.csv,where=family==harmony ; agg=max ; col=k,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_39
+P30-0299,,six,git:8595a16:docs/ANALYSIS_SPEC.md,"re=Real tasks: pancreas, lung, immune, immune_hum_mou, atac_small, atac_large",present,no longer printed with this meaning in the rewritten supplement; value still re-read,SA7_40
+P30-0300,,three,paper/figure_data/label_transfer.csv,where=arm==mmd ; agg=max ; col=n_runs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_01
+P30-0301,,three,paper/figure_data/label_transfer.csv,where=arm==none ; agg=max ; col=n_runs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_02
+P30-0302,,five,paper/figure_data/label_transfer.csv,where=arm==scvi_adv ; agg=min ; col=n_runs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_03
+P30-0303,paper/supp/note9.tex::seeds 0--4 and,0--4,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=scvi_adv, scANVI, sysVI: five seeds (0-4)",,re-anchored in the rewritten supplement,SA9_04
+P30-0304,,15,git:8595a16:scripts/analysis_x1.py,re=LABEL_K = (15),,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_06
+P30-0305,paper/supp/note9.tex::All 120 entries,120,paper/figure_data/label_transfer.csv,where=not_evaluable==False&computed==True ; agg=count,d,re-anchored in the rewritten supplement,SA9_07
+P30-0306,,five,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/mean_rank.csv,where=cond==1&arm==mmd ; agg=value ; col=n_tasks,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_08
+P30-0307,,six,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/mean_rank.csv,where=cond==0&arm==mmd ; agg=value ; col=n_tasks,d,no longer printed with this meaning in the rewritten supplement; value still re-read,SA9_09
+P30-0308,"paper/supp/note9.tex::all 3,073 sweep","3,073",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/analysis_sweep.json,key=primary.label_transfer.n_embeddings,",d",re-anchored in the rewritten supplement,SA9_10
+P30-0309,,six,git:98732ff:docs/PREREG.md,re=one\s+shared\s+(six)-point\s+grid,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_01
+P30-0310,,five,git:98732ff:docs/PREREG.md,"re=the\s+main\s+benchmark\s+is\s+X1\s+\(8\s+datasets,\s+both\s+decoders,\s+(seeds\s+0\s+to\s+4)\)",present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_02
+P30-0311,,eight,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.tasks,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_03
+P30-0312,,0.1,git:98732ff:docs/PREREG.md,re=ten\s+base\s+strengths\s+(0\.1)\s+to\s+3000,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_04
+P30-0313,,"3,000",,expr=int(N10_05h),",d",no longer printed with this meaning in the rewritten supplement; value still re-read,N10_05
+P30-0314,,100,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.seeds.0,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_06
+P30-0315,,102,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.seeds.2,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_07
+P30-0316,,two,git:98732ff:docs/PREREG.md,re=companion\s+pilots\s+are\s+A2\s,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_08
+P30-0317,,3,paper/supp/supp-records_facts.json,"re=""prereg-tier12-v1"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_09
+P30-0318,,4,paper/supp/supp-records_facts.json,"re=""prereg-tier12-v2"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_10
+P30-0319,,202,git:fc12029:docs/PREREG.md,re=The\s+(202)\s+A1\s+fits\s+made\s+at\s+prereg-tier12-v1,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_11
+P30-0320,,13,git:10a1ca5:docs/PREREG.md,re=the\s+amendments\s+of\s+2026-10-(13)\s+and\s+2026-10-14,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_12
+P30-0321,,16,git:10a1ca5:docs/PREREG.md,"re=and\s+2026-10-(16),\s+before\s+the\s+tag",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_13
+P30-0322,,16,paper/supp/supp-records_facts.json,"re=""prereg-tier12-v3"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_14
+P30-0323,,five,git:98732ff:docs/PREREG.md,re=extended\s+to\s+the\s+(five)\s+datasets\s+it\s+did\s+not,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_15
+P30-0324,,21,git:98732ff:docs/PREREG.md,re=decided\s+by\s+the\s+user\s+on\s+2026-10-(21)\s+and\s+2026-10-22,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_16
+P30-0325,,22,git:98732ff:docs/PREREG.md,re=decided\s+by\s+the\s+user\s+on\s+2026-10-21\s+and\s+2026-10-(22),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_17
+P30-0326,,22,paper/supp/supp-records_facts.json,"re=""98732ff"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_18
+P30-0327,,"1,890",git:98732ff:docs/PREREG.md,"re=That\s+is\s+(1,890)\s+fits",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_19
+P30-0328,,22,git:8595a16:docs/ANALYSIS_SPEC.md,re=decided the replacement on 2026-10-(22) and 2026-10-23,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_20
+P30-0329,,23,git:8595a16:docs/ANALYSIS_SPEC.md,re=decided the replacement on 2026-10-22 and 2026-10-(23),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_21
+P30-0330,,22,paper/supp/supp-records_facts.json,"re=""065a486"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_22
+P30-0331,,22,paper/supp/supp-records_facts.json,"re=""5d01da0"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_23
+P30-0332,,three,git:98732ff:docs/PREREG.md,re=A1\s+fitted\s+(three)\s+of\s+the\s+eight\s+datasets,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_24
+P30-0333,,22,git:98732ff:docs/PREREG.md,"re=the\s+5
+?\s*fitting\s+jobs\s+were\s+submitted\s+\(2026-10-(22)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_25
+P30-0334,,28,paper/supp/supp-records_facts.json,"re=(?s)""group"": ""sweep"".*?""score_date"": \[\s*""2026-10-(28)""",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_26
+P30-0335,,30,paper/supp/supp-records_facts.json,"re=(?s)""group"": ""sweep"",\s*""n_fits"": 378,\s*""n_scored"": 378.*?""2026-10-29"",\s*""2026-10-(30)""",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_27
+P30-0336,,2,git:8595a16:docs/RESCOPE_20261102.md,re=Decided by the first author on 2026-11-0(2),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_28
+P30-0337,,1,paper/supp/supp-records_facts.json,"re=""2bc5b00"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_29
+P30-0338,,20:16,paper/supp/supp-records_facts.json,"re=""2bc5b00"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-01T(20:16)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_30
+P30-0339,,1,paper/supp/supp-records_facts.json,"re=""8e32bb2"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_31
+P30-0340,,eight,git:8595a16:docs/SWEEP_ANALYSIS.md,re=\| `all8_debug` \| all (eight) \|,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_32
+P30-0341,,2,paper/supp/supp-records_facts.json,"re=""8595a16"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_33
+P30-0342,,5,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,"re=# Sweep analysis final run, 2026-11-0(5)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_34
+P30-0343,,three,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.seeds,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_35
+P30-0344,,five,git:8595a16:docs/SWEEP_ANALYSIS.md,re=Spec: (five) seeds 0-4,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_36
+P30-0345,,three,git:8595a16:docs/SWEEP_ANALYSIS.md,re=analysis has (three) repeats,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_37
+P30-0346,,2,git:8595a16:docs/SWEEP_ANALYSIS.md,re=m >= (2) of 3,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_38
+P30-0347,,3,git:8595a16:docs/SWEEP_ANALYSIS.md,re=m >= 2 of (3),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_39
+P30-0348,,4,git:8595a16:docs/SWEEP_ANALYSIS.md,re=only when m >= (4) of the 5 repeats,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_40
+P30-0349,,5,git:8595a16:docs/SWEEP_ANALYSIS.md,re=only when m >= 4 of the (5) repeats,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_41
+P30-0350,,10,git:8595a16:docs/SWEEP_ANALYSIS.md,re=\((10) base strengths; 12 for,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_42
+P30-0351,,12,git:8595a16:docs/SWEEP_ANALYSIS.md,re=base strengths; (12) for the discriminator,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_43
+P30-0352,,six,git:8595a16:docs/SWEEP_ANALYSIS.md,re=the (six) grid strengths of the R1 record,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_44
+P30-0353,,five,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=scANVI, sysVI: (five) seeds 0-4",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_45
+P30-0354,,one,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=Harmony, Scanorama, PCA: (one) run",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_46
+P30-0355,,30,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/secondary.csv,col=collapse_n ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_47
+P30-0356,,36,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/secondary.csv,col=collapse_n ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_48
+P30-0357,,30,git:8595a16:docs/SWEEP_ANALYSIS.md,re=Spec: (30) runs,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_49
+P30-0358,,three,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=\| `run3b` \| atac_small, immune, sim1 \|",present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_50
+P30-0359,,eight,git:8595a16:docs/SWEEP_ANALYSIS.md,re=\| `all8_debug` \| all (eight) \|,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_51
+P30-0360,,one,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/inputs/inputs.json,key=baseline_rows_missing,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_52
+P30-0361,,855,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=n_manifest,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_53
+P30-0362,,13,git:replication-prediction-v1:experiments/sweep_replication/PREDICTION.json,key=n_ranked_pairs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_54
+P30-0363,,two,git:2113ec7:experiments/sweep_replication/replication_design.py,re=take the (two) strengths that bracket it,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_55
+P30-0364,,0,git:replication-prediction-v1:experiments/sweep_replication/AGREEMENT.md,re=seeds (0)-4,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_56
+P30-0365,,4,git:replication-prediction-v1:experiments/sweep_replication/AGREEMENT.md,re=seeds 0-(4),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_57
+P30-0366,,1,paper/supp/supp-records_facts.json,"re=""2113ec7"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_58
+P30-0367,,13,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_pairs,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_59
+P30-0368,,four,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_large_gaps,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_60
+P30-0369,paper/supp/note10.tex::of 0.04 or,0.04,git:replication-prediction-v1:experiments/sweep_replication/AGREEMENT.md,re=differences of (0\.04) or more,,re-anchored in the rewritten supplement,N10_61
+P30-0370,,2,paper/supp/supp-records_facts.json,"re=""replication-prediction-v1"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_62
+P30-0371,,five,git:replication-prediction-v1:experiments/sweep_replication/AGREEMENT.md,re=add the next grid strength outward once \((five) seeds\),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_63
+P30-0372,,21,git:98732ff:docs/PREREG.md,re=The\s+user\s+stopped\s+X1\s+on\s+2026-10-(21),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_64
+P30-0373,,1,paper/supp/supp-records_facts.json,"re=""2113ec7"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_65
+P30-0374,,2,paper/supp/supp-records_facts.json,"re=""replication-prediction-v1"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_66
+P30-0375,,572,git:98732ff:docs/PREREG.md,re=About\s+(572)\s+main-benchmark\s+latents\s+exist,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_67
+P30-0376,,167,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,where=dir==models ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_68
+P30-0377,,405,git:98732ff:docs/PREREG.md,re=(405)\s+on\s+JHPCE\s+scratch,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_69
+P30-0378,,160,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,where=dir==scores ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_70
+P30-0379,,19,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,where=dir==scores&type==symlink ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_71
+P30-0380,,12,git:10a1ca5:docs/PREREG.md,re=19\s+X1\s+rows\s+had\s+been\s+scored\s+on\s+2026-10-(12),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_72
+P30-0381,,141,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,where=dir==scores&type==file ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_73
+P30-0382,,20,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,re=scores\t\S+\tfile\t\d+\t2026-10-(20),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_74
+P30-0383,,21,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,re=scores\t\S+\tfile\t\d+\t2026-10-(21),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_75
+P30-0384,,Five,git:8595a16:docs/ANALYSIS_SPEC.md,"re=experiments X3, X7, X8, X12 and X15 were dropped",present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_76
+P30-0385,,17,git:8595a16:docs/ANALYSIS_SPEC.md,re=dropped by the first author on 2026-10-(17),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_77
+P30-0386,,21,paper/supp/supp-records_facts.json,"re=""prereg-x6-v1"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_78
+P30-0387,,22,git:8595a16:docs/ANALYSIS_SPEC.md,re=On 2026-10-(22) and 2026-10-23 the first author replaced,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_79
+P30-0388,,23,git:8595a16:docs/ANALYSIS_SPEC.md,re=On 2026-10-22 and 2026-10-(23) the first author replaced,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_80
+P30-0389,,eight,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.tasks,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_81
+P30-0390,,eight,git:98732ff:docs/PREREG.md,re=strength-grid\s+rule\s+is\s+re-run\s+on\s+all\s+(eight)\s+datasets,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_82
+P30-0391,,two,git:98732ff:docs/PREREG.md,"re=(2)\s+more
+?\s*strengths\s+beyond\s+that\s+edge",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_83
+P30-0392,,two,git:98732ff:docs/PREREG.md,re=already\s+counts\s+as\s+round\s+1\s+at\s+(two)\s+edges,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_84
+P30-0393,,0.01,git:98732ff:docs/PREREG.md,re=unconditioned\s+decoder\s+at\s+strengths\s+(0\.01)\s+and\s+0\.03,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_85
+P30-0394,,0.03,git:98732ff:docs/PREREG.md,re=unconditioned\s+decoder\s+at\s+strengths\s+0\.01\s+and\s+(0\.03),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_86
+P30-0395,,"10,000",git:98732ff:docs/PREREG.md,"re=conditioned\s+decoder\s+at\s+strengths\s+(10,000)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_87
+P30-0396,,"30,000",git:98732ff:docs/PREREG.md,"re=and
+?\s*(30,000),\s+3\s+seeds\s+each",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_88
+P30-0397,,12,git:98732ff:docs/PREREG.md,re=the\s+(12)\s+fits\s+that\s+the\s+first\s+extension\s+round,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_89
+P30-0398,,96,,expr=int(N10_89)*8,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_90
+P30-0399,,0.03,git:98732ff:docs/PREREG.md,"re=strength\s+(0\.03):\s+discriminator,\s+reference\s+and\s+pooled\s+critics",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_91
+P30-0400,,9,git:98732ff:docs/PREREG.md,"re=The\s+(9)\s+fits\s+that\s+R4
+?\s*added\s+for\s+matching",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_92
+P30-0401,,"3,024",git:98732ff:docs/PREREG.md,"re=the\s+(3,024)\s+pilot\s+fits\s+of\s+the\s+eight\s+datasets",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_93
+P30-0402,,"3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==sweep_fits ; col=n ; agg=sum,",d",no longer printed with this meaning in the rewritten supplement; value still re-read,N10_94
+P30-0403,,9,,expr=N10_95 - N10_96,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_97
+P30-0404,,70,git:a475ea3:experiments/sweep_replication/agreement_result/replication_readings.csv,where=status==bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_98
+P30-0405,,78,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_99
+P30-0406,,8,git:a475ea3:experiments/sweep_replication/agreement_result/replication_readings.csv,where=status!=bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_100
+P30-0407,,0,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/README.md,"re=five seeds, (0)-4",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_101
+P30-0408,,4,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/README.md,"re=five seeds, 0-(4)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_102
+P30-0409,,40,,expr=N10_103 - N10_104,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_105
+P30-0410,,15,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/README.md,re=workstation RTX 3080 (\d+) fits,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_106
+P30-0411,,25,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/README.md,re=JHPCE L40S (\d+) fits,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_107
+P30-0412,,77,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,where=status==bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_108
+P30-0413,,80,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/inputs/inputs.json,re=scanorama_l(80)_c0,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_109
+P30-0414,,32,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=OOM / (32)-bit-index error,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_110
+P30-0415,,447,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=\+ (447) baseline rows scored,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_111
+P30-0416,,448,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=1 of (448) baseline rows,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_112
+P30-0417,,5,git:045e62c:paper/supp/figures.tex,re=open marker at \$k=(5)\$,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_113
+P30-0418,,4,git:10a1ca5:docs/PREREG.md,"re=2026-10-0(4),\s+X13\s+Scanorama\s+grid",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_114
+P30-0419,,"2, 5, 10, 20, 40",git:10a1ca5:docs/PREREG.md,"re=knn\s+\{(2,\s+5,\s+10,\s+20,\s+40),\s+80\}",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_115
+P30-0420,,80,git:10a1ca5:docs/PREREG.md,"re=knn\s+\{2,\s+5,\s+10,\s+20,\s+40,\s+(80)\}",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_116
+P30-0421,,160,git:10a1ca5:docs/PREREG.md,re=knn\s+(160)\s+is\s+replaced\s+by\s+2,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_117
+P30-0422,,8,git:10a1ca5:docs/PREREG.md,"re=did\s+not
+?\s*finish\s+within\s+(8)\s+h",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_118
+P30-0423,,100,git:10a1ca5:docs/PREREG.md,re=the\s+dimred-(100)\s+tool\s+default\s+at\s+knn\s+20,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_119
+P30-0424,,20,git:10a1ca5:docs/PREREG.md,re=the\s+dimred-100\s+tool\s+default\s+at\s+knn\s+(20),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_120
+P30-0425,,seventh,git:10a1ca5:docs/PREREG.md,re=keeping\s+6\s+values;\s+the\s+dimred-100\s+tool\s+default\s+at\s+knn\s+20\s+stays,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_121
+P30-0426,,448,git:8595a16:docs/RESCOPE_20261102.md,re=(448) rows in,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_122
+P30-0427,,two,git:98732ff:docs/PREREG.md,re=companion\s+pilots\s+are\s+A2\s,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_123
+P30-0428,,0.02,git:8595a16:docs/SWEEP_ANALYSIS.md,re=low-signal flag \(b_common - b0 < (0\.02)\),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_124
+P30-0429,,13,git:10a1ca5:docs/PREREG.md,"re=P1\s+starts\s+at\s+lambda\s+=\s+0;\s+low-signal\s+blocks\s+are\s+not\s+evaluable\s+\(I072,\s+D-04,\s+SI-56\)\s+\|\s+2026-10-(13)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_125
+P30-0430,,4,git:10a1ca5:docs/PREREG.md,"re=2026-10-0(4),\s+pairing\s+wording",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_126
+P30-0431,,8,paper/REPRODUCE.md,re=make_replication.py` \(2\^(8) patterns\),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_127
+P30-0432,,5,paper/supp/supp-records_facts.json,"re=""9faac6e"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_128
+P30-0433,,5,paper/supp/supp-records_facts.json,"re=""803ed80"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_129
+P30-0434,,5,paper/supp/supp-records_facts.json,"re=""639c302"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_130
+P30-0435,,5,paper/supp/supp-records_facts.json,"re=""f618484"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_131
+P30-0436,,2,paper/supp/supp-records_facts.json,"re=""8595a16"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_132
+P30-0437,,2,git:8595a16:docs/SWEEP_ANALYSIS.md,re=m >= (2) of 3,,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_133
+P30-0438,,3,git:8595a16:docs/SWEEP_ANALYSIS.md,re=m >= 2 of (3),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_134
+P30-0439,,six,git:8595a16:docs/ANALYSIS_SPEC.md,re=lowers the target for all (six),,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_135
+P30-0440,,two,git:8595a16:docs/SCORER_EQUIVALENCE.json,re=Score rows made on the workstation and score rows made on JHPCE,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_136
+P30-0441,,two,git:8595a16:docs/ANALYSIS_SPEC.md,re=atac_small and atac_large share,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_137
+P30-0442,,one,git:8595a16:docs/SCORER_EQUIVALENCE.json,"re=""identity_check"": \{",present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_138
+P30-0443,,two,git:98732ff:docs/PREREG.md,re=the\s+main\s+benchmark\s+is\s+X1,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_139
+P30-0444,"paper/supp/note11.tex::used scvi-tools 1.4.2, PyTorch",1.4.2,paper/supp/supp-records_facts.json,"key=versions.fitting, workstation.scvi-tools",,re-anchored in the rewritten supplement,N11_01
+P30-0445,,2.13.0,paper/supp/supp-records_facts.json,"re=""torch"": ""(2\.13\.0)\+cu130""",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_02
+P30-0446,"paper/supp/note11.tex::used scib 1.1.7, R",1.1.7,paper/supp/supp-records_facts.json,key=versions.scoring.scib,,re-anchored in the rewritten supplement,N11_03
+P30-0447,paper/supp/note11.tex::kBET 0.99.6 and,0.99.6,paper/supp/supp-records_facts.json,key=versions.scoring.R_kBET,,re-anchored in the rewritten supplement,N11_04
+P30-0448,"paper/supp/note11.tex::1.1.7, R 4.5.2, kBET",4.5.2,paper/supp/supp-records_facts.json,key=versions.scoring.r-base,,re-anchored in the rewritten supplement,N11_05
+P30-0449,,10,git:a475ea3:docs/jhpce/GATE_JHPCE.md,re=Local: RTX 3080 (10) GB,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_06
+P30-0450,,6,git:a475ea3:docs/jhpce/GATE_JHPCE.md,re=AMD Ryzen 5 3600 \((6) cores / 12 threads,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_07
+P30-0451,,12,git:a475ea3:docs/jhpce/GATE_JHPCE.md,re=AMD Ryzen 5 3600 \(6 cores / (12) threads,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_08
+P30-0452,,46,git:a475ea3:docs/jhpce/GATE_JHPCE.md,re=L40S (46) GB,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_09
+P30-0453,,2,git:8595a16:docs/SCORER_EQUIVALENCE.json,"re=AMD EPYC 7702, Zen (2)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_10
+P30-0454,,five,git:98732ff:docs/PREREG.md,"re=the\s+three\s+finished\s+datasets\s+on\s+the\s+workstation,\s+the\s+(five)\s+new\s+ones\s+on\s+the\s+L40S",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_11
+P30-0455,,2,git:a475ea3:experiments/sweep_replication/README.md,re=the driver was updated on 2026-11-0(2),,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_12
+P30-0456,,one,paper/supp/supp-records_facts.json,"re=""AMD EPYC 7702 64-Core Processor \(jhpce\)"": 377,\s*""AMD Ryzen 5 3600 6-Core Processor \(workstation\)"": (1)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_13
+P30-0457,,two,git:8595a16:docs/SCORER_EQUIVALENCE.json,re=Score rows made on the workstation and score rows made on JHPCE,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_14
+P30-0458,,5,git:8595a16:docs/SCORER_EQUIVALENCE.json,key=identity_check.n_latents,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_15
+P30-0459,,"3,024",git:98732ff:docs/PREREG.md,"re=the\s+(3,024)\s+pilot\s+fits\s+of\s+the\s+eight\s+datasets",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_17
+P30-0460,,"1,098",git:98732ff:docs/PREREG.md,"re=the\s+(1,098)\s+base\s+fits\s+of\s+the\s+three\s+finished\s+datasets",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_18
+P30-0461,,ten,git:98732ff:docs/PREREG.md,re=the\s+(ten)\s+base\s+strengths\s+0\.1\s+to\s+3000,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_19
+P30-0462,,36,git:98732ff:docs/PREREG.md,re=their\s+(36)\s+fits\s+of\s+the\s+first\s+extension\s+round,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_20
+P30-0463,,three,git:98732ff:docs/PREREG.md,re=A1\s+fitted\s+(three)\s+of\s+the\s+eight\s+datasets,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_21
+P30-0464,,"1,890",git:98732ff:docs/PREREG.md,"re=That\s+is\s+(1,890)\s+fits",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_22
+P30-0465,,five,git:98732ff:docs/PREREG.md,re=extended\s+to\s+the\s+(five)\s+datasets\s+it\s+did\s+not,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_23
+P30-0466,,378,git:98732ff:docs/PREREG.md,"re=(378)\s+per
+?\s*dataset",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_24
+P30-0467,,12,git:98732ff:docs/PREREG.md,re=the\s+(12)\s+fits\s+that\s+the\s+first\s+extension\s+round,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_25
+P30-0468,,9,git:98732ff:docs/PREREG.md,"re=The\s+(9)\s+fits\s+that\s+R4
+?\s*added\s+for\s+matching",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_26
+P30-0469,"paper/supp/note11.tex::comprised 3,033 fits.","3,033",/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==sweep_fits ; col=n ; agg=sum,",d",re-anchored in the rewritten supplement,N11_27
+P30-0470,,0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/counts.csv,where=kind==sweep_failed ; col=n ; agg=sum,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_28
+P30-0471,,100,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.seeds.0,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_29
+P30-0472,,102,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.seeds.2,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_30
+P30-0473,paper/supp/note11.tex::added 108 posterior-sample,108,git:10a1ca5:docs/PREREG.md,"re=\(2\s+tasks\s+×\s+2\s+decoders\s+×\s+3\s+arms\),\s+(108)\s+new\s+fits",,re-anchored in the rewritten supplement,N11_31
+P30-0474,paper/supp/note11.tex::and 180 standardised-input,180,git:10a1ca5:docs/PREREG.md,"re=\(2\s+×\s+2\s+×\s+5\),\s+(180)\s+new\s+fits",,re-anchored in the rewritten supplement,N11_32
+P30-0475,,0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/tier12_v3/rules/r23/step.json,key=n_failure_rows,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_33
+P30-0476,paper/supp/note11.tex::of 448 planned,448,git:8595a16:docs/RESCOPE_20261102.md,re=(448) rows in,,re-anchored in the rewritten supplement,N11_34
+P30-0477,,0,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=scANVI, sysVI: five seeds (0)-4",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_35
+P30-0478,,4,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=scANVI, sysVI: five seeds 0-(4)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_36
+P30-0479,,one,git:8595a16:docs/SWEEP_ANALYSIS.md,"re=Harmony, Scanorama, PCA: (one) run",,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_37
+P30-0480,paper/supp/note11.tex::supplied 447 of,447,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/RUN_RECORD.md,re=\+ (447) baseline rows scored,,re-anchored in the rewritten supplement,N11_38
+P30-0481,,0,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/inputs/inputs.json,key=n_failed,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_39
+P30-0482,,one,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/inputs/inputs.json,key=baseline_rows_missing,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_40
+P30-0483,,80,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/inputs/inputs.json,re=scanorama_l(80)_c0,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_41
+P30-0484,,572,git:98732ff:docs/PREREG.md,re=About\s+(572)\s+main-benchmark\s+latents\s+exist,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_42
+P30-0485,,21,git:98732ff:docs/PREREG.md,re=The\s+user\s+stopped\s+X1\s+on\s+2026-10-(21),,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_43
+P30-0486,,167,paper/analysis_pass12/planned_benchmark_files_20261105.tsv,where=dir==models ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_44
+P30-0487,,405,git:98732ff:docs/PREREG.md,re=(405)\s+on\s+JHPCE\s+scratch,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_45
+P30-0488,paper/supp/note11.tex::comprised 855 planned,855,git:replication-prediction-v1:experiments/sweep_replication/design_20261102/summary.json,key=n_rows,d,re-anchored in the rewritten supplement,N11_46
+P30-0489,,775,git:replication-prediction-v1:experiments/sweep_replication/design_20261102/summary.json,key=n_adversarial,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_47
+P30-0490,,80,git:replication-prediction-v1:experiments/sweep_replication/design_20261102/summary.json,key=n_plain,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_48
+P30-0491,,40,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/README.md,re=Extension run list: manifests/sweep_replication_ext1.tsv \((40) rows,,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_49
+P30-0492,paper/supp/note11.tex::giving 895 fits.,895,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_scored,d,re-anchored in the rewritten supplement,N11_50
+P30-0493,,0,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_failed_rows,d,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_51
+P30-0494,"paper/supp/note11.tex::reused 783 fits,",783,git:697cc6c:docs/biology_check/summary.md,re=(783) saved fits on 8 tasks,,re-anchored in the rewritten supplement,N11_52
+P30-0495,,eight,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/paper_numbers.json,key=_meta.tasks,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_53
+P30-0496,,5,paper/supp/supp-records_facts.json,"re=""639c302"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-11-0?(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_01
+P30-0497,,5,git:697cc6c:docs/biology_check/biology_check.json,re=biology_check_2026110(5)/run,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_02
+P30-0498,,eight,git:697cc6c:docs/biology_check/summary.md,re=averaged all (8) tasks,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_03
+P30-0499,,six,git:697cc6c:docs/biology_check/summary.md,re=mean over the (6) real tasks of the SD,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_04
+P30-0500,,100,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=\((100), 101, 102\)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_05
+P30-0501,,102,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=\(100, 101, (102)\)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_06
+P30-0502,paper/supp/note12.tex::over seeds 100--102. Differences,100,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=both decoders, seeds (100)-102",,re-anchored in the rewritten supplement,N12_07
+P30-0503,,102,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=both decoders, seeds 100-(102)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_08
+P30-0504,,0,git:697cc6c:docs/BIOLOGY_CHECK.md,re=x seeds (0)-4,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_09
+P30-0505,,4,git:697cc6c:docs/BIOLOGY_CHECK.md,re=x seeds 0-(4),,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_10
+P30-0506,,one,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=Harmony, Scanorama, PCA \((one) run per setting\)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_11
+P30-0507,paper/supp/note12.tex::reuses 783 fits,783,git:697cc6c:docs/biology_check/summary.md,re=(783) saved fits on 8 tasks,,re-anchored in the rewritten supplement,N12_12
+P30-0508,,eight,git:697cc6c:docs/biology_check/biology_check.json,key=tasks,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_13
+P30-0509,,15,git:697cc6c:docs/biology_check/biology_check.json,key=constants.K,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_14
+P30-0510,,15,git:697cc6c:docs/biology_check/biology_check.json,key=constants.K,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_15
+P30-0511,,1,git:697cc6c:docs/BIOLOGY_CHECK.md,re=fewer than (1)% of the task's cells,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_16
+P30-0512,,four,git:697cc6c:docs/biology_check/biology_check.json,key=constants.MARKER_TASKS,len,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_17
+P30-0513,"paper/supp/note12.tex::their 2,000 highly","2,000",git:697cc6c:docs/BIOLOGY_CHECK.md,"re=restricted to its (2,000) highly variable genes",,re-anchored in the rewritten supplement,N12_18
+P30-0514,,20,git:697cc6c:docs/biology_check/biology_check.json,key=constants.N_MARKERS,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_19
+P30-0515,,15,git:697cc6c:docs/biology_check/biology_check.json,key=constants.K,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_20
+P30-0516,,20,git:697cc6c:docs/biology_check/biology_check.json,key=constants.N_MARKERS,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_21
+P30-0517,,10,git:697cc6c:docs/biology_check/biology_check.json,key=constants.MIN_MARKER_CELLS,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_22
+P30-0518,,one,git:697cc6c:docs/BIOLOGY_CHECK.md,re=present in only (one) batch,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_23
+P30-0519,,15,git:697cc6c:docs/BIOLOGY_CHECK.md,re=by a (15)-nearest-neighbour classifier,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_24
+P30-0520,,100,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=conditioned decoder over seeds
+?\s*(100)-102",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_25
+P30-0521,,102,git:697cc6c:docs/BIOLOGY_CHECK.md,"re=conditioned decoder over seeds
+?\s*100-(102)",,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_26
+P30-0522,,six,git:697cc6c:docs/biology_check/summary.md,re=Real = (6) real tasks,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_27
+P30-0523,,two,git:697cc6c:docs/biology_check/summary.md,re=sim = (2) simulations,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_28
+P30-0524,,"[0,1]",git:697cc6c:docs/BIOLOGY_CHECK.md,"re=purity and Jaccard lie in \[0, 1\]",present,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_29
+P30-0525,,six,git:697cc6c:docs/biology_check/summary.md,re=Real = (6) real tasks,,no longer printed with this meaning in the rewritten supplement; value still re-read,N12_30
+P30-0526,,one,git:replication-prediction-v1:experiments/sweep_replication/AGREEMENT.md,re=add the next grid strength outward (once),present,no longer printed with this meaning in the rewritten supplement; value still re-read,N10_140
+P30-0527,,one,git:a475ea3:docs/jhpce/GATE_JHPCE.md,re=Local: RTX 3080 10 GB,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_54
+P30-0528,,one,git:98732ff:docs/PREREG.md,re=Each\s+dataset's\s+pilot\s+therefore\s+sits\s+on\s+one\s+machine,present,no longer printed with this meaning in the rewritten supplement; value still re-read,N11_55
+P30-0529,"paper/supp/note6.tex::all 11,270 ATAC","11,270",paper/figure_data/supp_methods/tasks.csv,where=task==atac_small ; col=cells ; agg=value,",d",re-anchored in the rewritten supplement,P17N6a
+P30-0530,,"3,618",git:8595a16:docs/ANALYSIS_SPEC.md,"re=atac_small and atac_large share (3,618) cells",,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N6b
+P30-0531,,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10a
+P30-0532,,1,paper/replication_data/replication_numbers.json,key=p_family_hits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10b
+P30-0533,,64,paper/replication_data/replication_numbers.json,key=p_family_patterns,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10c
+P30-0534,,6,git:fd8c2fc:paper/supp/note11.tex,"re=scvi-tools adversary & lung, pancreas, simulation 2 &[^\n]*& 2026-10-0(6) \\",,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10d
+P30-0535,,7,git:fd8c2fc:paper/supp/note11.tex,"re=sysVI & lung, pancreas, simulation 2 &[^\n]*& 2026-10-06 to 2026-10-0(7) \\",,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10e
+P30-0536,,12,git:fd8c2fc:paper/supp/note11.tex,re=scvi-tools adversary & human--mouse immune &[^\n]*& 2026-10-(12) to,,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N10f
+P30-0537,,1,paper/figure_data/supp_methods/scib_1.1.7/trajectory.py,"re=adata_post_ti2\.obs\[""dpt_pseudotime""\] > (1), ""dpt_pseudotime""\s+\] = 0",,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N3a
+P30-0538,,0,paper/figure_data/supp_methods/scib_1.1.7/trajectory.py,"re=adata_post_ti\.obs\[""dpt_pseudotime""\]\.fillna\((0), inplace=True\)",,no longer printed with this meaning in the rewritten supplement; value still re-read,P17N3b
+P30-0539,,895,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_scored,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S01
+P30-0540,,0,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_failed_rows,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S02
+P30-0541,"paper/supp/note13.tex::the planned 855, with",855,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=n_manifest,d,re-anchored in the rewritten supplement,P23S03
+P30-0542,,40,,expr=P23S01 - P23S03,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S04
+P30-0543,,8,git:a475ea3:experiments/sweep_replication/agreement_result/replication_readings.csv,where=status!=bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S05
+P30-0544,,-0.006,paper/replication_data/replication_numbers.json,key=plain_diff_min,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S06
+P30-0545,,0.005,paper/replication_data/replication_numbers.json,key=plain_diff_max,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S07
+P30-0546,,70,git:a475ea3:experiments/sweep_replication/agreement_result/replication_readings.csv,where=status==bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S08
+P30-0547,,78,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S09
+P30-0548,,77,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,where=status==bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S10
+P30-0549,paper/supp/note13.tex::reaching 0.674 against,0.674,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,where=status==unreached_low ; col=B_max,.3f,re-anchored in the rewritten supplement,P23S11
+P30-0550,"paper/supp/note13.tex::0.674 against 0.684, and",0.684,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,where=status==unreached_low ; col=bstar,.3f,re-anchored in the rewritten supplement,P23S12
+P30-0551,paper/supp/note13.tex::median 0.004 and,0.004,paper/replication_data/replication_numbers.json,key=absdiff_median,.3f,re-anchored in the rewritten supplement,P23S13
+P30-0552,paper/supp/note13.tex::and maximum 0.024. The,0.024,paper/replication_data/replication_numbers.json,key=absdiff_max,.3f,re-anchored in the rewritten supplement,P23S14
+P30-0553,,77,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_readings.csv,where=status==bracketed ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S15
+P30-0554,,0.002,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=mean_abs_reading_diff ; agg=min,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S16
+P30-0555,,0.011,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=mean_abs_reading_diff ; agg=max,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S17
+P30-0556,,7,paper/replication_data/replication_numbers.json,key=n_from_plain_passed,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S18
+P30-0557,,6,paper/replication_data/replication_numbers.json,key=n_top_same,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S19
+P30-0558,,13,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S20
+P30-0559,,29,paper/replication_data/replication_numbers.json,key=n_rank_same,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S21
+P30-0560,,56,paper/replication_data/replication_numbers.json,key=n_rank_within1,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S22
+P30-0561,,4,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_large_gaps.csv,where=sign_kept==True ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S23
+P30-0562,paper/supp/note13.tex::small: $+0.041$ in,+0.041,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_large_gaps.csv,where=pair==atac_small|0 ; col=sweep_diff,+.3f,re-anchored in the rewritten supplement,P23S24
+P30-0563,paper/supp/note13.tex::and $+0.013$ in,+0.013,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_large_gaps.csv,where=pair==atac_small|0 ; col=rep_diff,+.3f,re-anchored in the rewritten supplement,P23S25
+P30-0564,,-0.067,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=tau ; agg=min,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S26
+P30-0565,,0.867,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=tau ; agg=max,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S27
+P30-0566,,11,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_pairs_tau_positive,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S28
+P30-0567,"paper/supp/note13.tex::$\tau_b$ was 0.456, with",0.456,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=mean_tau,.3f,re-anchored in the rewritten supplement,P23S29
+P30-0568,"paper/supp/note13.tex::with $p=0.00049$, meeting",0.00049,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=p_value,.5f,re-anchored in the rewritten supplement,P23S30
+P30-0569,,4,paper/replication_data/replication_numbers.json,key=p_pair_hits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S31
+P30-0570,,3,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=sign_kept,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S32
+P30-0571,,0.426,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=mean_tau,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S33
+P30-0572,,0.00049,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=p_value,.5f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S34
+P30-0573,,0.0039,paper/replication_data/replication_numbers.json,key=p_task,.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S35
+P30-0574,,1,paper/replication_data/replication_numbers.json,key=p_task_hits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S36
+P30-0575,,256,paper/replication_data/replication_numbers.json,key=p_task_patterns,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S37
+P30-0576,,8,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=task ; agg=nunique,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S38
+P30-0577,,8,paper/replication_data/replication_numbers.json,key=n_tasks_tau_sum_positive,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S39
+P30-0578,paper/supp/note13.tex::Of 160 sweep,160,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_near_ties,d,re-anchored in the rewritten supplement,P23S40
+P30-0579,"paper/supp/note13.tex::0.02, 155 remained",155,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=near_ties_within_0p04,d,re-anchored in the rewritten supplement,P23S41
+P30-0580,,127,git:a475ea3:experiments/sweep_replication/agreement_result/replication_agreement_summary.json,key=near_ties_within_0p04,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S42
+P30-0581,,4,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=sign_kept_slope_adj,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S43
+P30-0582,,4,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_agreement_summary.json,key=n_large_gaps,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S44
+P30-0583,,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S47
+P30-0584,,1,paper/replication_data/replication_numbers.json,key=p_family_hits,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S48
+P30-0585,,64,paper/replication_data/replication_numbers.json,key=p_family_patterns,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S49
+P30-0586,,6,paper/replication_data/replication_numbers.json,key=n_families_tau_sum_positive,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S50
+P30-0587,,six,paper/replication_data/replication_numbers.json,key=n_families,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P23S51
+P30-0588,,5.20,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.discriminator.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M01
+P30-0589,,5.00,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.discriminator.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M02
+P30-0590,,2.60,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.reference.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M03
+P30-0591,,3.80,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.reference.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M04
+P30-0592,,3.60,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.pooled.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M05
+P30-0593,"paper/supp/note13.tex::decoder (2.20), replacing",2.20,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.pooled.sweep,.2f,re-anchored in the rewritten supplement,P23M06
+P30-0594,,3.60,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.barycenter.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M07
+P30-0595,,3.00,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.barycenter.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M08
+P30-0596,,3.80,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.mmd.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M09
+P30-0597,,4.60,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.mmd.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M10
+P30-0598,,2.20,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.sinkhorn.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M11
+P30-0599,,2.40,paper/figure_data/replication_mean_ranks.json,key=batch_conditioned.sinkhorn.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M12
+P30-0600,,3.00,paper/figure_data/replication_mean_ranks.json,key=unconditioned.discriminator.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M13
+P30-0601,,3.50,paper/figure_data/replication_mean_ranks.json,key=unconditioned.discriminator.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M14
+P30-0602,,3.83,paper/figure_data/replication_mean_ranks.json,key=unconditioned.reference.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M15
+P30-0603,,3.33,paper/figure_data/replication_mean_ranks.json,key=unconditioned.reference.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M16
+P30-0604,"paper/supp/note13.tex::led (2.67), replacing",2.67,paper/figure_data/replication_mean_ranks.json,key=unconditioned.pooled.replication,.2f,re-anchored in the rewritten supplement,P23M17
+P30-0605,,3.33,paper/figure_data/replication_mean_ranks.json,key=unconditioned.pooled.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M18
+P30-0606,,4.17,paper/figure_data/replication_mean_ranks.json,key=unconditioned.barycenter.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M19
+P30-0607,,4.00,paper/figure_data/replication_mean_ranks.json,key=unconditioned.barycenter.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M20
+P30-0608,,3.17,paper/figure_data/replication_mean_ranks.json,key=unconditioned.mmd.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M21
+P30-0609,,2.17,paper/figure_data/replication_mean_ranks.json,key=unconditioned.mmd.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M22
+P30-0610,,4.17,paper/figure_data/replication_mean_ranks.json,key=unconditioned.sinkhorn.replication,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M23
+P30-0611,,4.67,paper/figure_data/replication_mean_ranks.json,key=unconditioned.sinkhorn.sweep,.2f,no longer printed with this meaning in the rewritten supplement; value still re-read,P23M24
+P30-0612,,13,git:replication-prediction-v1:experiments/sweep_replication/PREDICTION.json,key=n_ranked_pairs,,no longer printed with this meaning in the rewritten supplement; value still re-read,P23X01
+P30-0613,,11,paper/figure_data/pareto_frontier.json,key=n_real_pairs,,no longer printed with this meaning in the rewritten supplement; value still re-read,P23P13
+P30-0614,,6,paper/figure_data/collapse_common_range.json,key=n_common_min,,no longer printed with this meaning in the rewritten supplement; value still re-read,P23K32
+P30-0615,,33,paper/figure_data/collapse_common_range.json,key=n_common_max,,no longer printed with this meaning in the rewritten supplement; value still re-read,P23K33
+P30-0616,,36,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/secondary.csv,col=collapse_n ; agg=max,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_B03
+P30-0617,,10,paper/analysis_pass10/reference_coverage.json,key=lung.types_in_reference,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R01
+P30-0618,,17,paper/analysis_pass10/reference_coverage.json,key=lung.types_in_task,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R02
+P30-0619,,14,paper/analysis_pass10/reference_coverage.json,key=immune_hum_mou.types_in_reference,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R03
+P30-0620,,19,paper/analysis_pass10/reference_coverage.json,key=immune_hum_mou.types_in_task,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R04
+P30-0621,,3,paper/analysis_pass10/reference_coverage.json,key=sim2.types_in_reference,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R05
+P30-0622,,4,paper/analysis_pass10/reference_coverage.json,key=sim2.types_in_task,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_R06
+P30-0623,paper/supp/note13.tex::giving $p=0.0039$ over,0.0039,paper/replication_data/replication_numbers.json,key=p_task,.4f,re-anchored in the rewritten supplement,P24_P14D3
+P30-0624,,-0.067,git:a475ea3:experiments/sweep_replication/agreement_result_with_extension/replication_task_readings.csv,col=tau ; agg=min,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P14D6
+P30-0625,,six,paper/replication_data/replication_numbers.json,key=n_families,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P16R6
+P30-0626,paper/supp/note13.tex::gave $p=0.0156$ over,0.0156,paper/replication_data/replication_numbers.json,key=p_family,.4f,re-anchored in the rewritten supplement,P24_P16D1
+P30-0627,,22,git:8595a16:docs/ANALYSIS_SPEC.md,re=decided the replacement on 2026-10-(22) and 2026-10-23,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M2
+P30-0628,,23,git:8595a16:docs/ANALYSIS_SPEC.md,re=decided the replacement on 2026-10-22 and 2026-10-(23),,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M3
+P30-0629,,22,paper/supp/supp-records_facts.json,"re=""065a486"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M4
+P30-0630,,22,paper/supp/supp-records_facts.json,"re=""5d01da0"": \{\s*""commit"": ""\w+"",\s*""date"": ""2026-10-(\d+)T",,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M5
+P30-0631,,6,git:fd8c2fc:paper/supp/note11.tex,"re=scvi-tools adversary & lung, pancreas, simulation 2 &[^\n]*& 2026-10-0(6) \\",,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M6
+P30-0632,,12,git:fd8c2fc:paper/supp/note11.tex,re=scvi-tools adversary & human--mouse immune &[^\n]*& 2026-10-(12) to,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P17M7
+P30-0633,,13,git:replication-prediction-v1:experiments/sweep_replication/PREDICTION.json,key=n_ranked_pairs,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P22E01
+P30-0634,,8,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/ranking_pairs.csv,col=task ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P22E02
+P30-0635,,eight,/home/kendall/experiment_data/wasserstein-critic-deconfounding/sweep_analysis_final_20261105/tables/ranking_pairs.csv,col=task ; agg=nunique,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P22E03
+P30-0636,,0.674,paper/figure_data/res3_curve_numbers.json,key=atac_large_bary_max_batch,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P23C11
+P30-0637,,0.683,paper/figure_data/res3_curve_numbers.json,key=atac_large_others_max_batch_min,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P23C12
+P30-0638,,0.834,paper/figure_data/res3_curve_numbers.json,key=atac_large_others_max_batch_max,.3f,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P23C13
+P30-0639,,30,paper/figure_data/secondary.csv,col=collapse_n ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P23K34
+P30-0640,,33,paper/figure_data/secondary.csv,where=task==immune&cond==1&arm in discriminator|reference|pooled ; col=collapse_n ; agg=min,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24_P23K35
+P30-0641,,3,paper/figure_data/single_methods.csv,where=cond==1&name==harmony|2|50&task in pancreas|lung|immune|atac_small|atac_large|immune_hum_mou&S_minus_plain_scvi>0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24N14
+P30-0642,,1,paper/figure_data/single_methods.csv,where=cond==1&name==scanorama|20|100&task in pancreas|lung|immune|atac_small|atac_large|immune_hum_mou&S_minus_plain_scvi>0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24N15
+P30-0643,,1,paper/figure_data/single_methods.csv,where=cond==1&name==pca|0|50&task in pancreas|lung|immune|atac_small|atac_large|immune_hum_mou&S_minus_plain_scvi>0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24N16
+P30-0644,,1,paper/figure_data/transfer_strength.csv,where=cond==1&family==harmony&task in pancreas|lung|immune|atac_small|atac_large|immune_hum_mou&S_minus_plain_scvi>0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24N17
+P30-0645,,0,paper/figure_data/transfer_strength.csv,where=cond==1&family==scanorama&task in pancreas|lung|immune|atac_small|atac_large|immune_hum_mou&S_minus_plain_scvi>0 ; agg=count,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24N18
+P30-0646,paper/supp/tableS13.tex::strength 0.03 on,0.03,paper/figure_data/curves.csv,where=task==immune&cond==1&arm==discriminator&lam>0 ; col=lam ; agg=min,,re-anchored in the rewritten supplement,P24N25
+P30-0647,,three,paper/figure_data/label_transfer.csv,where=arm==mmd ; col=n_runs ; agg=max,d,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B0171
+P30-0648,"paper/supp/note12.tex::and seeds 100--102, alongside",100,paper/figure_data/biology_check_first_crossing/summary.md,re=seeds (100)-102,,re-anchored in the rewritten supplement,P24B0172
+P30-0649,,102,paper/figure_data/biology_check_first_crossing/summary.md,re=seeds 100-(102),,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B0173
+P30-0650,,six,paper/figure_data/res5_label_transfer.json,key=n_pairs.0,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1011
+P30-0651,,four,paper/figure_data/biology_check_first_crossing/biology_check.json,key=constants.MARKER_TASKS,len,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1118
+P30-0652,,two,paper/tools/first_crossing_strength.py,re=Its two bracketing points,present,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1122
+P30-0653,,two,paper/tools/first_crossing_strength.py,re=Its two bracketing points,present,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1124
+P30-0654,,two,paper/tools/first_crossing_strength.py,re=Its two bracketing points,present,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1125
+P30-0655,,two,paper/tools/first_crossing_strength.py,re=Its two bracketing points,present,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1126
+P30-0656,,9,paper/tools/first_crossing_strength.py,re=2026-11-0(9),,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1127
+P30-0657,,2026,paper/tools/first_crossing_strength.py,re=(2026)-11-09,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1128
+P30-0658,,9,paper/tools/first_crossing_strength.py,re=2026-11-0(9),,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1129
+P30-0659,,2026,paper/tools/first_crossing_strength.py,re=(2026)-11-09,,no longer printed with this meaning in the rewritten supplement; value still re-read,P24B1130

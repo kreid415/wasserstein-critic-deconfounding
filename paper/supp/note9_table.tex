@@ -2,7 +2,7 @@
 {\scriptsize\renewcommand{\tablename}{Supplementary Table}\renewcommand{\thetable}{S11}\def\theHtable{S11}%
 \setlength{\tabcolsep}{4pt}\setlength{\LTcapwidth}{\textwidth}
 \begin{longtable}{@{}lrrrrrr@{}}
-\caption{Label transfer at the first-crossing strength, per method, task and decoder (Supplementary Note 9; descriptive). Strength: of the two fitted strengths bracketing the first crossing of $b^*$, the one whose batch score is nearer $b^*$ (ties to the smaller strength), or the upper one when the lower is plain scVI; -- for plain scVI and the scvi-tools adversary, which have none. Macro F1 and SD: mean and standard deviation over the seeds of the held-out-batch macro F1. Batch score $B$: seed-mean batch score of the embeddings; $|B-b^*|$: its distance from $b^*$.}\label{tab:s11}\\
+\caption{Label transfer at the first-crossing strength (Supplementary Notes 5 and 9). Macro F1 averages held-out batches; the table gives its mean and standard deviation across seeds. Batch score $B$ and $|B-b^*|$ show the achieved batch removal and distance from the target. Plain scVI and the scvi-tools adversary have no selected strength and remain unmatched. Low-signal pairs are marked.}\label{tab:s11}\\
 \toprule Method & Strength & Seeds & Macro F1 & SD & Batch score & $|B-b^*|$ \\
 \endfirsthead
 \multicolumn{7}{@{}l}{\textit{Supplementary Table S11, continued}} \\
@@ -162,4 +162,4 @@ MMD & 10 & 3 & 0.920 & 0.054 & 0.262 & 0.057 \\
 Sinkhorn & 30 & 3 & 0.813 & 0.056 & 0.386 & 0.068 \\
 \bottomrule
 \end{longtable}}
-\addtocounter{table}{-1}% the caption stepped the main table counter; S11 is numbered by hand
+\addtocounter{table}{-1}%

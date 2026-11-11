@@ -1,71 +1,70 @@
-% Supplementary Note 1: loss equations. Written from the code at tag prereg-tier12-v3 (commit 10a1ca5): scripts/scvi_adversarial_plan.py
-% (training step), src/wcd_vae/wcd/{adversarial,critic,alignment,barycenter}.py, and scvi-tools 1.4.2 (scVI loss, KL weight, adversarial classifier).
 \medskip\noindent\textbf{Supplementary Note 1. Model and loss equations.}\par\smallskip
 \begingroup\small\setlength{\parskip}{3pt}
-\noindent\textit{Notation.} A cell $i$ has counts $x_{ig}$ for genes $g=1,\dots,G$ (2,000 highly variable genes, or all features for the chromatin-accessibility tasks), a batch label $s_i\in\{1,\dots,K\}$ and a latent vector $z_i\in\mathbb{R}^d$ with $d=10$. The encoder gives $q(z_i\mid x_i)=\mathcal{N}(\mu_i,\mathrm{diag}\,\sigma_i^2)$. $\mathcal{B}$ is a minibatch of 128 cells, $\mathcal{B}_k$ its cells from batch $k$ and $\mathcal{B}_{-k}$ its cells from the other batches. $K_{\mathcal{B}}$ is the set of batches for which both $\mathcal{B}_k$ and $\mathcal{B}_{-k}$ are non-empty; a minibatch with no such batch adds zero to the penalty. Every penalty is applied to the posterior mean, $u_i=\mu_i$ (no per-dimension standardisation); $\hat P_k$ is the empirical distribution of $\{u_i: i\in\mathcal{B}_k\}$ and $\hat P_{-k}$ that of $\{u_i: i\in\mathcal{B}_{-k}\}$. The strength is $\lambda\ge 0$; plain scVI is $\lambda=0$.
+A cell $i$ has counts $x_{ig}$, batch $s_i\in\{1,\dots,K\}$ and latent $z_i\in\mathbb{R}^d$, with $d=10$. The encoder reads $\log(1+x_i)$ and gives $q(z_i\mid x_i)=\mathcal{N}(\mu_i,\mathrm{diag}\,\sigma_i^2)$. All penalties act on unstandardised posterior means $u_i=\mu_i$. A minibatch $\mathcal{B}$ contains 128 cells, with $\mathcal{B}_k$ from batch $k$ and $\mathcal{B}_{-k}$ from other batches. Their empirical distributions are $\hat P_k$ and $\hat P_{-k}$. The set $K_{\mathcal{B}}$ contains batches for which both subsets are non-empty. Empty comparisons contribute zero. Plain scVI has strength $\lambda=0$.
 
-\noindent\textit{Encoder objective.} For all methods the encoder and decoder minimise, over each minibatch,
+The encoder and decoder minimise
 \begin{equation}
 \mathcal{L}_G \;=\; \mathcal{L}_{\mathrm{scVI}} \;+\; \lambda\,\mathcal{A}(u_{\mathcal{B}}),\qquad
 \mathcal{L}_{\mathrm{scVI}}=\frac1{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\Big[-\mathbb{E}_{q}\sum_{g}\log p_{\mathrm{ZINB}}(x_{ig}\mid\mu_{ig},\theta_g,\pi_{ig})+\beta_e\,\mathrm{KL}\big(q(z_i\mid x_i)\,\|\,\mathcal{N}(0,I_d)\big)\Big],
 \label{eq:s1-gen}
 \end{equation}
-where $\mathcal{A}$ is the alignment term of the penalty (below), the expectation is over the posterior of the latent, and the likelihood is the zero-inflated negative binomial
+with the zero-inflated negative binomial likelihood
 \begin{equation}
 p_{\mathrm{ZINB}}(x\mid\mu,\theta,\pi)=\pi\,\mathbf{1}[x=0]+(1-\pi)\,\frac{\Gamma(x+\theta)}{\Gamma(\theta)\,x!}\Big(\frac{\theta}{\theta+\mu}\Big)^{\theta}\Big(\frac{\mu}{\theta+\mu}\Big)^{x},\qquad \mu_{ig}=\ell_i\,\rho_g(z_i,s_i),\quad \ell_i=\textstyle\sum_{g'}x_{ig'},
 \label{eq:s1-zinb}
 \end{equation}
-with $\ell_i$ the observed library size (scvi-tools' default), $\rho(z_i,s_i)$ the decoder's softmax over genes, $\theta_g$ a per-gene dispersion and $\pi_{ig}$ the dropout probability produced by the decoder. The encoder reads $\log(1+x_i)$. In the batch-conditioned setting the decoder receives the one-hot batch label $s_i$; in the unconditioned setting no batch label reaches the encoder or the decoder. The weight of the latent KL term follows scvi-tools' linear warm-up, $\beta_e=e/400$ for epochs $e<400$ and $1$ afterwards (the final value for each task is in Table~S2). The penalty acts from the first step and is not scaled by the warm-up. The adversary heads below are trained on detached $u_{\mathcal{B}}$, and only the encoder gradient of $\mathcal{A}$ enters $\mathcal{L}_G$.
+Here $\ell_i$ is observed library size, $\rho$ the decoder's gene softmax, $\theta_g$ gene dispersion and $\pi_{ig}$ dropout probability. The batch-conditioned decoder receives the one-hot batch label. The unconditioned model supplies no batch label to either network. The KL weight is $\beta_e=e/400$ for epochs $e<400$, then $1$. The penalty acts at full strength from the first step. Adversaries train on detached posterior means, while the alignment loss supplies encoder gradients.
 
-\noindent\textit{Jensen--Shannon-type discriminator.} A classifier head $h:\mathbb{R}^d\to\mathbb{R}^K$ (two hidden layers of 128 units) is trained with one step per encoder step to predict the batch,
+\noindent\textit{Discriminator.} A batch classifier $h:\mathbb{R}^d\to\mathbb{R}^K$, with two hidden layers of 128 units, takes one update per encoder step:
 \begin{equation}
 \min_h\;\mathcal{L}_D=\frac1{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\mathcal{L}_{\mathrm{CE}}\big(h(u_i),s_i\big),\qquad \mathcal{L}_{\mathrm{CE}}(h(u),s)=-\log\mathrm{softmax}(h(u))_s ,
 \label{eq:s1-disc}
 \end{equation}
-and the encoder minimises the fool loss of scvi-tools, the cross-entropy between the prediction and the uniform distribution over the other $K-1$ batches (a Jensen--Shannon-type objective; the loss is not bounded above and is not the Jensen--Shannon divergence itself),
+The encoder minimises scvi-tools' fool loss, the cross-entropy against a uniform distribution over the other $K-1$ batches:
 \begin{equation}
 \mathcal{A}_{\mathrm{JS}}=-\frac1{|\mathcal{B}|}\sum_{i\in\mathcal{B}}\frac1{K-1}\sum_{k\neq s_i}\log\mathrm{softmax}\big(h(u_i)\big)_k .
 \label{eq:s1-fool}
 \end{equation}
+This Jensen--Shannon-type objective is unbounded above and is not the Jensen--Shannon divergence itself.
 
-\noindent\textit{Wasserstein-1 critics.} A critic head $C=(C_1,\dots,C_K)$ (two hidden layers of 128 units, one output per batch) estimates, for each active batch $k$ with target distribution $T_k$, the Kantorovich--Rubinstein dual
+\noindent\textit{Wasserstein critics.} A critic with two hidden layers of 128 units and one output per batch estimates
 \begin{equation}
 \hat W_k=\frac1{|\mathcal{B}_k|}\sum_{i\in\mathcal{B}_k}C_k(u_i)-\frac1{|T_k|}\sum_{t\in T_k}C_k(t)\;\approx\;W_1(\hat P_k,\hat T_k),
 \label{eq:s1-w1}
 \end{equation}
-where the right-hand side is the distance between the empirical distributions; the dual is a lower bound of it for a 1-Lipschitz $C_k$, which the gradient penalty below enforces softly, so $\hat W_k$ is an estimate and not a bound. The targets are: reference critic, $T_k=\{u_j:s_j=r\}$, the cells of the reference batch $r$, the batch with the highest cell-type entropy $-\sum_c p_{r,c}\log p_{r,c}$ (head $r$ is inactive; this rule uses the cell-type labels); pooled critic, $T_k=\{u_j:j\in\mathcal{B}_{-k}\}$; barycenter critic, $T_k=\hat B$, the support of the Wasserstein-2 barycenter of the batches present in the minibatch,
+The Kantorovich--Rubinstein dual bounds $W_1$ from below for a 1-Lipschitz critic. Lipschitz continuity is enforced softly here, so $\hat W_k$ is an estimate, not a bound. The reference critic targets reference-batch cells, $T_k=\{u_j:s_j=r\}$, with head $r$ inactive. The pooled critic targets $\mathcal{B}_{-k}$. The barycenter critic targets the Wasserstein-2 barycenter of the batches present:
 \begin{equation}
 \hat B=\arg\min_{B}\;\frac1{K_{\mathrm{pres}}}\sum_{k\ \mathrm{present}} W_2^2(\hat P_k,B),
 \label{eq:s1-bary}
 \end{equation}
-with $|\mathcal{B}|$ atoms of equal weight, solved by the free-support fixed-point algorithm (at most 10 iterations, stopping threshold $10^{-7}$), started from the minibatch cells and recomputed at every step; $\hat B$ is detached, so no gradient passes through it. A head is active when its batch is present in the minibatch and its target is non-empty; $\mathcal{H}$ is the set of active heads. The critic takes five steps per encoder step on
+$K_{\mathrm{pres}}$ is the number of batches present. The barycenter has $|\mathcal{B}|$ equally weighted atoms. A free-support fixed-point algorithm starts at the minibatch cells, takes at most 10 iterations and stops at $10^{-7}$. It is recomputed each step and detached. A head is active when its batch and target are non-empty. With $\mathcal{H}$ the active heads, the critic takes five updates per encoder step:
 \begin{equation}
 \min_C\;\mathcal{L}_C=-\frac1{|\mathcal{H}|}\sum_{k\in\mathcal{H}}\hat W_k\;+\;\lambda_{\mathrm{GP}}\,\frac1{|\mathcal{H}|}\sum_{k\in\mathcal{H}}\frac1{|\mathcal{B}_k|}\sum_{i\in\mathcal{B}_k}\Big(\big\lVert\nabla_{x}C_k(\hat x_i)\big\rVert_2-1\Big)^2,\qquad \hat x_i=\varepsilon_i u_i+(1-\varepsilon_i)t_i,
 \label{eq:s1-gp}
 \end{equation}
-with $\lambda_{\mathrm{GP}}=10$, $\varepsilon_i\sim\mathrm{U}(0,1)$ and $t_i$ drawn uniformly from $T_k$ for each cell $i$ of batch $k$. In the encoder step the gradient penalty is dropped and the encoder minimises the critic's estimate,
+Here $\lambda_{\mathrm{GP}}=10$, $\varepsilon_i\sim\mathrm{U}(0,1)$ and $t_i$ is drawn uniformly from $T_k$. The encoder minimises
 \begin{equation}
 \mathcal{A}_{W}=\frac1{|\mathcal{H}|}\sum_{k\in\mathcal{H}}\hat W_k ,
 \label{eq:s1-aw}
 \end{equation}
-where the reference cells (reference critic) and the cells of the other batches (pooled critic) are not detached and so receive gradient, while the barycenter support is a constant. No spectral normalisation is used.
+Reference and pooled target cells receive gradients, whereas the barycenter support is constant. No spectral normalisation is used.
 
-\noindent\textit{Reference batch.} The reference critic's reference batch is the batch with the highest cell-type entropy, ties going to the larger batch. The entropy rule prefers the batch whose cell types are most evenly represented, so that the target does not favour a few cell types, as a merely large batch, the other obvious choice, may do when a few cell types dominate it. The chosen reference holds every cell type in five of the eight tasks, and 10 of 17 (lung), 14 of 19 (human--mouse immune) and 3 of 4 (simulation 2) in the others, so in those three tasks some cells of other batches have no cell of their type in the reference (\texttt{paper/analysis\_pass10/reference\_coverage.json}).
+The reference batch maximises cell-type entropy $-\sum_c p_{r,c}\log p_{r,c}$, with ties favouring the larger batch. This label-based choice favours even cell-type representation. It contains every type in five tasks, but only 10 of 17 in lung, 14 of 19 in human--mouse immune and 3 of 4 in simulation 2.
 
-\noindent\textit{Maximum mean discrepancy.} Each batch is compared with the cells of all other batches in the minibatch, with the squared MMD as a biased (V-statistic) estimate,
+\noindent\textit{Maximum mean discrepancy.} Each batch is compared with the other batches through the biased squared MMD estimator:
 \begin{equation}
 \mathcal{A}_{\mathrm{MMD}}=\frac1{|K_{\mathcal{B}}|}\sum_{k\in K_{\mathcal{B}}}\widehat{\mathrm{MMD}}^2(\hat P_k,\hat P_{-k}),\qquad
 \widehat{\mathrm{MMD}}^2=\frac1{n_k^2}\sum_{i,j\in\mathcal{B}_k}\kappa(u_i,u_j)+\frac1{n_{-k}^2}\sum_{i,j\in\mathcal{B}_{-k}}\kappa(u_i,u_j)-\frac2{n_kn_{-k}}\sum_{i\in\mathcal{B}_k}\sum_{j\in\mathcal{B}_{-k}}\kappa(u_i,u_j),
 \label{eq:s1-mmd}
 \end{equation}
-with $n_k=|\mathcal{B}_k|$, $n_{-k}=|\mathcal{B}_{-k}|$ and the multi-scale Gaussian kernel
+Here $n_k=|\mathcal{B}_k|$, $n_{-k}=|\mathcal{B}_{-k}|$ and the fixed multi-scale Gaussian kernel is
 \begin{equation}
 \kappa(u,u')=\frac15\sum_{m\in\{0.25,\,0.5,\,1,\,2,\,4\}}\exp\!\Big(-\frac{\lVert u-u'\rVert^2}{2\sigma_m^2}\Big),\qquad \sigma_m=\sqrt{d}\,m ,
 \label{eq:s1-kernel}
 \end{equation}
-so that for $d=10$ the bandwidths are $\sigma=0.79$, $1.58$, $3.16$, $6.32$ and $12.65$. They are fixed and not tuned.
+The bandwidths at $d=10$ are 0.79, 1.58, 3.16, 6.32 and 12.65.
 
-\noindent\textit{Sinkhorn divergence.} With the Euclidean ground cost $c(u,u')=\lVert u-u'\rVert_2$ and entropic smoothing $\epsilon=0.05\sqrt{2d}$,
+\noindent\textit{Sinkhorn divergence.} The ground cost is $c(u,u')=\lVert u-u'\rVert_2$ and smoothing is $\epsilon=0.05\sqrt{2d}$:
 \begin{equation}
 \mathcal{A}_{\mathrm{SD}}=\frac1{|K_{\mathcal{B}}|}\sum_{k\in K_{\mathcal{B}}}S_\epsilon(\hat P_k,\hat P_{-k}),\qquad
 S_\epsilon(\alpha,\beta)=\mathrm{OT}_\epsilon(\alpha,\beta)-\tfrac12\mathrm{OT}_\epsilon(\alpha,\alpha)-\tfrac12\mathrm{OT}_\epsilon(\beta,\beta),
@@ -75,7 +74,7 @@ S_\epsilon(\alpha,\beta)=\mathrm{OT}_\epsilon(\alpha,\beta)-\tfrac12\mathrm{OT}_
 \mathrm{OT}_\epsilon(\alpha,\beta)=\max_{f,g}\;\langle\alpha,f\rangle+\langle\beta,g\rangle-\epsilon\,\big\langle\alpha\otimes\beta,\;e^{(f\oplus g-c)/\epsilon}-1\big\rangle ,
 \label{eq:s1-ot}
 \end{equation}
-which at the optimum equals $\langle\alpha,f\rangle+\langle\beta,g\rangle$. The potentials are found by Sinkhorn updates, annealed in $\epsilon$ from the diameter of the cost matrix with ratio $0.8$ per step, then iterated at the final $\epsilon$ in double precision until the largest $L_1$ marginal error of the plans is below $10^{-4}$ (a cap of 500,000 iterations raises an error). The gradient is the envelope-theorem gradient: the potentials are held fixed and the cost carries gradient through its row point only. At this smoothing $S_\epsilon$ is below $W_1$ and is not an estimate of it.
+At the optimum, the transport objective equals $\langle\alpha,f\rangle+\langle\beta,g\rangle$. Sinkhorn updates anneal $\epsilon$ from the cost-matrix diameter with ratio 0.8. Double-precision iterations at the final $\epsilon$ stop when the largest $L_1$ marginal error is below $10^{-4}$. Reaching 500,000 iterations raises an error. Envelope-theorem gradients hold the potentials fixed and differentiate the cost through its row point only. At this smoothing, $S_\epsilon$ is below $W_1$ and does not estimate it.
 
-\noindent\textit{scvi-tools adversarial classifier} (batch-conditioned decoder only). A classifier with 32 hidden units, applied to a sample $z_i$ from the posterior, is trained in one step per encoder step on $\kappa\,\mathcal{L}_{\mathrm{CE}}$ (as in Eq.~\ref{eq:s1-disc}, detached input), and the encoder minimises $\mathcal{L}_{\mathrm{scVI}}+\kappa\,\mathcal{A}_{\mathrm{JS}}$ with $\mathcal{A}_{\mathrm{JS}}$ as in Eq.~\ref{eq:s1-fool}, where $\kappa=1-\beta_e$ is fixed by the KL weight and there is no strength to vary.
-\endgroup
+\noindent\textit{scvi-tools adversary.} With the batch-conditioned decoder, this classifier uses 32 hidden units and posterior samples $z_i$. It takes one step per encoder step on $\kappa\mathcal{L}_{\mathrm{CE}}$, using detached inputs. The encoder minimises $\mathcal{L}_{\mathrm{scVI}}+\kappa\mathcal{A}_{\mathrm{JS}}$, with fixed weight $\kappa=1-\beta_e$.
+\par\endgroup
