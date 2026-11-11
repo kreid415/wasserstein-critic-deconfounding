@@ -1,6 +1,6 @@
 """Tests of paper/tools/make_supp_supp-records.py: the committed tables match the committed facts, and collect + render run end to
 end on a synthetic data root (with this repository's git history and committed environment exports)."""
-import importlib.util, json, shutil
+import importlib.util, json, subprocess
 from pathlib import Path
 
 import numpy as np
@@ -11,10 +11,18 @@ spec = importlib.util.spec_from_file_location("supp_records", HERE / "make_supp_
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 NOTES = ["paper/supp/note10.tex", "paper/supp/note11.tex"]
+BASE = "fd8c2fc"  # the notes with their generated tables as last committed; the notes are edited by hand after this commit
 
 
-def test_committed_tables_match_facts():  # test-reason: golden check that the committed note tables equal what the committed facts give
-    assert m.main(["--check"]) == 0
+def _at_base(rel):
+    return subprocess.run(["git", "-C", str(m.ROOT), "show", f"{BASE}:{rel}"], capture_output=True, text=True, check=True).stdout
+
+
+def test_committed_tables_match_facts(tmp_path):  # test-reason: golden check that the committed note tables equal what the committed facts give
+    for rel in [*NOTES, m.FACTS]:
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text(_at_base(rel))
+    assert m.main(["--root", str(tmp_path), "--check"]) == 0
 
 
 def _fit(d, sub, tag, config, scored=True, site="", cpu="AMD Ryzen 5 3600 6-Core Processor"):
@@ -51,7 +59,7 @@ def test_collect_and_render_synthetic(tmp_path):
     (d / m.REPL_SCORES[0]).mkdir(parents=True)  # replication: the 895 committed rows, none scored here
     for rel in NOTES:
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(m.ROOT / rel, root / rel)
+        (root / rel).write_text(_at_base(rel))
 
     assert m.main(["collect", "--data-root", str(d), "--root", str(root)]) == 0
     facts = json.loads((root / m.FACTS).read_text())

@@ -17,6 +17,7 @@ from abstract_words import count  # noqa: E402
 from accept_changes import accept  # noqa: E402
 
 START = "bec1ece"
+BASE = "fd8c2fc"  # the Pass 29 result; later passes and hand edits change these files, so they are compared with this commit
 MAIN = [  # (old, new) in the printed text of paper/outline.tex, the first author's wording of 2026-11-10
     (r"and 0.213 at each penalty's strongest setting.",
      r"and 0.213 at each penalty's strongest setting, where batch removal was not matched."),
@@ -63,6 +64,10 @@ SUPP = {  # path -> (old, new), edited in place
 EDITED = ["paper/outline.tex", *SUPP]
 
 
+def committed(rel, commit=BASE):
+    return subprocess.run(["git", "-C", str(REPO), "show", f"{commit}:{rel}"], capture_output=True, text=True, check=True).stdout
+
+
 def test_pass29_script_reproduces_the_committed_files(tmp_path, monkeypatch, capsys):  # test-reason: runs pass29_edits.py, which no other test runs; catches a hand edit of a file it writes, a file written besides them, a printed change outside the author line and the eight fixes, a wording that differs from the first author's, struck text that is not the old wording, an author line out of place, tracked markup in a supplement file, and word counts that move
     start = {}
     for rel in EDITED:
@@ -75,10 +80,10 @@ def test_pass29_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     monkeypatch.setenv("PASS29_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass29_edits.py"), run_name="__main__")
     for rel in EDITED:
-        assert (tmp_path / rel).read_text() == (REPO / rel).read_text(), rel
+        assert (tmp_path / rel).read_text() == committed(rel), rel
     assert sorted(p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*") if p.is_file()) == sorted(EDITED)
     assert "main text 5488 words (limit 5500); main captions, Table 1 included, 422 words (limit 450)" in capsys.readouterr().out
-    raw = (REPO / "paper/outline.tex").read_text()
+    raw = committed("paper/outline.tex")
     assert len(count(raw)[0]) == 330                     # abstract, limit 350
     # the printed text is the bec1ece text with the eight fixes and the author line (directly before the Pass 28 line), nothing else
     lines = raw.split("\n")
@@ -100,6 +105,6 @@ def test_pass29_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     assert rejected == start["paper/outline.tex"]
     # supplement notes, Table 1 and its generator: the one replacement each, without tracked markup
     for rel, (old, new) in SUPP.items():
-        s = (REPO / rel).read_text()
+        s = committed(rel)
         assert start[rel].count(old) == 1 and s == start[rel].replace(old, new), rel
         assert not re.search(r"\\(replaced|added|deleted)\b", s), rel

@@ -18,6 +18,7 @@ from accept_changes import accept  # noqa: E402
 
 START = "9db2382"
 RESULT = "6282edb"  # the Pass 27 result; Pass 28 edits paper/outline.tex, so that file is compared with this commit
+BASE = "fd8c2fc"  # the supplement files and generators as last written by pass scripts; later edited by hand
 EDITED = ["paper/outline.tex", "paper/supp/note7.tex", "paper/supp/tableS7.tex", "paper/supp/tableS8.tex",
           "paper/tools/make_supp_tables.py", "paper/tools/make_supp_supp-analysis.py"]
 
@@ -38,7 +39,7 @@ def test_pass27_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     monkeypatch.setenv("PASS27_ROOT", str(tmp_path))
     runpy.run_path(str(TOOLS / "pass27_edits.py"), run_name="__main__")
     for rel in EDITED:
-        result = start_file(rel, RESULT).decode() if rel == "paper/outline.tex" else (REPO / rel).read_text()
+        result = start_file(rel, RESULT).decode() if rel == "paper/outline.tex" else start_file(rel, BASE).decode()
         assert (tmp_path / rel).read_text() == result, rel
     assert "Table 1 included, 412 words (limit 450)" in capsys.readouterr().out
     # outline.tex: the printed text differs from 9db2382 in the new author line, the history sentence, Res-4, Res-6, the collapse float,
@@ -55,7 +56,7 @@ def test_pass27_script_reproduces_the_committed_files(tmp_path, monkeypatch, cap
     assert raw.count("input{table1}") == 1 and raw.count("\n\\input{table1}\n") == 1     # no markup on the \input line
     assert raw.count("\n\\includegraphics[width=\\textwidth]{figures/fig4.png}\n") == 1 and "%\\caption{Collapse rate per" in raw  # old float commented out
     # supplement files and generators: references follow the numbering, no tracked markup
-    supp = "".join((REPO / rel).read_text() for rel in EDITED[1:])
+    supp = "".join(start_file(rel, BASE).decode() for rel in EDITED[1:])
     assert not re.search(r"\\(replaced|added|deleted)", supp) and not re.search(r"Figure[ ~]5|Figures 3 and 4|rate, Figure 4", supp)
     for part in ("Figure 3, Table 1 and Supplementary Figure S8; the placement is in Figure 4 and", "The main text and Table 1 count only",
                  r"and of Figure~4)", "collapse rate, Table 1)"):
